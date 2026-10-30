@@ -520,6 +520,23 @@ class StageReleaseTests(unittest.TestCase):
         releases = [target for target in targets if target.startswith("GitHub public release ")]
         self.assertEqual(releases, [f"GitHub public release {TARGET}"])
 
+    def test_staging_clears_predecessor_native_optional_evidence(self) -> None:
+        root = self.staging_copy(source_release=CURRENT)
+        source_path = root / "releases" / CURRENT / "manifest.json"
+        source = self.load(source_path)
+        for variant in source["components"]["ninfer_variants"]:
+            for field in ("quality_screen", "t1_parity", "fit"):
+                variant["qualification"][field] = {
+                    "path": f"releases/{CURRENT}/qualification/old-{field}.json", "sha256": "0" * 64}
+        self.save(source_path, source)
+        result = self.stage(root, None, source_release=CURRENT)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        staged = self.load(root / "releases" / TARGET / "manifest.json")
+        for variant in staged["components"]["ninfer_variants"]:
+            for field in ("quality_screen", "t1_parity", "fit"):
+                self.assertNotIn(field, variant["qualification"])
+        self.assertEqual(self.load(source_path), source)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -208,6 +208,7 @@ def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
     for field, path, suffix in (("quality_screen", quality_screen, "quality-screen"),
                                 ("t1_parity", t1_parity, "t1-parity"),
                                 ("fit", fit_proof, "fit")):
+        qualification.pop(field, None)
         if path is not None:
             qualification[field] = {
                 "path": f"releases/{release}/qualification/{variant_id}.{suffix}.json",

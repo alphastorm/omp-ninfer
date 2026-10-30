@@ -475,6 +475,10 @@ def main() -> int:
     for variant in manifest["components"].get("ninfer_variants", []):
         variant.update(dependency_pins.get(variant["id"], {}))
         qual = variant.get("qualification", {})
+        # Optional native admission proofs bind a release and its predecessor. Unchanged
+        # runtimes carry by identity; changed runtimes must supply fresh proofs at rebind.
+        for key in ("quality_screen", "t1_parity", "fit"):
+            qual.pop(key, None)
         for key in ("summary", "public_url"):
             if isinstance(qual.get(key), str):
                 qual[key] = qual[key].replace(f"/{args.source}/", f"/{args.release}/")

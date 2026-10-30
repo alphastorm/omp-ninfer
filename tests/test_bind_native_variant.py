@@ -520,8 +520,35 @@ class BindNativeVariantTest(unittest.TestCase):
             BINDER.bind(self.manifest, "rtx4090", "v0.8.0-qwen38-4090-beta.1", self.checksums_path,
                         self.receipt_path, "v0.15.0", quality_screen=self.screen_path)
 
+    def test_screen_rebind_clears_stale_parity_and_fit(self):
+        self.prepare_p15()
+        qualification = self.manifest["components"]["ninfer_variants"][0]["qualification"]
+        for field in ("quality_screen", "t1_parity", "fit"):
+            qualification[field] = {"path": "releases/v0.14.0/qualification/old.json", "sha256": "0" * 64}
+        variant = BINDER.bind(self.manifest, "rtx4090", "v0.8.0-qwen38-4090-beta.1", self.checksums_path,
+                              self.receipt_path, "v0.15.0", quality_screen=self.screen_path)
+        self.assertNotIn("t1_parity", variant["qualification"])
+        self.assertNotIn("fit", variant["qualification"])
+        self.assertEqual(variant["qualification"]["quality_screen"]["sha256"],
+                         hashlib.sha256(self.screen_path.read_bytes()).hexdigest())
+
+    def test_rebind_cannot_silently_reuse_an_existing_screen(self):
+        self.prepare_p15()
+        variant = BINDER.bind(self.manifest, "rtx4090", "v0.8.0-qwen38-4090-beta.1", self.checksums_path,
+                              self.receipt_path, "v0.15.0", quality_screen=self.screen_path)
+        destination = self.workspace / variant["qualification"]["quality_screen"]["path"]
+        destination.write_bytes(self.screen_path.read_bytes())
+        before = deepcopy(self.manifest)
+        with self.assertRaisesRegex(BINDER.BindError, "quality_screen is required"):
+            BINDER.bind(self.manifest, "rtx4090", "v0.8.0-qwen38-4090-beta.1", self.checksums_path,
+                        self.receipt_path, "v0.15.0")
+        self.assertEqual(self.manifest, before)
+
     def test_p15_mtp_rebuild_binds_direct_t1_parity_instead_of_screen(self):
         self.prepare_p15()
+        qualification = self.manifest["components"]["ninfer_variants"][0]["qualification"]
+        for field in ("quality_screen", "fit"):
+            qualification[field] = {"path": "releases/v0.14.0/qualification/old.json", "sha256": "0" * 64}
         predecessor = json.loads((self.workspace / "releases/v0.14.0/manifest.json").read_text())[
             "components"]["ninfer_variants"][0]
         candidate = {"server_binary_sha256": self.receipt["binaries"]["server_sha256"],
@@ -538,6 +565,7 @@ class BindNativeVariantTest(unittest.TestCase):
         variant = BINDER.bind(self.manifest, "rtx4090", "v0.8.0-qwen38-4090-beta.1", self.checksums_path,
                               self.receipt_path, "v0.15.0", t1_parity=path)
         self.assertNotIn("quality_screen", variant["qualification"])
+        self.assertNotIn("fit", variant["qualification"])
         self.assertEqual(variant["qualification"]["t1_parity"]["sha256"],
                          hashlib.sha256(path.read_bytes()).hexdigest())
 
