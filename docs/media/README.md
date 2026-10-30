@@ -89,8 +89,8 @@ claims stay bound by `releases/v0.14.0/`.
 
 | File | SHA-256 | Provenance |
 | --- | --- | --- |
-| `omp-ninfer-demo-v14.cast` | `40d38c380ec13053b7542e5a86213f747329baa1bbc46c0c4b453ef561295ff1` | Raw asciinema capture of the take, unedited (`653,823` bytes, `100×30`, `1,345` events, `76.64 s`). |
-| `omp-ninfer-demo-v14-render.cast` | `5474eeb485453f92c127157b1aa3a5acb9799ec4a224c8ea19ca3f53c09c465e` | Render cast (`625,022` bytes, `1,315` kept events, `35.159 s`): byte-identical event payloads and order; only the `36.158 s` restart wait (`632..1084`) is scaled by `0.066375` to `2.4 s` and the `/exit` shutdown tail after event `1315` is dropped. |
+| `omp-ninfer-demo-v14.cast` | `e01935efe16ec1cd7a48948991eb39fbb4fc42a4e972aced7b508944e83e00d8` | Path-normalized asciinema capture (`653,405` bytes, `100×30`, `1,345` events, `76.64 s`); capture-only command/environment headers removed. |
+| `omp-ninfer-demo-v14-render.cast` | `3bdf99428470638ac96cee12186f2ddaf9fe7530e1e9990e1d7f6ce7c8574b5d` | Path-normalized render cast (`624,604` bytes, `1,315` kept events, `35.159 s`): payloads match the normalized capture; the `36.158 s` restart wait (`632..1084`) is scaled by `0.066375` to `2.4 s` and the `/exit` tail after event `1315` is dropped. |
 | `omp-ninfer-demo-v14.gif` | `c1fb503ae66feeec80f55a2c3af84386357f412b3c8a56aa4831d86bd9d9f694` | `1714×1215`, `285` frames, `31.83 s` (including a `3 s` final hold), `2,232,959` bytes; rendered from `omp-ninfer-demo-v14-render.cast` with `agg` (JetBrains Mono `28 px`, `--fps-cap 20`, `--idle-time-limit 1.75`, `--last-frame-duration 3`) and lossless `gifsicle -O3`. The README embed. |
 | `omp-ninfer-demo-v14.mp4` | `e571f21ceb8558b4db1bf541716a110a59949e55b4dddc64034dedd2cac3823c` | `1714×1216` (one row of `#060809` ground color padded for an even height), `30 fps` CFR (`955` frames), `31.83 s`, `1,837,044` bytes; H.264 `yuv420p` faststart, silent. |
 | `omp-ninfer-demo-v14-poster.png` | `35dce796a491338bd3ee42ec3295559b3cabe69b9779abd38cde49923f6ed88e` | Final frame (GIF frame `285` of `285`), `1714×1215`, `196,316` bytes: the passing test run, the `!ninfer-restart` recovery line, and the post-restart follow-up answer. |
@@ -110,7 +110,8 @@ Together, these two timing changes reduce the cast duration from `76.639 s` (`76
 events) to `35.159 s` (`1,315` kept events) before `agg` idle compression.
 
 Rendered with `asciinema` 3.2.1, `agg` 1.9.0, LCDF `Gifsicle` 1.98 (lossless `-O3`), and `ffmpeg`
-9.0.2:
+9.0.2. These commands document the original render. The GIF, MP4 and poster remain those original
+rendered binaries; the public casts were subsequently path-normalized, not re-recorded.
 
 ```sh
 agg --font-family "JetBrains Mono" --font-size 28 --fps-cap 20 --idle-time-limit 1.75 --last-frame-duration 3 \
@@ -126,17 +127,19 @@ yellow, blue, and cyan slots to the same restrained saturation family.
 ## Redaction discipline
 
 The recorded environment used a neutral shared home directory outside any user account and a
-`PATH` limited to the demo bin directory and the system directories. Verified over the complete
-raw cast byte stream: zero occurrences of the maintainer username, host names or tailnet suffixes,
-tunnel and appliance port numbers, bearer key material, pyenv or Homebrew interpreter paths, or
-user home directories, and `5,522` truecolor sequences confirming a full-fidelity render. The
-scratch project path under a neutral shared home directory outside any user account is visible in
-one tool panel.
+`PATH` limited to the demo bin directory and the system directories. The v0.15.1 documentation
+scrub removes command/environment metadata from every public cast header and normalizes displayed
+home-path prefixes to `/demo-home`. Event order, timing, and all other event bytes are retained.
+The release verifier scans both raw and decoded `.cast` text, including headers, for private
+markers. The v14 streams retain their `5,522` truecolor sequences. These sanitized cast
+representations do not claim that the original rendered binaries were regenerated or that a
+new recording or runtime qualification occurred.
 
 ## Historical media (v0.3-era recording)
 
-The v0.3.0 recording remains published and immutable (`15.303371 s`, `1224×868`, `2,829,121` bytes
-MP4; `5,425` truecolor sequences). It was recorded with `omp-18.0.9-macos-arm64` (SHA-256
+The v0.3.0 rendered recording remains unchanged (`15.303371 s`, `1224×868`, `2,829,121` bytes
+MP4; `5,425` truecolor sequences); its current public cast is path-normalized as described above.
+It was recorded with `omp-18.0.9-macos-arm64` (SHA-256
 `ba85e7ab…c00c7`) against the v0.3.0 RTX 5090 runtime (image
 `ghcr.io/alphastorm/ninfer-runtime@sha256:63c794e2…f08d`, server binary `d11dbba7…efdfa`, model
 artifact `eec39564…bf3e`, profile `qwen38-5090-v0.2.0-beta.2`) fixing an off-by-one wraparound bug
@@ -144,7 +147,7 @@ in `ringbuf.py` and answering one stateful follow-up, with no server restart sho
 
 | File | SHA-256 | Provenance |
 | --- | --- | --- |
-| `omp-ninfer-demo-v3.cast` | `c541c0ea8b213582af078e2f86d7b30a56a91b5defb4267ecb75550521f37904` | Raw asciinema v3 capture of the take, unedited. 100×30, `xterm-256color`, 1,283 events. |
+| `omp-ninfer-demo-v3.cast` | `77bdd1d8695729b98bca986e06a18d48df3c27734f577c6955efc9576d87b5d8` | Path-normalized asciinema v3 capture; capture-only headers removed. 100×30, `xterm-256color`, 1,283 events. |
 | `omp-ninfer-demo-v3.gif` | `481dc84654bef6c087985670a990bcdcfda75634e40be43b7f5d41bf2cee6717` | 1224×868, 20 fps GIF89a rendered from the banner-trimmed cast (below) with `agg` (JetBrains Mono 20 px, brand theme, `--idle-time-limit 1.75`), optimized with `gifsicle -O3`. |
 | `omp-ninfer-demo-v3.mp4` | `e7f8be69b4040edc8209e8ee75bcf04cffe8155d82b0758894491b4380266ae3` | H.264 `yuv420p` faststart transcode of the same render, even dimensions, silent. |
 | `omp-ninfer-demo-v3-poster.png` | `722b8bf81e031510690b31cc770c92a982c2a39c82dc1cfcd6d975c216d3698d` | Single 1224×868 frame: the passing test run, the one-line fix summary, and the stateful follow-up question. |
@@ -160,14 +163,14 @@ with a fresh temporary key and restored the incumbent container afterward.
 
 ## Historical media (v0.2-era recording)
 
-The previous canonical recording and its launch derivatives remain published and immutable; their
-hashes are unchanged. They were recorded against the identical runtime image during the
+The previous rendered recording and its launch derivatives remain unchanged; only the current
+public cast representation is path-normalized. They were recorded against the identical runtime image during the
 `v0.2.0-beta.1` window, when the client displayed a beta-suffixed provider name and the RTX 3090
 lane was still preview-only.
 
 | File | SHA-256 | Provenance |
 | --- | --- | --- |
-| `omp-ninfer-demo.cast` | `8b019c31973855779a8f8826f8a1950ef5b93806a8257cfe48ffd71322c692af` | Raw asciinema v3 capture, unedited. 100×30. |
+| `omp-ninfer-demo.cast` | `64be5fe325a6298ceea1a55adf05e864d7afc7d5e12da091375b16308c1447f9` | Path-normalized asciinema v3 capture; capture-only headers removed. 100×30. |
 | `omp-ninfer-demo.gif` | `d30836afe7abb07cdf137d06971d7be41d3a83846451e746254535d47bdc2ff7` | `agg` render (16 px), `gifsicle -O3 --lossy=70`. |
 | `omp-ninfer-demo.mp4` | `a8d1b3bbe4f2dbd44a121a43a5c3d59beb6ade19c5e667b99fbfdae3ee932509` | H.264 `yuv420p` faststart master. Silent. |
 | `omp-ninfer-demo-poster.png` | `321cca847cdbe500502057887e46a9613cdea34dc8198ec4de15c3667713b920` | Single frame: passing tests, fix summary, follow-up prompt. |

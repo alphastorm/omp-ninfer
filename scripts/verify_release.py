@@ -2026,8 +2026,15 @@ def validate_public_text(root: Path, errors: list[str]) -> None:
     # host measurements, so they are the likeliest place for a hostname or a home directory to
     # reach the public repository. Scan them with the same rule as the prose.
     documents.update(repository_files(root, (".json",), "docs/measurements"))
+    documents.update(repository_files(root, (".cast",), "docs/media"))
     for document in sorted(documents):
         source = document.read_text(encoding="utf-8")
+        if document.suffix == ".cast":
+            try:
+                source += "\n" + "\n".join(text for line in source.splitlines() if line.strip()
+                                           for text in walk_strings(json.loads(line)))
+            except json.JSONDecodeError:
+                errors.append(f"{document.relative_to(root).as_posix()} must contain valid cast JSON lines")
         for marker in PRIVATE_MARKERS:
             require(marker not in source,
                     f"{document.relative_to(root).as_posix()} contains private marker {marker!r}", errors)

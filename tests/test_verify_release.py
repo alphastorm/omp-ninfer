@@ -450,6 +450,37 @@ class NativeQualityContractTests(unittest.TestCase):
 
 
 class ReleaseContractTest(unittest.TestCase):
+    def test_demo_cast_headers_publish_only_playback_metadata(self):
+        receipt = self.load(ROOT / "docs/measurements/2026-10-28-readme-demo-v14.json")
+        casts = sorted((ROOT / "docs/media").glob("*.cast"))
+        provenance = (ROOT / "docs/media/README.md").read_text()
+        self.assertEqual(len(casts), 4)
+        for path in casts:
+            with self.subTest(cast=path.name):
+                with path.open(encoding="utf-8") as stream:
+                    header = json.loads(next(stream))
+                self.assertEqual(set(header), {"version", "timestamp", "term"})
+                self.assertEqual(set(header["term"]), {"cols", "rows", "type"})
+                digest = VERIFY_RELEASE.sha256_file(path)
+                self.assertIn(digest, provenance)
+                if path.name in receipt["files"]:
+                    self.assertEqual(receipt["files"][path.name]["sha256"], digest)
+                    self.assertEqual(receipt["files"][path.name]["bytes"], path.stat().st_size)
+
+    def test_public_text_scan_includes_cast_headers_and_events(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            media = root / "docs/media"
+            media.mkdir(parents=True)
+            path = media / "fixture.cast"
+            for text in ('{"command": "sf-pc"}\n', '[0.0, "o", "/Users/example"]\n',
+                         json.dumps({"command": "C:\\Users\\example"}) + "\n"):
+                path.write_text(text)
+                errors = []
+                VERIFY_RELEASE.validate_public_text(root, errors)
+                self.assertTrue(any("docs/media/fixture.cast contains private marker" in error
+                                    for error in errors), "public cast text must be scanned")
+
     def test_receipt_command_text_is_not_a_json_evidence_reference(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

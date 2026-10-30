@@ -38,6 +38,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   explicitly consume their status instead of exempting an entire block (P15-R01).
 - Chain the macOS/Linux clone, directory change and release-scoped ready gate so clone failure
   cannot validate an existing older checkout (P15-R05).
+- Remove capture-only command/environment metadata from all four public demo casts, normalize the
+  synthetic scratch-home text, refresh the recording receipt, and include complete decoded
+  cast text in the public marker scan (P15-R12).
 
 ### Changed
 

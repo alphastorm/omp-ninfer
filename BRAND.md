@@ -151,17 +151,17 @@ imply official partnership.
 | `docs/media/omp-ninfer-demo-v14.gif` | canonical v0.14.0 README embed (1714×1215, 20 fps cap, 31.83 s); provenance in `docs/media/README.md` |
 | `docs/media/omp-ninfer-demo-v14.mp4` | canonical v0.14.0 real-session demo master (1714×1216, 30 fps H.264 `yuv420p` faststart, silent) |
 | `docs/media/omp-ninfer-demo-v14-poster.png` | canonical v0.14.0 demo poster frame (1714×1215, final frame) |
-| `docs/media/omp-ninfer-demo-v14.cast` | canonical v0.14.0 raw asciinema capture, unedited (provenance: `docs/media/README.md`) |
-| `docs/media/omp-ninfer-demo-v14-render.cast` | canonical v0.14.0 render cast (restart wait compressed, `/exit` tail dropped; byte-identical event payloads; provenance: `docs/media/README.md`) |
+| `docs/media/omp-ninfer-demo-v14.cast` | canonical v0.14.0 path-normalized asciinema capture; capture-only headers removed (provenance: `docs/media/README.md`) |
+| `docs/media/omp-ninfer-demo-v14-render.cast` | canonical v0.14.0 path-normalized render cast (restart wait compressed, `/exit` tail dropped; payloads match the normalized capture; provenance: `docs/media/README.md`) |
 | `docs/media/omp-ninfer-demo-v3.gif` | historical v0.3.0 README embed (1224×868, 20 fps); retained for provenance |
 | `docs/media/omp-ninfer-demo-v3.mp4` | historical v0.3.0 real-session demo master (MP4); retained for provenance |
 | `docs/media/omp-ninfer-demo-v3-poster.png` | historical v0.3.0 demo poster frame (1224×868); retained for provenance |
-| `docs/media/omp-ninfer-demo-v3.cast` | historical v0.3.0 raw asciinema capture (provenance: `docs/media/README.md`) |
+| `docs/media/omp-ninfer-demo-v3.cast` | historical v0.3.0 path-normalized asciinema capture; capture-only headers removed (provenance: `docs/media/README.md`) |
 | `docs/media/omp-ninfer-demo.gif` | historical v0.2-era full-session GIF render; retained for provenance |
 | `docs/media/omp-ninfer-demo.mp4` | historical v0.2-era real-session demo master (MP4); retained for provenance |
 | `docs/media/omp-ninfer-demo-poster.png` | historical v0.2-era demo poster frame for posts and video embeds |
 | `site/` | canonical public site (`alphastorm.github.io/omp-ninfer`): five hand-maintained pages, `site.css`, and `site/fonts/`. `.github/workflows/pages.yml` stages `logo.svg`, `favicon.svg`, `og.png`, `architecture.png`, and the v14 demo MP4 and poster from their canonical sources at deploy time (`tests/test_site.py` keeps that list, `.gitignore`, and every page reference in step), so `site/` never carries copies. The home page's recording is the v14 demo; its qualified numbers come from the receipts, never the clip. |
-| `docs/media/omp-ninfer-demo.cast` | historical v0.2-era raw asciinema capture (provenance: `docs/media/README.md`) |
+| `docs/media/omp-ninfer-demo.cast` | historical v0.2-era path-normalized asciinema capture; capture-only headers removed (provenance: `docs/media/README.md`) |
 | `docs/media/omp-ninfer-demo-social.mp4` | historical v0.2-era updater-free social derivative |
 | `docs/media/omp-ninfer-demo-social-discord.gif` | historical v0.2-era update-banner-free README/Discord fallback |
 | `docs/media/omp-ninfer-demo-social-poster.png` | historical v0.2-era poster from the clean social interval |
