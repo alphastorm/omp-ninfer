@@ -287,11 +287,11 @@ class NativeQualityContractTests(unittest.TestCase):
         self.predecessor["runtime_shape"]["fit"].update(
             device_state_slots=2, draft_mlp_device_format="artifact", token_embedding_residency="device")
         self.save_predecessor()
-        from test_native_screen_arm import arm_identity
+        from test_native_screen_arm import screen_run_identity
         self.screen = {
             "artifact_type": "omp-ninfer.quality-screen-verdict", "schema_version": 1,
             "verdict": "pass", "validity": {"valid": True},
-            "runs": {role: {"arm": arm_identity("candidate" in role, "determinism" in role)}
+            "runs": {role: screen_run_identity(role)
                      for role in ("production", "candidate", "production_determinism", "candidate_determinism")},
             "raw_prompts_outputs_or_secrets_included": False,
         }
@@ -368,6 +368,42 @@ class NativeQualityContractTests(unittest.TestCase):
         VERIFY_RELEASE.validate_quality_screen(self.root, self.release, self.variant, errors, source)
         self.assertTrue(any("stay inside" in error for error in errors))
 
+    def test_screen_production_must_match_the_published_predecessor(self):
+        for key in ("package_sha256", *VERIFY_RELEASE.NATIVE_IDENTITY_FIELDS):
+            with self.subTest(key=key):
+                screen = deepcopy(self.screen)
+                for role in ("production", "production_determinism"):
+                    screen["runs"][role]["arm"][key] = "9" * 64
+                if key == "model_artifact_sha256":
+                    for role in ("candidate", "candidate_determinism"):
+                        screen["runs"][role]["arm"][key] = "9" * 64
+                self.evidence("quality_screen", screen)
+                errors = []
+                VERIFY_RELEASE.validate_quality_screen(self.root, self.release, self.variant, errors)
+                self.assertTrue(any(f"production {key} must match the predecessor" in error
+                                    for error in errors), errors)
+        self.evidence("quality_screen", self.screen)
+        (self.root / "releases/v0.14.0/manifest.json").unlink()
+        errors = []
+        VERIFY_RELEASE.validate_quality_screen(self.root, self.release, self.variant, errors)
+        self.assertTrue(any("must bind a predecessor variant" in error for error in errors), errors)
+
+    def test_screen_requires_exact_full_corpus_membership_for_all_four_runs(self):
+        for role in self.screen["runs"]:
+            for field, value in (("prompt_count", 80 if "determinism" not in role else 79),
+                                 ("prompt_ids_sha256", "0" * 64),
+                                 ("prompt_ids_sha256", None)):
+                with self.subTest(role=role, field=field, value=value):
+                    screen = deepcopy(self.screen)
+                    if value is None:
+                        screen["runs"][role].pop(field)
+                    else:
+                        screen["runs"][role][field] = value
+                    self.evidence("quality_screen", screen)
+                    errors = []
+                    VERIFY_RELEASE.validate_quality_screen(self.root, self.release, self.variant, errors)
+                    self.assertTrue(any("frozen corpus membership" in error for error in errors), errors)
+
     def test_mtp_rebuild_exemption_requires_frozen_corpus_direct_bytes_and_same_fit(self):
         self.variant["runtime_shape"] = deepcopy(self.predecessor["runtime_shape"])
         identity = lambda row: {key: row[key] for key in VERIFY_RELEASE.NATIVE_IDENTITY_FIELDS}
@@ -414,6 +450,37 @@ class NativeQualityContractTests(unittest.TestCase):
 
 
 class ReleaseContractTest(unittest.TestCase):
+    def test_demo_cast_headers_publish_only_playback_metadata(self):
+        receipt = self.load(ROOT / "docs/measurements/2026-10-28-readme-demo-v14.json")
+        casts = sorted((ROOT / "docs/media").glob("*.cast"))
+        provenance = (ROOT / "docs/media/README.md").read_text()
+        self.assertEqual(len(casts), 4)
+        for path in casts:
+            with self.subTest(cast=path.name):
+                with path.open(encoding="utf-8") as stream:
+                    header = json.loads(next(stream))
+                self.assertEqual(set(header), {"version", "timestamp", "term"})
+                self.assertEqual(set(header["term"]), {"cols", "rows", "type"})
+                digest = VERIFY_RELEASE.sha256_file(path)
+                self.assertIn(digest, provenance)
+                if path.name in receipt["files"]:
+                    self.assertEqual(receipt["files"][path.name]["sha256"], digest)
+                    self.assertEqual(receipt["files"][path.name]["bytes"], path.stat().st_size)
+
+    def test_public_text_scan_includes_cast_headers_and_events(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            media = root / "docs/media"
+            media.mkdir(parents=True)
+            path = media / "fixture.cast"
+            for text in ('{"command": "sf-pc"}\n', '[0.0, "o", "/Users/example"]\n',
+                         json.dumps({"command": "C:\\Users\\example"}) + "\n"):
+                path.write_text(text)
+                errors = []
+                VERIFY_RELEASE.validate_public_text(root, errors)
+                self.assertTrue(any("docs/media/fixture.cast contains private marker" in error
+                                    for error in errors), "public cast text must be scanned")
+
     def test_receipt_command_text_is_not_a_json_evidence_reference(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -1587,7 +1654,8 @@ class ReleaseContractTest(unittest.TestCase):
             ("council left open", lambda record: record["product_tooling"].update(status="pending"),
              None, [f"{ledger} product_tooling.status 'pending' is not closed"]),
             ("other bytes", None, lambda summary: summary.update(sha256="0" * 64),
-             [f"{gate}.sha256 must match the review ledger bytes"]),
+             [f"{gate}.sha256 must match repository file bytes",
+              f"{gate}.sha256 must match the review ledger bytes"]),
             ("failed summary", None, lambda summary: summary.update(status="failed"),
              [f"{gate}.status must be passed in ready mode"]),
         )
@@ -1600,6 +1668,83 @@ class ReleaseContractTest(unittest.TestCase):
                     self.assertEqual(errors, expected)
                 finally:
                     temporary.cleanup()
+
+    def test_ready_g4_omission_fails_closed_for_new_releases_only(self) -> None:
+        historical = self.load(ROOT / "releases/v0.10.0/qualification.json")
+        self.assertNotIn("g4_review", historical["observed_gates"])
+        errors = []
+        VERIFY_RELEASE.validate_review_ledger(ROOT, "v0.10.0", historical, errors)
+        self.assertEqual(errors, [], "published evidence predates the mandatory G4 binding")
+        for qualification in ({}, {"observed_gates": {}}, {"observed_gates": {"g4_review": None}}):
+            with self.subTest(qualification=qualification):
+                errors = []
+                VERIFY_RELEASE.validate_review_ledger(ROOT, "v0.15.1", qualification, errors)
+                self.assertEqual(errors, [
+                    "qualification.observed_gates.g4_review is required in ready mode"])
+
+    def test_bound_routes_must_pass_for_this_release_inside_its_directory(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            path = root / "releases/v0.15.1/acceptance/documented-routes.json"
+            path.parent.mkdir(parents=True)
+            for fields, foreign, expected in (
+                ({}, False, None),
+                ({"release": "v0.15.0"}, False, "receipt release must match"),
+                ({"status": "failed"}, False, "receipt status must be passed"),
+                ({}, True, "repository_path must stay inside release"),
+            ):
+                with self.subTest(fields=fields, foreign=foreign):
+                    target = path if not foreign else root / "old-routes.json"
+                    target.write_text(json.dumps({"release": "v0.15.1", "status": "passed", **fields}))
+                    qualification = {"release": "v0.15.1", "composition": {
+                        "documented_route_acceptance": {"status": "passed",
+                            "repository_path": target.relative_to(root).as_posix(),
+                            "sha256": VERIFY_RELEASE.sha256_file(target)}}}
+                    errors = []
+                    VERIFY_RELEASE.validate_documented_route_acceptance(root, qualification, errors)
+                    if expected:
+                        self.assertTrue(any(expected in error for error in errors), errors)
+                    else:
+                        self.assertEqual(errors, [])
+
+    def test_qualification_repository_bindings_are_enforced_recursively(self) -> None:
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        release_root = root / "releases" / PUBLIC_RELEASE
+        target = root / "binding-fixture.txt"
+        target.write_text("bound bytes")
+        digest = VERIFY_RELEASE.sha256_file(target)
+        for reference, sha, expected in (
+            ("binding-fixture.txt", digest, None),
+            ("binding-fixture.txt", "0" * 64, "sha256 must match repository file bytes"),
+            ("missing.txt", digest, "repository_path must name a file inside the repository"),
+            ("../outside.txt", digest, "repository_path must name a file inside the repository"),
+            (str(target), digest, "repository_path must name a file inside the repository"),
+        ):
+            with self.subTest(reference=reference, sha=sha):
+                binding = {"repository_path": reference}
+                if sha is not None:
+                    binding["sha256"] = sha
+                self.rebind_qualification(release_root, lambda record: record.update(
+                    binding_probe={"receipts": [binding]}))
+                _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+                if expected:
+                    self.assertTrue(any("qualification.binding_probe.receipts[0]." + expected
+                                        in error for error in errors), errors)
+                else:
+                    self.assertEqual(errors, [])
+
+    def test_new_qualification_bindings_require_hashes_without_rewriting_published_annotations(self):
+        historical = self.load(ROOT / "releases/v0.15.0/qualification.json")
+        annotation = historical["observed_gates"]["changed_client_acceptance"]
+        self.assertIn("repository_path", annotation)
+        self.assertNotIn("sha256", annotation)
+        errors = []
+        VERIFY_RELEASE.validate_repository_bindings(ROOT, historical, errors, require_hashes=False)
+        self.assertEqual(errors, [], "published path-only annotations are not rewritten")
+        errors = []
+        VERIFY_RELEASE.validate_repository_bindings(ROOT, annotation, errors)
+        self.assertTrue(any("sha256 must be a lower-case SHA-256" in error for error in errors), errors)
 
     def test_ready_route_acceptance_summary_must_restate_its_bound_evidence(self) -> None:
         """The fixture binds its routes evidence but predates the summary: add v0.14.0's summary,
@@ -1622,7 +1767,10 @@ class ReleaseContractTest(unittest.TestCase):
             ("evidence edited after binding", lambda root, summary: (
                 root / "releases" / PUBLIC_RELEASE / "acceptance" / "documented-routes.json").write_text(
                     "{}\n", encoding="utf-8"),
-             [f"{bound} must bind the checked-in passed routes evidence",
+             [f"{bound}.sha256 must match repository file bytes",
+              f"{bound} must bind the checked-in passed routes evidence",
+              f"{bound} receipt release must match qualification release",
+              f"{bound} receipt status must be passed",
               f"{summary_field}.candidate_commit must be the routes evidence's candidate_commit"]),
         )
         for case, change, expected in cases:

@@ -24,12 +24,16 @@ Installed binaries must match the published upstream assets.
 
 The evidence file is private (it names no secrets, but it is the operator's working record);
 its schema is the EVIDENCE_KEYS below, and each platforms entry names the status (qualified or
-preview) its profile takes: upstream staging leaves every profile pending, so this is where the
+preview) its profile takes, plus the original client probe's candidate and release: upstream
+staging leaves every profile pending, so this is where the
 accepted posture is decided. documented_routes.scope states what the accepted routes cover.
 restoration is the restoration receipt's body in v0.14.0's shape (candidate_commit, rtx5090 and
 one section per accepted native lane); every displaced incumbent must be observed back in place,
 or nothing is written. The immutable URL pins that follow are scripts/rebind_release.py's:
 commit these files, then --stage platform, acceptance, manifest.
+Before composition, qualification.observed_gates.g4_review must hash-bind this release's
+review ledger; product_tooling.stage_commit is the frozen candidate every input must name.
+This subject binding is not council approval or publication authorization.
 """
 from __future__ import annotations
 
@@ -47,7 +51,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from verify_release import (  # pyright: ignore[reportMissingImports]
     OMP_PROFILE_PLATFORMS, effective_native_model, validate_upstream_client_bindings,
-    validate_upstream_omp_component,
+    validate_upstream_omp_component, ga_release, product_version, OCI_DIGEST_RE,
+    bound_file,
 )
 from rebind_release import RAW  # pyright: ignore[reportMissingImports]
 from compose_native_qualification import first_release_rollback
@@ -114,6 +119,36 @@ def relative(path: Path) -> str:
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise SystemExit(f"compose_route_acceptance: {message}")
+
+
+def frozen_candidate(release: str, qualification: dict) -> str:
+    """The hash-bound product review subject owns acceptance identity, not --candidate."""
+    gate = qualification.get("observed_gates", {}).get("g4_review", {})
+    path = bound_file(ROOT, gate.get("repository_path"))
+    require(path is not None and path.is_relative_to((ROOT / "releases" / release).resolve())
+            and sha256(path.read_bytes()) == gate.get("sha256"),
+            "acceptance requires a hash-bound frozen product subject in this release")
+    ledger = load(path)
+    require(ledger.get("artifact_type") == "omp_ninfer_review_ledger"
+            and ledger.get("release") == release,
+            "the frozen product subject ledger must belong to this release")
+    candidate = ledger.get("product_tooling", {}).get("stage_commit")
+    require(isinstance(candidate, str) and COMMIT_RE.fullmatch(candidate) is not None,
+            "the frozen product subject must name product_tooling.stage_commit")
+    return candidate
+
+
+def rebind_composed_evidence(value: Any, hashes: dict[str, str]) -> None:
+    """Refresh only references to artifacts this composition actually authors."""
+    if isinstance(value, list):
+        for child in value:
+            rebind_composed_evidence(child, hashes)
+    elif isinstance(value, dict):
+        reference = value.get("repository_path")
+        if isinstance(reference, str) and reference in hashes:
+            value["sha256"] = hashes[reference]
+        for child in value.values():
+            rebind_composed_evidence(child, hashes)
 
 
 def check_native_first_release(native: dict[str, Any], qualification: dict[str, Any]) -> None:
@@ -200,7 +235,28 @@ def positive_seconds(value: Any) -> bool:
     return isinstance(value, (int, float)) and not isinstance(value, bool) and value > 0
 
 
-def check_restoration(restoration: Any, lanes: tuple[str, ...], candidate: str) -> None:
+def predecessor_image_digest(release: str) -> str:
+    """Read the incumbent from the latest ready GA predecessor, never from operator evidence."""
+    current = product_version(release)
+    predecessors = []
+    for path in (ROOT / "releases").iterdir():
+        version = product_version(path.name)
+        if (not path.is_dir() or not ga_release(path.name) or version is None
+                or current is None or version >= current or not (path / "manifest.json").is_file()):
+            continue
+        manifest = load(path / "manifest.json")
+        if manifest.get("status") == "ready":
+            predecessors.append((version, manifest))
+    require(bool(predecessors), "restoration requires a published predecessor manifest")
+    predecessor = max(predecessors, key=lambda row: row[0])[1]
+    digest = predecessor.get("components", {}).get("ninfer", {}).get("oci_manifest_digest")
+    require(isinstance(digest, str) and OCI_DIGEST_RE.fullmatch(digest) is not None,
+            "published predecessor must bind an RTX 5090 image digest")
+    return digest
+
+
+def check_restoration(restoration: Any, lanes: tuple[str, ...], candidate: str,
+                      predecessor_digest: str) -> None:
     """Restoration counts only when it observed every incumbent the windows displaced back in place."""
     require(isinstance(restoration, dict) and bool(restoration), "restoration evidence is empty")
     overridden = sorted(set(restoration).intersection(RESTORATION_RECEIPT_FIELDS))
@@ -214,6 +270,8 @@ def check_restoration(restoration: Any, lanes: tuple[str, ...], candidate: str) 
     image = incumbent.get("original_image")
     require(isinstance(image, str) and OCI_IMAGE_RE.fullmatch(image) is not None,
             "rtx5090 restoration must name the incumbent's digest-pinned image")
+    require(image.rsplit("@", 1)[1] == predecessor_digest,
+            "rtx5090 restored image must match the published predecessor digest")
     require(incumbent.get("restart_policy") == "unless-stopped",
             f"rtx5090 restoration left restart policy {incumbent.get('restart_policy')!r}, "
             "not unless-stopped")
@@ -262,7 +320,11 @@ def restoration_summary(restoration: dict, lanes: tuple[str, ...], path: str) ->
 
 
 def platform_receipt(release: str, as_of: str, profile: dict, evidence: dict,
-                     manifest: dict) -> dict:
+                     manifest: dict, candidate: str) -> dict:
+    require(evidence.get("candidate") == candidate,
+            f"{profile['id']}: live capture candidate must match the frozen product subject")
+    require(evidence.get("release") == release,
+            f"{profile['id']}: live capture release must match {release}")
     distribution = profile["client_distribution"]
     omp = manifest["components"]["omp"]
     errors: list[str] = []
@@ -281,6 +343,7 @@ def platform_receipt(release: str, as_of: str, profile: dict, evidence: dict,
         "kind": "omp-ninfer-platform-acceptance-receipt",
         "receipt_id": f"{profile['id']}-{omp['upstream_commit'][:8]}-{distribution['asset_sha256'][:10]}-{release}",
         "product_release": release,
+        "candidate_commit": candidate,
         "profile": profile["id"],
         "status": "passed",
         "as_of": as_of,
@@ -347,6 +410,8 @@ def main() -> int:
         key = lane.removesuffix("-native")
         require(key not in evidence or lane in lanes, f"undeclared native evidence: {key}")
     qualification = load(qualification_path)
+    candidate = frozen_candidate(args.release, qualification)
+    require(args.candidate == candidate, "--candidate does not match the frozen product subject")
     authority = load(authority_path)
     require(authority.get("product_release") == args.release,
             "the root compatibility authority is not this release; run the lane cut first")
@@ -357,6 +422,7 @@ def main() -> int:
     require(not errors, "; ".join(errors))
     # Upstream staging leaves every profile pending, without a receipt or installability, so the
     # evidence decides each accepted status; check them all before anything is written.
+    platform_receipts = {}
     for profile in authority["profiles"]:
         status = evidence["platforms"].get(profile["id"], {}).get("status")
         require(status in ACCEPTED_STATUSES,
@@ -364,6 +430,8 @@ def main() -> int:
         require(status != "qualified"
                 or profile.get("gpu_qualification", {}).get("status") == "qualified",
                 f"{profile['id']}: qualified without a qualified GPU runtime")
+        platform_receipts[profile["id"]] = platform_receipt(
+            args.release, args.as_of, profile, evidence["platforms"][profile["id"]], manifest, candidate)
     native_model = effective_native_model(manifest)
     for variant in manifest["components"].get("ninfer_variants", []):
         require(variant.get("model_artifact_sha256") == native_model.get("artifact_sha256"),
@@ -374,7 +442,8 @@ def main() -> int:
         receipt_path = ROOT / lane_receipt if lane_receipt and lane_receipt.startswith("releases/") else release_root / str(lane_receipt)
         check_native_first_release(native, load(receipt_path) if lane_receipt else {})
     # The restoration receipt and every incumbent-restored claim below rest on this evidence.
-    check_restoration(evidence["restoration"], lanes, args.candidate)
+    check_restoration(evidence["restoration"], lanes, candidate,
+                      predecessor_image_digest(args.release))
     scope = evidence["documented_routes"].get("scope")
     require(isinstance(scope, str) and bool(scope.strip()),
             "evidence documented_routes needs the scope the accepted routes cover")
@@ -385,7 +454,7 @@ def main() -> int:
     for lane in lanes:
         raw = routes[lane].read_bytes()
         receipt = json.loads(raw)
-        check_route(lane, receipt, args.candidate)
+        check_route(lane, receipt, candidate)
         receipts[lane] = receipt
         target = measurements / f"{args.measurement_prefix}-{lane}-run.json"
         target.write_bytes(raw)
@@ -427,7 +496,7 @@ def main() -> int:
     for profile in authority["profiles"]:
         platform_evidence = evidence["platforms"][profile["id"]]
         filename = f"{OMP_PROFILE_PLATFORMS[profile['id']]}-{omp['distribution_version']}.json"
-        receipt = platform_receipt(args.release, args.as_of, profile, platform_evidence, manifest)
+        receipt = platform_receipts[profile["id"]]
         save(acceptance_root / filename, receipt)
         digest = sha256((acceptance_root / filename).read_bytes())
         # This is product qualification metadata; stock OMP does not read the authority. The URL
@@ -435,7 +504,7 @@ def main() -> int:
         status = platform_evidence["status"]
         profile.update(status=status, installable=status == "qualified", blockers=[])
         profile["acceptance_receipt"] = {
-            "url": f"{RAW}/{args.candidate}/releases/{args.release}/acceptance/{filename}",
+            "url": f"{RAW}/{candidate}/releases/{args.release}/acceptance/{filename}",
             "sha256": digest,
         }
         platform_rows.append({"profile": profile["id"], "sha256": digest})
@@ -459,7 +528,7 @@ def main() -> int:
             "lane": native_variant,
             "as_of": args.as_of,
             "status": "passed",
-            "candidate_commit": args.candidate,
+            "candidate_commit": candidate,
             "client": {
                 **windows["client_distribution"],
                 "version": f"omp/{omp['distribution_version']}",
@@ -502,7 +571,7 @@ def main() -> int:
                 "the guide changed after the routes ran; evidence must describe document_change")
         routes_doc["document_change"] = change
     routes_doc.update({
-        "candidate_commit": args.candidate,
+        "candidate_commit": candidate,
         "routes": route_rows,
         "steps": [{"lane": lane, "status": "passed"} for lane in lanes],
         "current_block_addresses": addresses,
@@ -617,7 +686,7 @@ def main() -> int:
     summary: dict[str, Any] = {
         "status": "passed",
         "scope": scope,
-        "candidate_commit": args.candidate,
+        "candidate_commit": candidate,
         # Every executed block still matches the guide (refused above otherwise), so committing
         # this evidence leaves the candidate's routes unchanged.
         "evidence_commit_changes_candidate": False,
@@ -640,6 +709,11 @@ def main() -> int:
     qualification["as_of"] = max(qualification["as_of"], args.as_of)
     qualification["external_installation_qualified"] = True
     qualification["remaining_release_gates"] = []
+    authored = [client_components, composed_path, routes_path, restoration_path,
+                *(ROOT / path for path in platform_paths),
+                *(ROOT / row["receipt"] for row in route_rows.values()),
+                *(ROOT / row["repository_path"] for row in native_refs.values())]
+    rebind_composed_evidence(qualification, {relative(path): sha256(path.read_bytes()) for path in authored})
     save(qualification_path, qualification)
     manifest["qualification"]["summary_sha256"] = sha256(qualification_path.read_bytes())
     manifest["status"] = "ready"

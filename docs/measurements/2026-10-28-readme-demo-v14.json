@@ -205,7 +205,7 @@
     }
   },
   "redaction": {
-    "verified_over": "the complete raw cast byte stream",
+    "verified_over": "both public cast byte streams, including playback headers and decoded event text; .cast files are included in the public-text release verifier",
     "zero_occurrences_of": [
       "maintainer username",
       "host names and tailnet suffixes",
@@ -215,16 +215,17 @@
       "user home directories"
     ],
     "truecolor_sequences": 5522,
-    "note": "the scratch project lives under a shared neutral home directory outside any user account; that path is visible in one tool panel"
+    "note": "Capture-only command and environment header fields were removed in the v0.15.1 documentation scrub. The synthetic scratch-home prefix in both public cast streams is normalized to /demo-home; event order and timing are unchanged. GIF, MP4 and poster remain the original renders of the synthetic project, not a new capture.",
+    "public_header_fields": ["version", "term", "timestamp"]
   },
   "files": {
     "omp-ninfer-demo-v14.cast": {
-      "sha256": "40d38c380ec13053b7542e5a86213f747329baa1bbc46c0c4b453ef561295ff1",
-      "bytes": 653823
+      "sha256": "e01935efe16ec1cd7a48948991eb39fbb4fc42a4e972aced7b508944e83e00d8",
+      "bytes": 653405
     },
     "omp-ninfer-demo-v14-render.cast": {
-      "sha256": "5474eeb485453f92c127157b1aa3a5acb9799ec4a224c8ea19ca3f53c09c465e",
-      "bytes": 625022
+      "sha256": "3bdf99428470638ac96cee12186f2ddaf9fe7530e1e9990e1d7f6ce7c8574b5d",
+      "bytes": 624604
     },
     "omp-ninfer-demo-v14.gif": {
       "sha256": "c1fb503ae66feeec80f55a2c3af84386357f412b3c8a56aa4831d86bd9d9f694",

@@ -475,6 +475,10 @@ def main() -> int:
     for variant in manifest["components"].get("ninfer_variants", []):
         variant.update(dependency_pins.get(variant["id"], {}))
         qual = variant.get("qualification", {})
+        # Optional native admission proofs bind a release and its predecessor. Unchanged
+        # runtimes carry by identity; changed runtimes must supply fresh proofs at rebind.
+        for key in ("quality_screen", "t1_parity", "fit"):
+            qual.pop(key, None)
         for key in ("summary", "public_url"):
             if isinstance(qual.get(key), str):
                 qual[key] = qual[key].replace(f"/{args.source}/", f"/{args.release}/")
@@ -570,8 +574,10 @@ def main() -> int:
         f"external-installation acceptance against the published {args.release_tag} "
         "component and runtime image"
     ]
+    # Product-route evidence never carries into a successor, even when the OMP binary does.
+    composition.pop("documented_route_acceptance", None)
+    qualification["documented_route_acceptance"] = {"status": "pending"}
     if omp_descriptor is not None:
-        composition.pop("documented_route_acceptance", None)
         qualification["remaining_release_gates"].append(
             "fresh upstream OMP platform and documented-route acceptance"
         )

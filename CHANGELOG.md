@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Bind a native quality screen's production package, server, configuration and model hashes
+  to the immediately preceding published release's variant, not merely to its GPU lane
+  ([#117](https://github.com/alphastorm/omp-ninfer/issues/117), P15-R06).
+- Clear optional native screen, T1-parity and fit bindings when staging a successor or rebinding
+  a package; rebind accepts only the evidence explicitly supplied for that operation (P15-R07).
+- Require the native screen's exact frozen 1,120-prompt membership and first 80 determinism
+  prompts in both arms, with duplicate-free scored/response membership seals (P15-R08).
+- Fail closed on an omitted G4 review binding in ready mode from v0.15.1; historical releases
+  that predate mandatory machine-bound review evidence remain unchanged (P15-R03).
+- Recheck a bound documented-routes receipt's release, passed status and current-release
+  location even when its summary is absent (P15-R09).
+- Enforce every nested qualification `repository_path`/`sha256` binding against the
+  repository's actual file bytes in draft, installable and ready verification (P15-R11).
+  From v0.15.1 every repository reference requires its hash; published path-only annotations
+  remain historical metadata rather than being rewritten as new evidence. The composer
+  refreshes qualification references to artifacts it authors, including its rewritten client
+  descriptor, without changing bindings to independent evidence. Staging also discards prior
+  documented-route evidence when the client binary is carried unchanged.
+- Refuse route composition unless the restored RTX 5090 image's digest equals the latest
+  ready GA predecessor's published manifest digest; restoration flags alone do not suffice
+  (P15-R02).
+- Derive acceptance's candidate from this release's hash-bound product review subject and
+  require the caller, route/restoration receipts and original platform captures to agree.
+  Platform receipts retain the candidate binding; stale captures fail before output writes
+  (P15-R04, P15-R10).
+- Check native acceptance's stop and final restart, and always check the Windows runner's
+  trailing native exit code. Expected outage failures and hash-verified resumed downloads
+  explicitly consume their status instead of exempting an entire block (P15-R01).
+- Chain the macOS/Linux clone, directory change and release-scoped ready gate so clone failure
+  cannot validate an existing older checkout (P15-R05).
+- Remove capture-only command/environment metadata from all four public demo casts, normalize the
+  synthetic scratch-home text, refresh the recording receipt, and include complete decoded
+  cast text in the public marker scan (P15-R12).
+- Align the installed fail-closed fragment's client-version comments with the stock OMP
+  18.14.0 manifest pin (P15-R13).
+
 ### Changed
 
 - Mark v0.15.0 as the published release across the README, quickstart banner, facts, roadmap,

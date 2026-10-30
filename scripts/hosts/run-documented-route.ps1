@@ -109,10 +109,9 @@ foreach ($step in $manifest.steps) {
         $text = [IO.File]::ReadAllText($path, [Text.UTF8Encoding]::new($false))
         $global:LASTEXITCODE = 0
         Invoke-Expression $text
-        # A block that reads $LASTEXITCODE owns its exit-code semantics (a fail-closed check
-        # expects its last native command to fail and throws if it does not). Any other block
-        # that ends on a failed native command is a failed step.
-        if (($text -notmatch 'LASTEXITCODE') -and (Test-Path variable:LASTEXITCODE) -and $LASTEXITCODE -ne 0) {
+        # Every block must finish successfully. A documented expected failure (outage or
+        # a verified complete resumed download) must explicitly consume its native exit code.
+        if ((Test-Path variable:LASTEXITCODE) -and $LASTEXITCODE -ne 0) {
             throw "block ended with native exit code $LASTEXITCODE"
         }
         $record.status = 'passed'

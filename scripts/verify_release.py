@@ -721,6 +721,29 @@ def bound_file(root: Path, reference: Any) -> Path | None:
     return path if path.is_relative_to(root.resolve()) and path.is_file() else None
 
 
+def validate_repository_bindings(root: Path, value: Any, errors: list[str],
+                                 label: str = "qualification", *, require_hashes: bool = True) -> None:
+    """Enforce every repository file/hash binding, including nested qualification entries."""
+    if isinstance(value, list):
+        for index, child in enumerate(value):
+            validate_repository_bindings(root, child, errors, f"{label}[{index}]",
+                                         require_hashes=require_hashes)
+    elif isinstance(value, dict):
+        if "repository_path" in value and (require_hashes or "sha256" in value):
+            reference = value["repository_path"]
+            path = bound_file(root, reference)
+            valid_path = (isinstance(reference, str) and not Path(reference).is_absolute()
+                          and path is not None)
+            require(valid_path, f"{label}.repository_path must name a file inside the repository", errors)
+            require_sha(value.get("sha256"), f"{label}.sha256", errors)
+            if valid_path:
+                require(sha256_file(path) == value.get("sha256"),
+                        f"{label}.sha256 must match repository file bytes", errors)
+        for key, child in value.items():
+            validate_repository_bindings(root, child, errors, f"{label}.{key}",
+                                         require_hashes=require_hashes)
+
+
 def validate_review_ledger(
     root: Path,
     release: Any,
@@ -735,6 +758,9 @@ def validate_review_ledger(
     gates = qualification.get("observed_gates")
     gate = gates.get("g4_review") if isinstance(gates, dict) else None
     if gate is None:
+        # Earlier published releases predate a mandatory machine-bound G4 ledger.
+        require((product_version(release) or (0, 0, 0)) < (0, 15, 1),
+                "qualification.observed_gates.g4_review is required in ready mode", errors)
         return
     label = "qualification.observed_gates.g4_review"
     if not isinstance(gate, dict):
@@ -792,12 +818,19 @@ def validate_documented_route_acceptance(
     require(bound.get("status") == "passed" and path is not None
             and sha256_file(path) == bound.get("sha256"),
             f"{label} must bind the checked-in passed routes evidence", errors)
+    release = qualification.get("release")
+    require(path is not None and path.is_relative_to((root / "releases" / str(release)).resolve()),
+            f"{label}.repository_path must stay inside release", errors)
+    routes = load_json(path) if path is not None else {}
+    require(routes.get("release") == release,
+            f"{label} receipt release must match qualification release", errors)
+    require(routes.get("status") == "passed",
+            f"{label} receipt status must be passed", errors)
     if summary is None:
         return
     if not isinstance(summary, dict):
         errors.append("qualification.documented_route_acceptance must be an object")
         return
-    routes = load_json(path) if path is not None else {}
     for field, expected, meaning in (
         ("status", "passed", "passed"),
         ("evidence_path", bound.get("repository_path"), f"{label}.repository_path"),
@@ -1604,16 +1637,21 @@ def validate_quality_screen(root: Path, release: str, variant: dict[str, Any],
     from redaction_screen import ScreenError, native_arm
     runs = value.get("runs", {})
     try:
-        selected = {role: {"arm": native_arm(runs[role]["arm"])} for role in (
+        selected = {role: {**runs[role], "arm": native_arm(runs[role]["arm"])} for role in (
             "production", "candidate", "production_determinism", "candidate_determinism")}
         validate_native_arms(selected)
     except (ScreenError, KeyError, TypeError, ValueError):
-        errors.append(f"{label} must bind four valid native arms with fresh determinism identity")
+        errors.append(f"{label} must bind four valid native arms with fresh determinism identity "
+                      "and frozen corpus membership")
         return
     candidate, production = selected["candidate"]["arm"], selected["production"]["arm"]
+    predecessor = predecessor_native_variant(root, release, variant["id"])
+    require(predecessor is not None, f"{label} must bind a predecessor variant", errors)
     for key in ("package_sha256", *NATIVE_IDENTITY_FIELDS):
         require(candidate.get(key) == variant.get(key),
                 f"{label} candidate {key} must match the variant", errors)
+        require(predecessor is not None and production.get(key) == predecessor.get(key),
+                f"{label} production {key} must match the predecessor", errors)
     require(production["lane"] == variant["id"].split("-")[0],
             f"{label} production lane must match the variant", errors)
 
@@ -1988,8 +2026,15 @@ def validate_public_text(root: Path, errors: list[str]) -> None:
     # host measurements, so they are the likeliest place for a hostname or a home directory to
     # reach the public repository. Scan them with the same rule as the prose.
     documents.update(repository_files(root, (".json",), "docs/measurements"))
+    documents.update(repository_files(root, (".cast",), "docs/media"))
     for document in sorted(documents):
         source = document.read_text(encoding="utf-8")
+        if document.suffix == ".cast":
+            try:
+                source += "\n" + "\n".join(text for line in source.splitlines() if line.strip()
+                                           for text in walk_strings(json.loads(line)))
+            except json.JSONDecodeError:
+                errors.append(f"{document.relative_to(root).as_posix()} must contain valid cast JSON lines")
         for marker in PRIVATE_MARKERS:
             require(marker not in source,
                     f"{document.relative_to(root).as_posix()} contains private marker {marker!r}", errors)
@@ -2071,6 +2116,9 @@ def validate(
 
     profile = load_json(profile_path) if profile_path.is_file() else {}
     qualification = load_json(qualification_path) if qualification_path.is_file() else {}
+    # Published path-only gate annotations predate mandatory paired bindings.
+    validate_repository_bindings(root, qualification, errors,
+                                 require_hashes=(product_version(release) or (0, 0, 0)) >= (0, 15, 1))
     qualification_pending = pending_allowed and not qualification
     components = manifest.get("components", {})
     omp = components.get("omp", {})

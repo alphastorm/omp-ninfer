@@ -133,6 +133,14 @@ class ReleaseProseTests(unittest.TestCase):
 
 
 class ExtractionTests(unittest.TestCase):
+    def test_installed_fail_closed_comments_match_the_stock_client_pin(self):
+        release = json.loads((ROOT / "compatibility.json").read_text())["product_release"]
+        manifest = json.loads((ROOT / "releases" / release / "manifest.json").read_text())
+        version = manifest["components"]["omp"]["distribution_version"]
+        fragment = (ROOT / "examples/manual-tunnel/fail-closed.yml").read_text()
+        self.assertIn(f"OMP {version} model fragment", fragment)
+        self.assertIn(f"stock upstream {version};", fragment)
+
     def test_prepared_routes_keep_all_composer_addresses_and_new_pins(self) -> None:
         guide = documented_route.DEFAULT_DOC.read_text(encoding="utf-8")
         release = re.search(r"(?:Prepared|Versioned) guide: (v[0-9.]+)", guide).group(1)
@@ -676,6 +684,40 @@ class HostPreparationTests(unittest.TestCase):
             self.assertRegex(self.prepare(home).decode(), r"\A[0-9a-f]{64}\n\Z")
 
 
+@unittest.skipIf(os.name == "nt", "executes the documented POSIX clone block")
+class ShellCloneTests(unittest.TestCase):
+    def test_clone_failure_never_verifies_a_stale_checkout_and_ready_is_release_scoped(self):
+        block = documented_route.extract(
+            documented_route.DEFAULT_DOC, "1. Clone the exact release on both machines").text
+        release = re.search(r"--branch (v[0-9.]+)", block).group(1)
+        for clone_exit, verify_exit, stale in ((1, 0, True), (0, 1, False), (0, 0, False)):
+            with self.subTest(clone_exit=clone_exit, verify_exit=verify_exit), \
+                    tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                stubs = root / "bin"
+                stubs.mkdir()
+                if stale:
+                    (root / "omp-ninfer").mkdir()
+                for name, body in (
+                    ("git", 'echo git >> "$CALLS"\n[ "$CLONE_EXIT" -eq 0 ] || exit "$CLONE_EXIT"\n'
+                            'mkdir -p omp-ninfer\n'),
+                    ("python3", 'echo "python3 $*" >> "$CALLS"\nexit "$VERIFY_EXIT"\n'),
+                ):
+                    path = stubs / name
+                    path.write_text("#!/bin/sh\n" + body)
+                    path.chmod(0o755)
+                calls = root / "calls"
+                result = subprocess.run(["bash", "-c", block], cwd=root, capture_output=True, text=True,
+                                        timeout=20, env=dict(os.environ, CALLS=str(calls),
+                                            CLONE_EXIT=str(clone_exit), VERIFY_EXIT=str(verify_exit),
+                                            PATH=f"{stubs}{os.pathsep}{os.environ['PATH']}"))
+                self.assertEqual(result.returncode, clone_exit or verify_exit, result.stderr)
+                ran = calls.read_text().splitlines()
+                self.assertEqual(len(ran), 1 if clone_exit else 2, ran)
+                if not clone_exit:
+                    self.assertIn(f"--release {release} --require-ready", ran[-1])
+
+
 @unittest.skipIf(os.name == "nt", "executes POSIX shell blocks and checks POSIX file modes")
 class ClientConfigurationTests(unittest.TestCase):
     """Section 7's macOS/Linux blocks and the troubleshooting guide's fail-closed recipe install OMP's
@@ -907,6 +949,21 @@ class WindowsNativeCommandTests(unittest.TestCase):
         # The runtime may still be serving: no request may stand in for the outage.
         self.assertEqual(self.run_block(block, {"wsl.exe", "omp"}, prelude), (["wsl.exe"], False))
 
+    def test_native_acceptance_checks_stop_and_final_start(self) -> None:
+        for lane in ("rtx4090-native", "rtx3090-native"):
+            text = self.steps(lane)["acceptance"]
+            tail = text[text.index("& $Controller -Action Stop"):]
+            for action, expected_calls, reached in (("", ["omp"], True), ("Stop", [], False),
+                                                     ("Start", ["omp"], False)):
+                prelude = (
+                    "$Controller = 'Fixture-Controller'\n$StateRoot = 'fixture'\n$Provider = 'fixture'\n"
+                    "$Launcher = Join-Path $PSScriptRoot 'bin/omp'\n"
+                    "function Fixture-Controller { param($Action, $StateRoot)\n"
+                    f"  $global:LASTEXITCODE = if ($Action -ceq '{action}') {{ 7 }} else {{ 0 }}\n"
+                    "}\n")
+                with self.subTest(lane=lane, failed_action=action):
+                    self.assertEqual(self.run_block(tail, {"omp"}, prelude), (expected_calls, reached))
+
 
 @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed to execute the Windows host scripts")
 @unittest.skipIf(os.name == "nt", "the native command stubs are POSIX shell scripts")
@@ -979,6 +1036,35 @@ $accelerators::Add('Security.Principal.WindowsPrincipal', [FixturePrincipal])
                          (["failed", "skipped"], ["git clone", "git checkout"]))
         # An earlier attempt's clone already holds the name.
         self.assertEqual(self.substitute_clone({"clone"}, stale_clone=True), (["failed", "skipped"], ["git clone"]))
+
+    def test_last_exitcode_mentions_never_disable_the_trailing_exit_rule(self):
+        for text, expected in (
+            ("$null = $LASTEXITCODE\n& git status\n", ["failed", "skipped"]),
+            ("& git status\nif ($LASTEXITCODE -eq 0) { throw 'expected failure' }\n",
+             ["failed", "skipped"]),
+            ("& git status\nif ($LASTEXITCODE -eq 0) { throw 'expected failure' }\n"
+             "$global:LASTEXITCODE = 0\n", ["passed", "passed"]),
+        ):
+            with self.subTest(text=text), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                bundle = root / "bundle"
+                bundle.mkdir()
+                steps = []
+                for position, (slug, body) in enumerate((("acceptance", text), ("after", "$null = 1\n")), 1):
+                    name = f"{position:02d}-{slug}.ps1"
+                    (bundle / name).write_text(body)
+                    steps.append({"position": position, "slug": slug, "file": name,
+                                  "heading": "fixture", "index": 0,
+                                  "sha256": hashlib.sha256(body.encode()).hexdigest()})
+                (bundle / "manifest.json").write_text(json.dumps({
+                    "lane": "fixture", "document": "fixture", "document_sha256": "0" * 64, "steps": steps}))
+                host = root / "host.ps1"
+                host.write_text(self.RUNNER_HOST)
+                receipt = root / "receipt.json"
+                _, output = self.run_pwsh(root, {"status"}, [
+                    host, ROOT / "scripts/hosts/run-documented-route.ps1", bundle, root, receipt, self.CANDIDATE])
+                self.assertTrue(receipt.exists(), output)
+                self.assertEqual([row["status"] for row in json.loads(receipt.read_text())["steps"]], expected)
 
 
 if __name__ == "__main__":
