@@ -278,11 +278,17 @@ class NativeCaptureTests(unittest.TestCase):
         self.assertFalse(result["raw_prompts_outputs_or_secrets_included"])
 
     def test_failed_capture_always_stops_and_has_no_completion(self):
-        with patch.object(NATIVE, "hook") as hook, patch.object(NATIVE, "capture_endpoint", side_effect=ScreenError("failed")), \
+        def fresh_arm(*_):
+            value = arm_identity()
+            value["fresh_start"]["process_started_utc"] = datetime.now(timezone.utc).isoformat()
+            return value
+        with patch.object(NATIVE, "hook") as hook, \
+                patch.object(NATIVE, "capture_endpoint", side_effect=ScreenError("failed")) as capture, \
                 patch.object(NATIVE, "measured_power", return_value=350), \
-                patch.object(NATIVE, "arm_record", return_value=arm_identity()):
-            with self.assertRaises(ScreenError):
+                patch.object(NATIVE, "arm_record", side_effect=fresh_arm):
+            with self.assertRaisesRegex(ScreenError, "^failed$"):
                 NATIVE.run_arm(self.args)
+            capture.assert_called_once()
             self.assertEqual(hook.call_args.args[0], self.args.stop_cmd)
             self.assertFalse((self.args.out / "shard-0000/complete.json").exists())
 
