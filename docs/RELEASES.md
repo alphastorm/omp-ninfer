@@ -13,6 +13,28 @@ the exact combination.
 [External-install acceptance](#external-install-acceptance) · [Cut procedure](#cut-procedure) ·
 [Release notes](#release-notes)
 
+## Staged v0.15.0 — stock OMP 18.14.0 and the RTX 3090 fast-track
+
+**Staged host-free draft, not published.** Stock OMP **18.14.0** (`31147f9d`, tree `9a63b5bf`)
+replaces 18.12.6 in the release-local descriptor. RTX 5090 `v0.7.0-qwen38-5090-beta.3`
+(source `2c6f423b`, image `760fb6be`, server `55f0b95a`, kept profile/config
+`qwen38-5090-v0.13.0` / `751d22dc`) and RTX 4090 `v0.7.0-qwen38-4090-beta.3`
+(package `87038cfb`, server `5caa7780`, config `b5cfbf50`, MTP3) carry unchanged from v0.14.0.
+RTX 3090 also still carries `v0.7.0-qwen38-3090-beta.3` / MTP3 in this first stage; the lead binds
+`v0.8.0-qwen38-3090-beta.1` / DFlash2 K7 only after its shipping-package qualification, powered
+screen, speed, fit/durability and agent gates. No current package outcome is inferred.
+
+The [prepared guide](QUICKSTART.md) targets v0.15.0 before any route window; use the
+[immutable v0.14.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/docs/QUICKSTART.md)
+for the published release. Runtime carry-forward does not transfer client/public-route acceptance
+or council approval. Root authority/profiles stay v0.14.0 until the later lane pin. Fresh platform,
+live/documented-route and public-install acceptance, restoration, one changed-scope council,
+composition and immutable pins remain gates. RTX 4090 DFlash2 K6/K5, the `alphastorm/ninfer#48/#49`
+fixes for carried RTX 4090/RTX 5090 bytes, and council P2 deferrals move to v0.15.1.
+See the [staged notes](../releases/v0.15.0/NINFER_RELEASE_NOTES.md),
+[manifest](../releases/v0.15.0/manifest.json), and
+[host-free client review](measurements/2026-10-30-omp-18140-client-upgrade-review.json).
+
 ## v0.14.0 — one engine source across all three lanes and stock OMP 18.12.6
 
 Published **2026-10-28** (`2026-10-28T05:57:29Z`, GitHub release ID `426309668`, annotated tag

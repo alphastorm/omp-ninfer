@@ -61,6 +61,26 @@ Full release authority: [`releases/v0.14.0/NINFER_RELEASE_NOTES.md`](releases/v0
 
 ## Remaining work
 
+### Staged v0.15.0 fast-track
+
+**Staged, not published:** stock OMP 18.14.0 (`31147f9d`) plus a gated native RTX 3090
+DFlash2 K7 upgrade; RTX 4090 and RTX 5090 carry their exact v0.14.0 beta.3 runtimes unchanged.
+This host-free stage still binds the old RTX 3090 MTP3 package. Its planned
+`v0.8.0-qwen38-3090-beta.1` rebind follows the shipping-package 15-phase chain, powered EXP-101
+screen, 84-role depth-0 ABBA speed gate (weighted at least 1.08, every case at least 0.95),
+131K fit/true-cold durability and agent probes. Fresh client/route/public-install acceptance,
+restoration, one council over changed scope, composition and pins precede publication.
+The staged [notes](releases/v0.15.0/NINFER_RELEASE_NOTES.md) and
+[manifest](releases/v0.15.0/manifest.json) distinguish current bindings from planned components.
+Use the [immutable published v0.14.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/docs/QUICKSTART.md)
+for installation until publication.
+
+**Deferred to v0.15.1:** RTX 4090 DFlash2 K6/K5; the `alphastorm/ninfer#48/#49` fix train on
+carried RTX 4090/RTX 5090 components; council P2 deferrals. No runtime rebuild or EXP-102
+qualification of those carried lanes is part of the fast-track.
+
+### Published-release gaps
+
 Items below remain open after `v0.14.0`; each names the current evidence showing the gap is still
 unmet:
 

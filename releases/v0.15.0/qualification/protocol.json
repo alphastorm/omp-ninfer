@@ -1,0 +1,70 @@
+{
+  "artifact_type": "omp_ninfer_runtime_protocol_and_schema",
+  "schema_version": 1,
+  "release": "v0.14.0",
+  "as_of": "2026-10-28",
+  "identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "server_binary_sha256": "55f0b95ac3609673ff544d9a512fb28aee9580b5948719dfac537858b6714467",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "deployment_profile": "qwen38-5090-v0.13.0",
+    "checkpoint_schema_version": 3,
+    "require_origin_auth": true
+  },
+  "status": "passed",
+  "measurement_configuration_sha256": "9f0baf841db9da001569f51914e54ff7e4d9fc51f8f8f9ce4d1c93a3ca6afc15",
+  "product_smokes": {
+    "schema": "ninfer-integration-smokes/1",
+    "source": "2c6f423bd817b6534158553e1b34ab4959c43165",
+    "binary_sha256": "55f0b95ac3609673ff544d9a512fb28aee9580b5948719dfac537858b6714467",
+    "artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "config_sha256": "9f0baf841db9da001569f51914e54ff7e4d9fc51f8f8f9ce4d1c93a3ca6afc15",
+    "commands": [
+      {
+        "label": "serve_contract",
+        "exit": 0,
+        "seconds": 0.767,
+        "log_sha256": "0024b54204dddb601ed3e925016209f52dab0ae42f7c17234c2060009f992579"
+      },
+      {
+        "label": "agent_product",
+        "exit": 0,
+        "seconds": 3.674,
+        "log_sha256": "1bdeb1d3189677cabfdf0cb7768bd8758dd1e5a3c8320c6cf641a588bfce5adc"
+      }
+    ],
+    "passed": true,
+    "server_exit": 0
+  },
+  "grammar_ctest": {
+    "name": "ninfer_qwen3_5_grammar_real_test",
+    "status": "run",
+    "seconds": 22.9048
+  },
+  "supported_surfaces": {
+    "responses": "text.format json_schema",
+    "chat_completions": "response_format json_schema",
+    "tool_name_max_characters": 128,
+    "status_schema_version": 2,
+    "request_log_schema_version": 30
+  },
+  "strict_release_profile": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+  "provenance": [
+    {
+      "evidence_name": "smokes.json",
+      "evidence_sha256": "d03cfc7d87593e5eb5b288f30b2917de5d8f37e1992d6cd27d990a2bda252ade",
+      "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+      "evidence_post_freeze_uncommitted": true
+    },
+    {
+      "evidence_name": "real.xml",
+      "evidence_sha256": "e5615b00bfaeb9b88389cd34770dff871dab32a036f7ffd508b27d92ff57af6c",
+      "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+      "evidence_post_freeze_uncommitted": true
+    }
+  ],
+  "scope": "Fresh N grammar and product-mode smokes on shipping bytes. The diagnostic smoke config 9f0baf84 is not relabelled as release config 751d22dc. Stock-client/public-route acceptance is separate."
+}

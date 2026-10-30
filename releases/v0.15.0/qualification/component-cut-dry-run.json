@@ -1,0 +1,32 @@
+{
+  "artifact_type": "omp_ninfer_component_cut_dry_run_record",
+  "schema_version": 1,
+  "release": "v0.14.0",
+  "as_of": "2026-10-28",
+  "identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "server_binary_sha256": "55f0b95ac3609673ff544d9a512fb28aee9580b5948719dfac537858b6714467",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "deployment_profile": "qwen38-5090-v0.13.0",
+    "checkpoint_schema_version": 3,
+    "require_origin_auth": true
+  },
+  "status": "passed-lead-record",
+  "command": "scripts/hosts/cut-ninfer-5090-component.sh --version v0.7.0 --commit 2c6f423bd817b6534158553e1b34ab4959c43165 --assets $ASSETS --archive-sha b8f315bc3d735c1263d69ed2789bc5b4a6fc10c0652384fcd935d0137c9699fa --sbom-sha 17b1c6bdb4c52a9f860c0f8fda1e882e5ed737ad1c6c0f8369a643f9daa67869 --source-archive-sha 1964794f3b48998634b52c5bdc3fdf8a029e78d673af79b4c6211dc95fc161ff --base-image ghcr.io/alphastorm/ninfer@sha256:d4377ed01a5be949a90d3b403a3be2c5867a083cb1669379f60b25969ab7f22e --runtime-base-receipt-release runtime-base-04b603aa-20261025 --beta 3 --notes-file $NOTES --dry-run",
+  "dry_run": "Lead cut log records dry-run PASS before separately executed tags/prereleases/image publication at 01:07Z; this worker performed no cut.",
+  "resulting_tags": [
+    "v0.7.0-qwen38-5090-beta.3",
+    "v0.7.0-qwen38-5090-source.3",
+    "v0.7.0-qwen38-5090-runtime-beta.3"
+  ],
+  "workflow_url": "https://github.com/alphastorm/ninfer/actions/runs/40613266712",
+  "provenance": {
+    "evidence_name": "cut-log.md",
+    "evidence_sha256": "c632e448380f75b61f40143855571696b9752a0c522de01f1726540d7102b55a",
+    "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+    "evidence_post_freeze_uncommitted": true
+  }
+}

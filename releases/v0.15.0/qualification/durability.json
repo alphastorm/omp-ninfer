@@ -1,0 +1,98 @@
+{
+  "artifact_type": "omp_ninfer_schema3_production_restart",
+  "schema_version": 1,
+  "release": "v0.14.0",
+  "as_of": "2026-10-28",
+  "identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "server_binary_sha256": "55f0b95ac3609673ff544d9a512fb28aee9580b5948719dfac537858b6714467",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "deployment_profile": "qwen38-5090-v0.13.0",
+    "checkpoint_schema_version": 3,
+    "require_origin_auth": true
+  },
+  "status": "passed",
+  "g1": {
+    "minimum_checkpoint_hit_tokens": 16384,
+    "observed_checkpoint_hit_tokens": 20926,
+    "byte_identical": true,
+    "continuation_bytes": 27,
+    "production_path": true,
+    "tracer": false,
+    "four_boots": true
+  },
+  "production": {
+    "artifact_type": "ninfer-serve-restore-proof/1",
+    "binary_sha256": "55f0b95ac3609673ff544d9a512fb28aee9580b5948719dfac537858b6714467",
+    "source": "2c6f423bd817b6534158553e1b34ab4959c43165",
+    "upstream_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "production_path": true,
+    "tracer": false,
+    "first_stop": {
+      "saved": 1,
+      "skipped": 0,
+      "refused": 0,
+      "complete": true
+    },
+    "restart": {
+      "cached_input_tokens": 20926,
+      "continuation_bytes": 27,
+      "continuation_sha256": "5a2528e22c6a6603d5eeafd214223e57812a9da7174bc1a4445c8f9308f8344c",
+      "byte_identical": true,
+      "first_keyed_request_without_parent": true
+    },
+    "save": {
+      "state": "exported",
+      "reason": "none",
+      "committed": true,
+      "origin": "authenticated",
+      "dir_sync": "fsync",
+      "frontier_tokens": 20993,
+      "restored_tokens": 20993,
+      "payload_bytes": 2560565777,
+      "points": 6,
+      "states": 6,
+      "pages": 330
+    },
+    "policy_disabled": {
+      "mode": "startup_warmup_and_unretained_request",
+      "cached_input_tokens": 0,
+      "unretained_retrieve_status": 404,
+      "current_unchanged": true
+    },
+    "isolation": {
+      "foreign_retrieve": 404,
+      "foreign_delete": 404,
+      "missing_capability_retrieve": 404,
+      "own_retrieve": 200,
+      "own_delete": 200,
+      "deleted_after_restart": 404,
+      "descendant_after_restart": 200
+    },
+    "passed": true
+  },
+  "strict_profile": {
+    "require_origin_auth": true,
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "exact_profile_passed": true
+  },
+  "provenance": [
+    {
+      "evidence_name": "serve-restore.json",
+      "evidence_sha256": "e6f0a78cc9ef6f1c82f903875d51cc67f45df43644bcc59173680b9aede36e3c",
+      "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+      "evidence_post_freeze_uncommitted": true
+    },
+    {
+      "evidence_name": "exact-profile.json",
+      "evidence_sha256": "66e24a08e68fe38922e000cb23f82e2ae760716af9ce09534b21187fee6d37c7",
+      "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+      "evidence_post_freeze_uncommitted": true
+    }
+  ],
+  "scope": "Fresh N first-build four-boot HTTP/Engine/authenticated-disk proof. No predecessor checkpoint generation import or public-route acceptance is inferred."
+}

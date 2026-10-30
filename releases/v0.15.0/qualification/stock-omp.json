@@ -1,0 +1,113 @@
+{
+  "artifact_type": "omp_ninfer_client_upgrade_review",
+  "schema_version": 1,
+  "as_of": "2026-10-30",
+  "product_release": "v0.15.0",
+  "provenance": {
+    "review": "L9 stock OMP 18.14.0 source review, downloaded-asset receipt and two macOS arm64 semantic rehearsals; summarized without operator paths or private captures",
+    "implementation_commits": ["896893d8fc191007b4d593b002c1b008b1c16db9", "4061d7492aef144a2ebc796a9ad8031907a11663"],
+    "ci": "https://github.com/alphastorm/omp-ninfer/actions/runs/40993325183",
+    "ci_conclusion": "success",
+    "ci_head": "4061d7492aef144a2ebc796a9ad8031907a11663"
+  },
+  "client_upgrade": {
+    "from": "18.12.6",
+    "to": "18.14.0",
+    "reason": "Consume the rebuilt upstream binaries and preserve the exact custom Responses selectors and compatibility settings. Runtime bytes remain unchanged in this host-free stage; the planned RTX 3090 component is rebound separately after its gates.",
+    "upstream_commit": "31147f9d1a76608549821c3759f8487b4d66c72d",
+    "upstream_tree": "9a63b5bfbb5971962c44fca660744b0d75dcd2c2",
+    "release_id": 428242783,
+    "published_at": "2026-10-29T18:25:10Z",
+    "stable_releases_reviewed": ["18.12.6", "18.13.0", "18.13.1", "18.13.2", "18.13.3", "18.14.0"]
+  },
+  "descriptor_inputs": "releases/v0.15.0/qualification/client-components.json",
+  "host_free_checks": {
+    "asset_identity": {
+      "method": "L9 downloaded each raw release asset and compared its SHA-256 and byte count with GitHub release metadata and SHA256SUMS.txt. These observations are imported from that receipt, not new platform executions by the staging lane.",
+      "release_checksum_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.14.0/SHA256SUMS.txt",
+      "release_checksum_sha256": "50a8259a176e771a9bd4aeb4359e50e50efe442764dcdbf0af03ec1e9e7f2450",
+      "assets": [
+        {"name": "omp-darwin-arm64", "asset_id": 689493880, "bytes": 214816912, "sha256": "608843959ab34295d52460dd09dd7d548b6c903c08a83c67954c2d4c36fd1f5a", "sha256sums_match": true, "api_digest_match": true},
+        {"name": "omp-windows-x64.exe", "asset_id": 689493879, "bytes": 242797056, "sha256": "620a5935cdb6a9ed52d8b0c93892d6b5bb84155244a98f3be82af0455177bf29", "sha256sums_match": true, "api_digest_match": true},
+        {"name": "omp-linux-x64", "asset_id": 689493890, "bytes": 276244656, "sha256": "e7dd2b606c4ebe9d1a7bcfad1b8820db968cd6b05409fed1c6bc8db0b6a95a8f", "sha256sums_match": true, "api_digest_match": true}
+      ]
+    },
+    "semantic_rehearsals": {
+      "execution_kind": "macOS arm64 stock CLI/RPC against an owned loopback Responses stub on an ephemeral port",
+      "guide_sha256": "ab39f9d32cab634f330027aecd9e0ee879ed023edcdf329fb059596048530e61",
+      "binary_version": "omp/18.14.0",
+      "binary_sha256": "608843959ab34295d52460dd09dd7d548b6c903c08a83c67954c2d4c36fd1f5a",
+      "checks": ["tool_turn", "seed", "continuation", "restart_survival", "client_resume", "same_session", "fail_closed"],
+      "runs": [
+        {"model_id": "q38-ninfer", "lane_selector": "rtx5090-macos-client", "started_utc": "2026-10-30T02:28:18.879229+00:00", "passed_checks": 7, "failed_checks": 0},
+        {"model_id": "qwen3.8-27b", "lane_selector": "rtx4090-native", "started_utc": "2026-10-30T02:28:37.915772+00:00", "passed_checks": 7, "failed_checks": 0}
+      ],
+      "scope_limit": "Both executions used the macOS binary; the second lane selector does not execute Windows or a GPU. The restarted server is a stub, not NInfer. No verbatim installation-route, editing, image-input, compaction-quality, long-loop, or final prepared-guide acceptance is claimed."
+    }
+  },
+  "behavior_review": [
+    {
+      "id": "qwen38-edit-default",
+      "predicate": "Default hashline adapts to replace only for a recognized Qwen revision 3.8.0 selector. The opaque q38-ninfer alias is not recognized by that family predicate.",
+      "lane_effect": "qwen3.8-27b on native RTX 4090 and ninfer-heavy defaults to replace; q38-ninfer on RTX 3090 and RTX 5090 stays hashline. Source-derived, not an exercised edit-tool result.",
+      "action": "Keep exact served IDs and do not force an override. Model variants win first; PI_EDIT_VARIANT pins the mode; non-hashline edit.mode is retained; PI_STRICT_EDIT_MODE prevents adaptation. An explicit settings-derived hashline alone is not necessarily a pin.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/31147f9d1a76608549821c3759f8487b4d66c72d/packages/coding-agent/src/utils/edit-mode.ts#L20-L43",
+        "https://github.com/can1357/oh-my-pi/blob/31147f9d1a76608549821c3759f8487b4d66c72d/packages/catalog/src/compat/rules/taxonomy/qwen.kdl#L1-L17"
+      ]
+    },
+    {
+      "id": "compaction-accounting-and-summaries",
+      "predicate": "At the default 131072-token window, reserve=max(floor(window*0.15),16384)=19660; compaction triggers strictly above 111412. The client bounds retained history, ignores stale usage and opaque encrypted-reasoning bytes, rejects non-reducing automatic candidates, preserves main summaries when optional short summaries fail, and retains split-turn extra context.",
+      "lane_effect": "The numeric default threshold stays; compaction cut points and prompt bytes can change. Native remote compaction/cache-target changes require opt-in not present in these fragments.",
+      "action": "Keep defaults and the below-threshold durability seed. Do not infer production compaction quality or prefix-reuse equivalence from the semantic rehearsal.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/31147f9d1a76608549821c3759f8487b4d66c72d/packages/agent/src/compaction/compaction.ts#L328-L428",
+        "https://github.com/can1357/oh-my-pi/blob/31147f9d1a76608549821c3759f8487b4d66c72d/packages/agent/src/compaction/compaction.ts#L1232-L1344",
+        "https://github.com/can1357/oh-my-pi/blob/31147f9d1a76608549821c3759f8487b4d66c72d/packages/agent/src/compaction/compaction.ts#L1523-L1552",
+        "https://github.com/can1357/oh-my-pi/blob/31147f9d1a76608549821c3759f8487b4d66c72d/packages/agent/src/compaction/compaction-v2-streaming.ts#L175-L190"
+      ]
+    },
+    {
+      "id": "loop-guard-option-mapping",
+      "predicate": "model.loopGuard now reaches custom openai-responses models through the common stream-option base; the stock exact suffix-cycle detector is enabled by default. Semantic heuristics still have compatibility/model predicates.",
+      "action": "Leave stock settings enabled; no new models.yml key or disabling override. Long-loop false positives and cutoff behavior remain unexercised.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/31147f9d1a76608549821c3759f8487b4d66c72d/packages/ai/src/stream.ts#L1783-L1811",
+        "https://github.com/can1357/oh-my-pi/blob/31147f9d1a76608549821c3759f8487b4d66c72d/packages/ai/src/utils/thinking-loop.ts#L127-L140"
+      ]
+    },
+    {
+      "id": "exact-selectors-and-compat-keys",
+      "predicate": "Provider-qualified IDs resolve exactly; a recognized :medium suffix selects effort after exact-ID lookup. Stateful Responses, reasoning-summary and encrypted-reasoning compatibility keys remain supported.",
+      "action": "Retain ninfer-beta/q38-ninfer, ninfer-native-3090/q38-ninfer, ninfer-native-4090/qwen3.8-27b and ninfer-heavy/qwen3.8-27b:medium. Keep statefulResponses=true, includeEncryptedReasoning=false and supportsReasoningSummary=false; clear PI_OPENAI_STATEFUL. No provider aliases or fleet-agent changes.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/31147f9d1a76608549821c3759f8487b4d66c72d/packages/coding-agent/src/config/model-resolver.ts#L733-L748",
+        "https://github.com/can1357/oh-my-pi/blob/31147f9d1a76608549821c3759f8487b4d66c72d/packages/coding-agent/src/config/model-resolver.ts#L942-L982",
+        "https://github.com/can1357/oh-my-pi/blob/31147f9d1a76608549821c3759f8487b4d66c72d/packages/ai/src/providers/openai-responses.ts#L515-L527",
+        "https://github.com/can1357/oh-my-pi/blob/31147f9d1a76608549821c3759f8487b4d66c72d/packages/ai/src/providers/openai-shared.ts#L4180-L4195"
+      ]
+    },
+    {
+      "id": "bun-144-rebuild",
+      "predicate": "The exact 18.14.0 release-binary workflow installs Bun 1.4.4. The 18.13.0 release documents CVE-2026-91403 (compromised eMudhra intermediate certificates) and CVE-2026-111497 (Brotli decoder out-of-bounds write).",
+      "lane_effect": "All three client executable identities change. Retaining an old binary does not receive the bundled-runtime fixes.",
+      "action": "Use the new asset URLs, sizes and full hashes. No independent reproducible rebuild or embedded-runtime extraction is claimed.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/31147f9d1a76608549821c3759f8487b4d66c72d/.github/workflows/ci.yml#L795-L821",
+        "https://github.com/can1357/oh-my-pi/releases/tag/v18.13.0"
+      ]
+    }
+  ],
+  "verdict": {
+    "host_free_blocker_found": false,
+    "qualification_claimed": false,
+    "new_client_inference_qualification_claimed": false,
+    "predecessor_acceptance_transferred": false,
+    "scope_limit": "Source review and two imported macOS stub rehearsals only. Windows/Linux execution, real GPU behavior, native package upgrade/rollback, all fresh documented routes, restoration, council and publication remain separate gates."
+  },
+  "sources": [
+    "https://github.com/can1357/oh-my-pi/releases/tag/v18.14.0",
+    "https://github.com/can1357/oh-my-pi/compare/v18.12.6...v18.14.0"
+  ]
+}

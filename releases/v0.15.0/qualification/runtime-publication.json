@@ -1,0 +1,18 @@
+{
+  "artifact_type": "ninfer_runtime_image_publication_receipt",
+  "schema_version": 4,
+  "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+  "release_tag": "v0.7.0-qwen38-5090-beta.3",
+  "runtime_release_tag": "v0.7.0-qwen38-5090-runtime-beta.3",
+  "binary_asset": "ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.tar.gz",
+  "binary_sha256": "b8f315bc3d735c1263d69ed2789bc5b4a6fc10c0652384fcd935d0137c9699fa",
+  "base_image": "ghcr.io/alphastorm/ninfer@sha256:d4377ed01a5be949a90d3b403a3be2c5867a083cb1669379f60b25969ab7f22e",
+  "base_image_digest": "sha256:d4377ed01a5be949a90d3b403a3be2c5867a083cb1669379f60b25969ab7f22e",
+  "runtime_base_receipt_release": "runtime-base-04b603aa-20261025",
+  "runtime_base_source_commit": "04b603aae4e9ce3c26f4175cf808180c0f05b5fe",
+  "runtime_base_receipt_sha256": "e998a3d6198abf702fb8bf1d8a6c83ade28849023d572303210f03f3cd734a4d",
+  "image_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:760fb6bea925eb26d4fa53ab87a126494b69ba7bcfed515d23dee7afa65cdb2a",
+  "image_digest": "sha256:760fb6bea925eb26d4fa53ab87a126494b69ba7bcfed515d23dee7afa65cdb2a",
+  "workflow_url": "https://github.com/alphastorm/ninfer/actions/runs/40613266712",
+  "secret_free": true
+}

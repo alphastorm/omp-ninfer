@@ -1,6 +1,6 @@
 # OMP NInfer — canonical facts
 
-Updated: 2026-10-28 · Published release: v0.14.0 (2026-10-28) · stock Oh My Pi 18.12.6
+Updated: 2026-10-30 · Published release: v0.14.0 (2026-10-28) · stock Oh My Pi 18.12.6
 
 Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release layer) → NInfer
 (inference engine) → Qwen3.8 27B (served model).
@@ -49,6 +49,21 @@ All of these should be materially true:
 See the [decision guide](DECISION_GUIDE.md) for the side-by-side comparison.
 
 ## Current release
+
+**Staged next: v0.15.0, not published.** The host-free draft pins stock Oh My Pi **18.14.0**
+(`31147f9d`, tree `9a63b5bf`; Darwin `60884395`, Windows `620a5935`, Linux `e7dd2b60`) and
+currently carries all three v0.14.0 runtime packages unchanged. RTX 4090 `v0.7.0-qwen38-4090-beta.3`
+and RTX 5090 `v0.7.0-qwen38-5090-beta.3` remain carried in the final fast-track scope. RTX 3090
+still binds MTP3 `v0.7.0-qwen38-3090-beta.3` here; its planned DFlash2 K7
+`v0.8.0-qwen38-3090-beta.1` rebind awaits shipping-package gates. Fresh client/route acceptance,
+changed-scope council, composition and immutable pins are separate. The root compatibility
+authority stays v0.14.0 until the lead's lane pin. See the
+[staged notes](../releases/v0.15.0/NINFER_RELEASE_NOTES.md),
+[staged manifest](../releases/v0.15.0/manifest.json), and
+[host-free client review](measurements/2026-10-30-omp-18140-client-upgrade-review.json).
+The prepared guide is not an installation recommendation; the
+[immutable published v0.14.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/docs/QUICKSTART.md)
+remains the install authority.
 
 Published release **v0.14.0** (2026-10-28, GitHub `Latest`) binds unmodified upstream Oh My Pi
 **18.12.6** (`45c35e40`, tree `8a90a1b4`), shared published model container version 3 `81f924d4`

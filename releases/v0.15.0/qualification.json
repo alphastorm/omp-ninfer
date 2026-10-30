@@ -1,0 +1,158 @@
+{
+  "artifact_type": "omp_ninfer_release_qualification",
+  "schema_version": 1,
+  "release": "v0.15.0",
+  "runtime_identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "behavioral_source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+    "release_source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+    "release_source_archive_sha256": "1964794f3b48998634b52c5bdc3fdf8a029e78d673af79b4c6211dc95fc161ff",
+    "release_server_binary_sha256": "55f0b95ac3609673ff544d9a512fb28aee9580b5948719dfac537858b6714467",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "model_artifact_bytes": 20437521664,
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "public_model_id": "q38-ninfer",
+    "deployment_profile": "qwen38-5090-v0.13.0",
+    "require_origin_auth": true
+  },
+  "native_runtime_identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "branch": "rebase/p14-integration",
+    "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+  },
+  "composition": {
+    "behavioral_qualification": {
+      "status": "passed",
+      "repository_path": "releases/v0.15.0/qualification/rtx5090.json",
+      "sha256": "244fd756bc74f75dc9a646ced1cc94c83dacd7f2fdb8a5d102197b023e620cf4",
+      "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+      "server_binary_sha256": "55f0b95ac3609673ff544d9a512fb28aee9580b5948719dfac537858b6714467",
+      "provenance": {
+        "evidence_name": "rtx5090-v0140-profile-gates.json",
+        "evidence_sha256": "244fd756bc74f75dc9a646ced1cc94c83dacd7f2fdb8a5d102197b023e620cf4",
+        "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+        "evidence_post_freeze_uncommitted": true
+      },
+      "evidence_scope": "Carried unchanged v0.14.0 RTX 5090 lane receipt on the identical published beta.3 image and kept configuration; not fresh product-route acceptance."
+    },
+    "local_release_packaging": {
+      "status": "passed",
+      "published": true,
+      "release_source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+      "release_server_binary_sha256": "55f0b95ac3609673ff544d9a512fb28aee9580b5948719dfac537858b6714467",
+      "registry_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:760fb6bea925eb26d4fa53ab87a126494b69ba7bcfed515d23dee7afa65cdb2a",
+      "oci_manifest_digest": "sha256:760fb6bea925eb26d4fa53ab87a126494b69ba7bcfed515d23dee7afa65cdb2a",
+      "binary_package_sha256": "b8f315bc3d735c1263d69ed2789bc5b4a6fc10c0652384fcd935d0137c9699fa",
+      "binary_package_bytes": 547378794,
+      "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.7.0-qwen38-5090-beta.3/ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.spdx.json",
+      "sbom_sha256": "17b1c6bdb4c52a9f860c0f8fda1e882e5ed737ad1c6c0f8369a643f9daa67869",
+      "component_release_url": "https://github.com/alphastorm/ninfer/releases/tag/v0.7.0-qwen38-5090-beta.3",
+      "runtime_base_reference": "ghcr.io/alphastorm/ninfer@sha256:d4377ed01a5be949a90d3b403a3be2c5867a083cb1669379f60b25969ab7f22e",
+      "runtime_base_receipt_release": "runtime-base-04b603aa-20261025",
+      "package_inventory": {
+        "repository_path": "releases/v0.14.0/qualification/packaging.json",
+        "sha256": "05c0b24a7703568bd06cb978cbada3b2b528037ad1ad47b60cd71b6525184ab1"
+      },
+      "runtime_base_receipt": {
+        "repository_path": "releases/v0.14.0/qualification/runtime-base.json",
+        "sha256": "f93842ead917550288678be73ff9cb65ac4395dc4d5f56422d1a58b07827279c"
+      },
+      "scope": "Carried unchanged v0.14.0 archive/source/SPDX/image and base receipts. No rebuild, new runtime publication or fresh client/public-route acceptance is claimed."
+    },
+    "native_runtime_variants": {
+      "rtx3090-windows-native": {
+        "status": "passed",
+        "beta_qualified": true,
+        "installable": true,
+        "repository_path": "releases/v0.15.0/qualification/rtx3090.json",
+        "sha256": "6ee752252901dd1c382d1a2442f6b5aab973e2e370548a7dd0f7f94ce697026d",
+        "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+        "release_tag": "v0.7.0-qwen38-3090-beta.3",
+        "package_sha256": "a7637f6672d235e5abb4e54dbdb0689e43a96385b6200c647196aae66b7f42f3",
+        "configuration_sha256": "d08d262bfe939ed9aaa6f7053ab8a8304fb7e3fef50dad3cb9329e28fb4ece15",
+        "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+        "public_package_executed": false,
+        "scope": "Carried v0.14.0 MTP3 package qualification; no new public-install or DFlash2 result."
+      },
+      "rtx4090-windows-native": {
+        "status": "passed",
+        "beta_qualified": true,
+        "installable": true,
+        "repository_path": "releases/v0.15.0/qualification/rtx4090.json",
+        "sha256": "f514c8bdfba58a84f99b3dd27c8461c1c1c4972f43593f8b0897aeaea86156a0",
+        "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+        "release_tag": "v0.7.0-qwen38-4090-beta.3",
+        "package_sha256": "87038cfb749e00c3af4e590ddcde03f1e7628c8a8c8793b7137f770213865437",
+        "configuration_sha256": "b5cfbf50d264831832fbe69458b56629a65b0d5b5295ec8bbbd4ea2d73002c38",
+        "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+        "public_package_executed": false,
+        "scope": "Carried v0.14.0 MTP3 package qualification; no new public-install or DFlash2 result."
+      }
+    },
+    "external_installation_acceptance": {
+      "status": "pending",
+      "note": "rerun against the published v0.7.0-qwen38-5090-beta.3 component (image 760fb6be) before the cut; the receipt lands at releases/v0.15.0/acceptance/composed-external-installation.json"
+    },
+    "native_integration": {
+      "repository_path": "releases/v0.14.0/qualification/native-integration.json",
+      "sha256": "5def8b5b5ce0463678700a992090e7cf6f5a4ca94e19c82cddb4636e7c5fb1b4"
+    },
+    "native_publication": {
+      "repository_path": "releases/v0.14.0/qualification/native-publication.json",
+      "sha256": "11c8bef1256f9081760269a30d256c7650ce7dc00571affefed17eab3d3af4a7"
+    }
+  },
+  "as_of": "2026-10-30",
+  "status": "runtime-release-eligible",
+  "publication_authorized": false,
+  "external_installation_qualified": false,
+  "scope": "Host-free v0.15.0 draft: stock OMP 18.14.0 is new; all three v0.14.0 runtime identities and original qualification subjects are carried unchanged. RTX 3090 remains MTP3 here until the lead binds the gated DFlash2 component. No new platform, route, public-install, restoration or council approval is claimed.",
+  "interpretation": "Runtime-release eligibility applies only to the carried published components. The two macOS stub rehearsals are client-semantic evidence, not GPU inference or real NInfer checkpoint survival. New-client acceptance and the eventual RTX 3090 replacement require fresh final-candidate evidence.",
+  "eligibility_scope": "Staged draft only. Root authority, profiles and launchers remain v0.14.0; no lane pin, release tag, component publication or product publication occurs in this stage.",
+  "documented_route_acceptance": {
+    "status": "pending",
+    "scope": "Fresh stock OMP 18.14.0 and final RTX 3090-bound guide execution required; predecessor route and restoration observations do not transfer.",
+    "fresh_product_acceptance": false,
+    "composition_run": false
+  },
+  "remaining_release_gates": [
+    "RTX 3090 shipping-package qualification, powered screen, depth-0 84-role ABBA speed, 131K fit/true-cold durability and agent probes before DFlash2 rebind",
+    "lane pin after native variant rebind and draft hash-chain reconciliation",
+    "fresh stock OMP 18.14.0 platform, documented-route, native public-install and independent restoration acceptance on the final candidate",
+    "one council over changed scope since v0.14.0",
+    "composition, immutable evidence pins and founder-owned publication"
+  ],
+  "observed_gates": {
+    "carried_runtime_qualification": {
+      "status": "carried-unchanged-subjects",
+      "source_release": "v0.14.0",
+      "scope": "All runtime/model/package/configuration bytes remain the published predecessor subjects; no gate was rerun by this host-free lane."
+    },
+    "stock_client_review": {
+      "status": "passed-host-free-only",
+      "repository_path": "docs/measurements/2026-10-30-omp-18140-client-upgrade-review.json",
+      "sha256": "1d53d7be2b346326dcbca2cfab4deb71de4c17fe55724942ac955843d1be5671",
+      "descriptor": {
+        "repository_path": "releases/v0.15.0/qualification/client-components.json",
+        "disposition": "new-client-identity",
+        "sha256": "77f35ee752d520b8be7368b3ef31b62f74f9ff74e930f96f75ecb374ae23c674"
+      },
+      "scope": "L9 source review, three asset downloads and two macOS stub rehearsals; no live client or final-guide acceptance."
+    },
+    "changed_client_acceptance": {
+      "status": "pending",
+      "scope": "Fresh three-platform and final-candidate documented-route/public-install evidence required."
+    },
+    "rtx3090_dflash2": {
+      "status": "pending",
+      "scope": "DFlash2 K7 component is not yet bound; current RTX 3090 runtime is the carried v0.14.0 MTP3 package."
+    },
+    "g4_review": {
+      "status": "pending",
+      "scope": "One council over changes since v0.14.0; no predecessor ledger is copied or approved for this composition."
+    }
+  }
+}

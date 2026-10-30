@@ -51,6 +51,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Stage v0.15.0 with unmodified stock OMP 18.14.0 (`31147f9d`, Bun 1.4.4 rebuild for
+  CVE-2026-91403 / CVE-2026-111497), a content-safe host-free client review, and a prepared
+  v0.15.0 guide before route acceptance. Exact selectors and Responses compatibility keys stay;
+  `qwen3.8-27b` gets stock replace-edit while opaque `q38-ninfer` stays hashline.
+- Carry the exact v0.14.0 RTX 5090 and RTX 4090 beta.3 runtime bytes unchanged. This host-free
+  stage also carries RTX 3090 MTP3 until the lead's gated DFlash2 K7 component rebind. No new
+  platform/public-route acceptance, council approval, lane pin, tag or publication is claimed.
+  The published product and root authority remain v0.14.0. RTX 4090 DFlash2 K6/K5,
+  `alphastorm/ninfer#48/#49` for carried RTX 4090/RTX 5090, and council P2 deferrals move to v0.15.1.
 - Refresh the read-only upstream watch against the shipped v0.14.0 engine base `64d10fbf`
   and stock OMP 18.12.6, and track `Neroued/ninfer`'s `feat/qwen4-27b-ops` branch separately.
   The [2026-10-29 receipt](docs/measurements/2026-10-29-upstream-watch.json) records current

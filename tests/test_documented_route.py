@@ -133,8 +133,9 @@ class ReleaseProseTests(unittest.TestCase):
 
 
 class ExtractionTests(unittest.TestCase):
-    def test_v0140_prepared_routes_keep_all_composer_addresses_and_new_pins(self) -> None:
-        release = json.loads((ROOT / "compatibility.json").read_text())["product_release"]
+    def test_prepared_routes_keep_all_composer_addresses_and_new_pins(self) -> None:
+        guide = documented_route.DEFAULT_DOC.read_text(encoding="utf-8")
+        release = re.search(r"(?:Prepared|Versioned) guide: (v[0-9.]+)", guide).group(1)
         clients = json.loads((ROOT / "releases" / release / "qualification" /
                               "client-components.json").read_text())["platforms"]
         routes = {lane: documented_route.lane_blocks(documented_route.DEFAULT_DOC, lane)
@@ -149,7 +150,7 @@ class ExtractionTests(unittest.TestCase):
                     self.assertIn(client["asset_url"], block.text)
                     self.assertIn(client["asset_sha256"], block.text)
                 if step.slug == "clone-and-verify":
-                    self.assertIn("git clone --branch v0.14.0 --depth 1", block.text)
+                    self.assertIn(f"git clone --branch {release} --depth 1", block.text)
                     self.assertIn("--require-ready", block.text)
         executable = "\n".join(
             block.text for block in documented_route.parse_blocks(
@@ -157,18 +158,18 @@ class ExtractionTests(unittest.TestCase):
             if block.language in ("sh", "powershell"))
         self.assertNotIn("v0.13.1", executable)
         self.assertEqual(re.findall(r"git clone --branch (v[0-9.]+)", executable),
-                         ["v0.14.0"] * 4)
+                         [release] * 4)
         self.assertEqual(re.findall(r"releases[/\\](v[0-9.]+)[/\\]manifest\.json", executable),
-                         ["v0.14.0"] * 5)
+                         [release] * 5)
         preparation = documented_route.extract(
             documented_route.DEFAULT_DOC, "3. Prepare the model and key on the inference host").text
         self.assertIn('CHECKPOINTS="$ROOT/checkpoints-v013"', preparation)
-        self.assertIn("releases/v0.14.0/manifest.json", preparation)
+        self.assertIn(f"releases/{release}/manifest.json", preparation)
         self.assertIn('MODEL="$ROOT/qwen3_8_27b-v3.ninfer"', preparation)
         for lane in ("rtx4090-native", "rtx3090-native"):
             steps = {step.slug: block for step, block in routes[lane]}
             native = steps["stage-and-install"].text
-            self.assertIn(r"releases\v0.14.0\manifest.json", native)
+            self.assertIn(f"releases\\{release}\\manifest.json", native)
             self.assertIn("'qwen3_8_27b-v3.ninfer'", native)
             self.assertIn("$NativeModel = $Manifest.components.model", native)
             self.assertNotIn("components.native_model", native)

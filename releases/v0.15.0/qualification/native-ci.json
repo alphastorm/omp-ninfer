@@ -1,0 +1,25 @@
+{
+  "artifact_type": "omp_ninfer_native_ci",
+  "schema_version": 1,
+  "release": "v0.14.0",
+  "as_of": "2026-10-28",
+  "status": "passed",
+  "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+  "run_id": 40528693778,
+  "workflow": "Build and host contracts",
+  "workflow_url": "https://github.com/alphastorm/ninfer/actions/runs/40528693778",
+  "conclusion": "success",
+  "completed_at": "2026-10-27T15:56:32Z",
+  "jobs": {
+    "Windows MSVC configure-only (PortableCore manifest required)": "success",
+    "Linux CUDA 13 / host tests / bounded sm_120a compile": "success",
+    "Weekly or manual full Linux runtime compile": "skipped"
+  },
+  "provenance": {
+    "evidence_name": "integration-ci.json",
+    "evidence_sha256": "01763816915cfa67ec26daaaf3856d0ae59b4549934a06cc81c659212cdd9601",
+    "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+    "evidence_post_freeze_uncommitted": true
+  },
+  "scope": "Exact-head fork CI on the common engine source. Windows configure-only and skipped weekly full build remain visible; not physical GPU/package or council proof."
+}
