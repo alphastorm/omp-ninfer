@@ -466,12 +466,13 @@ class BindNativeVariantTest(unittest.TestCase):
         qualified = json.loads(REBASED_LANE_RECEIPT.read_text())
         qualified["runtime_shape"] = shape
         self.write_lane_receipt(qualified)
-        from test_native_screen_arm import arm_identity
+        from test_native_screen_arm import screen_run_identity
         screen = {"artifact_type": "omp-ninfer.quality-screen-verdict", "schema_version": 1,
                   "verdict": "pass", "validity": {"valid": True},
                   "raw_prompts_outputs_or_secrets_included": False, "runs": {}}
         for role in ("production", "candidate", "production_determinism", "candidate_determinism"):
-            arm = arm_identity("candidate" in role, "determinism" in role)
+            identity = screen_run_identity(role)
+            arm = identity["arm"]
             arm.update(lane="rtx4090", gpu_name="NVIDIA GeForce RTX 4090",
                        release_id="qwen38-4090-native-v0.8.0-beta.1", power_limit_w=450,
                        model_artifact_sha256=self.receipt["model_sha256"])
@@ -479,7 +480,7 @@ class BindNativeVariantTest(unittest.TestCase):
                 arm.update(package_sha256=self.receipt["package"]["sha256"],
                            server_binary_sha256=self.receipt["binaries"]["server_sha256"],
                            configuration_sha256=self.receipt["config_sha256"])
-            screen["runs"][role] = {"arm": arm}
+            screen["runs"][role] = identity
         self.screen_path = self.workspace / "verdict.json"
         self.screen_path.write_text(json.dumps(screen))
         return package

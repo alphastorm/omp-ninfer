@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ([#117](https://github.com/alphastorm/omp-ninfer/issues/117), P15-R06).
 - Clear optional native screen, T1-parity and fit bindings when staging a successor or rebinding
   a package; rebind accepts only the evidence explicitly supplied for that operation (P15-R07).
+- Require the native screen's exact frozen 1,120-prompt membership and first 80 determinism
+  prompts in both arms, with duplicate-free scored/response membership seals (P15-R08).
 
 ### Changed
 

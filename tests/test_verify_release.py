@@ -287,11 +287,11 @@ class NativeQualityContractTests(unittest.TestCase):
         self.predecessor["runtime_shape"]["fit"].update(
             device_state_slots=2, draft_mlp_device_format="artifact", token_embedding_residency="device")
         self.save_predecessor()
-        from test_native_screen_arm import arm_identity
+        from test_native_screen_arm import screen_run_identity
         self.screen = {
             "artifact_type": "omp-ninfer.quality-screen-verdict", "schema_version": 1,
             "verdict": "pass", "validity": {"valid": True},
-            "runs": {role: {"arm": arm_identity("candidate" in role, "determinism" in role)}
+            "runs": {role: screen_run_identity(role)
                      for role in ("production", "candidate", "production_determinism", "candidate_determinism")},
             "raw_prompts_outputs_or_secrets_included": False,
         }
@@ -387,6 +387,22 @@ class NativeQualityContractTests(unittest.TestCase):
         errors = []
         VERIFY_RELEASE.validate_quality_screen(self.root, self.release, self.variant, errors)
         self.assertTrue(any("must bind a predecessor variant" in error for error in errors), errors)
+
+    def test_screen_requires_exact_full_corpus_membership_for_all_four_runs(self):
+        for role in self.screen["runs"]:
+            for field, value in (("prompt_count", 80 if "determinism" not in role else 79),
+                                 ("prompt_ids_sha256", "0" * 64),
+                                 ("prompt_ids_sha256", None)):
+                with self.subTest(role=role, field=field, value=value):
+                    screen = deepcopy(self.screen)
+                    if value is None:
+                        screen["runs"][role].pop(field)
+                    else:
+                        screen["runs"][role][field] = value
+                    self.evidence("quality_screen", screen)
+                    errors = []
+                    VERIFY_RELEASE.validate_quality_screen(self.root, self.release, self.variant, errors)
+                    self.assertTrue(any("frozen corpus membership" in error for error in errors), errors)
 
     def test_mtp_rebuild_exemption_requires_frozen_corpus_direct_bytes_and_same_fit(self):
         self.variant["runtime_shape"] = deepcopy(self.predecessor["runtime_shape"])

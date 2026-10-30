@@ -48,6 +48,7 @@ from redaction_screen import (  # noqa: E402
     base_id,
     bound_index,
     run_identity,
+    prompt_membership,
     variant_id,
     variant_prefixes,
 )
@@ -180,6 +181,21 @@ def variants_for(control: bool) -> int:
 
 def screen_order(cases: Sequence[str], controls: set[str]) -> list[str]:
     return [variant_id(case, index) for case in sorted(cases) for index in range(variants_for(case in controls))]
+
+
+# Public case identifiers only; EXP-097's frozen 84-case inventory and EXP-085's controls.
+FROZEN_CASE_IDS = (
+    *(f"log-{index:03d}" for index in range(1, 25)),
+    "reg-commit-468dcf69", "reg-commit-5933e395", "reg-commit-708d6c94", "reg-commit-85d47e27",
+    "reg-commit-ddee681f", "reg-commit-e881586f", "reg-title-commit-measure", "reg-title-rollback",
+    *(f"repo-{index:03d}" for index in range(1, 31)),
+    "struct-002", "struct-005", *(f"worklog-{index:03d}" for index in range(1, 21)),
+)
+FROZEN_CONTROLS = {"log-023", "log-024", "repo-029", "repo-030",
+                   "worklog-007", "worklog-008", "worklog-014"}
+FROZEN_SCREEN_IDS = screen_order(FROZEN_CASE_IDS, FROZEN_CONTROLS)
+FROZEN_SCREEN_MEMBERSHIP = prompt_membership(FROZEN_SCREEN_IDS)
+FROZEN_DETERMINISM_MEMBERSHIP = prompt_membership(FROZEN_SCREEN_IDS[:80])
 
 
 def load_cases(cases_dir: Path) -> list[tuple[str, str, bool]]:
@@ -536,6 +552,11 @@ def validate_native_arms(runs: dict[str, Any]) -> None:
         return
     if not all("arm" in identity for identity in runs.values()):
         raise ScreenError("all four native runs require arm.json")
+    for role, identity in runs.items():
+        expected = (FROZEN_DETERMINISM_MEMBERSHIP if role.endswith("_determinism")
+                    else FROZEN_SCREEN_MEMBERSHIP)
+        if any(identity.get(field) != value for field, value in expected.items()):
+            raise ScreenError(f"{role}: frozen corpus membership must match the 1120/80 prompt sets")
     stable = ("lane", "gpu_name", "power_limit_w", "package_sha256", "server_binary_sha256",
               "configuration_sha256", "model_artifact_sha256", "release_id")
     for role in ("production", "candidate"):

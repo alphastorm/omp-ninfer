@@ -396,6 +396,11 @@ def native_arm(value: Any) -> dict[str, Any]:
     return value
 
 
+def prompt_membership(ids: Sequence[str]) -> dict[str, Any]:
+    return {"prompt_count": len(ids), "prompt_ids_sha256": hashlib.sha256(
+        json.dumps(sorted(ids), separators=(",", ":")).encode()).hexdigest()}
+
+
 def run_identity(run: Path) -> dict[str, Any]:
     manifest = json.loads((run / "manifest.json").read_text(encoding="utf-8"))
     scores = json.loads((run / "scores.json").read_text(encoding="utf-8"))
@@ -404,6 +409,13 @@ def run_identity(run: Path) -> dict[str, Any]:
             "responses_sha256": hashlib.sha256((run / "responses.jsonl").read_bytes()).hexdigest()}
     if (run / "arm.json").is_file():
         identity["arm"] = native_arm(json.loads((run / "arm.json").read_text(encoding="utf-8")))
+        scored_ids = [row["case_id"] for row in scores.get("per_case", [])]
+        response_ids = [json.loads(line)["case_id"] for line in (
+            run / "responses.jsonl").read_text(encoding="utf-8").splitlines() if line.strip()]
+        if (len(scored_ids) != len(set(scored_ids)) or len(response_ids) != len(set(response_ids))
+                or set(scored_ids) != set(response_ids)):
+            raise ScreenError("native scored/response IDs must match without duplicates")
+        identity.update(prompt_membership(scored_ids))
     return identity
 
 

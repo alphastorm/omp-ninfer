@@ -1604,11 +1604,12 @@ def validate_quality_screen(root: Path, release: str, variant: dict[str, Any],
     from redaction_screen import ScreenError, native_arm
     runs = value.get("runs", {})
     try:
-        selected = {role: {"arm": native_arm(runs[role]["arm"])} for role in (
+        selected = {role: {**runs[role], "arm": native_arm(runs[role]["arm"])} for role in (
             "production", "candidate", "production_determinism", "candidate_determinism")}
         validate_native_arms(selected)
     except (ScreenError, KeyError, TypeError, ValueError):
-        errors.append(f"{label} must bind four valid native arms with fresh determinism identity")
+        errors.append(f"{label} must bind four valid native arms with fresh determinism identity "
+                      "and frozen corpus membership")
         return
     candidate, production = selected["candidate"]["arm"], selected["production"]["arm"]
     predecessor = predecessor_native_variant(root, release, variant["id"])

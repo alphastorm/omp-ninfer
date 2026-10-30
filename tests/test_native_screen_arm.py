@@ -36,10 +36,43 @@ def arm_identity(candidate=False, determinism=False):
             "prompts_sha256": ("3" if determinism else "2") * 64}
 
 
+FROZEN_CASE_IDS = [row["id"] for row in json.loads(
+    (ROOT / "docs/measurements/2026-10-25-exp097-role-corpus.json").read_text())["cases"]]
+FROZEN_CONTROLS = {"log-023", "log-024", "repo-029", "repo-030",
+                   "worklog-007", "worklog-008", "worklog-014"}
+FROZEN_SCREEN_IDS = SCREEN.screen_order(FROZEN_CASE_IDS, FROZEN_CONTROLS)
+
+
+def screen_run_identity(role):
+    ids = FROZEN_SCREEN_IDS[:80] if "determinism" in role else FROZEN_SCREEN_IDS
+    return {"arm": arm_identity("candidate" in role, "determinism" in role),
+            "prompt_count": len(ids),
+            "prompt_ids_sha256": hashlib.sha256(
+                json.dumps(sorted(ids), separators=(",", ":")).encode()).hexdigest()}
+
+
 class NativeIdentityTests(unittest.TestCase):
     def identities(self):
-        return {role: {"arm": arm_identity("candidate" in role, "determinism" in role)}
+        return {role: screen_run_identity(role)
                 for role in ("production", "candidate", "production_determinism", "candidate_determinism")}
+
+    def test_verdict_refuses_partial_or_wrong_frozen_membership_before_deciding(self):
+        for role, field, value in (
+            ("production", "prompt_count", 1119),
+            ("candidate", "prompt_ids_sha256", "0" * 64),
+            ("production_determinism", "prompt_count", 79),
+            ("candidate_determinism", "prompt_ids_sha256", "0" * 64),
+        ):
+            runs = self.identities()
+            runs[role][field] = value
+            args = argparse.Namespace(**{key: Path(key) for key in runs})
+            with self.subTest(role=role, field=field), \
+                    patch.object(SCREEN, "run_identity", side_effect=runs.values()), \
+                    patch.object(SCREEN, "load_run", return_value={}), \
+                    patch.object(SCREEN, "decide") as decide:
+                with self.assertRaisesRegex(ScreenError, "frozen corpus membership"):
+                    SCREEN.verdict(args)
+                decide.assert_not_called()
 
     def test_native_preconditions_and_legacy_container_identity(self):
         SCREEN.validate_native_arms(self.identities())
@@ -84,6 +117,25 @@ class NativeIdentityTests(unittest.TestCase):
             with self.assertRaises(ScreenError):
                 run_identity(run)
 
+    def test_native_membership_seals_reject_duplicates_or_missing_responses(self):
+        self.assertEqual(list(SCREEN.FROZEN_CASE_IDS), FROZEN_CASE_IDS)
+        self.assertEqual(SCREEN.FROZEN_CONTROLS, FROZEN_CONTROLS)
+        with tempfile.TemporaryDirectory() as temporary:
+            run = Path(temporary)
+            NATIVE.save(run / "manifest.json", {})
+            NATIVE.save(run / "arm.json", arm_identity())
+            for scored, responses in (
+                (["log-001.v0", "log-001.v0"], ["log-001.v0"]),
+                (["log-001.v0"], ["log-001.v0", "log-001.v0"]),
+                (["log-001.v0"], ["log-002.v0"]),
+            ):
+                NATIVE.save(run / "scores.json", {"per_case": [{"case_id": value} for value in scored]})
+                (run / "responses.jsonl").write_text(
+                    "".join(json.dumps({"case_id": value}) + "\n" for value in responses))
+                with self.subTest(scored=scored, responses=responses), self.assertRaisesRegex(
+                        ScreenError, "match without duplicates"):
+                    run_identity(run)
+
     def test_verdict_checks_identity_before_statistical_decision(self):
         with patch.object(SCREEN, "run_identity", side_effect=self.identities().values()), \
                 patch.object(SCREEN, "load_run", return_value={}), patch.object(SCREEN, "decide", return_value={}) as decide:
@@ -123,7 +175,7 @@ from pathlib import Path
 p=argparse.ArgumentParser();p.add_argument('--run');p.add_argument('--cases');a=p.parse_args();out=Path(a.run)
 rows=[]
 for line in (out/'responses.jsonl').read_text().splitlines():
- r=json.loads(line);rows.append({'case_id':r['case_id'],'is_redaction_control':r['case_id'].startswith('repo-'),'required_facts_found':1,'required_facts_total':1,'citations_supported':1,'citations_total':1,'schema_valid':True,'tool_evaluable':True,'tool_selection_ok':True,'tool_argument_ok':True})
+ r=json.loads(line);rows.append({'case_id':r['case_id'],'is_redaction_control':r['case_id'].split('.v')[0] in ('log-023','log-024','repo-029','repo-030','worklog-007','worklog-008','worklog-014'),'required_facts_found':1,'required_facts_total':1,'citations_supported':1,'citations_total':1,'schema_valid':True,'tool_evaluable':True,'tool_selection_ok':True,'tool_argument_ok':True})
 (out/'scores.json').write_text(json.dumps({'per_case':rows}))
 '''
 CONTROL = '''import json,sys
@@ -247,8 +299,7 @@ class NativeCaptureTests(unittest.TestCase):
 
     def test_host_free_1120_prompt_capture_and_native_verdict(self):
         self.start_stub()
-        ids = SCREEN.screen_order([f"log-{i:03d}" for i in range(77)] + [
-            f"repo-{i:03d}" for i in range(7)], {f"repo-{i:03d}" for i in range(7)})
+        ids = FROZEN_SCREEN_IDS
         self.assertEqual(len(ids), 1120)
         self.args.prompts.write_text("".join(json.dumps({"case_id": value}) + "\n" for value in ids))
         subset = self.root / "subset.jsonl"
