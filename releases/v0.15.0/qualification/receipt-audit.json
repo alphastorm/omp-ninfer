@@ -4,8 +4,8 @@
   "release": "v0.15.0",
   "as_of": "2026-10-30",
   "source_release": "v0.14.0",
-  "status": "host-free-staged",
-  "policy": "Carry every unchanged runtime evidence file with its original subject/date. Replace client descriptor, host-free client review and staging metadata. No predecessor product acceptance or council approval transfers. All three v0.14.0 runtime/model/profile subjects remain unchanged throughout the client-only v0.15.0 release.",
+  "status": "composed-three-lane",
+  "policy": "Carry every unchanged runtime evidence file with its original subject/date. Replace the client descriptor and host-free review; preserve the historical staging receipt separately from fresh acceptance. No predecessor product acceptance or product-tooling council approval transfers. The unchanged runtime council retains its original v0.14.0 subject. All three v0.14.0 runtime/model/profile subjects remain unchanged throughout the client-only v0.15.0 release.",
   "files": [
     {
       "file": "build.json",
@@ -150,7 +150,7 @@
       "file": "staging.json",
       "predecessor_sha256": "a1ffdd29b6d6bf359b3a3751c71ea90dd71662e1ac3579d2bbdb0b971cd3576a",
       "disposition": "replaced",
-      "reason": "Current host-free draft operation and remaining gates; no lane pin or current hardware qualification.",
+      "reason": "Historical host-free draft operation with its original stage-time gate observations preserved. Later lane pin/root promotion, fresh stock-client/public-route acceptance and closed G4 dispositions are bound separately; this receipt is not relabeled as hardware acceptance.",
       "staged_sha256": "317dfcfbc25055450e89145c69aae45eb5afb6956a1a28308851f10f072d34fc"
     },
     {
@@ -168,8 +168,9 @@
     "reason": "Bind the new product-tooling council closed by disposition at af62e766 and copy only the unchanged v0.14.0 native_runtime council entry for the three carried runtime subjects. No in-scope residual P0/P1 remains after C1-C5; #117 tracks product residuals and #116 tracks deferred, unshipped N15/F2 work. G4 approval is not publication or public-route acceptance."
   },
   "public_acceptance": {
-    "disposition": "dropped-predecessor-acceptance",
-    "status": "pending",
-    "reason": "No new client platform, documented-route, native public-install or restoration receipt exists for the final v0.15.0 candidate."
+    "disposition": "replaced-fresh-candidate-acceptance",
+    "status": "passed",
+    "candidate_commit": "af62e7662fdc7195f7c1c88f2278b15f63130eba",
+    "reason": "Predecessor client/route acceptance was dropped, not relabeled. All five routes/31 exact executable blocks, three newly downloaded stock OMP 18.14.0 binaries, both fresh temporary first-lineage native installs and independent restoration passed on the accepted candidate. Both initial windows passed and restored; later public-URL native checks were already_installed, not upgrade or rollback proof. Runtime/model/profile qualifications retain their original unchanged v0.14.0 subjects."
   }
 }

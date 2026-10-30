@@ -143,9 +143,9 @@
   "status": "runtime-release-eligible",
   "publication_authorized": false,
   "external_installation_qualified": true,
-  "scope": "Client-only v0.15.0: stock OMP 18.14.0 and P15 product tooling/docs are new; all three v0.14.0 runtime identities, models, serving profiles and original qualification subjects carry unchanged. Both native lanes remain MTP3. Fresh three-platform live-client acceptance, all five documented routes/31 exact blocks, both first-lineage native public installs and independent restoration passed on candidate af62e7662fdc7195f7c1c88f2278b15f63130eba on 2026-10-30. macOS remains preview; Windows and WSL2 Linux clients are qualified, not a separate native Linux OS. Changed-scope council binding, final manifest evidence pin, strict ready verification and founder-owned publication remain separate gates.",
+  "scope": "Client-only v0.15.0: stock OMP 18.14.0 and P15 product tooling/docs are new; all three v0.14.0 runtime identities, models, serving profiles and original qualification subjects carry unchanged. Both native lanes remain MTP3. Fresh three-platform live-client acceptance, all five documented routes/31 exact blocks, both first-lineage native public installs and independent restoration passed on candidate af62e7662fdc7195f7c1c88f2278b15f63130eba on 2026-10-30. macOS remains preview; Windows and WSL2 Linux clients are qualified, not a separate native Linux OS. The new product council is closed by disposition with no in-scope residual P0/P1 after lead controls, and the unchanged runtime council retains its original v0.14.0 subject. Both are bound separately from acceptance; G4 approval does not authorize founder-owned publication.",
   "interpretation": "Carried runtime qualifications retain their original subjects and are not new runtime performance, quality or durability measurements. The host-free source review and macOS stub rehearsals are separately scoped; fresh exact-candidate platform/live and documented-route acceptance used the new published stock OMP 18.14.0 binaries on the unchanged beta.3 components. Image input covers macOS and Windows against RTX 5090 only. Both initial windows passed and restored without correction, canonical promotion or production upgrade: RTX 5090 retained its digest-pinned image, mount and unless-stopped policy after a 403.884 s hold; native drivers ran 371.3255772590637/394.3888010978699 s and restored the same canonical beta.3 stopped state hashes at 450/370 W. Native documented installs were fresh temporary first-lineage installs; later downloaded-public-URL checks returned already_installed with lifecycle pointers unchanged. Neither native lane has a predecessor or supported rollback direction. Acceptance is owner-operated tester-equivalent, not independent external-user outcomes or council approval.",
-  "eligibility_scope": "Runtime/installability and fresh candidate-bound stock OMP 18.14.0 client/public-route acceptance are complete. Root authority, live profiles and launchers name v0.15.0; the guide stays prepared and front-door install links remain on published v0.14.0 until publication. All three v0.14.0 runtime/model/profile subjects remain unchanged. Council binding, final manifest evidence pin and final current-head verification are separate controls; publication_authorized stays false.",
+  "eligibility_scope": "Runtime/installability, fresh candidate-bound stock OMP 18.14.0 client/public-route acceptance and G4 dispositions are complete. Root authority, live profiles and launchers name v0.15.0; the guide stays prepared and front-door install links remain on published v0.14.0 until publication. All three v0.14.0 runtime/model/profile subjects remain unchanged. The bound historical host-free staging receipt is not current acceptance or council approval. Immutable platform/composed/manifest pins bind evidence without changing the accepted candidate. Final current-head suites, strict ready/check-pins verification, remote hashes and PR CI precede founder-owned publication; publication_authorized stays false.",
   "documented_route_acceptance": {
     "status": "passed",
     "scope": "All five fresh documented routes/31 exact candidate blocks, three newly downloaded stock OMP 18.14.0 clients and both first-lineage native beta.3 public installs passed on unchanged v0.14.0 runtime/model/profile bytes. No predecessor client or product-route acceptance is carried; Linux evidence is WSL2-scoped and macOS remains preview.",
@@ -205,6 +205,13 @@
       "repository_path": "releases/v0.15.0/acceptance/composed-external-installation.json",
       "scope": "Fresh stock OMP 18.14.0 acceptance on macOS arm64 preview, Windows x64 and Linux x64 under WSL2; all five documented routes/31 exact candidate blocks, both native first-lineage public installs and independent restoration passed. Both initial windows passed and restored without correction or promotion; separate public-URL native checks were already_installed. No predecessor client/route acceptance is carried, no new runtime measurement is inferred, and council approval/publication are separate."
     },
+    "staging": {
+      "status": "passed",
+      "repository_path": "releases/v0.15.0/qualification/staging.json",
+      "sha256": "317dfcfbc25055450e89145c69aae45eb5afb6956a1a28308851f10f072d34fc",
+      "stage": "host-free-draft",
+      "scope": "The bound historical host-free draft-stage receipt records the new stock client and unchanged v0.14.0 runtime preparation without premature root promotion. Its original stage-time gate observations are preserved, not relabeled. Subsequent lane pin/root promotion, fresh candidate-bound acceptance and closed G4 dispositions are bound separately. No product publication is granted."
+    },
     "g4_review": {
       "status": "passed",
       "repository_path": "releases/v0.15.0/review/runtime-ledger.json",
@@ -221,5 +228,9 @@
       "public_route_acceptance_granted": false,
       "scope": "The new four-seat product-tooling council closed by disposition with no in-scope residual P0/P1 after lead controls C1-C5; all 17 returned items remain in 13 normalized rows and deferred residuals are tracked in #117. The composed client descriptor identities were audited against staged L9 and its hash rebound under C4. All three runtime lanes carry unchanged from v0.14.0, so native_runtime is copied unchanged from that release's closed fork ledger, including its missing Mythos transport result and #89/#94/#95/#96 residuals; no new runtime review or N15/F2 approval is inferred. The attempted N15/F2 fork-council residuals in #116 concern deferred, unshipped work. G4 approval covers only the bound dispositions, not publication or public-route acceptance; final strict ready/pin verification is a separate C3 control."
     }
+  },
+  "receipt_audit": {
+    "repository_path": "releases/v0.15.0/qualification/receipt-audit.json",
+    "sha256": "759b08cb08987c6c3b3fa177414df4ad5d714890306f20123a0db65df507464b"
   }
 }

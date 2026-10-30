@@ -61,6 +61,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Finalize v0.15.0's ready qualification posture: preserve the historical host-free staging
+  receipt, bind fresh client/route acceptance and closed council dispositions separately,
+  and keep publication founder-owned with the public front door on v0.14.0.
 - Bind v0.15.0's product-tooling council closed by disposition and the unchanged v0.14.0
   runtime-council entry to their exact subjects and ledger bytes. Product residuals remain
   deferred in #117; #116 concerns unshipped N15/F2 work. G4 approval grants neither publication
@@ -78,8 +81,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   public installs and independent restoration passed on frozen candidate `af62e766` on 2026-10-30.
   Both initial windows passed and restored (403.884 s RTX 5090 hold; 371.326/394.389 s native
   driver windows); public native checks were `already_installed`, not upgrade/rollback proof.
-  Root authority/profiles/launchers are lane-pinned to v0.15.0. No council approval, final manifest
-  pin, tag or publication is claimed; the published product remains v0.14.0. Native RTX 3090 DFlash2 is deferred
+  Root authority/profiles/launchers are lane-pinned to v0.15.0; closed G4 dispositions bind
+  separately from fresh acceptance. Immutable evidence pins do not authorize a tag or publication;
+  the published product remains v0.14.0. Native RTX 3090 DFlash2 is deferred
   to v0.15.1 after fork-after-resume failed with
   `Native could not release an unreferenced checkpoint owner`. RTX 4090 DFlash2 K6/K5,
   `alphastorm/ninfer#48/#49` for all three carried components, and council P2 deferrals remain deferred.
