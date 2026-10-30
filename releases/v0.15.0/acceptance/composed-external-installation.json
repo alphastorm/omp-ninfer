@@ -15,7 +15,7 @@
     "note": "All three newly downloaded stock OMP 18.14.0 asset/binary identities, typed tool/result, exact continuation and unavailable-route fail-closed checks passed. Both native routes used the same stock Windows client. The macOS documented route additionally returned the exact nonce after server restart and client resume."
   },
   "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
-  "compatibility_sha256": "e8160ccd8ebd53ef9189b0171d968e8450caa055c973bcd53a8196fd5c0a5832",
+  "compatibility_sha256": "3f180499409e6432a0957f6f7e50a283c5c6a1290d0f3c73c8e09d5262b8dcc4",
   "windows_asset_sha256": "620a5935cdb6a9ed52d8b0c93892d6b5bb84155244a98f3be82af0455177bf29",
   "windows_binary_sha256": "620a5935cdb6a9ed52d8b0c93892d6b5bb84155244a98f3be82af0455177bf29",
   "platform_receipts": [
