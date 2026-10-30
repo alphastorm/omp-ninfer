@@ -1,0 +1,422 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-098",
+  "title": "Native DFlash2 K=7 on RTX 3090 and RTX 4090: RTX 3090 passes the 108-role and 7-supplemental decode gates (x1.29968, min case 0.97987) and the 131,072-token INT8 fit and true-cold durability proof at 21,968 MiB peak with 768 MiB headroom; RTX 4090 clears the aggregate bar (x1.26362) but fails the 0.95 per-case floor on log-024@0 (0.945889, reproduced in isolation at 0.9451)",
+  "generated_utc": "2026-10-27T13:50:00Z",
+  "status": "completed_with_limits",
+  "question": "With the W8 static shared-memory device-link blocker removed and a load-time sm_86/sm_89 DFlash2 fit seam (Q8_G32_FP16 to Q4_G64_FP16 draft MLP gate/up requantization plus host-mapped token_embedding), does DFlash2 K=7 clear the preregistered 108-role decode gate (weighted >= 1.08, every case >= 0.95) and the 7-case supplemental suite on the native Windows RTX 3090 and RTX 4090 lanes, and does the passing lane fit 131,072 INT8 KV tokens with true-cold checkpoint durability?",
+  "answer": "RTX 3090 passed every speed, fit, and true-cold durability bar; RTX 4090 passed the aggregate speed bar and all 7 supplementals but missed the 0.95 per-case floor on one case (log-024@0). On frozen v0.13.1 control binaries (7a25cd72 on upstream 64d10fbf, model v3 81f924d4, 65,536 INT8 KV, concurrency 1, chunk 1,024, extra device state slots 0), RTX 3090 at 350 W decoded the 108-role corpus at 102.60 vs 78.94 tok/s (weighted x1.29968, minimum case ratio 0.97987 on log-024@0, 0 cases below 0.95) and the 7 supplementals at 95.10 vs 74.58 tok/s (weighted x1.27512, minimum case 1.10042). RTX 4090 at 450 W decoded the 108-role corpus at 174.85 vs 138.37 tok/s (weighted x1.26362) and the 7 supplementals at 164.12 vs 131.16 tok/s (weighted x1.25136, minimum case 1.05885), but log-024@0 landed at 127.73 vs 135.03 tok/s (ratio 0.945889); an authorized isolated 4-arm ABBA reproduced the regression at 127.98 vs 135.41 tok/s (median ratio 0.945090, range 0.945011-0.945169). Admitted to 131,072-token fit qualification on source e456af37b (cleanly rebased into shipped source 2c6f423b as 059e73b6), RTX 3090 passed the real GPU mapped-loading oracle (17,852,965,376 B device weights, 1,350,860,800 B host-mapped token_embedding, 1,467,318,272 B device weight savings vs the unquantized-draft 65,536-token startup profile) and started three consecutive 131,072-token INT8 processes with 805,306,368 B (768 MiB) retained KV capacity headroom, 1,758,461,952 B (1,677 MiB) available after startup, and 21,968.0 MiB peak VRAM across 376 samples at 349.99 W peak. Its v4 true-cold durability proof exported an authenticated 3,066-token checkpoint (691,580,046 B, 48 pages, 3 states, 3 points), verified a separate fresh cold-reference process with 0 cached tokens and 3,090 computed prefill tokens against a restored process reusing 3,066 tokens (24 computed), and matched all 32 generated token IDs and 114 UTF-8 output bytes (sha256 07b8db1f) with 0 refused saves.",
+  "decision": {
+    "action": "Merge the native DFlash2 engine support and load-time fit seam into shared source 2c6f423b (v0.14.0) with DFlash2 off by default; keep both published v0.14.0 native lane specs on MTP3 while staging the RTX 3090 DFlash2 K=7 lane-profile switch and RTX 4090 log-024@0 investigation for the next release",
+    "rule": "Preregistered P14 S3 gate: 108-role ABBA (84 cases at depth 0, 12 at 32,000, 12 at 64,000) requires weighted decode ratio >= 1.08 and every case ratio >= 0.95; the 7-case supplemental suite is required separately; only a passing card advances to 131,072-token INT8 fit and true-cold durability qualification (kv_capacity_headroom_bytes and available_after_startup_bytes >= 805,306,368 B on RTX 3090, 0 allocation or shutdown refusals, true-cold reference with 0 cached tokens matching restored continuation token IDs and UTF-8 bytes).",
+    "verdict": "RTX 3090 speed, 131K fit, and true-cold durability PASS (lane-profile switch ready, pending native powered quality screen and shipping-binary gate); RTX 4090 speed gate FAIL on single case log-024@0 (0.945889 < 0.95, reproduced at 0.945090)",
+    "reason": "The engine source is unified across all three lanes in v0.14.0, and the managed native installer and package validator hard-code MTP3 and device_state_slots >= 1 in schema 4, so switching RTX 3090 to DFlash2 K=7 requires a release-spec schema update and a powered native quality screen.",
+    "not_decided_here": "Native 1,120-prompt powered quality screen on the Q4-draft DFlash2 profile, RTX 4090 131,072-token fit (not run after the log-024@0 stop), and the full 131,072-token depth speed series on the final shipping binary."
+  },
+  "method": {
+    "source_lineage": {
+      "upstream_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+      "current_route_control_source_sha": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
+      "fit_binary_source_sha": "e456af37b2b46494301052e061cc4a182cd1a02e",
+      "rebased_branch_name": "rebase/p14-native-dflash2",
+      "rebased_branch_commits": [
+        "f74c89c4",
+        "fef598b6",
+        "eb4bb470",
+        "356defad"
+      ],
+      "rebased_branch_head_sha": "059e73b635185f0fa296e7656e967d1809947a73",
+      "rebased_branch_base_sha": "7ee32e2080f2231454d38fe75c12a00718f8c5ec",
+      "shipped_v0140_source_sha": "2c6f423bd817b6534158553e1b34ab4959c43165",
+      "shipped_v0140_parent_relation": "059e73b635185f0fa296e7656e967d1809947a73 is the direct parent of 2c6f423bd817b6534158553e1b34ab4959c43165",
+      "fork_ci_run_id": 40493982421,
+      "toolchain": "MSVC 19.44.35228.0, CUDA 13.3.73, Release, Windows 11 driver 621.01",
+      "model_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+    },
+    "seam_design": {
+      "link_blocker_resolved": "EXP-089's three W8 static shared-memory device-link failures (49,664 and 50,176 B against the 49,152 B sm_89/sm_86 limit) no longer exist on the 64d10fbf lineage: dynamic_grouped_conv builds only Q8 launch/prepare and linear_swiglu/w8 is absent.",
+      "load_seam": "Under #if NINFER_SM86 || NINFER_SM89 and options.dflash2() in src/models/qwen3_5/load.cpp:127-164,214-224, plan_load marks the 5-layer draft MLP gate and up projections (Q8_G32_FP16, [5120, 17408]) for CPU-side requantization to Q4_G64_FP16 before layout reservation (saving 425 MiB of codes plus group scales) and places token_embedding (1,350,860,800 B) on CPU with HostAccess::CudaTransfer so materialize_effective binds its CUDA-registered host-transfer device address without allocating device VRAM. Combined with the optimized proposal head, total device weights drop from 19,320,283,648 B on the unquantized-draft 65,536-token startup profile to 17,852,965,376 B (1,467,318,272 B saved)."
+    },
+    "depth_calibrator": {
+      "version": "positive-span-v1",
+      "runner_sha256": "aff4363a2fc3c7fada8f92eb2d79ef47e9d53bee9db09be47020bef7cf0b2ed0",
+      "retained_depth0_runner_sha256": "0b71f78b43ba7e66c0651b11b7d6f56d9947a7b85c24e187710686fdca06becb",
+      "tolerance_tokens": 64,
+      "source_receipt_sha256": {
+        "rtx3090_current_route_gate": "b2c78745481217a3afcbda9536c25709383cf3f884ad10bfb98a8c09893d6791",
+        "rtx4090_current_route_gate": "0087c67ad0f7abfb0b6a5645f3087da2d592d7f376ddfc17ae49a264c5855c15",
+        "rtx4090_log024_resolution": "7f8ed89f279faa92709a0b28dcc319574d15f60df78911e4049f29750d1d8106",
+        "rtx3090_fit_proof_v4": "7d4e85aa4f46e8cb62b2bf7c0d185744beb2c8b35d5f831b1aba016be37318c8"
+      }
+    }
+  },
+  "observations": {
+    "current_route_gates": {
+      "rtx3090": {
+        "lane": "rtx3090",
+        "cuda_architecture": "86",
+        "server_binary_sha256": "cdd24c5efcbdb414770e819598c3619f53970faa3e3fe1c7ad7e42b362c9b790",
+        "power_limit_w": 350.0,
+        "restored_power_limit_w": 370.0,
+        "peak_memory_used_mib": 21512.0,
+        "gate": "pass",
+        "role_108": {
+          "case_count": 108,
+          "weighted_decode_tok_s": {
+            "A_mtp3": 78.94239592890304,
+            "B_dflash2_k7": 102.59999261943155
+          },
+          "weighted_decode_ratio": 1.2996817668396456,
+          "minimum_case_ratio": 0.979873126880705,
+          "minimum_case_id": "log-024@0",
+          "minimum_case_decode_tok_s": {
+            "A_mtp3": 76.3557820555688,
+            "B_dflash2_k7": 74.81897891821183
+          },
+          "below_case_floor": [],
+          "acceptance": {
+            "A_mtp3": {
+              "accepted": 84010,
+              "drafted": 104982,
+              "rounds": 35026
+            },
+            "B_dflash2_k7": {
+              "accepted": 94772,
+              "drafted": 170906,
+              "rounds": 24476
+            }
+          },
+          "by_depth": {
+            "0": {
+              "case_count": 84,
+              "weighted_decode_tok_s": {
+                "A_mtp3": 78.9864818575665,
+                "B_dflash2_k7": 100.49265078447168
+              },
+              "weighted_decode_ratio": 1.2722765772209792,
+              "minimum_case_ratio": 0.979873126880705
+            },
+            "32000": {
+              "case_count": 12,
+              "weighted_decode_tok_s": {
+                "A_mtp3": 81.3250180098937,
+                "B_dflash2_k7": 118.02862818198132
+              },
+              "weighted_decode_ratio": 1.4513200374283644,
+              "minimum_case_ratio": 1.2063088742771613
+            },
+            "64000": {
+              "case_count": 12,
+              "weighted_decode_tok_s": {
+                "A_mtp3": 76.29692183600196,
+                "B_dflash2_k7": 108.93813304748389
+              },
+              "weighted_decode_ratio": 1.4278181927397187,
+              "minimum_case_ratio": 1.2402744022071719
+            }
+          }
+        },
+        "supplemental_7": {
+          "case_count": 7,
+          "weighted_decode_tok_s": {
+            "A_mtp3": 74.57801321873436,
+            "B_dflash2_k7": 95.09612456035859
+          },
+          "weighted_decode_ratio": 1.2751227936502603,
+          "minimum_case_ratio": 1.1004163054135232,
+          "minimum_case_id": "reasoning-invariant",
+          "below_case_floor": [],
+          "acceptance": {
+            "A_mtp3": {
+              "accepted": 9866,
+              "drafted": 13352,
+              "rounds": 4452
+            },
+            "B_dflash2_k7": {
+              "accepted": 11146,
+              "drafted": 22130,
+              "rounds": 3174
+            }
+          }
+        }
+      },
+      "rtx4090": {
+        "lane": "rtx4090",
+        "cuda_architecture": "89",
+        "server_binary_sha256": "cfc3e06649f5e539397963556f7e5459592d0d5ee7ae330a622cd5f43c356251",
+        "power_limit_w": 450.0,
+        "restored_power_limit_w": 450.0,
+        "peak_memory_used_mib": 21804.0,
+        "gate": "fail",
+        "role_108": {
+          "case_count": 108,
+          "weighted_decode_tok_s": {
+            "A_mtp3": 138.3701375009264,
+            "B_dflash2_k7": 174.84661319166125
+          },
+          "weighted_decode_ratio": 1.2636152304935784,
+          "minimum_case_ratio": 0.945888572680627,
+          "minimum_case_id": "log-024@0",
+          "minimum_case_decode_tok_s": {
+            "A_mtp3": 135.0319399040443,
+            "B_dflash2_k7": 127.72516890213265
+          },
+          "below_case_floor": [
+            "log-024@0"
+          ],
+          "acceptance": {
+            "A_mtp3": {
+              "accepted": 83864,
+              "drafted": 104700,
+              "rounds": 34930
+            },
+            "B_dflash2_k7": {
+              "accepted": 94758,
+              "drafted": 171262,
+              "rounds": 24526
+            }
+          },
+          "by_depth": {
+            "0": {
+              "case_count": 84,
+              "weighted_decode_tok_s": {
+                "A_mtp3": 138.46879267008617,
+                "B_dflash2_k7": 171.39490153774923
+              },
+              "weighted_decode_ratio": 1.2377872171248894,
+              "minimum_case_ratio": 0.945888572680627
+            },
+            "32000": {
+              "case_count": 12,
+              "weighted_decode_tok_s": {
+                "A_mtp3": 142.9626972769723,
+                "B_dflash2_k7": 197.07248590588338
+              },
+              "weighted_decode_ratio": 1.37848886219655,
+              "minimum_case_ratio": 1.180994395271774
+            },
+            "64000": {
+              "case_count": 12,
+              "weighted_decode_tok_s": {
+                "A_mtp3": 133.2448097587841,
+                "B_dflash2_k7": 187.35732620290415
+              },
+              "weighted_decode_ratio": 1.4061135029730696,
+              "minimum_case_ratio": 1.2600740641087589
+            }
+          }
+        },
+        "supplemental_7": {
+          "case_count": 7,
+          "weighted_decode_tok_s": {
+            "A_mtp3": 131.1554107641864,
+            "B_dflash2_k7": 164.12277641614733
+          },
+          "weighted_decode_ratio": 1.2513610796525603,
+          "minimum_case_ratio": 1.0588475916342968,
+          "minimum_case_id": "reasoning-invariant",
+          "below_case_floor": [],
+          "acceptance": {
+            "A_mtp3": {
+              "accepted": 9858,
+              "drafted": 13384,
+              "rounds": 4462
+            },
+            "B_dflash2_k7": {
+              "accepted": 11184,
+              "drafted": 21876,
+              "rounds": 3136
+            }
+          }
+        },
+        "log024_isolated_resolution": {
+          "case_id": "log-024@0",
+          "prompt_tokens": 4536,
+          "completion_tokens": 1024,
+          "request_sha256": "cc7b5ef1f63a31d2292c1dc0d1201433d8ff4a9dbc7e73beb32cf747a225dcde",
+          "original_in_campaign": {
+            "plan_sha256": "5d396eb690fa66c926468cc6e424e44bb212214bd1248f09904d23a49de86949",
+            "arm_decode_tok_s": [
+              135.0015713049098,
+              127.71548342823633,
+              127.73485437602899,
+              135.06230850317877
+            ],
+            "median_tok_s": {
+              "A_mtp3": 135.0319399040443,
+              "B_dflash2_k7": 127.72516890213265
+            },
+            "ratio": 0.945888572680627,
+            "observed_ratio_range": [
+              0.9456041796089282,
+              0.9461730937007508
+            ]
+          },
+          "dedicated_isolated_abba": {
+            "plan_sha256": "52ba4b1e3293f878ee04dc9598586c15a684cbb8fdad5f262b4a348cce714263",
+            "arm_decode_tok_s": [
+              135.41642050258045,
+              127.98806511292831,
+              127.97002941911008,
+              135.41287305651448
+            ],
+            "median_tok_s": {
+              "A_mtp3": 135.41464677954747,
+              "B_dflash2_k7": 127.9790472660192
+            },
+            "ratio": 0.9450901383981506,
+            "observed_ratio_range": [
+              0.9450111658849492,
+              0.9451691129802154
+            ],
+            "A_mtp3_rounds": 314,
+            "A_mtp3_drafted": 942,
+            "A_mtp3_accepted": 708,
+            "A_mtp3_output_sha256": "0fdce53cd2e688a32a72a49a82f07a9059641f650461a92883aca4c6f4788c10",
+            "B_dflash2_k7_rounds": 291,
+            "B_dflash2_k7_drafted": 2032,
+            "B_dflash2_k7_accepted": 732,
+            "B_dflash2_k7_output_sha256": "bbe977b90f4a6fec611543b42449168b13ed6f3d6635486ed615f06ee8c4d76d"
+          },
+          "gate_floor": 0.95,
+          "original_108_case_gate_unchanged": true,
+          "finding": "floor regression reproduced"
+        }
+      }
+    },
+    "rtx3090_131k_fit_and_durability": {
+      "status": "passed",
+      "source_sha": "e456af37b2b46494301052e061cc4a182cd1a02e",
+      "server_binary_sha256": "8dfd5f950fd24d6a241b9fb610eff20d8b9c8fdc46d05d0903b88f1260c82d35",
+      "loading_real_test_sha256": "40adc00c7f69dacbe1ff948db32f2e70df67ad3c30a7ac24dffce8716ccda346",
+      "frozen_fit_plan_sha256": "698ce6b3f1cfc81defd14020a4d666ee128789ca710649d0c82d140",
+      "fit_proof_plan_sha256": "7d5c820d8d2beafdadae50d4041b5318a1b9357c4fa825c33b1561b766c24a0c",
+      "fit_proof_script_sha256": "f73f473472d4fbc6b516dbe0ecb904393c3b97d331f400fc5d770192a8a6538c",
+      "mapped_loading_gpu_test": {
+        "status": "passed",
+        "device_weights_bytes": 17852965376,
+        "unquantized_draft_profile_weights_bytes": 19320283648,
+        "device_weight_saving_bytes": 1467318272,
+        "host_mapped_embedding_bytes": 1350860800,
+        "h2d_uploaded_bytes": 17852959232,
+        "parent_count": 839,
+        "draft_weight_count": 91,
+        "materialization_seconds": 13.5174,
+        "peak_rss_kib": 3441756,
+        "eager_and_graph_gather_widths_verified": [
+          1,
+          4,
+          8,
+          1024
+        ]
+      },
+      "profile_config": {
+        "max_context": 131072,
+        "kv_capacity": 131072,
+        "kv_dtype": "int8",
+        "kv_cache": "int8-group64",
+        "prefill_chunk": 1024,
+        "max_concurrency": 1,
+        "speculative_backend": "dflash2",
+        "draft_tokens": 7,
+        "proposal_head": "optimized",
+        "device_state_slots": 0,
+        "total_device_state_slots": 1,
+        "host_context_mib": 16384,
+        "admission_headroom_mib": 768,
+        "gpu_keep_warm_ms": 60000,
+        "cuda_graph": true,
+        "prefix_reuse": true,
+        "session_checkpoint_quota_mib": 8192,
+        "session_checkpoint_staging_mib": 256,
+        "power_limit_w": 350.0,
+        "restored_power_limit_w": 370.0
+      },
+      "startup_memory_bytes": {
+        "device_budget_bytes": 24468520960,
+        "weights_used_bytes": 17852965376,
+        "available_after_weights_bytes": 6613368832,
+        "kv_payload_bytes": 4429185024,
+        "sequence_capacity_bytes": 4708532480,
+        "workspace_capacity_bytes": 103948288,
+        "cuda_graph_calibration_retained_bytes": 39845888,
+        "startup_retained_bytes": 42032640,
+        "runtime_reservation_bytes": 4812480768,
+        "kv_capacity_headroom_bytes": 805306368,
+        "planned_slack_bytes": 955735808,
+        "available_after_startup_bytes": 1758461952,
+        "host_context_capacity_bytes": 17179869184
+      },
+      "vram_and_power": {
+        "startup_ready_memory_used_mib": 21966.0,
+        "max_memory_used_mib": 21968.0,
+        "samples": 376,
+        "max_power_w": 349.99,
+        "max_temperature_c": 54.44,
+        "restored_power_limit_w": 370.0,
+        "restored_memory_used_mib": 0.0
+      },
+      "true_cold_durability": {
+        "reference_scope": "true-cold-zero-reuse",
+        "checkpoint_exported": {
+          "committed": true,
+          "origin": "authenticated",
+          "dir_sync": "ntfs-write-through",
+          "frontier_tokens": 3066,
+          "pages": 48,
+          "states": 3,
+          "points": 3,
+          "payload_bytes": 691580046
+        },
+        "cold_reference": {
+          "checkpoint_store_empty_before_start": true,
+          "prior_inference_requests": 0,
+          "request_id": 1,
+          "prompt_tokens": 3090,
+          "http_cached_tokens": 0,
+          "computed_prefill_tokens": 3090,
+          "prefix_reuse_path": "root"
+        },
+        "restored_continuation": {
+          "request_id": 1,
+          "prompt_tokens": 3090,
+          "http_cached_tokens": 3066,
+          "computed_prefill_tokens": 24,
+          "prefix_reuse_path": "private_endpoint"
+        },
+        "generated_token_count": 32,
+        "generated_token_ids_identical": true,
+        "continuation_bytes": 114,
+        "byte_identical": true,
+        "continuation_sha256": "07b8db1f7f1b57894b245b880dc08bb99b1b6cec594a4e1d1430a1dba50133f7",
+        "shutdowns_complete": 3,
+        "shutdown_refused_saves": 0
+      },
+      "partial_provisional_131k_speed_series": {
+        "verdict": "no_verdict_cut_before_completion",
+        "depth_0_84_roles": {
+          "A_mtp3_tok_s": 78.9632560906,
+          "B_dflash2_k7_tok_s": 100.7745515291,
+          "ratio": 1.276220821156,
+          "minimum_case_ratio": 0.985702860901
+        },
+        "depth_32000_12_roles": {
+          "A_mtp3_tok_s": 81.1304362955,
+          "B_dflash2_k7_tok_s": 117.7556638216,
+          "ratio": 1.451436343727,
+          "minimum_case_ratio": 1.132761173805
+        },
+        "depth_64000": "A0 completed only; B1 interrupted by founder cut and marked invalid",
+        "depth_120000": "not started"
+      }
+    }
+  },
+  "limits": [
+    "Current-route 108-role and 7-supplemental speed gates were measured on the frozen 7a25cd72 control binaries at 65,536-token INT8 KV capacity, not on the final 131,072-token shipping package.",
+    "The 131,072-token fit-profile role-speed series on e456af37b was cut after depth 0 and depth 32,000 and carries no 108-role verdict.",
+    "No 1,120-prompt powered quality screen or symmetric T3 screen has yet been run on native DFlash2 with Q4-requantized draft MLP gate/up weights.",
+    "RTX 4090 131,072-token fit and durability were not run because the card stopped at the log-024@0 per-case floor."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}
