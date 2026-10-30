@@ -6,14 +6,14 @@
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#060809">
 <title>OMP NInfer vs Ollama, LM Studio, llama.cpp, vLLM — a candid comparison</title>
-<meta name="description" content="A dated, candid decision guide for local inference backends for coding-agent sessions. OMP NInfer v0.14.0 (2026-10-28): Qualified on RTX 5090, RTX 4090, and RTX 3090 with stock Oh My Pi 18.12.6.">
+<meta name="description" content="A dated, candid decision guide for local inference backends for coding-agent sessions: OMP NInfer vs Ollama, LM Studio, llama.cpp, and vLLM. Qualified on RTX 5090 · 4090 · 3090.">
 <link rel="canonical" href="https://alphastorm.github.io/omp-ninfer/compare/">
 <link rel="preload" href="../fonts/space-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../fonts/jetbrains-mono-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../site.css">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <meta property="og:title" content="OMP NInfer vs Ollama, LM Studio, llama.cpp, vLLM — a candid comparison">
-<meta property="og:description" content="A dated, candid decision guide for local inference backends for coding-agent sessions. OMP NInfer v0.14.0 (2026-10-28): Qualified on RTX 5090, RTX 4090, and RTX 3090 with stock Oh My Pi 18.12.6.">
+<meta property="og:description" content="A dated, candid decision guide for local inference backends for coding-agent sessions: OMP NInfer vs Ollama, LM Studio, llama.cpp, and vLLM. Qualified on RTX 5090 · 4090 · 3090.">
 <meta property="og:image" content="https://alphastorm.github.io/omp-ninfer/og.png">
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="640">
@@ -58,14 +58,14 @@
 <a href="https://github.com/Neroued/ninfer">NInfer</a> serving Qwen3.8&nbsp;27B. Every project below
 is excellent at a different job; most operators should use one of them, and this page exists to make
 that call fast and candid, without self-assigned scores or rankings.</p>
-<p class="verified">OMP NInfer column: v0.14.0, stock Oh My Pi 18.12.6 (2026-10-28). Other columns:
-public documentation as of 2026-08-31; reverify before deciding.</p>
+<p class="verified">OMP NInfer column: v0.14.0 (published 2026-10-28) with stock Oh My Pi 18.12.6.
+Other columns: public documentation as of 2026-08-31, not re-verified since; capabilities change quickly, so reverify before deciding.</p>
 
 <h2>The map</h2>
 <div class="table-scroll">
 <table>
 <tr><th>Dimension</th><th>OMP NInfer</th><th>Ollama</th><th>LM Studio</th><th>llama.cpp</th><th>vLLM</th></tr>
-<tr><td>Primary job</td><td data-label="OMP NInfer">Durable OMP appliance (<code>v0.14.0</code>, stock OMP <code>18.12.6</code>; DFlash2 on RTX 5090, MTP3 on native RTX 4090 and RTX 3090)</td><td data-label="Ollama">Easy model runner</td><td data-label="LM Studio">GUI model runner</td><td data-label="llama.cpp">Portable inference engine</td><td data-label="vLLM">General serving engine</td></tr>
+<tr><td>Primary job</td><td data-label="OMP NInfer">Durable OMP appliance (stock Oh My Pi; <code>DFlash2</code> speculative decoding on RTX 5090, <code>MTP3</code> on native RTX 4090 and RTX 3090)</td><td data-label="Ollama">Easy model runner</td><td data-label="LM Studio">GUI model runner</td><td data-label="llama.cpp">Portable inference engine</td><td data-label="vLLM">General serving engine</td></tr>
 <tr><td>Model breadth</td><td data-label="OMP NInfer">One model (Qwen3.8 27B), hash-pinned across all lanes (20.4&nbsp;GB <code>81f924d4</code>)</td><td data-label="Ollama">Broad</td><td data-label="LM Studio">Broad</td><td data-label="llama.cpp">Broad</td><td data-label="vLLM">Broad</td></tr>
 <tr><td>Qualified OMP workflow</td><td data-label="OMP NInfer">Core product (vision + tools + JSON-schema output on RTX 5090; text + tools + JSON-schema output on native RTX 4090 and RTX 3090)</td><td data-label="Ollama">Generic endpoint</td><td data-label="LM Studio">Generic endpoint</td><td data-label="llama.cpp">Generic endpoint</td><td data-label="vLLM">Generic endpoint</td></tr>
 <tr><td>Explicit Responses continuation</td><td data-label="OMP NInfer">Core product</td><td data-label="Ollama">Verify current support</td><td data-label="LM Studio">Verify current support</td><td data-label="llama.cpp">Verify current support</td><td data-label="vLLM">Verify current support</td></tr>
@@ -76,12 +76,11 @@ public documentation as of 2026-08-31; reverify before deciding.</p>
 <tr><td>Best fit</td><td data-label="OMP NInfer">One private, long-lived OMP session</td><td data-label="Ollama">Easy breadth</td><td data-label="LM Studio">Desktop convenience</td><td data-label="llama.cpp">Portability</td><td data-label="vLLM">Serving scale</td></tr>
 </table>
 </div>
-<p class="verified">Last verified 2026-08-31 against each project's public documentation; the OMP
-NInfer column was updated 2026-10-28 for published v0.14.0 (2026-10-28) without re-verifying the
-other projects. Capabilities change quickly — reverify before deciding.</p>
+<p class="verified">Qualified on RTX 5090 · 4090 · 3090 under the current release manifest (vision
+on the RTX 5090 container at 127.0.0.1:18089; native Windows lanes serve text and tools one lane at a time on 127.0.0.1:18082).</p>
 <p>Qwen3.8 27B is the served model. <a href="https://github.com/Neroued/ninfer">Neroued's NInfer</a>
-and its GPU ports supply the specialized single-GPU engine; this project's runtime adds explicit
-OpenAI Responses continuation state and durable local NVMe checkpoints. Oh My Pi owns tools,
+and its GPU ports supply the specialized single-GPU engine; the shipped NInfer runtime adds explicit
+OpenAI Responses continuation state (previous_response_id) and durable local NVMe checkpoints. Oh My Pi owns tools,
 transcript state, and agent orchestration. Ordinary in-process prefix caching already avoids
 repeated prefill of matching input while a server stays up and is conceded as prior art; the
 product claim here is transactional, durable continuation across restarts.
@@ -99,7 +98,7 @@ LM&nbsp;Studio for model breadth and convenience, llama.cpp for portability, or 
 serving and concurrency.</p>
 <p>Full criteria: <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/DECISION_GUIDE.md">decision guide</a> ·
 prior art: <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/RELATED_WORK.md">related work</a> ·
-<a href="../status/">v0.14.0 release status</a></p>
+<a href="../status/">release status</a></p>
 </div>
 </section>
 </main>
