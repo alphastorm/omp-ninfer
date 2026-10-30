@@ -140,10 +140,28 @@ unmet:
    [`releases/v0.14.0/qualification/rtx3090.json`](releases/v0.14.0/qualification/rtx3090.json),
    [`examples/manual-tunnel/fail-closed.yml`](examples/manual-tunnel/fail-closed.yml)); concurrent
    native requests require memory and latency qualification on those exact packages.
-8. **Open kernel and schedule backlog.** Verify-round host-commit idle time
-   ([`docs/measurements/2026-10-03-dflash2-round-costs-rtx5090.json`](docs/measurements/2026-10-03-dflash2-round-costs-rtx5090.json),
-   EXP-058 and EXP-092), Q4/Q5 GEMV/MMA epilogue fusion (EXP-056), and warm-turn template fragment
-   consolidation (EXP-059) remain open in [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md#ideas-backlog).
+8. **Open kernel and schedule backlog (including native DFlash2 for the next release).** Native
+   DFlash2 K=7 lane-profile qualification is in progress for the next release without a date
+   commitment (EXP-098,
+   [`docs/measurements/2026-10-27-native-dflash2-gates-and-fit.json`](docs/measurements/2026-10-27-native-dflash2-gates-and-fit.json):
+   the `sm_86`/`sm_89` load-time fit seam in `2c6f423b` requantizes the 5-layer draft MLP `gate`/`up`
+   weights to `Q4_G64_FP16` and maps `token_embedding` from host memory; on `v0.13.1` control
+   binaries `7a25cd72` at `65,536` INT8 KV, the 108-role decode gate requires weighted ratio `>=
+   1.08` and every case `>= 0.95`, which RTX 3090 passed at `×1.29968` with minimum case `0.97987`
+   before passing the 131,072-token INT8 fit and true-cold durability proof on source `e456af37b`
+   at `21,968 MiB` peak with `768 MiB` headroom; RTX 4090 reached `×1.26362` aggregate on
+   `7a25cd72` and is gated on resolving depth-0 case `log-024@0` at `0.945889`, reproduced in
+   isolation at `0.9451` against the `0.95` floor). Root-cause numerics localization for the
+   rejected native `sm_86`/`sm_89` small-T tensor-core decode candidate (EXP-099,
+   [`docs/measurements/2026-10-27-native-small-t-tensor-core-decode.json`](docs/measurements/2026-10-27-native-small-t-tensor-core-decode.json))
+   and `Group64` A8 prefill leak flips (EXP-100,
+   [`docs/measurements/2026-10-27-native-group64-a8-prefill.json`](docs/measurements/2026-10-27-native-group64-a8-prefill.json)),
+   verify-round host-commit idle time (EXP-058,
+   [`docs/measurements/2026-09-26-decode-draft-source-and-launch-chain.json`](docs/measurements/2026-09-26-decode-draft-source-and-launch-chain.json);
+   EXP-092,
+   [`docs/measurements/2026-10-03-dflash2-round-costs-rtx5090.json`](docs/measurements/2026-10-03-dflash2-round-costs-rtx5090.json)),
+   Q4/Q5 GEMV/MMA epilogue fusion (EXP-056), and warm-turn template fragment consolidation
+   (EXP-059) remain open in [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md#ideas-backlog).
 
 ## Deferred and rejected decisions
 
@@ -162,13 +180,110 @@ so future work does not repeat closed experiments:
   ([`docs/UPSTREAM.md`](docs/UPSTREAM.md),
   [`docs/measurements/2026-09-27-engine-window-upstream-e31bc99b-vs-shipped.json`](docs/measurements/2026-09-27-engine-window-upstream-e31bc99b-vs-shipped.json),
   [`docs/measurements/2026-10-10-upstream-81c8ce09-rtx5090.json`](docs/measurements/2026-10-10-upstream-81c8ce09-rtx5090.json)).
-- **Ada (`sm_89`) small-T Q5 tensor-core verify route — rejected (EXP-069).** Measured +0.38% decode
-  at 26K and +0.40% at 60K on the RTX 4090, below the 2.0% and 1.0% promotion margins
+- **Full upstream re-port from `64d10fbf` to `1882c6ad` — deferred in favor of targeted fix
+  cherry-picks.** Upstream `Neroued/ninfer` master `1882c6ad`
+  (`1882c6adbc98043fcf89f3589aa5addb3742777a`) is 215 commits ahead of the `v0.13.0`–`v0.14.0`
+  merge base `64d10fbf` (`64d10fbf9f8e6bfc79ab0570b94674c5b9997929`), while `alphastorm/ninfer`
+  is 518 commits ahead of `64d10fbf` at `2c6f423b` (and `main` tip `752dd887`, which merges
+  `2c6f423b` plus `alphastorm/ninfer#48` installer upgrade/rollback and `#49` runtime/media/checkpoint
+  fixes; see [`docs/UPSTREAM.md`](docs/UPSTREAM.md)). Classification of all 215 upstream commit
+  subjects shows 177 on unrelated tracks (Spark/DGX Spark, `GLM5Next`, `TP2`/`EP2`, MoE,
+  `qwen4_exp`, distributed, and bench/docs), 26 serving/context features or config refactors, 2
+  marginal CPU-side latency commits (context admission/reclaim overhead and grammar
+  terminal-automata compilation), and 10 serving/runtime/artifact/build fixes; zero commits touch
+  `NINFER_SM86`/`NINFER_SM89` guards or improve Qwen3.8-27B dense decode, DFlash2, or MTP3 kernels
+  (upstream's `docs/performance/qwen3.8-27b.md` remains the historical 2026-09-28 campaign at
+  revision `7f6aafed`). Meanwhile, upstream restructured the exact seams the fork's 518-commit
+  stack sits on: (1) in `src/models/qwen3_5`, upstream deleted
+  `program/transactions/{binding,capture,commit,context_operation,pause,reclaim,replay}.cpp`,
+  `program/planning/{graph_profiles,request_plan,source}.cpp`,
+  `program/storage/{checkpoints,sequence,draft_context}.cpp`,
+  `program/speculative/{mtp,target_verification}.*`, and
+  `program/{execution_context.h,prefill.cpp,program_impl.*,round_buffers.{cpp,h},runtime_types.h,grammar_masks.cpp,graph_execution.h}`,
+  replacing them with `session/*` and
+  `program/{commit,decision,draft_commit,execution,frames,graphs,lifecycle,mtp,observations,resources,scoring,inputs}.cpp`
+  while both sides modified `load.cpp`, `model.{cpp,h}`, `startup.cpp`, `program/program.h`,
+  `execution/{text,draft}.cpp`, `parameters.cpp`, and `profile.cpp`; (2) in `src/runtime/engine`,
+  upstream split `engine.cpp` and `engine_core.h` into `engine_{execution,requests,schedule}.inl`,
+  `startup.{cpp,h,inl}`, `context_capacity.{cpp,h}`, and `src/runtime/executor/*` while deleting
+  `model_construction.{cpp,h}`, `model_instance.h`, `model_startup.h`, `kv_capacity.{cpp,h}`, and
+  `contract/timing.h` under the fork's schema 3 durable checkpoint store (`io_uring` and
+  `DirectStorage`); (3) in `src/serve`, upstream deleted `src/serve/serve_options.{cpp,h}`
+  (modify/delete conflict on every lane's CLI and startup flags) and rewrote `http_server.cpp`,
+  `openai_responses_*`, `request.h`, and `translate.cpp` under the fork's sibling-fanout and
+  origin-authentication layer; and (4) both sides edited `src/ops/common/cuda/mma.cuh`,
+  `src/ops/softmax_attention/dense/causal_cache/bf16/launch.{cu,h}`,
+  `causal_softmax_attention.cpp`, `src/ops/weight_input.cpp`, `src/media/decode/decode.cpp`,
+  `src/text/grammar.{cpp,h}`, and `src/text/json_schema.cpp`. Re-porting the fork's 26 modified
+  `qwen3_5` files, 24 modified `src/runtime` files, durable checkpoint store, and native packaging
+  contracts onto `1882c6ad` is deferred (estimated at 5–8 multi-agent days from the 4-day `v0.14.0`
+  integration on a compatible base, with GPU-only bit-identity and resume risk); the next release
+  cherry-picks self-contained bug fixes onto the `2c6f423b`/`752dd887` lineage instead.
+- **Qwen 4 27B (`Qwen4-27B` / `qwen4_exp`) model transition — deferred (no public weights;
+  upstream 27B ops unmerged on `feat/qwen4-27b-ops`).** No public `Qwen4-27B` weights, model card,
+  license, context specification, or agentic-coding/tool-use benchmarks exist (`Qwen` and `nvidia`
+  Hugging Face organizations publish no `Qwen4` checkpoints, and `IteraCompute/Qwen4-27B-NVFP4` is
+  an empty placeholder with no inference files). In Hugging Face `transformers`
+  (`Qwen4ExpTextConfig`) and upstream `Neroued/ninfer` master (`src/models/qwen4_exp/config.cpp`,
+  `docs/maintainer/qwen4_exp-model.md`), `qwen4_exp` currently implements only the
+  `Qwen3.8-Flash-Next` mixture-of-experts plus per-layer-embedding (MoE+PLE) variant
+  (`hidden_size = 2560`, 48 layers, 512 experts, one PLE layer) and rejects the dense 27B variant
+  (`hidden_size = 5120`, 64 layers, dense SwiGLU FFN, no PLE, query-sparse attention (`QSA`) with
+  24 query heads and 4 KV heads, and a Q4 proposal head). Upstream `Neroued/ninfer` implements the
+  27B kernel checklist across 19 commits on unmerged feature branch `feat/qwen4-27b-ops` (tip
+  `e1874e94`, 2026-10-29, branched from 2026-10-27 master commit `04d0d15b`: RTX 5090 `NVFP4`
+  `28672×5120` + fused SwiGLU and `5120×14336`, `FP8` `14976×5120` and `5120×5120`, `Q4`
+  `248320×5120` vocabulary projection, hidden-size-5,120 (`H5120`) gated-residual norm/combine and
+  `FP8` four-stream residual mixing, and four-KV-head `QSA` preparation and tuned sparse GQA across
+  `BF16`, `INT8`, `NVFP4`, and 8-bit-key/4-bit-value (`K8V4`) KV caches), while upstream `master`
+  (`04d0d15b`/`1882c6ad`) carries only unchecked design docs (`docs/designs/qwen4-27b-op-checklist.md`)
+  and leaves the dense 27B model layer and converter recipes (`tools/convert/official_recipes.py`)
+  unimplemented. `feat/qwen4-27b-ops` is tracked in the upstream watch while product work waits for
+  public weights and upstream model/converter support.
+- **Native `sm_86`/`sm_89` small-T tensor-core decode and `Group64` A8 prefill — rejected for
+  `v0.14.0` (EXP-069, EXP-099, EXP-100).** Earlier `sm_89` small-T Q5 tensor-core verify measured
+  only +0.38% decode at 26K and +0.40% at 60K on RTX 4090, below the 2.0% and 1.0% promotion
+  margins
   ([`docs/measurements/2026-09-28-rtx4090-q5-small-t-mma.json`](docs/measurements/2026-09-28-rtx4090-q5-small-t-mma.json)).
-- **DFlash2 on the native RTX 4090 and RTX 3090 lanes — rejected for 24 GB profiles (EXP-089).**
-  Does not link for `sm_89` or `sm_86` and its 1.65 GiB draft weights do not fit the 131,072-token
-  24 GB budget; native lanes retain MTP3
+  In the `v0.14.0` engine campaign, the `sm_86`/`sm_89` small-T tensor-core decode candidate
+  (tested binary source `dce5cf06`, cleanly rebased to `e1c2f66f`, EXP-099) raised C1 decode
+  (`4,541` fresh prompt tokens, `1,024` completion tokens, `0` reuse) by +39.8% on RTX 3090
+  (`84.42 → 117.98 tok/s` at 300 W; `90.79 → 126.81 tok/s` at 350 W) and +8.3% on RTX 4090
+  (`151.23 → 163.76 tok/s` at 450 W), but failed the T2 84-role output-divergence gate (`<= 8`
+  divergent cases allowed for rounding-only promotion; `55/84` on RTX 3090 and `58/84` on RTX
+  4090) and the 150-pair symmetric `Application A` one-sided binomial sign-test screen on RTX 3090
+  added secret fingerprints (`a = 4` baseline-only vs `b = 12` candidate-only,
+  `p = 0.0384 < 0.05`,
+  [`docs/measurements/2026-10-27-native-small-t-tensor-core-decode.json`](docs/measurements/2026-10-27-native-small-t-tensor-core-decode.json)).
+  Similarly, `Group64` A8 prefill (provisional campaign source `254a586a`, cleanly rebased to
+  `7ee32e20`, EXP-100) sped up C1 prefill `×1.312` on RTX 4090 at 450 W and `×1.611` (300 W) /
+  `×1.618` (350 W) on RTX 3090 and 130,048-token exact retrieval `×1.217` on RTX 4090 and `×1.366`
+  on RTX 3090 at 300 W, but failed the 200-pair symmetric `Application B` leak-presence screen on
+  RTX 4090 (`41` both, `a = 0` OFF-only, `b = 5` ON-only, `154` neither; `p = 1/32 = 0.03125 <
+  0.05`), while RTX 3090 passed (`41` both, `a = 0`, `b = 4`, `155` neither; `p = 1/16 = 0.0625`)
+  on four of the same five `worklog-007`/`worklog-014` prompts and was kept off by founder
+  decision; `Group64` A8 stays compiled off on both native lanes in `v0.14.0` while the
+  byte-identical attention prefill specializations (+4.96% on RTX 4090 at 450 W and +5.40% on RTX
+  3090 at 300 W at 130,048 tokens) shipped
+  ([`docs/measurements/2026-10-27-native-group64-a8-prefill.json`](docs/measurements/2026-10-27-native-group64-a8-prefill.json)).
+- **DFlash2 on the native RTX 4090 and RTX 3090 lanes — initial unquantized port rejected
+  (EXP-089); load-seam fit and RTX 3090 gates passed, in progress for the next release (EXP-098).**
+  The initial `alphastorm/ninfer` `c11b02f4` port failed `sm_89`/`sm_86` device link on three `W8`
+  static shared-memory kernels (`49,664–50,176` B vs `49,152` B) and its unquantized `1.65 GiB`
+  drafter did not fit the 131,072-token 24 GB budget
   ([`docs/measurements/2026-10-01-dflash2-native-lanes-feasibility.json`](docs/measurements/2026-10-01-dflash2-native-lanes-feasibility.json)).
+  On the `64d10fbf` lineage (`2c6f423b`), the `W8` link blocker is gone and the `sm_86`/`sm_89`
+  load-time fit seam (`Q4_G64_FP16` draft MLP `gate`/`up` + `1,350,860,800`-byte host-mapped
+  `token_embedding`) is in the engine: on `v0.13.1` control binaries `7a25cd72` at `65,536` INT8
+  KV, RTX 3090 passed the 108-role decode gate (`weighted >= 1.08`, every case `>= 0.95`) at
+  `×1.29968` (minimum case `0.97987`) and then passed the 131,072-token INT8 fit and true-cold
+  durability proof on source `e456af37b` (`21,968 MiB` peak, `768 MiB` headroom, `0` extra
+  device-state slots), while RTX 4090 passed the aggregate bar (`×1.26362`) on `7a25cd72` but
+  missed the `0.95` per-case floor on depth-0 case `log-024@0` (`0.945889`, reproduced at `0.9451`
+  in isolated ABBA,
+  [`docs/measurements/2026-10-27-native-dflash2-gates-and-fit.json`](docs/measurements/2026-10-27-native-dflash2-gates-and-fit.json)).
+  Published `v0.14.0` native profiles retain MTP3; native DFlash2 K=7 is in progress for the next
+  release without a date commitment (with RTX 4090 gated on resolving `log-024@0`).
 - **NVFP4 and FP8 KV caches with DFlash2 on the RTX 5090 — rejected by quality screen (EXP-084,
   EXP-085, EXP-087, EXP-088).** Raised KV capacity to four device state slots, but failed the
   1,120-prompt paired quality screen on unsupported claims or secret leaks; BF16 KV remains shipped
