@@ -7,13 +7,36 @@
       "upstream": "Neroued/ninfer",
       "upstream_ref": "master",
       "fork_repo": "alphastorm/ninfer",
-      "fork_point": "6e8b2e2ad5d53597c3ba8e7989f9546d40b921fc",
-      "fork_point_meaning": "upstream base of the mainline runtime tree every shipped lane now builds from (port/native-lanes-on-mainline; the RTX 5090 container lane moved onto it in v0.6.2). Supersedes the retired vendor/neroued-dev mirror point 4eef14a7, which was the container lineage's base before v0.6.2 and made this delta read 17 commits larger than it is.",
+      "fork_point": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+      "fork_point_meaning": "upstream master base of source 2c6f423b, shipped by all three v0.14.0 runtime lanes. The historical 6e8b2e2a base applied through v0.12.2, not to the shipped lineage.",
       "overlap_paths": [
+        "src/artifact/",
         "src/serve/",
         "src/runtime/engine/",
         "src/runtime/contract/",
-        "src/targets/qwen3_6/impl/runtime/",
+        "src/text/",
+        "src/models/qwen3_5/",
+        "src/ops/",
+        "packaging/windows/",
+        "tests/"
+      ]
+    },
+    {
+      "id": "ninfer-qwen4-27b-ops",
+      "upstream": "Neroued/ninfer",
+      "upstream_ref": "feat/qwen4-27b-ops",
+      "fork_repo": "alphastorm/ninfer",
+      "fork_point": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+      "fork_point_meaning": "research comparison against the upstream base of the shipped v0.14.0 lineage; this feature branch is watched, not adopted",
+      "last_observed_head": "e1874e940d5be18fd5edd2cff2c259cb11142e54",
+      "last_observed_date": "2026-10-29",
+      "overlap_paths": [
+        "src/artifact/",
+        "src/runtime/",
+        "src/serve/",
+        "src/text/",
+        "src/models/",
+        "src/ops/",
         "tests/"
       ]
     },
@@ -69,8 +92,8 @@
       "upstream": "can1357/oh-my-pi",
       "upstream_ref": "main",
       "fork_repo": "alphastorm/oh-my-pi",
-      "fork_point": "291e055836c210f314af3f73f53244e8e9d09de8",
-      "fork_point_meaning": "unmodified upstream v18.12.1 shipped by product v0.12.2; v18.12.6 is reviewed separately and is not yet staged",
+      "fork_point": "45c35e40c46166dc726ccc52f5d27f40f2449f99",
+      "fork_point_meaning": "unmodified upstream v18.12.6 shipped by product v0.14.0; newer client releases are watch candidates, not adopted pins",
       "overlap_paths": [
         "packages/ai/",
         "packages/core/"
