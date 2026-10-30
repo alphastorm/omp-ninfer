@@ -51,6 +51,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Refresh the read-only upstream watch against the shipped v0.14.0 engine base `64d10fbf`
+  and stock OMP 18.12.6, and track `Neroued/ninfer`'s `feat/qwen4-27b-ops` branch separately.
+  The [2026-10-29 receipt](docs/measurements/2026-10-29-upstream-watch.json) records current
+  deltas without adopting any watched source or changing release pins.
 - Mark v0.14.0 as the published release across the README, quickstart banner, facts, roadmap,
   release history, upstream watch, reference docs, site, and brand assets; front-door install links
   return to the guide on `main`.
