@@ -164,8 +164,8 @@
   "dropped_files": [],
   "review_ledger": {
     "file": "review/runtime-ledger.json",
-    "disposition": "dropped-predecessor-approval",
-    "reason": "The changed-scope v0.15.0 council has not run; the v0.14.0 ledger remains only at its original release path."
+    "disposition": "bound-closed-product-and-carried-runtime-dispositions",
+    "reason": "Bind the new product-tooling council closed by disposition at af62e766 and copy only the unchanged v0.14.0 native_runtime council entry for the three carried runtime subjects. No in-scope residual P0/P1 remains after C1-C5; #117 tracks product residuals and #116 tracks deferred, unshipped N15/F2 work. G4 approval is not publication or public-route acceptance."
   },
   "public_acceptance": {
     "disposition": "dropped-predecessor-acceptance",

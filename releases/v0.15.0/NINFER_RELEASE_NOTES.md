@@ -11,7 +11,8 @@ The published product remains [v0.14.0](../v0.14.0/NINFER_RELEASE_NOTES.md); use
 until publication. The [prepared guide](../../docs/QUICKSTART.md) passed fresh acceptance on
 candidate `af62e7662fdc7195f7c1c88f2278b15f63130eba`; it is not an installation recommendation
 before publication. Client/platform, documented-route, public-install and restoration evidence
-was re-executed, not inherited. Council approval remains a separate changed-scope gate.
+was re-executed, not inherited. The changed-scope product council is closed by disposition;
+the unchanged runtime council retains its original v0.14.0 subject.
 Product publication remains founder-owned. Owner-operated, exact-profile 0.x release; no SLA.
 
 [Manifest](manifest.json) · [Qualification](qualification.json) ·
@@ -175,17 +176,25 @@ not independent external-user outcomes.
 
 The [composed acceptance](acceptance/composed-external-installation.json) binds these fresh
 observations separately from carried runtime qualification. Root compatibility authority, profiles
-and launchers were lane-pinned to this candidate. The changed-scope product council and carried
-fork-council binding, final manifest evidence pin, strict ready verification and founder-owned
-publication remain separate gates; acceptance grants no publication authority.
+and launchers were lane-pinned to this candidate. The [bound review ledger](review/runtime-ledger.json)
+records the changed-scope product council closed by disposition and the unchanged v0.14.0
+fork-council entry. No in-scope residual P0/P1 remains after the recorded lead controls.
+Final manifest evidence pins, strict ready verification and founder-owned publication are
+separate controls; acceptance and G4 approval grant no publication authority.
 
 ## Support boundaries and next work
 
 macOS remains preview; Linux client evidence is WSL2-scoped. Native lanes serve sequentially on
 port `18082`. Native vision or DFlash2 serving, concurrent native serving, multi-GPU inference,
 multi-tenancy, silent cloud fallback and independent external-user outcomes are not qualified.
-The [v0.14.0 review ledger](../v0.14.0/review/runtime-ledger.json) retains its original subjects,
-reproducibility exception and P2 deferrals; it is not council approval for this composition.
+The carried runtime council retains its original v0.14.0 subject, reproducibility exception,
+P2 deferrals and missing Mythos transport result; it is not the new product-tooling review.
+All four seats completed the new product council; its P2/P3 residuals are deferred in
+[#117](https://github.com/alphastorm/omp-ninfer/issues/117), including the native-screen
+binding prerequisites before v0.15.1 can bind the RTX 3090 DFlash2 screen.
+The attempted N15/F2 fork-council residuals in
+[#116](https://github.com/alphastorm/omp-ninfer/issues/116) concern deferred, unshipped work;
+that council does not approve any new runtime in this client-only release.
 The `alphastorm/ninfer#48/#49` engine/installer fixes are not present in any of the three carried
 runtime components. RTX 4090 DFlash2 K6/K5 exploration and its failing floor case remain deferred.
 

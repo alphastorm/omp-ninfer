@@ -1,0 +1,118 @@
+{
+  "artifact_type": "omp_ninfer_review_ledger",
+  "schema_version": 1,
+  "release": "v0.15.0",
+  "as_of": "2026-10-30",
+  "status": "closed-by-disposition",
+  "approval_granted": true,
+  "scope": "G4 disposition approval only. The new product-tooling council is closed with no in-scope residual P0/P1 after lead controls. All three runtime lanes ship unchanged from v0.14.0; the native_runtime entry below is copied unchanged from that release\u2019s bound ledger, not a new review or re-description. Release-data mitigation and final ready/pin controls are separate from the unchanged frozen product subject. This ledger grants neither publication nor public-route acceptance.",
+  "native_runtime": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "branch": "rebase/p14-integration",
+    "source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+    "status": "closed-without-remediation",
+    "review_sequence_id": "omp-ninfer-v0.14.0-fork-2c6f423b",
+    "review_id": "CR-20261028T031911Z-2c6f423b",
+    "review_mode": "initial",
+    "review_class": "full-council",
+    "base_commit": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
+    "subject_digest": "f463adafff42667b3353b0dbb00fa5b744a4d395f97157823fe8f372e12da542",
+    "dispatch_subject_digest": "c78274af84db8579078b5c3b2eb6860d56d95b3220b52f559ebae40b44fc9e0a",
+    "binding_status": "Main closed the actual common-engine fork council without source/package remediation; all five ledger rows have final dispositions and no confirmed or unresolved in-scope P0/P1 remains. All three beta.3 components at N stand. The earlier container/native ancestor delta was reviewed in CR-20261026T071003Z-7a25cd72; this council does not relabel that historical subject.",
+    "receipt_digests": {
+      "close-report.md": "49a7e254773ef7dcadf50f7b7b3f1753608bce141ca845aca6167a8b43625b60",
+      "ledger.md": "1b29f7144c18abea02454e04d94bb67e5d1bc442f9e2c93367a365a602a4dd5c",
+      "review-record.json": "2690e14cc04b48458464ace28a6374c8d4530b9353dd19d687961dd6c51e8882",
+      "packet.md": "bf5bf7723be9ada54b6453622c68ae3401ac9e6c48eed94d16a627ebd26c3b6f",
+      "panel-selection.json": "7a2207e318dfb886ef3585184179f534a5d593b914144978682ae838aa780858",
+      "resolver-receipt.json": "80b558724df9aa91782652750d8029a382dc577c18c34e6c19092a8217b1d3dc",
+      "review-dispatch-envelope.json": "f9319e3cb58540d4bbf132e2b74c98cef3918012decbb2943e82721b08f17a2c",
+      "close-recheck.json": "c1ab99abcc7ca136272d4b9b4c600f9eb02fcb8004f633bf87ed27f0a2d09d71"
+    },
+    "reviewer_results": {
+      "daybreak-blue": "completed; openai-codex/gpt-6-sol:max",
+      "gemini-argon": "completed; google-antigravity/gemini-4-argon:high",
+      "gpt-astra": "completed; openai-codex/gpt-6-astra:max",
+      "claude-mythos": "missing/transport_failure; HTTP 429; the one permitted retry from retryTaskInput failed identically"
+    },
+    "dispositions": {
+      "daybreak-blue-R1": "defer P2: pre-existing unchecked media float-to-int conversions; no execution observed; authenticated media boundary and fixtures follow-up in #96",
+      "daybreak-blue-R2": "defer P2: pre-existing Start/Run omit post-install DLL rehash; install verifies payload; installer residual family #89",
+      "daybreak-blue-U1": "defer P2: unresolved missing-duration video budget case needs a crafted fixture; unchanged source; folded into #96",
+      "gemini-argon-R1": "defer P2: pre-existing error/cancel delivery precedes state/stat retirement; transient stale counters, not output/checkpoint corruption; #95",
+      "gpt-astra-R1": "accept with disclosure and defer P2: running RTX 3090 predecessor 300 W lease refuses successor 350 W install; stop-first prerequisite in guide/notes; #94"
+    },
+    "deferred_issues": [
+      "https://github.com/alphastorm/omp-ninfer/issues/89",
+      "https://github.com/alphastorm/omp-ninfer/issues/94",
+      "https://github.com/alphastorm/omp-ninfer/issues/95",
+      "https://github.com/alphastorm/omp-ninfer/issues/96"
+    ],
+    "required_scope": [
+      "Common-engine runtime/native source delta from shipped native 7a25cd72 to N 2c6f423b; the container 6d4d0a05-to-7a25cd72 ancestor delta retains CR-20261026T071003Z-7a25cd72 scope",
+      "Request-local grammar/media failures, queue/cancellation/round-tail retirement and CUDA stream/graph/lifetime boundaries",
+      "Exact shipping binary/source/dependency/configuration identities, strict-origin durable state, native MTP3/A8-off profiles and GPU/controller ownership",
+      "Fresh managed native qualification, exact first-build RTX 5090 RC/T1 and disclosed founder-approved 5090-only nonreproducibility exception"
+    ]
+  },
+  "product_tooling": {
+    "repository": "https://github.com/alphastorm/omp-ninfer",
+    "branch": "detached",
+    "stage_commit": "af62e7662fdc7195f7c1c88f2278b15f63130eba",
+    "status": "closed-by-disposition",
+    "review_sequence_id": "omp-ninfer-v0.15.0-product-af62e766",
+    "review_id": "CR-20261030T194208Z-af62e766-product",
+    "review_mode": "initial",
+    "review_class": "full-council",
+    "base_commit": "7c4c832a24479996d8ae84b65ccb7237a21749da",
+    "subject_digest": "8be79de57dc7d8bd053f8cd723f22d694b78c8e233b6ee9da892c0be59ff0e14",
+    "dispatch_subject_digest": "794532590efbb7c032a1277dfe4c5e205f813a296b9bbde521e6623fac07c09e",
+    "binding_status": "Main closed the actual four-seat product-tooling council by the supplied dispositions. All 17 returned items are preserved in 13 normalized root-cause rows, including CM-R4 merged into DB-R1; CM-U1/U2 are settled by lead controls C4/C5. No in-scope residual P0/P1 remains. C1/C2 independently establish actual restoration; C3 binds this ledger during finalization; C4 selects a release-data descriptor audit/rebind while deferring automated enforcement. No reviewed tooling/source remediation or new native screen is represented by this closure; final composition, ready verification and immutable pins remain separate lead-owned release steps.",
+    "receipt_digests": {
+      "close-report.md": "a76080d1a0928d6cae7628e0dafe6aae20632dffe564c9ad843b67027f81ca8b",
+      "ledger.md": "4d69f433ef199f9b879716b657e92ae17a29124041f86750bbe718b8e9ba6a53",
+      "review-record.json": "85e172d3c485da038453c39ff669896f5cee48383fb021653d227801bd266883",
+      "packet.md": "9e0ff1aee28fc4d43d68a134e54fd58465a6de12056112a02cb2dee0c36fac34",
+      "panel-selection.json": "8196e671fe16f8c8814eba8ee0e2aa44f4e6eb4942feececbca848f8a57b22b1",
+      "resolver-receipt.json": "41d0031c2a9367bb3ae98e8de0d548b1079e5f2f44c579b01c307ab8b0a1a56f",
+      "review-dispatch-envelope.json": "fdd9a7384b20c3436961e51040c817aafe076542d4947882a1d860b864a8f7ea",
+      "close-recheck.json": "98d1251608a82661e4cbb8dbe10d95baa9b8e92e80389e5f7906385efd184c29"
+    },
+    "reviewer_results": {
+      "daybreak-blue": "completed; openai-codex/gpt-6-sol:max",
+      "gemini-argon": "completed; google-antigravity/gemini-4-argon:high",
+      "gpt-astra": "completed; openai-codex/gpt-6-astra:max",
+      "claude-mythos": "completed; anthropic/claude-mythos-5-1:max"
+    },
+    "dispositions": {
+      "daybreak-blue-R1": "defer \u2192 issue (v0.15.1); P2 after controls; Native guide acceptance blocks leave the final controller Start unchecked; the Windows runner skips its trailing exit check whenever the block mentions LASTEXITCODE. DB-R1 is P2 after C2; this release is independently verified restored. CM-R4 is the same root cause and is merged with DB-R1, preserving both source IDs. Lead CM-R4 disposition: merged with DB-R1. P15-R01",
+      "claude-mythos-R4": "merged with DB-R1 (daybreak-blue-R1); both source IDs retained in P15-R01; P2 after C2",
+      "daybreak-blue-R2": "defer \u2192 issue; P2 after controls; The composer validates restoration booleans and digest syntax, not equality of the restored RTX 5090 image with the published predecessor. Claimed P1 becomes P2 after C1: predecessor image equality was observed for this release. P15-R02",
+      "daybreak-blue-R3": "defer \u2192 issue; P2 after controls; Ready-mode G4 validation returns early when g4_review is absent, so omission differs from an explicitly pending council gate. Claimed P1 becomes P2 under the explicit C3 ledger-binding/finalization control. Council approval is not publication authority. P15-R03",
+      "daybreak-blue-R4": "defer \u2192 issue; P2 after controls; Candidate acceptance binding relies on the caller-supplied --candidate rather than independently binding the frozen product subject. Trusted single-owner release inputs and separately candidate-bound acceptance contain the current release consequence; retain the lead P2 disposition. P15-R04",
+      "daybreak-blue-R5": "defer \u2192 issue; P2 after controls; The macOS clone block has no exit check and can enter an existing older checkout after clone failure; the unqualified ready gate defaults to that checkout\u2019s release. Reader-facing guide failure remains a P2 residual; correctly cloned candidate acceptance does not exercise this pre-existing-directory failure. P15-R05",
+      "gemini-argon-R1": "defer \u2192 must close before v0.15.1 binds the RTX 3090 DFlash2 screen; P2 after controls; The native quality screen production arm is not bound to the predecessor variant\u2019s package, server-binary and configuration hashes. Same root cause in gemini R1 and astra R1; both source IDs retained. No native screen binds in v0.15.0; all runtime lanes are carried unchanged. P15-R06",
+      "gpt-astra-R1": "defer \u2192 must close before v0.15.1 binds the RTX 3090 DFlash2 screen; P2 after controls; The native quality screen production arm is not bound to the predecessor variant\u2019s package, server-binary and configuration hashes. Same root cause in gemini R1 and astra R1; both source IDs retained. No native screen binds in v0.15.0; all runtime lanes are carried unchanged. P15-R06",
+      "gemini-argon-R2": "defer \u2192 before v0.15.1; P2 after controls; Native rebind/staging does not clear or rebase prior quality_screen, t1_parity and fit entries across evidence modes or successor releases. No such quality_screen/t1_parity/fit fields are present in the v0.15.0 native rows. Native-screen prerequisite before v0.15.1 binds the RTX 3090 DFlash2 screen. P15-R07",
+      "gpt-astra-R2": "defer \u2192 before v0.15.1; P2 after controls; Verification does not enforce full-screen membership in the frozen corpus: 1,120 screen prompts plus 80 determinism prompts. Current carried runtimes are not admitted through a new native screen. Native-screen prerequisite before v0.15.1 binds the RTX 3090 DFlash2 screen. P15-R08",
+      "gemini-argon-R3": "defer; P3 after controls; The bound documented-routes receipt\u2019s own release and top-level passed status are not re-checked, nor is its location confined to the current release. Lead retains P3 under current content-addressed composition and trusted release inputs. P15-R09",
+      "claude-mythos-R1": "defer; P2 after controls; Platform live_acceptance records are not candidate-bound in the composer; the freshness question is resolved by the actual acceptance window, not by executable binding. CM-R1 remains P2 after C5. CM-U2 is the same evidence-freshness root cause, retained here with its missing-evidence question settled by the lead; it is not an outstanding unresolved finding. P15-R10",
+      "claude-mythos-U2": "defer P2 for the CM-R1 composer-binding residual; capture question resolved by C5: all three client records were captured at af62e766 with OMP 18.14.0; P15-R10",
+      "claude-mythos-R2": "mitigate (data) + defer enforcement; P2 after controls; Qualification repository_path/sha256 pairs are unenforced; the lead audit found one stale composed client-descriptor binding. The data mitigation is separate from the unchanged frozen subject. Automated enforcement remains deferred at P2; CM-U1 is retained under the same hash-binding root cause and settled by the lead audit. P15-R11",
+      "claude-mythos-U1": "mitigate (data) + defer enforcement; P2; hash question resolved by C4: 10 pairs match, one rewritten descriptor binding is stale at compose head; finalization audits client binary identities and rebinds the descriptor hash; P15-R11",
+      "claude-mythos-R3": "defer \u2192 issue (scrub in v0.15.1 docs); P3 after controls; The pre-existing v14 demo cast headers retain a host identifier and shared demo-home path despite the complete-stream redaction claim, while the public-text scan excludes .cast files. Lead P3: pre-existing public bytes and bounded policy-consistency impact. No new host values or host paths are included in the public issue or release review ledger. P15-R12",
+      "claude-mythos-R5": "defer (docs); P3 after controls; The installed fail-closed configuration fragment still names stock OMP 18.12.1 although the release pins 18.14.0. Lead P3: comment-only drift; no functional effect on fail-closed retry configuration. P15-R13"
+    },
+    "deferred_issues": [
+      "https://github.com/alphastorm/omp-ninfer/issues/117"
+    ],
+    "required_scope": [
+      "Client-only product-tooling and documentation delta from published v0.14.0 7c4c832a to candidate af62e766: 135 changed files and 180 bound evidence files",
+      "Stock OMP 18.14.0 client derivation/acceptance, all documented routes, candidate-versus-ready/publication separation, release evidence composition and exact predecessor preservation",
+      "Native quality/fit/parity evidence-binding tooling: production-baseline identity, rebind/staging evidence lifecycle and full frozen-corpus membership; no native screen binds in v0.15.0",
+      "Lead controls C1\u2013C5 and exact P2/P3 dispositions; native-screen residuals gemini R1/R2 and astra R1/R2 are prerequisites before v0.15.1 binds the RTX 3090 DFlash2 screen; release-data descriptor mitigation and final ready/pin checks do not mutate the frozen reviewed subject"
+    ]
+  },
+  "publication_authorized": false,
+  "public_route_acceptance_granted": false
+}

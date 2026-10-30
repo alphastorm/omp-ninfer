@@ -61,6 +61,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Bind v0.15.0's product-tooling council closed by disposition and the unchanged v0.14.0
+  runtime-council entry to their exact subjects and ledger bytes. Product residuals remain
+  deferred in #117; #116 concerns unshipped N15/F2 work. G4 approval grants neither publication
+  nor public-route acceptance.
 - Reconcile v0.15.0's composed client descriptor audit: every staged stock OMP 18.14.0
   platform and binary/asset identity is unchanged, while acceptance rewrites release metadata.
   Bind the composed descriptor bytes and replace the historical draft-only eligibility prose.

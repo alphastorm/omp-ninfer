@@ -206,8 +206,20 @@
       "scope": "Fresh stock OMP 18.14.0 acceptance on macOS arm64 preview, Windows x64 and Linux x64 under WSL2; all five documented routes/31 exact candidate blocks, both native first-lineage public installs and independent restoration passed. Both initial windows passed and restored without correction or promotion; separate public-URL native checks were already_installed. No predecessor client/route acceptance is carried, no new runtime measurement is inferred, and council approval/publication are separate."
     },
     "g4_review": {
-      "status": "pending",
-      "scope": "One council over changes since v0.14.0; no predecessor ledger is copied or approved for this composition."
+      "status": "passed",
+      "repository_path": "releases/v0.15.0/review/runtime-ledger.json",
+      "sha256": "e257ce1d09e2b71eedb3f73753fbc9ab19180af4e79a1bab846a8bc1db25cb90",
+      "ledger_status": "closed-by-disposition",
+      "approval_granted": true,
+      "native_council": "CR-20261028T031911Z-2c6f423b",
+      "native_source_commit": "2c6f423bd817b6534158553e1b34ab4959c43165",
+      "native_base_commit": "7a25cd72f490183e4113f1e84e68e36d653ddd28",
+      "product_tooling_council": "CR-20261030T194208Z-af62e766-product",
+      "product_tooling_commit": "af62e7662fdc7195f7c1c88f2278b15f63130eba",
+      "product_tooling_base_commit": "7c4c832a24479996d8ae84b65ccb7237a21749da",
+      "publication_authorized": false,
+      "public_route_acceptance_granted": false,
+      "scope": "The new four-seat product-tooling council closed by disposition with no in-scope residual P0/P1 after lead controls C1-C5; all 17 returned items remain in 13 normalized rows and deferred residuals are tracked in #117. The composed client descriptor identities were audited against staged L9 and its hash rebound under C4. All three runtime lanes carry unchanged from v0.14.0, so native_runtime is copied unchanged from that release's closed fork ledger, including its missing Mythos transport result and #89/#94/#95/#96 residuals; no new runtime review or N15/F2 approval is inferred. The attempted N15/F2 fork-council residuals in #116 concern deferred, unshipped work. G4 approval covers only the bound dispositions, not publication or public-route acceptance; final strict ready/pin verification is a separate C3 control."
     }
   }
 }
