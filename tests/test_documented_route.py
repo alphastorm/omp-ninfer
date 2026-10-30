@@ -907,6 +907,21 @@ class WindowsNativeCommandTests(unittest.TestCase):
         # The runtime may still be serving: no request may stand in for the outage.
         self.assertEqual(self.run_block(block, {"wsl.exe", "omp"}, prelude), (["wsl.exe"], False))
 
+    def test_native_acceptance_checks_stop_and_final_start(self) -> None:
+        for lane in ("rtx4090-native", "rtx3090-native"):
+            text = self.steps(lane)["acceptance"]
+            tail = text[text.index("& $Controller -Action Stop"):]
+            for action, expected_calls, reached in (("", ["omp"], True), ("Stop", [], False),
+                                                     ("Start", ["omp"], False)):
+                prelude = (
+                    "$Controller = 'Fixture-Controller'\n$StateRoot = 'fixture'\n$Provider = 'fixture'\n"
+                    "$Launcher = Join-Path $PSScriptRoot 'bin/omp'\n"
+                    "function Fixture-Controller { param($Action, $StateRoot)\n"
+                    f"  $global:LASTEXITCODE = if ($Action -ceq '{action}') {{ 7 }} else {{ 0 }}\n"
+                    "}\n")
+                with self.subTest(lane=lane, failed_action=action):
+                    self.assertEqual(self.run_block(tail, {"omp"}, prelude), (expected_calls, reached))
+
 
 @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed to execute the Windows host scripts")
 @unittest.skipIf(os.name == "nt", "the native command stubs are POSIX shell scripts")
@@ -979,6 +994,35 @@ $accelerators::Add('Security.Principal.WindowsPrincipal', [FixturePrincipal])
                          (["failed", "skipped"], ["git clone", "git checkout"]))
         # An earlier attempt's clone already holds the name.
         self.assertEqual(self.substitute_clone({"clone"}, stale_clone=True), (["failed", "skipped"], ["git clone"]))
+
+    def test_last_exitcode_mentions_never_disable_the_trailing_exit_rule(self):
+        for text, expected in (
+            ("$null = $LASTEXITCODE\n& git status\n", ["failed", "skipped"]),
+            ("& git status\nif ($LASTEXITCODE -eq 0) { throw 'expected failure' }\n",
+             ["failed", "skipped"]),
+            ("& git status\nif ($LASTEXITCODE -eq 0) { throw 'expected failure' }\n"
+             "$global:LASTEXITCODE = 0\n", ["passed", "passed"]),
+        ):
+            with self.subTest(text=text), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                bundle = root / "bundle"
+                bundle.mkdir()
+                steps = []
+                for position, (slug, body) in enumerate((("acceptance", text), ("after", "$null = 1\n")), 1):
+                    name = f"{position:02d}-{slug}.ps1"
+                    (bundle / name).write_text(body)
+                    steps.append({"position": position, "slug": slug, "file": name,
+                                  "heading": "fixture", "index": 0,
+                                  "sha256": hashlib.sha256(body.encode()).hexdigest()})
+                (bundle / "manifest.json").write_text(json.dumps({
+                    "lane": "fixture", "document": "fixture", "document_sha256": "0" * 64, "steps": steps}))
+                host = root / "host.ps1"
+                host.write_text(self.RUNNER_HOST)
+                receipt = root / "receipt.json"
+                _, output = self.run_pwsh(root, {"status"}, [
+                    host, ROOT / "scripts/hosts/run-documented-route.ps1", bundle, root, receipt, self.CANDIDATE])
+                self.assertTrue(receipt.exists(), output)
+                self.assertEqual([row["status"] for row in json.loads(receipt.read_text())["steps"]], expected)
 
 
 if __name__ == "__main__":

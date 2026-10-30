@@ -371,6 +371,8 @@ if ((Get-FileHash $Model -Algorithm SHA256).Hash.ToLowerInvariant() -cne
     $NativeModel.artifact_sha256) {
   throw 'model artifact checksum mismatch'
 }
+# A complete resumed transfer's HTTP 416 is accepted only after both identity checks.
+$global:LASTEXITCODE = 0
 foreach ($Asset in @(
   @{ Url = $Variant[0].package_url; Sha = $Variant[0].package_sha256 },
   @{ Url = $Variant[0].installer_url; Sha = $Variant[0].installer_sha256 },
@@ -461,10 +463,13 @@ try {
 } finally { Pop-Location }
 
 & $Controller -Action Stop -StateRoot $StateRoot | Out-Null
+if ($LASTEXITCODE -ne 0) { throw 'native stop failed' }
 & $Launcher -p --no-session --auto-approve --max-time 20s `
   --model "$Provider/qwen3.8-27b" 'Return LOCAL_ONLY.'
 if ($LASTEXITCODE -eq 0) { throw 'outage request unexpectedly succeeded' }
+$global:LASTEXITCODE = 0
 & $Controller -Action Start -StateRoot $StateRoot | Out-Null
+if ($LASTEXITCODE -ne 0) { throw 'native restart failed' }
 ```
 
 
@@ -576,6 +581,8 @@ if ((Get-FileHash $Model -Algorithm SHA256).Hash.ToLowerInvariant() -cne
     $NativeModel.artifact_sha256) {
   throw 'model artifact checksum mismatch'
 }
+# A complete resumed transfer's HTTP 416 is accepted only after both identity checks.
+$global:LASTEXITCODE = 0
 foreach ($Asset in @(
   @{ Url = $Variant[0].package_url; Sha = $Variant[0].package_sha256 },
   @{ Url = $Variant[0].installer_url; Sha = $Variant[0].installer_sha256 },
@@ -666,10 +673,13 @@ try {
 } finally { Pop-Location }
 
 & $Controller -Action Stop -StateRoot $StateRoot | Out-Null
+if ($LASTEXITCODE -ne 0) { throw 'native stop failed' }
 & $Launcher -p --no-session --auto-approve --max-time 20s `
   --model "$Provider/q38-ninfer" 'Return LOCAL_ONLY.'
 if ($LASTEXITCODE -eq 0) { throw 'outage request unexpectedly succeeded' }
+$global:LASTEXITCODE = 0
 & $Controller -Action Start -StateRoot $StateRoot | Out-Null
+if ($LASTEXITCODE -ne 0) { throw 'native restart failed' }
 ```
 
 ## WSL2 Linux client over local loopback
@@ -1029,6 +1039,7 @@ if ($LASTEXITCODE -ne 0) { throw 'NInfer stop failed' }
 & $Launcher -p --no-session --auto-approve --max-time 20s `
   --model ninfer-beta/q38-ninfer 'Return LOCAL_ONLY.'
 if ($LASTEXITCODE -eq 0) { throw 'outage request unexpectedly succeeded' }
+$global:LASTEXITCODE = 0
 ```
 
 Expected result: a connection/authentication failure and no model response. Any cloud-provider

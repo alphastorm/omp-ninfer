@@ -33,6 +33,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   require the caller, route/restoration receipts and original platform captures to agree.
   Platform receipts retain the candidate binding; stale captures fail before output writes
   (P15-R04, P15-R10).
+- Check native acceptance's stop and final restart, and always check the Windows runner's
+  trailing native exit code. Expected outage failures and hash-verified resumed downloads
+  explicitly consume their status instead of exempting an entire block (P15-R01).
 
 ### Changed
 
