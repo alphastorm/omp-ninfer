@@ -61,6 +61,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Reconcile v0.15.0's composed client descriptor audit: every staged stock OMP 18.14.0
+  platform and binary/asset identity is unchanged, while acceptance rewrites release metadata.
+  Bind the composed descriptor bytes and replace the historical draft-only eligibility prose.
 - Stage v0.15.0 with unmodified stock OMP 18.14.0 (`31147f9d`, Bun 1.4.4 rebuild for
   CVE-2026-91403 / CVE-2026-111497), a content-safe host-free client review, and a prepared
   v0.15.0 guide before route acceptance. Exact selectors and Responses compatibility keys stay;

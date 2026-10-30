@@ -17,9 +17,9 @@
     {
       "file": "client-components.json",
       "predecessor_sha256": "e6cc2d7525f3b6cc8f7bb8b605a2bda0b2cdaa558cfac00c2d07fb111e4baa49",
-      "disposition": "replaced",
-      "reason": "New stock OMP 18.14.0 descriptor; no predecessor client identity or live acceptance is relabeled.",
-      "staged_sha256": "77f35ee752d520b8be7368b3ef31b62f74f9ff74e930f96f75ecb374ae23c674"
+      "disposition": "composed-by-acceptance",
+      "reason": "Acceptance recomposed release metadata around the unchanged staged stock OMP 18.14.0 identities. All three platform records and every client binary/asset identity match the staged L9 descriptor; no predecessor client identity or live acceptance is relabeled.",
+      "staged_sha256": "82497f76a1788d78e9934fa2f2adfdfb3f99f0be5c4840dd1ab20842cf7965f6"
     },
     {
       "file": "component-cut-dry-run.json",

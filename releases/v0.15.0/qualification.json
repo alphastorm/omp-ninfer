@@ -145,7 +145,7 @@
   "external_installation_qualified": true,
   "scope": "Client-only v0.15.0: stock OMP 18.14.0 and P15 product tooling/docs are new; all three v0.14.0 runtime identities, models, serving profiles and original qualification subjects carry unchanged. Both native lanes remain MTP3. Fresh three-platform live-client acceptance, all five documented routes/31 exact blocks, both first-lineage native public installs and independent restoration passed on candidate af62e7662fdc7195f7c1c88f2278b15f63130eba on 2026-10-30. macOS remains preview; Windows and WSL2 Linux clients are qualified, not a separate native Linux OS. Changed-scope council binding, final manifest evidence pin, strict ready verification and founder-owned publication remain separate gates.",
   "interpretation": "Carried runtime qualifications retain their original subjects and are not new runtime performance, quality or durability measurements. The host-free source review and macOS stub rehearsals are separately scoped; fresh exact-candidate platform/live and documented-route acceptance used the new published stock OMP 18.14.0 binaries on the unchanged beta.3 components. Image input covers macOS and Windows against RTX 5090 only. Both initial windows passed and restored without correction, canonical promotion or production upgrade: RTX 5090 retained its digest-pinned image, mount and unless-stopped policy after a 403.884 s hold; native drivers ran 371.3255772590637/394.3888010978699 s and restored the same canonical beta.3 stopped state hashes at 450/370 W. Native documented installs were fresh temporary first-lineage installs; later downloaded-public-URL checks returned already_installed with lifecycle pointers unchanged. Neither native lane has a predecessor or supported rollback direction. Acceptance is owner-operated tester-equivalent, not independent external-user outcomes or council approval.",
-  "eligibility_scope": "Staged draft only. Root authority, profiles and launchers remain v0.14.0; no lane pin, release tag, component publication or product publication occurs in this stage.",
+  "eligibility_scope": "Runtime/installability and fresh candidate-bound stock OMP 18.14.0 client/public-route acceptance are complete. Root authority, live profiles and launchers name v0.15.0; the guide stays prepared and front-door install links remain on published v0.14.0 until publication. All three v0.14.0 runtime/model/profile subjects remain unchanged. Council binding, final manifest evidence pin and final current-head verification are separate controls; publication_authorized stays false.",
   "documented_route_acceptance": {
     "status": "passed",
     "scope": "All five fresh documented routes/31 exact candidate blocks, three newly downloaded stock OMP 18.14.0 clients and both first-lineage native beta.3 public installs passed on unchanged v0.14.0 runtime/model/profile bytes. No predecessor client or product-route acceptance is carried; Linux evidence is WSL2-scoped and macOS remains preview.",
@@ -194,8 +194,8 @@
       "sha256": "e1108dcf05802e9dad4613bcbd4ba072b76df729632a79f8e77b4daa33e9ab87",
       "descriptor": {
         "repository_path": "releases/v0.15.0/qualification/client-components.json",
-        "disposition": "new-client-identity",
-        "sha256": "77f35ee752d520b8be7368b3ef31b62f74f9ff74e930f96f75ecb374ae23c674"
+        "disposition": "composed-by-acceptance",
+        "sha256": "82497f76a1788d78e9934fa2f2adfdfb3f99f0be5c4840dd1ab20842cf7965f6"
       },
       "scope": "L9 source review, three asset downloads and two macOS stub rehearsals; no live client or final-guide acceptance."
     },
