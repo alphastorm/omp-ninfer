@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Bind a native quality screen's production package, server, configuration and model hashes
+  to the immediately preceding published release's variant, not merely to its GPU lane
+  ([#117](https://github.com/alphastorm/omp-ninfer/issues/117), P15-R06).
+
 ### Changed
 
 - Mark v0.15.0 as the published release across the README, quickstart banner, facts, roadmap,

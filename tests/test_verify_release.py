@@ -368,6 +368,26 @@ class NativeQualityContractTests(unittest.TestCase):
         VERIFY_RELEASE.validate_quality_screen(self.root, self.release, self.variant, errors, source)
         self.assertTrue(any("stay inside" in error for error in errors))
 
+    def test_screen_production_must_match_the_published_predecessor(self):
+        for key in ("package_sha256", *VERIFY_RELEASE.NATIVE_IDENTITY_FIELDS):
+            with self.subTest(key=key):
+                screen = deepcopy(self.screen)
+                for role in ("production", "production_determinism"):
+                    screen["runs"][role]["arm"][key] = "9" * 64
+                if key == "model_artifact_sha256":
+                    for role in ("candidate", "candidate_determinism"):
+                        screen["runs"][role]["arm"][key] = "9" * 64
+                self.evidence("quality_screen", screen)
+                errors = []
+                VERIFY_RELEASE.validate_quality_screen(self.root, self.release, self.variant, errors)
+                self.assertTrue(any(f"production {key} must match the predecessor" in error
+                                    for error in errors), errors)
+        self.evidence("quality_screen", self.screen)
+        (self.root / "releases/v0.14.0/manifest.json").unlink()
+        errors = []
+        VERIFY_RELEASE.validate_quality_screen(self.root, self.release, self.variant, errors)
+        self.assertTrue(any("must bind a predecessor variant" in error for error in errors), errors)
+
     def test_mtp_rebuild_exemption_requires_frozen_corpus_direct_bytes_and_same_fit(self):
         self.variant["runtime_shape"] = deepcopy(self.predecessor["runtime_shape"])
         identity = lambda row: {key: row[key] for key in VERIFY_RELEASE.NATIVE_IDENTITY_FIELDS}

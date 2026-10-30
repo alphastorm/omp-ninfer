@@ -1611,9 +1611,13 @@ def validate_quality_screen(root: Path, release: str, variant: dict[str, Any],
         errors.append(f"{label} must bind four valid native arms with fresh determinism identity")
         return
     candidate, production = selected["candidate"]["arm"], selected["production"]["arm"]
+    predecessor = predecessor_native_variant(root, release, variant["id"])
+    require(predecessor is not None, f"{label} must bind a predecessor variant", errors)
     for key in ("package_sha256", *NATIVE_IDENTITY_FIELDS):
         require(candidate.get(key) == variant.get(key),
                 f"{label} candidate {key} must match the variant", errors)
+        require(predecessor is not None and production.get(key) == predecessor.get(key),
+                f"{label} production {key} must match the predecessor", errors)
     require(production["lane"] == variant["id"].split("-")[0],
             f"{label} production lane must match the variant", errors)
 

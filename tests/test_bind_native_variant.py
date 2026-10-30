@@ -441,8 +441,9 @@ class BindNativeVariantTest(unittest.TestCase):
                  "draft_tokens": {"min": 1, "max": None}, "proposal": "artifact-default",
                  "fit": {"device_state_slots": 2, "admission_headroom_mib": 640,
                          "draft_mlp_device_format": "artifact", "token_embedding_residency": "device"}}
-        previous = {**deepcopy(variant), "runtime_shape": shape, "server_binary_sha256": "a" * 64,
-                    "configuration_sha256": "b" * 64, "model_artifact_sha256": self.receipt["model_sha256"]}
+        previous = {**deepcopy(variant), "runtime_shape": shape, "package_sha256": "a" * 64,
+                    "server_binary_sha256": "c" * 64, "configuration_sha256": "e" * 64,
+                    "model_artifact_sha256": self.receipt["model_sha256"]}
         predecessor = self.workspace / "releases/v0.14.0/manifest.json"
         predecessor.parent.mkdir()
         predecessor.write_text(json.dumps({"components": {"ninfer_variants": [previous]}}))
