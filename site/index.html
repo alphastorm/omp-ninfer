@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#060809">
 <title>OMP NInfer — durable local inference for coding agents</title>
-<meta name="description" content="Durable local inference for coding agents: the qualified local inference appliance for Oh My Pi. Qualified on RTX 5090, RTX 4090, and RTX 3090 in v0.14.0 (2026-10-28) with stock Oh My Pi 18.12.6 and Qwen3.8 27B via NInfer.">
+<meta name="description" content="Durable local inference for coding agents: the qualified local inference appliance for Oh My Pi. Qualified on RTX 5090 · 4090 · 3090 with stock Oh My Pi and Qwen3.8 27B via NInfer.">
 <link rel="canonical" href="https://alphastorm.github.io/omp-ninfer/">
 <script>document.documentElement.className = "js";</script>
 <link rel="preload" href="demo-v14-poster.png" as="image" fetchpriority="high">
@@ -15,7 +15,7 @@
 <link rel="stylesheet" href="site.css">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <meta property="og:title" content="OMP NInfer — durable local inference for coding agents">
-<meta property="og:description" content="Durable local inference for coding agents: the qualified local inference appliance for Oh My Pi. Qualified on RTX 5090, RTX 4090, and RTX 3090 in v0.14.0 (2026-10-28) with stock Oh My Pi 18.12.6 and Qwen3.8 27B via NInfer.">
+<meta property="og:description" content="Durable local inference for coding agents: the qualified local inference appliance for Oh My Pi. Qualified on RTX 5090 · 4090 · 3090 with stock Oh My Pi and Qwen3.8 27B via NInfer.">
 <meta property="og:image" content="https://alphastorm.github.io/omp-ninfer/og.png">
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="640">
@@ -71,7 +71,7 @@
         <div class="receipt">
           <span class="k">Qualified on RTX 5090 · 4090 · 3090</span>
           <span class="v">v0.14.0 · stock Oh My Pi 18.12.6 · published 2026-10-28</span>
-          <span class="s">Fresh v0.14.0 acceptance: five documented routes, 31 steps, three stock clients, and both native Windows public installs passed with independent host restoration; owner-operated evidence. <a href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/releases/v0.14.0/manifest.json">manifest</a> · <a href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/releases/v0.14.0/NINFER_RELEASE_NOTES.md">release notes</a> · <a href="status/">lanes and status</a></span>
+          <span class="s">Fresh route acceptance: five documented routes, 31 steps, three stock clients, and both native Windows public installs passed with independent host restoration; owner-operated evidence. <a href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/releases/v0.14.0/manifest.json">manifest</a> · <a href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/releases/v0.14.0/NINFER_RELEASE_NOTES.md">release notes</a> · <a href="status/">lanes and status</a></span>
         </div>
       </div>
     </div>
@@ -79,7 +79,7 @@
       <div class="frame" id="demo-frame">
         <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="path">omp · ~/work/lru</span><span class="t">Qwen3.8 27B · NInfer · RTX 5090 · v0.14.0 · 32 s</span></div>
         <div class="screen">
-          <img class="poster" src="demo-v14-poster.png" width="1714" height="1215" fetchpriority="high" alt="Terminal frame from the recording: the agent explains and fixes the LRU bug, the user runs ninfer-restart, the shell reports “serving again after 36 s · Qwen3.8 27B reloaded · 131,072-token context”, and the agent answers the follow-up question from the restored session.">
+          <img class="poster" src="demo-v14-poster.png" width="1714" height="1215" fetchpriority="high" alt="Terminal frame from the recording: the agent explains and fixes the LRU bug, the user runs ninfer-restart, the helper reports “serving again after 36 s · Qwen3.8 27B reloaded · 131,072-token context · engine 2c6f423b”, and the agent answers the follow-up question from the restored session.">
           <video preload="none" playsinline controls poster="demo-v14-poster.png" aria-label="Real v0.14.0 session recording on one RTX 5090 with a mid-session ninfer-serve restart">
             <source src="demo-v14.mp4" type="video/mp4">
           </video>
@@ -101,7 +101,7 @@
       </div>
       <ul class="points">
         <li><h3>Explicit and durable</h3><p>Oh My Pi drives NInfer through stateful OpenAI Responses (<code>previous_response_id</code>); forks and rollback are qualified, and checkpoints restore after a server restart. Oh My Pi commits the transcript first, so losing retained state degrades to a replay, never a broken session.</p></li>
-        <li><h3>Private and fail-closed</h3><p>Both endpoints bind loopback only, every request is bearer-authenticated, and model fallback is off: an unreachable GPU fails the turn instead of answering from a cloud model. This is acceptance-tested, not configured.</p></li>
+        <li><h3>Private and fail-closed</h3><p>Runtime listeners bind loopback only, every request is bearer-authenticated, and model fallback is off: an unreachable GPU fails the turn instead of answering from a cloud model. This is acceptance-tested, not configured.</p></li>
         <li><h3>Exact and verifiable</h3><p>Model SHA-256, container digest and SBOM, native package and client checksums, and every qualification receipt are bound in one manifest; <code>python3 scripts/verify_release.py --require-ready</code> proves your clone is the qualified release.</p></li>
       </ul>
     </div>
@@ -123,28 +123,28 @@
       </thead>
       <tbody>
         <tr>
-          <td class="first"><span class="lane">RTX 5090</span><span class="tag">Windows 11 + Docker Desktop/WSL2 · <span class="nowrap">v0.7.0-qwen38-5090-beta.3</span> · qwen38-5090-v0.13.0 · DFlash2 draft window 7 · BF16 KV · model 81f924d4</span></td>
+          <td class="first"><span class="lane">RTX 5090</span><span class="tag">Windows 11 + Docker Desktop/WSL2 · runtime <span class="nowrap">v0.7.0-qwen38-5090-beta.3</span> · profile qwen38-5090-v0.13.0 · DFlash2 draft window 7 · BF16 KV · model 81f924d4</span></td>
           <td data-label="Exact 130,048-token retrieval"><span class="num">57.00<small>s</small></span><span class="sub">cold start</span></td>
           <td data-label="Decode"><span class="num">182.49<small>tok/s</small></span><span class="sub">server-side; 178.78 tok/s wall over 2,048 tokens</span></td>
           <td class="last" data-label="Receipt"><a class="receipt-link" href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/releases/v0.14.0/qualification/rtx5090.json">rtx5090.json · 2026-10-28</a></td>
         </tr>
         <tr>
-          <td class="first"><span class="lane">RTX 4090</span><span class="tag">native Windows 11 · <span class="nowrap">v0.7.0-qwen38-4090-beta.3</span> · MTP3 · INT8 KV · model 81f924d4</span></td>
+          <td class="first"><span class="lane">RTX 4090</span><span class="tag">native Windows 11 · runtime <span class="nowrap">v0.7.0-qwen38-4090-beta.3</span> · MTP3 · INT8 KV · model 81f924d4</span></td>
           <td data-label="Exact 130,048-token retrieval"><span class="num">81.78<small>s</small></span><span class="sub">cold start</span></td>
-          <td data-label="Decode"><span class="num">151.54<small>tok/s</small></span><span class="sub">C1 decode; 87.59% MTP acceptance, 2,195.36 tok/s prefill</span></td>
+          <td data-label="Decode"><span class="num">151.54<small>tok/s</small></span><span class="sub">C1 decode; 87.59% MTP3 acceptance, 2,195.36 tok/s prefill</span></td>
           <td class="last" data-label="Receipt"><a class="receipt-link" href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/releases/v0.14.0/qualification/rtx4090.json">rtx4090.json · 2026-10-28</a></td>
         </tr>
         <tr>
-          <td class="first"><span class="lane">RTX 3090</span><span class="tag">native Windows 11 · <span class="nowrap">v0.7.0-qwen38-3090-beta.3</span> · MTP3 · INT8 KV · 350 W serving cap · model 81f924d4</span></td>
+          <td class="first"><span class="lane">RTX 3090</span><span class="tag">native Windows 11 · runtime <span class="nowrap">v0.7.0-qwen38-3090-beta.3</span> · MTP3 · INT8 KV · 350 W serving cap · model 81f924d4</span></td>
           <td data-label="Exact 130,048-token retrieval"><span class="num">187.88<small>s</small></span><span class="sub">cold start</span></td>
-          <td data-label="Decode"><span class="num">90.64<small>tok/s</small></span><span class="sub">C1 decode; 92.96% MTP acceptance, 976.98 tok/s prefill</span></td>
+          <td data-label="Decode"><span class="num">90.64<small>tok/s</small></span><span class="sub">C1 decode; 92.96% MTP3 acceptance, 976.98 tok/s prefill</span></td>
           <td class="last" data-label="Receipt"><a class="receipt-link" href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/releases/v0.14.0/qualification/rtx3090.json">rtx3090.json · 2026-10-28</a></td>
         </tr>
       </tbody>
     </table>
     <div class="notes">
       <p>Each lane is qualified on its own speculative backend, profile, and benchmark fixture (2,048-token decode gate on RTX 5090; trajectory-sensitive 1,024-token C1 fixture on native RTX 4090 and RTX 3090). Never transfer one lane's numbers or capabilities to another, and do not read single-sample qualification gates as a cross-GPU ranking or a head-to-head comparison against vLLM or llama.cpp.</p>
-      <p>Historical v0.4.0 restart receipt (2026-08-30, one RTX 5090, not a current-release timing or restart speed-up ratio): 109,589 retained tokens served after a Docker restart in 24.8 s end-to-end including first-touch restore of a 7.95 GB checkpoint, with a 56.6 s model reload measured separately and 0.778 s server TTFT after restoration. <a href="benchmarks/">All lane measurements, charts, and receipts</a>.</p>
+      <p>Historical v0.4.0 restart receipt (2026-08-30, one RTX 5090, not a current-release timing or restart speedup ratio): 109,589 retained tokens served after a Docker restart in 24.8 s end-to-end including first-touch restore of a 7.95 GB checkpoint, with a 56.6 s model reload measured separately and 0.778 s server TTFT after restoration. <a href="benchmarks/">All lane measurements, charts, and receipts</a>.</p>
     </div>
   </div>
 </section>
@@ -156,12 +156,12 @@
         <p class="eyebrow">How it fits together</p>
         <h2>Who owns what.</h2>
       </div>
-      <p>Oh My Pi owns the conversation transcript, tools, coding workflow, and subagents. NInfer's single-GPU engine keeps your session's continuation state resident; OMP NInfer is the qualified release that binds them. Ordinary in-process prefix caching is conceded as prior art; the claim here is transactional continuation across restarts.</p>
+      <p>Oh My Pi owns the conversation transcript, tools, coding workflow, and subagents. NInfer's single-GPU engine keeps your session's continuation state resident on your GPU; OMP NInfer is the qualified release that binds them without a forked client or an extra gateway.</p>
     </div>
     <ol class="chain-row">
       <li><span class="role">Coding-agent client</span><span class="who"><a href="https://github.com/can1357/oh-my-pi">Oh My Pi</a></span><p>Owns the transcript, tools, forks, and replay. Commits locally before provider state advances.</p></li>
       <li><span class="role">Qualified appliance and release layer</span><span class="who">OMP NInfer</span><p>Setup, release manifests, hardware profiles, qualification, security boundaries, and support. No duplicated OMP or NInfer implementation.</p></li>
-      <li><span class="role">Inference engine</span><span class="who"><a href="https://github.com/Neroued/ninfer">NInfer</a></span><p>Neroued's single-GPU engine and its GPU ports. This project's runtime adds explicit OpenAI Responses continuation state (<code>previous_response_id</code>) and durable local NVMe checkpoints.</p></li>
+      <li><span class="role">Inference engine</span><span class="who"><a href="https://github.com/Neroued/ninfer">NInfer</a></span><p>Neroued's single-GPU engine and its GPU ports. The shipped NInfer runtime adds explicit OpenAI Responses continuation state (<code>previous_response_id</code>) and durable local NVMe checkpoints.</p></li>
       <li><span class="role">Served model</span><span class="who">Qwen3.8 27B</span><p>One hash-pinned artifact, 20.4 GB <code>81f924d4</code>, identical across all three qualified lanes.</p></li>
     </ol>
     <figure class="illustration"><img src="architecture.png" width="2480" height="840" loading="lazy" fetchpriority="low" alt="System boundary illustration: Oh My Pi, the authoritative client, keeps the truth — transcript, tools, branches, and replay commit locally before provider state advances. An authenticated loopback link leads to the qualified NInfer runtime, which keeps Qwen3.8 and scoped Responses state on the selected GPU; invalid state falls back to transcript replay. Commit boundary: complete stream, then durable transcript, then provider state. Lanes: 5090 WSL2, 4090 native, 3090 native."></figure>
@@ -170,7 +170,7 @@
       <li><b>Loopback only</b><span>The runtime binds <code>127.0.0.1:18089</code> (RTX 5090 container) or <code>127.0.0.1:18082</code> (native Windows lanes); remote macOS clients reach the host through an authenticated SSH local port forward.</span></li>
       <li><b>Bearer-authenticated</b><span>Every status, Responses, checkpoint, and stored-response route requires a random bearer key kept in access-restricted key files, never committed or embedded in YAML.</span></li>
       <li><b>Fail-closed, never cloud fallback</b><span>Explicit local provider routes disable retries, model fallback, and automatic client self-updates; an unavailable lane stops the request instead of escaping to a hosted model.</span></li>
-      <li><b>Every byte hash-pinned</b><span>Stock Oh My Pi 18.12.6 binaries, the model artifact, container image, native packages, SBOMs, server binaries, and configurations are bound in the release manifest.</span></li>
+      <li><b>Every byte hash-pinned</b><span>Stock Oh My Pi client binaries, the model artifact, container image, native packages, SBOMs, server binaries, and configurations are bound in the release manifest.</span></li>
     </ul>
     <p class="small" style="margin-top: 18px">Full detail: <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/FACTS.md">canonical facts</a> · <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/ARCHITECTURE.md">architecture</a> · <a href="security/">security boundary</a>.</p>
   </div>
@@ -208,7 +208,7 @@
       <div>
         <h3>Use it when</h3>
         <ul>
-          <li>You use Oh My Pi (18.12.6 in v0.14.0) and own an eligible RTX 5090, RTX 4090, or RTX 3090 setup matching the exact release profile.</li>
+          <li>You use Oh My Pi and own an eligible RTX 5090, RTX 4090, or RTX 3090 setup matching the exact release profile.</li>
           <li>Qwen3.8 27B is the model you want, running privately on hardware you own.</li>
           <li>Coding sessions are long-lived, and explicit continuation across inference-server restarts matters more than model catalog breadth.</li>
         </ul>
@@ -228,15 +228,7 @@
 
 <section id="release">
   <div class="wrap">
-    <ul class="strip" aria-label="Current release">
-      <li class="label">Current release</li>
-      <li>v0.14.0</li>
-      <li>Stock Oh My Pi 18.12.6</li>
-      <li>Published 2026-10-28</li>
-      <li>Qualified on RTX 5090 · 4090 · 3090</li>
-      <li><a href="status/">Lanes and status</a></li>
-    </ul>
-    <p class="small" style="margin-top: 18px">The 0.x series supports only the latest published release and its exact manifest and profiles. <a href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/releases/v0.14.0/manifest.json">Manifest</a> · <a href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/releases/v0.14.0/NINFER_RELEASE_NOTES.md">release notes</a> · <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/COMPATIBILITY.md">compatibility</a>.</p>
+    <p class="small">The 0.x series supports only the latest published release and its exact manifest and profiles. <a href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/releases/v0.14.0/manifest.json">Manifest</a> · <a href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/releases/v0.14.0/NINFER_RELEASE_NOTES.md">release notes</a> · <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/COMPATIBILITY.md">compatibility</a>.</p>
   </div>
 </section>
 

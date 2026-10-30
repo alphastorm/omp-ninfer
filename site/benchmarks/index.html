@@ -5,15 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#060809">
-<title>OMP NInfer benchmarks — measured, receipted lane qualifications</title>
-<meta name="description" content="Receipt-bound measurements for OMP NInfer v0.14.0 (2026-10-28) across RTX 5090, RTX 4090, and RTX 3090, with separate model-reload, checkpoint-restore, and request timing boundaries.">
+<title>OMP NInfer benchmarks — measured and receipted, lane by lane</title>
+<meta name="description" content="Receipt-bound measurements for OMP NInfer across RTX 5090, RTX 4090, and RTX 3090, with separate model-reload, checkpoint-restore, and request timing boundaries.">
 <link rel="canonical" href="https://alphastorm.github.io/omp-ninfer/benchmarks/">
 <link rel="preload" href="../fonts/space-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../fonts/jetbrains-mono-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../site.css">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
-<meta property="og:title" content="OMP NInfer benchmarks — measured, receipted lane qualifications">
-<meta property="og:description" content="Receipt-bound measurements for OMP NInfer v0.14.0 (2026-10-28) across RTX 5090, RTX 4090, and RTX 3090, with separate model-reload, checkpoint-restore, and request timing boundaries.">
+<meta property="og:title" content="OMP NInfer benchmarks — measured and receipted, lane by lane">
+<meta property="og:description" content="Receipt-bound measurements for OMP NInfer across RTX 5090, RTX 4090, and RTX 3090, with separate model-reload, checkpoint-restore, and request timing boundaries.">
 <meta property="og:image" content="https://alphastorm.github.io/omp-ninfer/og.png">
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="640">
@@ -52,42 +52,44 @@
 <section class="page">
 <div class="wrap">
 <p class="eyebrow">Benchmarks</p>
-<h1>Measured, receipted, reproducible</h1>
-<p class="lede">Every result below names its release, hardware lane, and measurement boundary.
-Runtime qualification and public-route acceptance are distinct, and warm/cold figures compare
-retained state against a fresh cold start, never an ordinary in-process cached follow-up.</p>
+<h1>Measured and receipted, lane by lane</h1>
+<p class="lede">Oh My Pi (coding-agent client) connects through OMP NInfer (qualified appliance and
+release layer) to NInfer (inference engine) serving Qwen3.8&nbsp;27B (served model). Every result
+below names its release, hardware lane, and measurement boundary: runtime qualification and
+public-route acceptance are distinct, and warm/cold figures compare retained state against a fresh
+cold start, never an ordinary in-process cached follow-up.</p>
 <p class="verified">v0.14.0 (stock Oh My Pi 18.12.6, published 2026-10-28) binds fresh RTX 5090
 container and native Windows RTX 4090 and RTX 3090 runtime qualifications on
 <a href="https://github.com/Neroued/ninfer">Neroued/ninfer</a> master <code>64d10fbf</code> (common
 source <code>2c6f423b</code>, shared model <code>81f924d4</code>). Method, charts, pre-cut T1/C1/retrieval
-comparisons, EXP-097 provider comparison (101.09% median role-corpus decode vs v0.12.2's
+comparisons, EXP-097 provider comparison (342.150 vs 338.448&nbsp;tok/s median role-corpus decode, 101.09% of v0.12.2's
 <code>1302d639</code> at <code>c2dbcbae</code> on RTX 5090, with attributed structured-output p95 and 64K
 continuation caveats), and the community table:
 <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/BENCHMARKS.md">docs/BENCHMARKS.md</a>.</p>
 
-<h2>Current qualified runtime numbers by lane (v0.14.0)</h2>
+<h2>Current qualified runtime numbers by lane</h2>
 <div class="table-scroll">
 <table>
 <tr><th>Lane</th><th>Runtime &amp; profile</th><th>130,048-token retrieval</th><th>Decode</th><th>Receipt</th></tr>
 <tr>
 <td>RTX 5090 container (Windows 11 + Docker Desktop/WSL2)</td>
 <td data-label="Runtime & profile"><code>v0.7.0-qwen38-5090-beta.3</code> · <code>qwen38-5090-v0.13.0</code> (source <code>2c6f423b</code> on <code>64d10fbf</code>, image <code>760fb6be</code>, server <code>55f0b95a</code>, config <code>751d22dc</code>, model <code>81f924d4</code> · 20.4&nbsp;GB; DFlash2 draft window 7, BF16 KV, 146,368 automatic KV tokens, two requests in flight)</td>
-<td data-label="130,048-token retrieval"><strong>57.00&nbsp;s</strong> cold (57.0&nbsp;s / 2,281.5&nbsp;tok/s wall, 56.416&nbsp;s server; exact retrieval at 131,072 ceiling)</td>
+<td data-label="130,048-token retrieval"><strong>57.00&nbsp;s</strong> cold (57.0&nbsp;s / 2,281.5&nbsp;tok/s wall, 56.416&nbsp;s server; exact retrieval against 131,072-token ceiling)</td>
 <td data-label="Decode"><strong>182.49&nbsp;tok/s</strong> server (<strong>178.78&nbsp;tok/s</strong> wall over 2,048 tokens; 0.244 DFlash2 acceptance, 2.71 tokens/round)</td>
 <td data-label="Receipt"><a href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/releases/v0.14.0/qualification/rtx5090.json">rtx5090.json</a> (2026-10-28)</td>
 </tr>
 <tr>
 <td>RTX 4090 native Windows 11</td>
 <td data-label="Runtime & profile"><code>v0.7.0-qwen38-4090-beta.3</code> · <code>qwen38-4090-native-v0.7.0-beta.3</code> (source <code>2c6f423b</code> on <code>64d10fbf</code>, package <code>87038cfb</code>, server <code>5caa7780</code>, config <code>b5cfbf50</code>, model <code>81f924d4</code> · 20.4&nbsp;GB; MTP3, INT8 KV, <code>Group64</code> A8 off, 14,787.734375&nbsp;MiB shared Host budget, 640&nbsp;MiB admission headroom, one request at a time)</td>
-<td data-label="130,048-token retrieval"><strong>81.78&nbsp;s</strong> (81.784&nbsp;s; exact retrieval at 131,072 ceiling)</td>
-<td data-label="Decode"><strong>151.54&nbsp;tok/s</strong> C1 decode (1,024 tokens, 87.59% MTP acceptance; 2,195.36&nbsp;tok/s prefill)</td>
+<td data-label="130,048-token retrieval"><strong>81.78&nbsp;s</strong> (81.784&nbsp;s; exact retrieval against 131,072-token ceiling)</td>
+<td data-label="Decode"><strong>151.54&nbsp;tok/s</strong> C1 decode (1,024 tokens, 87.59% MTP3 acceptance; 2,195.36&nbsp;tok/s prefill)</td>
 <td data-label="Receipt"><a href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/releases/v0.14.0/qualification/rtx4090.json">rtx4090.json</a> (2026-10-28)</td>
 </tr>
 <tr>
 <td>RTX 3090 native Windows 11</td>
 <td data-label="Runtime & profile"><code>v0.7.0-qwen38-3090-beta.3</code> · <code>qwen38-3090-native-v0.7.0-beta.3</code> (source <code>2c6f423b</code> on <code>64d10fbf</code>, package <code>a7637f66</code>, server <code>fedce425</code>, config <code>d08d262b</code>, model <code>81f924d4</code> · 20.4&nbsp;GB; MTP3, INT8 KV, <code>Group64</code> A8 off, 11,715.734375&nbsp;MiB shared Host budget, 768&nbsp;MiB admission headroom, 350&nbsp;W serving cap, one request at a time)</td>
-<td data-label="130,048-token retrieval"><strong>187.88&nbsp;s</strong> (187.878&nbsp;s; exact retrieval at 131,072 ceiling)</td>
-<td data-label="Decode"><strong>90.64&nbsp;tok/s</strong> C1 decode (1,024 tokens, 92.96% MTP acceptance; 976.98&nbsp;tok/s prefill)</td>
+<td data-label="130,048-token retrieval"><strong>187.88&nbsp;s</strong> (187.878&nbsp;s; exact retrieval against 131,072-token ceiling)</td>
+<td data-label="Decode"><strong>90.64&nbsp;tok/s</strong> C1 decode (1,024 tokens, 92.96% MTP3 acceptance; 976.98&nbsp;tok/s prefill)</td>
 <td data-label="Receipt"><a href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/releases/v0.14.0/qualification/rtx3090.json">rtx3090.json</a> (2026-10-28)</td>
 </tr>
 </table>
@@ -97,7 +99,7 @@ continuation caveats), and the community table:
 4090 and RTX 3090). Never transfer one lane's numbers or capabilities to another, and do not read
 single-sample qualification gates as a cross-GPU ranking or a head-to-head comparison against vLLM
 or llama.cpp.
-<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/releases/v0.14.0/acceptance/documented-routes.json">v0.14.0 documented-route acceptance</a> ·
+<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/releases/v0.14.0/acceptance/documented-routes.json">documented-route acceptance</a> ·
 <a href="../status/">release status and lane scope</a>.</p>
 
 <h2>Historical restart measurements: v0.4.0 (2026-08-30, one RTX 5090)</h2>
@@ -108,15 +110,15 @@ reload</strong> measured separately and <strong>0.778&nbsp;s server-side time to
 token</strong> after restoration
 (<a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/measurements/2026-08-30-rtx5090-durable-qualification.json">restart receipt</a>).
 A separate v0.4.0 request pair recorded <strong>47.920&nbsp;s cold wall time versus 1.790&nbsp;s
-warm follow-up wall time</strong> against a fresh cold start
-(<a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/measurements/2026-08-30-warm-vs-cold-v04.json">separate request-pair receipt</a>).
+warm follow-up wall time</strong> at 109,594 tokens (retained state versus fresh-process cold start;
+<a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/measurements/2026-08-30-warm-vs-cold-v04.json">separate request-pair receipt</a>).
 These historical samples use distinct timing boundaries and are not current-release latency promises
-or a restart speed-up ratio.</p>
+or a restart speedup ratio.</p>
 <p>Method, per-lane numbers, and historical sections:
 <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/BENCHMARKS.md">docs/BENCHMARKS.md</a> ·
 experiment ledger: <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/PERFORMANCE.md">docs/PERFORMANCE.md</a> ·
 raw receipts: <a href="https://github.com/alphastorm/omp-ninfer/tree/main/docs/measurements">docs/measurements/</a></p>
-<p class="verified">Updated 2026-10-28 for published v0.14.0 (2026-10-28): fresh RTX 5090, RTX 4090, and RTX 3090 beta.3 runtime qualification at common source <code>2c6f423b</code>, and labelled historical v0.4.0 restart proof.</p>
+<p class="verified">All qualification and acceptance receipts are owner-operated measurements on retained hardware at common engine source <code>2c6f423b</code>; candidate rehearsal and historical series are labelled separately and never transfer across releases.</p>
 </div>
 </section>
 </main>

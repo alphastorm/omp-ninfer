@@ -258,15 +258,6 @@ section { padding: clamp(56px, 8vw, 104px) 0; border-top: 1px solid var(--border
 .cols li { margin: 0; padding: 12px 0; border-bottom: 1px solid var(--border); }
 @media (min-width: 760px) { .cols { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 56px; } }
 
-/* Status strip */
-.strip { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; list-style: none; margin: 0; padding: 0; }
-.strip li { margin: 0; font: 500 12.5px/1 var(--font-mono); color: var(--muted); display: inline-flex; align-items: center; gap: 8px; min-height: 28px; padding: 0 10px; border: 1px solid var(--border); border-radius: 999px; background: var(--raised); white-space: nowrap; }
-.strip li::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--local); flex: none; }
-.strip li.label { border: 0; background: none; padding: 0; color: var(--faint); font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; font-size: 11px; }
-.strip li.label::before { display: none; }
-.strip li a { color: inherit; }
-.strip li a:hover { color: var(--ink); }
-
 /* Prose pages (compare, status, benchmarks, security) */
 .page { padding-top: clamp(40px, 6vw, 72px); border-top: 0; }
 .page .wrap > * + * { margin-top: 1.1em; }
