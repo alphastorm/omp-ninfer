@@ -41,6 +41,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove capture-only command/environment metadata from all four public demo casts, normalize the
   synthetic scratch-home text, refresh the recording receipt, and include complete decoded
   cast text in the public marker scan (P15-R12).
+- Align the installed fail-closed fragment's client-version comments with the stock OMP
+  18.14.0 manifest pin (P15-R13).
 
 ### Changed
 

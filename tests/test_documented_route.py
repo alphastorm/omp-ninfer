@@ -133,6 +133,14 @@ class ReleaseProseTests(unittest.TestCase):
 
 
 class ExtractionTests(unittest.TestCase):
+    def test_installed_fail_closed_comments_match_the_stock_client_pin(self):
+        release = json.loads((ROOT / "compatibility.json").read_text())["product_release"]
+        manifest = json.loads((ROOT / "releases" / release / "manifest.json").read_text())
+        version = manifest["components"]["omp"]["distribution_version"]
+        fragment = (ROOT / "examples/manual-tunnel/fail-closed.yml").read_text()
+        self.assertIn(f"OMP {version} model fragment", fragment)
+        self.assertIn(f"stock upstream {version};", fragment)
+
     def test_prepared_routes_keep_all_composer_addresses_and_new_pins(self) -> None:
         guide = documented_route.DEFAULT_DOC.read_text(encoding="utf-8")
         release = re.search(r"(?:Prepared|Versioned) guide: (v[0-9.]+)", guide).group(1)
