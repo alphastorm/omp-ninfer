@@ -49,10 +49,10 @@ OMP remains responsible for tool approval and workspace boundaries.
 5. OMP uses explicit local provider routes (`ninfer-beta/q38-ninfer`,
    `ninfer-native-4090/qwen3.8-27b`, or `ninfer-native-3090/q38-ninfer`) with retries, model
    fallback, and automatic client self-updates disabled (`examples/manual-tunnel/fail-closed.yml`).
-6. The upstream OMP 18.12.6 binaries, shared Qwen3.8 27B model container version 3 artifact
+6. The upstream OMP 18.14.0 binaries, shared Qwen3.8 27B model container version 3 artifact
    (`81f924d4`), NInfer container image and native packages, server binaries, SPDX and CycloneDX
    dependency SBOMs, seccomp profile, runtime configurations, and qualification summaries are pinned
-   by immutable SHA-256 digests and commits in `releases/v0.14.0/manifest.json` before release
+   by immutable SHA-256 digests and commits in `releases/v0.15.0/manifest.json` before release
    status becomes `ready`.
 7. The NInfer container image is pulled by OCI manifest digest (`@sha256:`), never a mutable tag.
 8. Support material excludes raw prompts, outputs, request logs, secrets, private paths, hostnames,
@@ -127,7 +127,7 @@ defect.
 
 ## Artifact verification
 
-Run from the exact release tag (`v0.14.0`):
+Run from the exact release tag (`v0.15.0`):
 
 ```sh
 python3 scripts/verify_release.py --require-ready

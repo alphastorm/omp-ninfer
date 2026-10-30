@@ -25,9 +25,9 @@
  "name": "OMP NInfer",
  "applicationCategory": "DeveloperApplication",
  "operatingSystem": "Windows 11 — RTX 5090 via Docker Desktop/WSL2, RTX 4090 and RTX 3090 native; clients macOS preview, Windows, Linux under WSL2",
- "description": "Durable local inference for coding agents. Qualified on RTX 5090, RTX 4090, and RTX 3090 in v0.14.0 (published 2026-10-28) with stock Oh My Pi 18.12.6 and Qwen3.8 27B via NInfer.",
- "softwareVersion": "0.14.0",
- "datePublished": "2026-10-28",
+ "description": "Durable local inference for coding agents. Qualified on RTX 5090, RTX 4090, and RTX 3090 in v0.15.0 (published 2026-10-30) with stock Oh My Pi 18.14.0 and Qwen3.8 27B via NInfer.",
+ "softwareVersion": "0.15.0",
+ "datePublished": "2026-10-30",
  "url": "https://alphastorm.github.io/omp-ninfer/",
  "codeRepository": "https://github.com/alphastorm/omp-ninfer",
  "license": "https://github.com/alphastorm/omp-ninfer/blob/main/LICENSE"}
@@ -43,7 +43,7 @@
       <a href="../compare/">Compare</a>
       <a href="../security/" aria-current="page">Security</a>
       <a href="../status/">Status</a>
-      <a class="ext" href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/docs/QUICKSTART.md">Quickstart</a>
+      <a class="ext" href="https://github.com/alphastorm/omp-ninfer/blob/v0.15.0/docs/QUICKSTART.md">Quickstart</a>
       <a class="ext" href="https://github.com/alphastorm/omp-ninfer">GitHub</a>
     </nav>
   </div>
@@ -58,7 +58,7 @@ release layer) to NInfer (inference engine) serving Qwen3.8&nbsp;27B (served mod
 own. Your prompt, transcript, and checkpointed continuation state stay local: runtime listeners bind
 loopback only, every request carries a bearer key, and an unreachable GPU fails the turn instead of
 answering from a cloud model.</p>
-<p class="verified">Verified on published v0.14.0 (2026-10-28, stock Oh My Pi 18.12.6): fail-closed
+<p class="verified">Verified on published v0.15.0 (2026-10-30, stock Oh My Pi 18.14.0): fail-closed
 behavior is proved in release acceptance across all three client platforms, not assumed from
 configuration. Full model:
 <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/SECURITY.md">docs/SECURITY.md</a>.</p>
@@ -90,7 +90,7 @@ hosted model.</span></li>
 binaries, the shared Qwen3.8 27B model container version 3 artifact (<code>81f924d4</code> across all
 three lanes), container image (<code>@sha256:</code>), native packages, SPDX and CycloneDX dependency
 SBOMs, server binaries, and configurations are bound in
-<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/releases/v0.14.0/manifest.json"><code>releases/v0.14.0/manifest.json</code></a>.
+<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.15.0/releases/v0.15.0/manifest.json"><code>releases/v0.15.0/manifest.json</code></a>.
 Checkpoints live in owner-restricted local NVMe directories with HMAC origin authentication
 (<code>manifest.mac</code>; mandatory <code>--session-checkpoint-require-origin-auth</code> on RTX 5090 schema 3 <code>/checkpoints-v013</code> and native <code>session-checkpoints-v3</code>), not encryption.</span></li>
 </ul>

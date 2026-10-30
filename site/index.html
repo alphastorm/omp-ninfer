@@ -27,9 +27,9 @@
  "name": "OMP NInfer",
  "applicationCategory": "DeveloperApplication",
  "operatingSystem": "Windows 11 — RTX 5090 via Docker Desktop/WSL2, RTX 4090 and RTX 3090 native; clients macOS preview, Windows, Linux under WSL2",
- "description": "Durable local inference for coding agents. Qualified on RTX 5090, RTX 4090, and RTX 3090 in v0.14.0 (published 2026-10-28) with stock Oh My Pi 18.12.6 and Qwen3.8 27B via NInfer.",
- "softwareVersion": "0.14.0",
- "datePublished": "2026-10-28",
+ "description": "Durable local inference for coding agents. Qualified on RTX 5090, RTX 4090, and RTX 3090 in v0.15.0 (published 2026-10-30) with stock Oh My Pi 18.14.0 and Qwen3.8 27B via NInfer.",
+ "softwareVersion": "0.15.0",
+ "datePublished": "2026-10-30",
  "url": "https://alphastorm.github.io/omp-ninfer/",
  "codeRepository": "https://github.com/alphastorm/omp-ninfer",
  "license": "https://github.com/alphastorm/omp-ninfer/blob/main/LICENSE"}
@@ -45,7 +45,7 @@
       <a href="compare/">Compare</a>
       <a href="security/">Security</a>
       <a href="status/">Status</a>
-      <a class="ext" href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/docs/QUICKSTART.md">Quickstart</a>
+      <a class="ext" href="https://github.com/alphastorm/omp-ninfer/blob/v0.15.0/docs/QUICKSTART.md">Quickstart</a>
       <a class="ext" href="https://github.com/alphastorm/omp-ninfer">GitHub</a>
     </nav>
   </div>
@@ -65,13 +65,13 @@
       </div>
       <div>
         <div class="actions">
-          <a class="cta" href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/docs/QUICKSTART.md">Get started</a>
-          <a class="cta secondary" href="https://github.com/alphastorm/omp-ninfer/releases/tag/v0.14.0">Download v0.14.0</a>
+          <a class="cta" href="https://github.com/alphastorm/omp-ninfer/blob/v0.15.0/docs/QUICKSTART.md">Get started</a>
+          <a class="cta secondary" href="https://github.com/alphastorm/omp-ninfer/releases/tag/v0.15.0">Download v0.15.0</a>
         </div>
         <div class="receipt">
           <span class="k">Qualified on RTX 5090 · 4090 · 3090</span>
-          <span class="v">v0.14.0 · stock Oh My Pi 18.12.6 · published 2026-10-28</span>
-          <span class="s">Fresh route acceptance: five documented routes, 31 steps, three stock clients, and both native Windows public installs passed with independent host restoration; owner-operated evidence. <a href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/releases/v0.14.0/manifest.json">manifest</a> · <a href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/releases/v0.14.0/NINFER_RELEASE_NOTES.md">release notes</a> · <a href="status/">lanes and status</a></span>
+          <span class="v">v0.15.0 · stock Oh My Pi 18.14.0 · published 2026-10-30</span>
+          <span class="s">Fresh route acceptance: five documented routes, 31 steps, three stock clients, and both native Windows public installs passed with independent host restoration; owner-operated evidence. <a href="https://github.com/alphastorm/omp-ninfer/blob/v0.15.0/releases/v0.15.0/manifest.json">manifest</a> · <a href="https://github.com/alphastorm/omp-ninfer/blob/v0.15.0/releases/v0.15.0/NINFER_RELEASE_NOTES.md">release notes</a> · <a href="status/">lanes and status</a></span>
         </div>
       </div>
     </div>
@@ -115,7 +115,7 @@
         <p class="eyebrow">Measured, not estimated</p>
         <h2>Three lanes, each bound to exact bytes and a receipt.</h2>
       </div>
-      <p>Every number names its release, hardware lane, and measurement boundary. Retrieval figures are fresh-process cold starts; decode figures are the lane's own qualification gate, never an ordinary in-process cached follow-up.</p>
+      <p>Every number names its release, hardware lane, and measurement boundary (runtime qualifications carried unchanged from v0.14.0). Retrieval figures are fresh-process cold starts; decode figures are the lane's own qualification gate, never an ordinary in-process cached follow-up.</p>
     </div>
     <table class="measured">
       <thead>
@@ -126,19 +126,19 @@
           <td class="first"><span class="lane">RTX 5090</span><span class="tag">Windows 11 + Docker Desktop/WSL2 · runtime <span class="nowrap">v0.7.0-qwen38-5090-beta.3</span> · profile qwen38-5090-v0.13.0 · DFlash2 draft window 7 · BF16 KV · model 81f924d4</span></td>
           <td data-label="Exact 130,048-token retrieval"><span class="num">57.00<small>s</small></span><span class="sub">cold start</span></td>
           <td data-label="Decode"><span class="num">182.49<small>tok/s</small></span><span class="sub">server-side; 178.78 tok/s wall over 2,048 tokens</span></td>
-          <td class="last" data-label="Receipt"><a class="receipt-link" href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/releases/v0.14.0/qualification/rtx5090.json">rtx5090.json · 2026-10-28</a></td>
+          <td class="last" data-label="Receipt"><a class="receipt-link" href="https://github.com/alphastorm/omp-ninfer/blob/v0.15.0/releases/v0.15.0/qualification/rtx5090.json">rtx5090.json · 2026-10-28</a></td>
         </tr>
         <tr>
           <td class="first"><span class="lane">RTX 4090</span><span class="tag">native Windows 11 · runtime <span class="nowrap">v0.7.0-qwen38-4090-beta.3</span> · MTP3 · INT8 KV · model 81f924d4</span></td>
           <td data-label="Exact 130,048-token retrieval"><span class="num">81.78<small>s</small></span><span class="sub">cold start</span></td>
           <td data-label="Decode"><span class="num">151.54<small>tok/s</small></span><span class="sub">C1 decode; 87.59% MTP3 acceptance, 2,195.36 tok/s prefill</span></td>
-          <td class="last" data-label="Receipt"><a class="receipt-link" href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/releases/v0.14.0/qualification/rtx4090.json">rtx4090.json · 2026-10-28</a></td>
+          <td class="last" data-label="Receipt"><a class="receipt-link" href="https://github.com/alphastorm/omp-ninfer/blob/v0.15.0/releases/v0.15.0/qualification/rtx4090.json">rtx4090.json · 2026-10-28</a></td>
         </tr>
         <tr>
           <td class="first"><span class="lane">RTX 3090</span><span class="tag">native Windows 11 · runtime <span class="nowrap">v0.7.0-qwen38-3090-beta.3</span> · MTP3 · INT8 KV · 350 W serving cap · model 81f924d4</span></td>
           <td data-label="Exact 130,048-token retrieval"><span class="num">187.88<small>s</small></span><span class="sub">cold start</span></td>
           <td data-label="Decode"><span class="num">90.64<small>tok/s</small></span><span class="sub">C1 decode; 92.96% MTP3 acceptance, 976.98 tok/s prefill</span></td>
-          <td class="last" data-label="Receipt"><a class="receipt-link" href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/releases/v0.14.0/qualification/rtx3090.json">rtx3090.json · 2026-10-28</a></td>
+          <td class="last" data-label="Receipt"><a class="receipt-link" href="https://github.com/alphastorm/omp-ninfer/blob/v0.15.0/releases/v0.15.0/qualification/rtx3090.json">rtx3090.json · 2026-10-28</a></td>
         </tr>
       </tbody>
     </table>
@@ -228,7 +228,7 @@
 
 <section id="release">
   <div class="wrap">
-    <p class="small">The 0.x series supports only the latest published release and its exact manifest and profiles. <a href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/releases/v0.14.0/manifest.json">Manifest</a> · <a href="https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/releases/v0.14.0/NINFER_RELEASE_NOTES.md">release notes</a> · <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/COMPATIBILITY.md">compatibility</a>.</p>
+    <p class="small">The 0.x series supports only the latest published release and its exact manifest and profiles. <a href="https://github.com/alphastorm/omp-ninfer/blob/v0.15.0/releases/v0.15.0/manifest.json">Manifest</a> · <a href="https://github.com/alphastorm/omp-ninfer/blob/v0.15.0/releases/v0.15.0/NINFER_RELEASE_NOTES.md">release notes</a> · <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/COMPATIBILITY.md">compatibility</a>.</p>
   </div>
 </section>
 

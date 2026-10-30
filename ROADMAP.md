@@ -20,11 +20,15 @@ by Oh My Pi, Qwen, or NVIDIA.
 
 ## Current release
 
-**v0.14.0** (published 2026-10-28, GitHub `Latest`) pins unmodified upstream Oh My Pi **18.12.6**
-(`45c35e40`) across macOS arm64 (preview), Windows x64, and Linux x64 (WSL2), shared published model
-container version 3 `81f924d4` (`qwen3_8_27b-v3.ninfer`, 20,437,521,664 bytes), and one common engine
-source `2c6f423b` (`2c6f423bd817b6534158553e1b34ab4959c43165`) on upstream `Neroued/ninfer` master
-`64d10fbf` across all three qualified GPU lanes:
+**v0.15.0** (published 2026-10-30, GitHub `Latest`) pins unmodified upstream Oh My Pi **18.14.0**
+(`31147f9d`, tree `9a63b5bf`, upstream binaries rebuilt with Bun 1.4.4 for CVE-2026-91403 and
+CVE-2026-111497; `qwen3.8-27b` on native RTX 4090 defaults to stock `replace` edit-tool mode while
+`q38-ninfer` on RTX 5090 and native RTX 3090 keeps `hashline`) across macOS arm64 (preview), Windows
+x64, and Linux x64 (WSL2), while retaining the qualified `v0.14.0` GPU runtime packages, shared
+published model container version 3 `81f924d4` (`qwen3_8_27b-v3.ninfer`, 20,437,521,664 bytes), and
+serving profiles unchanged from `v0.14.0` (built from common engine source `2c6f423b`,
+`2c6f423bd817b6534158553e1b34ab4959c43165`, on upstream `Neroued/ninfer` master `64d10fbf`) across
+all three qualified GPU lanes:
 
 - **RTX 5090 container (`v0.7.0-qwen38-5090-beta.3`, source `2c6f423b` on `64d10fbf`, image
   `760fb6be` on base `d4377ed0`, server `55f0b95a`, model `81f924d4`):** Windows 11 + Docker
@@ -45,7 +49,7 @@ source `2c6f423b` (`2c6f423bd817b6534158553e1b34ab4959c43165`) on upstream `Nero
   MiB admission headroom, and two extra device-state slots on RTX 4090; 11,715.734375 MiB /
   12,284,837,888-byte shared Host budget, 768 MiB admission headroom, four extra device-state slots,
   and 350 W serving cap on RTX 3090; stop a running v0.13.1 RTX 3090 lane before upgrading to
-  v0.14.0 because its 300 W GPU-owner lease fails the new 350 W cap check before replacement,
+  v0.14.0 or v0.15.0 because its 300 W GPU-owner lease fails the new 350 W cap check before replacement,
   [#94](https://github.com/alphastorm/omp-ninfer/issues/94)). Both install on one two-GPU host bound
   by GPU UUID and run one lane at a time; both lineages record no supported rollback target
   (`not_applicable`, zero rollback directions; prior native roots stay preserved separately for
@@ -54,69 +58,43 @@ source `2c6f423b` (`2c6f423bd817b6534158553e1b34ab4959c43165`) on upstream `Nero
 Stock OMP has no `omp appliance` lifecycle commands; container and native host scripts own runtime
 lifecycle, and source-first native qualification is an established release procedure
 ([`docs/RELEASES.md#next-native-release-sequencing`](docs/RELEASES.md#next-native-release-sequencing)).
-Full release authority: [`releases/v0.14.0/NINFER_RELEASE_NOTES.md`](releases/v0.14.0/NINFER_RELEASE_NOTES.md) ·
-[`releases/v0.14.0/manifest.json`](releases/v0.14.0/manifest.json) ·
-[`releases/v0.14.0/qualification.json`](releases/v0.14.0/qualification.json) ·
+Full release authority: [`releases/v0.15.0/NINFER_RELEASE_NOTES.md`](releases/v0.15.0/NINFER_RELEASE_NOTES.md) ·
+[`releases/v0.15.0/manifest.json`](releases/v0.15.0/manifest.json) ·
+[`releases/v0.15.0/qualification.json`](releases/v0.15.0/qualification.json) ·
 [`docs/RELEASES.md`](docs/RELEASES.md) · [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md).
 
 ## Remaining work
 
-### Staged v0.15.0 client-only release
-
-**Staged, not published:** stock OMP 18.14.0 (`31147f9d`), with the exact RTX 5090, RTX 4090
-and RTX 3090 v0.14.0 beta.3 runtime components, model bytes and serving profiles carried unchanged.
-Both native lanes remain MTP3; no runtime rebuild or native DFlash2 switch is in this release.
-The P15 native evidence-binding tools, guide-derived client probe defaults, WSL2 guide,
-read-only upstream watch and CI coverage ship as product changes. Fresh stock-client acceptance
-on all three platforms, all five routes/31 exact blocks, both native public installs and independent
-restoration passed on candidate `af62e766` on 2026-10-30
-([composed receipt](releases/v0.15.0/acceptance/composed-external-installation.json)).
-Both initial windows restored their baselines; no promotion or production upgrade occurred.
-Changed-scope product council and carried fork-council binding, final manifest pin, strict ready
-verification and founder-owned publication remain separate gates.
-The staged [notes](releases/v0.15.0/NINFER_RELEASE_NOTES.md) and
-[manifest](releases/v0.15.0/manifest.json) bind the client-only scope.
-Use the [immutable published v0.14.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/docs/QUICKSTART.md)
-for installation until publication.
-
-**Deferred to v0.15.1:** native RTX 3090 DFlash2 after fork-after-resume failed with
-`Native could not release an unreferenced checkpoint owner`; RTX 4090 DFlash2 K6/K5; the
-`alphastorm/ninfer#48/#49` fix train on all three carried runtime components; council P2 deferrals.
-The runtime defect must be fixed and the shipping-package gates must pass before any native
-DFlash2 lane switch. No date or unmeasured outcome is promised.
-
-### Published-release gaps
-
-Items below remain open after `v0.14.0`; each names the current evidence showing the gap is still
+Items below remain open after `v0.15.0`; each names the current evidence showing the gap is still
 unmet:
 
 1. **Independent multi-owner clean-install, recovery, and rollback evidence.** All qualifications
-   and 31-block documented-route acceptances through `v0.14.0` are maintainer-operated on owner
+   and 31-block documented-route acceptances through `v0.15.0` are maintainer-operated on owner
    hardware, and both native Windows lanes (`v0.7.0-qwen38-4090-beta.3` and
    `v0.7.0-qwen38-3090-beta.3`) have no supported rollback target (`not_applicable`, zero
    directions) on the two-GPU Windows host
-   ([`releases/v0.14.0/qualification.json`](releases/v0.14.0/qualification.json),
-   [`releases/v0.14.0/qualification/rtx4090.json`](releases/v0.14.0/qualification/rtx4090.json),
-   [`releases/v0.14.0/qualification/rtx3090.json`](releases/v0.14.0/qualification/rtx3090.json),
-   [`releases/v0.14.0/NINFER_RELEASE_NOTES.md`](releases/v0.14.0/NINFER_RELEASE_NOTES.md)).
+   ([`releases/v0.15.0/qualification.json`](releases/v0.15.0/qualification.json),
+   [`releases/v0.15.0/qualification/rtx4090.json`](releases/v0.15.0/qualification/rtx4090.json),
+   [`releases/v0.15.0/qualification/rtx3090.json`](releases/v0.15.0/qualification/rtx3090.json),
+   [`releases/v0.15.0/NINFER_RELEASE_NOTES.md`](releases/v0.15.0/NINFER_RELEASE_NOTES.md)).
 2. **macOS managed lifecycle and native Linux OS qualification.** The macOS arm64 route remains a
    manual SSH tunnel preview without managed client installation or appliance lifecycle (`scripts/mac_tunnel.py`
    supervises only the local SSH forward), and the Linux x64 client is evidenced only under WSL2 on
    the Windows 11 container host rather than a native Linux OS
-   ([`releases/v0.14.0/qualification.json`](releases/v0.14.0/qualification.json),
+   ([`releases/v0.15.0/qualification.json`](releases/v0.15.0/qualification.json),
    [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md)).
 3. **Hardware-independent public route qualification.** [`scripts/client_acceptance.py`](scripts/client_acceptance.py)
    and [`scripts/doctor.py`](scripts/doctor.py) provide host-free client rehearsals, live owner-lane
    checks, and named-cause WSL/Docker/loopback preflight, while full 31-block documented-route
    release qualification still requires live maintainer GPU-host windows
-   ([`releases/v0.14.0/acceptance/documented-routes.json`](releases/v0.14.0/acceptance/documented-routes.json)).
+   ([`releases/v0.15.0/acceptance/documented-routes.json`](releases/v0.15.0/acceptance/documented-routes.json)).
    The earlier route-lifecycle tracker [#15](https://github.com/alphastorm/omp-ninfer/issues/15) is
    closed; it is historical context, not an open tracker for these additions.
 4. **Distribution signing and notarization.**
    [`scripts/generate_native_sbom.py`](scripts/generate_native_sbom.py) generates CycloneDX 1.5
    dependency SBOMs and the verifier supports `sbom_dependency_url` / `sbom_dependency_sha256`,
    and both published beta.3 native components in
-   [`releases/v0.14.0/manifest.json`](releases/v0.14.0/manifest.json) bind separate dependency
+   [`releases/v0.15.0/manifest.json`](releases/v0.15.0/manifest.json) bind separate dependency
    inventories, including MSVC CRT and DirectStorage redistributables, beside their SPDX file
    inventories. Package signing and notarization remain unclaimed ([`docs/SECURITY.md`](docs/SECURITY.md)).
    OMP NInfer consumes unmodified upstream OMP binaries by
@@ -127,48 +105,45 @@ unmet:
    on the originating host ([`docs/measurements/2026-09-05-sync-probe-rtx5090.json`](docs/measurements/2026-09-05-sync-probe-rtx5090.json),
    [`docs/FACTS.md#checkpoint-transport-and-nas-replication`](docs/FACTS.md#checkpoint-transport-and-nas-replication)),
    not restoration onto a second physical inference host. The RTX 3090 fleet scout role remains
-   disabled ([`releases/v0.14.0/NINFER_RELEASE_NOTES.md`](releases/v0.14.0/NINFER_RELEASE_NOTES.md)),
+   disabled ([`releases/v0.15.0/NINFER_RELEASE_NOTES.md`](releases/v0.15.0/NINFER_RELEASE_NOTES.md)),
    and any fleet completed-work claim requires re-running the fixed multi-machine workload
    ([`scripts/fleet_dispatch.py`](scripts/fleet_dispatch.py), EXP-016 in
    [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md#experiment-ledger)).
-6. **Deferred runtime, installer, and release-tooling residuals ([#88](https://github.com/alphastorm/omp-ninfer/issues/88)–[#90](https://github.com/alphastorm/omp-ninfer/issues/90), [#94](https://github.com/alphastorm/omp-ninfer/issues/94)–[#100](https://github.com/alphastorm/omp-ninfer/issues/100)).**
-   In `v0.14.0`, all three GPU lanes bind common engine source `2c6f423b` on `64d10fbf` (qualifying
-   enforced JSON-schema output and 128-character tool names across all three lanes), and both
-   common-engine fork (`CR-20261028T031911Z-2c6f423b`) and product-tooling
-   (`CR-20261028T043650Z-c81a8e7e`) full councils closed without remediation
-   ([`releases/v0.14.0/review/runtime-ledger.json`](releases/v0.14.0/review/runtime-ledger.json)).
-   Deferred P2/P3 residuals remain tracked in [#88](https://github.com/alphastorm/omp-ninfer/issues/88)
-   (carried RTX 5090 off-worker export-lease admission reachability, durable-owner/session-gate
-   metadata churn, and workflow base-receipt cross-checking),
-   [#89](https://github.com/alphastorm/omp-ninfer/issues/89) (native Windows failed-stop installer
-   rollback cleanup, post-install DLL rehash on Start/Run, isolated capacity miss, checkpoint
-   open/close error classification, and stale-generation retention),
-   [#90](https://github.com/alphastorm/omp-ninfer/issues/90) (release-tooling composer, verifier,
-   binder, and cutter hardening),
-   [#94](https://github.com/alphastorm/omp-ninfer/issues/94) (RTX 3090 stop-before-upgrade across
-   the 300 W → 350 W cap change),
-   [#95](https://github.com/alphastorm/omp-ninfer/issues/95) (engine state/stat retirement before
-   error/cancel delivery),
-   [#96](https://github.com/alphastorm/omp-ninfer/issues/96) (media decode range and missing-duration
-   video budget checks),
-   [#97](https://github.com/alphastorm/omp-ninfer/issues/97) (unit tests binding the real tunnel port),
-   [#98](https://github.com/alphastorm/omp-ninfer/issues/98) (native `client_acceptance.py`
-   default-model handling),
-   [#99](https://github.com/alphastorm/omp-ninfer/issues/99) (late `corrections.json` validation at
-   summarize), and
-   [#100](https://github.com/alphastorm/omp-ninfer/issues/100) (ledger-summary consistency,
-   restoration-input validation, pre-effect runtime-base receipt binding, top-level route status,
-   stale-phrase matching, and key-preservation/Windows exit-status guide gaps), alongside
-   deterministic RTX 5090 `nvcc` module IDs and a corrected, repeated native `Group64` A8 screen.
+6. **Deferred runtime, installer, and release-tooling residuals ([#88](https://github.com/alphastorm/omp-ninfer/issues/88)–[#90](https://github.com/alphastorm/omp-ninfer/issues/90), [#94](https://github.com/alphastorm/omp-ninfer/issues/94)–[#96](https://github.com/alphastorm/omp-ninfer/issues/96), [#116](https://github.com/alphastorm/omp-ninfer/issues/116), [#117](https://github.com/alphastorm/omp-ninfer/issues/117)).**
+   In `v0.15.0`, the changed-scope product-tooling council (`CR-20261030T194208Z-af62e766-product`)
+   closed by disposition with no in-scope residual P0/P1 after lead controls, and the carried
+   runtime council retains its original `v0.14.0` common-engine fork subject
+   (`CR-20261028T031911Z-2c6f423b`) in
+   [`releases/v0.15.0/review/runtime-ledger.json`](releases/v0.15.0/review/runtime-ledger.json).
+   Product-tooling residuals [#97](https://github.com/alphastorm/omp-ninfer/issues/97)–[#100](https://github.com/alphastorm/omp-ninfer/issues/100)
+   are addressed in `v0.15.0` (ephemeral unit-test tunnel port, guide-derived `client_acceptance.py`
+   model defaults, pre-window `corrections.json` enforcement, and ledger/restoration/route-status
+   verifier checks plus idempotent key/config reruns and Windows command exit checks), while the new
+   product-council P2/P3 residuals are tracked in
+   [#117](https://github.com/alphastorm/omp-ninfer/issues/117) (including native-screen predecessor
+   binding, rebind/stage evidence clearing, and full-corpus membership enforcement required before
+   `v0.15.1` binds the RTX 3090 DFlash2 screen) and the fork-council residuals for the deferred,
+   unshipped native-DFlash2 candidate (`alphastorm/ninfer` commits `5caa4a48` / `2af6b3de`) are
+   tracked in [#116](https://github.com/alphastorm/omp-ninfer/issues/116). Because `v0.15.0` carries the
+   `v0.14.0` runtime binaries unchanged, the `alphastorm/ninfer#48` installer upgrade/rollback and
+   `#49` runtime/media/checkpoint fixes and prior runtime deferrals remain open for the next runtime
+   cut in [#88](https://github.com/alphastorm/omp-ninfer/issues/88)–[#90](https://github.com/alphastorm/omp-ninfer/issues/90)
+   and [#94](https://github.com/alphastorm/omp-ninfer/issues/94)–[#96](https://github.com/alphastorm/omp-ninfer/issues/96),
+   alongside deterministic RTX 5090 `nvcc` module IDs and a corrected, repeated native `Group64` A8
+   screen.
 7. **Native-lane concurrency.** Both native Windows lanes are qualified at one active request
    (`--max-concurrency 1`, 30 s pending timeout) and run sequentially on shared port `18082`
-   ([`releases/v0.14.0/qualification/rtx4090.json`](releases/v0.14.0/qualification/rtx4090.json),
-   [`releases/v0.14.0/qualification/rtx3090.json`](releases/v0.14.0/qualification/rtx3090.json),
+   ([`releases/v0.15.0/qualification/rtx4090.json`](releases/v0.15.0/qualification/rtx4090.json),
+   [`releases/v0.15.0/qualification/rtx3090.json`](releases/v0.15.0/qualification/rtx3090.json),
    [`examples/manual-tunnel/fail-closed.yml`](examples/manual-tunnel/fail-closed.yml)); concurrent
    native requests require memory and latency qualification on those exact packages.
 8. **Open kernel and schedule backlog (including native DFlash2 deferred to v0.15.1).** Native
-   DFlash2 K=7 lane-profile qualification is deferred beyond the client-only v0.15.0 without a date
-   commitment (EXP-098,
+   DFlash2 K=7 lane-profile qualification is deferred to `v0.15.1` without a date commitment: during
+   candidate gate probes on the unshipped native-DFlash2 build, fork-after-resume failed with
+   `Native could not release an unreferenced checkpoint owner` (a checkpoint-owner replacement
+   defect in `alphastorm/ninfer`'s `ResourceManager`, fixed on the fork; `v0.15.1` awaits a
+   shipping-package rebuild, the native quality-screen binding prerequisites in
+   [#117](https://github.com/alphastorm/omp-ninfer/issues/117), and full requalification; EXP-098,
    [`docs/measurements/2026-10-27-native-dflash2-gates-and-fit.json`](docs/measurements/2026-10-27-native-dflash2-gates-and-fit.json):
    the `sm_86`/`sm_89` load-time fit seam in `2c6f423b` requantizes the 5-layer draft MLP `gate`/`up`
    weights to `Q4_G64_FP16` and maps `token_embedding` from host memory; on `v0.13.1` control
@@ -194,7 +169,7 @@ unmet:
 Negative and deferred results stay visible in [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md#experiment-ledger)
 so future work does not repeat closed experiments:
 
-- **Wholesale upstream engine merge — prior deferral superseded by v0.13.0–v0.14.0 (EXP-097).** Earlier upstream
+- **Wholesale upstream engine merge — prior deferral superseded by v0.13.0–v0.15.0 (EXP-097).** Earlier upstream
   NInfer (`594930e7`, `e31bc99b`, `81c8ce09`) trailed the fork by 18–19% on matched decode, lost
   sibling fanout reuse, overran the 32 GB automatic C2 BF16 budget by 561 MiB, and lacked the
   durable disk session store. `v0.13.0` re-ported the RTX 5090 durable/runtime families onto master
@@ -208,7 +183,7 @@ so future work does not repeat closed experiments:
   [`docs/measurements/2026-10-10-upstream-81c8ce09-rtx5090.json`](docs/measurements/2026-10-10-upstream-81c8ce09-rtx5090.json)).
 - **Full upstream re-port from `64d10fbf` to `1882c6ad` — deferred in favor of targeted fix
   cherry-picks.** Upstream `Neroued/ninfer` master `1882c6ad`
-  (`1882c6adbc98043fcf89f3589aa5addb3742777a`) is 215 commits ahead of the `v0.13.0`–`v0.14.0`
+  (`1882c6adbc98043fcf89f3589aa5addb3742777a`) is 215 commits ahead of the `v0.13.0`–`v0.15.0`
   merge base `64d10fbf` (`64d10fbf9f8e6bfc79ab0570b94674c5b9997929`), while `alphastorm/ninfer`
   is 518 commits ahead of `64d10fbf` at `2c6f423b` (and `main` tip `752dd887`, which merges
   `2c6f423b` plus `alphastorm/ninfer#48` installer upgrade/rollback and `#49` runtime/media/checkpoint
@@ -308,9 +283,12 @@ so future work does not repeat closed experiments:
   missed the `0.95` per-case floor on depth-0 case `log-024@0` (`0.945889`, reproduced at `0.9451`
   in isolated ABBA,
   [`docs/measurements/2026-10-27-native-dflash2-gates-and-fit.json`](docs/measurements/2026-10-27-native-dflash2-gates-and-fit.json)).
-  Both published `v0.14.0` and client-only `v0.15.0` native profiles retain MTP3. Native RTX 3090
-  DFlash2 is deferred to v0.15.1 after the fork-after-resume runtime defect; RTX 4090 remains
-  gated on resolving `log-024@0`. The historical gates do not qualify a new shipping package.
+  Both published `v0.14.0` and `v0.15.0` (which updates only the client) retain MTP3 on the native
+  profiles. Native RTX 3090 DFlash2 is deferred to `v0.15.1` after the fork-after-resume runtime
+  defect (`Native could not release an unreferenced checkpoint owner`, fixed in `alphastorm/ninfer`
+  and awaiting shipping-package rebuild and requalification); RTX 4090 remains gated on resolving
+  `log-024@0`.
+  The historical gates do not qualify a new shipping package.
 - **NVFP4 and FP8 KV caches with DFlash2 on the RTX 5090 — rejected by quality screen (EXP-084,
   EXP-085, EXP-087, EXP-088).** Raised KV capacity to four device state slots, but failed the
   1,120-prompt paired quality screen on unsupported claims or secret leaks; BF16 KV remains shipped
@@ -357,6 +335,7 @@ per-version history lives in [`CHANGELOG.md`](CHANGELOG.md) and [`docs/RELEASES.
 
 | Release | Date | Summary | Notes |
 | --- | --- | --- | --- |
+| `v0.15.0` | 2026-10-30 | Repin stock OMP 18.14.0 (`31147f9d`, Bun 1.4.4 rebuild for CVE-2026-91403 and CVE-2026-111497; `qwen3.8-27b` replace-edit default) across all five documented routes (31 blocks) with unchanged v0.14.0 beta.3 GPU runtimes, shared model v3 (`81f924d4`), and serving profiles; ship native screen-arm capture (`scripts/native_screen_arm.py`), quality/fit/parity binding (`scripts/bind_native_variant.py`, `scripts/verify_release.py`), WSL2 client route, and idempotent guide reruns; defer native RTX 3090 DFlash2 to v0.15.1 ([#116](https://github.com/alphastorm/omp-ninfer/issues/116), [#117](https://github.com/alphastorm/omp-ninfer/issues/117)) | [notes](releases/v0.15.0/NINFER_RELEASE_NOTES.md) |
 | `v0.14.0` | 2026-10-28 | Bind common engine source `2c6f423b` on upstream master `64d10fbf` across RTX 5090 (`v0.7.0-qwen38-5090-beta.3`), native RTX 4090 (`v0.7.0-qwen38-4090-beta.3`), and native RTX 3090 (`v0.7.0-qwen38-3090-beta.3`, 350 W cap, stop-before-upgrade [#94](https://github.com/alphastorm/omp-ninfer/issues/94), `Group64` A8 off) with shared model v3 (`81f924d4`) and stock OMP 18.12.6 re-accepted across all five routes (31 blocks) | [notes](releases/v0.14.0/NINFER_RELEASE_NOTES.md) |
 | `v0.13.1` | 2026-10-26 | Rebase native Windows RTX 4090 (`v0.7.0-qwen38-4090-beta.2`) and RTX 3090 (`v0.7.0-qwen38-3090-beta.2`) onto upstream master `64d10fbf` (source `7a25cd72`) with shared model v3 (`81f924d4`), strict-origin schema 3 checkpoints (`session-checkpoints-v3`), shared Host budgets (640 / 768 MiB admission headroom), JSON-schema output, 128-character tool names, and CycloneDX dependency SBOMs; carry RTX 5090 `v0.7.0-qwen38-5090-beta.2` and stock OMP 18.12.6 re-accepted across all five routes | [notes](releases/v0.13.1/NINFER_RELEASE_NOTES.md) |
 | `v0.13.0` | 2026-10-25 | Rebase RTX 5090 container (`v0.7.0-qwen38-5090-beta.2`, source `6d4d0a05`) onto upstream master `64d10fbf` with model v3 (`81f924d4`), schema 3 checkpoints (`checkpoints-v013`, strict origin auth, non-blocking export), JSON-schema output, 128-character tool names, and stock OMP 18.12.6; carry native RTX 4090 and RTX 3090 packages re-accepted with OMP 18.12.6 | [notes](releases/v0.13.0/NINFER_RELEASE_NOTES.md) |
