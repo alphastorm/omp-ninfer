@@ -538,7 +538,7 @@ def main(argv=None):
                         help="descriptor platform row; required with --client-component")
     parser.add_argument("--home", type=Path, required=True, help="read-only route seed HOME")
     parser.add_argument("--provider", default="ninfer-beta")
-    parser.add_argument("--model", default="ninfer-beta/q38-ninfer")
+    parser.add_argument("--model", help="<provider>/<served model ID>; default: --provider plus the guide's RTX 5090 model")
     parser.add_argument("--key-file", default="ninfer-beta.key", help="key filename within seed .omp/agent")
     parser.add_argument("--max-in-flight", type=positive_int, default=2)
     parser.add_argument("--scenario", action="append", choices=("subagents", "sessions"), help="repeatable; default both")
@@ -550,6 +550,9 @@ def main(argv=None):
     parser.add_argument("--baseline", type=Path, help="passing --max-in-flight 1 receipt from this server instance")
     parser.add_argument("--receipt", type=Path, required=True)
     args = parser.parse_args(argv)
+    if args.model is None:
+        from client_acceptance import documented_model_id
+        args.model = args.provider + "/" + documented_model_id("rtx5090-macos-client")
     try:
         expected_version, expected_sha256, identity_source = expected_client_identity(args)
     except (OSError, ValueError) as error:

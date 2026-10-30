@@ -14,7 +14,7 @@ loopback to the NInfer inference engine serving Qwen3.8 27B on your GPU.
 | RTX 5090 container on Windows 11 / WSL2 or Linux | macOS arm64 client over a manual SSH tunnel (preview) | [macOS manual SSH route (preview)](#macos-client-over-a-manual-ssh-tunnel-preview) |
 | RTX 4090 native Windows 11 (alone or beside RTX 3090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; beta.3 public-route acceptance passed | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) |
 | RTX 3090 native Windows 11 (alone or beside RTX 4090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; beta.3 public-route acceptance passed; stop before upgrade | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
-| RTX 5090 container with Linux x64 client under WSL2 only | WSL2 shell client over local loopback `127.0.0.1:18089` (no native Linux OS qualification) | [Host setup](#3-prepare-the-model-and-key-on-the-inference-host), [client key](#6-install-the-same-key-on-the-mac), [OMP provider](#7-add-the-omp-provider), and [shell checks](#macoslinux-command-forms) |
+| RTX 5090 container with Linux x64 client under WSL2 only | WSL2 shell client over local loopback `127.0.0.1:18089` (no native Linux OS qualification) | [WSL2 Linux client](#wsl2-linux-client-over-local-loopback) |
 | Other GPU, non-WSL Linux client, or concurrent native serving | Unsupported | [Compatibility boundary](COMPATIBILITY.md) |
 
 ## Before you start
@@ -63,6 +63,14 @@ finish only when the route is ready/stopped, and run inside your approved mainte
 The stop test always attempts the start hook in a `finally` block. A live receipt is
 `owner-live`, but does not replace runtime-identity, cache-hit, restoration or release qualification
 gates. See `python3 scripts/client_acceptance.py --help` for options.
+
+Measurement probes that previously assumed `q38-ninfer` now take their default from this guide's
+RTX 5090 provider fragment. Run them from a complete product checkout, or pass `--model` explicitly
+to a standalone copy. Their free-form `--lane` labels identify receipts, not model selection.
+`client_acceptance.py --lane` instead follows the selected route's provider: the native RTX 3090
+and RTX 5090 routes currently serve `q38-ninfer`, while native RTX 4090 serves `qwen3.8-27b`.
+The native campaign launchers also resolve their model from the checkout before any host action;
+their staged quality child requires that explicit model rather than keeping another default.
 
 Before starting a container lane, run on its inference host:
 `python3 scripts/doctor.py --lane rtx5090 --model MODEL --key-file KEY --omp OMP --client-platform linux-x64`.
@@ -392,6 +400,8 @@ rerun leaves identical files in place, and the block refuses to replace a `model
 $Provider = if ($VariantId -ceq 'rtx4090-windows-native') { 'ninfer-native-4090' } else { 'ninfer-native-3090' }
 $Agent = Join-Path $HOME '.omp\agent'
 New-Item -ItemType Directory -Force -Path $Agent | Out-Null
+$env:NINFER_NATIVE_API_KEY = (Get-Content -Raw $ApiKeyFile).Trim()
+Remove-Item Env:PI_OPENAI_STATEFUL -ErrorAction SilentlyContinue
 $ModelsPath = Join-Path $Agent 'models.yml'
 $ConfigPath = Join-Path $Agent 'config.yml'
 $ModelsSource = '.\examples\windows-native\models.fragment.yml'
@@ -404,9 +414,10 @@ if ((Test-Path $ConfigPath) -and (Get-FileHash $ConfigPath).Hash -cne (Get-FileH
 }
 if (-not (Test-Path $ModelsPath)) { Copy-Item $ModelsSource $ModelsPath }
 if (-not (Test-Path $ConfigPath)) { Copy-Item $ConfigSource $ConfigPath }
-$env:NINFER_NATIVE_API_KEY = (Get-Content -Raw $ApiKeyFile).Trim()
-Remove-Item Env:PI_OPENAI_STATEFUL -ErrorAction SilentlyContinue
 ```
+
+The key and stateful setting are loaded before either merge refusal. If a file differs, merge
+only the named provider or fail-closed settings, then continue in this same PowerShell process.
 
 
 ## Native lane acceptance
@@ -590,6 +601,8 @@ rerun leaves identical files in place, and the block refuses to replace a `model
 $Provider = 'ninfer-native-3090'
 $Agent = Join-Path $HOME '.omp\agent'
 New-Item -ItemType Directory -Force -Path $Agent | Out-Null
+$env:NINFER_NATIVE_API_KEY = (Get-Content -Raw $ApiKeyFile).Trim()
+Remove-Item Env:PI_OPENAI_STATEFUL -ErrorAction SilentlyContinue
 $ModelsPath = Join-Path $Agent 'models.yml'
 $ConfigPath = Join-Path $Agent 'config.yml'
 $ModelsSource = '.\examples\windows-native\models-rtx3090.fragment.yml'
@@ -602,9 +615,10 @@ if ((Test-Path $ConfigPath) -and (Get-FileHash $ConfigPath).Hash -cne (Get-FileH
 }
 if (-not (Test-Path $ModelsPath)) { Copy-Item $ModelsSource $ModelsPath }
 if (-not (Test-Path $ConfigPath)) { Copy-Item $ConfigSource $ConfigPath }
-$env:NINFER_NATIVE_API_KEY = (Get-Content -Raw $ApiKeyFile).Trim()
-Remove-Item Env:PI_OPENAI_STATEFUL -ErrorAction SilentlyContinue
 ```
+
+The key and stateful setting are loaded before either merge refusal. If a file differs, merge
+only the named provider or fail-closed settings, then continue in this same PowerShell process.
 
 
 ## RTX 3090 native lane acceptance
@@ -635,6 +649,55 @@ try {
 if ($LASTEXITCODE -eq 0) { throw 'outage request unexpectedly succeeded' }
 & $Controller -Action Start -StateRoot $StateRoot | Out-Null
 ```
+
+## WSL2 Linux client over local loopback
+
+This is the Linux x64 client inside the same Ubuntu 24.04 WSL2 distro that owns the RTX 5090
+container, not a separately qualified native Linux OS. In that distro, clone and verify the
+release with [section 1](#1-clone-the-exact-release-on-both-machines), then complete
+[host preparation](#3-prepare-the-model-and-key-on-the-inference-host) and
+[runtime startup](#4-start-ninfer-on-the-inference-host). Skip the Mac installer and SSH tunnel:
+this client reaches `127.0.0.1:18089` directly.
+
+From the tagged clone, install the release's checksummed `omp-linux-x64` and copy the local key:
+
+```sh
+(
+set -euo pipefail
+CLIENT='releases/v0.14.0/qualification/client-components.json'
+URL=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["platforms"]["linux-x64"]["asset_url"])' "$CLIENT")
+EXPECTED=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["platforms"]["linux-x64"]["asset_sha256"])' "$CLIENT")
+VERSION=$(python3 -c 'import json,sys; print("omp/" + json.load(open(sys.argv[1]))["omp"]["distribution_version"])' "$CLIENT")
+curl --fail --location --output omp-linux-x64 "$URL"
+test "$(sha256sum omp-linux-x64 | cut -d ' ' -f 1)" = "$EXPECTED"
+install -d -m 700 "$HOME/.local/bin" "$HOME/.omp/agent"
+install -m 755 omp-linux-x64 "$HOME/.local/bin/omp"
+install -m 600 "$HOME/.config/omp-ninfer/api-key" "$HOME/.omp/agent/ninfer-beta.key"
+unset PI_OPENAI_STATEFUL
+test "$("$HOME/.local/bin/omp" --version)" = "$VERSION"
+)
+```
+
+Add `$HOME/.local/bin` to `PATH`, then install or merge both
+[section 7 shell config blocks](#7-add-the-omp-provider). Use the
+[text/tool](#text-and-tool-turn) and [stateful follow-up](#stateful-follow-up-and-omp-resume)
+checks in that shell, without a tunnel. The shared
+[server-survival check](#session-survives-the-server-process) uses SSH only for the restart;
+on this loopback route run `docker restart --timeout 60 omp-ninfer-beta` locally instead.
+No Linux image-input qualification is claimed.
+
+For fail-closed acceptance, stop this owned runtime rather than a nonexistent tunnel:
+
+```sh
+set -e
+"$HOME/omp-ninfer/examples/manual-tunnel/stop-ninfer.sh"
+if omp -p --no-session --max-time 20s --model ninfer-beta/q38-ninfer "Return LOCAL_ONLY."; then
+  echo 'outage request unexpectedly succeeded' >&2; false
+fi
+```
+
+Expected result: a connection failure and no model response. Any cloud-provider request is a
+release failure. Restart NInfer with section 4 only after observing the failure.
 
 ## macOS client over a manual SSH tunnel (preview)
 
@@ -882,6 +945,8 @@ $Identity = [Security.Principal.WindowsIdentity]::GetCurrent().Name
 & icacls.exe $KeyPath /inheritance:r /grant:r "${Identity}:(R,W)" | Out-Null
 if ($LASTEXITCODE -ne 0) { throw 'NInfer key ACL restriction failed' }
 
+$env:NINFER_BETA_API_KEY = (Get-Content -Raw $KeyPath).Trim()
+Remove-Item Env:PI_OPENAI_STATEFUL -ErrorAction SilentlyContinue
 $ModelsPath = Join-Path $Agent 'models.yml'
 $ConfigPath = Join-Path $Agent 'config.yml'
 $ModelsSource = '.\examples\windows-docker-local\models.fragment.yml'
@@ -894,10 +959,10 @@ if ((Test-Path $ConfigPath) -and (Get-FileHash $ConfigPath).Hash -cne (Get-FileH
 }
 if (-not (Test-Path $ModelsPath)) { Copy-Item $ModelsSource $ModelsPath }
 if (-not (Test-Path $ConfigPath)) { Copy-Item $ConfigSource $ConfigPath }
-$env:NINFER_BETA_API_KEY = (Get-Content -Raw $KeyPath).Trim()
-Remove-Item Env:PI_OPENAI_STATEFUL -ErrorAction SilentlyContinue
 ```
 
+The key and stateful setting are loaded before either merge refusal. If a file differs, merge
+only the named provider or fail-closed settings, then continue in this same PowerShell process.
 The environment variable lives only in that PowerShell process (`& "$env:LOCALAPPDATA\OMP\omp.exe" --model ninfer-beta/q38-ninfer`
 opens an interactive session). Always pass an explicit provider/model so outages fail closed.
 
@@ -950,8 +1015,10 @@ request is a release failure. Restart NInfer with section 4 only after observing
 ### macOS/Linux command forms
 
 Run these in the terminal that installed the per-model fragment in section 7, with the tunnel
-from section 5 open in another. Every check is a `-p` (print) turn, so it exits on its own; the
-shell tests the outcome, and `set -e` stops the sequence at the first failure.
+from section 5 open in another for macOS. The [WSL2 loopback route](#wsl2-linux-client-over-local-loopback)
+needs no tunnel and uses its own runtime-stop outage check instead of **Fail closed** below.
+Every check is a `-p` (print) turn, so it exits on its own; the shell tests the outcome, and
+`set -e` stops the sequence at the first failure.
 
 ### Text and tool turn
 

@@ -28,7 +28,9 @@ $campaignIdFile = Join-Path $root 'campaign-id.txt'
 $logs = Join-Path $root 'logs'
 $traces = Join-Path $root 'traces'
 $receipts = Join-Path $root 'receipts'
-$modelId = 'q38-ninfer'
+# Run this launcher from the product checkout; staged child tools receive its exact selector.
+$modelId = (& python -c 'import sys; sys.path.insert(0, sys.argv[1]); from client_acceptance import documented_model_id; print(documented_model_id(sys.argv[2]))' (Join-Path $PSScriptRoot '..') 'rtx3090-native' | Out-String).Trim()
+if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($modelId)) { throw 'documented RTX 3090 model lookup failed' }
 $sourceCommit = '3e37b03eac5633fe434afd84c45c54c2078f1556'
 $binarySha256 = '13fd2c551e5fd6a0a1377420de72ca0b33620edcfed55ecdaad24c8583fd3a53'
 $corpusSha256 = '9bf5957482dc5f86d6cb04d4c82a55c2d0c9ad01f1f3595dc54727e44b896623'

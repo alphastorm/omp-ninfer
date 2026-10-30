@@ -237,7 +237,7 @@ def main() -> int:
     parser.add_argument("--wire", choices=("fork", "upstream"), required=True)
     parser.add_argument("--base-url", required=True)
     parser.add_argument("--api-key-file", required=True, type=Path)
-    parser.add_argument("--model", default="q38-ninfer")
+    parser.add_argument("--model", help="served model ID; default: the guide's RTX 5090 provider")
     parser.add_argument("--long-fixture", type=Path, help="required unless --resume-from")
     parser.add_argument("--log-cmd", required=True, help="shell command printing the arm's request JSONL")
     parser.add_argument("--identity-json", type=Path, help="operator-recorded identity of the arm")
@@ -254,6 +254,9 @@ def main() -> int:
     if args.resume_from is None and args.long_fixture is None:
         parser.error("--long-fixture is required unless --resume-from is given")
 
+    if args.model is None:
+        from client_acceptance import documented_model_id
+        args.model = documented_model_id("rtx5090-macos-client")
     api_key = args.api_key_file.read_text(encoding="utf-8").strip()
     if args.resume_from is not None:
         return resume(args, api_key)

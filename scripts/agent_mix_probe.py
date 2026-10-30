@@ -360,7 +360,7 @@ def parse_args(argv=None):
         formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--base-url", help="server origin; required except in dry-run")
     parser.add_argument("--api-key-file", help="bearer token file; required except in dry-run")
-    parser.add_argument("--model", default="q38-ninfer")
+    parser.add_argument("--model", help="served model ID; default: the guide's RTX 5090 provider")
     parser.add_argument("--arm", default="unlabeled", help="capacity/runtime label recorded in receipt")
     parser.add_argument("--receipt", help="output JSON path; required except in dry-run")
     parser.add_argument("--log-cmd", help="shell command printing chronological server JSONL")
@@ -380,6 +380,9 @@ def parse_args(argv=None):
     parser.add_argument("--dry-run", action="store_true", help="offline prefixes and full request plan only")
     parser.add_argument("--plan-json", help="write prompt-free sequence and prefix metrics as JSON")
     args = parser.parse_args(argv)
+    if args.model is None:
+        from client_acceptance import documented_model_id
+        args.model = documented_model_id("rtx5090-macos-client")
     for key in ("chars_per_token", "size_scale", "a_tokens", "b_tokens", "c_tokens", "timeout"):
         if not math.isfinite(getattr(args, key)) or getattr(args, key) <= 0:
             parser.error(f"--{key.replace('_', '-')} must be finite and positive")

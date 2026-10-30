@@ -255,7 +255,7 @@ def main() -> int:
     parser.add_argument("--lane", required=True, help="public lane label for the receipt")
     parser.add_argument("--base-url", required=True)
     parser.add_argument("--api-key-file", required=True, type=Path)
-    parser.add_argument("--model", default="q38-ninfer")
+    parser.add_argument("--model", help="served model ID; default: the guide's RTX 5090 provider")
     parser.add_argument("--base-tokens", type=int, default=56000,
                         help="approximate synthetic base size in tokens")
     parser.add_argument("--branches", type=int, default=4)
@@ -269,6 +269,9 @@ def main() -> int:
                         help="leave the probe session's checkpoints in the lane store")
     args = parser.parse_args()
 
+    if args.model is None:
+        from client_acceptance import documented_model_id
+        args.model = documented_model_id("rtx5090-macos-client")
     api_key = args.api_key_file.read_text().strip()
     session = hashlib.sha256(
         f"fleet-probe-{args.lane}-{dt.datetime.now(dt.UTC).isoformat()}".encode()).hexdigest()

@@ -38,7 +38,7 @@ def main() -> int:
     parser.add_argument("--lane", required=True)
     parser.add_argument("--base-url", required=True)
     parser.add_argument("--api-key-file", required=True)
-    parser.add_argument("--model", default="q38-ninfer")
+    parser.add_argument("--model", help="served model ID; default: the guide's RTX 5090 provider")
     parser.add_argument("--depth", type=int, default=1,
                         help="turns between the base and the branch point")
     parser.add_argument("--siblings", type=int, default=2, help="branches from the branch point")
@@ -47,6 +47,9 @@ def main() -> int:
     parser.add_argument("--receipt", type=Path, required=True)
     args = parser.parse_args()
 
+    if args.model is None:
+        from client_acceptance import documented_model_id
+        args.model = documented_model_id("rtx5090-macos-client")
     api_key = Path(args.api_key_file).read_text(encoding="utf-8").strip()
     session = hashlib.sha256(
         f"sibling-{dt.datetime.now(dt.UTC).strftime('%Y%m%dT%H%M%S%fZ')}".encode()).hexdigest()
