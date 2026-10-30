@@ -138,6 +138,19 @@ def frozen_candidate(release: str, qualification: dict) -> str:
     return candidate
 
 
+def rebind_composed_evidence(value: Any, hashes: dict[str, str]) -> None:
+    """Refresh only references to artifacts this composition actually authors."""
+    if isinstance(value, list):
+        for child in value:
+            rebind_composed_evidence(child, hashes)
+    elif isinstance(value, dict):
+        reference = value.get("repository_path")
+        if isinstance(reference, str) and reference in hashes:
+            value["sha256"] = hashes[reference]
+        for child in value.values():
+            rebind_composed_evidence(child, hashes)
+
+
 def check_native_first_release(native: dict[str, Any], qualification: dict[str, Any]) -> None:
     first = first_release_rollback(qualification.get("rollback"))
     preparation = native["preparation"]
@@ -696,6 +709,11 @@ def main() -> int:
     qualification["as_of"] = max(qualification["as_of"], args.as_of)
     qualification["external_installation_qualified"] = True
     qualification["remaining_release_gates"] = []
+    authored = [client_components, composed_path, routes_path, restoration_path,
+                *(ROOT / path for path in platform_paths),
+                *(ROOT / row["receipt"] for row in route_rows.values()),
+                *(ROOT / row["repository_path"] for row in native_refs.values())]
+    rebind_composed_evidence(qualification, {relative(path): sha256(path.read_bytes()) for path in authored})
     save(qualification_path, qualification)
     manifest["qualification"]["summary_sha256"] = sha256(qualification_path.read_bytes())
     manifest["status"] = "ready"

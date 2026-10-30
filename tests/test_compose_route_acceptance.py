@@ -550,6 +550,30 @@ class UpstreamCompositionTests(unittest.TestCase):
             self.compose()
         self.assertFalse((self.release_root / "acceptance").exists())
 
+    def test_composition_rebinds_references_to_the_evidence_it_rewrites(self):
+        descriptor = self.release_root / "qualification/client-components.json"
+        MODULE.save(descriptor, {"old": "staged descriptor"})
+        qualification = MODULE.load(self.release_root / "qualification.json")
+        qualification["observed_gates"]["stock_client_review"] = {"descriptor": {
+            "repository_path": descriptor.relative_to(self.root).as_posix(),
+            "sha256": MODULE.sha256(descriptor.read_bytes())}}
+        qualification["observed_gates"]["changed_client_acceptance"] = {
+            "repository_path": f"releases/{self.release}/acceptance/composed-external-installation.json"}
+        independent = self.root / "independent.json"
+        MODULE.save(independent, {"retained": True})
+        binding = {"repository_path": "independent.json", "sha256": MODULE.sha256(independent.read_bytes())}
+        qualification["independent"] = binding
+        MODULE.save(self.release_root / "qualification.json", qualification)
+        self.assertEqual(self.compose(), 0)
+        qualification = MODULE.load(self.release_root / "qualification.json")
+        for reference in (
+            qualification["observed_gates"]["stock_client_review"]["descriptor"],
+            qualification["observed_gates"]["changed_client_acceptance"],
+        ):
+            self.assertEqual(reference["sha256"],
+                             MODULE.sha256((self.root / reference["repository_path"]).read_bytes()))
+        self.assertEqual(qualification["independent"], binding)
+
     def test_platform_capture_must_bind_the_frozen_candidate_and_release_before_writing(self):
         self.refused_before_writing(lambda evidence: evidence["platforms"]["darwin-remote-ssh"], (
             ("other candidate", lambda platform: platform.update(candidate="2" * 40),
