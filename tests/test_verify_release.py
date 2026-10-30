@@ -1623,7 +1623,8 @@ class ReleaseContractTest(unittest.TestCase):
             ("council left open", lambda record: record["product_tooling"].update(status="pending"),
              None, [f"{ledger} product_tooling.status 'pending' is not closed"]),
             ("other bytes", None, lambda summary: summary.update(sha256="0" * 64),
-             [f"{gate}.sha256 must match the review ledger bytes"]),
+             [f"{gate}.sha256 must match repository file bytes",
+              f"{gate}.sha256 must match the review ledger bytes"]),
             ("failed summary", None, lambda summary: summary.update(status="failed"),
              [f"{gate}.status must be passed in ready mode"]),
         )
@@ -1675,6 +1676,34 @@ class ReleaseContractTest(unittest.TestCase):
                     else:
                         self.assertEqual(errors, [])
 
+    def test_qualification_repository_bindings_are_enforced_recursively(self) -> None:
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        release_root = root / "releases" / PUBLIC_RELEASE
+        target = root / "binding-fixture.txt"
+        target.write_text("bound bytes")
+        digest = VERIFY_RELEASE.sha256_file(target)
+        for reference, sha, expected in (
+            ("binding-fixture.txt", digest, None),
+            ("binding-fixture.txt", "0" * 64, "sha256 must match repository file bytes"),
+            ("binding-fixture.txt", None, "sha256 must be a lower-case SHA-256"),
+            ("missing.txt", digest, "repository_path must name a file inside the repository"),
+            ("../outside.txt", digest, "repository_path must name a file inside the repository"),
+            (str(target), digest, "repository_path must name a file inside the repository"),
+        ):
+            with self.subTest(reference=reference, sha=sha):
+                binding = {"repository_path": reference}
+                if sha is not None:
+                    binding["sha256"] = sha
+                self.rebind_qualification(release_root, lambda record: record.update(
+                    binding_probe={"receipts": [binding]}))
+                _, errors = VERIFY_RELEASE.validate(root, require_ready=False)
+                if expected:
+                    self.assertTrue(any("qualification.binding_probe.receipts[0]." + expected
+                                        in error for error in errors), errors)
+                else:
+                    self.assertEqual(errors, [])
+
     def test_ready_route_acceptance_summary_must_restate_its_bound_evidence(self) -> None:
         """The fixture binds its routes evidence but predates the summary: add v0.14.0's summary,
         restated for that evidence, then drift it the ways a hand edit did."""
@@ -1696,7 +1725,8 @@ class ReleaseContractTest(unittest.TestCase):
             ("evidence edited after binding", lambda root, summary: (
                 root / "releases" / PUBLIC_RELEASE / "acceptance" / "documented-routes.json").write_text(
                     "{}\n", encoding="utf-8"),
-             [f"{bound} must bind the checked-in passed routes evidence",
+             [f"{bound}.sha256 must match repository file bytes",
+              f"{bound} must bind the checked-in passed routes evidence",
               f"{bound} receipt release must match qualification release",
               f"{bound} receipt status must be passed",
               f"{summary_field}.candidate_commit must be the routes evidence's candidate_commit"]),

@@ -721,6 +721,27 @@ def bound_file(root: Path, reference: Any) -> Path | None:
     return path if path.is_relative_to(root.resolve()) and path.is_file() else None
 
 
+def validate_repository_bindings(root: Path, value: Any, errors: list[str],
+                                 label: str = "qualification") -> None:
+    """Enforce every repository file/hash binding, including nested qualification entries."""
+    if isinstance(value, list):
+        for index, child in enumerate(value):
+            validate_repository_bindings(root, child, errors, f"{label}[{index}]")
+    elif isinstance(value, dict):
+        if "repository_path" in value:
+            reference = value["repository_path"]
+            path = bound_file(root, reference)
+            valid_path = (isinstance(reference, str) and not Path(reference).is_absolute()
+                          and path is not None)
+            require(valid_path, f"{label}.repository_path must name a file inside the repository", errors)
+            require_sha(value.get("sha256"), f"{label}.sha256", errors)
+            if valid_path:
+                require(sha256_file(path) == value.get("sha256"),
+                        f"{label}.sha256 must match repository file bytes", errors)
+        for key, child in value.items():
+            validate_repository_bindings(root, child, errors, f"{label}.{key}")
+
+
 def validate_review_ledger(
     root: Path,
     release: Any,
@@ -2086,6 +2107,7 @@ def validate(
 
     profile = load_json(profile_path) if profile_path.is_file() else {}
     qualification = load_json(qualification_path) if qualification_path.is_file() else {}
+    validate_repository_bindings(root, qualification, errors)
     qualification_pending = pending_allowed and not qualification
     components = manifest.get("components", {})
     omp = components.get("omp", {})

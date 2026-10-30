@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   that predate mandatory machine-bound review evidence remain unchanged (P15-R03).
 - Recheck a bound documented-routes receipt's release, passed status and current-release
   location even when its summary is absent (P15-R09).
+- Enforce every nested qualification `repository_path`/`sha256` binding against the
+  repository's actual file bytes in draft, installable and ready verification (P15-R11).
 
 ### Changed
 
