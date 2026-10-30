@@ -261,6 +261,158 @@ class ShippedNativeReceiptBindingTest(unittest.TestCase):
                     f"{self.prefix}.release_tag must name the package version and beta ({shipped})"])
 
 
+class NativeQualityContractTests(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        self.release = "v0.15.0"
+        self.directory = self.root / "releases" / self.release / "qualification"
+        self.directory.mkdir(parents=True)
+        self.variant = {
+            "id": "rtx3090-windows-native", "release_tag": "v0.8.0-qwen38-3090-beta.1",
+            "package_sha256": "b" * 64, "server_binary_sha256": "d" * 64,
+            "configuration_sha256": "f" * 64, "model_artifact_sha256": "1" * 64,
+            "maximum_context_tokens": 131072, "qualification": {},
+            "runtime_shape": {"max_concurrency": 1, "speculative_backend": "dflash2",
+                "draft_tokens": {"min": 7, "max": 7}, "proposal": "artifact-default", "fit": {
+                    "device_state_slots": 0, "admission_headroom_mib": 768,
+                    "draft_mlp_device_format": "Q4_G64_FP16", "token_embedding_residency": "host-mapped"}},
+        }
+        self.predecessor = deepcopy(self.variant)
+        self.predecessor.update(release_tag="v0.7.0-qwen38-3090-beta.3",
+                                package_sha256="a" * 64, server_binary_sha256="c" * 64,
+                                configuration_sha256="e" * 64)
+        self.predecessor["runtime_shape"]["speculative_backend"] = "mtp"
+        self.predecessor["runtime_shape"]["fit"].update(
+            device_state_slots=2, draft_mlp_device_format="artifact", token_embedding_residency="device")
+        self.save_predecessor()
+        from test_native_screen_arm import arm_identity
+        self.screen = {
+            "artifact_type": "omp-ninfer.quality-screen-verdict", "schema_version": 1,
+            "verdict": "pass", "validity": {"valid": True},
+            "runs": {role: {"arm": arm_identity("candidate" in role, "determinism" in role)}
+                     for role in ("production", "candidate", "production_determinism", "candidate_determinism")},
+            "raw_prompts_outputs_or_secrets_included": False,
+        }
+
+    def save_predecessor(self):
+        path = self.root / "releases/v0.14.0/manifest.json"
+        path.parent.mkdir(exist_ok=True)
+        path.write_text(json.dumps({"components": {"ninfer_variants": [self.predecessor]}}))
+
+    def evidence(self, field, value):
+        path = self.directory / f"{field}.json"
+        path.write_text(json.dumps(value))
+        self.variant["qualification"][field] = {
+            "path": path.relative_to(self.root).as_posix(), "sha256": VERIFY_RELEASE.sha256_file(path)}
+        return path
+
+    def validate(self):
+        errors = []
+        VERIFY_RELEASE.validate_native_quality(self.root, self.release, self.variant, errors)
+        return errors
+
+    def fit(self):
+        return {"artifact_type": "omp-ninfer.native-fit", "schema_version": 1, "status": "passed",
+                "identity": {key: self.variant[key] for key in ("package_sha256", *VERIFY_RELEASE.NATIVE_IDENTITY_FIELDS)},
+                "runtime_shape": self.variant["runtime_shape"], "maximum_context_tokens": 131072,
+                "measured_admission_headroom_mib": 768,
+                "effective_weights": {"converted_device_bytes": 1024, "host_mapped_bytes": 1024},
+                "raw_prompts_outputs_or_secrets_included": False}
+
+    def test_dflash_requires_bound_screen_and_fit_even_for_a_draft(self):
+        self.assertTrue(any("quality_screen" in error for error in self.validate()))
+        self.evidence("quality_screen", self.screen)
+        self.assertTrue(any("qualification.fit" in error for error in self.validate()))
+        self.evidence("fit", self.fit())
+        self.assertEqual(self.validate(), [])
+        for key, value in (("converted_device_bytes", 0), ("host_mapped_bytes", 0)):
+            fit = self.fit()
+            fit["effective_weights"][key] = value
+            self.evidence("fit", fit)
+            self.assertTrue(any(key in error for error in self.validate()))
+
+    def test_screen_rejects_wrong_bytes_invalid_verdict_and_disclosed_content(self):
+        for mutate in (
+            lambda value: value.update(verdict="fail"),
+            lambda value: value["validity"].update(valid=False),
+            lambda value: value.update(raw_prompts_outputs_or_secrets_included=True),
+            lambda value: value["runs"]["candidate"]["arm"].update(server_binary_sha256="0" * 64),
+            lambda value: value["runs"]["production"]["arm"].update(lane="rtx4090"),
+        ):
+            screen = deepcopy(self.screen)
+            mutate(screen)
+            self.evidence("quality_screen", screen)
+            errors = []
+            VERIFY_RELEASE.validate_quality_screen(self.root, self.release, self.variant, errors)
+            self.assertTrue(errors)
+        path = self.evidence("quality_screen", self.screen)
+        path.write_text(json.dumps({**self.screen, "extra": "changed"}))
+        errors = []
+        VERIFY_RELEASE.validate_quality_screen(self.root, self.release, self.variant, errors)
+        self.assertTrue(any("SHA-256" in error for error in errors))
+
+    def test_incoming_screen_is_checked_before_destination_exists(self):
+        incoming = self.evidence("quality_screen", self.screen)
+        data = incoming.read_bytes()
+        incoming.unlink()
+        source = self.root / "incoming.json"
+        source.write_bytes(data)
+        errors = []
+        VERIFY_RELEASE.validate_quality_screen(self.root, self.release, self.variant, errors, source)
+        self.assertEqual(errors, [])
+        self.assertFalse(incoming.exists())
+        self.variant["qualification"]["quality_screen"]["path"] = "../outside.json"
+        errors = []
+        VERIFY_RELEASE.validate_quality_screen(self.root, self.release, self.variant, errors, source)
+        self.assertTrue(any("stay inside" in error for error in errors))
+
+    def test_mtp_rebuild_exemption_requires_frozen_corpus_direct_bytes_and_same_fit(self):
+        self.variant["runtime_shape"] = deepcopy(self.predecessor["runtime_shape"])
+        identity = lambda row: {key: row[key] for key in VERIFY_RELEASE.NATIVE_IDENTITY_FIELDS}
+        parity = {"artifact_type": "omp-ninfer.native-t1-parity", "schema_version": 1, "status": "passed",
+                  "lane": "rtx3090", "predecessor": identity(self.predecessor), "candidate": identity(self.variant),
+                  "case_ids_sha256": VERIFY_RELEASE.T1_CASE_IDS_SHA256, "compared": 84, "identical": 84,
+                  "comparison_method": VERIFY_RELEASE.T1_COMPARISON_METHOD,
+                  "raw_prompts_outputs_or_secrets_included": False}
+        self.evidence("t1_parity", parity)
+        self.assertEqual(self.validate(), [])
+        for field, value in (("compared", 83), ("identical", 83), ("case_ids_sha256", "0" * 64),
+                             ("comparison_method", "digest-equality"), ("raw_prompts_outputs_or_secrets_included", True),
+                             ("predecessor", identity(self.variant))):
+            self.evidence("t1_parity", {**parity, field: value})
+            self.assertTrue(self.validate(), field)
+        self.evidence("t1_parity", parity)
+        self.variant["runtime_shape"]["fit"]["device_state_slots"] = 0
+        self.assertTrue(any("unchanged predecessor" in error for error in self.validate()))
+        self.variant["runtime_shape"] = deepcopy(self.predecessor["runtime_shape"])
+        (self.root / "releases/v0.14.0/manifest.json").unlink()
+        self.assertTrue(self.validate())
+
+    def test_carried_rows_and_historical_releases_are_exempt_but_changed_shape_is_not(self):
+        self.variant = deepcopy(self.predecessor)
+        self.assertEqual(self.validate(), [])
+        self.variant["runtime_shape"]["fit"]["device_state_slots"] = 0
+        self.assertTrue(any("quality_screen" in error for error in self.validate()))
+        self.release = "v0.14.0"
+        self.assertEqual(self.validate(), [])
+
+    def test_legacy_predecessor_shape_uses_only_hash_bound_mtp_configuration(self):
+        path = self.root / "releases/v0.14.0/qualification/rtx3090.json"
+        path.parent.mkdir()
+        path.write_text(json.dumps({"configuration": {"speculative_backend": "mtp",
+                                                   "device_state_slots": 2, "admission_headroom_mib": 768}}))
+        predecessor = deepcopy(self.predecessor)
+        del predecessor["runtime_shape"]
+        predecessor["qualification"] = {"summary": path.relative_to(self.root).as_posix(),
+                                        "sha256": VERIFY_RELEASE.sha256_file(path)}
+        self.assertEqual(VERIFY_RELEASE.native_shape(self.root, predecessor),
+                         VERIFY_RELEASE.native_shape(self.root, self.predecessor))
+        path.write_text("{}")
+        self.assertIsNone(VERIFY_RELEASE.native_shape(self.root, predecessor))
+
+
 class ReleaseContractTest(unittest.TestCase):
     def test_receipt_command_text_is_not_a_json_evidence_reference(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
