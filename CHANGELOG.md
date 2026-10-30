@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   prompts in both arms, with duplicate-free scored/response membership seals (P15-R08).
 - Fail closed on an omitted G4 review binding in ready mode from v0.15.1; historical releases
   that predate mandatory machine-bound review evidence remain unchanged (P15-R03).
+- Recheck a bound documented-routes receipt's release, passed status and current-release
+  location even when its summary is absent (P15-R09).
 
 ### Changed
 

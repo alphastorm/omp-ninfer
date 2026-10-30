@@ -1650,6 +1650,31 @@ class ReleaseContractTest(unittest.TestCase):
                 self.assertEqual(errors, [
                     "qualification.observed_gates.g4_review is required in ready mode"])
 
+    def test_bound_routes_must_pass_for_this_release_inside_its_directory(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            path = root / "releases/v0.15.1/acceptance/documented-routes.json"
+            path.parent.mkdir(parents=True)
+            for fields, foreign, expected in (
+                ({}, False, None),
+                ({"release": "v0.15.0"}, False, "receipt release must match"),
+                ({"status": "failed"}, False, "receipt status must be passed"),
+                ({}, True, "repository_path must stay inside release"),
+            ):
+                with self.subTest(fields=fields, foreign=foreign):
+                    target = path if not foreign else root / "old-routes.json"
+                    target.write_text(json.dumps({"release": "v0.15.1", "status": "passed", **fields}))
+                    qualification = {"release": "v0.15.1", "composition": {
+                        "documented_route_acceptance": {"status": "passed",
+                            "repository_path": target.relative_to(root).as_posix(),
+                            "sha256": VERIFY_RELEASE.sha256_file(target)}}}
+                    errors = []
+                    VERIFY_RELEASE.validate_documented_route_acceptance(root, qualification, errors)
+                    if expected:
+                        self.assertTrue(any(expected in error for error in errors), errors)
+                    else:
+                        self.assertEqual(errors, [])
+
     def test_ready_route_acceptance_summary_must_restate_its_bound_evidence(self) -> None:
         """The fixture binds its routes evidence but predates the summary: add v0.14.0's summary,
         restated for that evidence, then drift it the ways a hand edit did."""
@@ -1672,6 +1697,8 @@ class ReleaseContractTest(unittest.TestCase):
                 root / "releases" / PUBLIC_RELEASE / "acceptance" / "documented-routes.json").write_text(
                     "{}\n", encoding="utf-8"),
              [f"{bound} must bind the checked-in passed routes evidence",
+              f"{bound} receipt release must match qualification release",
+              f"{bound} receipt status must be passed",
               f"{summary_field}.candidate_commit must be the routes evidence's candidate_commit"]),
         )
         for case, change, expected in cases:

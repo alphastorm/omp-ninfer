@@ -795,12 +795,19 @@ def validate_documented_route_acceptance(
     require(bound.get("status") == "passed" and path is not None
             and sha256_file(path) == bound.get("sha256"),
             f"{label} must bind the checked-in passed routes evidence", errors)
+    release = qualification.get("release")
+    require(path is not None and path.is_relative_to((root / "releases" / str(release)).resolve()),
+            f"{label}.repository_path must stay inside release", errors)
+    routes = load_json(path) if path is not None else {}
+    require(routes.get("release") == release,
+            f"{label} receipt release must match qualification release", errors)
+    require(routes.get("status") == "passed",
+            f"{label} receipt status must be passed", errors)
     if summary is None:
         return
     if not isinstance(summary, dict):
         errors.append("qualification.documented_route_acceptance must be an object")
         return
-    routes = load_json(path) if path is not None else {}
     for field, expected, meaning in (
         ("status", "passed", "passed"),
         ("evidence_path", bound.get("repository_path"), f"{label}.repository_path"),
