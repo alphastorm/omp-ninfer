@@ -1,0 +1,89 @@
+{
+  "artifact_type": "omp-ninfer.native-fit",
+  "schema_version": 1,
+  "status": "passed",
+  "source_commit": "2af6b3dec467e61d284889c69e903eef464bda97",
+  "diagnostic_loader": {
+    "sha256": "61a25e9dbc90384eb6339986f5060d99ba00788ef8214d6ef7644e3b786e0e85",
+    "source_commit": "2af6b3dec467e61d284889c69e903eef464bda97",
+    "architecture": "sm_86",
+    "shipping": false,
+    "rounds": 1
+  },
+  "raw_prompts_outputs_or_secrets_included": false,
+  "identity": {
+    "package_sha256": "8536cdff395be30e91ae8b2b10c1f338b88bff9bc450d7d22a0f1e4eff52dd0a",
+    "server_binary_sha256": "05cb97e446a1c872005c875f0b214a99553888ac40f021e6f99a6df9a9a0672d",
+    "configuration_sha256": "55788a647fb250a37754076a2d8f28d542119fb88191428bbaeb7be076ee43aa",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+  },
+  "runtime_shape": {
+    "max_concurrency": 1,
+    "speculative_backend": "dflash2",
+    "draft_tokens": {
+      "min": 7,
+      "max": 7
+    },
+    "proposal": "artifact-default",
+    "fit": {
+      "device_state_slots": 0,
+      "admission_headroom_mib": 768,
+      "draft_mlp_device_format": "Q4_G64_FP16",
+      "token_embedding_residency": "host-mapped"
+    }
+  },
+  "native_state_image_bytes": 195897344,
+  "maximum_context_tokens": 131072,
+  "effective_weights": {
+    "converted_device_bytes": 473497600,
+    "host_mapped_bytes": 1350860800
+  },
+  "startup": {
+    "engine": {
+      "max_context": 131072,
+      "kv_capacity": 131072,
+      "max_concurrency": 1,
+      "prefill_chunk": 1024,
+      "gpu_keep_warm_ms": 0,
+      "speculative_backend": "dflash2",
+      "speculative_draft_window": 7,
+      "proposal_head": "optimized"
+    },
+    "memory": {
+      "available_after_startup_bytes": 1758461952,
+      "kv_capacity_headroom_bytes": 805306368,
+      "host_context_capacity_bytes": 13291470848,
+      "runtime_reservation_bytes": 4812480768,
+      "device_budget_bytes": 24468520960
+    }
+  },
+  "measured_admission_headroom_mib": 768.0,
+  "host_context_bytes": 13291470848,
+  "retrieval": {
+    "prompt_tokens": 130048,
+    "exact_answer_matched": true,
+    "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a"
+  },
+  "durability": {
+    "explicit_save_authenticated_committed": true,
+    "managed_stop_authenticated_committed": true,
+    "true_cold_empty_store": true,
+    "cold_cached_input_tokens": 0,
+    "restored_input_tokens": 3066,
+    "output_bytes_identical": true,
+    "generated_token_ids_identical": true,
+    "generated_token_count": 32,
+    "managed_stop_restore_exact": true
+  },
+  "device_memory": {
+    "samples": 920,
+    "peak_used_mib": 21968.0,
+    "minimum_free_mib": 2358.0
+  },
+  "restoration": {
+    "status": "passed",
+    "owner_power_limit_w": 370,
+    "scratch_tasks_removed": true,
+    "incumbent_state": "stopped-as-found"
+  }
+}

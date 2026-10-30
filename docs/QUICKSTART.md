@@ -6,8 +6,9 @@ This guide prepares an unpublished candidate. The published release remains **v0
 its [immutable guide](https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/docs/QUICKSTART.md)
 until v0.15.0 is published. The executable blocks below target v0.15.0 for fresh acceptance;
 they do not authorize installation from a draft or replace the ready gate.
-This host-free stage still carries the v0.14.0 RTX 3090 MTP3 package. Its planned DFlash2 K7
-replacement must pass its gates and be rebound before the candidate's route window.
+The RTX 3090 route is prepared for `v0.8.0-qwen38-3090-beta.1` (F2 `2af6b3de`, DFlash2 K7).
+Its qualification and fit receipts are staged; the manifest still carries MTP3 until the lead's
+post-screen component cut and gated rebind. Do not execute this route before that rebind and lane pin.
 
 OMP NInfer is the qualified local inference appliance and release layer connecting the
 [Oh My Pi](https://github.com/can1357/oh-my-pi) (OMP) coding-agent client over authenticated
@@ -20,7 +21,7 @@ loopback to the NInfer inference engine serving Qwen3.8 27B on your GPU.
 | RTX 5090 container on Windows 11 + Docker Desktop / WSL2 | Native Windows x64 client over local loopback `127.0.0.1:18089` | [RTX 5090 Windows route](#ready-route-native-windows-and-docker-desktop-wsl2) |
 | RTX 5090 container on Windows 11 / WSL2 or Linux | macOS arm64 client over a manual SSH tunnel (preview) | [macOS manual SSH route (preview)](#macos-client-over-a-manual-ssh-tunnel-preview) |
 | RTX 4090 native Windows 11 (alone or beside RTX 3090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; unchanged beta.3 runtime, fresh client/route acceptance required | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) |
-| RTX 3090 native Windows 11 (alone or beside RTX 4090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; carried beta.3 MTP3 until the gated DFlash2 rebind | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
+| RTX 3090 native Windows 11 (alone or beside RTX 4090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; prepared DFlash2 K7 beta.1, gated rebind and fresh route acceptance required | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
 | RTX 5090 container with Linux x64 client under WSL2 only | WSL2 shell client over local loopback `127.0.0.1:18089` (no native Linux OS qualification) | [WSL2 Linux client](#wsl2-linux-client-over-local-loopback) |
 | Other GPU, non-WSL Linux client, or concurrent native serving | Unsupported | [Compatibility boundary](COMPATIBILITY.md) |
 
@@ -45,7 +46,8 @@ loopback to the NInfer inference engine serving Qwen3.8 27B on your GPU.
   host plus a local filesystem for checkpoints (never a network share). RTX 5090 needs
   `28672 MiB` host RAM and a shared Host budget of `20867.734375 MiB` (21,881,405,440 bytes).
   Native RTX 4090 retains its `32768 MiB` host floor and shared Host budget `14787.734375 MiB`
-  (15,506,063,360 bytes); RTX 3090 uses `11715.734375 MiB` (12,284,837,888 bytes).
+  (15,506,063,360 bytes); the prepared RTX 3090 DFlash2 profile uses `12675.734375 MiB`
+  (13,291,470,848 bytes), translating the measured 195,897,344-byte native state image.
   These replace separate host-slot/KV budgets; no smaller-host qualification is claimed.
 
 ## Contributor acceptance and preflight
@@ -194,12 +196,14 @@ the contributor harness's native default-model issue (#98). See [Releases](RELEA
 | --- | --- | --- | --- |
 | RTX 5090 container (`127.0.0.1:18089`) | `v0.7.0-qwen38-5090-beta.3`, source `2c6f423b` on upstream `64d10fbf`, server `55f0b95a`, image `760fb6be` | `81f924d4` (20,437,521,664 bytes) | Kept `qwen38-5090-v0.13.0` (config `751d22dc`): mandatory strict origin auth, DFlash2 K=7, BF16 KV (146,368 automatic tokens), 131,072 context, two active requests plus two extra device-state slots, shared Host budget, 180 s pending timeout; JSON-schema output, 128-character tool names, text, tools, vision, preserved thinking |
 | RTX 4090 native Windows (`127.0.0.1:18082`) | `v0.7.0-qwen38-4090-beta.3`, source `2c6f423b` on upstream `64d10fbf`, package `87038cfb`, server `5caa7780` | `81f924d4` (20,437,521,664 bytes) | `qwen38-4090-native-v0.7.0-beta.3` (public config `b5cfbf50`): mandatory strict origin auth, MTP3/INT8, `Group64` A8 off, 131,072 context, C1, 30 s pending timeout, two extra slots, 2,048-token prefill, shared Host budget, 640 MiB admission headroom; JSON-schema output, 128-character tool names, text/tools (no vision or DFlash2) |
-| RTX 3090 native Windows (`127.0.0.1:18082`) | `v0.7.0-qwen38-3090-beta.3`, source `2c6f423b` on upstream `64d10fbf`, package `a7637f66`, server `fedce425` | `81f924d4` (20,437,521,664 bytes) | `qwen38-3090-native-v0.7.0-beta.3` (public config `d08d262b`): mandatory strict origin auth, MTP3/INT8, `Group64` A8 off, 131,072 context, C1, 30 s pending timeout, four extra slots, 1,024-token prefill, shared Host budget, 768 MiB admission headroom, 350 W serving cap; JSON-schema output, 128-character tool names, text/tools (no vision or DFlash2) |
+| RTX 3090 native Windows (`127.0.0.1:18082`) | Prepared `v0.8.0-qwen38-3090-beta.1`, source `2af6b3de` on upstream `64d10fbf`, package `8536cdff`, server `05cb97e4`; not yet bound | `81f924d4` (20,437,521,664 bytes) | `qwen38-3090-native-v0.8.0-beta.1` (public config `55788a64`): mandatory strict origin auth, DFlash2 K7/INT8, `Group64` A8 off, 131,072 context, C1, 30 s pending timeout, zero extra slots, 1,024-token prefill, shared Host budget 12,675.734375 MiB, 768 MiB admission headroom, `Q4_G64_FP16` draft MLP and host-mapped embedding, 350 W serving cap; JSON-schema output, 128-character tool names, text/tools (no vision) |
 
 The exact RTX 5090 image is
 `ghcr.io/alphastorm/ninfer-runtime@sha256:760fb6bea925eb26d4fa53ab87a126494b69ba7bcfed515d23dee7afa65cdb2a`,
-and all three lanes bind engine source `2c6f423bd817b6534158553e1b34ab4959c43165`.
-It ships checked first-build bytes under a founder-approved 5090-only reproducibility exception;
+and the carried RTX 5090/RTX 4090 lanes bind engine source
+`2c6f423bd817b6534158553e1b34ab4959c43165`. The prepared RTX 3090 replacement instead uses F2
+`2af6b3dec467e61d284889c69e903eef464bda97`; this is deliberately not a common-source release.
+The carried RTX 5090 ships checked first-build bytes under a founder-approved 5090-only reproducibility exception;
 same-source second builds are not bit-identical. See the
 [release notes](../releases/v0.14.0/NINFER_RELEASE_NOTES.md) and
 [manifest](../releases/v0.14.0/manifest.json) for exact identities and scope.
@@ -212,15 +216,19 @@ same-source second builds are not bit-identical. See the
   expiring at the server
   ([troubleshooting](TROUBLESHOOTING.md#a-turn-fails-with-request_queue_timeout-late-in-a-long-session)).
 - **Native two-GPU UUID topology and rollback:** Both native packages bind their GPU UUID and PCI
-  address on a two-GPU Windows 11 host and serve sequentially on port `18082`. Both beta.3 runtime
-  qualifications record no predecessor (`not_applicable`, zero rollback directions), not an
-  inherited beta.2 upgrade/rollback result. Historical v0.14.0 public-install and restoration
-  acceptance passed; new-client v0.15.0 acceptance remains required. Preserve prior native release
-  roots separately for historical recovery.
-- **RTX 3090 power and upgrade:** the serving cap is now 350 W. Qualification restored the owner's
-  370 W baseline on stop; this is not a promise about another operator's hardware. Stop a running
-  v0.13.1 RTX 3090 lane before installing v0.14.0; its old 300 W lease otherwise fails the new
-  cap check before replacement ([#94](https://github.com/alphastorm/omp-ninfer/issues/94)).
+  address on a two-GPU Windows 11 host and serve sequentially on port `18082`. The carried RTX 4090
+  beta.3 qualification still records no predecessor (`not_applicable`, zero rollback directions).
+  RTX 3090's fresh 15-phase scratch qualification also has that first-lineage disposition; its
+  separate actual-v0.14.0 upgrade, forced first-Start failure/rollback, and interrupted-install
+  repair/reinstall rehearsals passed. These do not transfer final public-route acceptance or
+  establish arbitrary rollback directions. Preserve prior native release roots separately.
+- **RTX 3090 power and upgrade:** v0.14.0 to the prepared DFlash2 component is equal-cap,
+  **350 W to 350 W**; a running incumbent was upgraded successfully. The historical
+  v0.13.1-to-v0.14.0 stop prerequisite is not this transition. Qualification and transaction
+  rehearsals restored the owner's 370 W baseline; this is not a promise about other hardware.
+  The forced failure preceded candidate server launch; `prior_paused=true`, live-candidate
+  Stop/final-save/Kill failure and the mkdir-before-journal interval remain unproved
+  ([#116](https://github.com/alphastorm/omp-ninfer/issues/116)).
 - **Checkpoints and legacy routes:** Stock OMP names each session with `prompt_cache_key`, which the
   authenticated runtime hashes into the session identity. Checkpoints restore across graceful
   restarts on all three lanes, but saves are best effort under traffic (a crash or expired wait can
@@ -230,12 +238,13 @@ same-source second builds are not bit-identical. See the
   the older RTX 3090 `v0.2` lineage on the OMP 18.0.9 fork client remains in the
   [historical v0.7.2 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md).
 - **Session capability boundary:** Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.
-- **Native protocol and checkpoint gates:** Both beta.3 native runtime qualifications cover Chat and Responses
+- **Native protocol and checkpoint gates:** The carried RTX 4090 and fresh RTX 3090 qualifications cover Chat and Responses
   JSON-schema structured output, 128-character tool names, status endpoint schema 2, and request-log
   schema 30. The package server-config (schema 4) uses
   `cache/<release-instance-id>/session-checkpoints-v3` (where `<release-instance-id>` is the
-  installed release ID such as `qwen38-4090-native-v0.7.0-beta.3-2c6f423bd817`), not the old native
-  root. Keep old native roots untouched; never migrate their generations. Replay OMP transcripts for
+  installed release ID such as `qwen38-4090-native-v0.7.0-beta.3-2c6f423bd817` or
+  `qwen38-3090-native-v0.8.0-beta.1-2af6b3dec467`), not the old native
+  root. Keep old native roots untouched; never import MTP3 generations into the DFlash2 store. Replay OMP transcripts for
   a fresh prefill. Both native profiles require `--session-checkpoint-require-origin-auth` and a key
   of at least 32 bytes; the generated key below is 64 characters. Do not drop strict origin to
   accept old state.
@@ -487,20 +496,27 @@ if ($LASTEXITCODE -eq 0) { throw 'outage request unexpectedly succeeded' }
 Requires Windows 11 x64, one RTX 3090 (sm_86), a supported NVIDIA driver, Git, PowerShell, Python 3
 (`py` launcher), and 40 GiB free disk. The installer binds the card's UUID and PCI address even
 beside an RTX 4090 (use `-GpuUuid` if multiple RTX 3090 cards exist). Stop the other native lane on
-port `18082` first. The beta.3 runtime qualification records no predecessor (`not_applicable`,
-zero rollback directions); prior beta.2 acceptance does not transfer.
+port `18082` first. The prepared component is
+[`v0.8.0-qwen38-3090-beta.1`](https://github.com/alphastorm/ninfer/releases/tag/v0.8.0-qwen38-3090-beta.1),
+source `2af6b3de`: DFlash2 K7, INT8 KV, 131,072-token context, one active request, zero extra
+device-state slots, 768 MiB admission headroom, and shared Host budget 13,291,470,848 bytes.
+The exact package is
+[`ninfer-rtx3090-native-v0.8.0-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz`](https://github.com/alphastorm/ninfer/releases/download/v0.8.0-qwen38-3090-beta.1/ninfer-rtx3090-native-v0.8.0-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz)
+(`8536cdff`, 971,617,000 bytes); its closed
+[`SHA256SUMS`](https://github.com/alphastorm/ninfer/releases/download/v0.8.0-qwen38-3090-beta.1/SHA256SUMS)
+is `684df9cf`. These are prepared publication addresses, not an already-published component.
+The blocks continue to derive the package and lifecycle assets from the gated manifest.
 
-This section still installs the carried MTP3 package; it is not yet the planned DFlash2 K7
-route. The following older upgrade warning applies only to that carried installer's historical
-v0.13.1-to-v0.14.0 transition, not the planned equal-cap 350 W upgrade from v0.14.0.
-
-**Upgrade from v0.13.1: stop the running RTX 3090 lane before installing v0.14.0.** Use the
-installed controller's `Stop` action from [Operate the RTX 3090 native lane](#operate-the-rtx-3090-native-lane)
-and inspect any refusal before continuing. A running v0.13.1 lane holds a 300 W GPU-owner lease;
-the new installer checks it against the 350 W serving cap and refuses before replacement, leaving
-the old lane running unchanged. A stopped lane upgrades normally
-([#94](https://github.com/alphastorm/omp-ninfer/issues/94)). Keep prior roots for historical recovery;
-this prerequisite is not a claim of qualified upgrade/rollback directions.
+**Upgrade from v0.14.0 is equal-cap, 350 W to 350 W.** Running-lane upgrade, forced
+post-activation first-Start refusal/rollback to the healthy incumbent, and interrupted-install
+repair followed by same-instance reinstall all passed on the exact F2 package. The fresh 15-phase
+qualification's rollback is separately `not_applicable` (first scratch lineage, zero directions),
+not that transition proof. Keep prior roots; MTP3 checkpoint generations must not enter the new
+`qwen38-3090-native-v0.8.0-beta.1-2af6b3dec467` DFlash2 store. Replay OMP transcripts instead.
+Inspect any installed controller's `Stop` refusal before proceeding. The rehearsals do not cover
+`prior_paused=true`, failed live-candidate Stop/final saves/Kill, or mkdir-before-journal recovery
+([#116](https://github.com/alphastorm/omp-ninfer/issues/116)); final-candidate route acceptance is
+still separate.
 
 ```powershell
 git clone --branch v0.15.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
@@ -1163,9 +1179,10 @@ runtime-scanned directories, and publishes the session's `current` pointer last.
 `manifest.mac` is an HMAC keyed by the lane's bearer key; pass `--allow-unauthenticated` only for
 legacy local checkpoints, never to bypass the release policy. Both the `qwen38-5090-v0.13.0`
 container profile and the `qwen38-4090-native-v0.7.0-beta.3` /
-`qwen38-3090-native-v0.7.0-beta.3` native profiles start with
+`qwen38-3090-native-v0.8.0-beta.1` native profiles start with
 `--session-checkpoint-require-origin-auth` (32-byte bearer floor) so unauthenticated or altered
-generations are refused at load. They do not migrate prior checkpoint stores.
+generations are refused at load. They do not migrate prior checkpoint stores; never import an
+MTP3 generation into the RTX 3090 DFlash2 instance.
 
 For bulk transfer over high-latency or Windows-to-Windows links where single-stream `scp` stalls,
 use [`scripts/hosts/pscp.py`](../scripts/hosts/pscp.py) (verifies whole-file SHA-256 on both ends):

@@ -20,15 +20,24 @@ replaces 18.12.6 in the release-local descriptor. RTX 5090 `v0.7.0-qwen38-5090-b
 (source `2c6f423b`, image `760fb6be`, server `55f0b95a`, kept profile/config
 `qwen38-5090-v0.13.0` / `751d22dc`) and RTX 4090 `v0.7.0-qwen38-4090-beta.3`
 (package `87038cfb`, server `5caa7780`, config `b5cfbf50`, MTP3) carry unchanged from v0.14.0.
-RTX 3090 also still carries `v0.7.0-qwen38-3090-beta.3` / MTP3 in this first stage; the lead binds
-`v0.8.0-qwen38-3090-beta.1` / DFlash2 K7 only after its shipping-package qualification, powered
-screen, speed, fit/durability and agent gates. No current package outcome is inferred.
+The prepared RTX 3090 component is `v0.8.0-qwen38-3090-beta.1` / DFlash2 K7, F2
+`2af6b3dec467e61d284889c69e903eef464bda97`, package `8536cdff` (971,617,000 bytes), server
+`05cb97e4`, public config `55788a64`. Its 15-phase qualification and 34/34 second-build
+EXE/DLL byte comparison passed. Shipping fit measured 131,072 context/KV, zero extra slots,
+768 MiB admission headroom, 21,968 MiB peak used and true-cold **0** versus restored **3,066**
+cached tokens with all 32 generated IDs/output bytes identical. The equal-cap actual-v0.14.0
+350 W-to-350 W upgrade, forced first-Start failure/rollback and interrupted-install
+repair/reinstall rehearsals passed. Fork council sequence `omp-ninfer-v0.15.0-fork-5caa4a48`
+closed by lead verification (11 final rows, no in-scope residual P0/P1);
+[#116](https://github.com/alphastorm/omp-ninfer/issues/116) records the residual boundaries.
+The manifest's RTX 3090 MTP3 row deliberately remains unbound until the lead's post-screen
+component publication and gated rebind; the screen, speed and probe results are still placeholders.
 
 The [prepared guide](QUICKSTART.md) targets v0.15.0 before any route window; use the
 [immutable v0.14.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/docs/QUICKSTART.md)
 for the published release. Runtime carry-forward does not transfer client/public-route acceptance
-or council approval. Root authority/profiles stay v0.14.0 until the later lane pin. Fresh platform,
-live/documented-route and public-install acceptance, restoration, one changed-scope council,
+or product-tooling approval. Root authority/profiles stay v0.14.0 until the later lane pin. Fresh platform,
+live/documented-route and public-install acceptance, restoration, product-tooling review,
 composition and immutable pins remain gates. RTX 4090 DFlash2 K6/K5, the `alphastorm/ninfer#48/#49`
 fixes for carried RTX 4090/RTX 5090 bytes, and council P2 deferrals move to v0.15.1.
 See the [staged notes](../releases/v0.15.0/NINFER_RELEASE_NOTES.md),

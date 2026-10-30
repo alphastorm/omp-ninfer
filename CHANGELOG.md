@@ -56,8 +56,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   v0.15.0 guide before route acceptance. Exact selectors and Responses compatibility keys stay;
   `qwen3.8-27b` gets stock replace-edit while opaque `q38-ninfer` stays hashline.
 - Carry the exact v0.14.0 RTX 5090 and RTX 4090 beta.3 runtime bytes unchanged. This host-free
-  stage also carries RTX 3090 MTP3 until the lead's gated DFlash2 K7 component rebind. No new
-  platform/public-route acceptance, council approval, lane pin, tag or publication is claimed.
+  stage prepares RTX 3090 `v0.8.0-qwen38-3090-beta.1` from F2 `2af6b3de` (package `8536cdff`,
+  server `05cb97e4`, config `55788a64`), while the manifest still carries MTP3 until the lead's
+  gated rebind. Stage the exact 15-phase qualification and 131K fit receipts and packaged config;
+  retarget the native guide without changing its manifest-driven installer flow. Fill measured
+  34/34 double-build identity, 21,968 MiB peak / 768 MiB headroom, true-cold versus 3,066-token
+  restored byte/ID parity, and actual-beta.3 equal-cap upgrade/rollback/repair PASS.
+  Fork council dispositions closed with residuals in
+  [#116](https://github.com/alphastorm/omp-ninfer/issues/116); screen, speed and probes remain
+  placeholders. No new platform/public-route acceptance, product-tooling approval, lane pin,
+  tag or publication is claimed.
   The published product and root authority remain v0.14.0. RTX 4090 DFlash2 K6/K5,
   `alphastorm/ninfer#48/#49` for carried RTX 4090/RTX 5090, and council P2 deferrals move to v0.15.1.
 - Refresh the read-only upstream watch against the shipped v0.14.0 engine base `64d10fbf`

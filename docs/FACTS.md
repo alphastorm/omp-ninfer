@@ -50,14 +50,19 @@ See the [decision guide](DECISION_GUIDE.md) for the side-by-side comparison.
 
 ## Current release
 
-**Staged next: v0.15.0, not published.** The host-free draft pins stock Oh My Pi **18.14.0**
-(`31147f9d`, tree `9a63b5bf`; Darwin `60884395`, Windows `620a5935`, Linux `e7dd2b60`) and
-currently carries all three v0.14.0 runtime packages unchanged. RTX 4090 `v0.7.0-qwen38-4090-beta.3`
-and RTX 5090 `v0.7.0-qwen38-5090-beta.3` remain carried in the final fast-track scope. RTX 3090
-still binds MTP3 `v0.7.0-qwen38-3090-beta.3` here; its planned DFlash2 K7
-`v0.8.0-qwen38-3090-beta.1` rebind awaits shipping-package gates. Fresh client/route acceptance,
-changed-scope council, composition and immutable pins are separate. The root compatibility
-authority stays v0.14.0 until the lead's lane pin. See the
+**Staged next: v0.15.0, not published.** The draft pins stock Oh My Pi **18.14.0**
+(`31147f9d`, tree `9a63b5bf`; Darwin `60884395`, Windows `620a5935`, Linux `e7dd2b60`).
+RTX 4090 `v0.7.0-qwen38-4090-beta.3` and RTX 5090 `v0.7.0-qwen38-5090-beta.3` remain carried
+unchanged. The prepared RTX 3090 replacement is **`v0.8.0-qwen38-3090-beta.1`**, frozen F2
+`2af6b3de`, package `8536cdff` (971,617,000 bytes), server `05cb97e4`, config `55788a64`:
+DFlash2 K7 / INT8, 131,072 context, C1, zero extra slots, shared Host budget
+13,291,470,848 bytes and 768 MiB admission headroom. Its 15-phase qualification, 34/34
+double-build byte identity, 131K fit/true-cold durability and actual-beta.3 equal-cap
+upgrade/rollback/repair rehearsals passed; the fork council closed with residuals in
+[#116](https://github.com/alphastorm/omp-ninfer/issues/116). The manifest still binds carried
+MTP3 until the lead's post-screen cut and gated rebind; quality, speed and probes remain unfilled.
+Fresh client/route acceptance, product-tooling review, composition and immutable pins are separate.
+The root compatibility authority stays v0.14.0 until the lead's lane pin. See the
 [staged notes](../releases/v0.15.0/NINFER_RELEASE_NOTES.md),
 [staged manifest](../releases/v0.15.0/manifest.json), and
 [host-free client review](measurements/2026-10-30-omp-18140-client-upgrade-review.json).

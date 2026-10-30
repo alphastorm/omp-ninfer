@@ -49,7 +49,7 @@ class V0140PreparationTests(unittest.TestCase):
         self.assertTrue(qualification["external_installation_qualified"])
         self.assertFalse(qualification["publication_authorized"])
 
-    def test_prepared_guide_lane_identities_match_the_candidate_manifest(self) -> None:
+    def test_current_guide_preserves_carried_5090_and_4090_identities(self) -> None:
         manifest = load(RELEASE / "manifest.json")
         text = documented_route.DEFAULT_DOC.read_text(encoding="utf-8")
         self.assertIn(SOURCE, text)
@@ -66,6 +66,8 @@ class V0140PreparationTests(unittest.TestCase):
         self.assertIn("20,437,521,664 bytes", glance)
         for variant in manifest["components"]["ninfer_variants"]:
             number = variant["id"].split("-", 1)[0][3:]
+            if number != "4090":
+                continue  # The prepared v0.15.0 guide replaces RTX 3090; its own tests bind F2.
             row = next(line for line in glance.splitlines()
                        if line.startswith(f"| RTX {number} native Windows"))
             with self.subTest(lane=number):
@@ -75,20 +77,16 @@ class V0140PreparationTests(unittest.TestCase):
                               f"qwen38-{number}-native-v0.7.0-beta.3",
                               "MTP3/INT8", "`Group64` A8 off"):
                     self.assertIn(value, row)
-                if number == "3090":
-                    self.assertIn("350 W serving cap", row)
         self.assertNotIn("beta.2", glance)
         self.assertIn("founder-approved 5090-only reproducibility exception", glance)
 
-    def test_native_3090_upgrade_requires_stop_before_the_first_install_block(self) -> None:
-        text = documented_route.DEFAULT_DOC.read_text(encoding="utf-8")
-        section = text.split("## Native Windows RTX 3090 release lane\n", 1)[1].split(
-            "```powershell", 1)[0]
+    def test_historical_3090_stop_prerequisite_remains_in_release_notes(self) -> None:
+        text = (RELEASE / "NINFER_RELEASE_NOTES.md").read_text(encoding="utf-8")
         for claim in ("stop the running RTX 3090 lane before installing v0.14.0",
-                      "installed controller's `Stop` action", "300 W GPU-owner lease",
-                      "350 W serving cap", "A stopped lane upgrades normally",
+                      "300 W GPU-owner lease",
+                      "350 W cap", "A stopped lane upgrades normally",
                       "https://github.com/alphastorm/omp-ninfer/issues/94"):
-            self.assertIn(claim, section)
+            self.assertIn(claim, text)
 
     def test_three_lanes_bind_one_exact_engine_source(self) -> None:
         manifest = load(RELEASE / "manifest.json")

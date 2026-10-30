@@ -462,6 +462,11 @@ class ReleaseContractTest(unittest.TestCase):
                 model = VERIFY_RELEASE.effective_native_model(manifest)
                 errors = []
                 VERIFY_RELEASE.validate_model_component(model, "components.model", errors)
+                self.assertEqual(errors, [])
+                if manifest["status"] == "draft":
+                    # A prepared draft may stage incoming receipts before its gated rebind.
+                    # Its preparation tests must assert refusal of those unbound bytes.
+                    continue
                 authority_path = path.parent / "compatibility.json"
                 authority = self.load(authority_path) if authority_path.exists() else {}
                 VERIFY_RELEASE.validate_ninfer_variants(

@@ -65,11 +65,17 @@ Full release authority: [`releases/v0.14.0/NINFER_RELEASE_NOTES.md`](releases/v0
 
 **Staged, not published:** stock OMP 18.14.0 (`31147f9d`) plus a gated native RTX 3090
 DFlash2 K7 upgrade; RTX 4090 and RTX 5090 carry their exact v0.14.0 beta.3 runtimes unchanged.
-This host-free stage still binds the old RTX 3090 MTP3 package. Its planned
-`v0.8.0-qwen38-3090-beta.1` rebind follows the shipping-package 15-phase chain, powered EXP-101
-screen, 84-role depth-0 ABBA speed gate (weighted at least 1.08, every case at least 0.95),
-131K fit/true-cold durability and agent probes. Fresh client/route/public-install acceptance,
-restoration, one council over changed scope, composition and pins precede publication.
+The RTX 3090 guide and receipts are prepared for **`v0.8.0-qwen38-3090-beta.1`**, F2
+`2af6b3de` (package `8536cdff`, server `05cb97e4`, public config `55788a64`).
+Shipping-package 15-phase qualification, 34/34 complete-byte double-build identity,
+131K fit/true-cold durability and actual-beta.3 350 W-to-350 W upgrade/rollback/repair
+rehearsals passed. The fork council closed with residuals tracked in
+[#116](https://github.com/alphastorm/omp-ninfer/issues/116).
+The manifest still carries the old RTX 3090 MTP3 package until the lead's post-screen cut/rebind.
+Powered EXP-101, the 84-role depth-0 ABBA speed gate (weighted at least 1.08, every case at
+least 0.95), and agent probes are the only measurement placeholders. Fresh
+client/route/public-install acceptance, restoration, product-tooling review, composition and pins
+precede publication.
 The staged [notes](releases/v0.15.0/NINFER_RELEASE_NOTES.md) and
 [manifest](releases/v0.15.0/manifest.json) distinguish current bindings from planned components.
 Use the [immutable published v0.14.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/docs/QUICKSTART.md)

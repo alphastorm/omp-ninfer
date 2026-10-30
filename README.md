@@ -87,6 +87,17 @@ port 18082; all three lanes serve the same 20.4 GB Qwen3.8 27B model container v
 credentials. Exact component, source, and model identities: [facts](docs/FACTS.md#current-release) ·
 [manifest](releases/v0.14.0/manifest.json).
 
+**Prepared next, not published: v0.15.0.** Stock Oh My Pi **18.14.0** plus native RTX 3090
+**`v0.8.0-qwen38-3090-beta.1`** (F2 `2af6b3de`, package `8536cdff`, server `05cb97e4`,
+config `55788a64`) prepares DFlash2 K7, 131,072-token INT8 context and zero extra device-state
+slots at 350 W. The 15-phase chain, 34/34 double-build byte identity, 131K fit/true-cold
+durability and actual-v0.14.0 equal-cap upgrade/rollback/repair rehearsals passed; fork council
+residuals are in [#116](https://github.com/alphastorm/omp-ninfer/issues/116). The manifest still
+carries MTP3 pending the screen/speed/probe results, component cut and gated rebind. RTX 4090
+and RTX 5090 retain their exact v0.14.0 beta.3 bytes. Fresh final-candidate acceptance and pins
+are separate; use the [immutable v0.14.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/docs/QUICKSTART.md)
+until publication. [Prepared notes](releases/v0.15.0/NINFER_RELEASE_NOTES.md).
+
 ## Get started
 
 1. **[Choose your lane](docs/QUICKSTART.md#choose-your-lane)** and check its prerequisites.
