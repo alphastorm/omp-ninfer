@@ -27,6 +27,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refuse route composition unless the restored RTX 5090 image's digest equals the latest
   ready GA predecessor's published manifest digest; restoration flags alone do not suffice
   (P15-R02).
+- Derive acceptance's candidate from this release's hash-bound product review subject and
+  require the caller, route/restoration receipts and original platform captures to agree.
+  Platform receipts retain the candidate binding; stale captures fail before output writes
+  (P15-R04, P15-R10).
 
 ### Changed
 

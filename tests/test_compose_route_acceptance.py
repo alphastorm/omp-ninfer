@@ -211,12 +211,13 @@ class PlatformReceiptTests(unittest.TestCase):
 
     def evidence(self, binary: str) -> dict:
         return {"binary_sha256": binary, "live_acceptance": deepcopy(LIVE),
-                "limitations": []}
+                "candidate": CANDIDATE, "release": "v9.9.9", "limitations": []}
 
     def test_stock_client_receipt_needs_no_previous_fork_receipt(self) -> None:
         receipt = MODULE.platform_receipt("v9.9.9", "2026-01-01", self.PROFILE,
-                                          self.evidence("8" * 64), MANIFEST)
+                                          self.evidence("8" * 64), MANIFEST, CANDIDATE)
         self.assertEqual(receipt["product_release"], "v9.9.9")
+        self.assertEqual(receipt["candidate_commit"], CANDIDATE)
         self.assertEqual(receipt["client"]["asset_sha256"], "8" * 64)
         self.assertEqual(receipt["source"]["repository"], UPSTREAM["upstream_repository"])
         self.assertNotIn("hosted_ci", receipt)
@@ -225,21 +226,22 @@ class PlatformReceiptTests(unittest.TestCase):
 
     def test_an_installed_binary_other_than_the_published_client_is_refused(self) -> None:
         message = refused(MODULE.platform_receipt, "v9.9.9", "2026-01-01", self.PROFILE,
-                          self.evidence("9" * 64), MANIFEST)
+                          self.evidence("9" * 64), MANIFEST, CANDIDATE)
         self.assertIn("not the published client", message)
 
     def test_wrong_preflight_version_cannot_be_claimed_as_passed(self) -> None:
         evidence = self.evidence("8" * 64)
         evidence["live_acceptance"]["omp_version"] = "omp/18.2.3"
         message = refused(MODULE.platform_receipt, "v9.9.9", "2026-01-01", self.PROFILE,
-                          evidence, MANIFEST)
+                          evidence, MANIFEST, CANDIDATE)
         self.assertIn("client version differs", message)
 
     def test_fork_client_cannot_be_accepted_as_stock(self) -> None:
         profile = deepcopy(self.PROFILE)
         del profile["client_distribution"]["distribution_kind"]
         self.assertIn("stock upstream client required", refused(
-            MODULE.platform_receipt, "v9.9.9", "2026-01-01", profile, self.evidence("8" * 64), MANIFEST))
+            MODULE.platform_receipt, "v9.9.9", "2026-01-01", profile, self.evidence("8" * 64),
+            MANIFEST, CANDIDATE))
 
 
 class UpstreamCompositionTests(unittest.TestCase):
@@ -270,6 +272,7 @@ class UpstreamCompositionTests(unittest.TestCase):
             "as_of": "2026-01-01", "documented_route_acceptance": deepcopy(STAGED_ROUTE_ACCEPTANCE),
             "composition": {"external_installation_acceptance": {
                 "public_url": "https://example.invalid/acceptance.json"}}})
+        self.bind_subject()
         # The authority exactly as upstream staging leaves it: the predecessor's accepted profiles
         # reset to pending, without receipts or installability.
         authority = {"product_release": self.release, "composition": {"status": "v9.9.8", "blockers": []},
@@ -288,6 +291,7 @@ class UpstreamCompositionTests(unittest.TestCase):
         evidence = {
             "platforms": {profile["id"]: {
                 "status": ACCEPTED[profile["id"]],
+                "candidate": CANDIDATE, "release": self.release,
                 "binary_sha256": profile["client_distribution"]["binary_sha256"],
                 "live_acceptance": deepcopy(LIVE), "limitations": []} for profile in self.profiles},
             "rtx4090": native_evidence("rtx4090"),
@@ -314,6 +318,16 @@ class UpstreamCompositionTests(unittest.TestCase):
             path = self.root / f"{lane}.json"
             MODULE.save(path, receipt)
             self.argv += ["--route", f"{lane}={path}"]
+
+    def bind_subject(self):
+        path = self.release_root / "review/runtime-ledger.json"
+        MODULE.save(path, {"artifact_type": "omp_ninfer_review_ledger", "release": self.release,
+                           "product_tooling": {"stage_commit": CANDIDATE}})
+        qualification = MODULE.load(self.release_root / "qualification.json")
+        qualification["observed_gates"] = {"g4_review": {
+            "repository_path": path.relative_to(self.root).as_posix(),
+            "sha256": MODULE.sha256(path.read_bytes())}}
+        MODULE.save(self.release_root / "qualification.json", qualification)
 
     def compose(self) -> int:
         with patch.object(MODULE, "ROOT", self.root), patch.object(MODULE, "DOCUMENT", self.document), \
@@ -510,6 +524,42 @@ class UpstreamCompositionTests(unittest.TestCase):
         self.assertFalse((self.release_root / "acceptance").exists())
         self.assertEqual(list((self.root / "docs/measurements").iterdir()), [])
 
+    def test_caller_and_all_receipts_cannot_override_the_frozen_product_subject(self):
+        other = "2" * 40
+        self.argv[self.argv.index("--candidate") + 1] = other
+        for path in self.root.glob("*-*.json"):
+            receipt = MODULE.load(path)
+            if "clone_commit" in receipt:
+                receipt["clone_commit"] = other
+                MODULE.save(path, receipt)
+        evidence = MODULE.load(self.root / "evidence.json")
+        evidence["restoration"]["candidate_commit"] = other
+        for platform in evidence["platforms"].values():
+            platform["candidate"] = other
+        MODULE.save(self.root / "evidence.json", evidence)
+        with self.assertRaisesRegex(SystemExit, "does not match the frozen product subject"):
+            self.compose()
+        self.assertFalse((self.release_root / "acceptance").exists())
+        self.assertEqual(list((self.root / "docs/measurements").iterdir()), [])
+
+    def test_composition_requires_a_hash_bound_current_release_product_subject(self):
+        qualification = MODULE.load(self.release_root / "qualification.json")
+        qualification["observed_gates"]["g4_review"]["sha256"] = "0" * 64
+        MODULE.save(self.release_root / "qualification.json", qualification)
+        with self.assertRaisesRegex(SystemExit, "hash-bound frozen product subject"):
+            self.compose()
+        self.assertFalse((self.release_root / "acceptance").exists())
+
+    def test_platform_capture_must_bind_the_frozen_candidate_and_release_before_writing(self):
+        self.refused_before_writing(lambda evidence: evidence["platforms"]["darwin-remote-ssh"], (
+            ("other candidate", lambda platform: platform.update(candidate="2" * 40),
+             "live capture candidate must match the frozen product subject"),
+            ("missing candidate", lambda platform: platform.pop("candidate"),
+             "live capture candidate must match the frozen product subject"),
+            ("other release", lambda platform: platform.update(release="v0.14.0"),
+             "live capture release must match"),
+        ))
+
     def test_native_receipt_needs_its_own_live_observations_before_writing(self) -> None:
         """Empty native observations once composed a passed public-install receipt."""
         self.refused_before_writing(lambda evidence: evidence["rtx4090"]["observations"], (
@@ -642,6 +692,11 @@ class UpstreamCompositionTests(unittest.TestCase):
             index = self.argv.index(f"rtx4090-native={self.root / 'rtx4090-native.json'}")
             del self.argv[index - 1:index + 1]
         MODULE.save(target / "manifest.json", manifest)
+        MODULE.save(self.root / "evidence.json", evidence)
+        self.bind_subject()
+        evidence = MODULE.load(self.root / "evidence.json")
+        for platform in evidence["platforms"].values():
+            platform["release"] = self.release
         MODULE.save(self.root / "evidence.json", evidence)
         for path in (self.root / "compatibility.json", target / "compatibility.json"):
             authority = MODULE.load(path)
