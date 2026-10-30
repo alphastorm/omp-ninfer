@@ -735,6 +735,9 @@ def validate_review_ledger(
     gates = qualification.get("observed_gates")
     gate = gates.get("g4_review") if isinstance(gates, dict) else None
     if gate is None:
+        # Earlier published releases predate a mandatory machine-bound G4 ledger.
+        require((product_version(release) or (0, 0, 0)) < (0, 15, 1),
+                "qualification.observed_gates.g4_review is required in ready mode", errors)
         return
     label = "qualification.observed_gates.g4_review"
     if not isinstance(gate, dict):

@@ -1637,6 +1637,19 @@ class ReleaseContractTest(unittest.TestCase):
                 finally:
                     temporary.cleanup()
 
+    def test_ready_g4_omission_fails_closed_for_new_releases_only(self) -> None:
+        historical = self.load(ROOT / "releases/v0.10.0/qualification.json")
+        self.assertNotIn("g4_review", historical["observed_gates"])
+        errors = []
+        VERIFY_RELEASE.validate_review_ledger(ROOT, "v0.10.0", historical, errors)
+        self.assertEqual(errors, [], "published evidence predates the mandatory G4 binding")
+        for qualification in ({}, {"observed_gates": {}}, {"observed_gates": {"g4_review": None}}):
+            with self.subTest(qualification=qualification):
+                errors = []
+                VERIFY_RELEASE.validate_review_ledger(ROOT, "v0.15.1", qualification, errors)
+                self.assertEqual(errors, [
+                    "qualification.observed_gates.g4_review is required in ready mode"])
+
     def test_ready_route_acceptance_summary_must_restate_its_bound_evidence(self) -> None:
         """The fixture binds its routes evidence but predates the summary: add v0.14.0's summary,
         restated for that evidence, then drift it the ways a hand edit did."""
