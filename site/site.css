@@ -149,6 +149,10 @@ section { padding: clamp(56px, 8vw, 104px) 0; border-top: 1px solid var(--border
 .hero .wrap > * { min-width: 0; }
 .hero h1 { max-width: 20ch; }
 .hero h1 .line { display: block; }
+@media (max-width: 420px) {
+  .hero h1 { font-size: 2.25rem; text-wrap: balance; }
+  .hero h1 .line { display: inline; }
+}
 .hero-body { display: grid; gap: 28px; align-items: start; }
 .hero-body .actions { margin-top: 0; }
 .hero .chain { font-size: 15px; color: var(--muted); margin-top: 18px; max-width: var(--measure); line-height: 1.6; }
