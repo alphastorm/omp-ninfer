@@ -278,6 +278,7 @@ table { border-collapse: collapse; width: 100%; margin: 24px 0; font-size: 14px;
 th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; overflow-wrap: anywhere; }
 th { color: var(--muted); font: 600 11.5px/1.4 var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; }
 td:first-child { color: var(--ink); font-weight: 600; }
+td:first-child code { white-space: nowrap; }
 tr:hover td { background: var(--raised); }
 .table-scroll { overflow-x: auto; margin: 24px 0; }
 .table-scroll table { margin: 0; min-width: 760px; }
