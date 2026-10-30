@@ -13,35 +13,35 @@ is a universal GPU, model, or end-to-end latency claim.
   [Neroued/ninfer](https://github.com/Neroued/ninfer) and cover different artifacts and settings.
 - **Community results** are tester submissions collected below.
 
-## Current qualified results — v0.14.0
+## Current qualified results — v0.15.0
 
-Published release **v0.14.0** (2026-10-28) pins unmodified upstream OMP **18.12.6** (`45c35e40`),
+Published release **v0.15.0** (2026-10-30) pins unmodified upstream OMP **18.14.0** (`31147f9d`),
 shared published model container version 3 `81f924d4` (`20,437,521,664` bytes, revision `1cbd84e7`),
-and one frozen engine source `2c6f423b` (`2c6f423bd817b6534158553e1b34ab4959c43165`) on upstream
-`Neroued/ninfer` master `64d10fbf` across the RTX 5090 container runtime
-(`v0.7.0-qwen38-5090-beta.3`, image `760fb6be` on base `d4377ed0`, server `55f0b95a`, profile
-`qwen38-5090-v0.13.0`, strict-origin configuration `751d22dc`) and the native Windows RTX 4090
-(`v0.7.0-qwen38-4090-beta.3`, package `87038cfb`, server `5caa7780`, profile
-`qwen38-4090-native-v0.7.0-beta.3`, public config `b5cfbf50`) and RTX 3090
-(`v0.7.0-qwen38-3090-beta.3`, package `a7637f66`, server `fedce425`, profile
+and carries all three `v0.14.0` runtime components and serving profiles unchanged from `v0.14.0`
+(built from frozen engine source `2c6f423b`, `2c6f423bd817b6534158553e1b34ab4959c43165`, on
+upstream `Neroued/ninfer` master `64d10fbf`): the RTX 5090 container runtime (`v0.7.0-qwen38-5090-beta.3`, image `760fb6be` on base
+`d4377ed0`, server `55f0b95a`, profile `qwen38-5090-v0.13.0`, strict-origin configuration
+`751d22dc`) and the native Windows RTX 4090 (`v0.7.0-qwen38-4090-beta.3`, package `87038cfb`,
+server `5caa7780`, profile `qwen38-4090-native-v0.7.0-beta.3`, public config `b5cfbf50`) and RTX
+3090 (`v0.7.0-qwen38-3090-beta.3`, package `a7637f66`, server `fedce425`, profile
 `qwen38-3090-native-v0.7.0-beta.3`, public config `d08d262b`, 350 W serving cap) packages. Fresh
-v0.14.0 acceptance exercised all five documented routes (31 executable blocks), all three stock
-18.12.6 clients, and both first-of-lineage beta.3 native public installs (19/19 RTX 4090 and 19/19
-RTX 3090 route-behavior checks) on frozen candidate `c81a8e7e`
-([documented routes](../releases/v0.14.0/acceptance/documented-routes.json) ·
-[composed acceptance](../releases/v0.14.0/acceptance/composed-external-installation.json)).
+v0.15.0 acceptance exercised all five documented routes (31 executable blocks), all three stock
+18.14.0 clients, and both first-of-lineage beta.3 native public installs (19/19 RTX 4090 and 19/19
+RTX 3090 route-behavior checks) on frozen candidate `af62e766`
+([documented routes](../releases/v0.15.0/acceptance/documented-routes.json) ·
+[composed acceptance](../releases/v0.15.0/acceptance/composed-external-installation.json)).
 
 | Lane | Runtime | Gate | Result | Receipt |
 | --- | --- | --- | --- | --- |
-| RTX 5090 container (`qwen38-5090-v0.13.0`, config `751d22dc`; DFlash2 draft window 7, BF16 KV, 146,368 automatic KV tokens, 131,072-token context, two requests in flight) | `v0.7.0-qwen38-5090-beta.3` (source `2c6f423b`, image `760fb6be`, server `55f0b95a`, model `81f924d4`) | `prefill_curve` (130,048 tokens, cold) | **57.00 s** (**57.0 s**, **2,281.5 tok/s** wall, 56.416 s server prefill); exact retrieval | [`releases/v0.14.0/qualification/rtx5090.json`](../releases/v0.14.0/qualification/rtx5090.json) |
-| RTX 5090 container | `v0.7.0-qwen38-5090-beta.3` (source `2c6f423b`, image `760fb6be`, server `55f0b95a`, model `81f924d4`) | `decode` (2,048 completion tokens, DFlash2 K=7) | **182.49 tok/s** server-side (**178.78 tok/s** wall); **0.244** DFlash2 acceptance, **2.71 tokens/round** | [`releases/v0.14.0/qualification/rtx5090.json`](../releases/v0.14.0/qualification/rtx5090.json) |
-| RTX 5090 container | `v0.7.0-qwen38-5090-beta.3` (source `2c6f423b`, image `760fb6be`, server `55f0b95a`, model `81f924d4`) | `agent_protocol`, schema 3 restart, and 32 GB C2 | **passed** (authenticated identity, stateful continuation, 2 forks, deleted parent 404 before/after restart, live sibling 200; four-boot schema 3 restart **20,926 cached tokens / 27 byte-identical continuation bytes**; 32 GB C2 durable pressure overlap **35.5524 s**, **1,074,790,400 B** headroom, **+2 MiB** graph growth; 30,848 MiB idle VRAM; 66/66 host and 11/11 dense test executables) | [`releases/v0.14.0/qualification/rtx5090.json`](../releases/v0.14.0/qualification/rtx5090.json) · [`durability.json`](../releases/v0.14.0/qualification/durability.json) · [`concurrency.json`](../releases/v0.14.0/qualification/concurrency.json) |
-| RTX 4090 native Windows (`qwen38-4090-native-v0.7.0-beta.3`, config `b5cfbf50`; MTP3, INT8 KV, `Group64` A8 off, 131,072-token context, one request at a time, 14,787.734375 MiB shared Host budget, 640 MiB admission headroom) | `v0.7.0-qwen38-4090-beta.3` (source `2c6f423b`, package `87038cfb`, server `5caa7780`, model `81f924d4`) | `long_session` (130,048 tokens) | **81.78 s** (**81.784 s**); exact retrieval | [`releases/v0.14.0/qualification/rtx4090.json`](../releases/v0.14.0/qualification/rtx4090.json) |
-| RTX 4090 native Windows | `v0.7.0-qwen38-4090-beta.3` (source `2c6f423b`, package `87038cfb`, server `5caa7780`, model `81f924d4`) | `benchmark_c1` (4,541 prompt / 1,024 completion tokens) | **151.54 tok/s** decode at **87.59%** MTP acceptance; **2,195.36 tok/s** prefill; 8.880 s wall, 22,847 MiB peak, 467.27 W peak | [`releases/v0.14.0/qualification/rtx4090.json`](../releases/v0.14.0/qualification/rtx4090.json) |
-| RTX 4090 native Windows | `v0.7.0-qwen38-4090-beta.3` (source `2c6f423b`, package `87038cfb`, server `5caa7780`, model `81f924d4`) | `persistence`, `protocol`, `state_security` | **passed** (1,647 cached tokens after explicit save and 1,650 after graceful `stop-event` flush across 34.062 s restart with replaced process and cold-baseline counter match; canonical schema 2 product protocol at full 14,787.734375 MiB and reduced 12,438.578125 MiB shared Host budgets including Chat/Responses JSON-schema output and 128-character tool names; first-of-lineage rollback `not_applicable`, zero directions; 450 W restored on stop) | [`releases/v0.14.0/qualification/rtx4090.json`](../releases/v0.14.0/qualification/rtx4090.json) |
-| RTX 3090 native Windows (`qwen38-3090-native-v0.7.0-beta.3`, config `d08d262b`; MTP3, INT8 KV, `Group64` A8 off, 131,072-token context, one request at a time, 11,715.734375 MiB shared Host budget, 768 MiB admission headroom, 350 W serving cap) | `v0.7.0-qwen38-3090-beta.3` (source `2c6f423b`, package `a7637f66`, server `fedce425`, model `81f924d4`) | `long_session` (130,048 tokens) | **187.88 s** (**187.878 s**); exact retrieval | [`releases/v0.14.0/qualification/rtx3090.json`](../releases/v0.14.0/qualification/rtx3090.json) |
-| RTX 3090 native Windows | `v0.7.0-qwen38-3090-beta.3` (source `2c6f423b`, package `a7637f66`, server `fedce425`, model `81f924d4`) | `benchmark_c1` (4,541 prompt / 1,024 completion tokens) | **90.64 tok/s** decode at **92.96%** MTP acceptance; **976.98 tok/s** prefill; 16.027 s wall, 22,734 MiB peak, 350.19 W peak | [`releases/v0.14.0/qualification/rtx3090.json`](../releases/v0.14.0/qualification/rtx3090.json) |
-| RTX 3090 native Windows | `v0.7.0-qwen38-3090-beta.3` (source `2c6f423b`, package `a7637f66`, server `fedce425`, model `81f924d4`) | `persistence`, `protocol`, `state_security` | **passed** (1,647 cached tokens after explicit save and 1,650 after graceful `stop-event` flush across 35.016 s restart with replaced process and cold-baseline counter match; canonical schema 2 product protocol at full 11,715.734375 MiB and reduced 9,366.578125 MiB shared Host budgets including Chat/Responses JSON-schema output and 128-character tool names; first-of-lineage rollback `not_applicable`, zero directions; 370 W restored on stop) | [`releases/v0.14.0/qualification/rtx3090.json`](../releases/v0.14.0/qualification/rtx3090.json) |
+| RTX 5090 container (`qwen38-5090-v0.13.0`, config `751d22dc`; DFlash2 draft window 7, BF16 KV, 146,368 automatic KV tokens, 131,072-token context, two requests in flight) | `v0.7.0-qwen38-5090-beta.3` (source `2c6f423b`, image `760fb6be`, server `55f0b95a`, model `81f924d4`) | `prefill_curve` (130,048 tokens, cold) | **57.00 s** (**57.0 s**, **2,281.5 tok/s** wall, 56.416 s server prefill); exact retrieval | [`releases/v0.15.0/qualification/rtx5090.json`](../releases/v0.15.0/qualification/rtx5090.json) |
+| RTX 5090 container | `v0.7.0-qwen38-5090-beta.3` (source `2c6f423b`, image `760fb6be`, server `55f0b95a`, model `81f924d4`) | `decode` (2,048 completion tokens, DFlash2 K=7) | **182.49 tok/s** server-side (**178.78 tok/s** wall); **0.244** DFlash2 acceptance, **2.71 tokens/round** | [`releases/v0.15.0/qualification/rtx5090.json`](../releases/v0.15.0/qualification/rtx5090.json) |
+| RTX 5090 container | `v0.7.0-qwen38-5090-beta.3` (source `2c6f423b`, image `760fb6be`, server `55f0b95a`, model `81f924d4`) | `agent_protocol`, schema 3 restart, and 32 GB C2 | **passed** (authenticated identity, stateful continuation, 2 forks, deleted parent 404 before/after restart, live sibling 200; four-boot schema 3 restart **20,926 cached tokens / 27 byte-identical continuation bytes**; 32 GB C2 durable pressure overlap **35.5524 s**, **1,074,790,400 B** headroom, **+2 MiB** graph growth; 30,848 MiB idle VRAM; 66/66 host and 11/11 dense test executables) | [`releases/v0.15.0/qualification/rtx5090.json`](../releases/v0.15.0/qualification/rtx5090.json) · [`durability.json`](../releases/v0.15.0/qualification/durability.json) · [`concurrency.json`](../releases/v0.15.0/qualification/concurrency.json) |
+| RTX 4090 native Windows (`qwen38-4090-native-v0.7.0-beta.3`, config `b5cfbf50`; MTP3, INT8 KV, `Group64` A8 off, 131,072-token context, one request at a time, 14,787.734375 MiB shared Host budget, 640 MiB admission headroom) | `v0.7.0-qwen38-4090-beta.3` (source `2c6f423b`, package `87038cfb`, server `5caa7780`, model `81f924d4`) | `long_session` (130,048 tokens) | **81.78 s** (**81.784 s**); exact retrieval | [`releases/v0.15.0/qualification/rtx4090.json`](../releases/v0.15.0/qualification/rtx4090.json) |
+| RTX 4090 native Windows | `v0.7.0-qwen38-4090-beta.3` (source `2c6f423b`, package `87038cfb`, server `5caa7780`, model `81f924d4`) | `benchmark_c1` (4,541 prompt / 1,024 completion tokens) | **151.54 tok/s** decode at **87.59%** MTP acceptance; **2,195.36 tok/s** prefill; 8.880 s wall, 22,847 MiB peak, 467.27 W peak | [`releases/v0.15.0/qualification/rtx4090.json`](../releases/v0.15.0/qualification/rtx4090.json) |
+| RTX 4090 native Windows | `v0.7.0-qwen38-4090-beta.3` (source `2c6f423b`, package `87038cfb`, server `5caa7780`, model `81f924d4`) | `persistence`, `protocol`, `state_security` | **passed** (1,647 cached tokens after explicit save and 1,650 after graceful `stop-event` flush across 34.062 s restart with replaced process and cold-baseline counter match; canonical schema 2 product protocol at full 14,787.734375 MiB and reduced 12,438.578125 MiB shared Host budgets including Chat/Responses JSON-schema output and 128-character tool names; first-of-lineage rollback `not_applicable`, zero directions; 450 W restored on stop) | [`releases/v0.15.0/qualification/rtx4090.json`](../releases/v0.15.0/qualification/rtx4090.json) |
+| RTX 3090 native Windows (`qwen38-3090-native-v0.7.0-beta.3`, config `d08d262b`; MTP3, INT8 KV, `Group64` A8 off, 131,072-token context, one request at a time, 11,715.734375 MiB shared Host budget, 768 MiB admission headroom, 350 W serving cap) | `v0.7.0-qwen38-3090-beta.3` (source `2c6f423b`, package `a7637f66`, server `fedce425`, model `81f924d4`) | `long_session` (130,048 tokens) | **187.88 s** (**187.878 s**); exact retrieval | [`releases/v0.15.0/qualification/rtx3090.json`](../releases/v0.15.0/qualification/rtx3090.json) |
+| RTX 3090 native Windows | `v0.7.0-qwen38-3090-beta.3` (source `2c6f423b`, package `a7637f66`, server `fedce425`, model `81f924d4`) | `benchmark_c1` (4,541 prompt / 1,024 completion tokens) | **90.64 tok/s** decode at **92.96%** MTP acceptance; **976.98 tok/s** prefill; 16.027 s wall, 22,734 MiB peak, 350.19 W peak | [`releases/v0.15.0/qualification/rtx3090.json`](../releases/v0.15.0/qualification/rtx3090.json) |
+| RTX 3090 native Windows | `v0.7.0-qwen38-3090-beta.3` (source `2c6f423b`, package `a7637f66`, server `fedce425`, model `81f924d4`) | `persistence`, `protocol`, `state_security` | **passed** (1,647 cached tokens after explicit save and 1,650 after graceful `stop-event` flush across 35.016 s restart with replaced process and cold-baseline counter match; canonical schema 2 product protocol at full 11,715.734375 MiB and reduced 9,366.578125 MiB shared Host budgets including Chat/Responses JSON-schema output and 128-character tool names; first-of-lineage rollback `not_applicable`, zero directions; 370 W restored on stop) | [`releases/v0.15.0/qualification/rtx3090.json`](../releases/v0.15.0/qualification/rtx3090.json) |
 
 ### v0.14.0 common-engine qualification boundary and matched pre-cut comparisons
 
@@ -89,7 +89,7 @@ reproducibility exception ([`build.json`](../releases/v0.14.0/qualification/buil
 | Keep-warm idle TTFT | 0.725149 s off / 0.586925 s on, three samples per arm after 12 s idle | Descriptive only, not powered significance or end-to-end OMP speed |
 
 Historical powered quality/leak, actual OMP parallel, eight-session fanout/warm-arrival, and long
-OMP compaction are not re-measured for v0.13.0–v0.14.0.
+OMP compaction are not re-measured for v0.13.0–v0.15.0.
 
 Separately from the final-runtime gates above, the [EXP-097 provider comparison](measurements/2026-10-25-exp097-role-corpus.json)
 (`alphastorm/ninfer` evidence commit `80480bec`, tested source `c2dbcbae`, locally upgraded model
@@ -152,7 +152,7 @@ without repeating the full corpus comparison.
 *Historical v0.3.0 — RTX 5090 container lane (`sm_120a`, MTP3, BF16 KV, C1):* cold-process prefill
 throughput across the context window, from 3,193.77 tok/s at 7,680 prompt tokens to 2,199.41 tok/s
 at 130,048 prompt tokens, with exact needle retrieval verified at every point (the graphic footer
-also notes historical v0.4.0's 2,186.3 tok/s at 130,448 tokens). Current v0.14.0 RTX 5090
+also notes historical v0.4.0's 2,186.3 tok/s at 130,448 tokens). Current v0.15.0 RTX 5090
 130,048-token retrieval is 57.00 s (2,281.5 tok/s wall) on `v0.7.0-qwen38-5090-beta.3` in the table above.
 
 ![Decode throughput per qualified lane on its own shipped profile: RTX 5090 at 144.8 tok/s with MTP3 on v0.4.0 agent-shaped, RTX 3090 at 90.17 tok/s with MTP3 on v0.3.0, RTX 4090 at 97.69 tok/s peak with MTP3 on v0.3.1](../assets/chart-decode.png)
@@ -160,7 +160,7 @@ also notes historical v0.4.0's 2,186.3 tok/s at 130,448 tokens). Current v0.14.0
 *Historical v0.3.0 / v0.3.1 / v0.4.0 — single-request MTP3 decode per lane:* RTX 5090 container on
 historical v0.4.0 (144.8 tok/s agent-shaped MTP3, BF16 KV), RTX 3090 native Windows on historical
 v0.3.0 (90.17 tok/s C1 MTP3 at 93.43% acceptance under the 300 W cap), and RTX 4090 native Windows
-on historical v0.3.1 (97.69 tok/s peak MTP3, 107,851-token restored continuation). Current v0.14.0
+on historical v0.3.1 (97.69 tok/s peak MTP3, 107,851-token restored continuation). Current v0.15.0
 decode rates (RTX 5090 DFlash2 K=7 at 182.49 tok/s server-side; RTX 4090 MTP3 C1 at 151.54 tok/s;
 RTX 3090 MTP3 C1 at 90.64 tok/s) are in the current results table above.
 
@@ -1314,7 +1314,7 @@ one sample per problem, thinking enabled). The `groupwise-int` row evaluates the
 RTX 4090 and RTX 3090 MTP3 lanes through v0.13.0, and on the RTX 5090 lane prior to v0.10.0), not
 the separate 20,437,336,576-byte DFlash2-enabled `0634abb0` artifact served on the RTX 5090
 container lane in v0.10.0–v0.12.2 (whose 1,184 tensor payloads and six frontend resources match the
-v0.13.0–v0.14.0 container version 3 `81f924d4` artifact served across all three lanes in v0.13.1–v0.14.0):
+v0.13.0–v0.15.0 container version 3 `81f924d4` artifact served across all three lanes in v0.13.1–v0.15.0):
 
 | Artifact profile | AIME 2025 | AIME 2026 | GPQA-Diamond | ERQA | RealWorldQA |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -1343,11 +1343,11 @@ different artifacts/settings than the shipped product profiles:
 | Qwen3.6-27B `nvfp4` saturated decode at concurrency 8 | 1,146.9 aggregate tok/s (5.67× C=1) |
 | Qwen3.8-27B `nvfp4` MTP3 structured output | 219.8 tok/s at 90.8% acceptance |
 
-Those results are not product claims: the shipped v0.14.0 profiles are `Qwen3.8-27B` `groupwise-int`
+Those results are not product claims: the shipped v0.15.0 profiles are `Qwen3.8-27B` `groupwise-int`
 (model container version 3 `81f924d4`) with DFlash2 K=7, BF16 KV, and two requests in flight on the
 RTX 5090 container lane, and MTP3, INT8 KV, and one active request on the native RTX 4090 and RTX
 3090 Windows lanes, whose qualified numbers are in
-[Current qualified results — v0.14.0](#current-qualified-results--v0140). They show the headroom of
+[Current qualified results — v0.15.0](#current-qualified-results--v0150). They show the headroom of
 the engine family this product rides on. Full methodology:
 [upstream performance document](https://github.com/Neroued/ninfer/blob/master/docs/performance.md).
 

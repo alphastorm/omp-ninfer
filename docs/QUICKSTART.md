@@ -1,13 +1,6 @@
 # Quickstart
 
-> **Prepared guide: v0.15.0 · stock Oh My Pi 18.14.0 · fresh client and route acceptance passed**
-
-This guide prepares an unpublished candidate. The published release remains **v0.14.0**; use
-its [immutable guide](https://github.com/alphastorm/omp-ninfer/blob/v0.14.0/docs/QUICKSTART.md)
-until v0.15.0 is published. The executable blocks below passed fresh candidate-bound acceptance;
-they do not authorize installation before publication or replace the ready gate.
-This client-only release carries all three v0.14.0 runtime components, models and serving
-profiles unchanged. Native RTX 3090 DFlash2 is deferred to v0.15.1 after a runtime defect was found.
+> **Versioned guide: v0.15.0 · stock Oh My Pi 18.14.0 · Qualified on RTX 5090 · 4090 · 3090**
 
 OMP NInfer is the qualified local inference appliance and release layer connecting the
 [Oh My Pi](https://github.com/can1357/oh-my-pi) (OMP) coding-agent client over authenticated
@@ -15,7 +8,7 @@ loopback to the NInfer inference engine serving Qwen3.8 27B on your GPU.
 
 ## Choose your lane
 
-| GPU and host | Prepared client route in v0.15.0 | Start here |
+| GPU and host | Client route in v0.15.0 | Start here |
 | --- | --- | --- |
 | RTX 5090 container on Windows 11 + Docker Desktop / WSL2 | Native Windows x64 client over local loopback `127.0.0.1:18089` | [RTX 5090 Windows route](#ready-route-native-windows-and-docker-desktop-wsl2) |
 | RTX 5090 container on Windows 11 / WSL2 or Linux | macOS arm64 client over a manual SSH tunnel (preview) | [macOS manual SSH route (preview)](#macos-client-over-a-manual-ssh-tunnel-preview) |
@@ -26,7 +19,7 @@ loopback to the NInfer inference engine serving Qwen3.8 27B on your GPU.
 
 ## Before you start
 
-- **Clone the tag and run the ready gate:** after publication, start from a clean clone of `v0.15.0` and verify
+- **Clone the tag and run the ready gate:** start from a clean clone of `v0.15.0` and verify
   `python3 scripts/verify_release.py --require-ready` (`py -3 scripts\verify_release.py --require-ready`
   on Windows). Never install from a moving branch, an untagged archive, or a draft/candidate manifest.
 - **Keep one release authority end to end:** stock OMP has no `omp appliance` commands, and
@@ -181,7 +174,7 @@ the [v0.15.0 notes](../releases/v0.15.0/NINFER_RELEASE_NOTES.md) distinguish shi
 fixes from carried runtime limits. Council binding, final manifest pin, strict ready verification
 and founder-owned publication are separate from acceptance. See [Releases](RELEASES.md).
 
-## Staged runtime bindings at a glance
+## Current release at a glance
 
 | Lane | Runtime component and source | Model artifact | Serving profile and limits |
 | --- | --- | --- | --- |
@@ -194,8 +187,8 @@ The exact RTX 5090 image is
 and all three lanes bind engine source `2c6f423bd817b6534158553e1b34ab4959c43165`.
 It ships checked first-build bytes under a founder-approved 5090-only reproducibility exception;
 same-source second builds are not bit-identical. See the
-[release notes](../releases/v0.14.0/NINFER_RELEASE_NOTES.md) and
-[manifest](../releases/v0.14.0/manifest.json) for exact identities and scope.
+[release notes](../releases/v0.15.0/NINFER_RELEASE_NOTES.md) and
+[manifest](../releases/v0.15.0/manifest.json) for exact identities and scope.
 
 - **Serving limits and compaction:** RTX 5090 admits two requests at once and holds a pending
   request for up to 180 s (`--pending-timeout-ms 180000`) when both prompts plus output reservations
@@ -283,8 +276,8 @@ Requires Windows 11 x64, one RTX 4090 (sm_89), a supported NVIDIA driver, Git, P
 (`py` launcher), and 40 GiB free disk. The installer binds the unique RTX 4090 UUID and PCI address
 even beside an RTX 3090 (use `-GpuUuid` if multiple RTX 4090 cards exist; never hide a card). Stop
 the other native lane on port `18082` first. The carried beta.3 runtime qualification records no
-predecessor (`not_applicable`, zero rollback directions); v0.14.0 public-install and product-route
-acceptance passed historically, not for the new client or retargeted guide. Keep prior native release
+predecessor (`not_applicable`, zero rollback directions); fresh v0.15.0 public-install and product-route
+acceptance passed with stock OMP 18.14.0. Keep prior native release
 roots untouched for historical recovery.
 
 ```powershell
@@ -826,8 +819,8 @@ Keep the host directory `checkpoints-v013`, mounted at `/checkpoints-v013`; keep
 establish cross-binary checkpoint compatibility. Never import prior generations; resume earlier
 sessions by replaying the authoritative client transcript for a fresh prefill. New exact-runtime
 checkpoints accelerate later continuations. All three beta.3 runtime qualifications cover
-JSON-schema structured output and 128-character Chat/Responses tool names; fresh product-route
-acceptance remains separate. See the [v0.14.0 compatibility matrix](../releases/v0.14.0/COMPATIBILITY.md).
+JSON-schema structured output and 128-character Chat/Responses tool names, and fresh v0.15.0
+product-route acceptance passed across all five routes. See the [v0.15.0 compatibility matrix](../releases/v0.15.0/COMPATIBILITY.md).
 
 ## 4. Start NInfer on the inference host
 
