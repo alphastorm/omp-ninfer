@@ -25,7 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   From v0.15.1 every repository reference requires its hash; published path-only annotations
   remain historical metadata rather than being rewritten as new evidence. The composer
   refreshes qualification references to artifacts it authors, including its rewritten client
-  descriptor, without changing bindings to independent evidence.
+  descriptor, without changing bindings to independent evidence. Staging also discards prior
+  documented-route evidence when the client binary is carried unchanged.
 - Refuse route composition unless the restored RTX 5090 image's digest equals the latest
   ready GA predecessor's published manifest digest; restoration flags alone do not suffice
   (P15-R02).

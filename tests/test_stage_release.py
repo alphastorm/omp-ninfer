@@ -511,6 +511,24 @@ class StageReleaseTests(unittest.TestCase):
         self.assertEqual([row["client_distribution"]
                           for row in self.load(staged / "compatibility.json")["profiles"]], clients)
 
+    def test_staging_without_descriptor_discards_predecessor_route_evidence(self) -> None:
+        root = self.staging_copy(source_release=CURRENT)
+        source = root / "releases" / CURRENT
+        qualification = self.load(source / "qualification.json")
+        reference = qualification["composition"]["documented_route_acceptance"]
+        path = root / reference["repository_path"]
+        # A byte rewrite (including platform newline conversion) cannot be carried as fresh
+        # successor acceptance under the predecessor's recorded hash.
+        path.write_bytes(path.read_bytes() + b"\n")
+        qualification["documented_route_acceptance"] = {"status": "passed", "fresh_product_acceptance": True}
+        self.save(source / "qualification.json", qualification)
+        result = self.stage(root, None, source_release=CURRENT)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        staged = self.load(root / "releases" / TARGET / "qualification.json")
+        self.assertNotIn("documented_route_acceptance", staged["composition"])
+        self.assertEqual(staged["documented_route_acceptance"]["status"], "pending")
+        self.assertNotIn("fresh_product_acceptance", staged["documented_route_acceptance"])
+
     def test_staged_manifest_publishes_as_the_staged_release(self) -> None:
         """v0.8.5 and v0.8.6 were staged still targeting their predecessor's GitHub release."""
         root = self.staging_copy(source_release=CURRENT)
