@@ -106,6 +106,15 @@ PREREGISTRATION: dict[str, Any] = {
                     "2026-10-30 before any candidate data: the candidate is the frozen source 2af6b3de RTX "
                     "3090 package (server 05cb97e4, configuration 55788a64, model 81f924d4); every role, "
                     "production included, uses 50-prompt shards"),
+        "EXP-102": ("registered 2026-10-30 before any data: native Windows RTX 4090 powered screen for the P16 "
+                    "candidate (one request, low reasoning, 450 W). Production arm: the published v0.14.0 "
+                    "incumbent v0.7.0-qwen38-4090-beta.3 (server 5caa7780, configuration b5cfbf50, model "
+                    "81f924d4; MTP3, INT8 KV, 131,072 tokens) as a packaged scratch install on the same card at "
+                    "explicit port 18084; production screen, then fresh-cache determinism. Candidate arm: the RTX "
+                    "4090 package of the frozen P16 source, whose server prefix and profile are appended here "
+                    "before any candidate data; candidate screen, then fresh-cache determinism. 1,120 screen "
+                    "prompts and the first 80 determinism prompts in fixed matched contiguous 50-prompt shards "
+                    "with resumed identity and seal verification; under this rule unchanged"),
     },
     "pairing": "by prompt id; a pair where either arm errored is left out of the primary statistics",
     "primary": {
