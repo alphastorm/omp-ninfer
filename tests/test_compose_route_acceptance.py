@@ -584,6 +584,70 @@ class UpstreamCompositionTests(unittest.TestCase):
             self.assertEqual(receipt["lane"], f"{lane}-windows-native")
             self.assertEqual(external["evidence"][f"{lane}_public_install"]["sha256"], MODULE.sha256(path.read_bytes()))
 
+    def p15_fixture(self, *, rebuild_4090: bool) -> dict:
+        self.add_3090()
+        self.release = "v0.15.0"
+        target = self.root / "releases" / self.release
+        self.release_root.rename(target)
+        self.release_root = target
+        self.argv[self.argv.index("--release") + 1] = self.release
+        manifest = MODULE.load(target / "manifest.json")
+        evidence = MODULE.load(self.root / "evidence.json")
+        for variant in manifest["components"]["ninfer_variants"]:
+            gpu = variant["id"].split("-")[0]
+            variant["release_tag"] = f"v0.8.0-qwen38-{gpu[3:]}-beta.1"
+            variant["runtime_shape"] = {
+                "max_concurrency": 1, "speculative_backend": "dflash2" if gpu == "rtx3090" else "mtp",
+                "fit": {"device_state_slots": 0 if gpu == "rtx3090" else 2,
+                        "admission_headroom_mib": 768 if gpu == "rtx3090" else 640,
+                        "draft_mlp_device_format": "Q4_G64_FP16" if gpu == "rtx3090" else "artifact",
+                        "token_embedding_residency": "host-mapped" if gpu == "rtx3090" else "device"}}
+            field = "quality_screen" if gpu == "rtx3090" else "t1_parity"
+            variant["qualification"][field] = {
+                "path": f"releases/{self.release}/qualification/{gpu}.{field}.json", "sha256": "7" * 64}
+            rollback = {"status": "passed", "directions": 2,
+                        "intermediate_release": f"qwen38-{gpu[3:]}-native-v0.7.0-beta.3",
+                        "active_release": f"qwen38-{gpu[3:]}-native-v0.8.0-beta.1"}
+            MODULE.save(target / "qualification" / f"{gpu}.json", {"rollback": rollback})
+            evidence[gpu]["preparation"].update(lineage_mode="upgrade", previous_release_present=True)
+            evidence[gpu]["observations"]["rollback"] = rollback
+        if not rebuild_4090:
+            manifest["components"]["ninfer_variants"] = [
+                row for row in manifest["components"]["ninfer_variants"] if row["id"].startswith("rtx3090")]
+            del evidence["rtx4090"], evidence["restoration"]["rtx4090"]
+            index = self.argv.index(f"rtx4090-native={self.root / 'rtx4090-native.json'}")
+            del self.argv[index - 1:index + 1]
+        MODULE.save(target / "manifest.json", manifest)
+        MODULE.save(self.root / "evidence.json", evidence)
+        for path in (self.root / "compatibility.json", target / "compatibility.json"):
+            authority = MODULE.load(path)
+            authority["product_release"] = self.release
+            MODULE.save(path, authority)
+        return manifest
+
+    def test_p15_3090_dflash_and_4090_mtp_rebuild_compose_without_changing_runtime_gates(self):
+        before = self.p15_fixture(rebuild_4090=True)
+        self.assertEqual(self.compose(), 0)
+        after = MODULE.load(self.release_root / "manifest.json")
+        self.assertEqual(after["components"]["ninfer_variants"], before["components"]["ninfer_variants"])
+        routes = MODULE.load(self.release_root / "acceptance/documented-routes.json")
+        self.assertEqual(set(routes["routes"]), set(MODULE.LANES) | set(MODULE.NATIVE_LANES))
+        for gpu in ("rtx3090", "rtx4090"):
+            receipt = MODULE.load(self.release_root / "acceptance" / f"{gpu}-public-install.json")
+            self.assertEqual(receipt["runtime"]["tag"], f"v0.8.0-qwen38-{gpu[3:]}-beta.1")
+            self.assertEqual(receipt["observations"]["rollback"]["directions"], 2)
+            self.assertIn("v0.7.0-beta.3", receipt["observations"]["rollback"]["intermediate_release"])
+
+    def test_p15_3090_only_uses_four_routes_and_one_native_restoration(self):
+        self.p15_fixture(rebuild_4090=False)
+        self.assertEqual(self.compose(), 0)
+        routes = MODULE.load(self.release_root / "acceptance/documented-routes.json")
+        self.assertEqual(set(routes["routes"]), set(MODULE.LANES) | {"rtx3090-native"})
+        self.assertFalse((self.release_root / "acceptance/rtx4090-public-install.json").exists())
+        qualification = MODULE.load(self.release_root / "qualification.json")
+        self.assertEqual(set(qualification["documented_route_acceptance"]["restoration"]["native_driver_window_s"]),
+                         {"rtx3090"})
+
     def test_bound_3090_requires_its_route_and_evidence(self) -> None:
         self.add_3090(route=False, evidence=False)
         with self.assertRaisesRegex(SystemExit, "need one --route"):
