@@ -263,6 +263,9 @@ class UpstreamCompositionTests(unittest.TestCase):
         MODULE.save(self.release_root / "qualification" / "rtx4090.json", FIRST_RELEASE)
         manifest.update(status="candidate", publication={"blockers": ["acceptance"]}, qualification={})
         MODULE.save(self.release_root / "manifest.json", manifest)
+        MODULE.save(self.root / "releases/v0.14.0/manifest.json", {
+            "release": "v0.14.0", "status": "ready", "components": {"ninfer": {
+                "oci_manifest_digest": RESTORATION["rtx5090"]["original_image"].split("@")[1]}}})
         MODULE.save(self.release_root / "qualification.json", {
             "as_of": "2026-01-01", "documented_route_acceptance": deepcopy(STAGED_ROUTE_ACCEPTANCE),
             "composition": {"external_installation_acceptance": {
@@ -485,6 +488,27 @@ class UpstreamCompositionTests(unittest.TestCase):
             ("relabelled upgrade", lambda restoration: restoration.update(production_upgrade_activated=True),
              "cannot set the receipt's own fields"),
         ))
+
+    def test_restored_image_must_equal_the_published_predecessor_digest(self) -> None:
+        self.refused_before_writing(lambda evidence: evidence["restoration"]["rtx5090"], (
+            ("wrong digest", lambda incumbent: incumbent.update(
+                original_image="ghcr.io/alphastorm/ninfer-runtime@sha256:" + "0" * 64),
+             "restored image must match the published predecessor digest"),
+            ("candidate not predecessor", lambda incumbent: incumbent.update(
+                original_image="ghcr.io/alphastorm/ninfer-runtime@" +
+                MANIFEST["components"]["ninfer"]["oci_manifest_digest"]),
+             "restored image must match the published predecessor digest"),
+        ))
+
+    def test_restoration_requires_a_published_predecessor_not_a_draft(self) -> None:
+        path = self.root / "releases/v0.14.0/manifest.json"
+        predecessor = MODULE.load(path)
+        predecessor["status"] = "draft"
+        MODULE.save(path, predecessor)
+        with self.assertRaisesRegex(SystemExit, "published predecessor"):
+            self.compose()
+        self.assertFalse((self.release_root / "acceptance").exists())
+        self.assertEqual(list((self.root / "docs/measurements").iterdir()), [])
 
     def test_native_receipt_needs_its_own_live_observations_before_writing(self) -> None:
         """Empty native observations once composed a passed public-install receipt."""

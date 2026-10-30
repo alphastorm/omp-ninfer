@@ -47,7 +47,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from verify_release import (  # pyright: ignore[reportMissingImports]
     OMP_PROFILE_PLATFORMS, effective_native_model, validate_upstream_client_bindings,
-    validate_upstream_omp_component,
+    validate_upstream_omp_component, ga_release, product_version, OCI_DIGEST_RE,
 )
 from rebind_release import RAW  # pyright: ignore[reportMissingImports]
 from compose_native_qualification import first_release_rollback
@@ -200,7 +200,28 @@ def positive_seconds(value: Any) -> bool:
     return isinstance(value, (int, float)) and not isinstance(value, bool) and value > 0
 
 
-def check_restoration(restoration: Any, lanes: tuple[str, ...], candidate: str) -> None:
+def predecessor_image_digest(release: str) -> str:
+    """Read the incumbent from the latest ready GA predecessor, never from operator evidence."""
+    current = product_version(release)
+    predecessors = []
+    for path in (ROOT / "releases").iterdir():
+        version = product_version(path.name)
+        if (not path.is_dir() or not ga_release(path.name) or version is None
+                or current is None or version >= current or not (path / "manifest.json").is_file()):
+            continue
+        manifest = load(path / "manifest.json")
+        if manifest.get("status") == "ready":
+            predecessors.append((version, manifest))
+    require(bool(predecessors), "restoration requires a published predecessor manifest")
+    predecessor = max(predecessors, key=lambda row: row[0])[1]
+    digest = predecessor.get("components", {}).get("ninfer", {}).get("oci_manifest_digest")
+    require(isinstance(digest, str) and OCI_DIGEST_RE.fullmatch(digest) is not None,
+            "published predecessor must bind an RTX 5090 image digest")
+    return digest
+
+
+def check_restoration(restoration: Any, lanes: tuple[str, ...], candidate: str,
+                      predecessor_digest: str) -> None:
     """Restoration counts only when it observed every incumbent the windows displaced back in place."""
     require(isinstance(restoration, dict) and bool(restoration), "restoration evidence is empty")
     overridden = sorted(set(restoration).intersection(RESTORATION_RECEIPT_FIELDS))
@@ -214,6 +235,8 @@ def check_restoration(restoration: Any, lanes: tuple[str, ...], candidate: str) 
     image = incumbent.get("original_image")
     require(isinstance(image, str) and OCI_IMAGE_RE.fullmatch(image) is not None,
             "rtx5090 restoration must name the incumbent's digest-pinned image")
+    require(image.rsplit("@", 1)[1] == predecessor_digest,
+            "rtx5090 restored image must match the published predecessor digest")
     require(incumbent.get("restart_policy") == "unless-stopped",
             f"rtx5090 restoration left restart policy {incumbent.get('restart_policy')!r}, "
             "not unless-stopped")
@@ -374,7 +397,8 @@ def main() -> int:
         receipt_path = ROOT / lane_receipt if lane_receipt and lane_receipt.startswith("releases/") else release_root / str(lane_receipt)
         check_native_first_release(native, load(receipt_path) if lane_receipt else {})
     # The restoration receipt and every incumbent-restored claim below rest on this evidence.
-    check_restoration(evidence["restoration"], lanes, args.candidate)
+    check_restoration(evidence["restoration"], lanes, args.candidate,
+                      predecessor_image_digest(args.release))
     scope = evidence["documented_routes"].get("scope")
     require(isinstance(scope, str) and bool(scope.strip()),
             "evidence documented_routes needs the scope the accepted routes cover")
