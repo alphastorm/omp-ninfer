@@ -604,7 +604,8 @@ class BindNativeVariantTest(unittest.TestCase):
         self.write_checksums()
         qualified = json.loads(REBASED_LANE_RECEIPT.read_text())
         qualified["runtime_shape"] = spec["runtime_shape"]
-        qualified["configuration"].update(configuration)
+        qualified["configuration"].update({key: value for key, value in configuration.items()
+                                            if key != "pending_timeout_ms"})
         self.write_lane_receipt(qualified)
         screen = json.loads(self.screen_path.read_text())
         for role in ("candidate", "candidate_determinism"):

@@ -30,6 +30,7 @@ from compose_native_qualification import (
     native_runtime_configuration,
     native_probe_acceptance_errors,
     matches_native_configuration,
+    NATIVE_RECEIPT_POLICY_FIELDS,
 )
 from render_compatibility import (  # pyright: ignore[reportMissingImports]
     OMP_PROFILE_PLATFORMS,
@@ -1463,16 +1464,21 @@ def validate_ninfer_variants(
                 errors,
             )
         receipt = load_json(summary_path) if summary_path.is_file() else {}
+        candidate_configuration = None
         if "runtime_shape" in item:
             require(receipt.get("runtime_shape") == item["runtime_shape"],
                     f"{prefix} qualification runtime_shape must match the variant", errors)
         if ((product_version(release) or (0, 0, 0)) >= (0, 16, 0)
                 and (not carried_native or "server_config" in qualification or "release_spec" in qualification)):
-            configuration = native_profile(root, release, item, errors,
-                                           (incoming_profiles or {}).get(variant_id))
-            if configuration is not None:
+            candidate_configuration = native_profile(root, release, item, errors,
+                                                     (incoming_profiles or {}).get(variant_id))
+            if candidate_configuration is not None:
                 observed = receipt.get("configuration", {})
-                for field, expected in configuration.items():
+                fields = (*NATIVE_RECEIPT_POLICY_FIELDS,
+                          *(("pending_timeout_ms",) if isinstance(observed, dict)
+                            and "pending_timeout_ms" in observed else ()))
+                for field in fields:
+                    expected = candidate_configuration[field]
                     require(isinstance(observed, dict) and type(observed.get(field)) is type(expected)
                             and observed.get(field) == expected,
                             f"{prefix} qualification configuration.{field} must match candidate policy", errors)
@@ -1516,7 +1522,7 @@ def validate_ninfer_variants(
             validate_native_gates(receipt, prefix, errors, complete=rebased)
             if rebased:
                 errors.extend(f"{prefix}: {error}"
-                              for error in native_protocol_qualification_errors(receipt))
+                              for error in native_protocol_qualification_errors(receipt, candidate_configuration))
         identity = receipt.get("identity", {})
         package = receipt.get("package", {})
         require(package.get("filename") == package_name,

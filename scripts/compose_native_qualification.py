@@ -18,6 +18,12 @@ import re
 from decimal import Decimal, DecimalException
 from typing import Any
 
+NATIVE_RECEIPT_POLICY_FIELDS = (
+    "max_context", "kv_capacity", "kv_dtype", "concurrency", "prefill_chunk",
+    "device_state_slots", "admission_headroom_mib", "host_context_mib", "host_context_bytes",
+    "speculative_backend", "speculative_draft_tokens", "public_model_id",
+)
+
 
 def first_release_rollback(value: Any) -> bool:
     """The orchestrator's explicit zero-direction first-lineage result, not a passed rollback."""
@@ -342,7 +348,8 @@ def native_probe_acceptance_errors(configuration: dict[str, Any], probes: Any,
     return errors
 
 
-def native_protocol_qualification_errors(receipt: dict[str, Any]) -> list[str]:
+def native_protocol_qualification_errors(receipt: dict[str, Any],
+                                         candidate_configuration: dict[str, Any] | None = None) -> list[str]:
     """The native release shape preserves actual phase wrappers around canonical payloads."""
     errors = []
     gates = receipt.get("deterministic_gates", {})
@@ -378,7 +385,10 @@ def native_protocol_qualification_errors(receipt: dict[str, Any]) -> list[str]:
     if type(concurrency) is int and concurrency > 1:
         if type(slots) is not int or slots < 2:
             errors.append("concurrent native protocol requires at least two extra device-state slots")
-        pending = configuration.get("pending_timeout_ms")
+        # The fork's schema-1 orchestrator receipt does not project pending_timeout_ms.
+        # The product supplies it from the separately authenticated packaged server-config.
+        pending = (candidate_configuration if candidate_configuration is not None
+                   else configuration).get("pending_timeout_ms")
         if type(pending) is not int or not 180000 <= pending <= 2147483647:
             errors.append("concurrent native protocol requires at least a 180-second pending timeout")
     pressure = receipt.get("protocol_under_pool_pressure", {})

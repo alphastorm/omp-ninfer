@@ -255,6 +255,13 @@ class NativeConcurrentProtocolTests(unittest.TestCase):
             value = deepcopy(receipt)
             value["configuration"].update(fields)
             self.assertTrue(native.native_protocol_qualification_errors(value), fields)
+        # Preserve the real orchestrator receipt schema: timeout lives in the authenticated
+        # packaged config, not in a fabricated edit to a qualification receipt.
+        receipt["configuration"].pop("pending_timeout_ms")
+        _, _, policy = candidate_profile("rtx3090")
+        self.assertEqual(native.native_protocol_qualification_errors(receipt, policy), [])
+        self.assertTrue(native.native_protocol_qualification_errors(receipt))
+        self.assertTrue(native.native_protocol_qualification_errors(receipt, {**policy, "pending_timeout_ms": 30000}))
 
     def test_concurrent_acceptance_is_separate_from_serial_speed_gate(self):
         spec, _, configuration = candidate_profile("rtx3090")
