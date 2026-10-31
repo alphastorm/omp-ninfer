@@ -448,8 +448,20 @@ class BindNativeVariantTest(unittest.TestCase):
         predecessor.parent.mkdir()
         predecessor.write_text(json.dumps({"components": {"ninfer_variants": [previous]}}))
         package = self.workspace / PACKAGE.replace("v0.6.1", "v0.8.0")
-        config = json.dumps({"speculative": {"backend": "mtp"}}).encode()
-        spec = json.dumps({"schema_version": 5, "lane": "rtx4090", "runtime_shape": shape}).encode()
+        config = json.dumps({
+            "artifact_type": "ninfer_windows_server_config", "schema_version": 4,
+            "release_id": "fixture-native", "deployment_profile": "fixture-native",
+            "model_id": "qwen3.8-27b", "speculative": {"backend": "mtp", "draft_tokens": 3},
+            "engine": {"max_context": 131072, "kv_capacity": 131072, "kv_dtype": "int8",
+                       "max_concurrency": 1, "pending_timeout_ms": 30000, "prefill_chunk": 1024,
+                       "admission_headroom_mib": 640},
+            "context_cache": {"device_state_slots": 2, "host_context_mib": "14787.734375"},
+        }).encode()
+        spec = json.dumps({
+            "artifact_type": "ninfer_windows_release_spec", "schema_version": 5, "lane": "rtx4090",
+            "release_id": "fixture-native", "deployment_profile": "fixture-native", "runtime_shape": shape,
+            "host_context_translation": {"host_context_bytes": 15506063360},
+        }).encode()
         with tarfile.open(package, "w:gz") as archive:
             for name, data in (("server-config.json", config), ("release-spec.json", spec)):
                 member = tarfile.TarInfo("payload/" + name)
@@ -569,6 +581,68 @@ class BindNativeVariantTest(unittest.TestCase):
         self.assertNotIn("fit", variant["qualification"])
         self.assertEqual(variant["qualification"]["t1_parity"]["sha256"],
                          hashlib.sha256(path.read_bytes()).hexdigest())
+
+    def test_p16_binds_authenticated_profiles_fit_and_release_mirror_before_writing(self):
+        from test_native_candidate_policy import candidate_profile
+        package = self.prepare_p15()
+        target = self.workspace / "releases/v0.16.0/qualification"
+        self.release_root.parent.rename(target.parent)
+        self.release_root, self.manifest_path = target, target.parent / "manifest.json"
+        spec, config, configuration = candidate_profile("rtx4090")
+        config_bytes = json.dumps(config).encode()
+        with tarfile.open(package, "w:gz") as archive:
+            for name, data in (("server-config.json", config_bytes), ("release-spec.json", json.dumps(spec).encode())):
+                member = tarfile.TarInfo("payload/" + name)
+                member.size = len(data)
+                archive.addfile(member, io.BytesIO(data))
+        self.receipt["config_sha256"] = hashlib.sha256(config_bytes).hexdigest()
+        self.receipt["package"].update(sha256=hashlib.sha256(package.read_bytes()).hexdigest(),
+                                       bytes=package.stat().st_size)
+        self.write_receipt()
+        self.entries[package.name] = self.receipt["package"]["sha256"]
+        self.entries["package-build-receipt.json"] = self.receipt_digest
+        self.write_checksums()
+        qualified = json.loads(REBASED_LANE_RECEIPT.read_text())
+        qualified["runtime_shape"] = spec["runtime_shape"]
+        qualified["configuration"].update(configuration)
+        self.write_lane_receipt(qualified)
+        screen = json.loads(self.screen_path.read_text())
+        for role in ("candidate", "candidate_determinism"):
+            screen["runs"][role]["arm"].update(configuration_sha256=self.receipt["config_sha256"],
+                                               package_sha256=self.receipt["package"]["sha256"])
+        self.screen_path.write_text(json.dumps(screen))
+        fit = {
+            "artifact_type": "omp-ninfer.native-fit", "schema_version": 1, "status": "passed",
+            "identity": {"package_sha256": self.receipt["package"]["sha256"],
+                         "server_binary_sha256": self.receipt["binaries"]["server_sha256"],
+                         "configuration_sha256": self.receipt["config_sha256"],
+                         "model_artifact_sha256": self.receipt["model_sha256"]},
+            "runtime_shape": spec["runtime_shape"], "maximum_context_tokens": 131072,
+            "configuration": configuration, "measured_admission_headroom_mib": 640,
+            "effective_weights": {"converted_device_bytes": 1024, "host_mapped_bytes": 2048},
+            "raw_prompts_outputs_or_secrets_included": False,
+        }
+        proof = self.workspace / "fit.json"
+        proof.write_text(json.dumps(fit))
+        self.manifest_path.write_text(json.dumps(self.manifest))
+        compatibility = target.parent / "compatibility.json"
+        compatibility.write_text(json.dumps({"runtime_variants": [
+            {"id": "rtx4090-windows-native", "maximum_context_tokens": 65536}]}))
+        argv = ["bind_native_variant.py", "--release", "v0.16.0", "--lane", "rtx4090",
+                "--tag", "v0.8.0-qwen38-4090-beta.1", "--checksums", str(self.checksums_path),
+                "--receipt", str(self.receipt_path), "--quality-screen", str(self.screen_path),
+                "--fit-proof", str(proof)]
+        with mock.patch.object(sys, "argv", argv), contextlib.redirect_stdout(io.StringIO()):
+            BINDER.main()
+        variant = json.loads(self.manifest_path.read_text())["components"]["ninfer_variants"][0]
+        for field, filename in (("release_spec", "release-spec.json"), ("server_config", "server-config.json")):
+            reference = variant["qualification"][field]
+            path = self.workspace / reference["path"]
+            self.assertEqual(path.name, filename)
+            self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), reference["sha256"])
+        self.assertEqual(json.loads(compatibility.read_text())["runtime_variants"][0]["runtime_shape"],
+                         spec["runtime_shape"])
+        self.assertEqual(json.loads(compatibility.read_text())["runtime_variants"][0]["maximum_context_tokens"], 131072)
 
 
 if __name__ == "__main__":

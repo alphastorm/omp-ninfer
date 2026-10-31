@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import bind_native_variant as binder
 import compose_native_qualification as native
+import compose_route_acceptance as composer
 import run_variant_campaign as campaign
 import verify_release as verifier
 
@@ -51,6 +52,48 @@ def candidate_profile(lane: str) -> tuple[dict, dict, dict]:
         "public_model_id": config["model_id"],
     }
     return spec, config, configuration
+
+
+def probe_receipts(variant, configuration):
+    """Synthetic wire/driver shapes; never qualification evidence."""
+    identity = {"binary_sha256": variant["server_binary_sha256"],
+                "config_sha256": variant["configuration_sha256"],
+                "model_artifact_sha256": variant["model_artifact_sha256"], "source_dirty": False}
+    status = {"artifact_type": "ninfer_server_status", "schema_version": 2, "status": "ok",
+              "identity": identity, "scheduler": {"max_concurrency": configuration["concurrency"]},
+              "runtime": {"max_context": configuration["max_context"]}}
+    fleet = {"artifact_type": "omp_ninfer_fleet_fanout_probe", "schema_version": 3,
+             "identity": identity, "branches": 4, "transient_retries": 0,
+             "steps": [{"step": step} for step in
+                       ("base_prefill", "warm_edit", "checkpoint_save", "branch_0", "branch_1",
+                        "branch_2", "branch_3", "session_delete")]}
+    if configuration["concurrency"] == 1:
+        return {"fleet": fleet}
+    model = f"ninfer-native-{variant['id'].split('-')[0][3:]}/{configuration['public_model_id']}"
+    fanout = {"artifact_type": "omp_ninfer_concurrency_probe", "schema_version": 1, "ok": True,
+              "arguments": {"arm": "rtx3090-C2-acceptance", "scenario": ["fanout"], "branches": 4,
+                            "fanout_concurrency": 4, "model": configuration["public_model_id"]},
+              "identity": {phase: {"body": deepcopy(status)} for phase in ("server_before", "server_after")},
+              "scenarios": [{"name": "fanout", "ok": True, "requests": [
+                  {"label": label, "ok": True, "http_status": 200,
+                   "submitted_monotonic_s": 1 if label == "fanout-base" else 3,
+                   "completed_monotonic_s": 2 if label == "fanout-base" else 6}
+                  for label in ("fanout-base", "branch-0", "branch-1", "branch-2", "branch-3")]}]}
+    omp = {"sha256": "1" * 64, "version": "omp/18.14.0"}
+    parallel = {"artifact_type": "omp_ninfer_parallel_proof", "passed": True, "model": model,
+                "omp": omp, "max_in_flight": 2, "scenarios": [
+                    {"scenario": name, "passed": True, "max_in_flight": 2, "overlap_seconds": 1.5,
+                     "checks": {"logged_requests": True, "all_logged_requests_completed": True,
+                                "single_server_instance": True, "provider_limit_respected": True,
+                                "concurrency_expected": True}}
+                    for name in ("subagents", "sessions")]}
+    compaction = {"artifact_type": "omp_ninfer_long_session_proof", "passed": True, "model": model,
+                  "omp": omp, "checks": {"every_turn_completed": True, "compactions_committed": True,
+                    "no_failed_compaction": True, "control_recalled_after_each_compaction": True,
+                    "one_session": True},
+                  "parameters": {"compactions": 2},
+                  "compactions": [{"committed": True}, {"committed": True}]}
+    return {"fleet": fleet, "fanout": fanout, "parallel": parallel, "compaction": compaction}
 
 
 class NativeCandidateFitTests(unittest.TestCase):
@@ -158,6 +201,46 @@ class NativeCandidateFitTests(unittest.TestCase):
             with self.subTest(field=field), self.assertRaises(binder.BindError):
                 binder.package_runtime_shape(package, receipt)
 
+    def test_composer_and_ready_verifier_bind_actual_policy_and_c2_probes(self):
+        for lane in ("rtx3090", "rtx4090"):
+            self.prepare(lane)
+            probes = native.native_probe_summary(probe_receipts(self.variant, self.configuration))
+            evidence = {"runtime_configuration": self.configuration, "probe_acceptance": probes}
+            with mock.patch.object(composer, "ROOT", self.root):
+                self.assertEqual(composer.check_native_policy("v0.16.0", self.variant, evidence, "1" * 64),
+                                 self.configuration)
+                wrong = deepcopy(evidence)
+                wrong["runtime_configuration"]["pending_timeout_ms"] += 1
+                with self.assertRaisesRegex(SystemExit, "actual runtime configuration"):
+                    composer.check_native_policy("v0.16.0", self.variant, wrong, "1" * 64)
+            acceptance = self.root / "releases/v0.16.0/acceptance"
+            acceptance.mkdir(exist_ok=True)
+            path = acceptance / f"{lane}-public-install.json"
+            receipt = {"status": "passed", "release": "v0.16.0", "lane": self.variant["id"],
+                       "runtime": {"package_sha256": self.variant["package_sha256"],
+                                   "binary_sha256": self.variant["server_binary_sha256"],
+                                   "configuration_sha256": self.variant["configuration_sha256"],
+                                   "model_sha256": self.variant["model_artifact_sha256"],
+                                   "runtime_shape": self.variant["runtime_shape"], "configuration": self.configuration},
+                       "probe_acceptance": probes}
+            composed = acceptance / "composed.json"
+            def bind_receipt():
+                path.write_text(json.dumps(receipt))
+                composed.write_text(json.dumps({"evidence": {f"{lane}_public_install": {
+                    "repository_path": path.relative_to(self.root).as_posix(),
+                    "sha256": verifier.sha256_file(path)}}}))
+                return {"composition": {"external_installation_acceptance": {
+                    "repository_path": composed.relative_to(self.root).as_posix(),
+                    "sha256": verifier.sha256_file(composed)}}}
+            manifest = {"components": {"omp": {"binary_sha256": "1" * 64}, "ninfer_variants": [self.variant]}}
+            errors = []
+            verifier.validate_native_route_policy(self.root, "v0.16.0", manifest, bind_receipt(), errors)
+            self.assertEqual(errors, [])
+            receipt["runtime"]["configuration"] = {**self.configuration, "concurrency": 99}
+            errors = []
+            verifier.validate_native_route_policy(self.root, "v0.16.0", manifest, bind_receipt(), errors)
+            self.assertTrue(any("exact authenticated" in error for error in errors))
+
 
 class NativeConcurrentProtocolTests(unittest.TestCase):
     def test_protocol_accepts_c2_but_not_under_reserved_or_short_deadline_c2(self):
@@ -188,6 +271,46 @@ class NativeConcurrentProtocolTests(unittest.TestCase):
         start["engine"]["max_concurrency"] = 2
         with self.assertRaisesRegex(campaign.CampaignError, "max_concurrency"):
             campaign.bind_server_start(start, spec=arm, matrix=matrix, model=MODEL, instance_id="instance")
+
+    def test_c2_requires_real_fanout_stock_omp_and_automatic_compaction_oracles(self):
+        _, _, configuration = candidate_profile("rtx3090")
+        variant = {"id": "rtx3090-windows-native", "server_binary_sha256": "a" * 64,
+                   "configuration_sha256": "b" * 64, "model_artifact_sha256": "c" * 64}
+        raw = probe_receipts(variant, configuration)
+        summary = native.native_probe_summary(raw)
+        self.assertEqual(native.native_probe_acceptance_errors(configuration, summary, variant, "1" * 64), [])
+        for name in raw:
+            value = deepcopy(summary)
+            del value[name]
+            self.assertTrue(native.native_probe_acceptance_errors(configuration, value, variant, "1" * 64), name)
+        for mutate in (
+            lambda value: value["fanout"]["arguments"].update(fanout_concurrency=1),
+            lambda value: value["fanout"]["statuses"]["server_after"]["scheduler"].update(max_concurrency=1),
+            lambda value: value["fanout"]["statuses"]["server_before"]["identity"].update(config_sha256="0" * 64),
+            lambda value: value["parallel"].update(max_in_flight=1),
+            lambda value: value["parallel"]["omp"].update(sha256="0" * 64),
+            lambda value: value["compaction"].update(committed=1),
+            lambda value: value["compaction"]["checks"].update(control_recalled_after_each_compaction=False),
+        ):
+            value = deepcopy(summary)
+            mutate(value)
+            self.assertTrue(native.native_probe_acceptance_errors(configuration, value, variant, "1" * 64))
+        sequential = deepcopy(raw)
+        for index, row in enumerate(sequential["fanout"]["scenarios"][0]["requests"]):
+            row.update(submitted_monotonic_s=index * 10, completed_monotonic_s=index * 10 + 2)
+        self.assertTrue(native.native_probe_acceptance_errors(
+            configuration, native.native_probe_summary(sequential), variant, "1" * 64))
+
+    def test_native_client_home_uses_candidate_context_and_provider_limit(self):
+        from client_acceptance import prepare_home
+        with tempfile.TemporaryDirectory() as temporary:
+            home = Path(temporary)
+            prepare_home(home, "http://127.0.0.1:18082/v1", "synthetic-key", "q38-ninfer",
+                         context_window=65536, concurrency=2)
+            models = json.loads((home / ".omp/agent/models.yml").read_text())
+            config = json.loads((home / ".omp/agent/config.yml").read_text())
+            self.assertEqual(models["providers"]["ninfer-acceptance"]["models"][0]["contextWindow"], 65536)
+            self.assertEqual(config["providers"]["maxInFlightRequests"]["ninfer-acceptance"], 2)
 
 
 if __name__ == "__main__":

@@ -71,7 +71,8 @@ class ManualTunnelScriptsTest(unittest.TestCase):
         # summary outlasted OMP's resends (EXP-072). OMP waits for its own in-flight slot without a
         # deadline, but leaves a provider missing from the limits unlimited, so every provider a
         # shipped fragment declares needs one, equal to its lane's concurrency: the RTX 5090
-        # providers take the root profiles' value and the RTX 4090 providers admit one.
+        # providers take the root profiles' value, the C2 RTX 3090 admits two, and the
+        # RTX 4090 providers still admit one. Native lane ownership remains sequential.
         config = (EXAMPLES / "fail-closed.yml").read_text(encoding="utf-8")
         block = re.search(r"^providers:\n  maxInFlightRequests:\n((?:    [\w-]+: \d+\n)+)",
                           config, re.M)
@@ -95,8 +96,12 @@ class ManualTunnelScriptsTest(unittest.TestCase):
             rtx5090_providers.add(profile["omp_provider"]["id"])
         self.assertEqual(len(rtx5090_concurrency), 1, "the RTX 5090 routes run one configuration")
         (rtx5090,) = rtx5090_concurrency
-        self.assertEqual(limits, {provider: rtx5090 if provider in rtx5090_providers else 1
+        self.assertEqual(limits, {provider: rtx5090 if provider in rtx5090_providers
+                                  else 2 if provider == "ninfer-native-3090" else 1
                                   for provider in declared})
+        self.assertIn("one active RTX 3090 lane", config)
+        for fragment in (ROOT / "examples/windows-native").glob("*.fragment.yml"):
+            self.assertIn("contextWindow: 131072", fragment.read_text())
         self.assertNotIn("asyncEnabled", config)
 
     def test_a_lane_admitting_two_requests_holds_a_waiting_one_inside_omps_stream_watchdog(self) -> None:
