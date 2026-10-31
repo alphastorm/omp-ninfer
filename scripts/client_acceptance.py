@@ -73,21 +73,21 @@ def command_json(value):
     return parsed
 
 
-def prepare_home(home, endpoint, key, model_id):
+def prepare_home(home, endpoint, key, model_id, *, context_window=131072, concurrency=1):
     agent = home / ".omp/agent"
     agent.mkdir(parents=True)
     # JSON is YAML-compatible. No private settings, extensions or cloud credentials are copied.
     models = {"providers": {"ninfer-acceptance": {"baseUrl": endpoint, "apiKey": key,
         "api": "openai-responses", "authHeader": True, "models": [{"id": model_id,
         "name": "Local acceptance", "reasoning": True, "input": ["text"],
-        "contextWindow": 131072, "maxTokens": 4096,
+        "contextWindow": context_window, "maxTokens": 4096,
         "cost": {"input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0},
         "compat": {"statefulResponses": True, "includeEncryptedReasoning": False,
                    "supportsReasoningSummary": False}}]}}}
     (agent / "models.yml").write_text(json.dumps(models), encoding="utf-8")
     (agent / "models.yml").chmod(0o600)
     (agent / "config.yml").write_text(json.dumps({"retry": {"enabled": False, "modelFallback": False},
-        "startup": {"checkUpdate": False}, "providers": {"maxInFlightRequests": {"ninfer-acceptance": 1}}}),
+        "startup": {"checkUpdate": False}, "providers": {"maxInFlightRequests": {"ninfer-acceptance": concurrency}}}),
         encoding="utf-8")
     (home / "work").mkdir()
     (home / "work/marker.txt").write_text(probe.MARKER + "\n", encoding="utf-8")
@@ -290,6 +290,7 @@ def main(argv=None):
     parser.add_argument("--omp-sha256", required=True)
     parser.add_argument("--omp-version", required=True, help="exact stock version, e.g. omp/18.14.0")
     parser.add_argument("--lane", choices=[v for v in LANES if v != "rtx5090-container-host"], default="rtx5090-macos-client")
+    parser.add_argument("--release", help="native candidate release; defaults to the checkout's compatibility authority")
     parser.add_argument("--local-rehearsal", action="store_true")
     parser.add_argument("--endpoint")
     parser.add_argument("--model-id", help="served model ID; defaults to the model the selected lane's documented provider step configures")
@@ -312,6 +313,31 @@ def main(argv=None):
             parser.error("use the documented http://loopback:port/v1 route, not a remote or credential-bearing URL")
     args.omp = args.omp.resolve()
     model_id = args.model_id or documented_model_id(args.lane)
+    context_window, concurrency = 131072, 1  # Serial synthetic rehearsal, not a shipping-policy claim.
+    native_configuration = None
+    if args.lane in ("rtx3090-native", "rtx4090-native") and not args.local_rehearsal:
+        from verify_release import native_profile, product_version
+        release = args.release or json.loads((ROOT / "compatibility.json").read_text())["product_release"]
+        manifest = json.loads((ROOT / "releases" / release / "manifest.json").read_text())
+        variant = next(row for row in manifest["components"]["ninfer_variants"]
+                       if row["id"] == args.lane.removesuffix("-native") + "-windows-native")
+        errors = []
+        if (product_version(release) or (0, 0, 0)) >= (0, 16, 0):
+            native_configuration = native_profile(ROOT, release, variant, errors)
+        else:
+            # Published predecessors bind these original config bytes, without P16's spec reference.
+            path = ROOT / "releases" / release / "profiles" / args.lane.removesuffix("-native") / "server-config.json"
+            if not path.is_file() or sha256(path) != variant["configuration_sha256"]:
+                parser.error("historical native config must match its manifest hash")
+            config = json.loads(path.read_text())
+            native_configuration = {"max_context": config["engine"]["max_context"],
+                                    "concurrency": config["engine"]["max_concurrency"],
+                                    "public_model_id": config["model_id"]}
+        if errors or native_configuration is None:
+            parser.error("native acceptance requires the exact bound candidate profile: " + "; ".join(errors))
+        if model_id != native_configuration["public_model_id"]:
+            parser.error("native model must match the authenticated candidate configuration")
+        context_window, concurrency = native_configuration["max_context"], native_configuration["concurrency"]
     args.model = "ninfer-acceptance/" + model_id
     receipt = {"artifact_type": "omp_ninfer_client_acceptance", "schema_version": 1,
                "receipt_class": receipt_class(args.local_rehearsal), "qualification_claimed": False,
@@ -320,6 +346,8 @@ def main(argv=None):
                "block_addresses": block_addresses(args.lane),
                "execution": "semantic client checks; not verbatim install-route execution",
                "checks": {}, "error": None, "started_utc": datetime.datetime.now(datetime.UTC).isoformat()}
+    if native_configuration is not None:
+        receipt["runtime_configuration"] = native_configuration
     try:
         actual = sha256(args.omp)
         if actual != args.omp_sha256.lower():
@@ -339,7 +367,7 @@ def main(argv=None):
                 if stub:
                     stub.start()
                 endpoint = f"http://127.0.0.1:{stub.port}/v1" if stub else args.endpoint
-                prepare_home(home, endpoint, key, model_id)
+                prepare_home(home, endpoint, key, model_id, context_window=context_window, concurrency=concurrency)
                 def lifecycle(action):
                     if stub:
                         getattr(stub, action)()

@@ -3,8 +3,8 @@
 
 The roadmap's fleet-routing claim is gated on a measured fixed workload. This runner takes the
 public MTP-ablation corpus (7 scenarios x 2 repetitions = 14 independent jobs, 24 requests) and
-dispatches the jobs across the named lanes with one worker per lane (one active request per
-qualified profile), then records batch completion wall, per-lane completed work, and per-lane
+dispatches the jobs across the named lanes with one worker per lane (an intentionally serial
+measurement even on C2 profiles), then records batch completion wall, per-lane completed work, and per-lane
 output projections. Two policies:
 
   dynamic  every idle lane pulls the next job from one longest-first queue
@@ -48,7 +48,7 @@ from run_mtp_ablation import (  # noqa: E402
     scoped_identity,
 )
 
-ARM = 3  # every lane ships MTP3
+ARM = 3  # Frozen corpus identity, not the active lane's speculative backend or draft width.
 # Longest-first queue order for the dynamic policy (measured per-scenario cost, largest first).
 JOB_ORDER = (
     "responses_long_replay",

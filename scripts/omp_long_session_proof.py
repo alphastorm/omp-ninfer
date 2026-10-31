@@ -35,6 +35,7 @@ import argparse
 import datetime
 import hashlib
 import json
+import os
 import random
 import subprocess
 import sys
@@ -228,7 +229,7 @@ def main(argv=None):
     if not (args.home / ".omp/agent/models.yml").is_file():
         parser.error(f"{args.home}/.omp/agent/models.yml is missing")
     version = subprocess.run([str(args.omp), "--version"], capture_output=True, text=True,
-                             env={"HOME": str(args.home), "PATH": "/usr/bin:/bin"}, timeout=60).stdout.strip()
+                             env=dict(os.environ, HOME=str(args.home), USERPROFILE=str(args.home)), timeout=60).stdout.strip()
     args.omp_version = version
 
     facts = identifiers(args.seed, args.compactions)

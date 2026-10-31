@@ -36,7 +36,7 @@ class ProofEnvironmentTests(unittest.TestCase):
             for version, expected in (("omp/18.4.0", "1"), ("omp/18.4.10", "1"),
                                       ("omp/18.8.0", None), ("omp/18.8.3", None), ("omp/18.8.7", None),
                                       ("omp/18.10.1", None), ("omp/18.12.1", None),
-                                      ("omp/18.12.6", None)):
+                                      ("omp/18.12.6", None), ("omp/18.14.0", None)):
                 with self.subTest(probe=name, version=version), tempfile.TemporaryDirectory() as temporary:
                     args = argparse.Namespace(home=Path(temporary), omp=Path("fixture-omp"),
                                               model="ninfer-beta/q38-ninfer", omp_version=version)
@@ -47,6 +47,8 @@ class ProofEnvironmentTests(unittest.TestCase):
                         omp = module.Omp(args, "environment-invariant", False)
                         try:
                             environment = spawn.call_args.kwargs["env"]
+                            self.assertEqual(environment["HOME"], str(args.home))
+                            self.assertEqual(environment["USERPROFILE"], str(args.home))
                             if expected is None:
                                 self.assertFalse("PI_OPENAI_STATEFUL" in environment,
                                                  "per-model client launch contains the global override")

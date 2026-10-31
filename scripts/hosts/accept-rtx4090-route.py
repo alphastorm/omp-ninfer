@@ -22,8 +22,11 @@ import sys
 import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from compose_native_qualification import first_release_rollback
+from compose_native_qualification import (
+    first_release_rollback, native_status_errors, native_probe_summary, native_probe_acceptance_errors,
+)
 from documented_route import provider_model_id
+from verify_release import native_profile, product_version
 
 
 def quote(value: object) -> str:
@@ -165,6 +168,21 @@ def assess_evidence(evidence: Path, clone: Path, bundle: Path, release: str, can
             live["fail_closed"]["exit_code"] != 0 and live["fail_closed"]["no_model_response"] and live["fail_closed"]["only_selected_local_provider_observed"],
         "restoration_passed": load("restoration.json")["status"] == "passed" and load("final-audit.json")["status"] == "passed",
     }
+    configuration = None
+    probe_acceptance = None
+    if (product_version(release) or (0, 0, 0)) >= (0, 16, 0):
+        policy_errors = []
+        configuration = native_profile(clone, release, expected, policy_errors)
+        checks["candidate_configuration_bound"] = configuration is not None and not policy_errors
+        if configuration is not None:
+            checks["served_candidate_policy"] = not native_status_errors(recovery["server"], expected, configuration)
+            probes = {name: load(f"{filename}-probe.json") for name, filename in
+                      (("fleet", "fleet"), *((("fanout", "fanout"), ("parallel", "parallel"), ("compaction", "compaction"))
+                                           if configuration["concurrency"] > 1 else ()))}
+            probe_acceptance = native_probe_summary(probes)
+            client_sha = manifest["components"]["omp"]["binary_sha256"]
+            checks["native_probe_acceptance"] = not native_probe_acceptance_errors(
+                configuration, probe_acceptance, expected, client_sha)
     qualification_path = expected.get("qualification", {}).get("summary")
     qualification_file = (clone / qualification_path if qualification_path and qualification_path.startswith("releases/")
                           else clone / "releases" / release / str(qualification_path))
@@ -186,6 +204,9 @@ def assess_evidence(evidence: Path, clone: Path, bundle: Path, release: str, can
                 "local_compatibility_errors": [row["error"] for row in rejected],
                 "offline_provider_errors": [{key: row.get(key) for key in ("provider", "model", "errorMessage")} for row in provider_errors],
                 "live_acceptance": live}
+    if configuration is not None:
+        behavior["runtime_configuration"] = configuration
+        behavior["probe_acceptance"] = probe_acceptance
     (evidence / "behavior-evidence.json").write_text(json.dumps(behavior, indent=2) + "\n")
     return behavior
 

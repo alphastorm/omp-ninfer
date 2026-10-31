@@ -1,5 +1,10 @@
 [CmdletBinding()]
-param([switch]$Preflight)
+param(
+    [switch]$Preflight,
+    [string]$AcceptanceRelease='',
+    [string]$AcceptanceKeyFile='',
+    [string]$AcceptanceReceipt=''
+)
 
 # RTX 3090 lane runner for scripts/run_variant_campaign.py on the native Windows host.
 # The lane's NInfer service is owner-managed and normally stopped; the campaign takes the GPU
@@ -11,6 +16,17 @@ $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 
 $lane = 'rtx3090'
+# An already running managed candidate owns this explicit acceptance arm. Never start the
+# historical speed-campaign binary or acquire its owner lease on this path.
+if ($AcceptanceRelease) {
+    if ($Preflight -or -not $AcceptanceKeyFile -or -not $AcceptanceReceipt) {
+        throw 'C2 acceptance requires key/receipt and cannot be combined with speed preflight'
+    }
+    & python (Join-Path $PSScriptRoot '..\run_variant_campaign.py') accept-concurrency `
+        --release $AcceptanceRelease --lane $lane --base-url http://127.0.0.1:18082 `
+        --api-key-file $AcceptanceKeyFile --output $AcceptanceReceipt
+    exit $LASTEXITCODE
+}
 $stateRoot = 'C:\ProgramData\NInfer\qwen38-3090-omp-v0.2'
 $ownerController = Join-Path $stateRoot 'gpu-owner\Control-GpuOwner.ps1'
 $ownerState = Join-Path $stateRoot 'gpu-owner-state'
@@ -228,6 +244,7 @@ try {
             '--deployment-profile', "variant-campaign-rtx3090-$label",
             '--device', '0', '--max-context', [string]$arm.max_context, '--kv-capacity', 'auto',
             '--prefill-chunk', [string]$arm.prefill_chunk, '--kv-dtype', [string]$arm.kv_dtype,
+            # Intentionally C1/30 s: this arm measures serial single-request decode speed.
             '--max-concurrency', '1', '--max-pending-requests', '16',
             '--pending-timeout-ms', '30000', '--reasoning-effort', 'xhigh',
             '--response-store-max-records', '1024', '--response-store-max-mib', '256',
@@ -236,6 +253,8 @@ try {
         )
         if ($arm.speculative_backend -eq 'mtp') {
             $serverArgs += @('--spec', 'mtp', '--draft-tokens', [string]$arm.speculative_draft_window, '--lm-head-draft')
+        } elseif ($arm.speculative_backend -eq 'dflash2') {
+            $serverArgs += @('--spec', 'dflash2', '--draft-tokens', [string]$arm.speculative_draft_window)
         }
         if (-not (Test-Path -LiteralPath $trace -PathType Leaf)) {
             $initOut = @(& python $runner init --arms $arms --lane $lane --arm $label --model $modelId --campaign-id $campaignId --output $trace 2>&1)

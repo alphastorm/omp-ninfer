@@ -19,7 +19,7 @@ param(
     [Parameter(Mandatory=$true)][string]$ExpectedStateSha256,
     [string]$TemporaryPrevious='',
     [switch]$FirstRelease,
-    [ValidateSet('DryRun','Preflight','Accept','Restore','Audit','Route','Live','Offline')][string]$Mode='DryRun',
+    [ValidateSet('DryRun','Preflight','Accept','Restore','Audit','Route','Live','Offline','NativeProbes')][string]$Mode='DryRun',
     [string]$StateRoot='',
     [string]$TaskName='',
     [string]$Stage='',
@@ -71,6 +71,25 @@ function DocumentedProvider {
     $ids=@([regex]::Matches((Get-Content -LiteralPath $fragment -Raw -Encoding UTF8),'(?m)^      - id: (\S+)\r?$')|ForEach-Object {$_.Groups[1].Value})
     if($ids.Count -ne 1){throw "$($installed[0]) must declare exactly one model"}
     [pscustomobject]@{fragment=$fragment;selector="$provider/$($ids[0])"}
+}
+function CandidateConfiguration {
+    $code=@'
+import json, sys
+from pathlib import Path
+sys.path.insert(0, sys.argv[1])
+from verify_release import native_profile
+root, release, lane = Path(sys.argv[2]), sys.argv[3], sys.argv[4]
+manifest = json.loads((root / "releases" / release / "manifest.json").read_text())
+variant = next(row for row in manifest["components"]["ninfer_variants"] if row["id"] == lane + "-windows-native")
+errors = []
+configuration = native_profile(root, release, variant, errors)
+if errors or configuration is None:
+    raise SystemExit("; ".join(errors))
+print(json.dumps(configuration))
+'@
+    $json=@(& py -3 -c $code "$Clone\scripts" $Clone $Release $Lane)
+    if($LASTEXITCODE -ne 0){throw 'candidate native configuration binding failed'}
+    ($json -join "`n")|ConvertFrom-Json
 }
 function Probe {
     $state=ReadJson "$StateRoot\state.json"
@@ -311,6 +330,33 @@ if($Mode -in @('Live','Offline')) {
     & py -3 "$Workspace\omp-client-probe.py" --release $Release --candidate $Candidate --phase $phase --output "$Workspace\structured" --binary $binary --clone $Clone --platform windows-x64 --profile windows-docker-local --provider $provider --model $documented.selector --endpoint http://127.0.0.1:18082/v1 --key-file $KeyFile --expected-runtime "$Workspace\expected-runtime.json"
     exit $LASTEXITCODE
 }
+if($Mode -eq 'NativeProbes') {
+    SetIsolation 'route';$env:NINFER_NATIVE_API_KEY=[IO.File]::ReadAllText($KeyFile).Trim()
+    $configuration=CandidateConfiguration;$documented=DocumentedProvider
+    $state=ReadJson "$StateRoot\state.json";$installed=$state.releases.([string]$state.active_release)
+    $requests=@(Get-ChildItem $installed.release_root -Filter requests.jsonl -Recurse -File)
+    if($requests.Count -ne 1){throw 'native probes require the candidate request log'}
+    $logCommand='powershell.exe -NoProfile -NonInteractive -Command "Get-Content -LiteralPath '+(Quote $requests[0].FullName)+' -Encoding UTF8"'
+    # This is the existing sequential regression. --branches 4 does not make it concurrent.
+    & py -3 "$Clone\scripts\fleet_probe.py" --lane "$Lane-sequential-regression" --base-url http://127.0.0.1:18082 --api-key-file $KeyFile --model $configuration.public_model_id --branches 4 --log-cmd $logCommand --receipt "$Workspace\fleet-probe.json"
+    if($LASTEXITCODE -ne 0){throw 'native sequential fleet regression failed'}
+    if($configuration.concurrency -gt 1) {
+        & py -3 "$Clone\scripts\run_variant_campaign.py" accept-concurrency --release $Release --lane $Lane --base-url http://127.0.0.1:18082 --api-key-file $KeyFile --output "$Workspace\fanout-probe.json"
+        if($LASTEXITCODE -ne 0){throw 'native C2 fanout acceptance failed'}
+        $binary=Join-Path $env:LOCALAPPDATA 'OMP\omp.exe'
+        $client=(ReadJson "$Clone\releases\$Release\manifest.json").components.omp
+        # The key stays in the protected, uncollected isolated HOME. Parallel proof copies it
+        # into its own temporary HOME and explicitly sets this provider's in-flight limit.
+        Copy-Item -LiteralPath $KeyFile "$HOME\.omp\agent\native-acceptance.key"
+        & py -3 "$Clone\scripts\omp_parallel_proof.py" --omp $binary --omp-sha256 $client.binary_sha256 --omp-version "omp/$($client.distribution_version)" --home $HOME --provider $provider --model $documented.selector --key-file native-acceptance.key --max-in-flight $configuration.concurrency --log-cmd $logCommand --receipt "$Workspace\parallel-probe.json"
+        if($LASTEXITCODE -ne 0){throw 'native C2 OMP subagent/session proof failed'}
+        # Automatic foreground/background compaction uses the route's unmodified config,
+        # including provider limit two; no disabling async compaction to make the gate pass.
+        & py -3 "$Clone\scripts\omp_long_session_proof.py" --omp $binary --omp-sha256 $client.binary_sha256 --home $HOME --model $documented.selector --compactions 2 --receipt "$Workspace\compaction-probe.json"
+        if($LASTEXITCODE -ne 0){throw 'native C2 automatic compaction proof failed'}
+    }
+    exit 0
+}
 if($Mode -eq 'DryRun') {
     $p=Probe;AssertBaseline $p
     Control Status 'dryrun-controller-status.json'
@@ -382,7 +428,11 @@ if($Mode -eq 'Preflight') {
     $probe="$Workspace\acl-probe.txt";[IO.File]::WriteAllText($probe,'private ACL proof',$utf8)
     SetExactAcl $probe $b.observable.state_sddl
     $null=ValidateSnapshot "$Workspace\preflight-snapshot"
-    SaveJson "$Workspace\expected-runtime.json" @{server_binary_sha256=$variant.server_binary_sha256;configuration_sha256=$variant.configuration_sha256;model_sha256=$variant.model_artifact_sha256;source_commit=$variant.source_commit;package_sha256=$variant.package_sha256}
+    $expectedRuntime=@{server_binary_sha256=$variant.server_binary_sha256;configuration_sha256=$variant.configuration_sha256;model_sha256=$variant.model_artifact_sha256;source_commit=$variant.source_commit;package_sha256=$variant.package_sha256}
+    if([Version]($Release.TrimStart('v')) -ge [Version]'0.16.0') {
+        $expectedRuntime.configuration=CandidateConfiguration
+    }
+    SaveJson "$Workspace\expected-runtime.json" $expectedRuntime
     SaveJson "$Workspace\preflight.json" @{status='passed';started_utc=$started.ToString('o');completed_utc=[DateTime]::UtcNow.ToString('o');elapsed_seconds=([DateTime]::UtcNow-$started).TotalSeconds;candidate=$Candidate;release=$Release;document_sha256=$bundleManifest.document_sha256;block_hashes=@($bundleManifest.steps.sha256);published_assets=$assets;client_version=$version;client_parser=@{listed=$parserListed;exit_code=$parser.ExitCode};client_binary_sha256=(Hash $binary);client_asset_sha256=(Hash $clientAsset);model_sha256=$modelSha;exact_acl_restore_probe=$true;baseline=$b.observable}
     Write-Output 'PREFLIGHT_OK';return
 }
@@ -437,6 +487,11 @@ try {
     $boundary='structured-live';$remaining=[Math]::Floor((($WindowMinutes-10)*60)-([DateTime]::UtcNow-$started).TotalSeconds)
     if($remaining -lt 120){throw 'window reserve reached before live probe'}
     if((Child Live ([Math]::Min(8*60,$remaining))) -ne 0){throw 'structured live probe failed'}
+    if((ReadJson "$Workspace\expected-runtime.json").PSObject.Properties.Name -contains 'configuration') {
+        $boundary='native-probes';$remaining=[Math]::Floor((($WindowMinutes-10)*60)-([DateTime]::UtcNow-$started).TotalSeconds)
+        if($remaining -lt 120){throw 'window reserve reached before native probes'}
+        if((Child NativeProbes $remaining) -ne 0){throw 'native profile acceptance probes failed'}
+    }
     $boundary='structured-outage';Control Stop 'outage-stop.json'
     if((Child Offline 90) -ne 0){throw 'structured fail-closed probe failed'}
     $boundary='behavior-evidence';$logs=@(Get-ChildItem "$Workspace\route-home\.omp" -File -Recurse|Where-Object {$_.Name -like '*.log' -or $_.Name -like '*.jsonl'})

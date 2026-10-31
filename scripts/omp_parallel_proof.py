@@ -217,7 +217,7 @@ def config_command(args, home, action, key, value=None):
     if action == "set":
         command.append(json.dumps(value))
     command.append("--json")
-    result = subprocess.run(command, env=dict(os.environ, HOME=str(home), NO_COLOR="1"),
+    result = subprocess.run(command, env=dict(os.environ, HOME=str(home), USERPROFILE=str(home), NO_COLOR="1"),
                             cwd=home, capture_output=True, text=True, timeout=60)
     if result.returncode:
         raise RuntimeError("OMP config command failed")

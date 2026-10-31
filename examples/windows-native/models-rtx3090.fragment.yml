@@ -1,3 +1,5 @@
+# Qualified C2 lane: pair with fail-closed.yml's provider limit 2 and 180 s pending timeout.
+# The two in-flight requests share one 131072-token INT8 pool; only one native lane owns 18082.
 providers:
   ninfer-native-3090:
     baseUrl: http://127.0.0.1:18082/v1

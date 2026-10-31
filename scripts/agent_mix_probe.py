@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Measure shared-prefix reuse for a synthetic three-agent mix, one capacity arm at a time.
 
-Run against an otherwise idle server with max_concurrency=1. Use the same arguments
+Run against an otherwise idle server at its recorded, qualified concurrency (C1 or C2).
+This workload remains sequential; it is not a concurrent fanout measurement. Use the same arguments
 and a cold server for each capacity arm; --arm labels, but does not configure, it.
 Prefix sizes use system text plus compact tool JSON as a character proxy, NOT the
 model's chat template/tokenizer. Calibrate with the returned prompt_tokens. The tool JSON

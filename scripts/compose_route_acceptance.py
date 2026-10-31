@@ -52,10 +52,12 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from verify_release import (  # pyright: ignore[reportMissingImports]
     OMP_PROFILE_PLATFORMS, effective_native_model, validate_upstream_client_bindings,
     validate_upstream_omp_component, ga_release, product_version, OCI_DIGEST_RE,
-    bound_file,
+    bound_file, native_profile,
 )
 from rebind_release import RAW  # pyright: ignore[reportMissingImports]
-from compose_native_qualification import first_release_rollback
+from compose_native_qualification import (
+    first_release_rollback, native_probe_acceptance_errors, matches_native_configuration,
+)
 
 DOCUMENT = ROOT / "docs" / "QUICKSTART.md"
 LANES = ("rtx5090-container-host", "rtx5090-macos-client", "rtx5090-windows-client")
@@ -229,6 +231,19 @@ def check_native_observations(lane: str, observations: Any) -> None:
     install = observations.get("public_install")
     require(isinstance(install, dict) and install.get("status") == "passed",
             f"{lane}: the native public install did not pass")
+
+
+def check_native_policy(release: str, variant: dict, native: dict, client_sha256: str) -> dict | None:
+    if (product_version(release) or (0, 0, 0)) < (0, 16, 0):
+        return None
+    errors: list[str] = []
+    configuration = native_profile(ROOT, release, variant, errors)
+    require(configuration is not None and not errors, "; ".join(errors))
+    require(matches_native_configuration(native.get("runtime_configuration"), configuration),
+            f"{variant['id']}: acceptance must bind the candidate's actual runtime configuration")
+    errors = native_probe_acceptance_errors(configuration, native.get("probe_acceptance"), variant, client_sha256)
+    require(not errors, f"{variant['id']}: " + "; ".join(errors))
+    return configuration
 
 
 def positive_seconds(value: Any) -> bool:
@@ -433,11 +448,14 @@ def main() -> int:
         platform_receipts[profile["id"]] = platform_receipt(
             args.release, args.as_of, profile, evidence["platforms"][profile["id"]], manifest, candidate)
     native_model = effective_native_model(manifest)
+    native_configurations = {}
     for variant in manifest["components"].get("ninfer_variants", []):
         require(variant.get("model_artifact_sha256") == native_model.get("artifact_sha256"),
                 f"{variant['id']}: runtime model must match the effective native model")
         native = evidence[variant["id"].split("-")[0]]
         check_native_observations(variant["id"], native.get("observations"))
+        native_configurations[variant["id"]] = check_native_policy(
+            args.release, variant, native, manifest["components"]["omp"]["binary_sha256"])
         lane_receipt = variant.get("qualification", {}).get("summary")
         receipt_path = ROOT / lane_receipt if lane_receipt and lane_receipt.startswith("releases/") else release_root / str(lane_receipt)
         check_native_first_release(native, load(receipt_path) if lane_receipt else {})
@@ -541,7 +559,12 @@ def main() -> int:
                 "binary_sha256": variant["server_binary_sha256"],
                 "configuration_sha256": variant["configuration_sha256"],
                 "model_sha256": native_model["artifact_sha256"],
+                **({"configuration": native_configurations[native_variant],
+                    "runtime_shape": variant["runtime_shape"]}
+                   if native_configurations[native_variant] is not None else {}),
             },
+            **({"probe_acceptance": native["probe_acceptance"]}
+               if native_configurations[native_variant] is not None else {}),
             "preparation": native["preparation"],
             "observations": native["observations"],
             "documented_route": {"repository_path": route_rows[native_lane]["receipt"],

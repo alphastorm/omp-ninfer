@@ -6,6 +6,11 @@ started as a fresh process inside one shared campaign identity. The corpus, requ
 output projection, and server-log binding are reused from ``run_mtp_ablation.py``; this module
 owns the variant arm contract, the prefill/decode metrics, the workload model, and the per-lane
 decision.
+
+The speed campaign deliberately keeps max_concurrency=1: it measures single-request
+decode, not aggregate throughput. ``accept-concurrency`` is a separately labelled
+C2 acceptance arm against an already running, hash-bound native candidate. It uses
+the real four-way fanout probe and never enters the speed-gate reducer.
 """
 from __future__ import annotations
 
@@ -40,10 +45,55 @@ ENGINE_KV_NAMES = {
     "int8": frozenset({"int8", "int8-group64"}),
     "rk2v4-e8": frozenset({"rk2v4-e8"}),
 }
-SPECULATIVE_BACKENDS = ("none", "mtp")
+SPECULATIVE_BACKENDS = ("none", "mtp", "dflash2")
 LABEL_CHARACTERS = frozenset("abcdefghijklmnopqrstuvwxyz0123456789-")
 
 CampaignError = corpus.AblationError
+
+
+def concurrency_acceptance_arguments(lane: str, configuration: Mapping[str, Any]) -> list[str]:
+    if (configuration.get("concurrency") != 2
+            or type(configuration.get("concurrency")) is not int
+            or type(configuration.get("pending_timeout_ms")) is not int
+            or configuration["pending_timeout_ms"] < 180000):
+        raise CampaignError("C2 acceptance requires a qualified two-request profile with a 180-second timeout")
+    return ["--arm", f"{lane}-C2-acceptance", "--scenario", "fanout",
+            "--fanout-concurrency", "4", "--branches", "4",
+            "--model", configuration["public_model_id"]]
+
+
+def accept_concurrency(args: argparse.Namespace) -> int:
+    """Exercise the candidate without restarting it or modifying the serial speed baselines."""
+    from concurrency_probe import main as probe
+    from compose_native_qualification import native_status_errors
+    from verify_release import native_profile
+    root = Path(__file__).resolve().parents[1]
+    manifest = corpus.read_json_object(root / "releases" / args.release / "manifest.json")
+    variant = next((row for row in manifest["components"].get("ninfer_variants", [])
+                    if row["id"] == f"{args.lane}-windows-native"), None)
+    if variant is None:
+        raise CampaignError("C2 acceptance requires a bound native variant")
+    errors: list[str] = []
+    configuration = native_profile(root, args.release, variant, errors)
+    if errors or configuration is None:
+        raise CampaignError("; ".join(errors))
+    argv = concurrency_acceptance_arguments(args.lane, configuration)
+    output = Path(args.output)
+    if output.exists():
+        raise CampaignError("C2 acceptance receipt already exists; use a fresh arm")
+    result = probe([*argv, "--base-url", args.base_url, "--api-key-file", args.api_key_file,
+                    "--receipt", str(output), "--timeout", str(args.timeout)])
+    receipt = corpus.read_json_object(output)
+    receipt["campaign_arm"] = {"purpose": "concurrent-acceptance-not-serial-speed-gate",
+                              "configuration": configuration, "package_sha256": variant["package_sha256"]}
+    for phase in ("server_before", "server_after"):
+        status = receipt.get("identity", {}).get(phase, {}).get("body", {})
+        if native_status_errors(status, variant, configuration):
+            receipt["ok"] = False
+            receipt["error"] = "C2 acceptance served identity/concurrency differs from candidate"
+            result = 1
+    corpus.atomic_write_json(output, receipt)
+    return result
 
 
 @dataclass(frozen=True)
@@ -370,7 +420,7 @@ def bind_server_start(
         "engine.max_context": (engine.get("max_context"), spec.max_context),
         "engine.speculative_backend": (engine.get("speculative_backend"), spec.speculative_backend),
         "engine.speculative_draft_window": (engine.get("speculative_draft_window"), spec.speculative_draft_window),
-        "engine.max_concurrency": (engine.get("max_concurrency"), 1),
+        "engine.max_concurrency": (engine.get("max_concurrency"), 1),  # Serial decode speed gate, not C2 acceptance.
         "engine.prefix_reuse": (engine.get("prefix_reuse"), True),
         "sampling_defaults.greedy": (sampling.get("greedy"), True),
     }
@@ -1282,6 +1332,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="command", required=True)
 
+    acceptance = subparsers.add_parser("accept-concurrency", help="separate C2 native fanout acceptance arm")
+    acceptance.add_argument("--release", required=True)
+    acceptance.add_argument("--lane", choices=("rtx3090", "rtx4090"), required=True)
+    acceptance.add_argument("--base-url", required=True)
+    acceptance.add_argument("--api-key-file", required=True)
+    acceptance.add_argument("--output", required=True)
+    acceptance.add_argument("--timeout", type=float, default=1800)
+
     contract = subparsers.add_parser("contract", help="render the lane arm matrix bound to the corpus contract")
     contract.add_argument("--arms", required=True)
     contract.add_argument("--lane", required=True)
@@ -1346,6 +1404,8 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
+        if args.command == "accept-concurrency":
+            return accept_concurrency(args)
         if args.command == "contract":
             matrix = load_lane_matrix_file(Path(args.arms), args.lane)
             corpus.write_or_print(

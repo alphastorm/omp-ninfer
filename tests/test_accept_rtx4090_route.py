@@ -554,6 +554,55 @@ New-Item -ItemType File -Force (Join-Path $Workspace 'route-home\AppData\Local\O
             (window["evidence"] / "documented-requests.jsonl").write_text("\n".join(map(json.dumps, window["requests"])))
             self.assertFalse(assess()["checks"]["only_expected_server_model"])
 
+    @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed for native probe dispatch")
+    def test_native_probe_dispatch_keeps_c1_fleet_and_adds_c2_acceptance_and_stock_proofs(self):
+        from test_native_candidate_policy import candidate_profile
+        proof = r'''
+param($Source,$Workspace,$Bundle,$Clone,$Lane,$Configuration)
+$ErrorActionPreference='Stop'
+$script:configuration=Get-Content -LiteralPath $Configuration -Raw
+function py {
+    if($args[1] -eq '-c') {[Console]::Out.WriteLine($script:configuration)}
+    else {[Console]::Out.WriteLine((ConvertTo-Json -Compress @($args)))}
+    $global:LASTEXITCODE=0
+}
+& ([scriptblock]::Create([IO.File]::ReadAllText($Source))) -Mode NativeProbes -Lane $Lane -Release v0.16.0 -Candidate ('1'*40) -Workspace $Workspace -Bundle $Bundle -Clone $Clone -ExpectedStateSha256 ('2'*64) -TemporaryPrevious older -StateRoot (Join-Path $Workspace 'state') -KeyFile (Join-Path $Workspace 'key.txt') -RealHome (Join-Path $Workspace 'home')
+'''
+        for lane in ("rtx3090", "rtx4090"):
+            with self.subTest(lane=lane), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                workspace, clone, bundle = root / "window", root / "clone", root / "bundle"
+                workspace.mkdir()
+                shutil.copy(ROOT / "scripts/hosts/native-gpu.ps1", workspace)
+                (workspace / "key.txt").write_text("synthetic-key\n")
+                (workspace / "route-home/.omp/agent").mkdir(parents=True)
+                (workspace / "installed").mkdir()
+                (workspace / "installed/requests.jsonl").write_text("")
+                write_json(workspace / "state/state.json",
+                           {"active_release": "candidate", "releases": {
+                               "candidate": {"release_root": str(workspace / "installed")}}})
+                _, _, configuration = candidate_profile(lane)
+                write_json(root / "configuration.json", configuration)
+                write_json(clone / "releases/v0.16.0/manifest.json",
+                           {"components": {"omp": {"binary_sha256": "a" * 64, "distribution_version": "18.14.0"}}})
+                shutil.copytree(ROOT / "examples/windows-native", clone / "examples/windows-native")
+                documented_route.bundle(ROOT / "docs/QUICKSTART.md", f"{lane}-native", bundle)
+                (root / "proof.ps1").write_text(proof)
+                result = subprocess.run([shutil.which("pwsh"), "-NoProfile", "-File", str(root / "proof.ps1"),
+                    str(ROOT / "scripts/hosts/accept-rtx4090-route.ps1"), str(workspace), str(bundle),
+                    str(clone), lane, str(root / "configuration.json")],
+                    capture_output=True, text=True, timeout=60)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                calls = [json.loads(line) for line in result.stdout.splitlines() if line.strip()]
+                self.assertEqual(len(calls), 4 if lane == "rtx3090" else 1)
+                self.assertTrue(calls[0][1].endswith("fleet_probe.py"))
+                self.assertEqual(calls[0][calls[0].index("--branches") + 1], "4")
+                self.assertEqual(calls[0][calls[0].index("--model") + 1], configuration["public_model_id"])
+                if lane == "rtx3090":
+                    self.assertIn("accept-concurrency", calls[1])
+                    self.assertEqual(calls[2][calls[2].index("--max-in-flight") + 1], "2")
+                    self.assertEqual(calls[3][calls[3].index("--compactions") + 1], "2")
+
 
 @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed to run the orchestrator's statements")
 class NativeCommandStatusTests(unittest.TestCase):

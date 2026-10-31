@@ -49,7 +49,8 @@ class Omp:
 
     def __init__(self, args, label, cont, observe=None):
         self.observe = observe
-        env = dict(client_environment(args.omp_version), HOME=str(args.home), NO_COLOR="1")
+        env = dict(client_environment(args.omp_version), HOME=str(args.home),
+                   USERPROFILE=str(args.home), NO_COLOR="1")
         command = [str(args.omp), "--mode", "rpc", "--model", args.model,
                    "--session-dir", str(args.home / "sessions")]
         if cont:

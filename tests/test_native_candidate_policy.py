@@ -58,7 +58,8 @@ def probe_receipts(variant, configuration):
     """Synthetic wire/driver shapes; never qualification evidence."""
     identity = {"binary_sha256": variant["server_binary_sha256"],
                 "config_sha256": variant["configuration_sha256"],
-                "model_artifact_sha256": variant["model_artifact_sha256"], "source_dirty": False}
+                "model_artifact_sha256": variant["model_artifact_sha256"], "source_dirty": False,
+                "model_id": configuration["public_model_id"]}
     status = {"artifact_type": "ninfer_server_status", "schema_version": 2, "status": "ok",
               "identity": identity, "scheduler": {"max_concurrency": configuration["concurrency"]},
               "runtime": {"max_context": configuration["max_context"]}}
@@ -300,6 +301,18 @@ class NativeConcurrentProtocolTests(unittest.TestCase):
             row.update(submitted_monotonic_s=index * 10, completed_monotonic_s=index * 10 + 2)
         self.assertTrue(native.native_probe_acceptance_errors(
             configuration, native.native_probe_summary(sequential), variant, "1" * 64))
+
+    def test_serial_4090_campaign_accepts_dflash2_without_an_mtp_proposal_head(self):
+        from test_run_variant_campaign import matrix_for, server_start, test_manifest, MODEL
+        manifest = test_manifest()
+        entry = manifest["lanes"]["rtx-test"]["arms"][0]
+        entry.update(speculative_backend="dflash2", speculative_draft_window=7)
+        matrix = matrix_for(manifest)
+        spec = matrix.spec("inc")
+        start = server_start(spec.as_dict(), "instance")
+        start["engine"]["proposal_head"] = "artifact-default"
+        self.assertEqual(campaign.bind_server_start(
+            start, spec=spec, matrix=matrix, model=MODEL, instance_id="instance")["capacity"]["kv_capacity"], 131072)
 
     def test_native_client_home_uses_candidate_context_and_provider_limit(self):
         from client_acceptance import prepare_home

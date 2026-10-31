@@ -1,5 +1,10 @@
 [CmdletBinding()]
-param([switch]$Preflight)
+param(
+    [switch]$Preflight,
+    [string]$AcceptanceRelease='',
+    [string]$AcceptanceKeyFile='',
+    [string]$AcceptanceReceipt=''
+)
 
 # RTX 4090 lane runner for scripts/run_variant_campaign.py on the native Windows host.
 # Every arm is one fresh ninfer-serve.exe process from the shipped v0.2 release binary; the
@@ -12,6 +17,17 @@ $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 
 $lane = 'rtx4090'
+# Only a separately qualified C2 candidate may use this acceptance arm; the P16 RTX 4090
+# remains C1 and is refused here rather than silently changing the speed benchmark.
+if ($AcceptanceRelease) {
+    if ($Preflight -or -not $AcceptanceKeyFile -or -not $AcceptanceReceipt) {
+        throw 'C2 acceptance requires key/receipt and cannot be combined with speed preflight'
+    }
+    & python (Join-Path $PSScriptRoot '..\run_variant_campaign.py') accept-concurrency `
+        --release $AcceptanceRelease --lane $lane --base-url http://127.0.0.1:18082 `
+        --api-key-file $AcceptanceKeyFile --output $AcceptanceReceipt
+    exit $LASTEXITCODE
+}
 $stateRoot = 'C:\ProgramData\NInfer\qwen38-4090'
 $controller = Join-Path $stateRoot 'Control-Release.ps1'
 $releaseRoot = Join-Path $stateRoot 'releases\qwen38-4090-v0.2-32aa589982c4'
@@ -228,6 +244,7 @@ try {
             '--deployment-profile', "variant-campaign-rtx4090-$label",
             '--device', '0', '--max-context', [string]$arm.max_context, '--kv-capacity', [string]$arm.max_context,
             '--prefill-chunk', [string]$arm.prefill_chunk, '--kv-dtype', [string]$arm.kv_dtype,
+            # Intentionally C1/30 s: this arm measures serial single-request decode speed.
             '--max-concurrency', '1', '--max-pending-requests', '16',
             '--pending-timeout-ms', '30000', '--reasoning-effort', 'xhigh',
             '--response-store-max-records', '1024', '--response-store-max-mib', '256',
@@ -236,6 +253,8 @@ try {
         )
         if ($arm.speculative_backend -eq 'mtp') {
             $serverArgs += @('--spec', 'mtp', '--draft-tokens', [string]$arm.speculative_draft_window, '--lm-head-draft')
+        } elseif ($arm.speculative_backend -eq 'dflash2') {
+            $serverArgs += @('--spec', 'dflash2', '--draft-tokens', [string]$arm.speculative_draft_window)
         }
         if (-not (Test-Path -LiteralPath $trace -PathType Leaf)) {
             $initOut = @(& python $runner init --arms $arms --lane $lane --arm $label --model $modelId --campaign-id $campaignId --output $trace 2>&1)

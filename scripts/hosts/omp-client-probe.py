@@ -45,6 +45,12 @@ def runtime_identity(status, expected):
         assert isinstance(identity.get(actual), str) and identity[actual] == expected[wanted], \
             "served runtime identity mismatch: " + actual
     assert status["status"] == "ok" and identity.get("source_dirty") is False, "runtime not clean/healthy"
+    if "configuration" in expected:
+        configuration = expected["configuration"]
+        assert status.get("scheduler", {}).get("max_concurrency") == configuration["concurrency"], \
+            "served runtime concurrency mismatch"
+        assert status.get("runtime", {}).get("max_context") == configuration["max_context"], \
+            "served runtime context ceiling mismatch"
     return identity
 
 

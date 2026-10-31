@@ -167,6 +167,7 @@ def arm_record(release: dict[str, Any], lane: str, power: float, prompts_sha: st
         "lane": lane, "release_id": release["release_id"], "package_sha256": release["package_sha256"],
         "server_binary_sha256": release["binary_sha256"], "configuration_sha256": release["config_sha256"],
         "model_artifact_sha256": release["model_artifact_sha256"], "gpu_name": release["gpu_name"],
+        # Screen request concurrency is intentionally serial, not the server's in-flight limit.
         "power_limit_w": power, "endpoint_port": release["port"], "concurrency": 1, "reasoning": "low",
         "fresh_start": {"cache_root_empty": True, "process_started_utc": started.isoformat()},
         "prompts_sha256": prompts_sha,
