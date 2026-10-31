@@ -106,7 +106,11 @@ PREREGISTRATION: dict[str, Any] = {
                     "shards with resumed identity and seal verification; under this rule unchanged. Appended "
                     "2026-10-30 before any candidate data: the candidate is the frozen source 2af6b3de RTX "
                     "3090 package (server 05cb97e4, configuration 55788a64, model 81f924d4); every role, "
-                    "production included, uses 50-prompt shards"),
+                    "production included, uses 50-prompt shards. Amended 2026-10-31 before any candidate data "
+                    "(none was collected for 2af6b3de): the candidate is the frozen P16 source 26fa28d0 RTX 3090 "
+                    "package (component v0.8.0-qwen38-3090-beta.1; package 040d5923, server 72cd776b, "
+                    "configuration cbe67aae, model 81f924d4; DFlash2 K=7, INT8 KV, concurrency 2 over one shared "
+                    "131,072-token pool); the screen still sends one request at a time"),
         "EXP-102": ("registered 2026-10-30 before any data: native Windows RTX 4090 powered screen for the P16 "
                     "candidate (one request, low reasoning, 450 W). Production arm: the published v0.14.0 "
                     "incumbent v0.7.0-qwen38-4090-beta.3 (server 5caa7780, configuration b5cfbf50, model "
@@ -118,7 +122,10 @@ PREREGISTRATION: dict[str, Any] = {
                     "with resumed identity and seal verification; under this rule unchanged. Amended 2026-10-30 "
                     "before any data: the scratch install listens on the release-spec port 18082, as EXP-101's "
                     "does, because the incumbent's installer has no port override and any other port would change "
-                    "configuration b5cfbf50"),
+                    "configuration b5cfbf50. Appended 2026-10-31 before any candidate data: the candidate is the "
+                    "frozen P16 source 26fa28d0 RTX 4090 package (component v0.8.0-qwen38-4090-beta.1; package "
+                    "06526bdb, server c6f59e9e, configuration f00cfac9, model 81f924d4; DFlash2 K=7, INT8 KV, "
+                    "concurrency 1, 131,072 tokens)"),
     },
     "pairing": "by prompt id; a pair where either arm errored is left out of the primary statistics",
     "primary": {
