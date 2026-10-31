@@ -103,6 +103,8 @@ def bind_lane_receipts(release: str, compatibility_path: Path, manifest_path: Pa
         source = variants[variant["id"]]
         for key in VARIANT_ROW_KEYS:
             variant[key] = source[key]
+        if "runtime_shape" in source:
+            variant["runtime_shape"] = source["runtime_shape"]
         variant.update(model_url=native_model["artifact_url"],
                        model_bytes=native_model["artifact_bytes"],
                        model_sha256=native_model["artifact_sha256"])

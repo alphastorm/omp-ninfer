@@ -30,6 +30,9 @@ schema-5 runtime_shape is derived from bytes. New/changed native runtimes bind
 --quality-screen; unchanged MTP rebuilds may instead bind --t1-parity with 84/84
 actual retained-output-byte comparisons. DFlash2 also requires --fit-proof.
 --maximum-context-tokens replaces both an existing row and its release-local mirror.
+From v0.16.0 the binder also stages the authenticated release-spec/server-config
+under profiles/<lane>/ and binds both in qualification. The native fit and lane
+receipts must describe that exact shared-pool policy, including concurrency and timeout.
 """
 
 from __future__ import annotations
@@ -47,6 +50,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from render_compatibility import RUNTIME_VARIANT_IDS
+from compose_native_qualification import native_runtime_configuration
 from verify_release import (
     effective_native_model,
     native_dependency_sbom_filename,
@@ -99,7 +103,8 @@ def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
          receipt_path: Path, release: str, *, maximum_context_tokens: int | None = None,
          qualification_commit: str | None = None, add: bool = False,
          quality_screen: Path | None = None, t1_parity: Path | None = None,
-         fit_proof: Path | None = None, package_path: Path | None = None) -> dict[str, Any]:
+         fit_proof: Path | None = None, package_path: Path | None = None,
+         staged_profiles: dict[str, bytes] | None = None) -> dict[str, Any]:
     """Derive the lane's row, have the verifier accept it, and only then put it in `manifest`.
 
     Nothing is written: the caller checks the set into the release tree after this returns.
@@ -193,13 +198,21 @@ def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
     for field in ("sbom_dependency_url", "sbom_dependency_sha256"):
         variant.pop(field, None)
     variant.update(dependency_pins)
+    metadata = None
     if (product_version(release) or (0, 0, 0)) >= (0, 15, 0):
-        variant["runtime_shape"] = package_runtime_shape(
-            package_path or checksums.parent / package_name, receipt)
+        metadata = package_metadata(package_path or checksums.parent / package_name, receipt)
+        variant["runtime_shape"] = json.loads(metadata["release-spec.json"])["runtime_shape"]
     for field, asset in SUPPORT_ASSETS.items():
         variant[f"{field}_url"] = f"{DOWNLOAD}/{tag}/{asset}"
         variant[f"{field}_sha256"] = require(entries, asset)
     qualification = variant.setdefault("qualification", {})
+    if (product_version(release) or (0, 0, 0)) >= (0, 16, 0):
+        assert metadata is not None
+        for field, filename in (("release_spec", "release-spec.json"), ("server_config", "server-config.json")):
+            qualification[field] = {
+                "path": f"releases/{release}/profiles/{lane}/{filename}",
+                "sha256": hashlib.sha256(metadata[filename]).hexdigest(),
+            }
     qualification["summary"] = f"releases/{release}/qualification/{lane}.json"
     summary_path = ROOT / qualification["summary"]
     if not summary_path.is_file():
@@ -228,6 +241,7 @@ def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
         incoming_quality_screens={variant_id: quality_screen} if quality_screen else None,
         incoming_t1_parities={variant_id: t1_parity} if t1_parity else None,
         incoming_fits={variant_id: fit_proof} if fit_proof else None,
+        incoming_profiles={variant_id: metadata} if metadata is not None else None,
     )
     if errors:
         raise BindError("; ".join(errors))
@@ -237,14 +251,16 @@ def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
         manifest["components"]["ninfer_variants"] = variants
     else:
         variants[index] = variant
+    if staged_profiles is not None and metadata is not None:
+        staged_profiles.update(metadata)
     return variant
 
 
-def package_runtime_shape(path: Path, receipt: dict[str, Any]) -> dict[str, Any]:
-    """Derive policy from the authenticated tar, not an unbound transcription of its spec."""
+def package_metadata(path: Path, receipt: dict[str, Any]) -> dict[str, bytes]:
+    """Read the small metadata members once, authenticating the complete tar before use."""
     if not path.is_file() or sha256_file(path) != receipt["package"]["sha256"]:
         raise BindError("v0.15.0 native binding requires the hash-matching package tar (--package)")
-    metadata: dict[str, tuple[dict[str, Any], str]] = {}
+    metadata: dict[str, bytes] = {}
     with tarfile.open(path, mode="r|gz") as archive:
         for member in archive:
             name = Path(member.name).name
@@ -256,17 +272,27 @@ def package_runtime_shape(path: Path, receipt: dict[str, Any]) -> dict[str, Any]
             if stream is None:
                 raise BindError("native tar metadata is unreadable")
             data = stream.read()
-            metadata[name] = (json.loads(data), hashlib.sha256(data).hexdigest())
+            metadata[name] = data
     if set(metadata) != {"release-spec.json", "server-config.json"}:
         raise BindError("native tar is missing release-spec.json or server-config.json")
-    spec = metadata["release-spec.json"][0]
-    config, config_sha = metadata["server-config.json"]
+    spec = json.loads(metadata["release-spec.json"])
+    config = json.loads(metadata["server-config.json"])
+    config_sha = hashlib.sha256(metadata["server-config.json"]).hexdigest()
     shape = spec.get("runtime_shape")
     if (spec.get("schema_version") != 5 or spec.get("lane") != receipt.get("lane")
             or config_sha != receipt.get("config_sha256") or not isinstance(shape, dict)
             or shape.get("speculative_backend") != config.get("speculative", {}).get("backend")):
         raise BindError("schema-5 package policy/config identity must match the build receipt")
-    return shape
+    try:
+        native_runtime_configuration(spec, config)
+    except ValueError as error:
+        raise BindError(str(error)) from error
+    return metadata
+
+
+def package_runtime_shape(path: Path, receipt: dict[str, Any]) -> dict[str, Any]:
+    """Derive policy from the authenticated tar, not an unbound transcription of its spec."""
+    return json.loads(package_metadata(path, receipt)["release-spec.json"])["runtime_shape"]
 
 
 def add_lane_rows(release: str, variant: dict[str, Any]) -> None:
@@ -296,6 +322,7 @@ def add_lane_rows(release: str, variant: dict[str, Any]) -> None:
             "package_bytes", "maximum_context_tokens")},
         "qualification_receipt": {"path": summary["summary"], "url": summary["public_url"],
                                   "sha256": summary["sha256"]},
+        **({"runtime_shape": variant["runtime_shape"]} if "runtime_shape" in variant else {}),
     })
     rows.sort(key=lambda row: RUNTIME_VARIANT_IDS.index(row["id"]))
     native = qualification["composition"].setdefault("native_runtime_variants", {})
@@ -341,21 +368,30 @@ def main() -> int:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     is_new = not any(row.get("id") == LANE_VARIANTS[args.lane]
                      for row in manifest["components"].get("ninfer_variants", []))
+    metadata: dict[str, bytes] = {}
     variant = bind(manifest, args.lane, args.tag, args.checksums, args.receipt, args.release,
                    maximum_context_tokens=args.maximum_context_tokens,
                    qualification_commit=args.qualification_commit, add=args.add,
                    quality_screen=args.quality_screen, t1_parity=args.t1_parity,
-                   fit_proof=args.fit_proof, package_path=args.package)
+                   fit_proof=args.fit_proof, package_path=args.package, staged_profiles=metadata)
     compatibility_path = ROOT / "releases" / args.release / "compatibility.json"
     compatibility = None
-    if not is_new and args.maximum_context_tokens is not None:
+    if not is_new and (args.maximum_context_tokens is not None
+                       or (product_version(args.release) or (0, 0, 0)) >= (0, 16, 0)):
         compatibility = json.loads(compatibility_path.read_text(encoding="utf-8"))
         mirror = next((row for row in compatibility["runtime_variants"] if row.get("id") == variant["id"]), None)
         if mirror is None:
             raise BindError("existing lane must have a release-local compatibility mirror")
         mirror["maximum_context_tokens"] = variant["maximum_context_tokens"]
+        if "runtime_shape" in variant:
+            mirror["runtime_shape"] = variant["runtime_shape"]
     if is_new:
         add_lane_rows(args.release, variant)
+    if (product_version(args.release) or (0, 0, 0)) >= (0, 16, 0):
+        for field, filename in (("release_spec", "release-spec.json"), ("server_config", "server-config.json")):
+            destination = ROOT / variant["qualification"][field]["path"]
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(metadata[filename])
     # Every check has passed. The manifest binds the closed outer set - the SHA256SUMS that lists
     # every published asset, not the per-package inner listing - and the verifier requires a
     # byte-identical copy of it in the release tree.

@@ -27,6 +27,9 @@ from compose_native_qualification import (
     bidirectional_rollback,
     first_release_rollback,
     native_protocol_qualification_errors,
+    native_runtime_configuration,
+    native_probe_acceptance_errors,
+    matches_native_configuration,
 )
 from render_compatibility import (  # pyright: ignore[reportMissingImports]
     OMP_PROFILE_PLATFORMS,
@@ -1308,6 +1311,7 @@ def validate_ninfer_variants(
     incoming_quality_screens: dict[str, Path] | None = None,
     incoming_t1_parities: dict[str, Path] | None = None,
     incoming_fits: dict[str, Path] | None = None,
+    incoming_profiles: dict[str, dict[str, bytes]] | None = None,
 ) -> None:
     """Native runtime rows, their checksum closure, and the lane receipts they bind.
 
@@ -1378,6 +1382,9 @@ def validate_ninfer_variants(
         if (product_version(release) or (0, 0, 0)) >= QUALITY_SCREEN_FROM:
             require(compatibility_item.get("maximum_context_tokens") == item.get("maximum_context_tokens"),
                     f"{prefix}.maximum_context_tokens must match compatibility", errors)
+        if (product_version(release) or (0, 0, 0)) >= (0, 16, 0):
+            require(compatibility_item.get("runtime_shape") == item.get("runtime_shape"),
+                    f"{prefix}.runtime_shape must match compatibility", errors)
         release_tag = item.get("release_tag")
         require(isinstance(release_tag, str)
                 and RUNTIME_VARIANT_RELEASE_TAG_RES[variant_id].fullmatch(release_tag) is not None,
@@ -1455,11 +1462,21 @@ def validate_ninfer_variants(
         if "runtime_shape" in item:
             require(receipt.get("runtime_shape") == item["runtime_shape"],
                     f"{prefix} qualification runtime_shape must match the variant", errors)
+        if (product_version(release) or (0, 0, 0)) >= (0, 16, 0):
+            configuration = native_profile(root, release, item, errors,
+                                           (incoming_profiles or {}).get(variant_id))
+            if configuration is not None:
+                observed = receipt.get("configuration", {})
+                for field, expected in configuration.items():
+                    require(isinstance(observed, dict) and type(observed.get(field)) is type(expected)
+                            and observed.get(field) == expected,
+                            f"{prefix} qualification configuration.{field} must match candidate policy", errors)
         validate_native_quality(
             root, release, item, errors,
             incoming_screen=(incoming_quality_screens or {}).get(variant_id),
             incoming_parity=(incoming_t1_parities or {}).get(variant_id),
             incoming_fit=(incoming_fits or {}).get(variant_id),
+            incoming_profile=(incoming_profiles or {}).get(variant_id),
         )
         # The RTX 3090 parity lineage and every mainline native lane qualify through an
         # orchestrator summary; the RTX 4090 durable lineage through its beta receipt.
@@ -1550,6 +1567,92 @@ T1_COMPARISON_METHOD = "retained-output-bytes"
 NATIVE_IDENTITY_FIELDS = ("server_binary_sha256", "configuration_sha256", "model_artifact_sha256")
 FIT_FIELDS = ("device_state_slots", "admission_headroom_mib", "draft_mlp_device_format",
               "token_embedding_residency")
+
+
+def native_profile(root: Path, release: str, variant: dict[str, Any], errors: list[str],
+                   incoming: dict[str, bytes] | None = None) -> dict[str, Any] | None:
+    """Read the hash-bound packaged spec/config; a receipt's authored shape is not authority."""
+    label = f"{variant.get('id')}.qualification"
+    metadata = {}
+    for field, filename in (("release_spec", "release-spec.json"), ("server_config", "server-config.json")):
+        reference = variant.get("qualification", {}).get(field)
+        if not isinstance(reference, dict) or set(reference) != {"path", "sha256"}:
+            errors.append(f"{label}.{field} must bind packaged path and sha256")
+            continue
+        relative = reference.get("path")
+        path = (root / relative).resolve() if isinstance(relative, str) else root.resolve()
+        if not isinstance(relative, str) or not path.is_relative_to((root / "releases" / release).resolve()):
+            errors.append(f"{label}.{field}.path must stay inside release")
+            continue
+        data = incoming.get(filename) if incoming is not None else (path.read_bytes() if path.is_file() else None)
+        if data is None or hashlib.sha256(data).hexdigest() != reference.get("sha256"):
+            errors.append(f"{label}.{field} SHA-256 must match packaged bytes")
+            continue
+        try:
+            value = json.loads(data)
+        except (ValueError, UnicodeError):
+            value = None
+        if not isinstance(value, dict):
+            errors.append(f"{label}.{field} must be an object")
+            continue
+        metadata[field] = value
+    if set(metadata) != {"release_spec", "server_config"}:
+        return None
+    require(variant["qualification"]["server_config"]["sha256"] == variant.get("configuration_sha256"),
+            f"{label}.server_config must match candidate configuration_sha256", errors)
+    spec = metadata["release_spec"]
+    require(spec.get("lane") == variant.get("id", "").split("-")[0],
+            f"{label}.release_spec lane must match the candidate", errors)
+    require(spec.get("runtime_shape") == variant.get("runtime_shape"),
+            f"{label}.release_spec runtime_shape must match the candidate", errors)
+    try:
+        configuration = native_runtime_configuration(spec, metadata["server_config"])
+    except ValueError as error:
+        errors.append(f"{label}: {error}")
+        return None
+    require(configuration["max_context"] == variant.get("maximum_context_tokens"),
+            f"{label} candidate configuration must match the advertised context ceiling", errors)
+    return configuration
+
+
+def validate_native_route_policy(root: Path, release: str, manifest: dict[str, Any],
+                                 qualification: dict[str, Any], errors: list[str]) -> None:
+    """Ready P16 routes must bind the actual native policy and separate C2 probe evidence."""
+    if (product_version(release) or (0, 0, 0)) < (0, 16, 0):
+        return
+    reference = qualification.get("composition", {}).get("external_installation_acceptance", {})
+    composed_path = bound_file(root, reference.get("repository_path"))
+    if composed_path is None or sha256_file(composed_path) != reference.get("sha256"):
+        errors.append("native route policy requires hash-bound composed external installation evidence")
+        return
+    composed = load_json(composed_path)
+    for variant in manifest.get("components", {}).get("ninfer_variants", []):
+        lane = variant["id"].split("-")[0]
+        label = f"{lane} public-install acceptance"
+        ref = composed.get("evidence", {}).get(f"{lane}_public_install", {})
+        path = bound_file(root, ref.get("repository_path"))
+        if (path is None or not path.is_relative_to((root / "releases" / release / "acceptance").resolve())
+                or sha256_file(path) != ref.get("sha256")):
+            errors.append(f"{label} must bind checked-in receipt bytes inside release acceptance")
+            continue
+        receipt = load_json(path)
+        require(receipt.get("status") == "passed" and receipt.get("release") == release
+                and receipt.get("lane") == variant["id"],
+                f"{label} must pass for this release and lane", errors)
+        runtime = receipt.get("runtime", {})
+        for field, expected in (("package_sha256", variant.get("package_sha256")),
+                                ("binary_sha256", variant.get("server_binary_sha256")),
+                                ("configuration_sha256", variant.get("configuration_sha256")),
+                                ("model_sha256", variant.get("model_artifact_sha256")),
+                                ("runtime_shape", variant.get("runtime_shape"))):
+            require(runtime.get(field) == expected, f"{label} runtime.{field} must match candidate", errors)
+        configuration = native_profile(root, release, variant, errors)
+        require(configuration is not None and matches_native_configuration(runtime.get("configuration"), configuration),
+                f"{label} must bind the exact authenticated candidate configuration", errors)
+        if configuration is not None:
+            errors.extend(f"{label}: {error}" for error in native_probe_acceptance_errors(
+                configuration, receipt.get("probe_acceptance"), variant,
+                manifest["components"]["omp"]["binary_sha256"]))
 
 
 def product_version(release: str) -> tuple[int, int, int] | None:
@@ -1683,13 +1786,16 @@ def validate_t1_parity(root: Path, release: str, variant: dict[str, Any],
                     and isinstance(row.get(key), str) and SHA256_RE.fullmatch(row[key]) is not None,
                     f"{label}.{role}.{key} must match the bound {role}", errors)
     shape = native_shape(root, variant)
+    current_shape, previous_shape = variant.get("runtime_shape"), (predecessor or {}).get("runtime_shape")
     require(predecessor is not None and shape is not None and shape["speculative_backend"] == "mtp"
-            and shape == native_shape(root, predecessor),
+            and shape == native_shape(root, predecessor)
+            and (not isinstance(previous_shape, dict) or current_shape == previous_shape),
             f"{label} exemption requires unchanged predecessor MTP backend and fit", errors)
 
 
 def validate_native_fit(root: Path, release: str, variant: dict[str, Any],
-                        errors: list[str], incoming: Path | None = None) -> None:
+                        errors: list[str], incoming: Path | None = None,
+                        incoming_profile: dict[str, bytes] | None = None) -> None:
     value = native_evidence(root, release, variant, "fit", errors, incoming)
     if value is None:
         return
@@ -1703,15 +1809,23 @@ def validate_native_fit(root: Path, release: str, variant: dict[str, Any],
     require(value.get("runtime_shape") == variant.get("runtime_shape"),
             f"{label} runtime_shape must match the variant", errors)
     require(value.get("maximum_context_tokens") == variant.get("maximum_context_tokens")
-            and variant.get("maximum_context_tokens") == 131072,
-            f"{label} must qualify the advertised 131072-token ceiling", errors)
+            and type(variant.get("maximum_context_tokens")) is int and variant["maximum_context_tokens"] > 0,
+            f"{label} must qualify the exact advertised context ceiling", errors)
     required = {"rtx3090-windows-native": 768, "rtx4090-windows-native": 640}[variant["id"]]
     fit = shape.get("fit", {}) if shape else {}
-    require(fit == {"device_state_slots": 0, "admission_headroom_mib": required,
-                    "draft_mlp_device_format": "Q4_G64_FP16", "token_embedding_residency": "host-mapped"},
-            f"{label} DFlash2 fit must bind zero slots, lane headroom and the native load seam", errors)
+    require(type(fit.get("device_state_slots")) is int and fit["device_state_slots"] >= 0
+            and type(fit.get("admission_headroom_mib")) is int and fit["admission_headroom_mib"] >= required
+            and fit.get("draft_mlp_device_format") == "Q4_G64_FP16"
+            and fit.get("token_embedding_residency") == "host-mapped",
+            f"{label} DFlash2 fit must bind candidate slots, lane headroom and the native load seam", errors)
+    if (product_version(release) or (0, 0, 0)) >= (0, 16, 0):
+        configuration = native_profile(root, release, variant, errors, incoming_profile)
+        require(configuration is not None and matches_native_configuration(value.get("configuration"), configuration),
+                f"{label} configuration must match the exact authenticated candidate policy", errors)
     observed = value.get("measured_admission_headroom_mib")
-    require(type(observed) in (int, float) and observed >= required,
+    declared = fit.get("admission_headroom_mib")
+    require(type(observed) in (int, float) and observed >= required
+            and type(declared) is int and observed >= declared,
             f"{label} measured headroom must meet the lane requirement", errors)
     weights = value.get("effective_weights", {})
     for key in ("converted_device_bytes", "host_mapped_bytes"):
@@ -1721,7 +1835,8 @@ def validate_native_fit(root: Path, release: str, variant: dict[str, Any],
 
 def validate_native_quality(root: Path, release: str, variant: dict[str, Any], errors: list[str],
                             *, incoming_screen: Path | None = None, incoming_parity: Path | None = None,
-                            incoming_fit: Path | None = None) -> None:
+                            incoming_fit: Path | None = None,
+                            incoming_profile: dict[str, bytes] | None = None) -> None:
     qualification = variant.get("qualification", {})
     if not isinstance(qualification, dict):
         return
@@ -1735,6 +1850,7 @@ def validate_native_quality(root: Path, release: str, variant: dict[str, Any], e
     previous_shape = native_shape(root, predecessor) if predecessor is not None else None
     carried = predecessor is not None and all(variant.get(key) == predecessor.get(key) for key in (
         "release_tag", "package_sha256", *NATIVE_IDENTITY_FIELDS, "maximum_context_tokens")) and shape == previous_shape
+    carried = carried and variant.get("runtime_shape") == (predecessor or {}).get("runtime_shape")
     if carried:
         return
     require(isinstance(shape, dict) and shape.get("speculative_backend") in ("mtp", "dflash2")
@@ -1748,7 +1864,7 @@ def validate_native_quality(root: Path, release: str, variant: dict[str, Any], e
     if shape and shape.get("speculative_backend") == "dflash2":
         require("quality_screen" in qualification,
                 f"{variant['id']} DFlash2 requires qualification.quality_screen", errors)
-        validate_native_fit(root, release, variant, errors, incoming_fit)
+        validate_native_fit(root, release, variant, errors, incoming_fit, incoming_profile)
 
 
 def validate_server_arguments(
@@ -2712,6 +2828,7 @@ def validate(
             )
             validate_review_ledger(root, release, qualification, errors)
             validate_documented_route_acceptance(root, qualification, errors)
+            validate_native_route_policy(root, release, manifest, qualification, errors)
             validate_ga_evidence_bindings(
                 release, manifest, compatibility, qualification, errors
             )

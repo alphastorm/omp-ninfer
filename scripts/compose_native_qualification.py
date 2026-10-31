@@ -12,6 +12,8 @@ historical receipts remain immutable; no legacy checks map is synthesized.
 
 from __future__ import annotations
 
+import hashlib
+import json
 import re
 from decimal import Decimal, DecimalException
 from typing import Any
@@ -105,6 +107,235 @@ def shared_host_context_bytes(value: Any) -> int | None:
     return None
 
 
+def native_runtime_configuration(spec: dict[str, Any], config: dict[str, Any]) -> dict[str, Any]:
+    """Project the exact packaged policy, checking spec/config agreement before binding it."""
+    lane = spec.get("lane")
+    floor = {"rtx3090": 768, "rtx4090": 640}.get(lane)
+    if (spec.get("artifact_type") != "ninfer_windows_release_spec"
+            or spec.get("schema_version") != 5 or floor is None
+            or config.get("artifact_type") != "ninfer_windows_server_config"
+            or config.get("schema_version") != 4):
+        raise ValueError("native profile requires lane-bound schema-5 spec and schema-4 config")
+    for field in ("release_id", "deployment_profile"):
+        if not isinstance(spec.get(field), str) or not spec[field] or spec[field] != config.get(field):
+            raise ValueError(f"native spec/config {field} must match")
+    engine, cache, speculative = (config.get(key, {}) for key in
+                                   ("engine", "context_cache", "speculative"))
+    shape = spec.get("runtime_shape", {})
+    if not all(isinstance(value, dict) for value in (engine, cache, speculative, shape)):
+        raise ValueError("native profile must describe engine, cache, speculation and runtime_shape")
+    fit, draft = shape.get("fit", {}), shape.get("draft_tokens", {})
+    if not isinstance(fit, dict) or not isinstance(draft, dict):
+        raise ValueError("native runtime_shape must describe fit and draft bounds")
+    for field in ("max_context", "kv_capacity", "max_concurrency", "pending_timeout_ms", "prefill_chunk"):
+        if type(engine.get(field)) is not int or engine[field] <= 0:
+            raise ValueError(f"native engine.{field} must be a positive integer")
+    if engine["kv_capacity"] < engine["max_context"]:
+        raise ValueError("native shared KV capacity must cover the per-request context ceiling")
+    if not isinstance(engine.get("kv_dtype"), str) or not engine["kv_dtype"]:
+        raise ValueError("native KV dtype must name the configured format")
+    slots, headroom = cache.get("device_state_slots"), engine.get("admission_headroom_mib")
+    if type(slots) is not int or slots < 0 or type(headroom) is not int or headroom < floor:
+        raise ValueError(f"native fit requires nonnegative extra slots and at least {floor} MiB headroom")
+    if engine["max_concurrency"] > 1 and (slots < 2 or not 180000 <= engine["pending_timeout_ms"] <= 2147483647):
+        raise ValueError("concurrent native policy requires two extra slots and a 180-second pending timeout")
+    for actual, expected, field in (
+        (shape.get("max_concurrency"), engine["max_concurrency"], "max_concurrency"),
+        (fit.get("device_state_slots"), slots, "device_state_slots"),
+        (fit.get("admission_headroom_mib"), headroom, "admission_headroom_mib"),
+        (shape.get("speculative_backend"), speculative.get("backend"), "speculative_backend"),
+    ):
+        if type(actual) is not type(expected) or actual != expected:
+            raise ValueError(f"native runtime_shape.{field} must match server-config")
+    backend, width = speculative.get("backend"), speculative.get("draft_tokens")
+    if backend not in ("mtp", "dflash2") or type(width) is not int or width <= 0:
+        raise ValueError("native speculative backend/draft width is invalid")
+    minimum, maximum = draft.get("min"), draft.get("max")
+    if (type(minimum) is not int or width < minimum
+            or (maximum is not None and (type(maximum) is not int or width > maximum))):
+        raise ValueError("native draft width must meet the packaged runtime_shape bounds")
+    seam = ("Q4_G64_FP16", "host-mapped") if backend == "dflash2" else ("artifact", "device")
+    if (fit.get("draft_mlp_device_format"), fit.get("token_embedding_residency")) != seam:
+        raise ValueError("native fit load seam must match its speculative backend")
+    host = shared_host_context_bytes(cache.get("host_context_mib"))
+    translation = spec.get("host_context_translation", {})
+    if (host is None or not isinstance(translation, dict)
+            or type(translation.get("host_context_bytes")) is not int
+            or translation["host_context_bytes"] != host):
+        raise ValueError("native spec/config must bind the same exact shared Host byte budget")
+    model = config.get("model_id")
+    if not isinstance(model, str) or not model:
+        raise ValueError("native server-config must name its public model")
+    return {
+        "max_context": engine["max_context"], "kv_capacity": engine["kv_capacity"],
+        "kv_dtype": engine["kv_dtype"], "concurrency": engine["max_concurrency"],
+        "pending_timeout_ms": engine["pending_timeout_ms"], "prefill_chunk": engine["prefill_chunk"],
+        "device_state_slots": slots, "admission_headroom_mib": headroom,
+        "host_context_mib": cache["host_context_mib"], "host_context_bytes": host,
+        "speculative_backend": backend, "speculative_draft_tokens": width, "public_model_id": model,
+    }
+
+
+def native_status_errors(status: Any, variant: dict[str, Any], configuration: dict[str, Any]) -> list[str]:
+    """Authenticated config identity binds timeout/backend; status also proves the active scheduler."""
+    if not isinstance(status, dict):
+        return ["native status must be an object"]
+    errors = []
+    identity = status.get("identity", {})
+    for field, expected in (
+        ("binary_sha256", variant.get("server_binary_sha256")),
+        ("config_sha256", variant.get("configuration_sha256")),
+        ("model_artifact_sha256", variant.get("model_artifact_sha256")),
+    ):
+        if not isinstance(identity, dict) or identity.get(field) != expected or not isinstance(expected, str):
+            errors.append(f"native served {field} must match the candidate")
+    if (status.get("status") != "ok" or status.get("artifact_type") != "ninfer_server_status"
+            or status.get("schema_version") not in (1, 2) or identity.get("source_dirty") is not False):
+        errors.append("native status must be healthy and clean")
+    if status.get("scheduler", {}).get("max_concurrency") != configuration["concurrency"]:
+        errors.append("native served concurrency must match the candidate")
+    if status.get("runtime", {}).get("max_context") != configuration["max_context"]:
+        errors.append("native served context ceiling must match the candidate")
+    return errors
+
+
+def matches_native_configuration(value: Any, expected: dict[str, Any]) -> bool:
+    return (isinstance(value, dict) and set(value) == set(expected)
+            and all(type(value[key]) is type(wanted) and value[key] == wanted for key, wanted in expected.items()))
+
+
+def native_probe_summary(probes: dict[str, Any]) -> dict[str, Any]:
+    """Content-safe projection of actual probe receipts, not an authored boolean checks map."""
+    def digest(value):
+        return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    fleet = probes["fleet"]
+    summary = {"fleet": {
+        "sha256": digest(fleet), "artifact_type": fleet.get("artifact_type"),
+        "identity": {field: fleet.get("identity", {}).get(field) for field in
+                     ("binary_sha256", "config_sha256", "model_artifact_sha256", "model_id", "source_dirty")},
+        "branches": fleet.get("branches"),
+        "transient_retries": fleet.get("transient_retries"),
+        "steps": [step.get("step") for step in fleet.get("steps", [])],
+    }}
+    if "fanout" in probes:
+        fanout = probes["fanout"]
+        scenarios = fanout.get("scenarios", [])
+        summary["fanout"] = {
+            "sha256": digest(fanout), "artifact_type": fanout.get("artifact_type"),
+            "ok": fanout.get("ok"), "arguments": {field: fanout.get("arguments", {}).get(field)
+                for field in ("arm", "scenario", "fanout_concurrency", "branches", "model")},
+            "statuses": {},
+            "scenarios": [{"name": row.get("name"), "ok": row.get("ok"),
+                "requests": [{field: request.get(field) for field in
+                    ("label", "ok", "http_status", "submitted_monotonic_s", "completed_monotonic_s")}
+                    for request in row.get("requests", [])]} for row in scenarios],
+        }
+        for phase in ("server_before", "server_after"):
+            status = fanout.get("identity", {}).get(phase, {}).get("body", {})
+            summary["fanout"]["statuses"][phase] = {
+                **{field: status.get(field) for field in ("artifact_type", "schema_version", "status")},
+                "identity": {field: status.get("identity", {}).get(field) for field in
+                             ("binary_sha256", "config_sha256", "model_artifact_sha256", "source_dirty")},
+                "runtime": {"max_context": status.get("runtime", {}).get("max_context")},
+                "scheduler": {"max_concurrency": status.get("scheduler", {}).get("max_concurrency")},
+            }
+    for name in ("parallel", "compaction"):
+        if name not in probes:
+            continue
+        proof = probes[name]
+        summary[name] = {
+            "sha256": digest(proof), "artifact_type": proof.get("artifact_type"), "passed": proof.get("passed"),
+            "model": proof.get("model"), "omp": {field: proof.get("omp", {}).get(field)
+                                                for field in ("sha256", "version")},
+            "checks": proof.get("checks"),
+        }
+        if name == "parallel":
+            summary[name].update(max_in_flight=proof.get("max_in_flight"),
+                                 scenarios=[{field: row.get(field) for field in
+                                     ("scenario", "passed", "max_in_flight", "overlap_seconds", "checks")}
+                                     for row in proof.get("scenarios", [])])
+        else:
+            summary[name].update(committed=sum(row.get("committed") is True for row in proof.get("compactions", [])),
+                                 parameters=proof.get("parameters"))
+    return summary
+
+
+def native_probe_acceptance_errors(configuration: dict[str, Any], probes: Any,
+                                   variant: dict[str, Any], client_sha256: str | None = None) -> list[str]:
+    """Judge sequential regression separately from C2 fanout and real stock-OMP proofs."""
+    if not isinstance(probes, dict):
+        return ["native probe acceptance must carry actual probe projections"]
+    errors = []
+    names = ["fleet"] + (["fanout", "parallel", "compaction"] if configuration["concurrency"] > 1 else [])
+    for name in names:
+        row = probes.get(name)
+        if not isinstance(row, dict) or not isinstance(row.get("sha256"), str) or re.fullmatch(r"[0-9a-f]{64}", row["sha256"]) is None:
+            errors.append(f"native {name} must bind its actual probe receipt")
+    if errors:
+        return errors
+    fleet = probes.get("fleet", {})
+    identity = fleet.get("identity", {})
+    if (fleet.get("artifact_type") != "omp_ninfer_fleet_fanout_probe" or fleet.get("branches") != 4
+            or fleet.get("transient_retries") != 0
+            or identity.get("model_id") != configuration["public_model_id"]
+            or any(identity.get(actual) != variant.get(expected) for actual, expected in (
+                ("binary_sha256", "server_binary_sha256"), ("config_sha256", "configuration_sha256"),
+                ("model_artifact_sha256", "model_artifact_sha256")))
+            or not {"base_prefill", "warm_edit", "checkpoint_save", "session_delete",
+                    *(f"branch_{index}" for index in range(4))}.issubset(fleet.get("steps", []))):
+        errors.append("native fleet sequential regression must complete on the candidate without retries")
+    if configuration["concurrency"] <= 1:
+        return errors
+    fanout = probes.get("fanout", {})
+    arguments = fanout.get("arguments", {})
+    scenarios = fanout.get("scenarios", [])
+    if (fanout.get("artifact_type") != "omp_ninfer_concurrency_probe" or fanout.get("ok") is not True
+            or arguments.get("arm") != variant["id"].split("-")[0] + "-C2-acceptance"
+            or arguments.get("scenario") != ["fanout"] or arguments.get("fanout_concurrency") != 4
+            or arguments.get("branches") != 4 or arguments.get("model") != configuration["public_model_id"]
+            or len(scenarios) != 1 or scenarios[0].get("name") != "fanout" or scenarios[0].get("ok") is not True):
+        errors.append("native C2 acceptance requires the real four-way fanout scenario")
+    for status in ("server_before", "server_after"):
+        errors.extend(native_status_errors(fanout.get("statuses", {}).get(status), variant, configuration))
+    requests = scenarios[0].get("requests", []) if len(scenarios) == 1 else []
+    branches = [row for row in requests if row.get("label") in {f"branch-{index}" for index in range(4)}]
+    intervals = [(row.get("submitted_monotonic_s"), row.get("completed_monotonic_s")) for row in branches]
+    valid_times = all(type(start) in (int, float) and type(end) in (int, float) and end > start
+                      for start, end in intervals)
+    if (len(requests) != 5 or len(branches) != 4 or len({row["label"] for row in branches}) != 4
+            or any(row.get("ok") is not True or row.get("http_status") != 200 for row in requests)
+            or not valid_times or not any(a < d and c < b for index, (a, b) in enumerate(intervals)
+                                          for c, d in intervals[index + 1:])):
+        errors.append("native fanout must complete five requests with genuinely overlapping branches")
+    model = f"ninfer-native-{variant['id'].split('-')[0][3:]}/{configuration['public_model_id']}"
+    for name, artifact in (("parallel", "omp_ninfer_parallel_proof"), ("compaction", "omp_ninfer_long_session_proof")):
+        proof = probes.get(name, {})
+        checks = proof.get("checks")
+        if (proof.get("artifact_type") != artifact or proof.get("passed") is not True
+                or proof.get("model") != model or (client_sha256 is not None
+                and proof.get("omp", {}).get("sha256") != client_sha256)):
+            errors.append(f"native C2 {name} must pass using the candidate's documented stock client/model")
+        if name == "parallel":
+            runs = proof.get("scenarios", [])
+            mandatory = {"logged_requests", "all_logged_requests_completed", "single_server_instance",
+                         "provider_limit_respected", "concurrency_expected"}
+            if (proof.get("max_in_flight") != configuration["concurrency"]
+                    or {row.get("scenario") for row in runs} != {"subagents", "sessions"}
+                    or any(row.get("passed") is not True or row.get("max_in_flight") != 2
+                           or type(row.get("overlap_seconds")) not in (int, float) or row["overlap_seconds"] <= 0
+                           or not isinstance(row.get("checks"), dict) or not mandatory.issubset(row["checks"])
+                           or not all(value is True for value in row["checks"].values())
+                           for row in runs)):
+                errors.append("native C2 must prove OMP subagent/session overlap at provider limit two")
+        elif (not isinstance(checks, dict)
+              or not {"every_turn_completed", "compactions_committed", "no_failed_compaction",
+                      "control_recalled_after_each_compaction", "one_session"}.issubset(checks)
+              or not all(value is True for value in checks.values())
+              or type(proof.get("committed")) is not int or proof["committed"] < 2):
+            errors.append("native C2 must commit and recall through two automatic compactions")
+    return errors
+
+
 def native_protocol_qualification_errors(receipt: dict[str, Any]) -> list[str]:
     """The native release shape preserves actual phase wrappers around canonical payloads."""
     errors = []
@@ -132,11 +363,18 @@ def native_protocol_qualification_errors(receipt: dict[str, Any]) -> list[str]:
     if (full_bytes is None or type(configuration.get("host_context_bytes")) is not int
             or configuration["host_context_bytes"] != full_bytes):
         errors.append("configuration shared Host MiB/bytes must agree exactly")
-    if configuration.get("concurrency") != 1 or type(configuration.get("concurrency")) is not int:
-        errors.append("canonical native protocol requires concurrency one")
+    concurrency = configuration.get("concurrency")
+    if type(concurrency) is not int or concurrency < 1:
+        errors.append("canonical native protocol requires positive integer concurrency")
     slots = configuration.get("device_state_slots")
     if type(slots) is not int or slots < 0:
         errors.append("configuration device_state_slots must be a nonnegative integer")
+    if type(concurrency) is int and concurrency > 1:
+        if type(slots) is not int or slots < 2:
+            errors.append("concurrent native protocol requires at least two extra device-state slots")
+        pending = configuration.get("pending_timeout_ms")
+        if type(pending) is not int or not 180000 <= pending <= 2147483647:
+            errors.append("concurrent native protocol requires at least a 180-second pending timeout")
     pressure = receipt.get("protocol_under_pool_pressure", {})
     if isinstance(pressure, dict):
         pressure_bytes = shared_host_context_bytes(pressure.get("host_context_mib"))
