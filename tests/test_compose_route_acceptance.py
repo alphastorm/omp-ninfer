@@ -318,6 +318,36 @@ class UpstreamCompositionTests(unittest.TestCase):
             path = self.root / f"{lane}.json"
             MODULE.save(path, receipt)
             self.argv += ["--route", f"{lane}={path}"]
+        self.bind_native_policies()
+
+    def bind_native_policies(self):
+        """Future-release fixtures carry real-shaped authenticated native policy and probe edges."""
+        if MODULE.product_version(self.release) < (0, 16, 0):
+            return
+        from test_native_candidate_policy import candidate_profile, probe_receipts
+        from compose_native_qualification import native_probe_summary
+        manifest = MODULE.load(self.release_root / "manifest.json")
+        evidence = MODULE.load(self.root / "evidence.json")
+        for variant in manifest["components"]["ninfer_variants"]:
+            lane = variant["id"].split("-")[0]
+            spec, config, configuration = candidate_profile(lane)
+            variant.update(maximum_context_tokens=configuration["max_context"], runtime_shape=spec["runtime_shape"])
+            for field, filename, value in (("release_spec", "release-spec.json", spec),
+                                           ("server_config", "server-config.json", config)):
+                path = self.release_root / "profiles" / lane / filename
+                MODULE.save(path, value)
+                variant["qualification"][field] = {
+                    "path": path.relative_to(self.root).as_posix(), "sha256": MODULE.sha256(path.read_bytes())}
+            variant["configuration_sha256"] = variant["qualification"]["server_config"]["sha256"]
+            if lane in evidence:
+                probes = probe_receipts(variant, configuration)
+                for name in ("parallel", "compaction"):
+                    if name in probes:
+                        probes[name]["omp"]["sha256"] = manifest["components"]["omp"]["binary_sha256"]
+                evidence[lane].update(runtime_configuration=configuration,
+                                      probe_acceptance=native_probe_summary(probes))
+        MODULE.save(self.release_root / "manifest.json", manifest)
+        MODULE.save(self.root / "evidence.json", evidence)
 
     def bind_subject(self):
         path = self.release_root / "review/runtime-ledger.json"
@@ -387,6 +417,7 @@ class UpstreamCompositionTests(unittest.TestCase):
         manifest["components"]["native_model"] = {"artifact_sha256": "e" * 64}
         manifest["components"]["ninfer_variants"][0]["model_artifact_sha256"] = "e" * 64
         MODULE.save(self.release_root / "manifest.json", manifest)
+        self.bind_native_policies()
         self.assertEqual(self.compose(), 0)
         native = MODULE.load(self.release_root / "acceptance/rtx4090-public-install.json")
         self.assertEqual(native["runtime"]["model_sha256"], "e" * 64)
@@ -667,6 +698,7 @@ class UpstreamCompositionTests(unittest.TestCase):
             path = self.root / "rtx3090-native.json"
             MODULE.save(path, receipt)
             self.argv += ["--route", f"rtx3090-native={path}"]
+        self.bind_native_policies()
 
     def test_five_routes_bind_separate_native_public_install_receipts(self) -> None:
         self.add_3090()

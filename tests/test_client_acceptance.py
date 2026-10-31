@@ -188,7 +188,7 @@ class DocumentedModelTests(unittest.TestCase):
 
 
 def candidate_checkout(root):
-    """Only the real guide, fragments and helper dependencies; no host or runtime state."""
+    """The candidate's guide, provider fragments and hash-bound native configs; no host state."""
     guide = root / "docs/QUICKSTART.md"
     guide.parent.mkdir(parents=True)
     guide.write_bytes(runner.DEFAULT_DOC.read_bytes())
@@ -202,6 +202,27 @@ def candidate_checkout(root):
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(re.sub(r"(?m)^      - id: \S+$", "      - id: " + model,
                                 (ROOT / "examples" / fragment).read_text()), encoding="utf-8")
+    release = json.loads((ROOT / "compatibility.json").read_text())["product_release"]
+    (root / "compatibility.json").write_text(json.dumps({"product_release": release}))
+    manifest = json.loads((ROOT / "releases" / release / "manifest.json").read_text())
+    for variant in manifest["components"]["ninfer_variants"]:
+        lane = variant["id"].split("-")[0]
+        source = ROOT / "releases" / release / "profiles" / lane / "server-config.json"
+        config = json.loads(source.read_text())
+        config["model_id"] = "candidate-" + lane[3:]
+        target = root / source.relative_to(ROOT)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(json.dumps(config))
+        variant["configuration_sha256"] = hashlib.sha256(target.read_bytes()).hexdigest()
+        qualification = variant.get("qualification", {})
+        if "server_config" in qualification:
+            qualification["server_config"]["sha256"] = variant["configuration_sha256"]
+        if "release_spec" in qualification:
+            reference = qualification["release_spec"]["path"]
+            destination = root / reference
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes((ROOT / reference).read_bytes())
+    (root / "releases" / release / "manifest.json").write_text(json.dumps(manifest))
     return root
 
 

@@ -325,6 +325,22 @@ class NativeConcurrentProtocolTests(unittest.TestCase):
             self.assertEqual(models["providers"]["ninfer-acceptance"]["models"][0]["contextWindow"], 65536)
             self.assertEqual(config["providers"]["maxInFlightRequests"]["ninfer-acceptance"], 2)
 
+    def test_served_concurrency_and_ceiling_must_match_with_integer_types(self):
+        for lane in ("rtx3090", "rtx4090"):
+            _, _, configuration = candidate_profile(lane)
+            variant = {"server_binary_sha256": "a" * 64, "configuration_sha256": "b" * 64,
+                       "model_artifact_sha256": "c" * 64}
+            status = {"artifact_type": "ninfer_server_status", "schema_version": 2, "status": "ok",
+                      "identity": {"binary_sha256": "a" * 64, "config_sha256": "b" * 64,
+                                   "model_artifact_sha256": "c" * 64, "source_dirty": False},
+                      "scheduler": {"max_concurrency": configuration["concurrency"]},
+                      "runtime": {"max_context": 131072}}
+            self.assertEqual(native.native_status_errors(status, variant, configuration), [])
+            for field, wrong in (("max_concurrency", True), ("max_concurrency", 3), ("max_context", 65536)):
+                value = deepcopy(status)
+                value["scheduler" if field == "max_concurrency" else "runtime"][field] = wrong
+                self.assertTrue(native.native_status_errors(value, variant, configuration))
+
 
 if __name__ == "__main__":
     unittest.main()

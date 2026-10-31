@@ -479,6 +479,11 @@ def main() -> int:
         # runtimes carry by identity; changed runtimes must supply fresh proofs at rebind.
         for key in ("quality_screen", "t1_parity", "fit"):
             qual.pop(key, None)
+        for key in ("release_spec", "server_config"):
+            reference = qual.get(key)
+            if isinstance(reference, dict) and isinstance(reference.get("path"), str):
+                reference["path"] = reference["path"].replace(
+                    f"releases/{args.source}/", f"releases/{args.release}/")
         for key in ("summary", "public_url"):
             if isinstance(qual.get(key), str):
                 qual[key] = qual[key].replace(f"/{args.source}/", f"/{args.release}/")

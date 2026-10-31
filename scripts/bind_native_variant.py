@@ -208,6 +208,10 @@ def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
     qualification = variant.setdefault("qualification", {})
     if (product_version(release) or (0, 0, 0)) >= (0, 16, 0):
         assert metadata is not None
+        ceiling = json.loads(metadata["server-config.json"])["engine"]["max_context"]
+        if maximum_context_tokens is not None and maximum_context_tokens != ceiling:
+            raise BindError("--maximum-context-tokens must match the authenticated candidate configuration")
+        variant["maximum_context_tokens"] = ceiling
         for field, filename in (("release_spec", "release-spec.json"), ("server_config", "server-config.json")):
             qualification[field] = {
                 "path": f"releases/{release}/profiles/{lane}/{filename}",

@@ -182,19 +182,25 @@ def native_status_errors(status: Any, variant: dict[str, Any], configuration: di
         return ["native status must be an object"]
     errors = []
     identity = status.get("identity", {})
+    if not isinstance(identity, dict):
+        return ["native status identity must be an object"]
     for field, expected in (
         ("binary_sha256", variant.get("server_binary_sha256")),
         ("config_sha256", variant.get("configuration_sha256")),
         ("model_artifact_sha256", variant.get("model_artifact_sha256")),
     ):
-        if not isinstance(identity, dict) or identity.get(field) != expected or not isinstance(expected, str):
+        if identity.get(field) != expected or not isinstance(expected, str):
             errors.append(f"native served {field} must match the candidate")
     if (status.get("status") != "ok" or status.get("artifact_type") != "ninfer_server_status"
-            or status.get("schema_version") not in (1, 2) or identity.get("source_dirty") is not False):
+            or type(status.get("schema_version")) is not int or status["schema_version"] not in (1, 2)
+            or identity.get("source_dirty") is not False):
         errors.append("native status must be healthy and clean")
-    if status.get("scheduler", {}).get("max_concurrency") != configuration["concurrency"]:
+    scheduler, runtime = status.get("scheduler"), status.get("runtime")
+    if (not isinstance(scheduler, dict) or type(scheduler.get("max_concurrency")) is not int
+            or scheduler["max_concurrency"] != configuration["concurrency"]):
         errors.append("native served concurrency must match the candidate")
-    if status.get("runtime", {}).get("max_context") != configuration["max_context"]:
+    if (not isinstance(runtime, dict) or type(runtime.get("max_context")) is not int
+            or runtime["max_context"] != configuration["max_context"]):
         errors.append("native served context ceiling must match the candidate")
     return errors
 

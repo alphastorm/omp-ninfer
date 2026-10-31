@@ -335,8 +335,6 @@ def main(argv=None):
                                     "public_model_id": config["model_id"]}
         if errors or native_configuration is None:
             parser.error("native acceptance requires the exact bound candidate profile: " + "; ".join(errors))
-        if model_id != native_configuration["public_model_id"]:
-            parser.error("native model must match the authenticated candidate configuration")
         context_window, concurrency = native_configuration["max_context"], native_configuration["concurrency"]
     args.model = "ninfer-acceptance/" + model_id
     receipt = {"artifact_type": "omp_ninfer_client_acceptance", "schema_version": 1,

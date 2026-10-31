@@ -562,8 +562,8 @@ param($Source,$Workspace,$Bundle,$Clone,$Lane,$Configuration)
 $ErrorActionPreference='Stop'
 $script:configuration=Get-Content -LiteralPath $Configuration -Raw
 function py {
-    if($args[1] -eq '-c') {[Console]::Out.WriteLine($script:configuration)}
-    else {[Console]::Out.WriteLine((ConvertTo-Json -Compress @($args)))}
+    if($args[1] -eq '-c') {Write-Output $script:configuration}
+    else {[Console]::Out.WriteLine((ConvertTo-Json -Compress @($args|ForEach-Object {[string]$_})))}
     $global:LASTEXITCODE=0
 }
 & ([scriptblock]::Create([IO.File]::ReadAllText($Source))) -Mode NativeProbes -Lane $Lane -Release v0.16.0 -Candidate ('1'*40) -Workspace $Workspace -Bundle $Bundle -Clone $Clone -ExpectedStateSha256 ('2'*64) -TemporaryPrevious older -StateRoot (Join-Path $Workspace 'state') -KeyFile (Join-Path $Workspace 'key.txt') -RealHome (Join-Path $Workspace 'home')

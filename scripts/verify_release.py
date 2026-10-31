@@ -1382,6 +1382,10 @@ def validate_ninfer_variants(
         if (product_version(release) or (0, 0, 0)) >= QUALITY_SCREEN_FROM:
             require(compatibility_item.get("maximum_context_tokens") == item.get("maximum_context_tokens"),
                     f"{prefix}.maximum_context_tokens must match compatibility", errors)
+        # Unchanged components retain the existing carry-by-identity admission.
+        # A changed candidate cannot use that path to omit its packaged policy.
+        carried_native = unchanged_native_variant(
+            item, predecessor_native_variant(root, release, variant_id))
         if (product_version(release) or (0, 0, 0)) >= (0, 16, 0):
             require(compatibility_item.get("runtime_shape") == item.get("runtime_shape"),
                     f"{prefix}.runtime_shape must match compatibility", errors)
@@ -1462,7 +1466,8 @@ def validate_ninfer_variants(
         if "runtime_shape" in item:
             require(receipt.get("runtime_shape") == item["runtime_shape"],
                     f"{prefix} qualification runtime_shape must match the variant", errors)
-        if (product_version(release) or (0, 0, 0)) >= (0, 16, 0):
+        if ((product_version(release) or (0, 0, 0)) >= (0, 16, 0)
+                and (not carried_native or "server_config" in qualification or "release_spec" in qualification)):
             configuration = native_profile(root, release, item, errors,
                                            (incoming_profiles or {}).get(variant_id))
             if configuration is not None:
@@ -1675,6 +1680,11 @@ def predecessor_native_variant(root: Path, release: str, variant_id: str) -> dic
                  if isinstance(row, dict) and row.get("id") == variant_id), None)
 
 
+def unchanged_native_variant(variant: dict[str, Any], predecessor: dict[str, Any] | None) -> bool:
+    return predecessor is not None and all(variant.get(key) == predecessor.get(key) for key in (
+        "release_tag", "package_sha256", *NATIVE_IDENTITY_FIELDS, "maximum_context_tokens", "runtime_shape"))
+
+
 def native_shape(root: Path, variant: dict[str, Any]) -> dict[str, Any] | None:
     shape = variant.get("runtime_shape")
     if isinstance(shape, dict):
@@ -1848,9 +1858,7 @@ def validate_native_quality(root: Path, release: str, variant: dict[str, Any], e
     predecessor = predecessor_native_variant(root, release, variant["id"])
     shape = native_shape(root, variant)
     previous_shape = native_shape(root, predecessor) if predecessor is not None else None
-    carried = predecessor is not None and all(variant.get(key) == predecessor.get(key) for key in (
-        "release_tag", "package_sha256", *NATIVE_IDENTITY_FIELDS, "maximum_context_tokens")) and shape == previous_shape
-    carried = carried and variant.get("runtime_shape") == (predecessor or {}).get("runtime_shape")
+    carried = unchanged_native_variant(variant, predecessor) and shape == previous_shape
     if carried:
         return
     require(isinstance(shape, dict) and shape.get("speculative_backend") in ("mtp", "dflash2")

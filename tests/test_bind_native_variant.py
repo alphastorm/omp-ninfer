@@ -624,6 +624,7 @@ class BindNativeVariantTest(unittest.TestCase):
         }
         proof = self.workspace / "fit.json"
         proof.write_text(json.dumps(fit))
+        self.manifest["components"]["ninfer_variants"][0]["maximum_context_tokens"] = 65536
         self.manifest_path.write_text(json.dumps(self.manifest))
         compatibility = target.parent / "compatibility.json"
         compatibility.write_text(json.dumps({"runtime_variants": [
