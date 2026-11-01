@@ -1,0 +1,249 @@
+{
+  "artifact_type": "omp_ninfer_client_upgrade_review",
+  "schema_version": 1,
+  "as_of": "2026-11-01",
+  "product_release": "v0.16.1",
+  "provenance": {
+    "review": "Host-free v18.14.2...v18.15.0 source review and independent four-asset download verification for issue #123. Three compare API pages enumerate all 235 commits (100/100/35), cross-checked against the complete Git history; the uncapped tagged-tree diff contains 257 paths. All changed paths and commit subjects were inventoried, with detailed inspection of route-sensitive source and regression fixtures, not an audit of every line. No client binary, semantic rehearsal, server, GPU or route driver was run. Product contract CI is reported by the review pull request, not claimed as inference qualification here.",
+    "implementation_commits": [],
+    "ci": null,
+    "ci_conclusion": "not-claimed",
+    "ci_head": null
+  },
+  "client_upgrade": {
+    "from": "18.14.2",
+    "to": "18.15.0",
+    "reason": "Recommend newest stable 18.15.0 for the future client-only v0.16.1: no blocking regression was identified on the documented static custom-Responses routes in this source review. The published v0.16.0 still pins 18.14.0, not 18.14.2; compose this incremental review with the separate 18.14.0-to-18.14.2 receipt. 18.15.0 retains both the Qwen exact-loop false-positive fix and incomplete-summary rejection; never adopt 18.14.1 alone. Missing-credential fallback, manual-compaction delivery and optional job-caption side requests require the explicit later probes recorded below. This is a recommendation for staging, not qualification or authorization to publish.",
+    "upstream_commit": "3fedf8d53267e32a6d7521ce725fdcc4a36fdc67",
+    "upstream_tree": "48bc72ba2418c0b78163d9769e91a0d8683e642b",
+    "release_id": 430630500,
+    "published_at": "2026-11-01T14:17:08Z",
+    "stable_releases_reviewed": [
+      "18.14.0",
+      "18.14.1",
+      "18.14.2",
+      "18.15.0"
+    ]
+  },
+  "descriptor_inputs": "releases/v0.16.0/qualification/client-components.json",
+  "host_free_checks": {
+    "asset_identity": {
+      "method": "Downloaded all three raw executable assets and SHA256SUMS.txt independently through their public release URLs outside every repository. Counted each complete byte stream and computed SHA-256 locally; all four counts and hashes match GitHub API sizes and sha256 digests, and all three executable hashes match rows in the independently downloaded checksum file. The checksum file has no self-row. These are download/integrity observations, not executable or platform qualification. descriptor_inputs names the published predecessor descriptor shape; no successor descriptor was created.",
+      "release_checksum_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.15.0/SHA256SUMS.txt",
+      "release_checksum_sha256": "c866af8cc5c8f04d0baee8b5a836b63419b6fa6095061685588af3a3cbe52f72",
+      "release_checksum_asset_id": 698539453,
+      "release_checksum_bytes": 844,
+      "release_checksum_api_digest": "sha256:c866af8cc5c8f04d0baee8b5a836b63419b6fa6095061685588af3a3cbe52f72",
+      "release_checksum_api_bytes_match": true,
+      "release_checksum_api_digest_match": true,
+      "assets": [
+        {
+          "name": "omp-darwin-arm64",
+          "asset_id": 698539455,
+          "bytes": 215295120,
+          "sha256": "d36dfabf0ee52d6f08efadb59c46f0349545c6f6975522417adae29646e73e34",
+          "api_digest": "sha256:d36dfabf0ee52d6f08efadb59c46f0349545c6f6975522417adae29646e73e34",
+          "api_bytes_match": true,
+          "api_digest_match": true,
+          "sha256sums_match": true,
+          "download_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.15.0/omp-darwin-arm64"
+        },
+        {
+          "name": "omp-windows-x64.exe",
+          "asset_id": 698539443,
+          "bytes": 243250176,
+          "sha256": "978846a816cb77f44a55e32b16493375ca837fbf87e0aec35a9c1c934bff0cd0",
+          "api_digest": "sha256:978846a816cb77f44a55e32b16493375ca837fbf87e0aec35a9c1c934bff0cd0",
+          "api_bytes_match": true,
+          "api_digest_match": true,
+          "sha256sums_match": true,
+          "download_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.15.0/omp-windows-x64.exe"
+        },
+        {
+          "name": "omp-linux-x64",
+          "asset_id": 698539441,
+          "bytes": 276785328,
+          "sha256": "6737ee2415555a3656cc7b89c14d1c25c18658ee4c0fd4f7309705149ccb7b0f",
+          "api_digest": "sha256:6737ee2415555a3656cc7b89c14d1c25c18658ee4c0fd4f7309705149ccb7b0f",
+          "api_bytes_match": true,
+          "api_digest_match": true,
+          "sha256sums_match": true,
+          "download_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.15.0/omp-linux-x64"
+        }
+      ]
+    },
+    "semantic_rehearsals": {
+      "execution_kind": "not executed; source review and download hashing only",
+      "guide_sha256": null,
+      "binary_version": null,
+      "binary_sha256": null,
+      "checks": [],
+      "runs": [],
+      "scope_limit": "No downloaded or installed client was executed, and no 18.14.0 rehearsal or acceptance is imported as 18.15.0 evidence. Platform rehearsals, real NInfer risk probes, five fresh documented routes (31 blocks), both native public installs and restoration remain unperformed. No socket or route port was opened."
+    }
+  },
+  "behavior_review": [
+    {
+      "id": "complete-incremental-source-census",
+      "predicate": "The latest-release endpoint, ten-release census and ten-tag census agree on public non-prerelease v18.15.0, release 430630500, published 2026-11-01T14:17:08Z. API tag resolution and fetched Git tag agree on commit 3fedf8d53267e32a6d7521ce725fdcc4a36fdc67 and tree 48bc72ba2418c0b78163d9769e91a0d8683e642b. Compare is ahead 235 / behind 0; all 235 unique API SHAs match the unshallowed Git range. The uncapped Git tree diff has 257 paths, equal to the comparison file count.",
+      "lane_effect": "The 18.14.0-to-18.14.2 review remains historical source evidence; this receipt covers the entire subsequent release interval without relying on an API default commit cap. No new security fix is advertised in the 18.15.0 release body; this is not a comprehensive security audit.",
+      "action": "Prefer 18.15.0 for v0.16.1, retaining all v0.16.0 runtime/model/profile bytes. Re-census before staging; any later stable requires its own complete incremental review.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/compare/v18.14.2...v18.15.0",
+        "https://api.github.com/repos/can1357/oh-my-pi/compare/v18.14.2...v18.15.0?per_page=100&page=1",
+        "https://api.github.com/repos/can1357/oh-my-pi/compare/v18.14.2...v18.15.0?per_page=100&page=2",
+        "https://api.github.com/repos/can1357/oh-my-pi/compare/v18.14.2...v18.15.0?per_page=100&page=3",
+        "https://api.github.com/repos/can1357/oh-my-pi/commits/v18.15.0",
+        "https://github.com/alphastorm/omp-ninfer/blob/8031bef3673e659dcce51894722cf77c0149fbc1/docs/measurements/2026-11-01-omp-18142-client-upgrade-review.json"
+      ]
+    },
+    {
+      "id": "carried-responses-state-schema-and-headers",
+      "predicate": "Between v18.14.2 and v18.15.0, openai-responses.ts remains c143d36f5224a4433e177150b668630d04fd4aa0, openai-responses-state.ts 7f52d1a19ede6211a6297ed1ec083a3ae56bdd61, openai-shared.ts 88893fbba3ac8b60f7920b84e5487ee4692f71e0 and stream.ts 1f9803e6909ce8c6c7e2789ccfce054f76563e32. Both models-config-schema blobs are identical (053ffa107e8941ab237eed11dbbb44ceacfd6c01 / fada9dc8f3fe386e0d21f12c322b31149b98913c). Header merging and stateful precedence have no further delta, but changed shared replay utilities still affect wire input.",
+      "lane_effect": "All five static fragments retain authHeader=true, statefulResponses=true, includeEncryptedReasoning=false and supportsReasoningSummary=false. includeEncryptedReasoning is a policy consumer, not a separately enumerated sparse-schema key. Carried provider blobs do not prove whole-wire equivalence.",
+      "action": "Keep the exact provider/model IDs, compatibility values and unique session cache keys. Clear PI_OPENAI_STATEFUL; repeat same-process chaining, cold replay, linked tool results and checkpoint-owner restart with exact new binary hashes.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/ai/src/providers/openai-responses.ts#L515-L527",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/ai/src/providers/openai-responses-state.ts",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/ai/src/providers/openai-shared.ts#L2218-L2236",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/ai/src/providers/openai-shared.ts#L4150-L4203",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/coding-agent/src/config/models-config-schema-bundle.ts#L54-L100"
+      ]
+    },
+    {
+      "id": "responses-replay-metadata-sanitization",
+      "predicate": "9b829114 and d9608ee2, shared by b1c3d0a9 / merge c92ce052, remove backend-only internal_chat_message_metadata_passthrough from transport copies of native Responses replay items and V1 remote-compaction input. Existing id policy is retained (computer-call ids preserved; ordinary replay ids dropped), generic metadata/content/call ids are not removed, and stored history is not mutated. Reasoning/image-generation whitelist paths remain separate.",
+      "lane_effect": "This is a real shared-utility wire delta even though the NInfer Responses provider file is unchanged. Normal NInfer history without the backend-only property should retain the prior request form; this expectation is source-derived, not a binary rehearsal. V1 remote compaction is not opted into by the shipped fragments.",
+      "action": "Add deterministic CI fixtures for a stored assistant/native-snapshot item containing the backend-only property, ordinary metadata and a linked function call/output. Require omission of only that internal property on the wire, correct call pairing and unchanged persisted input. Later real continuation/restart acceptance must still pass; do not enable remote compaction just to cover the Codex-only path.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/commit/9b8291140af8eba75d95757af1b9e1df91946269",
+        "https://github.com/can1357/oh-my-pi/commit/c92ce05295d313ea77833a02266ccf31b27f9954",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/ai/src/utils.ts#L114-L124",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/ai/src/utils.ts#L612-L651",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/agent/src/compaction/openai.ts#L845-L852",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/ai/test/openai-responses-history-payload.test.ts#L435-L517",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/agent/test/remote-compaction.test.ts#L540-L573"
+      ]
+    },
+    {
+      "id": "missing-credential-fallback-and-retry-opt-out",
+      "predicate": "fd83e877 / merge b52ac470 and final bca6adb8 add a pre-prompt walk to the first eligible keyed retry-fallback model when the primary has no credential. applyMissingCredentialFallback returns before walking if retry.modelFallback=false or the session disables model fallback; retry.enabled=false alone is not the new branch gate. The existing retry-disabled early return remains in #applyRetryPolicy. Quota-reset waits separately move to wall-clock deadlines in d18605ac / fde99632, behind enabled retry policy.",
+      "lane_effect": "The shipped fail-closed configuration explicitly sets both retry.enabled=false and retry.modelFallback=false plus fallbackRevertPolicy=never, so the new pre-prompt walk is source-gated off for these routes. Operator copies missing modelFallback=false are not equivalent and can now select another provider before sending a request.",
+      "action": "Keep all three fail-closed settings. Add a deterministic CI missing-key negative probe with a configured credentialed fallback and modelFallback=false: nonzero prompt outcome, no model invocation/provider switch and no successful output. Retain the real selected-provider outage request-count oracle. Do not claim the final upstream happy-path fallback fixture proves this opt-out.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/commit/b52ac4700e60fc42ecfb4dcf9311380a8efa3618",
+        "https://github.com/can1357/oh-my-pi/commit/bca6adb815d1ff4247f57972cc7982b0840d5e34",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/coding-agent/src/session/agent-session.ts#L8865-L8877",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/coding-agent/src/session/turn-recovery.ts#L2080-L2100",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/coding-agent/src/session/turn-recovery.ts#L2671-L2682",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/coding-agent/test/agent-session-retry-fallback.test.ts#L451-L507"
+      ]
+    },
+    {
+      "id": "manual-compaction-background-delivery-barrier",
+      "predicate": "9551c060 / merge 947f5937 makes IRC wakes, turn-triggering custom messages and yield-queue idle flushes await waitForContextReplacement(), which includes manual as well as idle compaction cleanup. Persistence reconnects before queued results start a turn. The new upstream regression fixture enqueues an async result during gated manual compaction and checks no premature request, one post-compaction request and persisted result content.",
+      "lane_effect": "A source fix for stale-history/lost-background-result races is relevant to fleet/fanout/parallel plus compaction; unchanged Responses transport does not cover this state transition. It does not change the numeric compaction threshold.",
+      "action": "Extend the compaction probe with one background completion during manual /compact: require no stale pre-compaction turn, exactly one delivered/persisted result, planted nonce/tool-link preservation and restart continuation. Record failure/cancellation cases separately; upstream fixtures were inspected, not run here.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/commit/947f5937c29611e737d32a0f413d8755f66c75d3",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/coding-agent/src/session/session-maintenance.ts#L2117-L2127",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/coding-agent/src/session/agent-session.ts#L1559-L1617",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/coding-agent/src/session/agent-session.ts#L2349-L2372",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/coding-agent/test/agent-session-compaction-cancellation.test.ts#L216-L275"
+      ]
+    },
+    {
+      "id": "carried-qwen-guard-edit-and-summary-boundaries",
+      "predicate": "thinking-loop.ts remains 31d9f7294b509585b1a00de69cb1d21922fd6828; Qwen class/taxonomy remain d38c1d34fa9fb38f5bf248cacba3b6786ea8e3e4 / e61045a2e1e0ebfa96eee12858015bae9116fdfa; edit-mode.ts and model-thinking.ts are identical. Local compaction.ts, branch-summarization.ts and compaction-v2-streaming.ts are also byte-carried. Generated policy taxonomy/behavior and all pre-existing provider entries match; the semantic cascade delta is Modular-only additions and SambaNova-only replayReasoningContent=true, not a Qwen rule change.",
+      "lane_effect": "Qwen/opaque aliases retain the exact guard. Newline-spanning short cycles require 1024 repeated characters with four repeats; non-newline short cycles retain four repeats/180 characters, long cycles three/1024. qwen3.8-27b retains replace and q38-ninfer hashline. Main/turn-prefix/handoff/branch length-stop rejection and display-only short-summary omission remain; default reserve is 19660, strict trigger >111412 and local summary output cap 15728, not route max 32768.",
+      "action": "Carry every existing 18.14.2 section-6 guard and summary probe without lowering assertions or thresholds. Keep guard enabled and retire compat.thinkingLoopGuard in operator copies. Do not infer live loop induction or compaction quality from blob equality.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/ai/src/utils/thinking-loop.ts#L67-L84",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/ai/src/utils/thinking-loop.ts#L139-L150",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/catalog/src/compat/rules/classes/qwen.kdl",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/catalog/src/compat/rules/taxonomy/qwen.kdl",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/catalog/src/compat/rules/providers/sambanova.kdl#L26-L35",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/agent/src/compaction/compaction.ts#L328-L428",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/agent/src/compaction/compaction.ts#L915-L923",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/agent/src/compaction/compaction.ts#L1075-L1083",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/agent/src/compaction/compaction.ts#L2441-L2452"
+      ]
+    },
+    {
+      "id": "snapcompact-reader-and-accounting-changes",
+      "predicate": "7c834613 / 3587ec7f and 6eedc5d3 / 642fce6b give text-only readers kept archive text instead of image-omitted placeholders, fit it to the reader window with head/tail preservation and explicit middle truncation, resolve persisted frame blobs, and include a re-renderable standing archive in the reduction baseline. Unreconstructable old framed history is not credited as replaceable. Explicit /compact snapcompact refusal is reported once and names an alternative manual mode.",
+      "lane_effect": "Session-maintenance projection/context bytes can change for existing snapcompact archives or reader changes. This is distinct from unchanged local-summary length-stop/budget logic and does not grant new vision support on any NInfer route.",
+      "action": "Add deterministic reader/resume/counting fixtures in CI, with framed archives, text-only readers and a smaller reader window. Require retained file/nonce edges, explicit dropped-middle accounting, no stale image placeholders or invented full-history retention. If authorized live probes exercise snapcompact, preserve declared input capabilities and classify unexercised branches honestly; no model switch or method override becomes a product default.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/commit/7c8346132aa7381b90155dcfe7e794e435e88f16",
+        "https://github.com/can1357/oh-my-pi/commit/6eedc5d3b97accc31e6bb14554e2191b47f366ea",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/coding-agent/src/session/session-maintenance.ts#L2718-L2768",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/coding-agent/src/session/session-maintenance.ts#L4730-L4764",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/coding-agent/src/session/session-maintenance.ts#L4924-L4994",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/snapcompact/src/snapcompact.ts#L2335-L2444"
+      ]
+    },
+    {
+      "id": "selectors-discovery-and-service-tier-gating",
+      "predicate": "b0b0054d / 032cae55 prefer a case-sensitive provider/id match before the previous case-insensitive ambiguity check. 4315f7f0 retains provider-reported limits for unbundled discovered models (cache schema 14 to 15); bd1ed41b advertises/parses service_tiers and permits ultrafast on an OpenAI-family relay only if its model lists it.",
+      "lane_effect": "The exact lowercase static NInfer selectors, declared 131072/32768 limits and [low, medium, xhigh] effort ladder do not opt into discovery, service tiers or effortMap. Source-derived high-to-medium / off-to-low clamps and the :medium heavy selector are carried. Modular/SambaNova provider additions do not apply to the local provider IDs.",
+      "action": "Keep static fragments, limits, exact provider-qualified IDs and fleet front matter unchanged. Add a source/CI selector control for the shipped IDs and suffix; do not add discovery, /fast, serviceTiers, per-call model opt-ins or an effortMap as part of this bump.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/commit/b0b0054d22329cf6868565f0df63565f05241111",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/coding-agent/src/config/model-resolver.ts#L395-L416",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/coding-agent/src/config/model-resolver.ts#L464-L485",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/ai/src/types.ts#L248-L278",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/coding-agent/src/config/model-discovery.ts#L1306-L1345",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/catalog/src/provider-models/openai-compat.ts#L535-L549"
+      ]
+    },
+    {
+      "id": "optional-background-captions-and-autolearn-side-requests",
+      "predicate": "1b1251f2 adds a once-per-long-background-command caption through the widget model role when a widget/job inspection or /jobs full requests it (15-second age threshold, async.widgets enabled). The resolver can try built-in smol defaults with usable credentials; retry.modelFallback=false is not this auxiliary-role policy. 71d793da also reuses the primary prompt-cache key and declared tool definitions for optional auto-learn capture while executing only learn/manage_skill; all other client tools are refused copies. b3baadf2 / 29e4f08c queue early worker messages until the assignment prompt starts.",
+      "lane_effect": "The documented short file-read/nonce/outage routes do not request captions or auto-learn. These optional paths can add legitimate side requests if exercised; neither unchanged transport nor retry opt-out proves a universal no-cloud/no-extra-request claim for arbitrary interactive sessions with inherited credentials. Worker assignment ordering is relevant to later fleet/fanout probes.",
+      "action": "Use isolated release homes/auth with only selected local credentials. Keep the existing documented-route request-count oracle unchanged; for any explicitly authorized background-widget/auto-learn probe, record the feature, selected role/provider and separately attributable auxiliary request count. Test assignment delivery and exactly-once completion in fleet/fanout. Do not silently enable optional features, provision cloud credentials or count a caption as a hidden retry.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/commit/1b1251f2f92b9b2c0b38d4694d3517bd9ab8de86",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/coding-agent/src/job-widgets/registry.ts#L114-L138",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/coding-agent/src/job-widgets/registry.ts#L264-L283",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/coding-agent/src/job-widgets/author.ts#L177-L203",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/coding-agent/src/job-widgets/caption.ts#L69-L109",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/coding-agent/src/sdk.ts#L1748-L1848",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/coding-agent/src/session/agent-session.ts#L1559-L1581"
+      ]
+    },
+    {
+      "id": "platform-auth-and-shell-lifecycle",
+      "predicate": "Usage-probe OAuth refreshes no longer disable credentials on invalid_grant; Workforce ADC uses its proper token endpoint. Those rotating-token paths are not the static local bearer-key route. CLI process handlers remain explicitly installed after SDK import stops taking over host signals; exit cleanup stays installed. Native shell open files now share descriptors across nesting and report the open-file limit on exhaustion; bash also sets GIT_SEQUENCE_EDITOR and GCM_INTERACTIVE and denies intercepted commands before approval. The release workflow has no Bun-pin change in this delta.",
+      "lane_effect": "All three executable identities change and still need fresh platform execution, tool/stdio/exit/restoration acceptance. The source changes do not establish a Windows, Linux or macOS runtime result, security audit, or reproducible-build proof. Existing ownership/restart probes remain; session-manager changes in this interval concern frame resolution, not its ownership lease contract.",
+      "action": "Keep macOS preview and Linux WSL2-only qualification boundaries. Rehearse all three downloaded clients and preserve real client exit/fail-closed and session-restart gates, plus a bounded shell/stdio fixture where appropriate in CI. No hardware connection, lease/window operation, merge, staging or publication is performed by this receipt.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/releases/tag/v18.15.0",
+        "https://github.com/can1357/oh-my-pi/commit/84bbd89e83dbabde090f174dea2973f7ba62eec0",
+        "https://github.com/can1357/oh-my-pi/commit/57f2ec57ef43e48c0c07b0f996eb3d92e48f5c0e",
+        "https://github.com/can1357/oh-my-pi/commit/ec614edf33481a8aafb9b6bb433f0b19b10525ba",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/coding-agent/src/cli.ts#L584-L602",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/crates/vendor/brush-core/src/openfiles.rs#L25-L55"
+      ]
+    }
+  ],
+  "verdict": {
+    "host_free_blocker_found": false,
+    "qualification_claimed": false,
+    "new_client_inference_qualification_claimed": false,
+    "predecessor_acceptance_transferred": false,
+    "scope_limit": "Source review and independently verified release-asset bytes/hashes only. Recommend 18.15.0 with no blocking regression identified for the documented static local routes; semantic rehearsals, real guard/compaction/background-delivery probes, fresh platform/five-route acceptance, native public installs, independent restoration, product review and founder publication remain separate unperformed gates. Published v0.16.0 remains on 18.14.0. No v0.16.1 descriptor, release tree, compatibility authority or profile is staged/repinned, and no new runtime upgrade/rollback is qualified."
+  },
+  "sources": [
+    "https://github.com/alphastorm/omp-ninfer/issues/123",
+    "https://api.github.com/repos/can1357/oh-my-pi/releases/latest",
+    "https://api.github.com/repos/can1357/oh-my-pi/releases?per_page=10",
+    "https://api.github.com/repos/can1357/oh-my-pi/tags?per_page=10",
+    "https://github.com/can1357/oh-my-pi/releases/tag/v18.15.0",
+    "https://github.com/can1357/oh-my-pi/compare/v18.14.2...v18.15.0",
+    "https://github.com/can1357/oh-my-pi/releases/download/v18.15.0/omp-darwin-arm64",
+    "https://github.com/can1357/oh-my-pi/releases/download/v18.15.0/omp-windows-x64.exe",
+    "https://github.com/can1357/oh-my-pi/releases/download/v18.15.0/omp-linux-x64",
+    "https://github.com/can1357/oh-my-pi/releases/download/v18.15.0/SHA256SUMS.txt"
+  ]
+}
