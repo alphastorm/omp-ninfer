@@ -506,6 +506,25 @@ class NativeQualityContractTests(unittest.TestCase):
         self.release = "v0.14.0"
         self.assertEqual(self.validate(), [])
 
+    def test_carried_native_receipts_require_exact_predecessor_bindings(self):
+        for field in ("quality_screen", "fit"):
+            self.predecessor["qualification"][field] = {
+                "path": f"releases/v0.14.0/qualification/{field}.json", "sha256": "a" * 64}
+        self.save_predecessor()
+        original = deepcopy(self.predecessor)
+        for field in ("quality_screen", "fit"):
+            for mutation in ("missing", "path", "sha256"):
+                with self.subTest(field=field, mutation=mutation):
+                    self.variant = deepcopy(original)
+                    reference = self.variant["qualification"].pop(field)
+                    if mutation != "missing":
+                        reference[mutation] = "0" * 64 if mutation == "sha256" else (
+                            f"releases/{self.release}/qualification/{field}.json")
+                        self.variant["qualification"][field] = reference
+                    self.assertIn(
+                        f"{self.variant['id']}.qualification.{field} must match the carried predecessor binding",
+                        self.validate())
+
     def test_legacy_predecessor_shape_uses_only_hash_bound_mtp_configuration(self):
         path = self.root / "releases/v0.14.0/qualification/rtx3090.json"
         path.parent.mkdir()
@@ -608,6 +627,52 @@ class ReleaseContractTest(unittest.TestCase):
                     authority, model["artifact_sha256"], errors,
                     allow_pending=manifest["status"] == "draft")
                 self.assertEqual(errors, [])
+
+    def test_native_manifest_must_bind_observed_quality_and_fit_receipts(self) -> None:
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        release = root / "releases/v0.16.0"
+        for profile in (release / "profiles").glob("*.json"):
+            shutil.copy2(profile, root / "profiles" / profile.name)
+        shutil.copy2(release / "compatibility.json", root / "compatibility.json")
+        shutil.copy2(release / "COMPATIBILITY.md", root / "docs/COMPATIBILITY.md")
+        manifest = self.load(release / "manifest.json")
+        qualification = self.load(release / "qualification.json")
+        # Published v0.16.0 declares screens; exercise the same contract for an
+        # explicitly declared fit gate without requiring old releases to add one.
+        for variant in manifest["components"]["ninfer_variants"]:
+            lane = variant["id"].split("-")[0]
+            reference = variant["qualification"]["fit"]
+            qualification["observed_gates"][f"{lane}_fit"] = {
+                "status": "passed", "repository_path": reference["path"],
+                "sha256": reference["sha256"]}
+        self.save(release / "qualification.json", qualification)
+        manifest["qualification"]["summary_sha256"] = VERIFY_RELEASE.sha256_file(
+            release / "qualification.json")
+        self.save(release / "manifest.json", manifest)
+        _, errors = VERIFY_RELEASE.validate(
+            root, require_ready=False, require_installable=True, product_release="v0.16.0")
+        self.assertEqual(errors, [])
+        for index, variant in enumerate(manifest["components"]["ninfer_variants"]):
+            lane = variant["id"].split("-")[0]
+            for field in ("quality_screen", "fit"):
+                for mutation in ("missing", "path", "sha256"):
+                    with self.subTest(variant=variant["id"], field=field, mutation=mutation):
+                        changed = deepcopy(manifest)
+                        bindings = changed["components"]["ninfer_variants"][index]["qualification"]
+                        reference = bindings.pop(field)
+                        if mutation != "missing":
+                            reference[mutation] = "0" * 64 if mutation == "sha256" else (
+                                "releases/v0.16.0/qualification/rtx5090.json")
+                            bindings[field] = reference
+                        self.save(release / "manifest.json", changed)
+                        _, errors = VERIFY_RELEASE.validate(
+                            root, require_ready=False, require_installable=True,
+                            product_release="v0.16.0")
+                        self.assertIn(
+                            f"{variant['id']}.qualification.{field} must match "
+                            f"qualification.observed_gates.{lane}_{field}",
+                            errors)
 
     def split_model_copy(self) -> tuple[Path, dict]:
         temporary, root = self.public_draft_copy()
