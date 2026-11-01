@@ -1,0 +1,960 @@
+{
+  "approval_granted": true,
+  "artifact_type": "omp_ninfer_review_ledger",
+  "as_of": "2026-11-01",
+  "native_runtime": {
+    "base_commit": "2af6b3dec467e61d284889c69e903eef464bda97",
+    "binding_status": "Original frozen N16 subject passed post-dispatch and final epoch rechecks with no drift. Frozen record, packet, manifest, resolver receipt and envelope are unchanged. Every returned finding/question is retained and mapped to L1-L6 with accountable-lead rationale/disposition verbatim. Closure is by disposition, not a new admitting epoch or code remediation.",
+    "ci_runs": [
+      {
+        "conclusion": "success",
+        "run_id": 41202282196,
+        "source_commit": "26fa28d0e7834515508fc07ac503164a6effc820",
+        "status": "completed",
+        "url": "https://github.com/alphastorm/ninfer/actions/runs/41202282196"
+      },
+      {
+        "conclusion": "success",
+        "run_id": 41202281991,
+        "source_commit": "26fa28d0e7834515508fc07ac503164a6effc820",
+        "status": "completed",
+        "url": "https://github.com/alphastorm/ninfer/actions/runs/41202281991"
+      },
+      {
+        "conclusion": "success",
+        "run_id": 41207365104,
+        "source_commit": "26fa28d0e7834515508fc07ac503164a6effc820",
+        "status": "completed",
+        "url": "https://github.com/alphastorm/ninfer/actions/runs/41207365104"
+      }
+    ],
+    "close_status": {
+      "epoch_digest_drift": [],
+      "epoch_recheck_exit_code": 0,
+      "frozen_record_gate_action": "full-council",
+      "frozen_record_gate_status": "ready",
+      "gate_note": "The unchanged initial record retains historical full-council admission; the gate does not consume outcome ledgers. No new dispatch is authorized by this close.",
+      "in_scope_residual_p01": [],
+      "method": "round1-accountable-lead-disposition",
+      "pending_rows": [],
+      "reason_codes": [],
+      "review_sequence_gate_exit_code": 0,
+      "sequence": "closed"
+    },
+    "deferred_issues": [
+      "https://github.com/alphastorm/ninfer/issues/50",
+      "https://github.com/alphastorm/ninfer/issues/51",
+      "https://github.com/alphastorm/ninfer/issues/52",
+      "https://github.com/alphastorm/ninfer/issues/53",
+      "https://github.com/alphastorm/ninfer/issues/54"
+    ],
+    "dispatch_subject_digest": "9aae652fbe67fff0d367c0f8525b42f3e6258a4309ae9922cc4064a78165ff1f",
+    "dispositions": {
+      "claude-mythos-R1": "L1; defer (issue); residual P2; Fail-open on absent evidence is real. After C-ROLLBACK, C-TXSCOPE, C-RECOMPUTE and C-PROCESS, the only reachable loss is the checkpoints of a candidate whose install never completed, deleted by transaction rollback/repair after an unclean candidate stop. That loss is cache-only, and the incumbent cannot consume a candidate's checkpoints anyway. Fixing it changes package bytes and therefore N, forcing a rebuild, re-cut and re-qualification of all three lanes: disproportionate to a bounded cache loss. Next release: treat a missing or invalid report and forced termination of a stop-event launch as incomplete, keep runtime.json and the candidate cache, and require an explicit operator reconcile. Add a red→green Windows test.; https://github.com/alphastorm/ninfer/issues/50",
+      "claude-mythos-R2": "L6; defer (issue); residual P3; Uninstall is a deliberate whole-state-root removal. The card stays at the qualified cap, which is a safe limit, and an operator can restore the limit with nvidia-smi. Record it in the next release's uninstall notes and fix it with L1.; https://github.com/alphastorm/ninfer/issues/54",
+      "claude-mythos-U1": "L1; defer (issue); residual P2; Fail-open on absent evidence is real. After C-ROLLBACK, C-TXSCOPE, C-RECOMPUTE and C-PROCESS, the only reachable loss is the checkpoints of a candidate whose install never completed, deleted by transaction rollback/repair after an unclean candidate stop. That loss is cache-only, and the incumbent cannot consume a candidate's checkpoints anyway. Fixing it changes package bytes and therefore N, forcing a rebuild, re-cut and re-qualification of all three lanes: disproportionate to a bounded cache loss. Next release: treat a missing or invalid report and forced termination of a stop-event launch as incomplete, keep runtime.json and the candidate cache, and require an explicit operator reconcile. Add a red→green Windows test.; https://github.com/alphastorm/ninfer/issues/50",
+      "claude-mythos-U2": "L3; defer (issue); residual P3; Under C-LOCKS a surviving candidate makes cleanup and the incumbent restart fail visibly. The installer runs elevated, so a blank ExecutablePath for the lane's own task child needs a protected or foreign-session process. No real-Windows evidence shows one; mythos U2 records the same gap. Next release: fail closed on blank-path processes named like the server, matching Control-Release.ps1:562-579.; https://github.com/alphastorm/ninfer/issues/51",
+      "daybreak-blue-R1": "L1; defer (issue); residual P2; Fail-open on absent evidence is real. After C-ROLLBACK, C-TXSCOPE, C-RECOMPUTE and C-PROCESS, the only reachable loss is the checkpoints of a candidate whose install never completed, deleted by transaction rollback/repair after an unclean candidate stop. That loss is cache-only, and the incumbent cannot consume a candidate's checkpoints anyway. Fixing it changes package bytes and therefore N, forcing a rebuild, re-cut and re-qualification of all three lanes: disproportionate to a bounded cache loss. Next release: treat a missing or invalid report and forced termination of a stop-event launch as incomplete, keep runtime.json and the candidate cache, and require an explicit operator reconcile. Add a red→green Windows test.; https://github.com/alphastorm/ninfer/issues/50",
+      "daybreak-blue-R2": "L3; defer (issue); residual P3; Under C-LOCKS a surviving candidate makes cleanup and the incumbent restart fail visibly. The installer runs elevated, so a blank ExecutablePath for the lane's own task child needs a protected or foreign-session process. No real-Windows evidence shows one; mythos U2 records the same gap. Next release: fail closed on blank-path processes named like the server, matching Control-Release.ps1:562-579.; https://github.com/alphastorm/ninfer/issues/51",
+      "daybreak-blue-R3": "L2; defer (same issue as L1); residual P2; Same asset and consequence class as L1: candidate cache inside an unfinished install transaction, recomputable. The refused sessions were never saved, so a later rollback deletes nothing that the refusal was protecting beyond the candidate cache. Fix together with L1.; https://github.com/alphastorm/ninfer/issues/50",
+      "gemini-argon-R1": "L5; defer (issue); residual P3; FP32 head logits is default OFF in every shipped profile. The packaged config is hash-asserted at Start (Control-Release.ps1:1079, 1169), so product users cannot enable it. With the opt-in on, restores would be refused, which fails closed: recompute, no corruption. Next release: one-line fix plus a restore test with the opt-in.; https://github.com/alphastorm/ninfer/issues/53",
+      "gpt-astra-R1": "L1; defer (issue); residual P2; Fail-open on absent evidence is real. After C-ROLLBACK, C-TXSCOPE, C-RECOMPUTE and C-PROCESS, the only reachable loss is the checkpoints of a candidate whose install never completed, deleted by transaction rollback/repair after an unclean candidate stop. That loss is cache-only, and the incumbent cannot consume a candidate's checkpoints anyway. Fixing it changes package bytes and therefore N, forcing a rebuild, re-cut and re-qualification of all three lanes: disproportionate to a bounded cache loss. Next release: treat a missing or invalid report and forced termination of a stop-event launch as incomplete, keep runtime.json and the candidate cache, and require an explicit operator reconcile. Add a red→green Windows test.; https://github.com/alphastorm/ninfer/issues/50",
+      "gpt-astra-R2": "L4; defer (issue); residual P3; The code is unchanged since F2. The P15 sequence reviewed it, so this is a gap in a file outside the delta. Triggering it needs `std::bad_alloc` for a small host allocation, i.e. process-wide memory exhaustion. The server is already failing then, and the controller's stop timeout ends in forced termination. Next release: reserve the retirement node before taking the lease, or retire inline on failure.; https://github.com/alphastorm/ninfer/issues/52",
+      "gpt-astra-R3": "L3; defer (issue); residual P3; Under C-LOCKS a surviving candidate makes cleanup and the incumbent restart fail visibly. The installer runs elevated, so a blank ExecutablePath for the lane's own task child needs a protected or foreign-session process. No real-Windows evidence shows one; mythos U2 records the same gap. Next release: fail closed on blank-path processes named like the server, matching Control-Release.ps1:562-579.; https://github.com/alphastorm/ninfer/issues/51"
+    },
+    "frozen_record_prior_general_review_pass_count": 0,
+    "general_review_pass_count": 1,
+    "initial_review_class": "full-council",
+    "initial_review_id": "CR-20261031T162716Z-26fa28d0",
+    "issue_groups": {
+      "L1-L2": {
+        "labels": [
+          "bug"
+        ],
+        "number": 50,
+        "title": "Retain incomplete managed-shutdown evidence until reconciliation",
+        "url": "https://github.com/alphastorm/ninfer/issues/50"
+      },
+      "L3": {
+        "labels": [
+          "bug"
+        ],
+        "number": 51,
+        "title": "Fail closed when installer repair cannot read a candidate image path",
+        "url": "https://github.com/alphastorm/ninfer/issues/51"
+      },
+      "L4": {
+        "labels": [
+          "bug"
+        ],
+        "number": 52,
+        "title": "Make checkpoint export retirement exception-safe",
+        "url": "https://github.com/alphastorm/ninfer/issues/52"
+      },
+      "L5": {
+        "labels": [
+          "bug"
+        ],
+        "number": 53,
+        "title": "Include FP32 head-logit mode in the durable engine identity",
+        "url": "https://github.com/alphastorm/ninfer/issues/53"
+      },
+      "L6": {
+        "labels": [
+          "bug"
+        ],
+        "number": 54,
+        "title": "Preserve paused-owner power metadata during uninstall",
+        "url": "https://github.com/alphastorm/ninfer/issues/54"
+      }
+    },
+    "ledger_sha256": "b2871c3664a0c4434dedc3aa2b3f2fdd7f5b301c9d3cecc7d1ce463c835aabe6",
+    "merged_dispositions": {
+      "L1": {
+        "change": "none",
+        "claim": "Stop-ManagedProcess returns success when a stop-event launch's shutdown report is missing, unreadable or wrong-launch (`graceful_unreported`), and after forced termination (`graceful_wait_expired`, `graceful_nonzero_exit`, `terminated`, `signal_failed`); only an explicit incomplete report throws",
+        "disposition": "defer (issue)",
+        "final_disposition": "defer",
+        "issue_url": "https://github.com/alphastorm/ninfer/issues/50",
+        "rationale": "Fail-open on absent evidence is real. After C-ROLLBACK, C-TXSCOPE, C-RECOMPUTE and C-PROCESS, the only reachable loss is the checkpoints of a candidate whose install never completed, deleted by transaction rollback/repair after an unclean candidate stop. That loss is cache-only, and the incumbent cannot consume a candidate's checkpoints anyway. Fixing it changes package bytes and therefore N, forcing a rebuild, re-cut and re-qualification of all three lanes: disproportionate to a bounded cache loss. Next release: treat a missing or invalid report and forced termination of a stop-event launch as incomplete, keep runtime.json and the candidate cache, and require an explicit operator reconcile. Add a red→green Windows test.",
+        "residual_severity": "P2",
+        "result": "confirmed",
+        "reviewer_ids": [
+          "claude-mythos",
+          "daybreak-blue",
+          "gpt-astra"
+        ],
+        "source_ids": [
+          "claude-mythos-R1",
+          "daybreak-blue-R1",
+          "gpt-astra-R1",
+          "claude-mythos-U1"
+        ],
+        "verified": "YES (Control-Release.ps1:932-1054)"
+      },
+      "L2": {
+        "change": "none",
+        "claim": "A refused final save is not sticky across a later Start, so a later clean Stop can permit transaction rollback",
+        "disposition": "defer (same issue as L1)",
+        "final_disposition": "defer",
+        "issue_url": "https://github.com/alphastorm/ninfer/issues/50",
+        "rationale": "Same asset and consequence class as L1: candidate cache inside an unfinished install transaction, recomputable. The refused sessions were never saved, so a later rollback deletes nothing that the refusal was protecting beyond the candidate cache. Fix together with L1.",
+        "residual_severity": "P2",
+        "result": "confirmed",
+        "reviewer_ids": [
+          "daybreak-blue"
+        ],
+        "source_ids": [
+          "daybreak-blue-R3"
+        ],
+        "verified": "YES (Control-Release.ps1:1048-1054, 1068-1115)"
+      },
+      "L3": {
+        "change": "none",
+        "claim": "Repair's quiescence census drops processes whose ExecutablePath is unreadable when state no longer names the candidate",
+        "disposition": "defer (issue)",
+        "final_disposition": "defer",
+        "issue_url": "https://github.com/alphastorm/ninfer/issues/51",
+        "rationale": "Under C-LOCKS a surviving candidate makes cleanup and the incumbent restart fail visibly. The installer runs elevated, so a blank ExecutablePath for the lane's own task child needs a protected or foreign-session process. No real-Windows evidence shows one; mythos U2 records the same gap. Next release: fail closed on blank-path processes named like the server, matching Control-Release.ps1:562-579.",
+        "residual_severity": "P3",
+        "result": "confirmed",
+        "reviewer_ids": [
+          "claude-mythos",
+          "daybreak-blue",
+          "gpt-astra"
+        ],
+        "source_ids": [
+          "daybreak-blue-R2",
+          "gpt-astra-R3",
+          "claude-mythos-U2"
+        ],
+        "verified": "YES (Install-Release.ps1:964-979)"
+      },
+      "L4": {
+        "change": "none",
+        "claim": "Export retirement is not exception-safe if allocating the retirement command throws",
+        "disposition": "defer (issue)",
+        "final_disposition": "defer",
+        "issue_url": "https://github.com/alphastorm/ninfer/issues/52",
+        "rationale": "The code is unchanged since F2. The P15 sequence reviewed it, so this is a gap in a file outside the delta. Triggering it needs `std::bad_alloc` for a small host allocation, i.e. process-wide memory exhaustion. The server is already failing then, and the controller's stop timeout ends in forced termination. Next release: reserve the retirement node before taking the lease, or retire inline on failure.",
+        "residual_severity": "P3",
+        "result": "confirmed",
+        "reviewer_ids": [
+          "gpt-astra"
+        ],
+        "source_ids": [
+          "gpt-astra-R2"
+        ],
+        "verified": "YES (engine_checkpoint.inl:15-21, 94-136, 155-162)"
+      },
+      "L5": {
+        "change": "none",
+        "claim": "`engine_identity()` omits `fp32_head_logits`, so the checkpoint fingerprint disagrees when the opt-in is enabled",
+        "disposition": "defer (issue)",
+        "final_disposition": "defer",
+        "issue_url": "https://github.com/alphastorm/ninfer/issues/53",
+        "rationale": "FP32 head logits is default OFF in every shipped profile. The packaged config is hash-asserted at Start (Control-Release.ps1:1079, 1169), so product users cannot enable it. With the opt-in on, restores would be refused, which fails closed: recompute, no corruption. Next release: one-line fix plus a restore test with the opt-in.",
+        "residual_severity": "P3",
+        "result": "confirmed",
+        "reviewer_ids": [
+          "gemini-argon"
+        ],
+        "source_ids": [
+          "gemini-argon-R1"
+        ],
+        "verified": "YES (engine.cpp:55-82 vs session_checkpoint_service.cpp:54-62)"
+      },
+      "L6": {
+        "change": "none",
+        "claim": "Uninstall removes the inner GPU-owner lease record while the outer lease has prior_paused=true, losing the prior power limit",
+        "disposition": "defer (issue)",
+        "final_disposition": "defer",
+        "issue_url": "https://github.com/alphastorm/ninfer/issues/54",
+        "rationale": "Uninstall is a deliberate whole-state-root removal. The card stays at the qualified cap, which is a safe limit, and an operator can restore the limit with nvidia-smi. Record it in the next release's uninstall notes and fix it with L1.",
+        "residual_severity": "P3",
+        "result": "unresolved",
+        "reviewer_ids": [
+          "claude-mythos"
+        ],
+        "source_ids": [
+          "claude-mythos-R2"
+        ],
+        "verified": "PARTIAL (Control-Release.ps1:1439-1465, 476-481)"
+      }
+    },
+    "merged_row_counts": {
+      "by_disposition": {
+        "defer": 6
+      },
+      "by_result": {
+        "confirmed": 5,
+        "unresolved": 1
+      },
+      "by_severity": {
+        "P0": 0,
+        "P1": 0,
+        "P2": 2,
+        "P3": 4
+      },
+      "pending": 0,
+      "total": 6
+    },
+    "not_selected_ineligible": [],
+    "receipt_digests": {
+      "initial": {
+        "LEAD-DISPOSITIONS.md": "da74b8c812b5bf955d2ed14425fb43a5f974972ff05e76abed5ab8fb222b209d",
+        "claude-mythos.json": "6527ce45f2ccb65850c25dd703b3baec06265fa4ee143c81d6ecf3873dbaf51e",
+        "close-report.md": "500e04d54922b73e4777fcf09f050466738d7b3948816ab66c8c4626d847e035",
+        "close-tooling.json": "bd3dec58f5f3e58b071f3ec4094eafa284ab494718c1a47214bced55537dcfab",
+        "daybreak-blue.json": "c28e15bbbbcef19690283db4876ecf24f48938dfeddefd4d89f86a852cffa964",
+        "dispatch-result.json": "d612f0b802710b23ea3f2fcd09a234a889ee7c08190a8d0c267cca276e782cd7",
+        "finding-source-map.json": "a0cb191237b49bddd1faf64f8f11647221bca60419e0841ef8589bc78298143d",
+        "frozen-subject.json": "21e4f182481bed4d79f2b7a880a185878751236d4ebc3ac33cb6c560a1ad0cea",
+        "gemini-argon.json": "9bb8617a8ef9005235a545dcc15e66fa549cc629a3a7fb7b217f5cb0975c2452",
+        "gpt-astra.json": "e30b3a674dee24517874b31b02d5a5f6f2aa2646c75d8f2ed83fe0608f8bc102",
+        "ledger.md": "b2871c3664a0c4434dedc3aa2b3f2fdd7f5b301c9d3cecc7d1ce463c835aabe6",
+        "packet.md": "78db17902eb4bdc0a5e614e20a9da2536f9dd4344b53582b8989bf26fa0d6c7c",
+        "panel-selection.json": "72bdd99b93ad575ae9f6df8287d5497094f31aea0321fe1a4b043742a5b5bf1b",
+        "resolver-receipt.json": "1135d79a663bd2bf39d0a74f2c4e1f94b8cbd0f3ebab3374dd6312b26197a694",
+        "review-dispatch-envelope.attempt-1.json": "3e8335217529ba9e7f062e32c1640769e4b1da408690c2802573e600882b0173",
+        "review-dispatch-envelope.json": "2ba1af0fbe05d9a221573a89330ed4275248c23d0828970bfc952ea69e1d543c",
+        "review-record.json": "cbb0c780d3317a24286c82b4a5f2f0a05ca94dfd1b4b838107c3eaacab36b372"
+      }
+    },
+    "record_sha256": "cbb0c780d3317a24286c82b4a5f2f0a05ca94dfd1b4b838107c3eaacab36b372",
+    "remediation_review_id": null,
+    "remediation_seats": [],
+    "repository": "https://github.com/alphastorm/ninfer",
+    "required_scope": [
+      "Complete F2..N16 common-engine/runtime/native source delta and bound adjacent ownership/identity context for all three lanes.",
+      "Exact N16 Linux RTX5090 checked-first-build RC/startup/T1 and supported-platform CI; checked-first-build nonreproducibility exception is retained, not generalized to natives.",
+      "Exact N16 native two-clean-round43/43 identity, zero private-marker findings, closed assets/dual SBOMs/local cut preflight for RTX3090 F2c and RTX4090 D1; final GPU acceptance is separate.",
+      "Default-OFF FP32/RK4, explicit shared-pool/native headroom and unchanged exact rollback/origin/fingerprint boundaries."
+    ],
+    "residual_limits": [
+      "L1/L2: absent/invalid or forced-stop final-save evidence and later Start can permit loss of an unfinished-install candidate cache; client-held conversation is recomputable and incumbent checkpoint trees are not cleanup targets.",
+      "L3: protected/foreign-session unreadable image paths on real Windows remain unmeasured; image locks and port refusal make a surviving candidate fail cleanup/restart visibly.",
+      "L4: unchanged F2 adjacent export-retirement allocation path can fail during process-wide host memory exhaustion; no fault-injection evidence is claimed.",
+      "L5: FP32 head logits remain OFF in every shipped profile; opt-in durable identity mismatch refuses restore/recomputes rather than corrupting state.",
+      "L6: PARTIAL source-supported uninstall/prior-paused metadata claim; safe qualified cap remains and operator restoration is possible; no real-host experiment is claimed.",
+      "Both source unresolved questions remain deferred at bounded residual severity, not declared answered by a passing host run.",
+      "Next-release issue fixes and uninstall notes are not implemented by this close. Product release-note inclusion and release-ledger composition remain separate integration steps."
+    ],
+    "review_class": "full-council",
+    "review_id": "CR-20261031T162716Z-26fa28d0",
+    "review_ids": [
+      "CR-20261031T162716Z-26fa28d0"
+    ],
+    "review_mode": "initial",
+    "review_sequence_id": "omp-ninfer-v0.16.0-fork-26fa28d0",
+    "reviewed_commit": "26fa28d0e7834515508fc07ac503164a6effc820",
+    "reviewer_results": {
+      "claude-mythos": {
+        "authority": "supplemental_evidence",
+        "evidence_items": 2,
+        "model": "anthropic/claude-mythos-5-1:max",
+        "model_family": "claude",
+        "sha256": "6527ce45f2ccb65850c25dd703b3baec06265fa4ee143c81d6ecf3873dbaf51e",
+        "status": "completed",
+        "unresolved_items": 2
+      },
+      "daybreak-blue": {
+        "authority": "independent_evidence",
+        "evidence_items": 3,
+        "model": "openai-codex/gpt-6-sol:max",
+        "model_family": "gpt",
+        "sha256": "c28e15bbbbcef19690283db4876ecf24f48938dfeddefd4d89f86a852cffa964",
+        "status": "completed",
+        "unresolved_items": 0
+      },
+      "gemini-argon": {
+        "authority": "independent_evidence",
+        "evidence_items": 1,
+        "model": "google-antigravity/gemini-4-argon:high",
+        "model_family": "gemini",
+        "sha256": "9bb8617a8ef9005235a545dcc15e66fa549cc629a3a7fb7b217f5cb0975c2452",
+        "status": "completed",
+        "unresolved_items": 0
+      },
+      "gpt-astra": {
+        "authority": "supplemental_evidence",
+        "evidence_items": 3,
+        "model": "openai-codex/gpt-6-astra:max",
+        "model_family": "gpt",
+        "sha256": "e30b3a674dee24517874b31b02d5a5f6f2aa2646c75d8f2ed83fe0608f8bc102",
+        "status": "completed",
+        "unresolved_items": 0
+      }
+    },
+    "row_counts": {
+      "by_disposition": {
+        "accept": 0,
+        "defer": 11,
+        "mitigate": 0,
+        "reject": 0
+      },
+      "by_result": {
+        "confirmed": 8,
+        "unresolved": 3
+      },
+      "by_severity": {
+        "P0": 0,
+        "P1": 7,
+        "P2": 2,
+        "P3": 2
+      },
+      "by_source_severity_and_disposition": {
+        "P1": {
+          "defer": 7
+        },
+        "P2": {
+          "defer": 2
+        },
+        "P3": {
+          "defer": 2
+        }
+      },
+      "evidence_items": 9,
+      "pending": 0,
+      "residual_after_controls": {
+        "P0": 0,
+        "P1": 0,
+        "P2": 5,
+        "P3": 6
+      },
+      "severity_basis": "Reviewer source severities preserved; residual severity and six merged root-cause groups are reported separately.",
+      "total": 11,
+      "unresolved_items_returned": 2
+    },
+    "source_commit": "26fa28d0e7834515508fc07ac503164a6effc820",
+    "source_to_lead": {
+      "claude-mythos-R1": "L1",
+      "claude-mythos-R2": "L6",
+      "claude-mythos-U1": "L1",
+      "claude-mythos-U2": "L3",
+      "daybreak-blue-R1": "L1",
+      "daybreak-blue-R2": "L3",
+      "daybreak-blue-R3": "L2",
+      "gemini-argon-R1": "L5",
+      "gpt-astra-R1": "L1",
+      "gpt-astra-R2": "L4",
+      "gpt-astra-R3": "L3"
+    },
+    "status": "closed-without-remediation",
+    "subject_digest": "42d8473cc636cf700a16e4f9be13f0af865704f65287482d13af38838e8eda7d",
+    "targeted_refutation_used": false
+  },
+  "public_route_acceptance_granted": false,
+  "publication_authorized": false,
+  "release": "v0.16.0",
+  "schema_version": 1,
+  "scope": "G4 disposition approval for the closed N16 common-engine fork council and the completed v0.16.0 product-tooling council. The native_runtime entry is copied unchanged from the closed fork ledger. All 21 product source items map to 16 lead rows; the one in-scope P1 is lead-verified mitigated in composition and no in-scope residual P0/P1 remains. Finalization controls for composed public-install package equality and published-head pin ancestry remain explicit. This ledger grants neither publication nor public-route acceptance.",
+  "status": "closed-by-disposition",
+  "product_tooling": {
+    "repository": "https://github.com/alphastorm/omp-ninfer",
+    "branch": "detached",
+    "stage_commit": "56899320d416bafda5c15d7e454e9b593badc0a6",
+    "reviewed_commit": "56899320d416bafda5c15d7e454e9b593badc0a6",
+    "base_commit": "dff3622fd34d2e5726c508380229de87d402842e",
+    "status": "closed-by-disposition",
+    "review_sequence_id": "omp-ninfer-v0.16.0-product-56899320",
+    "review_id": "CR-20261101T123454Z-56899320-product",
+    "review_ids": [
+      "CR-20261101T123454Z-56899320-product"
+    ],
+    "initial_review_id": "CR-20261101T123454Z-56899320-product",
+    "initial_review_class": "full-council",
+    "review_mode": "initial",
+    "review_class": "full-council",
+    "remediation_review_id": null,
+    "remediation_seats": [],
+    "general_review_pass_count": 1,
+    "frozen_record_prior_general_review_pass_count": 0,
+    "targeted_refutation_used": false,
+    "subject_digest": "e3b27e6ed5146605cc9ae79649996a112dc4e568703e90a9fcf194b1f9362fee",
+    "dispatch_subject_digest": "84e716acbd64370d983aee88b06f451c6a9bb3dc7f33502f04c0a898eaaf20ad",
+    "record_sha256": "c2fb34f8bd9a09bdca5de2564bcd68554d3c8c5f51907b082702f0a4a3a84e58",
+    "ledger_sha256": "405c537aad60bfc5f81f38e979ce2f0c3afe42f80f27011ea11f97d4970427eb",
+    "binding_status": "The accountable lead closed the actual four-seat initial product council by the preserved P1-P16 dispositions. All 21 returned source items are retained, including every unresolved question. P1 is mitigated by a lead-verified composition correction plus an executable invariant/red-to-green proof; P2 and the P3 label are composition data reconciliation, while the historical harness client is accepted. Eleven P2/P3 residual rows are deferred under issue128, with P4 also retaining issue109. P15 is an accepted process residual and P16 is resolved. The frozen56899320 subject remains unchanged. No source edit, reviewer re-dispatch or remediation epoch was made by this closure; final composition, ready/pin verification and founder publication are separate gates.",
+    "reviewer_results": {
+      "daybreak-blue": {
+        "status": "completed",
+        "model": "openai-codex/gpt-6-sol:max",
+        "model_family": "gpt",
+        "authority": "independent_evidence",
+        "evidence_items": 6,
+        "unresolved_items": 1,
+        "sha256": "1498062fc74f85548c2eabcae7c71b7d072d9268b0b53b05f88504bfd1740363",
+        "exit_code": 0
+      },
+      "gemini-argon": {
+        "status": "completed",
+        "model": "google-antigravity/gemini-4-argon:high",
+        "model_family": "gemini",
+        "authority": "independent_evidence",
+        "evidence_items": 3,
+        "unresolved_items": 0,
+        "sha256": "9c8eac04e1a309538e40d31dcb70f805a918535c28806d416f241c40c7e271da",
+        "exit_code": 0
+      },
+      "gpt-astra": {
+        "status": "completed",
+        "model": "openai-codex/gpt-6-astra:max",
+        "model_family": "gpt",
+        "authority": "supplemental_evidence",
+        "evidence_items": 2,
+        "unresolved_items": 1,
+        "sha256": "34934a7bf836cdee456bfc2734ecc402e313b2f70d8a3dc3497d2d7b541001c3",
+        "exit_code": 0
+      },
+      "claude-mythos": {
+        "status": "completed",
+        "model": "anthropic/claude-mythos-5-1:max",
+        "model_family": "claude",
+        "authority": "supplemental_evidence",
+        "evidence_items": 6,
+        "unresolved_items": 2,
+        "sha256": "640063d105b4c68f35cb16e0a2a841923a8f16d83c7a808295ff3589fac125c5",
+        "exit_code": 0
+      }
+    },
+    "not_selected_ineligible": [],
+    "receipt_digests": {
+      "initial": {
+        "review-record.json": "c2fb34f8bd9a09bdca5de2564bcd68554d3c8c5f51907b082702f0a4a3a84e58",
+        "packet.md": "ad2abc907d9ec0371eaef13fa56799261af523466ef2ba6b0ef55fb50df336b7",
+        "scope.md": "cd53bbc01e11eafad57840564133eed6cd355391dcb0e9ce44ece8dfdc9e5ed2",
+        "panel-selection.json": "554f4fd33754ecf594fb4ce2f6044e170538efc03941b1a18e7cd8343f254719",
+        "resolver-receipt.json": "735c2a6b0a95e74407a5f43245299bbe94712e27190cde079cdeec15598987c1",
+        "review-dispatch-envelope.json": "0c137dc2f73f7dcc5f915dac9b44a74aa50f29438167ec5701c988dc0fd51630",
+        "frozen-subject.json": "244fa3cce2592b81a7528459ce451bbcb12027364267854db55cbcfcd1dc6ad7",
+        "review-dispatch-envelope.attempt-1.json": "5864327e6523a80d8b92a5ad0761e3a88064dccc8f74402b652d5ac319bc1d4c",
+        "ledger.md": "405c537aad60bfc5f81f38e979ce2f0c3afe42f80f27011ea11f97d4970427eb",
+        "daybreak-blue.json": "1498062fc74f85548c2eabcae7c71b7d072d9268b0b53b05f88504bfd1740363",
+        "gemini-argon.json": "9c8eac04e1a309538e40d31dcb70f805a918535c28806d416f241c40c7e271da",
+        "gpt-astra.json": "34934a7bf836cdee456bfc2734ecc402e313b2f70d8a3dc3497d2d7b541001c3",
+        "claude-mythos.json": "640063d105b4c68f35cb16e0a2a841923a8f16d83c7a808295ff3589fac125c5",
+        "LEAD-DISPOSITIONS.md": "ecb50f4a5e30ef9e27494e200322dcb99a81b7a3db3a35c5ff307c90d1d64616",
+        "dispatch-result.json": "a8ae1862036d267699ad4e750c9bbf46a1023e36ba5cca72586f48d2d9858bfa",
+        "finding-source-map.json": "098e04bf1400fdc8ad70c835b1b9a1a73dc0e38064f9aeeebf32db68970841ec",
+        "close-tooling.json": "822e404dc49c96c5fe641cb2ffba735cea17aaf1db5354df67693b0dd7780a64",
+        "close-command-log.json": "105f5cf8e7bf997877778b105bf0d9853c62d9cb15977ae29ed181e6a5892469",
+        "deferred-issue.md": "08b20c791b8032da5a303849d55202a5c2f5cc35e489a1192793e1a5812ae88a",
+        "deferred-issue.json": "b32ba36de0245eac55974a3344008eade4f11123600db382f699dae9b199932a",
+        "close-report.md": "486c838a6c42443badc9a3317e9f8f892d7dc94059535583678e9daac21ab2d5"
+      }
+    },
+    "dispositions": {
+      "gemini-argon-R2": "P1; **mitigate** in composition: correct 12656433 / cca65f0d…, re-sync the release profile snapshots from the root profiles, and add a verify_release invariant (release-dir profile snapshots must equal the root profiles; a changed runtime component may not inherit the predecessor's source-archive bytes or checksums pins). Red→green test.; residual none; P1 mitigated by lead-verified composition correction; The RTX 5090 runtime entry in releases/v0.16.0/manifest.json keeps v0.15.0's `source_archive_bytes` (12538488) and `checksums_sha256` (9f5ed2e6…) while pointing at beta.4's source archive. releases/v0.16.0/profiles/qwen38-rtx5090-{manual-tunnel,windows-docker-local}.json still pin server 55f0b95a and release v0.15.0.; Verified: YES. The root profiles are correct (bab3fd77, v0.16.0); no documented route reads the stale release-dir copies.",
+      "gemini-argon-R1": "P2; mitigated by composition; re-checked at finalization; residual P2; The compatibility limitation still said \"Native profiles remain MTP3\".; Verified: YES at 56899320; already corrected at composition HEAD e5958cf (string absent).",
+      "gemini-argon-R3": "P3; mitigate the label (data correction in the same composition commit); accept the harness client version (historical gate client; product client acceptance is the 18.14.0 three-platform acceptance); residual P3; receipt-audit.json labels the replaced rtx4090 SHA256SUMS `kept-unchanged-subject`; rtx4090.json's 15-phase golden gate records omp/18.12.6.; Verified: Label: YES. omp/18.12.6 is the frozen 15-phase harness client, not the product client.",
+      "daybreak-blue-R2": "P4; defer (existing #109); residual P2; RTX 5090 host actions run outside the restore lock after the window check; restoration can be recorded before setup finishes.; Verified: YES. Known residual from v0.14.0 (#109).; https://github.com/alphastorm/omp-ninfer/issues/128",
+      "gpt-astra-R2": "P4; defer (existing #109); residual P2; RTX 5090 host actions run outside the restore lock after the window check; restoration can be recorded before setup finishes.; Verified: YES. Known residual from v0.14.0 (#109).; https://github.com/alphastorm/omp-ninfer/issues/128",
+      "daybreak-blue-R1": "P5; defer (residuals issue); residual P2; Windows Hold creates its marker before ownership/ACL complete, so a failure can leave it.; Verified: Plausible from source.; https://github.com/alphastorm/omp-ninfer/issues/128",
+      "gpt-astra-R1": "P6; defer, plus a CONTROL at finalization: the lead verifies the composed rtx3090/rtx4090 public-install receipts carry packages 040d5923 / 06526bdb.; residual P2; The composer does not bind nested public-install identities to the candidate package.; Verified: YES (tool gap).; https://github.com/alphastorm/omp-ninfer/issues/128",
+      "daybreak-blue-R3": "P7; defer (residuals issue); residual P2; Public scripts carry literal operator host, user and path defaults; the public-text scanner skips Python.; Verified: YES (pre-existing in the published repo).; https://github.com/alphastorm/omp-ninfer/issues/128",
+      "claude-mythos-R6": "P7; defer (residuals issue); residual P2; Public scripts carry literal operator host, user and path defaults; the public-text scanner skips Python.; Verified: YES (pre-existing in the published repo).; https://github.com/alphastorm/omp-ninfer/issues/128",
+      "daybreak-blue-R4": "P8; defer; residual P2; Private probe error strings could be copied into public receipts.; Verified: Plausible.; https://github.com/alphastorm/omp-ninfer/issues/128",
+      "daybreak-blue-R5": "P9; defer; founder runbook: complete with a manual `gh release create` if it ever happens; residual P2/P3; publish-product-release.sh cannot resume after a partial failure that follows the tag push.; Verified: YES.; https://github.com/alphastorm/omp-ninfer/issues/128",
+      "claude-mythos-R5": "P9; defer; founder runbook: complete with a manual `gh release create` if it ever happens; residual P2/P3; publish-product-release.sh cannot resume after a partial failure that follows the tag push.; Verified: YES.; https://github.com/alphastorm/omp-ninfer/issues/128",
+      "daybreak-blue-R6": "P10; defer; residual P2; The route checker accepts a `substituted` status on any step.; Verified: Plausible.; https://github.com/alphastorm/omp-ninfer/issues/128",
+      "claude-mythos-R1": "P11; defer, plus a CONTROL at finalization: every pinned commit must be an ancestor of the published head.; residual P2; Immutable pins are not checked for reachability from the published commit.; Verified: Tool gap.; https://github.com/alphastorm/omp-ninfer/issues/128",
+      "claude-mythos-U1": "P11; defer, plus a CONTROL at finalization: every pinned commit must be an ancestor of the published head.; residual P2; Immutable pins are not checked for reachability from the published commit.; Verified: Tool gap.; https://github.com/alphastorm/omp-ninfer/issues/128",
+      "claude-mythos-R2": "P12; defer; residual P2; The native public-install script does not enforce restoration on failure.; Verified: Plausible.; https://github.com/alphastorm/omp-ninfer/issues/128",
+      "claude-mythos-R3": "P13; defer; residual P2; The QUICKSTART operate blocks check only the final Status exit.; Verified: Plausible.; https://github.com/alphastorm/omp-ninfer/issues/128",
+      "claude-mythos-U2": "P13; defer; residual P2; The QUICKSTART operate blocks check only the final Status exit.; Verified: Plausible.; https://github.com/alphastorm/omp-ninfer/issues/128",
+      "claude-mythos-R4": "P14; defer; residual P2; The publish guard is tested only for argument refusal.; Verified: YES.; https://github.com/alphastorm/omp-ninfer/issues/128",
+      "daybreak-blue-U1": "P15; accept; exclude prior ledgers from future packets; residual P3; The bound fork runtime-ledger exposed earlier reviewer conclusions to a blind review.; Verified: YES (process).",
+      "gpt-astra-U1": "P16; closed; residual none; resolved question; Does the RTX 5090 restoration image equal the published v0.15.0 digest?; Verified: Resolved: original and restored image 760fb6be = the v0.15.0 published digest."
+    },
+    "merged_dispositions": {
+      "P1": {
+        "source_ids": [
+          "gemini-argon-R2"
+        ],
+        "reviewer_ids": [
+          "gemini-argon"
+        ],
+        "claim": "The RTX 5090 runtime entry in releases/v0.16.0/manifest.json keeps v0.15.0's `source_archive_bytes` (12538488) and `checksums_sha256` (9f5ed2e6…) while pointing at beta.4's source archive. releases/v0.16.0/profiles/qwen38-rtx5090-{manual-tunnel,windows-docker-local}.json still pin server 55f0b95a and release v0.15.0.",
+        "verified": "YES. The root profiles are correct (bab3fd77, v0.16.0); no documented route reads the stale release-dir copies.",
+        "lead_residual_verbatim": "**P1**: the published release would carry wrong identity pins.",
+        "residual_severity": "none; P1 mitigated by lead-verified composition correction",
+        "result": "confirmed",
+        "disposition": "**mitigate** in composition: correct 12656433 / cca65f0d…, re-sync the release profile snapshots from the root profiles, and add a verify_release invariant (release-dir profile snapshots must equal the root profiles; a changed runtime component may not inherit the predecessor's source-archive bytes or checksums pins). Red→green test.",
+        "final_disposition": "mitigate",
+        "change": "Lead-verified composition data correction to 12656433 / cca65f0d… and root-profile snapshots; verify_release invariant with red→green proof. Frozen reviewed tree unchanged.",
+        "rationale": "Lead verification (verbatim): YES. The root profiles are correct (bab3fd77, v0.16.0); no documented route reads the stale release-dir copies.; Residual (verbatim): **P1**: the published release would carry wrong identity pins.; Disposition/rationale (verbatim): **mitigate** in composition: correct 12656433 / cca65f0d…, re-sync the release profile snapshots from the root profiles, and add a verify_release invariant (release-dir profile snapshots must equal the root profiles; a changed runtime component may not inherit the predecessor's source-archive bytes or checksums pins). Red→green test."
+      },
+      "P2": {
+        "source_ids": [
+          "gemini-argon-R1"
+        ],
+        "reviewer_ids": [
+          "gemini-argon"
+        ],
+        "claim": "The compatibility limitation still said \"Native profiles remain MTP3\".",
+        "verified": "YES at 56899320; already corrected at composition HEAD e5958cf (string absent).",
+        "lead_residual_verbatim": "P2",
+        "residual_severity": "P2",
+        "result": "confirmed",
+        "disposition": "mitigated by composition; re-checked at finalization",
+        "final_disposition": "mitigate",
+        "change": "Already corrected at composition HEAD e5958cf; re-checked at finalization, per lead.",
+        "rationale": "Lead verification (verbatim): YES at 56899320; already corrected at composition HEAD e5958cf (string absent).; Residual (verbatim): P2; Disposition/rationale (verbatim): mitigated by composition; re-checked at finalization"
+      },
+      "P3": {
+        "source_ids": [
+          "gemini-argon-R3"
+        ],
+        "reviewer_ids": [
+          "gemini-argon"
+        ],
+        "claim": "receipt-audit.json labels the replaced rtx4090 SHA256SUMS `kept-unchanged-subject`; rtx4090.json's 15-phase golden gate records omp/18.12.6.",
+        "verified": "Label: YES. omp/18.12.6 is the frozen 15-phase harness client, not the product client.",
+        "lead_residual_verbatim": "P3",
+        "residual_severity": "P3",
+        "result": "confirmed",
+        "disposition": "mitigate the label (data correction in the same composition commit); accept the harness client version (historical gate client; product client acceptance is the 18.14.0 three-platform acceptance)",
+        "final_disposition": "mitigate",
+        "change": "Receipt-audit label data correction in composition; historical omp/18.12.6 harness client accepted; product acceptance is OMP18.14.0.",
+        "rationale": "Lead verification (verbatim): Label: YES. omp/18.12.6 is the frozen 15-phase harness client, not the product client.; Residual (verbatim): P3; Disposition/rationale (verbatim): mitigate the label (data correction in the same composition commit); accept the harness client version (historical gate client; product client acceptance is the 18.14.0 three-platform acceptance)"
+      },
+      "P4": {
+        "source_ids": [
+          "daybreak-blue-R2",
+          "gpt-astra-R2"
+        ],
+        "reviewer_ids": [
+          "daybreak-blue",
+          "gpt-astra"
+        ],
+        "claim": "RTX 5090 host actions run outside the restore lock after the window check; restoration can be recorded before setup finishes.",
+        "verified": "YES. Known residual from v0.14.0 (#109).",
+        "lead_residual_verbatim": "P2: needs a watchdog restore to fire mid-setup; this acceptance restored and verified the same container and image.",
+        "residual_severity": "P2",
+        "result": "confirmed",
+        "disposition": "defer (existing #109)",
+        "final_disposition": "defer",
+        "change": "none",
+        "rationale": "Lead verification (verbatim): YES. Known residual from v0.14.0 (#109).; Residual (verbatim): P2: needs a watchdog restore to fire mid-setup; this acceptance restored and verified the same container and image.; Disposition/rationale (verbatim): defer (existing #109)",
+        "issue_url": "https://github.com/alphastorm/omp-ninfer/issues/128",
+        "existing_issue_url": "https://github.com/alphastorm/omp-ninfer/issues/109"
+      },
+      "P5": {
+        "source_ids": [
+          "daybreak-blue-R1"
+        ],
+        "reviewer_ids": [
+          "daybreak-blue"
+        ],
+        "claim": "Windows Hold creates its marker before ownership/ACL complete, so a failure can leave it.",
+        "verified": "Plausible from source.",
+        "lead_residual_verbatim": "P2: operator-visible stale marker, manual cleanup",
+        "residual_severity": "P2",
+        "result": "unresolved",
+        "disposition": "defer (residuals issue)",
+        "final_disposition": "defer",
+        "change": "none",
+        "rationale": "Lead verification (verbatim): Plausible from source.; Residual (verbatim): P2: operator-visible stale marker, manual cleanup; Disposition/rationale (verbatim): defer (residuals issue)",
+        "issue_url": "https://github.com/alphastorm/omp-ninfer/issues/128"
+      },
+      "P6": {
+        "source_ids": [
+          "gpt-astra-R1"
+        ],
+        "reviewer_ids": [
+          "gpt-astra"
+        ],
+        "claim": "The composer does not bind nested public-install identities to the candidate package.",
+        "verified": "YES (tool gap).",
+        "lead_residual_verbatim": "P2 after control",
+        "residual_severity": "P2",
+        "result": "confirmed",
+        "disposition": "defer, plus a CONTROL at finalization: the lead verifies the composed rtx3090/rtx4090 public-install receipts carry packages 040d5923 / 06526bdb.",
+        "final_disposition": "defer",
+        "change": "none",
+        "rationale": "Lead verification (verbatim): YES (tool gap).; Residual (verbatim): P2 after control; Disposition/rationale (verbatim): defer, plus a CONTROL at finalization: the lead verifies the composed rtx3090/rtx4090 public-install receipts carry packages 040d5923 / 06526bdb.",
+        "issue_url": "https://github.com/alphastorm/omp-ninfer/issues/128"
+      },
+      "P7": {
+        "source_ids": [
+          "daybreak-blue-R3",
+          "claude-mythos-R6"
+        ],
+        "reviewer_ids": [
+          "claude-mythos",
+          "daybreak-blue"
+        ],
+        "claim": "Public scripts carry literal operator host, user and path defaults; the public-text scanner skips Python.",
+        "verified": "YES (pre-existing in the published repo).",
+        "lead_residual_verbatim": "P2",
+        "residual_severity": "P2",
+        "result": "confirmed",
+        "disposition": "defer (residuals issue)",
+        "final_disposition": "defer",
+        "change": "none",
+        "rationale": "Lead verification (verbatim): YES (pre-existing in the published repo).; Residual (verbatim): P2; Disposition/rationale (verbatim): defer (residuals issue)",
+        "issue_url": "https://github.com/alphastorm/omp-ninfer/issues/128"
+      },
+      "P8": {
+        "source_ids": [
+          "daybreak-blue-R4"
+        ],
+        "reviewer_ids": [
+          "daybreak-blue"
+        ],
+        "claim": "Private probe error strings could be copied into public receipts.",
+        "verified": "Plausible.",
+        "lead_residual_verbatim": "P2. Control: all 24 composed receipts were privacy-screened.",
+        "residual_severity": "P2",
+        "result": "unresolved",
+        "disposition": "defer",
+        "final_disposition": "defer",
+        "change": "none",
+        "rationale": "Lead verification (verbatim): Plausible.; Residual (verbatim): P2. Control: all 24 composed receipts were privacy-screened.; Disposition/rationale (verbatim): defer",
+        "issue_url": "https://github.com/alphastorm/omp-ninfer/issues/128"
+      },
+      "P9": {
+        "source_ids": [
+          "daybreak-blue-R5",
+          "claude-mythos-R5"
+        ],
+        "reviewer_ids": [
+          "claude-mythos",
+          "daybreak-blue"
+        ],
+        "claim": "publish-product-release.sh cannot resume after a partial failure that follows the tag push.",
+        "verified": "YES.",
+        "lead_residual_verbatim": "P2/P3",
+        "residual_severity": "P2/P3",
+        "result": "confirmed",
+        "disposition": "defer; founder runbook: complete with a manual `gh release create` if it ever happens",
+        "final_disposition": "defer",
+        "change": "none",
+        "rationale": "Lead verification (verbatim): YES.; Residual (verbatim): P2/P3; Disposition/rationale (verbatim): defer; founder runbook: complete with a manual `gh release create` if it ever happens",
+        "issue_url": "https://github.com/alphastorm/omp-ninfer/issues/128"
+      },
+      "P10": {
+        "source_ids": [
+          "daybreak-blue-R6"
+        ],
+        "reviewer_ids": [
+          "daybreak-blue"
+        ],
+        "claim": "The route checker accepts a `substituted` status on any step.",
+        "verified": "Plausible.",
+        "lead_residual_verbatim": "P2",
+        "residual_severity": "P2",
+        "result": "unresolved",
+        "disposition": "defer",
+        "final_disposition": "defer",
+        "change": "none",
+        "rationale": "Lead verification (verbatim): Plausible.; Residual (verbatim): P2; Disposition/rationale (verbatim): defer",
+        "issue_url": "https://github.com/alphastorm/omp-ninfer/issues/128"
+      },
+      "P11": {
+        "source_ids": [
+          "claude-mythos-R1",
+          "claude-mythos-U1"
+        ],
+        "reviewer_ids": [
+          "claude-mythos"
+        ],
+        "claim": "Immutable pins are not checked for reachability from the published commit.",
+        "verified": "Tool gap.",
+        "lead_residual_verbatim": "P2",
+        "residual_severity": "P2",
+        "result": "confirmed",
+        "disposition": "defer, plus a CONTROL at finalization: every pinned commit must be an ancestor of the published head.",
+        "final_disposition": "defer",
+        "change": "none",
+        "rationale": "Lead verification (verbatim): Tool gap.; Residual (verbatim): P2; Disposition/rationale (verbatim): defer, plus a CONTROL at finalization: every pinned commit must be an ancestor of the published head.",
+        "issue_url": "https://github.com/alphastorm/omp-ninfer/issues/128"
+      },
+      "P12": {
+        "source_ids": [
+          "claude-mythos-R2"
+        ],
+        "reviewer_ids": [
+          "claude-mythos"
+        ],
+        "claim": "The native public-install script does not enforce restoration on failure.",
+        "verified": "Plausible.",
+        "lead_residual_verbatim": "P2. Control: this acceptance's independent restore and audit passed.",
+        "residual_severity": "P2",
+        "result": "unresolved",
+        "disposition": "defer",
+        "final_disposition": "defer",
+        "change": "none",
+        "rationale": "Lead verification (verbatim): Plausible.; Residual (verbatim): P2. Control: this acceptance's independent restore and audit passed.; Disposition/rationale (verbatim): defer",
+        "issue_url": "https://github.com/alphastorm/omp-ninfer/issues/128"
+      },
+      "P13": {
+        "source_ids": [
+          "claude-mythos-R3",
+          "claude-mythos-U2"
+        ],
+        "reviewer_ids": [
+          "claude-mythos"
+        ],
+        "claim": "The QUICKSTART operate blocks check only the final Status exit.",
+        "verified": "Plausible.",
+        "lead_residual_verbatim": "P2",
+        "residual_severity": "P2",
+        "result": "unresolved",
+        "disposition": "defer",
+        "final_disposition": "defer",
+        "change": "none",
+        "rationale": "Lead verification (verbatim): Plausible.; Residual (verbatim): P2; Disposition/rationale (verbatim): defer",
+        "issue_url": "https://github.com/alphastorm/omp-ninfer/issues/128"
+      },
+      "P14": {
+        "source_ids": [
+          "claude-mythos-R4"
+        ],
+        "reviewer_ids": [
+          "claude-mythos"
+        ],
+        "claim": "The publish guard is tested only for argument refusal.",
+        "verified": "YES.",
+        "lead_residual_verbatim": "P2",
+        "residual_severity": "P2",
+        "result": "confirmed",
+        "disposition": "defer",
+        "final_disposition": "defer",
+        "change": "none",
+        "rationale": "Lead verification (verbatim): YES.; Residual (verbatim): P2; Disposition/rationale (verbatim): defer",
+        "issue_url": "https://github.com/alphastorm/omp-ninfer/issues/128"
+      },
+      "P15": {
+        "source_ids": [
+          "daybreak-blue-U1"
+        ],
+        "reviewer_ids": [
+          "daybreak-blue"
+        ],
+        "claim": "The bound fork runtime-ledger exposed earlier reviewer conclusions to a blind review.",
+        "verified": "YES (process).",
+        "lead_residual_verbatim": "P3",
+        "residual_severity": "P3",
+        "result": "design decision",
+        "disposition": "accept; exclude prior ledgers from future packets",
+        "final_disposition": "accept",
+        "change": "none",
+        "rationale": "Lead verification (verbatim): YES (process).; Residual (verbatim): P3; Disposition/rationale (verbatim): accept; exclude prior ledgers from future packets"
+      },
+      "P16": {
+        "source_ids": [
+          "gpt-astra-U1"
+        ],
+        "reviewer_ids": [
+          "gpt-astra"
+        ],
+        "claim": "Does the RTX 5090 restoration image equal the published v0.15.0 digest?",
+        "verified": "Resolved: original and restored image 760fb6be = the v0.15.0 published digest.",
+        "lead_residual_verbatim": "—",
+        "residual_severity": "none; resolved question",
+        "result": "confirmed",
+        "disposition": "closed",
+        "final_disposition": "accept",
+        "change": "none",
+        "rationale": "Lead verification (verbatim): Resolved: original and restored image 760fb6be = the v0.15.0 published digest.; Residual (verbatim): —; Disposition/rationale (verbatim): closed"
+      }
+    },
+    "source_to_lead": {
+      "gemini-argon-R2": "P1",
+      "gemini-argon-R1": "P2",
+      "gemini-argon-R3": "P3",
+      "daybreak-blue-R2": "P4",
+      "gpt-astra-R2": "P4",
+      "daybreak-blue-R1": "P5",
+      "gpt-astra-R1": "P6",
+      "daybreak-blue-R3": "P7",
+      "claude-mythos-R6": "P7",
+      "daybreak-blue-R4": "P8",
+      "daybreak-blue-R5": "P9",
+      "claude-mythos-R5": "P9",
+      "daybreak-blue-R6": "P10",
+      "claude-mythos-R1": "P11",
+      "claude-mythos-U1": "P11",
+      "claude-mythos-R2": "P12",
+      "claude-mythos-R3": "P13",
+      "claude-mythos-U2": "P13",
+      "claude-mythos-R4": "P14",
+      "daybreak-blue-U1": "P15",
+      "gpt-astra-U1": "P16"
+    },
+    "row_counts": {
+      "total": 21,
+      "evidence_items": 17,
+      "unresolved_items_returned": 4,
+      "by_source_severity": {
+        "P1": 4,
+        "P2": 14,
+        "P3": 3
+      },
+      "by_disposition": {
+        "mitigate": 3,
+        "defer": 16,
+        "accept": 2
+      },
+      "by_result": {
+        "confirmed": 13,
+        "unresolved": 7,
+        "design decision": 1
+      },
+      "pending": 0,
+      "in_scope_residual_p01": [],
+      "severity_basis": "Original reviewer severity and raw items retained in finding-source-map.json; lead residual severity and mitigation status are separate."
+    },
+    "merged_row_counts": {
+      "total": 16,
+      "by_disposition": {
+        "mitigate": 3,
+        "defer": 11,
+        "accept": 2
+      },
+      "by_result": {
+        "confirmed": 10,
+        "unresolved": 5,
+        "design decision": 1
+      },
+      "pending": 0,
+      "confirmed_in_scope_p1": 1,
+      "confirmed_in_scope_p1_mitigated": 1,
+      "in_scope_residual_p01": []
+    },
+    "deferred_issues": [
+      "https://github.com/alphastorm/omp-ninfer/issues/128",
+      "https://github.com/alphastorm/omp-ninfer/issues/109"
+    ],
+    "issue_groups": {
+      "P4-P14": {
+        "url": "https://github.com/alphastorm/omp-ninfer/issues/128",
+        "labels": [
+          "bug"
+        ],
+        "readback_verified": true,
+        "lead_rows": [
+          "P4",
+          "P5",
+          "P6",
+          "P7",
+          "P8",
+          "P9",
+          "P10",
+          "P11",
+          "P12",
+          "P13",
+          "P14"
+        ]
+      },
+      "P4-existing": {
+        "url": "https://github.com/alphastorm/omp-ninfer/issues/109",
+        "lead_rows": [
+          "P4"
+        ]
+      }
+    },
+    "close_status": {
+      "sequence": "closed",
+      "method": "round1-accountable-lead-disposition-with-lead-verified-localized-composition-mitigation",
+      "in_scope_residual_p01": [],
+      "pending_rows": [],
+      "epoch_digest_drift": [],
+      "epoch_recheck_exit_code": 0,
+      "review_sequence_gate_exit_code": 0,
+      "frozen_record_gate_status": "ready",
+      "frozen_record_gate_action": "full-council",
+      "reason_codes": [],
+      "gate_note": "The unchanged initial record retains historical full-council admission. The selector does not consume outcome ledgers; closure authorizes no new dispatch."
+    },
+    "finalization_controls": {
+      "CONTROL-PUBLIC-INSTALL": {
+        "lead_row": "P6",
+        "status": "required-at-finalization",
+        "owner": "accountable lead",
+        "requirement": "Verify the composed nested RTX3090/RTX4090 public-install package identities match the candidate packages.",
+        "rtx3090_package_sha256": "040d5923192a969dcb04bb63ff5c931f80bcf9a92f1f769f08e49e2121ad0e20",
+        "rtx4090_package_sha256": "06526bdb630a87c860ceb0eaafb633df867181b596648897cb5a64a92e268f27"
+      },
+      "CONTROL-PIN-ANCESTRY": {
+        "lead_row": "P11",
+        "status": "required-before-publication",
+        "owner": "accountable lead",
+        "requirement": "Verify every pinned commit is an ancestor of the final published head; local object-byte availability is not ancestry proof."
+      }
+    },
+    "founder_waivers": [
+      {
+        "artifact": "WAIVER-log024.json",
+        "sha256": "92b94c4a1beeb37917b5a086d740af66d6109b59724f0afb012aac73d20b21f3",
+        "scope": "RTX4090 log-024@0 speed floor only"
+      },
+      {
+        "artifact": "WAIVER-restore.json",
+        "sha256": "66ba8104c435f12f2c4740b5a0c0fe57047b4b4c5eb818072a4e28a1f083491f",
+        "scope": "Two named RTX5090 restart-TTFT positions only"
+      }
+    ],
+    "disclosed_deviations": [
+      "p16-agent-parity/2: concurrent positions paired by server admission order; raw outcomes preserved.",
+      "RTX3090 15-phase C2 qualification-tool override/fork PR56; no changed runtime or result rewrite.",
+      "Private RTX5090 acceptance restore-arm-only override retained the same production container/image; original infrastructure bytes restored before temporary-key revocation.",
+      "Stock OMP parallel-proof oracle gates attributable delivered values and isolation; marker/formatting compliance remains recorded but non-gating."
+    ],
+    "residual_limits": [
+      "No new host-failure reproduction is claimed for plausible P5/P8/P10/P12/P13 paths; proposed source verification remains unexecuted by this close-out.",
+      "P4 retains the restore-lock design tradeoff in issue109; no generalized lifecycle mechanism is added here.",
+      "P9 retains the founder runbook manual release-create completion procedure after partial tag publication.",
+      "P15 records accepted blind-review contamination from bound prior-ledger conclusions; future packets exclude prior ledgers, and no clean replacement review is invented.",
+      "Raw waived FAIL measurements stay failed; original decisions and current exact-candidate acceptance remain distinct from G4 disposition approval."
+    ],
+    "required_scope": [
+      "Complete published v0.15.0 dff3622f to acceptance candidate56899320 product delta:147 changed regular files,no deletions,243 bound repository evidence files.",
+      "Exact runtime/package/configuration/model/client identities; native fit/quality/speed/C2 policy; five documented routes,three stock clients,two public installs and independent restoration.",
+      "Release evidence composition,privacy,immutable pin/publication separation,UTF-8 subprocess handling and stock parallel-proof attribution/isolation.",
+      "Lead-verified localized composition mitigation and finalization controls; no claim that unseen composition bytes were the frozen reviewer subject."
+    ]
+  }
+}

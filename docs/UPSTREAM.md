@@ -8,6 +8,25 @@ watch manifest is [`upstream-watch.json`](../upstream-watch.json); the watch too
 [`scripts/upstream_watch.py`](../scripts/upstream_watch.py); dated reports land in
 [`docs/measurements/`](measurements/).
 
+## Prepared v0.16.1 client binding — OMP 18.15.0
+
+**Prepared next: v0.16.1 / stock OMP 18.15.0.** This client-only successor keeps all v0.16.0
+runtime packages, model and serving profiles byte-identical. Source and independently downloaded
+asset-integrity reviews are complete; no v0.16.0 client or route acceptance transfers to the new
+candidate. Fresh platform/five-route/native-install/restoration evidence, exact-head product review,
+immutable pins and founder-owned publication remain separate gates.
+
+Chosen upstream: [`v18.15.0`](https://github.com/can1357/oh-my-pi/releases/tag/v18.15.0),
+commit `3fedf8d53267e32a6d7521ce725fdcc4a36fdc67`, tree
+`48bc72ba2418c0b78163d9769e91a0d8683e642b`, release `430630500`.
+The [18.15.0 review](measurements/2026-11-01-omp-18150-client-upgrade-review.json) composes with
+the preceding [18.14.2 review](measurements/2026-11-01-omp-18142-client-upgrade-review.json),
+not with old-client acceptance. Shared replay metadata sanitization and manual-compaction result
+delivery changed even though core Responses/state blobs match. Explicit `retry.modelFallback=false`
+keeps the new missing-primary-key fallback branch off; optional widget captions resolve credentials
+separately. Keep static provider fragments, working compat keys, effort clamps, guard enabled and
+all original live gates. Remove obsolete operator `compat.thinkingLoopGuard`, not the detector.
+
 ## Current positions
 
 | Component / upstream | Current position (v0.16.0) | Upstream base / watch head | Evidence and notes |
@@ -266,9 +285,9 @@ commits and the uncapped tagged-tree diff. It records published asset identities
 provider/state and models-schema blobs, conditional header/retry changes, the Qwen exact-loop guard's
 new line-repetition floor, and rejection of length-truncated compaction summaries. It claims no
 executable rehearsal or NInfer qualification. [Issue #123](https://github.com/alphastorm/omp-ninfer/issues/123)
-plans a client-only successor to published `v0.16.0`: no successor is staged, no predecessor
-acceptance transfers, and fresh platform/routes, native public installs, restoration and
-candidate-bound founder grants remain required. Never adopt `18.14.1` alone; published `v0.16.0`
+records the client-only successor to published `v0.16.0`: the prepared tree selects 18.15.0,
+no predecessor acceptance transfers, and fresh platform/routes, native public installs, restoration
+and candidate-bound founder grants remain required. Never adopt `18.14.1` alone; published `v0.16.0`
 keeps its `18.14.0` client.
 
 ### v0.15.0–v0.16.0 client binding — OMP 18.14.0

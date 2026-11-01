@@ -48,6 +48,34 @@ All of these should be materially true:
 
 See the [decision guide](DECISION_GUIDE.md) for the side-by-side comparison.
 
+## Prepared next — v0.16.1 / OMP 18.15.0
+
+**Prepared next: v0.16.1 / stock OMP 18.15.0.** This client-only successor keeps all v0.16.0
+runtime packages, model and serving profiles byte-identical. Source and independently downloaded
+asset-integrity reviews are complete; no v0.16.0 client or route acceptance transfers to the new
+candidate. Fresh platform/five-route/native-install/restoration evidence, exact-head product review,
+immutable pins and founder-owned publication remain separate gates.
+
+The selected upstream release is `v18.15.0` (release `430630500`, source
+`3fedf8d53267e32a6d7521ce725fdcc4a36fdc67`, tree
+`48bc72ba2418c0b78163d9769e91a0d8683e642b`). The proposed
+[client descriptor](../releases/v0.16.1/qualification/client-components.json) records:
+
+| Client platform | Raw asset / ID | Bytes | Asset = binary SHA-256 |
+| --- | --- | ---: | --- |
+| macOS arm64 (preview) | `omp-darwin-arm64` / `698539455` | 215295120 | `d36dfabf0ee52d6f08efadb59c46f0349545c6f6975522417adae29646e73e34` |
+| Windows x64 | `omp-windows-x64.exe` / `698539443` | 243250176 | `978846a816cb77f44a55e32b16493375ca837fbf87e0aec35a9c1c934bff0cd0` |
+| Linux x64 (WSL2-scoped) | `omp-linux-x64` / `698539441` | 276785328 | `6737ee2415555a3656cc7b89c14d1c25c18658ee4c0fd4f7309705149ccb7b0f` |
+
+The [review](measurements/2026-11-01-omp-18150-client-upgrade-review.json) distinguishes carried
+Responses/state/schema and Qwen policy blobs from changed replay utilities and session maintenance.
+Retire only operator `compat.thinkingLoopGuard`; keep stateful Responses, encrypted-reasoning
+opt-out and reasoning-summary opt-out. Preserve default guard/compaction settings and the existing
+high→medium/off→low effort clamps. Explicit `retry.modelFallback=false` also gates the new
+missing-key fallback branch; it does not govern optional auxiliary widget-role credential selection.
+Isolated local-only auth and separately attributed optional requests remain necessary acceptance
+boundaries. No native/Linux vision or native Linux OS qualification is added.
+
 ## Current release
 
 Published release **v0.16.0** (2026-11-01, GitHub `Latest`; superseding `v0.15.0` and the

@@ -1,0 +1,147 @@
+{
+  "artifact_type": "omp_ninfer_release_receipt_audit",
+  "schema_version": 1,
+  "release": "v0.16.1",
+  "as_of": "2026-11-01",
+  "source_release": "v0.16.0",
+  "status": "staged-client-only",
+  "policy": "Carry unchanged runtime/model/base and original waiver subjects byte-identically. Replace the stock client descriptor/review and every new-client/platform/product-route acceptance. Product review and publication authority do not transfer.",
+  "files": [
+    {
+      "file": "client-components.json",
+      "predecessor_sha256": "16f6f0a361e66cab4b0b5629d15b48962cb63dadcf1871a44b1ba76593078050",
+      "staged_sha256": "54835407dc043c988a823fe4ba0a262d6f07a966998d75b91b85bf15890784c2",
+      "disposition": "replaced",
+      "reason": "Current client/release metadata or freshly composed evidence; actual bytes are bound here without transferring predecessor client acceptance."
+    },
+    {
+      "file": "native-publication.json",
+      "predecessor_sha256": "502a0f5eccc141e2fc4f58f639637eb874d36fb0259d181c9cfa144711aaded6",
+      "staged_sha256": "502a0f5eccc141e2fc4f58f639637eb874d36fb0259d181c9cfa144711aaded6",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Byte-identical published predecessor subject; original date, source, measurements and any waiver are retained, not a new-client observation."
+    },
+    {
+      "file": "rtx3090-speed.json",
+      "predecessor_sha256": "c904d3416106529d1f275559dde07165c50625ff1f13f2c6b0e3f27e6e7892f1",
+      "staged_sha256": "c904d3416106529d1f275559dde07165c50625ff1f13f2c6b0e3f27e6e7892f1",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Byte-identical published predecessor subject; original date, source, measurements and any waiver are retained, not a new-client observation."
+    },
+    {
+      "file": "rtx3090-windows-native.SHA256SUMS",
+      "predecessor_sha256": "0fd18a355fbb4f9285bb1991e3fb2e804d7aafb58c7bccf2281805925ee64fa4",
+      "staged_sha256": "0fd18a355fbb4f9285bb1991e3fb2e804d7aafb58c7bccf2281805925ee64fa4",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Byte-identical published predecessor subject; original date, source, measurements and any waiver are retained, not a new-client observation."
+    },
+    {
+      "file": "rtx3090-windows-native.fit.json",
+      "predecessor_sha256": "662619d798c044858c2d2c35a2d30e7eb0f1d60beb210de43a313b51811ff3af",
+      "staged_sha256": "662619d798c044858c2d2c35a2d30e7eb0f1d60beb210de43a313b51811ff3af",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Byte-identical published predecessor subject; original date, source, measurements and any waiver are retained, not a new-client observation."
+    },
+    {
+      "file": "rtx3090-windows-native.quality-screen.json",
+      "predecessor_sha256": "671659f05f6f3ddff7be7668676b958624ff1b8ee8a5f8627cd43c9825577f25",
+      "staged_sha256": "671659f05f6f3ddff7be7668676b958624ff1b8ee8a5f8627cd43c9825577f25",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Byte-identical published predecessor subject; original date, source, measurements and any waiver are retained, not a new-client observation."
+    },
+    {
+      "file": "rtx3090.json",
+      "predecessor_sha256": "48c7f63572e38b279dcc941c9f1a2acbf858ec95f1ffe3f0eb8bbc20a8111702",
+      "staged_sha256": "48c7f63572e38b279dcc941c9f1a2acbf858ec95f1ffe3f0eb8bbc20a8111702",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Byte-identical published predecessor subject; original date, source, measurements and any waiver are retained, not a new-client observation."
+    },
+    {
+      "file": "rtx4090-speed-waiver.json",
+      "predecessor_sha256": "92b94c4a1beeb37917b5a086d740af66d6109b59724f0afb012aac73d20b21f3",
+      "staged_sha256": "92b94c4a1beeb37917b5a086d740af66d6109b59724f0afb012aac73d20b21f3",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Byte-identical published predecessor subject; original date, source, measurements and any waiver are retained, not a new-client observation."
+    },
+    {
+      "file": "rtx4090-speed.json",
+      "predecessor_sha256": "32acdecc5a67ee9278fff5a173235a1d61e98e9db1b23dac9c4e56ee72d3e675",
+      "staged_sha256": "32acdecc5a67ee9278fff5a173235a1d61e98e9db1b23dac9c4e56ee72d3e675",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Byte-identical published predecessor subject; original date, source, measurements and any waiver are retained, not a new-client observation."
+    },
+    {
+      "file": "rtx4090-windows-native.SHA256SUMS",
+      "predecessor_sha256": "bf1650ebcdd2760b77be11140e8af3f6eb1adc9a2b8e534832f708383b7a60eb",
+      "staged_sha256": "bf1650ebcdd2760b77be11140e8af3f6eb1adc9a2b8e534832f708383b7a60eb",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Byte-identical published predecessor subject; original date, source, measurements and any waiver are retained, not a new-client observation."
+    },
+    {
+      "file": "rtx4090-windows-native.fit.json",
+      "predecessor_sha256": "44c500088b608d5b23c78cd7e63dfdbbd9807e1f4fff3ea956638dcc4b5dfb2b",
+      "staged_sha256": "44c500088b608d5b23c78cd7e63dfdbbd9807e1f4fff3ea956638dcc4b5dfb2b",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Byte-identical published predecessor subject; original date, source, measurements and any waiver are retained, not a new-client observation."
+    },
+    {
+      "file": "rtx4090-windows-native.quality-screen.json",
+      "predecessor_sha256": "6231dccddb40d712b573f42553dd8029813534e6c0284daa1541890c59135fff",
+      "staged_sha256": "6231dccddb40d712b573f42553dd8029813534e6c0284daa1541890c59135fff",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Byte-identical published predecessor subject; original date, source, measurements and any waiver are retained, not a new-client observation."
+    },
+    {
+      "file": "rtx4090.json",
+      "predecessor_sha256": "69ebf60c3b4bee7a32ec92bc282c9a7ec6b735cc75cad822f041c5e89e35fb77",
+      "staged_sha256": "69ebf60c3b4bee7a32ec92bc282c9a7ec6b735cc75cad822f041c5e89e35fb77",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Byte-identical published predecessor subject; original date, source, measurements and any waiver are retained, not a new-client observation."
+    },
+    {
+      "file": "rtx5090-restore-waiver.json",
+      "predecessor_sha256": "66ba8104c435f12f2c4740b5a0c0fe57047b4b4c5eb818072a4e28a1f083491f",
+      "staged_sha256": "66ba8104c435f12f2c4740b5a0c0fe57047b4b4c5eb818072a4e28a1f083491f",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Byte-identical published predecessor subject; original date, source, measurements and any waiver are retained, not a new-client observation."
+    },
+    {
+      "file": "rtx5090.json",
+      "predecessor_sha256": "2200fa4427868e572c79da5580c465f45519e4519f4d305bc115b655d8d09071",
+      "staged_sha256": "2200fa4427868e572c79da5580c465f45519e4519f4d305bc115b655d8d09071",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Byte-identical published predecessor subject; original date, source, measurements and any waiver are retained, not a new-client observation."
+    },
+    {
+      "file": "runtime-base.json",
+      "predecessor_sha256": "f93842ead917550288678be73ff9cb65ac4395dc4d5f56422d1a58b07827279c",
+      "staged_sha256": "f93842ead917550288678be73ff9cb65ac4395dc4d5f56422d1a58b07827279c",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Byte-identical published predecessor subject; original date, source, measurements and any waiver are retained, not a new-client observation."
+    },
+    {
+      "file": "runtime-publication.json",
+      "predecessor_sha256": "c07dadc5fe1b20113ddd9cfbe07c7861c7975b96eed84b6b47f99ddf3266e7dc",
+      "staged_sha256": "c07dadc5fe1b20113ddd9cfbe07c7861c7975b96eed84b6b47f99ddf3266e7dc",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Byte-identical published predecessor subject; original date, source, measurements and any waiver are retained, not a new-client observation."
+    },
+    {
+      "file": "stock-omp.json",
+      "predecessor_sha256": "e1108dcf05802e9dad4613bcbd4ba072b76df729632a79f8e77b4daa33e9ab87",
+      "staged_sha256": "20a1eb15613fd2bd8cb4c51b01b4d8cf101d67c49749a12a2eee48331da1196c",
+      "disposition": "replaced",
+      "reason": "Current client/release metadata or freshly composed evidence; actual bytes are bound here without transferring predecessor client acceptance."
+    }
+  ],
+  "dropped_files": [],
+  "review_ledger": {
+    "file": "review/runtime-ledger.json",
+    "disposition": "requires-new-product-subject",
+    "reason": "The original native_runtime ledger subject is carried; a predecessor product-tooling entry never approves this candidate. The separate current G4 gate binds actual lead-supplied evidence."
+  },
+  "public_acceptance": {
+    "disposition": "dropped-requires-fresh-candidate-acceptance",
+    "status": "not-performed"
+  }
+}

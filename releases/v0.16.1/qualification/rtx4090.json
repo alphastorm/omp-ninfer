@@ -1,0 +1,449 @@
+{
+  "artifact_type": "ninfer_windows_release_qualification",
+  "benchmark_c1": {
+    "completion_tokens": 1024,
+    "computed_prefill_tokens": 4541,
+    "decode_tokens_per_second": 254.27449960255956,
+    "max_gpu_utilization_percent": 100,
+    "max_memory_used_mib": 22639,
+    "max_power_w": 460.2,
+    "max_temperature_c": 65.18,
+    "mtp_acceptance_percent": 83.87715930902111,
+    "prefill_tokens_per_second": 2139.13829799963,
+    "prompt_tokens": 4541,
+    "status": "passed",
+    "wall_seconds": 6.210229900025297
+  },
+  "beta_qualified": true,
+  "configuration": {
+    "admission_headroom_mib": 640,
+    "checkpoint_require_origin_auth": true,
+    "concurrency": 1,
+    "device_state_slots": 2,
+    "fp32_head_logits": false,
+    "gpu_keep_warm_ms": 60000,
+    "graceful_stop_timeout_seconds": 900,
+    "host_context_bytes": 16512696320,
+    "host_context_mib": "15747.734375",
+    "kv_capacity": 131072,
+    "kv_dtype": "int8",
+    "managed_stop": "stop-event",
+    "max_context": 131072,
+    "prefill_chunk": 1024,
+    "public_model_id": "qwen3.8-27b",
+    "speculative_backend": "dflash2",
+    "speculative_draft_tokens": 7
+  },
+  "deterministic_gates": {
+    "benchmark_c1": "passed",
+    "golden_equivalent": "passed",
+    "long_session": "passed",
+    "persistence": "passed",
+    "protocol": "passed",
+    "protocol_under_pool_pressure": "passed",
+    "rollback": "not_applicable",
+    "state_security": "passed"
+  },
+  "golden_equivalent": {
+    "artifact_type": "ninfer_omp_golden_equivalent_receipt",
+    "omp": {
+      "client_version": "omp/18.12.6",
+      "events": 42,
+      "tool_results": 1,
+      "typed_tool_name": "read"
+    },
+    "oracles": {
+      "exact_visible_final_answer": "passed",
+      "tool_result_continuation": "passed",
+      "typed_tool_invocation": "passed"
+    },
+    "raw_transcript_included": false,
+    "schema_version": 1,
+    "status": "passed"
+  },
+  "identity": {
+    "binary_sha256": "c6f59e9e7da2fafb8c2ded9e2cfaa63d8be5c9a91e4dbf615af42ffb4698be71",
+    "build_profile": "native-v0.8.0-beta.1-rtx4090",
+    "build_type": "Release",
+    "config_sha256": "f00cfac96000cf6f4e11676242d09e7a3bfdefba1d5e6b768a6c4ab7785ddbc5",
+    "configuration_binding": "public-package-with-port-only-scratch-equivalence",
+    "configuration_sha256": "f00cfac96000cf6f4e11676242d09e7a3bfdefba1d5e6b768a6c4ab7785ddbc5",
+    "cuda_architecture": "89",
+    "cuda_compiler": "NVIDIA-13.3.73",
+    "cuda_toolkit": "13.3.73",
+    "cxx_compiler": "MSVC-19.44.35229.0",
+    "deployment_profile": "qwen38-4090-native-v0.8.0-beta.1",
+    "gpu_index": 0,
+    "gpu_name": "NVIDIA GeForce RTX 4090",
+    "lineage_base_sha": "752dd887be6a9cdb2da6217f3b664b3c03ed33ae",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "model_id": "qwen3.8-27b",
+    "patch_stack_sha": "26fa28d0e7834515508fc07ac503164a6effc820",
+    "qualified_configuration_sha256": "418687a4f601684588d0e0efc1cbf388f608239958b34fc31b612a41a6faf421",
+    "server_binary_sha256": "c6f59e9e7da2fafb8c2ded9e2cfaa63d8be5c9a91e4dbf615af42ffb4698be71",
+    "source_commit": "26fa28d0e7834515508fc07ac503164a6effc820",
+    "source_dirty": false,
+    "target": "Qwen3_5ForCausalLM",
+    "upstream_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "weights_id": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+  },
+  "limitations": [
+    "Public packages retain port 18082 and were not executed. The isolated installed rehearsals differ only in listen.port.",
+    "C1 and the recorded shared-Host pressure budget are the qualified profiles; no multi-GPU inference or smaller-host claim.",
+    "Restart proves the two recorded short sessions, not loss-free shutdown of every live session."
+  ],
+  "long_session": {
+    "completion_tokens": 17,
+    "elapsed_seconds": 83.35216239996953,
+    "exact_output": "ORCHID=493817; COLOR=COBALT",
+    "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a",
+    "prompt_tokens": 130048,
+    "status": "passed"
+  },
+  "orchestration_evidence": {
+    "benchmark_c1": {
+      "receipt_sha256": "97afaccfb0a7fb11906a8465e1a186d97504b17edd8245b2356ebb72ab096f85",
+      "status": "passed"
+    },
+    "context_128k": {
+      "receipt_sha256": "3cee85f444e60ab5ee2c456801341a975df09bbe7860fa5dbdccedf6be36316d",
+      "status": "passed"
+    },
+    "neutral_build": {
+      "receipt_sha256": "6dff5b823a6c41c535c2f0355f4d81a567765df79552d0f4667e2ae6a89ea28c",
+      "status": "passed"
+    },
+    "omp": {
+      "receipt_sha256": "df19968793c04f496fac71b5a56a3a3a9d8b3afbdcff9edf1ccde9be090d5e0b",
+      "status": "passed"
+    },
+    "package": {
+      "receipt_sha256": "ba79f1f56afd2c02b30e6cabd40d88f8f1c5f8201087a973593faa832b3aa3bb",
+      "status": "passed"
+    },
+    "preflight": {
+      "receipt_sha256": "5b2d65b7ea2657b95684d4fef1cbf837b8a621d942641ab391c7e7a1bd12aa3d",
+      "status": "passed"
+    },
+    "pressure_protocol": {
+      "receipt_sha256": "bfceff65a796f3ef338f9f1700876c2ef72dc782314fc3cca642e323783f16a5",
+      "status": "passed"
+    },
+    "private_path_scan": {
+      "receipt_sha256": "8d5322f176ef292b355de88c44941899fcd61408dbbcf2cda5aca0beb32b2af9",
+      "status": "passed"
+    },
+    "protocol": {
+      "receipt_sha256": "6a16a632f6038faf0ce81e0f1ee442ae031f41d8c6d2c807b4f7ed60c797e750",
+      "status": "passed"
+    },
+    "receipt": {
+      "receipt_sha256": "ea918e1dd8a34c0de82e8ac7fe23247b40114eb32510f3702f03b46e46996f7d",
+      "status": "passed"
+    },
+    "restart": {
+      "receipt_sha256": "6a658741abd945ba7399b30672f92024caafea0b4b7e3d25068c36a5f1945bb2",
+      "status": "passed"
+    },
+    "restore": {
+      "receipt_sha256": "14f786408ccf62fdfefa10039fe0349de5ae20e0ef9e367df3eea0572fd4b0c8",
+      "status": "passed"
+    },
+    "rollback": {
+      "receipt_sha256": "b94a23b7dd2576f40e4f94511e78eae34e0dd78025c7e0ed2832c1e06d22f95c",
+      "status": "passed"
+    },
+    "security": {
+      "receipt_sha256": "17ce5e0f24379d94d2f420acbbfd72485ebfc8d96ef2f7d2e3fec7b1685cb1d2",
+      "status": "passed"
+    },
+    "transfer_install": {
+      "receipt_sha256": "333ce1939195a9e01f6ebb94b48cdedbf026510fbcafcb2c9a4d674c3b2d4c22",
+      "status": "passed"
+    }
+  },
+  "package": {
+    "bytes": 991969490,
+    "controller_sha256": "f6bbcef1f11a84edd3ecc74ed5ba32c3b01f7685e4610115b26bb80b1bfba3ae",
+    "dependency_sbom_sha256": "b8c8efcb7d562b4b29e1a41bd20ce68449e6c0bdc49a1d04f224916bc358f6ba",
+    "filename": "ninfer-rtx4090-native-v0.8.0-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz",
+    "gpu_owner_controller_sha256": "432f06a8e97743e46b1b7d9285e68d4bc361a93d5f25badeaa7c713f147f3334",
+    "installer_sha256": "677c9aadab2081366df768c5bd0ce3cc683431f820a58d68ea4417246e4c1196",
+    "outer_checksums_sha256": "bf1650ebcdd2760b77be11140e8af3f6eb1adc9a2b8e534832f708383b7a60eb",
+    "sbom_sha256": "825a8d30df95fbe7b60299c17abaa2f9d7f7319da6569fa2aab7e2bde0d108b1",
+    "sha256": "06526bdb630a87c860ceb0eaafb633df867181b596648897cb5a64a92e268f27",
+    "state_protection_sha256": "d7b658187c20b5227374f96fedf7e9f85f35e03b50d5302c400e0b24b7114b36"
+  },
+  "persistence": {
+    "cached_input_tokens": 1647,
+    "checkpoint_bytes": 643998587,
+    "checkpoint_files": 10,
+    "counter_baseline": {
+      "committed_decode_tokens": 3,
+      "computed_prefill_tokens": 53,
+      "reused_prompt_tokens": 0
+    },
+    "counters_after_restart": {
+      "committed_decode_tokens": 3,
+      "computed_prefill_tokens": 53,
+      "reused_prompt_tokens": 0
+    },
+    "deletion_semantics": "logical-object-deletion",
+    "exact_output": "CHECKPOINT-NATIVE-731942",
+    "explicit_control": {
+      "cached_input_tokens": 1647,
+      "checkpoint_save": "explicit_endpoint",
+      "exact_output": "CHECKPOINT-NATIVE-731942",
+      "frontier_tokens": 1647,
+      "save_bytes": 643966448
+    },
+    "managed_stop": {
+      "elapsed_seconds": 6.315,
+      "exit_code": null,
+      "forced": false,
+      "graceful_wait_seconds": 900,
+      "mode": "stop-event",
+      "outcome": "graceful"
+    },
+    "managed_stop_flush": {
+      "cached_input_tokens": 1650,
+      "checkpoint_save": "shutdown_flush",
+      "exact_output": "MANAGED-STOP-FLUSH-408137",
+      "state_after_restart": "available",
+      "state_before_stop": "missing"
+    },
+    "process_replaced": true,
+    "restart_counters_reset": true,
+    "restart_seconds": 42.213060799986124,
+    "secure_erasure_claimed": false,
+    "status": "passed",
+    "status_schema_version": 2
+  },
+  "profile": "DFlash2-K7",
+  "protocol": {
+    "identity": {
+      "binary_sha256": "c6f59e9e7da2fafb8c2ded9e2cfaa63d8be5c9a91e4dbf615af42ffb4698be71",
+      "build_profile": "native-v0.8.0-beta.1-rtx4090",
+      "build_type": "Release",
+      "config_sha256": "418687a4f601684588d0e0efc1cbf388f608239958b34fc31b612a41a6faf421",
+      "cuda_architecture": "89",
+      "cuda_compiler": "NVIDIA-13.3.73",
+      "cuda_toolkit": "13.3.73",
+      "cxx_compiler": "MSVC-19.44.35229.0",
+      "deployment_profile": "qwen38-4090-native-v0.8.0-beta.1",
+      "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+      "model_id": "qwen3.8-27b",
+      "patch_stack_sha": "26fa28d0e7834515508fc07ac503164a6effc820",
+      "source_dirty": false,
+      "target": "Qwen3_5ForCausalLM",
+      "upstream_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+      "weights_id": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+    },
+    "protocol": {
+      "anthropic_count_tokens": 55,
+      "artifact_type": "ninfer_agent_protocol_smoke",
+      "authenticated_session_identity": true,
+      "completion_tokens": 3,
+      "contract": "product",
+      "isolated_session_reuse_path": "shared_stable_prefix",
+      "nonstream_finish_reason": "stop",
+      "responses_session_lifecycle": {
+        "continuation_completed": true,
+        "cross_session_status": 404,
+        "first_turn_completed": true,
+        "fork_count": 2,
+        "parent_delete_status": 200,
+        "parent_get_after_delete_status": 404,
+        "stored_route_isolation_status": 404,
+        "surviving_descendant_continued": true,
+        "surviving_descendants_retrieved": true
+      },
+      "same_session_reuse_path": "private_input_replay",
+      "schema_version": 2,
+      "status_identity_verified": true,
+      "stream_finish_reason": "stop",
+      "structured_output": {
+        "chat_json_schema": true,
+        "responses_json_schema": true
+      },
+      "tool_result_array_finish_reason": "length"
+    },
+    "runtime": {
+      "kv_cache": "int8-group64",
+      "kv_capacity_mode": "explicit",
+      "kv_capacity_tokens": 131072,
+      "max_context": 131072,
+      "proposal_head": "optimized",
+      "public_model_id": "qwen3.8-27b",
+      "speculative_backend": "dflash2",
+      "speculative_draft_window": 7
+    },
+    "sha256": "da61aa092bf334cb392cefbc8ca956f71111e24fbdafd55967ff04e3a565f89f",
+    "startup_attestation": {
+      "gpu_index": 0,
+      "gpu_name": "NVIDIA GeForce RTX 4090",
+      "gpu_uuid_verified": true,
+      "request_log_schema": 30
+    },
+    "status": "passed"
+  },
+  "protocol_under_pool_pressure": {
+    "device_state_slots": 2,
+    "host_context_mib": "12758.578125",
+    "protocol": {
+      "anthropic_count_tokens": 55,
+      "artifact_type": "ninfer_agent_protocol_smoke",
+      "authenticated_session_identity": true,
+      "completion_tokens": 3,
+      "contract": "product",
+      "isolated_session_reuse_path": "shared_stable_prefix",
+      "nonstream_finish_reason": "stop",
+      "responses_session_lifecycle": {
+        "continuation_completed": true,
+        "cross_session_status": 404,
+        "first_turn_completed": true,
+        "fork_count": 2,
+        "parent_delete_status": 200,
+        "parent_get_after_delete_status": 404,
+        "stored_route_isolation_status": 404,
+        "surviving_descendant_continued": true,
+        "surviving_descendants_retrieved": true
+      },
+      "same_session_reuse_path": "private_input_replay",
+      "schema_version": 2,
+      "status_identity_verified": true,
+      "stream_finish_reason": "stop",
+      "structured_output": {
+        "chat_json_schema": true,
+        "responses_json_schema": true
+      },
+      "tool_result_array_finish_reason": "length"
+    },
+    "sha256": "da61aa092bf334cb392cefbc8ca956f71111e24fbdafd55967ff04e3a565f89f",
+    "status": "passed"
+  },
+  "qualified_utc": "2026-10-31T21:22:21Z",
+  "release_id": "qwen38-4090-native-v0.8.0-beta.1",
+  "restoration": {
+    "gpu_lease_active": false,
+    "incumbent_state": "untouched",
+    "power_limit_w": 450,
+    "process_count": 0,
+    "status": "passed",
+    "task_state": "Ready"
+  },
+  "rollback": {
+    "active_release": "qwen38-4090-native-v0.8.0-beta.1-26fa28d0e783",
+    "directions": 0,
+    "reason": "first release of the lineage",
+    "status": "not_applicable"
+  },
+  "runtime_shape": {
+    "draft_tokens": {
+      "max": 7,
+      "min": 7
+    },
+    "fit": {
+      "admission_headroom_mib": 640,
+      "device_state_slots": 2,
+      "draft_mlp_device_format": "Q4_G64_FP16",
+      "token_embedding_residency": "host-mapped"
+    },
+    "max_concurrency": 1,
+    "proposal": "artifact-default",
+    "speculative_backend": "dflash2"
+  },
+  "schema_version": 1,
+  "scratch_equivalence": {
+    "configuration_delta": {
+      "path": "/listen/port",
+      "public": 18082,
+      "scratch": 18210
+    },
+    "identical_binaries": {
+      "benchmark_sha256": "39223a1b07a595daced5920890933c49855c2f7a5c447a17d9485433de331723",
+      "ninfer_sha256": "71242876cae4e605ed3ba6c4e6bc51b1c292a81fbda6262ed8ea82177b1d57fd",
+      "server_sha256": "c6f59e9e7da2fafb8c2ded9e2cfaa63d8be5c9a91e4dbf615af42ffb4698be71"
+    },
+    "identical_support_assets": {
+      "controller_sha256": "f6bbcef1f11a84edd3ecc74ed5ba32c3b01f7685e4610115b26bb80b1bfba3ae",
+      "gpu_owner_controller_sha256": "432f06a8e97743e46b1b7d9285e68d4bc361a93d5f25badeaa7c713f147f3334",
+      "installer_sha256": "677c9aadab2081366df768c5bd0ce3cc683431f820a58d68ea4417246e4c1196",
+      "state_protection_sha256": "d7b658187c20b5227374f96fedf7e9f85f35e03b50d5302c400e0b24b7114b36"
+    },
+    "observed_identity": {
+      "binary_sha256": "c6f59e9e7da2fafb8c2ded9e2cfaa63d8be5c9a91e4dbf615af42ffb4698be71",
+      "build_profile": "native-v0.8.0-beta.1-rtx4090",
+      "build_type": "Release",
+      "config_sha256": "418687a4f601684588d0e0efc1cbf388f608239958b34fc31b612a41a6faf421",
+      "cuda_architecture": "89",
+      "cuda_compiler": "NVIDIA-13.3.73",
+      "cuda_toolkit": "13.3.73",
+      "cxx_compiler": "MSVC-19.44.35229.0",
+      "deployment_profile": "qwen38-4090-native-v0.8.0-beta.1",
+      "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+      "model_id": "qwen3.8-27b",
+      "patch_stack_sha": "26fa28d0e7834515508fc07ac503164a6effc820",
+      "source_dirty": false,
+      "target": "Qwen3_5ForCausalLM",
+      "upstream_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+      "weights_id": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+    },
+    "production_route_activation_performed": false,
+    "public_configuration_sha256": "f00cfac96000cf6f4e11676242d09e7a3bfdefba1d5e6b768a6c4ab7785ddbc5",
+    "public_package_executed": false,
+    "public_package_sha256": "06526bdb630a87c860ceb0eaafb633df867181b596648897cb5a64a92e268f27",
+    "scratch_configuration_sha256": "418687a4f601684588d0e0efc1cbf388f608239958b34fc31b612a41a6faf421",
+    "scratch_package_sha256": "1f23e5d20429cb8268415898c03f1347c981da6bf4ef31f751dc0aca4d9a5765",
+    "startup_attestation": {
+      "gpu_index": 0,
+      "gpu_name": "NVIDIA GeForce RTX 4090",
+      "gpu_uuid_verified": true,
+      "request_log_schema": 30
+    },
+    "status": "passed"
+  },
+  "state_security": {
+    "absolute_nvidia_shim_interceptions": 0,
+    "active_interactive_gpu_rejections": 1,
+    "artifact_type": "ninfer_windows_state_security_regression",
+    "atomic_race_collision_rejections": 1,
+    "child_junction_rejections": 1,
+    "clean_default_managed_parent_creations": 2,
+    "forbidden_hook_patterns_scanned": 10,
+    "gpu_binding_lease_refusal_assertions": 2,
+    "gpu_power_evidence_class": "real-trusted-absolute-nvidia-smi",
+    "gpu_power_fixture_calls": 0,
+    "gpu_workload_evidence_class": "selected-nvml-residency-function-shim-and-real-idle-precheck",
+    "gpu_workload_measurement_source": "nvidia-smi.memory.used",
+    "installer_prewrite_root_rejections": 3,
+    "low_privilege_effective_read_denials": 2,
+    "low_privilege_effective_write_denials": 2,
+    "managed_release_acl_state_assertions": 1,
+    "managed_request_log_acl_state_assertions": 1,
+    "managed_rollback_directions": 0,
+    "null_dacl_rejections": 1,
+    "populated_root_status_milliseconds": 910,
+    "precreated_root_rejections": 1,
+    "prepared_lease_restore_assertions": 0,
+    "preplanted_gpu_owner_rejections": 1,
+    "qualified_power_limit_w": 0,
+    "raced_state_recursive_deletions": 0,
+    "request_jsonl_effective_access_denials": 2,
+    "request_jsonl_under_protected_state": true,
+    "resident_memory_boundary_assertions": 2,
+    "restored_power_limit_w": 450,
+    "retained_state_helper_hash_assertions": 0,
+    "root_dacl_protected": true,
+    "root_junction_rejections": 1,
+    "root_owner_sid": "S-1-5-32-544",
+    "schema_version": 2,
+    "shipped_scripts_scanned": 4,
+    "shipped_test_bypass": false,
+    "startup_gpu_evidence_assertions": 10,
+    "status": "passed",
+    "unowned_root_rejections": 1,
+    "wddm_diagnostics_only_assertions": 2
+  },
+  "status": "passed"
+}

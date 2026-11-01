@@ -1,0 +1,200 @@
+{
+  "artifact_type": "omp_ninfer_release_qualification",
+  "schema_version": 1,
+  "release": "v0.16.1",
+  "runtime_identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "behavioral_source_commit": "26fa28d0e7834515508fc07ac503164a6effc820",
+    "release_source_commit": "26fa28d0e7834515508fc07ac503164a6effc820",
+    "release_source_archive_sha256": "1ef87d525976b770ae3ba9794587750bd2ba926dccc64e86d7cc2081d2674737",
+    "release_server_binary_sha256": "bab3fd77e8b5cafb792d0e4648e5e2b0d935105557a0b08fb2541799a25ffce7",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "model_artifact_bytes": 20437521664,
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "public_model_id": "q38-ninfer",
+    "deployment_profile": "qwen38-5090-v0.13.0",
+    "require_origin_auth": true
+  },
+  "native_runtime_identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "source_commit": "26fa28d0e7834515508fc07ac503164a6effc820",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+  },
+  "composition": {
+    "behavioral_qualification": {
+      "status": "passed",
+      "repository_path": "releases/v0.16.1/qualification/rtx5090.json",
+      "sha256": "2200fa4427868e572c79da5580c465f45519e4519f4d305bc115b655d8d09071",
+      "source_commit": "26fa28d0e7834515508fc07ac503164a6effc820",
+      "server_binary_sha256": "bab3fd77e8b5cafb792d0e4648e5e2b0d935105557a0b08fb2541799a25ffce7",
+      "provenance": {
+        "evidence_name": "rtx5090.json",
+        "evidence_sha256": "2200fa4427868e572c79da5580c465f45519e4519f4d305bc115b655d8d09071",
+        "source_commit": "26fa28d0e7834515508fc07ac503164a6effc820",
+        "evidence_post_freeze_uncommitted": true
+      },
+      "evidence_scope": "Fresh published beta.4 image lane gate, not product-route acceptance. Founder restart-latency waiver is bound separately without changing lane or parity observations."
+    },
+    "local_release_packaging": {
+      "status": "passed",
+      "published": true,
+      "release_source_commit": "26fa28d0e7834515508fc07ac503164a6effc820",
+      "release_server_binary_sha256": "bab3fd77e8b5cafb792d0e4648e5e2b0d935105557a0b08fb2541799a25ffce7",
+      "registry_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:7a5a7bb88966512bcab2f711c1a7515bf0b8b834aaf0abd5456643493babb016",
+      "oci_manifest_digest": "sha256:7a5a7bb88966512bcab2f711c1a7515bf0b8b834aaf0abd5456643493babb016",
+      "binary_package_sha256": "f3a35cdb7859a576fa2ff7b474dfbd7ce5db37c7c756094cfd736d47fd284de0",
+      "binary_package_bytes": 579765099,
+      "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.7.0-qwen38-5090-beta.4/ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.spdx.json",
+      "sbom_sha256": "b09ad9a7d06607f25600349f9e3aec751aaa5fe7387d9a756270abbcda47f7d7",
+      "component_release_url": "https://github.com/alphastorm/ninfer/releases/tag/v0.7.0-qwen38-5090-beta.4",
+      "runtime_base_reference": "ghcr.io/alphastorm/ninfer@sha256:d4377ed01a5be949a90d3b403a3be2c5867a083cb1669379f60b25969ab7f22e",
+      "runtime_base_receipt_release": "runtime-base-04b603aa-20261025",
+      "runtime_base_receipt": {
+        "repository_path": "releases/v0.14.0/qualification/runtime-base.json",
+        "sha256": "f93842ead917550288678be73ff9cb65ac4395dc4d5f56422d1a58b07827279c"
+      },
+      "scope": "Current N16 archive/source/SPDX and beta.4 digest-addressed image are published component subjects. The unchanged runtime-base record retains its original publication and historical reuse subject. No product publication or fresh external-install acceptance is claimed.",
+      "publication_receipt": {
+        "repository_path": "releases/v0.16.0/qualification/runtime-publication.json",
+        "sha256": "c07dadc5fe1b20113ddd9cfbe07c7861c7975b96eed84b6b47f99ddf3266e7dc"
+      }
+    },
+    "native_runtime_variants": {
+      "rtx3090-windows-native": {
+        "status": "passed",
+        "beta_qualified": true,
+        "installable": true,
+        "repository_path": "releases/v0.16.1/qualification/rtx3090.json",
+        "sha256": "48c7f63572e38b279dcc941c9f1a2acbf858ec95f1ffe3f0eb8bbc20a8111702",
+        "source_commit": "26fa28d0e7834515508fc07ac503164a6effc820",
+        "release_tag": "v0.8.0-qwen38-3090-beta.1",
+        "package_sha256": "040d5923192a969dcb04bb63ff5c931f80bcf9a92f1f769f08e49e2121ad0e20",
+        "configuration_sha256": "cbe67aae59707d188966b851e21539c84784138a69fc8769825a09eac8ba8866",
+        "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+        "public_package_executed": false,
+        "scope": "Fresh N16 managed 15-phase qualification on a port-only scratch derivative. Public-install route and predecessor upgrade evidence remain separate."
+      },
+      "rtx4090-windows-native": {
+        "status": "passed",
+        "beta_qualified": true,
+        "installable": true,
+        "repository_path": "releases/v0.16.1/qualification/rtx4090.json",
+        "sha256": "69ebf60c3b4bee7a32ec92bc282c9a7ec6b735cc75cad822f041c5e89e35fb77",
+        "source_commit": "26fa28d0e7834515508fc07ac503164a6effc820",
+        "release_tag": "v0.8.0-qwen38-4090-beta.1",
+        "package_sha256": "06526bdb630a87c860ceb0eaafb633df867181b596648897cb5a64a92e268f27",
+        "configuration_sha256": "f00cfac96000cf6f4e11676242d09e7a3bfdefba1d5e6b768a6c4ab7785ddbc5",
+        "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+        "public_package_executed": false,
+        "scope": "Fresh N16 managed 15-phase qualification on a port-only scratch derivative. Public-install route and predecessor upgrade evidence remain separate."
+      }
+    },
+    "external_installation_acceptance": {
+      "status": "pending",
+      "note": "rerun against the published v0.7.0-qwen38-5090-beta.4 component (image 7a5a7bb8) before the cut; the receipt lands at releases/v0.16.1/acceptance/composed-external-installation.json"
+    },
+    "native_publication": {
+      "repository_path": "releases/v0.16.0/qualification/native-publication.json",
+      "sha256": "502a0f5eccc141e2fc4f58f639637eb874d36fb0259d181c9cfa144711aaded6"
+    }
+  },
+  "as_of": "2026-11-01",
+  "status": "runtime-release-eligible",
+  "publication_authorized": false,
+  "external_installation_qualified": false,
+  "scope": "Client-only v0.16.1 stage with stock OMP 18.15.0; unchanged published v0.16.0 runtime/model/profile subjects. New-client platform, route, native public-install, restoration and product review gates are not performed by staging.",
+  "interpretation": "Original runtime measurements and founder waivers retain their source identities and dates. No predecessor client, route, product council or publication approval transfers.",
+  "eligibility_scope": "Installable client candidate preparation only; fresh candidate-bound acceptance, exact product review, immutable pins and strict ready verification are separate gates.",
+  "documented_route_acceptance": {
+    "status": "pending"
+  },
+  "remaining_release_gates": [
+    "external-installation acceptance against the published v0.7.0-qwen38-5090-beta.4 component and runtime image",
+    "fresh upstream OMP platform and documented-route acceptance"
+  ],
+  "observed_gates": {
+    "rtx5090_lane": {
+      "status": "passed",
+      "repository_path": "releases/v0.16.0/qualification/rtx5090.json",
+      "sha256": "2200fa4427868e572c79da5580c465f45519e4519f4d305bc115b655d8d09071",
+      "scope": "Fresh exact beta.4 published-image lane receipt."
+    },
+    "rtx3090_quality_screen": {
+      "status": "passed",
+      "repository_path": "releases/v0.16.0/qualification/rtx3090-windows-native.quality-screen.json",
+      "sha256": "671659f05f6f3ddff7be7668676b958624ff1b8ee8a5f8627cd43c9825577f25",
+      "scope": "EXP-101: 1120 prompts, 80/80 fresh-cache determinism per arm, 9/9 primary bounds; 771/1120 cross-engine content/reasoning output pairs changed. Secret-leak counts 545 to 561, upper ratio 1.0673 within 1.10."
+    },
+    "rtx3090_speed": {
+      "status": "passed",
+      "repository_path": "releases/v0.16.0/qualification/rtx3090-speed.json",
+      "sha256": "c904d3416106529d1f275559dde07165c50625ff1f13f2c6b0e3f27e6e7892f1",
+      "scope": "84 depth-0 ABBA cases: weighted 1.2683598277, minimum 0.9764424319, no waiver."
+    },
+    "rtx4090_speed": {
+      "status": "failed-founder-waived",
+      "repository_path": "releases/v0.16.0/qualification/rtx4090-speed.json",
+      "sha256": "32acdecc5a67ee9278fff5a173235a1d61e98e9db1b23dac9c4e56ee72d3e675",
+      "scope": "Raw FAIL retained: log-024@0 0.933831973 below 0.95; weighted role108 1.27358155 and all115 1.274085083. Founder waiver bound separately."
+    },
+    "rtx4090_speed_waiver": {
+      "status": "waived-by-founder",
+      "repository_path": "releases/v0.16.0/qualification/rtx4090-speed-waiver.json",
+      "sha256": "92b94c4a1beeb37917b5a086d740af66d6109b59724f0afb012aac73d20b21f3",
+      "scope": "release notes and PERFORMANCE must state log-024@0 at 0.934 under founder waiver"
+    },
+    "rtx5090_restore_waiver": {
+      "status": "waived-by-founder",
+      "repository_path": "releases/v0.16.0/qualification/rtx5090-restore-waiver.json",
+      "sha256": "66ba8104c435f12f2c4740b5a0c0fe57047b4b4c5eb818072a4e28a1f083491f",
+      "scope": "release notes state that the first request after a server restart sometimes takes ~0.5 s instead of ~0.24 s in both engines, with the beta.4 runtime slow somewhat more often"
+    },
+    "rtx3090_upgrade": {
+      "status": "passed",
+      "scope": "PASS: 1c running-lane upgrade, 2c forced post-activation first-Start failure with rollback, 3c interrupted install/repair/same-instance reinstall from true v0.14.0 beta.3; all 3 scenarios passed once, candidate transaction-created targets removed, canonical states unchanged, 370 W restored; no product-route acceptance is inferred",
+      "provenance": {
+        "evidence_name": "gates2-upgrade-summary.json",
+        "evidence_sha256": "631428b55f0b2258993797465793a1b7b4d1d204f5c0b3185decb673ecc2162a",
+        "source_commit": "26fa28d0e7834515508fc07ac503164a6effc820",
+        "evidence_post_freeze_uncommitted": true
+      }
+    },
+    "rtx3090_agent_concurrency": {
+      "status": "passed",
+      "scope": "PASS: 83/83 positions (arrival 12, mix 51, sibling 5, two-restart restore 4, fleet 11) under p16-agent-parity/2, cache-gap deltas 0. Fanout-concurrency 4: 5/5 HTTP 200; calibrated 2 x 59,879-token test: 18/18 HTTP 200 across 3 trials; 0 HTTP 500",
+      "provenance": {
+        "evidence_name": "agent-summary.json",
+        "evidence_sha256": "8218925c0c1134dbf2e710c0aa77a45439fecdc971b6f7db9e2f00b6fb2f5c8e",
+        "source_commit": "26fa28d0e7834515508fc07ac503164a6effc820",
+        "evidence_post_freeze_uncommitted": true
+      }
+    },
+    "rtx4090_quality_screen": {
+      "status": "passed",
+      "repository_path": "releases/v0.16.0/qualification/rtx4090-windows-native.quality-screen.json",
+      "sha256": "6231dccddb40d712b573f42553dd8029813534e6c0284daa1541890c59135fff",
+      "scope": "EXP-102: PASS: 1,120 prompts; both arms 80/80 deterministic, 0 missing/error samples; 777/1,120 paired content/reasoning outputs changed. All 9 primary bounds passed: recall lower -0.0082 and precision lower -0.0093 (margin -0.02); unsupported upper 0.0045 (0.03); schema/tool-selection/tool-argument lower 0 (each -0.02); duplicate upper 0.0046 (0.02); redaction lower -0.0139 (-0.05); secret-leak ratio upper 1.0985 (1.10), counts 533 to 561, not zero"
+    },
+    "stock_client_review": {
+      "status": "passed-source-and-download-integrity-only",
+      "repository_path": "docs/measurements/2026-11-01-omp-18150-client-upgrade-review.json",
+      "sha256": "20a1eb15613fd2bd8cb4c51b01b4d8cf101d67c49749a12a2eee48331da1196c",
+      "preceding_review": {
+        "repository_path": "docs/measurements/2026-11-01-omp-18142-client-upgrade-review.json",
+        "sha256": "59b0b98ac8094f4d4e7e6c1fa8721deb2e8d938c173d7c3b909ef7ba439c743c"
+      },
+      "descriptor": {
+        "repository_path": "releases/v0.16.1/qualification/client-components.json",
+        "sha256": "54835407dc043c988a823fe4ba0a262d6f07a966998d75b91b85bf15890784c2",
+        "disposition": "staged-new-client"
+      },
+      "scope": "Complete 18.14.0-to-18.14.2 and incremental 18.15.0 source review with independently verified upstream asset bytes/digests. No executable rehearsal or inference result is imported from either source receipt."
+    }
+  },
+  "receipt_audit": {
+    "repository_path": "releases/v0.16.1/qualification/receipt-audit.json",
+    "sha256": "f733d75f7b25b9f1c966a8cac8bc14ac06f742094f2969500b05e0296d5c322a"
+  }
+}

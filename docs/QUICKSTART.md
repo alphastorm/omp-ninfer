@@ -1,6 +1,10 @@
 # Quickstart
 
-> **Versioned guide: v0.16.0 · stock Oh My Pi 18.14.0 · Qualified on RTX 5090 · 4090 · 3090**
+> **Prepared guide: v0.16.1 · stock Oh My Pi 18.15.0 · unchanged RTX 5090 · 4090 · 3090 runtimes**
+>
+> Published release remains **v0.16.0**. Until publication, use the
+> [immutable v0.16.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.16.0/docs/QUICKSTART.md).
+> This guide supplies frozen-candidate acceptance commands, not permission to install a draft.
 
 OMP NInfer is the qualified local inference appliance and release layer connecting the
 [Oh My Pi](https://github.com/can1357/oh-my-pi) (OMP) coding-agent client over authenticated
@@ -8,7 +12,7 @@ loopback to the NInfer inference engine serving Qwen3.8 27B on your GPU.
 
 ## Choose your lane
 
-| GPU and host | Client route in v0.16.0 | Start here |
+| GPU and host | Client route prepared for v0.16.1 | Start here |
 | --- | --- | --- |
 | RTX 5090 container on Windows 11 + Docker Desktop / WSL2 | Native Windows x64 client over local loopback `127.0.0.1:18089` | [RTX 5090 Windows route](#ready-route-native-windows-and-docker-desktop-wsl2) |
 | RTX 5090 container on Windows 11 / WSL2 or Linux | macOS arm64 client over a manual SSH tunnel (preview) | [macOS manual SSH route (preview)](#macos-client-over-a-manual-ssh-tunnel-preview) |
@@ -19,9 +23,10 @@ loopback to the NInfer inference engine serving Qwen3.8 27B on your GPU.
 
 ## Before you start
 
-- **Clone the tag and run the ready gate:** start from a clean clone of `v0.16.0` and verify
-  `python3 scripts/verify_release.py --require-ready` (`py -3 scripts\verify_release.py --require-ready`
-  on Windows). Never install from a moving branch, an untagged archive, or a draft/candidate manifest.
+- **Use the right release state:** published users start from tag `v0.16.0` and its immutable
+  guide. The v0.16.1 commands below are for owner-authorized acceptance of one clean frozen
+  candidate; the v0.16.1 tag is not installable until founder publication. Its installable gate is
+  not the final `--require-ready --check-pins` proof. Never install from a moving branch.
 - **Keep one release authority end to end:** stock OMP has no `omp appliance` commands, and
   `examples/manual-tunnel/fail-closed.yml` disables OMP's startup update check so `omp update`
   cannot replace the checksummed binary. Never mix current fragments with a legacy `v0.10.0` or
@@ -44,7 +49,7 @@ loopback to the NInfer inference engine serving Qwen3.8 27B on your GPU.
 ## Contributor acceptance and preflight
 
 You can exercise the stock client without a GPU: run
-`python3 scripts/client_acceptance.py --omp ./omp-darwin-arm64 --omp-sha256 SHA256 --omp-version omp/18.14.0 --local-rehearsal --receipt rehearsal.json`,
+`python3 scripts/client_acceptance.py --omp ./omp-darwin-arm64 --omp-sha256 SHA256 --omp-version omp/18.15.0 --local-rehearsal --receipt rehearsal.json`,
 substituting the binary and SHA-256 from the selected release's client descriptor (use
 `omp-windows-x64.exe` or `omp-linux-x64` on those platforms). The runner creates a disposable
 HOME and its own loopback Responses stub, checks a typed read-tool turn, continuation, a real
@@ -83,53 +88,66 @@ also checks the actual container's publication. For a hardware-independent local
 Read the [doctor boundaries and remedies](TROUBLESHOOTING.md#named-cause-preflight) before
 changing a running host.
 
-## OMP 18.14.0 client
+## OMP 18.15.0 client
 
-Release `v0.16.0` retains unmodified upstream
-[Oh My Pi v18.14.0](https://github.com/can1357/oh-my-pi/releases/tag/v18.14.0) (source
-`31147f9d1a76608549821c3759f8487b4d66c72d`, tree `9a63b5bfbb5971962c44fca660744b0d75dcd2c2`).
-Exact binary URLs, sizes, and SHA-256 pins (`omp-windows-x64.exe` `620a5935…`,
-`omp-linux-x64` `e7dd2b60…`, `omp-darwin-arm64` `60884395…`) are in
-[`releases/v0.16.0/qualification/client-components.json`](../releases/v0.16.0/qualification/client-components.json).
-The [upstream release comparison](https://github.com/can1357/oh-my-pi/compare/v18.12.6...v18.14.0)
-covers every intervening stable release. The
-[host-free review](measurements/2026-10-30-omp-18140-client-upgrade-review.json) records source
-predicates and two macOS semantic stub rehearsals, not fresh live route acceptance. When migrating:
+Prepared release `v0.16.1` selects unmodified upstream
+[Oh My Pi v18.15.0](https://github.com/can1357/oh-my-pi/releases/tag/v18.15.0), source
+`3fedf8d53267e32a6d7521ce725fdcc4a36fdc67`, tree
+`48bc72ba2418c0b78163d9769e91a0d8683e642b`, release `430630500`.
+The [client descriptor](../releases/v0.16.1/qualification/client-components.json) binds Windows
+`978846a8…`, Linux `6737ee24…` and Darwin `d36dfabf…`. The
+[18.14.2 review](measurements/2026-11-01-omp-18142-client-upgrade-review.json) and
+[18.15.0 review](measurements/2026-11-01-omp-18150-client-upgrade-review.json) cover the whole
+source delta plus independent download integrity; they are not semantic or live acceptance.
 
-- **Per-model stateful Responses:** keep `compat.statefulResponses: true`,
-  `compat.includeEncryptedReasoning: false`, and `compat.supportsReasoningSummary: false` on
-  each NInfer model. These keys remain supported; no fragment migration is needed.
-- **Remove `PI_OPENAI_STATEFUL`:** clear it from scripts, profiles, and environments
-  (`unset PI_OPENAI_STATEFUL` or `Remove-Item Env:PI_OPENAI_STATEFUL -ErrorAction SilentlyContinue`);
-  an inherited `0` overrides per-model `compat` and disables chaining.
-- **Keep the image-detail default:** older RTX 5090 fragments should omit
-  `compat.supportsImageDetailOriginal`; custom Responses endpoints default to `detail: "auto"`.
-- **Use exact selectors:** provider-qualified model IDs no longer fuzzy-match a sibling.
-  `ninfer-beta/q38-ninfer`, `ninfer-native-3090/q38-ninfer`, and
-  `ninfer-native-4090/qwen3.8-27b` are exact IDs. The fleet worker's
-  `ninfer-heavy/qwen3.8-27b:medium` is also valid: `:medium` selects effort, not a different model.
-- **Edit defaults depend on the wire ID:** stock OMP recognizes `qwen3.8-27b` as Qwen 3.8 and
-  now defaults it to the `replace` edit tool. The opaque `q38-ninfer` alias is not recognized
-  by that family predicate and keeps `hashline`. No served model ID is renamed and this guide
-  forces no edit override. An explicit `edit.modelVariants`, `edit.mode`, `PI_EDIT_VARIANT`,
-  or `PI_STRICT_EDIT_MODE` remains an owner choice.
-- **Leave the loop guard on:** `model.loopGuard` settings now reach custom `openai-responses`
-  models too; the default exact-cycle detector covers these NInfer routes. No loop-guard
-  disabling override is added by the fragments or acceptance runner.
-- **Keep fail-closed config, concurrency limits, and default compaction:** install or merge
-  [`examples/manual-tunnel/fail-closed.yml`](../examples/manual-tunnel/fail-closed.yml) so retries,
-  cloud fallback, and startup update checks stay off, `providers.maxInFlightRequests` keeps
-  `ninfer-beta` / `ninfer-main` / `ninfer-native-3090` at `2` and
-  `ninfer-native-4090` / `ninfer-heavy` at `1`. The stock reserve still gives a 111,412-token threshold for a
-  131,072-token window, with compaction triggered only above it; measured context includes the
-  prompt and tools, not just the user's text. The compaction rework bounds retained history,
-  ignores stale usage, and does not discard a completed summary if its optional short summary
-  fails. These custom endpoints do not opt into an unsupported native remote-compaction API.
-- **Use the rebuilt stock binaries:** upstream release builds now pin Bun 1.4.4, addressing
-  CVE-2026-91403 (compromised certificate authorities) and CVE-2026-111497 (Brotli decoder write).
-  Reusing the older client binary does not receive those bundled-runtime fixes.
+- **Keep the three working compat keys:** per model, `compat.statefulResponses: true`,
+  `compat.includeEncryptedReasoning: false`, `compat.supportsReasoningSummary: false`.
+  Remove obsolete operator `compat.thinkingLoopGuard`; the current schema/catalog does not use
+  that operator key. Leave the actual guard enabled and clear `PI_NO_THINKING_LOOP_GUARD`.
+- **Clear `PI_OPENAI_STATEFUL`** from environments and scripts; an inherited `0` disables chaining.
+  Omit old `compat.supportsImageDetailOriginal` overrides; custom Responses image detail stays auto.
+- **Preserve exact selectors and effort:** `ninfer-beta/q38-ninfer`,
+  `ninfer-native-3090/q38-ninfer`, `ninfer-native-4090/qwen3.8-27b`, and the worker's
+  `ninfer-heavy/qwen3.8-27b:medium`. Keep high→medium/off→low clamps, the stock
+  `qwen3.8-27b` replace / opaque `q38-ninfer` hashline edit defaults, declared 131072/32768 limits,
+  static fragments and existing concurrency limits. No discovery, service tiers, /fast, effortMap
+  or per-call-model opt-in is introduced.
+- **Keep exact-loop detection on:** short whole-line/newline-spanning cycles retain four repeats
+  but now need 1024 repeated characters; short non-newline cycles remain four/180 and long cycles
+  three/1024. A truly induced loop must still fail closed. Uninduced boundaries are not passes.
+- **Keep default compaction:** reserve 19660 and strict >111412 trigger remain. The ordinary
+  summary output cap is 15728, not the route's 32768. Length-stopped main, turn-prefix, handoff
+  and branch summaries fail visibly without committing partial context; a completed main summary
+  survives a truncated display-only short summary. Manual compaction now waits for persistence
+  replacement before delivering queued background results. Failure/cancellation and restart
+  continuation remain separate checks; snapcompact reader accounting adds no new vision scope.
+- **Keep explicit fail-closed settings:** install or merge
+  [fail-closed.yml](../examples/manual-tunnel/fail-closed.yml), including `retry.enabled=false`,
+  `retry.modelFallback=false` and `fallbackRevertPolicy=never`. `retry.enabled=false` alone does
+  not block the new missing-key pre-prompt fallback. Selected-provider outage must remain a failed
+  turn with no model content/provider switch and the original request-count oracle.
+- **Isolate auxiliary credentials:** ordinary file-read/nonce/outage routes do not request job
+  captions or optional auto-learn capture. A separately exercised eligible >15 s background job
+  can request a widget caption, whose role resolver may use smol credentials independently of
+  modelFallback. Use local-only auth for acceptance; separately attribute optional side requests.
+  Do not silently enable optional features or inherit cloud credentials to obtain coverage.
+- **Replay stays transcript-owned:** shared transport cleanup removes only
+  `internal_chat_message_metadata_passthrough` from replay copies, preserving legal metadata,
+  content and tool pairing without rewriting stored history. Native remote compaction is not
+  opted into. Repeat real continuation, tool/nonce, exit and checkpoint-owner restart gates with
+  the exact new platform binaries; source equality is not binary qualification.
 
-## Acceptance evidence
+## v0.16.1 acceptance boundary
+
+The prepared guide and client descriptor are inputs to fresh acceptance, not an acceptance result.
+All five routes / 31 executable blocks, three stock 18.15.0 clients, both unchanged native public
+installs and candidate-profile probes need new candidate-bound observations and independent
+restoration. macOS remains preview; Linux remains WSL2-only; vision remains macOS/Windows on
+RTX 5090 only. The published results below retain their original v0.16.0 identity and do not
+qualify this new client. After execution, composition records actual outcomes and the guide hash;
+no executable block may change between that candidate and its composed acceptance.
+
+## Published v0.16.0 acceptance evidence (historical, not v0.16.1)
 
 **v0.16.0 fresh acceptance** on frozen candidate
 `56899320d416bafda5c15d7e454e9b593badc0a6`
@@ -254,7 +272,7 @@ Clone the tag in Windows and in the WSL2 distro that owns Docker (`Set-Execution
 the current window only):
 
 ```powershell
-git clone --branch v0.16.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.16.1 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 if ($LASTEXITCODE -ne 0) { throw 'release clone failed' }
 Set-Location omp-ninfer
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
@@ -266,8 +284,8 @@ if ($LASTEXITCODE -ne 0) { throw 'ready gate failed' }
 
 ```powershell
 $ErrorActionPreference = 'Stop'
-$Url = 'https://github.com/can1357/oh-my-pi/releases/download/v18.14.0/omp-windows-x64.exe'
-$Expected = '620a5935cdb6a9ed52d8b0c93892d6b5bb84155244a98f3be82af0455177bf29'
+$Url = 'https://github.com/can1357/oh-my-pi/releases/download/v18.15.0/omp-windows-x64.exe'
+$Expected = '978846a816cb77f44a55e32b16493375ca837fbf87e0aec35a9c1c934bff0cd0'
 Invoke-WebRequest -UseBasicParsing -Uri $Url -OutFile omp-windows-x64.exe
 if ((Get-FileHash omp-windows-x64.exe -Algorithm SHA256).Hash.ToLowerInvariant() -cne $Expected) { throw 'OMP binary checksum mismatch' }
 $Launcher = "$env:LOCALAPPDATA\OMP\omp.exe"
@@ -278,7 +296,7 @@ Remove-Item Env:PI_OPENAI_STATEFUL -ErrorAction SilentlyContinue
 if ($LASTEXITCODE -ne 0) { throw 'OMP version check failed' }
 ```
 
-The client version must be `omp/18.14.0` (to roll back, verify the previous pinned binary's
+The client version must be `omp/18.15.0` (to roll back, verify the previous pinned binary's
 checksum before replacing `omp.exe`). Inside WSL2, run **3. Prepare the model and key** and
 **4. Start NInfer** below, skip sections 5–6 (Docker Desktop exposes `127.0.0.1:18089` to native
 Windows), then run **Native Windows OMP** in section 7 and **Native Windows command forms** in
@@ -295,7 +313,7 @@ and staging untouched for historical recovery; never import MTP3 checkpoints int
 runtime.
 
 ```powershell
-git clone --branch v0.16.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.16.1 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 if ($LASTEXITCODE -ne 0) { throw 'release clone failed' }
 Set-Location omp-ninfer
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
@@ -310,7 +328,7 @@ $VariantId = 'rtx4090-windows-native'
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 $ErrorActionPreference = 'Stop'
-$Manifest = Get-Content .\releases\v0.16.0\manifest.json -Raw | ConvertFrom-Json
+$Manifest = Get-Content .\releases\v0.16.1\manifest.json -Raw | ConvertFrom-Json
 $Variant = @($Manifest.components.ninfer_variants | Where-Object { $_.id -ceq $VariantId })
 if ($Variant.Count -ne 1 -or $Variant[0].status -cne 'qualified') {
   throw 'requested native runtime variant is not uniquely qualified'
@@ -500,7 +518,7 @@ is no longer required. Keep `v0.7.0-beta.3` roots, staging, and checkpoints for 
 checkpoints do not transfer into DFlash2.
 
 ```powershell
-git clone --branch v0.16.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.16.1 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 if ($LASTEXITCODE -ne 0) { throw 'release clone failed' }
 Set-Location omp-ninfer
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
@@ -515,7 +533,7 @@ $VariantId = 'rtx3090-windows-native'
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 $ErrorActionPreference = 'Stop'
-$Manifest = Get-Content .\releases\v0.16.0\manifest.json -Raw | ConvertFrom-Json
+$Manifest = Get-Content .\releases\v0.16.1\manifest.json -Raw | ConvertFrom-Json
 $Variant = @($Manifest.components.ninfer_variants | Where-Object { $_.id -ceq $VariantId })
 if ($Variant.Count -ne 1 -or $Variant[0].status -cne 'qualified') {
   throw 'requested native runtime variant is not uniquely qualified'
@@ -702,7 +720,7 @@ From the tagged clone, install the release's checksummed `omp-linux-x64` and cop
 ```sh
 (
 set -euo pipefail
-CLIENT='releases/v0.16.0/qualification/client-components.json'
+CLIENT='releases/v0.16.1/qualification/client-components.json'
 URL=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["platforms"]["linux-x64"]["asset_url"])' "$CLIENT")
 EXPECTED=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["platforms"]["linux-x64"]["asset_sha256"])' "$CLIENT")
 VERSION=$(python3 -c 'import json,sys; print("omp/" + json.load(open(sys.argv[1]))["omp"]["distribution_version"])' "$CLIENT")
@@ -769,21 +787,21 @@ Run the chain as one block. A failed clone stops before entering any existing `o
 directory; the ready gate explicitly names the release being installed.
 
 ```sh
-git clone --branch v0.16.0 --depth 1 \
+git clone --branch v0.16.1 --depth 1 \
   https://github.com/alphastorm/omp-ninfer.git &&
 cd omp-ninfer &&
-python3 scripts/verify_release.py --release v0.16.0 --require-ready
+python3 scripts/verify_release.py --release v0.16.1 --require-ready
 ```
 
 ## 2. Install the OMP beta on the Mac
 
-Despite the retained heading, this installs the stock Oh My Pi 18.14.0 binary (`omp-darwin-arm64`):
+Despite the retained heading, this installs the stock Oh My Pi 18.15.0 binary (`omp-darwin-arm64`):
 
 ```sh
 (
 set -euo pipefail
-URL='https://github.com/can1357/oh-my-pi/releases/download/v18.14.0/omp-darwin-arm64'
-EXPECTED='608843959ab34295d52460dd09dd7d548b6c903c08a83c67954c2d4c36fd1f5a'
+URL='https://github.com/can1357/oh-my-pi/releases/download/v18.15.0/omp-darwin-arm64'
+EXPECTED='d36dfabf0ee52d6f08efadb59c46f0349545c6f6975522417adae29646e73e34'
 curl --fail --location --output omp-darwin-arm64 "$URL"
 test "$(shasum -a 256 omp-darwin-arm64 | cut -d ' ' -f 1)" = "$EXPECTED"
 mkdir -p "$HOME/.local/bin"
@@ -794,7 +812,7 @@ unset PI_OPENAI_STATEFUL
 )
 ```
 
-The version must be `omp/18.14.0`; add `$HOME/.local/bin` to `PATH` before continuing.
+The version must be `omp/18.15.0`; add `$HOME/.local/bin` to `PATH` before continuing.
 
 ## 3. Prepare the model and key on the inference host
 
@@ -806,11 +824,11 @@ CHECKPOINTS="$ROOT/checkpoints-v013"
 install -d -m 700 "$ROOT" "$STATE" "$LOGS" "$CHECKPOINTS"
 
 MODEL_URL=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.16.0/manifest.json"))["components"]["model"]["artifact_url"])')
+  'import json; print(json.load(open("releases/v0.16.1/manifest.json"))["components"]["model"]["artifact_url"])')
 MODEL_BYTES=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.16.0/manifest.json"))["components"]["model"]["artifact_bytes"])')
+  'import json; print(json.load(open("releases/v0.16.1/manifest.json"))["components"]["model"]["artifact_bytes"])')
 MODEL_SHA256=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.16.0/manifest.json"))["components"]["model"]["artifact_sha256"])')
+  'import json; print(json.load(open("releases/v0.16.1/manifest.json"))["components"]["model"]["artifact_sha256"])')
 MODEL="$ROOT/qwen3_8_27b-v3.ninfer"
 
 # a rerun with a complete file gets HTTP 416 from the CDN; the byte-count and checksum below decide

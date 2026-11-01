@@ -1,0 +1,33 @@
+{
+ "artifact_type": "p16_founder_gate_waiver",
+ "schema_version": 1,
+ "recorded_utc": "2026-11-01T01:22:19.343966+00:00",
+ "decision": "founder selected 'Waive the floor case' (Ask, 2026-11-01 ~01:25Z)",
+ "lane": "rtx4090",
+ "subject": {
+  "source": "26fa28d0e7834515508fc07ac503164a6effc820",
+  "package_sha256": "06526bdb630a87c860ceb0eaafb633df867181b596648897cb5a64a92e268f27",
+  "server_sha256_prefix": "c6f59e9e",
+  "config_sha256_prefix": "f00cfac9",
+  "profile": "D1 (DFlash2 K7, INT8 KV, C1, 131072)"
+ },
+ "waived": {
+  "gate": "speed every-case floor >= 0.95",
+  "case": "log-024@0",
+  "ratio": 0.9338319730475076,
+  "baseline_tok_s": 139.4120056820121,
+  "candidate_tok_s": 130.18738833254372
+ },
+ "still_binding_and_passed": {
+  "weighted_role108": 1.2735815538271253,
+  "weighted_all115": 1.274085083,
+  "supplemental7_min": 1.0803583765
+ },
+ "speed_result_sha256": "32acdecc5a67ee9278fff5a173235a1d61e98e9db1b23dac9c4e56ee72d3e675",
+ "remains_binding": [
+  "EXP-102 candidate screen + determinism (EXP-085 rule)",
+  "upgrade/rollback/repair rehearsal 1c/2c/3c",
+  "release acceptance windows"
+ ],
+ "disclosure": "release notes and PERFORMANCE must state log-024@0 at 0.934 under founder waiver"
+}

@@ -25,6 +25,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Prepare v0.16.1 with stock Oh My Pi 18.15.0 (`3fedf8d5`, tree `48bc72ba`) for all three
+  client platforms, carrying v0.16.0 runtime/model/profile bytes unchanged. Bind the complete
+  18.14.0→18.14.2 and 18.14.2→18.15.0 source reviews and independent asset-integrity evidence;
+  fresh candidate-bound execution and publication are separate gates, not carried acceptance.
+- Retain Qwen exact-loop detection with a 1024-character floor for short newline-spanning cycles;
+  reject length-truncated main/handoff/branch summaries while preserving a completed main
+  summary if only the optional short summary truncates. Retire operator `compat.thinkingLoopGuard`,
+  preserving the three working Responses compat keys, static fragments and effort clamps.
+- Describe shared Responses replay sanitization, explicit missing-key `retry.modelFallback=false`,
+  manual-compaction/background-result delivery, snapcompact reader accounting and optional
+  caption/capture side-request boundaries without claiming new platform or inference results.
+
 - Mark v0.16.0 as the published release across the README, quickstart banner, facts, roadmap,
   release history, upstream watch, reference docs, site, and brand assets; front-door install links
   return to the guide on `main`.

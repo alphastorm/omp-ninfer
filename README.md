@@ -1,4 +1,4 @@
-[![OMP NInfer — your coding session should survive the process. Qualified on RTX 5090 · 4090 · 3090, v0.16.0.](assets/banner.png)](docs/QUICKSTART.md)
+[![OMP NInfer — your coding session should survive the process. Qualified on RTX 5090 · 4090 · 3090, v0.16.0.](assets/banner.png)](https://github.com/alphastorm/omp-ninfer/blob/v0.16.0/docs/QUICKSTART.md)
 
 <div align="center">
 
@@ -11,18 +11,18 @@ Every install route in the guide was run end to end on **v0.16.0** with unmodifi
 three client platforms, both native lanes
 ([receipt](releases/v0.16.0/acceptance/composed-external-installation.json)).
 
-### [Get started →](docs/QUICKSTART.md)
+### [Get started →](https://github.com/alphastorm/omp-ninfer/blob/v0.16.0/docs/QUICKSTART.md)
 
 [![CI][ci-badge]][ci] [![Release][release-badge]][releases] [![RTX 5090 decode][decode-badge]][benchmarks] [![Context][context-badge]][benchmarks] [![License][license-badge]][license]
 
-[Download v0.16.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.16.0) · [Lanes](docs/QUICKSTART.md#choose-your-lane) ·
+[Download v0.16.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.16.0) · [Lanes](https://github.com/alphastorm/omp-ninfer/blob/v0.16.0/docs/QUICKSTART.md#choose-your-lane) ·
 [Facts](docs/FACTS.md) · [Compare](docs/DECISION_GUIDE.md) · [Benchmarks](docs/BENCHMARKS.md) ·
 [Architecture](docs/ARCHITECTURE.md) · [Security](docs/SECURITY.md) · [Troubleshooting](docs/TROUBLESHOOTING.md) ·
 [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)
 
 </div>
 
-[Contributor acceptance and doctor](docs/QUICKSTART.md#contributor-acceptance-and-preflight) run without GPU hardware in rehearsal/offline mode; rehearsal receipts never qualify a release.
+[Contributor acceptance and doctor](https://github.com/alphastorm/omp-ninfer/blob/v0.16.0/docs/QUICKSTART.md#contributor-acceptance-and-preflight) run without GPU hardware in rehearsal/offline mode; rehearsal receipts never qualify a release.
 
 [ci]: https://github.com/alphastorm/omp-ninfer/actions/workflows/ci.yml
 [ci-badge]: https://img.shields.io/github/actions/workflow/status/alphastorm/omp-ninfer/ci.yml?branch=main&label=CI&labelColor=0B0E11
@@ -87,11 +87,30 @@ port 18082; all three lanes serve the same 20.4 GB Qwen3.8 27B model container v
 credentials. Exact component, source, and model identities: [facts](docs/FACTS.md#current-release) ·
 [glossary](docs/FACTS.md#glossary) · [manifest](releases/v0.16.0/manifest.json).
 
+## Next on main — prepared v0.16.1
+
+**Prepared next: v0.16.1 / stock OMP 18.15.0.** This client-only successor keeps all v0.16.0
+runtime packages, model and serving profiles byte-identical. Source and independently downloaded
+asset-integrity reviews are complete; no v0.16.0 client or route acceptance transfers to the new
+candidate. Fresh platform/five-route/native-install/restoration evidence, exact-head product review,
+immutable pins and founder-owned publication remain separate gates.
+
+The client update retains Qwen's exact loop guard with the 1 KiB whole-line repetition floor and
+rejects incomplete length-stopped summaries. It also changes shared Responses replay sanitization,
+missing-key fallback gating and manual-compaction/background-result delivery. Keep explicit
+`retry.modelFallback=false`, the three working Responses compatibility keys, static selectors and
+effort clamps; remove obsolete operator `compat.thinkingLoopGuard`, not the guard itself.
+Optional job-caption roles may make separately attributable requests and can use inherited smol
+credentials independently of the retry opt-out: acceptance uses isolated local-only auth.
+See the [prepared notes](releases/v0.16.1/NINFER_RELEASE_NOTES.md) and
+[18.15.0 source/integrity review](docs/measurements/2026-11-01-omp-18150-client-upgrade-review.json).
+Until publication, use the [published v0.16.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.16.0/docs/QUICKSTART.md).
+
 ## Get started
 
-1. **[Choose your lane](docs/QUICKSTART.md#choose-your-lane)** and check its prerequisites.
+1. **[Choose your lane](https://github.com/alphastorm/omp-ninfer/blob/v0.16.0/docs/QUICKSTART.md#choose-your-lane)** and check its prerequisites.
 2. **Clone tag `v0.16.0`** and run `python3 scripts/verify_release.py --require-ready`.
-3. **[Install the stock Oh My Pi 18.14.0 client](docs/QUICKSTART.md#omp-18140-client)** with the
+3. **[Install the stock Oh My Pi 18.14.0 client](https://github.com/alphastorm/omp-ninfer/blob/v0.16.0/docs/QUICKSTART.md#omp-18140-client)** with the
    fail-closed config and per-model fragment.
 4. **Run the acceptance checks** at the end of your lane's route: tool turn, continuation, restart
    survival, fail closed.
@@ -157,7 +176,7 @@ Lifecycle and cut rules: [releases](docs/RELEASES.md).
 
 | Document | What it answers |
 | --- | --- |
-| [Quickstart](docs/QUICKSTART.md) | Which lane, prerequisites, exact install, acceptance checks |
+| [Quickstart](https://github.com/alphastorm/omp-ninfer/blob/v0.16.0/docs/QUICKSTART.md) | Which lane, prerequisites, exact install, acceptance checks |
 | [Facts](docs/FACTS.md) | Current identities, limits, and non-claims in one place |
 | [Decision guide](docs/DECISION_GUIDE.md) | This versus Ollama, LM Studio, llama.cpp, vLLM |
 | [Compatibility](docs/COMPATIBILITY.md) | Qualified client and runtime combinations (generated) |

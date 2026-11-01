@@ -75,6 +75,24 @@ Full release authority: [`releases/v0.16.0/NINFER_RELEASE_NOTES.md`](releases/v0
 [`releases/v0.16.0/qualification.json`](releases/v0.16.0/qualification.json) ·
 [`docs/RELEASES.md`](docs/RELEASES.md) · [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md).
 
+## Prepared next — v0.16.1 client-only patch
+
+**Prepared next: v0.16.1 / stock OMP 18.15.0.** This client-only successor keeps all v0.16.0
+runtime packages, model and serving profiles byte-identical. Source and independently downloaded
+asset-integrity reviews are complete; no v0.16.0 client or route acceptance transfers to the new
+candidate. Fresh platform/five-route/native-install/restoration evidence, exact-head product review,
+immutable pins and founder-owned publication remain separate gates.
+
+The chosen client is upstream `v18.15.0`, commit `3fedf8d53267e32a6d7521ce725fdcc4a36fdc67`,
+tree `48bc72ba2418c0b78163d9769e91a0d8683e642b`, release `430630500`.
+[Prepared notes](releases/v0.16.1/NINFER_RELEASE_NOTES.md) and the
+[source/integrity review](docs/measurements/2026-11-01-omp-18150-client-upgrade-review.json)
+cover guard/summary behavior, replay sanitization, missing-key fallback, async manual compaction
+and optional side-request accounting. This is not a native-runtime upgrade, rk4v4 adoption,
+canonical promotion, checkpoint migration or new performance claim. All published v0.16.0
+measurements, waivers and subject identities remain historical authorities. No new Shipped row
+is recorded before publication.
+
 ## Remaining work
 
 Items below remain open after `v0.16.0`; each names the current evidence showing the gap is still

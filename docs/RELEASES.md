@@ -5,13 +5,44 @@ to NInfer (inference engine) serving Qwen3.8 27B (served model). OMP NInfer vers
 product; component repositories keep their own versions and tags, and the product manifest binds
 the exact combination.
 
-**Navigation:** [Current release (v0.16.0)](#v0160--native-dflash2-k7-rtx-3090-concurrency-2-and-unified-engine-fixes) ·
+**Navigation:** [Prepared v0.16.1](#prepared-v0161--stock-omp-18150-unchanged-gpu-lanes) · [Current release (v0.16.0)](#v0160--native-dflash2-k7-rtx-3090-concurrency-2-and-unified-engine-fixes) ·
 [Previous v0.15.0](#v0150--stock-omp-18140-with-unchanged-gpu-lanes) ·
 [Channels](#channels) · [Version identities](#version-identities) ·
 [Release state transition](#release-state-transition) · [Candidate freeze](#candidate-freeze) ·
 [Next native release sequencing](#next-native-release-sequencing) ·
 [External-install acceptance](#external-install-acceptance) · [Cut procedure](#cut-procedure) ·
 [Release notes](#release-notes)
+
+## Prepared v0.16.1 — stock OMP 18.15.0, unchanged GPU lanes
+
+**Prepared next: v0.16.1 / stock OMP 18.15.0.** This client-only successor keeps all v0.16.0
+runtime packages, model and serving profiles byte-identical. Source and independently downloaded
+asset-integrity reviews are complete; no v0.16.0 client or route acceptance transfers to the new
+candidate. Fresh platform/five-route/native-install/restoration evidence, exact-head product review,
+immutable pins and founder-owned publication remain separate gates.
+
+Published **v0.16.0** remains GitHub `Latest`. The
+[prepared notes](../releases/v0.16.1/NINFER_RELEASE_NOTES.md) and
+[descriptor](../releases/v0.16.1/qualification/client-components.json) select upstream release
+`430630500` (`2026-11-01T14:17:08Z`), commit `3fedf8d53267e32a6d7521ce725fdcc4a36fdc67`,
+tree `48bc72ba2418c0b78163d9769e91a0d8683e642b`.
+
+| Platform | Asset / ID | Bytes | SHA-256 |
+| --- | --- | ---: | --- |
+| Darwin arm64 | `omp-darwin-arm64` / `698539455` | 215295120 | `d36dfabf0ee52d6f08efadb59c46f0349545c6f6975522417adae29646e73e34` |
+| Windows x64 | `omp-windows-x64.exe` / `698539443` | 243250176 | `978846a816cb77f44a55e32b16493375ca837fbf87e0aec35a9c1c934bff0cd0` |
+| Linux x64 | `omp-linux-x64` / `698539441` | 276785328 | `6737ee2415555a3656cc7b89c14d1c25c18658ee4c0fd4f7309705149ccb7b0f` |
+
+`SHA256SUMS.txt` is asset `698539453`, 844 bytes, SHA-256
+`c866af8cc5c8f04d0baee8b5a836b63419b6fa6095061685588af3a3cbe52f72`.
+The [complete incremental review](measurements/2026-11-01-omp-18150-client-upgrade-review.json)
+records all four independent downloads and 235 commits/257 paths after the earlier 18.14.2
+review. It is not a sixth accepted route or a fresh live qualification receipt. The selected client
+retains the Qwen exact guard and incomplete-summary rejection, and changes shared replay cleanup,
+missing-key fallback gating, manual-compaction result delivery and optional caption accounting.
+No runtime package/profile/model or original waiver subject changes. The five routes remain
+2/10/5/7/7 blocks, macOS preview and Linux WSL2-only; both native public installs and exact
+restoration must be evidenced anew before composition and immutable pins.
 
 ## v0.16.0 — native DFlash2 K7, RTX 3090 concurrency 2, and unified engine fixes
 
