@@ -933,8 +933,11 @@ class ReleaseContractTest(unittest.TestCase):
                      root / "docs" / "COMPATIBILITY.md")
         # Component-mutation fixtures need valid release-note link targets; the
         # real documentation graph is checked by the normal validation of ROOT.
-        for document in ("QUICKSTART.md", "SECURITY.md", "BENCHMARKS.md"):
+        for document in ("QUICKSTART.md", "SECURITY.md", "BENCHMARKS.md",
+                         "FACTS.md", "PERFORMANCE.md"):
             (root / "docs" / document).write_text("# Test fixture\n", encoding="utf-8")
+        for document in ("CHANGELOG.md", "ROADMAP.md"):
+            (root / document).write_text("# Test fixture\n", encoding="utf-8")
         return temporary, root
 
     def add_unbound_client_candidate(self, root: Path) -> None:

@@ -143,8 +143,11 @@ class ManualTunnelScriptsTest(unittest.TestCase):
         launcher.write_text(text, encoding="utf-8")
         shutil.copytree(ROOT / "docs" / "measurements", root / "docs" / "measurements")
         shutil.copy2(release / "COMPATIBILITY.md", root / "docs" / "COMPATIBILITY.md")
-        for document in ("QUICKSTART.md", "SECURITY.md", "BENCHMARKS.md"):
+        for document in ("QUICKSTART.md", "SECURITY.md", "BENCHMARKS.md",
+                         "FACTS.md", "PERFORMANCE.md"):
             (root / "docs" / document).write_text("# Test fixture\n", encoding="utf-8")
+        for document in ("CHANGELOG.md", "ROADMAP.md"):
+            (root / document).write_text("# Test fixture\n", encoding="utf-8")
 
     @staticmethod
     def materialize_synthetic_runtime(

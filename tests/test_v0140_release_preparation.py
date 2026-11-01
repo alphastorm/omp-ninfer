@@ -5,17 +5,18 @@ from decimal import Decimal
 import hashlib
 import json
 from pathlib import Path
+import subprocess
 import sys
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(ROOT / "tests"))  # test_documented_route, also when this module runs alone
-import documented_route
 import render_compatibility
 import verify_release
 
 RELEASE = ROOT / "releases/v0.14.0"
+GUIDE_COMMIT = "7c4c832a24479996d8ae84b65ccb7237a21749da"
 SOURCE = "2c6f423bd817b6534158553e1b34ab4959c43165"
 MODEL = "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
 CONFIG = "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47"
@@ -42,6 +43,13 @@ def sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def historical_guide() -> str:
+    """Read the published v0.14.0 guide, not the moving successor preparation."""
+    return subprocess.check_output(
+        ["git", "show", f"{GUIDE_COMMIT}:docs/QUICKSTART.md"], cwd=ROOT, text=True
+    )
+
+
 class V0140PreparationTests(unittest.TestCase):
     def test_prepared_guide_keeps_publication_gated_after_acceptance(self) -> None:
         qualification = load(RELEASE / "qualification.json")
@@ -51,7 +59,7 @@ class V0140PreparationTests(unittest.TestCase):
 
     def test_prepared_guide_lane_identities_match_the_candidate_manifest(self) -> None:
         manifest = load(RELEASE / "manifest.json")
-        text = documented_route.DEFAULT_DOC.read_text(encoding="utf-8")
+        text = historical_guide()
         self.assertIn(SOURCE, text)
         glance = text.split(
             "| Lane | Runtime component and source | Model artifact | Serving profile and limits |\n", 1
@@ -81,7 +89,7 @@ class V0140PreparationTests(unittest.TestCase):
         self.assertIn("founder-approved 5090-only reproducibility exception", glance)
 
     def test_native_3090_upgrade_requires_stop_before_the_first_install_block(self) -> None:
-        text = documented_route.DEFAULT_DOC.read_text(encoding="utf-8")
+        text = historical_guide()
         section = text.split("## Native Windows RTX 3090 release lane\n", 1)[1].split(
             "```powershell", 1)[0]
         for claim in ("stop the running RTX 3090 lane before installing v0.14.0",
