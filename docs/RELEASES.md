@@ -1,15 +1,12 @@
 # Releases
 
-> Prepared v0.16.0 candidate: not a published product. Fresh candidate acceptance passed on 2026-11-01; product-council binding and the final manifest pin remain separate gates. Published installation remains on the [immutable v0.15.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.15.0/docs/QUICKSTART.md).
-
-
 Oh My Pi (coding-agent client) connects through OMP NInfer (qualified appliance and release layer)
 to NInfer (inference engine) serving Qwen3.8 27B (served model). OMP NInfer versions the integrated
 product; component repositories keep their own versions and tags, and the product manifest binds
 the exact combination.
 
-**Navigation:** [Prepared v0.16.0](#v0160--native-dflash2-k7-rtx-3090-concurrency-2-and-unified-engine-fixes) ·
-[Current release (v0.15.0)](#v0150--stock-omp-18140-with-unchanged-gpu-lanes) ·
+**Navigation:** [Current release (v0.16.0)](#v0160--native-dflash2-k7-rtx-3090-concurrency-2-and-unified-engine-fixes) ·
+[Previous v0.15.0](#v0150--stock-omp-18140-with-unchanged-gpu-lanes) ·
 [Channels](#channels) · [Version identities](#version-identities) ·
 [Release state transition](#release-state-transition) · [Candidate freeze](#candidate-freeze) ·
 [Next native release sequencing](#next-native-release-sequencing) ·
@@ -18,8 +15,9 @@ the exact combination.
 
 ## v0.16.0 — native DFlash2 K7, RTX 3090 concurrency 2, and unified engine fixes
 
-Prepared **v0.16.0** is not published; the current published product remains `v0.15.0` (published
-2026-10-30), and `v0.16.0` supersedes the `v0.15.1`
+Published **2026-11-01** (`2026-11-01T14:15:43Z`, GitHub release ID `430629884`, annotated tag
+`v0.16.0` → `83e2bdd5674d653428f2d4df82614fc6d4b3d304`) as GitHub `Latest`, succeeding `v0.15.0`
+(published 2026-10-30) and superseding the `v0.15.1`
 native-DFlash2 patch referenced in the `v0.15.0` release notes and roadmap. All three qualified GPU
 lanes bind one frozen engine source `26fa28d0e7834515508fc07ac503164a6effc820` (`26fa28d0`, tag
 `rebase/ckpt-native-n16`) on upstream `Neroued/ninfer` master
@@ -181,7 +179,7 @@ RTX 5090 hold **412.552 s**, native RTX 4090 / RTX 3090 windows **499.977 / 1,22
 
 Published **2026-10-30** (`2026-10-30T21:10:42Z`, GitHub release ID `429493153`, annotated tag
 `v0.15.0` → `dff3622fd34d2e5726c508380229de87d402842e`) as GitHub `Latest`, succeeding `v0.14.0`
-(published 2026-10-28); prepared successor `v0.16.0` is not published. Unmodified upstream OMP **18.14.0** (`31147f9d`, tree `9a63b5bf`, release ID
+(published 2026-10-28); superseded by `v0.16.0` on 2026-11-01. Unmodified upstream OMP **18.14.0** (`31147f9d`, tree `9a63b5bf`, release ID
 `428242783`, upstream binaries rebuilt with Bun 1.4.4 for CVE-2026-91403 and CVE-2026-111497;
 `qwen3.8-27b` on native RTX 4090 defaults to stock `replace` edit-tool mode while the opaque
 `q38-ninfer` alias on RTX 5090 and native RTX 3090 stays `hashline`) replaces 18.12.6 across macOS
@@ -441,13 +439,13 @@ native public installs, with independent restoration and production left unchang
 
 | Channel | Meaning | Recorded baseline |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.15.0`, published 2026-10-30 (`Latest`); prepared successor `v0.16.0` (not published) |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.16.0`, published 2026-11-01 (`Latest`); predecessor `v0.15.0` (2026-10-30) |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release.
 The historical fork client used separate `omp-beta` and stable `omp` Homebrew casks through
 v0.7.4. v0.10.0 introduced upstream OMP 18.4.10 binaries and no client cask; v0.11.0 and v0.12.0
 pinned stock OMP 18.8.7, v0.12.1 pinned 18.10.1, and v0.12.2 pinned 18.12.1; `v0.13.0` through
-`v0.14.0` pinned stock OMP 18.12.6, and `v0.15.0` through `v0.16.0` pin stock OMP 18.14.0. All five
+`v0.14.0` pinned stock OMP 18.12.6, and `v0.15.0` through current `v0.16.0` pin stock OMP 18.14.0. All five
 documented routes and fresh platform-client acceptance passed on the published components; see
 [documented-route acceptance](../releases/v0.16.0/acceptance/documented-routes.json) and
 [composed acceptance](../releases/v0.16.0/acceptance/composed-external-installation.json).
@@ -466,10 +464,11 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
-### v0.16.0 prepared release — native DFlash2 K7, RTX 3090 concurrency 2, and unified engine fixes
+### v0.16.0 public release — native DFlash2 K7, RTX 3090 concurrency 2, and unified engine fixes
 
-Prepared candidate (not published; the current GitHub `Latest` release remains `v0.15.0`, published
-2026-10-30; `v0.16.0` supersedes the planned `v0.15.1` patch).
+Published 2026-11-01 (`2026-11-01T14:15:43Z`, GitHub release ID `430629884`, annotated tag
+`v0.16.0` → `83e2bdd5674d653428f2d4df82614fc6d4b3d304`); the current GitHub `Latest` release
+(predecessor `v0.15.0`, published 2026-10-30; `v0.16.0` supersedes the planned `v0.15.1` patch).
 
 The [release notes](../releases/v0.16.0/NINFER_RELEASE_NOTES.md) and
 [manifest](../releases/v0.16.0/manifest.json) bind all three GPU lanes to one frozen engine source
@@ -620,16 +619,42 @@ model container version 3 `81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd35813
   `omp-windows-x64.exe` `620a5935`, 242,797,056 bytes; `omp-linux-x64` `e7dd2b60`, 276,244,656
   bytes in [`client-components.json`](../releases/v0.16.0/qualification/client-components.json)).
 
+Both G4 councils (`CR-20261031T162716Z-26fa28d0` on the common-engine fork, ledger `b2871c36`, and
+`CR-20261101T123454Z-56899320-product` on product tooling, ledger `405c537a`) closed by round-1
+accountable-lead disposition in [`review/runtime-ledger.json`](../releases/v0.16.0/review/runtime-ledger.json)
+(`ab195970`) with no in-scope residual P0/P1 (deferred items in
+[#88](https://github.com/alphastorm/omp-ninfer/issues/88)–[#90](https://github.com/alphastorm/omp-ninfer/issues/90),
+[#128](https://github.com/alphastorm/omp-ninfer/issues/128) retaining
+[#109](https://github.com/alphastorm/omp-ninfer/issues/109), and `alphastorm/ninfer`
+[#50](https://github.com/alphastorm/ninfer/issues/50)–[#54](https://github.com/alphastorm/ninfer/issues/54);
+this release closes `omp-ninfer` [#94](https://github.com/alphastorm/omp-ninfer/issues/94)–[#96](https://github.com/alphastorm/omp-ninfer/issues/96),
+[#116](https://github.com/alphastorm/omp-ninfer/issues/116), and
+[#117](https://github.com/alphastorm/omp-ninfer/issues/117)). Fresh authorized-window acceptance
+passed on frozen candidate `56899320d416bafda5c15d7e454e9b593badc0a6` on 2026-11-01: all five
+documented routes / 31 blocks (RTX 5090 host 2/2, macOS 10/10 preview, Windows 5/5, native RTX
+4090 7/7 blocks and 22/22 route-behavior checks with first-of-lineage rollback `not_applicable`,
+native RTX 3090 7/7 blocks and 22/22 route-behavior checks plus `C2` four-way fanout, parallel
+stock OMP overlap at limit 2, and two automatic-compaction/control-recall epochs with
+first-of-lineage rollback `not_applicable`), three newly downloaded stock 18.14.0 clients (plus
+WSL2 Linux URL/hash installation, live tool/continuation, and runtime-outage checks), and both
+`v0.8.0-beta.1` native public installs (`already_installed` verification for
+`qwen38-4090-native-v0.8.0-beta.1-26fa28d0e783` and
+`qwen38-3090-native-v0.8.0-beta.1-26fa28d0e783`). All three initial acceptance windows passed and
+restored on the first attempt: the RTX 5090 acceptance-window hold completed in 412.552 s and the
+native driver windows completed in 499.977 s (RTX 4090) and 1,225.308 s (RTX 3090), restoring the
+RTX 5090 incumbent (`760fb6be`, `unless-stopped`, HTTP 200, Fleet healthy) and both promoted
+canonical stopped native baselines at 450 W / 370 W (18/18 Restore and 18/18 final Audit checks per
+native lane).
 [Documented routes](../releases/v0.16.0/acceptance/documented-routes.json) ·
 [Composed acceptance](../releases/v0.16.0/acceptance/composed-external-installation.json) ·
+[Restoration](measurements/2026-11-01-v0160-acceptance-restoration.json) ·
 [Qualification](../releases/v0.16.0/qualification.json) ·
 [Review ledger](../releases/v0.16.0/review/runtime-ledger.json).
 
 ### v0.15.0 public release — stock OMP 18.14.0 with unchanged GPU lanes
 
 Published 2026-10-30 (`2026-10-30T21:10:42Z`, GitHub release ID `429493153`, annotated tag
-`v0.15.0` → `dff3622fd34d2e5726c508380229de87d402842e`); the current GitHub `Latest` release
-(predecessor `v0.14.0`, published 2026-10-28; prepared successor `v0.16.0` is not published).
+`v0.15.0` → `dff3622fd34d2e5726c508380229de87d402842e`); superseded as GitHub `Latest` by `v0.16.0`.
 
 The [release notes](../releases/v0.15.0/NINFER_RELEASE_NOTES.md) and
 [manifest](../releases/v0.15.0/manifest.json) bind unmodified upstream OMP **18.14.0** (upstream

@@ -1,8 +1,5 @@
 # Roadmap
 
-> Prepared v0.16.0 candidate: not a published product. Fresh candidate acceptance passed on 2026-11-01; product-council binding and the final manifest pin remain separate gates. Published installation remains on the [immutable v0.15.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.15.0/docs/QUICKSTART.md).
-
-
 This roadmap is a scope boundary, not a promise of dates. Oh My Pi (coding-agent client) connects
 through OMP NInfer (qualified appliance and release layer) to NInfer (inference engine) serving
 Qwen3.8 27B (served model) on user-owned NVIDIA GPUs. Qualified on RTX 5090 · 4090 · 3090, each
@@ -11,7 +8,7 @@ new product decision rather than placeholder abstractions, and no kernel, model,
 change becomes part of a release until its exact binary and profile are rebound through a new
 qualification receipt.
 
-Prepared v0.16.0 support boundaries (the published product remains v0.15.0): owner-operated exact profiles with no SLA or upgrade
+Standing support boundaries for the 0.x series: owner-operated exact profiles with no SLA or upgrade
 commitment; two requests in flight on the RTX 5090 container lane and on the native Windows RTX
 3090 lane (sharing one 131,072-token INT8 pool) and one active request on the native Windows RTX
 4090 lane (with native lanes running one lane at a time on port 18082); enforced JSON-schema
@@ -22,10 +19,10 @@ scheduling, automatic container restart, or silent cloud fallback; and no suppor
 claim outside the exact recorded package, machine, and profile. Community project; not affiliated
 with or endorsed by Oh My Pi, Qwen, or NVIDIA.
 
-## Prepared successor: v0.16.0
+## Current release
 
-**v0.16.0** (prepared candidate, not published; the published release remains `v0.15.0`,
-2026-10-30, and `v0.16.0` is intended to supersede `v0.15.0` and the planned `v0.15.1` patch) retains unmodified upstream
+**v0.16.0** (published 2026-11-01, GitHub `Latest`; superseding `v0.15.0`, 2026-10-30, and the
+planned `v0.15.1` patch) retains unmodified upstream
 Oh My Pi **18.14.0** (`31147f9d`, tree `9a63b5bf`, upstream binaries rebuilt with Bun 1.4.4 for
 CVE-2026-91403 and CVE-2026-111497; `qwen3.8-27b` on native RTX 4090 defaults to stock `replace`
 edit-tool mode while `q38-ninfer` on RTX 5090 and native RTX 3090 keeps `hashline`; `18.14.1` and
@@ -193,7 +190,7 @@ unmet:
 Negative and deferred results stay visible in [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md#experiment-ledger)
 so future work does not repeat closed experiments:
 
-- **Wholesale upstream engine merge — prior deferral superseded by v0.13.0–v0.15.0 (EXP-097).** Earlier upstream
+- **Wholesale upstream engine merge — prior deferral superseded by v0.13.0–v0.16.0 (EXP-097).** Earlier upstream
   NInfer (`594930e7`, `e31bc99b`, `81c8ce09`) trailed the fork by 18–19% on matched decode, lost
   sibling fanout reuse, overran the 32 GB automatic C2 BF16 budget by 561 MiB, and lacked the
   durable disk session store. `v0.13.0` re-ported the RTX 5090 durable/runtime families onto master
@@ -207,7 +204,7 @@ so future work does not repeat closed experiments:
   [`docs/measurements/2026-10-10-upstream-81c8ce09-rtx5090.json`](docs/measurements/2026-10-10-upstream-81c8ce09-rtx5090.json)).
 - **Full upstream re-port from `64d10fbf` to `1882c6ad` — deferred in favor of targeted fix
   cherry-picks.** Upstream `Neroued/ninfer` master `1882c6ad`
-  (`1882c6adbc98043fcf89f3589aa5addb3742777a`) is 215 commits ahead of the `v0.13.0`–`v0.15.0`
+  (`1882c6adbc98043fcf89f3589aa5addb3742777a`) is 215 commits ahead of the `v0.13.0`–`v0.16.0`
   merge base `64d10fbf` (`64d10fbf9f8e6bfc79ab0570b94674c5b9997929`), while `alphastorm/ninfer`
   is 518 commits ahead of `64d10fbf` at `2c6f423b` (and `main` tip `752dd887`, which merges
   `2c6f423b` plus `alphastorm/ninfer#48` installer upgrade/rollback and `#49` runtime/media/checkpoint
@@ -243,7 +240,7 @@ so future work does not repeat closed experiments:
   `qwen3_5` files, 24 modified `src/runtime` files, durable checkpoint store, and native packaging
   contracts onto `1882c6ad` is deferred (estimated at 5–8 multi-agent days from the 4-day `v0.14.0`
   integration on a compatible base, with GPU-only bit-identity and resume risk); the next release
-  cherry-picks self-contained bug fixes onto the `2c6f423b`/`752dd887` lineage instead.
+  cherry-picks self-contained bug fixes onto the `2c6f423b`/`752dd887`/`26fa28d0` lineage instead.
 - **No better primary model than `Qwen3.8-27B` (`groupwise-int` v3 `81f924d4`, `20,437,521,664`
   bytes / `19.03 GiB`) as of 2026-10-30; alternative upstream artifacts and `Qwen4-27B` (`qwen4_exp`)
   deferred or rejected.** A 2026-10-30 census of `neroued/*` and `Qwen/*` Hugging Face repositories
@@ -447,7 +444,7 @@ per-version history lives in [`CHANGELOG.md`](CHANGELOG.md) and [`docs/RELEASES.
 
 | Release | Date | Summary | Notes |
 | --- | --- | --- | --- |
-| `v0.16.0` | Prepared (not published) | Prepare native `DFlash2 K=7` on RTX 3090 (`v0.8.0-qwen38-3090-beta.1`, `C2` over one shared 131,072-token INT8 pool, 180 s timeout, `ninfer-native-3090: 2`, 350 W cap, 148.43 tok/s C1 decode, EXP-101, EXP-106) and RTX 4090 (`v0.8.0-qwen38-4090-beta.1`, `C1`, 1,024 prefill chunk, 254.27 tok/s C1 decode, EXP-102, EXP-104) and rebuild RTX 5090 (`v0.7.0-qwen38-5090-beta.4`, image `7a5a7bb8`, server `bab3fd77`) from common engine source `26fa28d0` on `64d10fbf` with Host export-State residency (`EXP-105`), `io_uring` lifetime fixes, running-lane installer handoff, and stock OMP 18.14.0 (`31147f9d`); close [#94](https://github.com/alphastorm/omp-ninfer/issues/94)–[#96](https://github.com/alphastorm/omp-ninfer/issues/96), [#116](https://github.com/alphastorm/omp-ninfer/issues/116), [#117](https://github.com/alphastorm/omp-ninfer/issues/117) (superseding `v0.15.1`) | [notes](releases/v0.16.0/NINFER_RELEASE_NOTES.md) |
+| `v0.16.0` | 2026-11-01 | Ship native `DFlash2 K=7` on RTX 3090 (`v0.8.0-qwen38-3090-beta.1`, `C2` over one shared 131,072-token INT8 pool, 180 s timeout, `ninfer-native-3090: 2`, 350 W cap, 148.43 tok/s C1 decode, EXP-101, EXP-106) and RTX 4090 (`v0.8.0-qwen38-4090-beta.1`, `C1`, 1,024 prefill chunk, 254.27 tok/s C1 decode, EXP-102, EXP-104) and rebuild RTX 5090 (`v0.7.0-qwen38-5090-beta.4`, image `7a5a7bb8`, server `bab3fd77`) from common engine source `26fa28d0` on `64d10fbf` with Host export-State residency (`EXP-105`), `io_uring` lifetime fixes, running-lane installer handoff, and stock OMP 18.14.0 (`31147f9d`); close [#94](https://github.com/alphastorm/omp-ninfer/issues/94)–[#96](https://github.com/alphastorm/omp-ninfer/issues/96), [#116](https://github.com/alphastorm/omp-ninfer/issues/116), [#117](https://github.com/alphastorm/omp-ninfer/issues/117) (superseding `v0.15.1`) | [notes](releases/v0.16.0/NINFER_RELEASE_NOTES.md) |
 | `v0.15.0` | 2026-10-30 | Repin stock OMP 18.14.0 (`31147f9d`, Bun 1.4.4 rebuild for CVE-2026-91403 and CVE-2026-111497; `qwen3.8-27b` replace-edit default) across all five documented routes (31 blocks) with unchanged v0.14.0 beta.3 GPU runtimes, shared model v3 (`81f924d4`), and serving profiles; ship native screen-arm capture (`scripts/native_screen_arm.py`), quality/fit/parity binding (`scripts/bind_native_variant.py`, `scripts/verify_release.py`), WSL2 client route, and idempotent guide reruns; defer native RTX 3090 DFlash2 to v0.15.1 ([#116](https://github.com/alphastorm/omp-ninfer/issues/116), [#117](https://github.com/alphastorm/omp-ninfer/issues/117)) | [notes](releases/v0.15.0/NINFER_RELEASE_NOTES.md) |
 | `v0.14.0` | 2026-10-28 | Bind common engine source `2c6f423b` on upstream master `64d10fbf` across RTX 5090 (`v0.7.0-qwen38-5090-beta.3`), native RTX 4090 (`v0.7.0-qwen38-4090-beta.3`), and native RTX 3090 (`v0.7.0-qwen38-3090-beta.3`, 350 W cap, stop-before-upgrade [#94](https://github.com/alphastorm/omp-ninfer/issues/94), `Group64` A8 off) with shared model v3 (`81f924d4`) and stock OMP 18.12.6 re-accepted across all five routes (31 blocks) | [notes](releases/v0.14.0/NINFER_RELEASE_NOTES.md) |
 | `v0.13.1` | 2026-10-26 | Rebase native Windows RTX 4090 (`v0.7.0-qwen38-4090-beta.2`) and RTX 3090 (`v0.7.0-qwen38-3090-beta.2`) onto upstream master `64d10fbf` (source `7a25cd72`) with shared model v3 (`81f924d4`), strict-origin schema 3 checkpoints (`session-checkpoints-v3`), shared Host budgets (640 / 768 MiB admission headroom), JSON-schema output, 128-character tool names, and CycloneDX dependency SBOMs; carry RTX 5090 `v0.7.0-qwen38-5090-beta.2` and stock OMP 18.12.6 re-accepted across all five routes | [notes](releases/v0.13.1/NINFER_RELEASE_NOTES.md) |

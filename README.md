@@ -1,4 +1,4 @@
-[![OMP NInfer — your coding session should survive the process. Qualified on RTX 5090 · 4090 · 3090, prepared v0.16.0 candidate.](assets/banner.png)](https://github.com/alphastorm/omp-ninfer/blob/v0.15.0/docs/QUICKSTART.md)
+[![OMP NInfer — your coding session should survive the process. Qualified on RTX 5090 · 4090 · 3090, v0.16.0.](assets/banner.png)](docs/QUICKSTART.md)
 
 <div align="center">
 
@@ -6,19 +6,16 @@
 keeps your session's continuation state resident on your GPU. **OMP NInfer** is the qualified release
 that binds them with one hash-pinned Qwen3.8 27B model on an RTX 5090, 4090, or 3090 you own.
 
-Every published install route was run end to end on **v0.15.0** with unmodified
+Every install route in the guide was run end to end on **v0.16.0** with unmodified
 [Oh My Pi 18.14.0](https://github.com/can1357/oh-my-pi/releases/tag/v18.14.0) — 31 steps,
 three client platforms, both native lanes
-([receipt](releases/v0.15.0/acceptance/composed-external-installation.json)).
+([receipt](releases/v0.16.0/acceptance/composed-external-installation.json)).
 
-### [Get started →](https://github.com/alphastorm/omp-ninfer/blob/v0.15.0/docs/QUICKSTART.md)
-
-The [prepared v0.16.0 guide](docs/QUICKSTART.md) targets the N16 runtime candidate.
-Candidate-bound external-install acceptance and product-tooling review are pending; this is not a published install route.
+### [Get started →](docs/QUICKSTART.md)
 
 [![CI][ci-badge]][ci] [![Release][release-badge]][releases] [![RTX 5090 decode][decode-badge]][benchmarks] [![Context][context-badge]][benchmarks] [![License][license-badge]][license]
 
-[Download v0.15.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.15.0) · [Lanes](docs/QUICKSTART.md#choose-your-lane) ·
+[Download v0.16.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.16.0) · [Lanes](docs/QUICKSTART.md#choose-your-lane) ·
 [Facts](docs/FACTS.md) · [Compare](docs/DECISION_GUIDE.md) · [Benchmarks](docs/BENCHMARKS.md) ·
 [Architecture](docs/ARCHITECTURE.md) · [Security](docs/SECURITY.md) · [Troubleshooting](docs/TROUBLESHOOTING.md) ·
 [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)
@@ -109,10 +106,10 @@ checkpoint directory `checkpoints-v013`), native Windows RTX 4090 `v0.8.0-qwen38
 INT8 KV, `C1`, `1,024`-token prefill chunk), and native Windows RTX 3090
 `v0.8.0-qwen38-3090-beta.1` (package `040d5923`, server `72cd776b`, profile
 `qwen38-3090-native-v0.8.0-beta.1`, DFlash2 `K=7`, INT8 KV, `C2` over one shared 131,072-token pool,
-`ninfer-native-3090: 2` in `fail-closed.yml`, 350 W serving cap). Running native lanes upgrade
+`ninfer-native-3090: 2` in [`examples/manual-tunnel/fail-closed.yml`](examples/manual-tunnel/fail-closed.yml), 350 W serving cap). Running native lanes upgrade
 directly through `Install-Release.ps1` — which stops a running incumbent via its own controller
 across power-cap transitions (closing [#94](https://github.com/alphastorm/omp-ninfer/issues/94); no
-manual stop-before-upgrade step is required) and retains `v0.7.0-beta.3` for
+manual stop-before-upgrade step is required) and retains `v0.7.0-qwen38-{4090,3090}-beta.3` for
 `Control-Release.ps1 -Action Rollback`. Prior MTP3 native checkpoints do not carry into DFlash2:
 keep prior checkpoint roots untouched for rollback and let OMP replay transcripts for fresh
 sessions. Native owners staying on v0.10.0 keep the

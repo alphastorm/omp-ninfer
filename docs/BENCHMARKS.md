@@ -1,8 +1,5 @@
 # Benchmarks
 
-> Prepared v0.16.0 candidate: not a published product. Fresh candidate acceptance passed on 2026-11-01; product-council binding and the final manifest pin remain separate gates. Published installation remains on the [immutable v0.15.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.15.0/docs/QUICKSTART.md).
-
-
 Oh My Pi (coding-agent client) connects through OMP NInfer (qualified appliance and release layer)
 to NInfer (inference engine) serving Qwen3.8 27B (served model). Every number on this page is a
 recorded measurement with a receipt, or it is explicitly labelled as someone else's published
@@ -18,7 +15,7 @@ is a universal GPU, model, or end-to-end latency claim.
 
 ## Current qualified results — v0.16.0
 
-Prepared release **v0.16.0** (not published; the published release remains `v0.15.0`, 2026-10-30)
+Published release **v0.16.0** (2026-11-01)
 retains unmodified upstream OMP **18.14.0** (`31147f9d`) and shared published model container
 version 3 `81f924d4` (`20,437,521,664` bytes, revision `1cbd84e7`), and rebuilds all three runtime
 components from frozen engine source `26fa28d0` (`26fa28d0e7834515508fc07ac503164a6effc820`) on
@@ -56,7 +53,7 @@ Windows `5/5`, both native routes `7/7` and `22/22` behavior gates each; both pu
 
 In `v0.16.0`, all three runtime components rebuild from frozen engine source `26fa28d0`
 (`26fa28d0e7834515508fc07ac503164a6effc820`) on upstream `Neroued/ninfer` master `64d10fbf`: both
-native Windows 24 GB lanes switch from MTP3 (`K=3`, `v0.14.0`–`v0.15.0`) to **DFlash2 draft window
+native Windows 24 GB lanes switch from MTP3 (`K=3` in `v0.3.1`–`v0.15.0`) to **DFlash2 draft window
 7 (`K=7`)** using `Q4_G64_FP16` draft MLP `gate`/`up` weights (`473,497,600` B) and host-mapped
 `token_embedding` (`1,350,860,800` B), native RTX 3090 advances from `C1` to **`C2` (two concurrent
 requests sharing one 131,072-token `INT8` KV pool)** with a `20,867.734375 MiB` (`21,881,405,440`
