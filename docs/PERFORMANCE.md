@@ -1,8 +1,5 @@
 # Performance program
 
-> Prepared v0.16.0 candidate: not a published product. Fresh candidate acceptance passed on 2026-11-01; product-council binding and the final manifest pin remain separate gates. Published installation remains on the [immutable v0.15.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.15.0/docs/QUICKSTART.md).
-
-
 The shipped profile is the floor, not the ceiling. This page is the public working surface for
 kernel and schedule optimization on the three qualified RTX runtime lanes: measured baselines, the
 profiling lane, an auditable ledger of what has been tried, and the open ideas backlog.
@@ -25,15 +22,14 @@ program so contributors can see the state of play in one place.
 ## Current state
 
 Oh My Pi (coding-agent client) connects through OMP NInfer (qualified appliance and release layer)
-to NInfer (inference engine) serving Qwen3.8 27B (served model). Prepared release **v0.16.0**
-(not published; intended to supersede `v0.15.0` and the planned `v0.15.1` patch; the published
-release remains `v0.15.0`, 2026-10-30) retains unmodified upstream OMP 18.14.0 (`31147f9d`) and
+to NInfer (inference engine) serving Qwen3.8 27B (served model). Published release **v0.16.0**
+(2026-11-01; superseding `v0.15.0` and the planned `v0.15.1` patch) retains unmodified upstream OMP 18.14.0 (`31147f9d`) and
 shared model container version 3 `81f924d4` while rebuilding all three qualified GPU lanes from one
 frozen engine source `26fa28d0` (`26fa28d0e7834515508fc07ac503164a6effc820`) on upstream
 `Neroued/ninfer` master `64d10fbf`: moving both native Windows 24 GB lanes (`RTX 4090` and
 `RTX 3090`) from `MTP3` to **DFlash2 draft window 7 (`K=7`)** with `INT8` KV, advancing the native
 RTX 3090 lane to **two requests in flight (`C2`)** over one shared 131,072-token pool, and
-shipping the RTX 5090 `beta.4` container rebuild (see [`FACTS.md`](FACTS.md) and
+shipping the RTX 5090 `v0.7.0-qwen38-5090-beta.4` container rebuild (see [`FACTS.md`](FACTS.md) and
 [`BENCHMARKS.md`](BENCHMARKS.md)).
 
 - **Current runtimes:**

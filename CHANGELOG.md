@@ -7,32 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
+### Changed
 
-- Bind promoted release-local profile snapshots byte-for-byte to the root profiles, and reject
-  partial carry-forward of a changed runtime source archive's byte count or checksum-set hash.
-  Correct the v0.16.0 RTX 5090 source pins and profile snapshots without changing accepted
-  executable guide blocks, runtime packages, or client identities.
-- Gate stock OMP parallel-session recall on the session's exact code at alphanumeric
-  boundaries and the absence of every other session's code, not on whole-answer formatting.
-  Keep the former equality result as non-gating `formatting_exact` evidence, so a correct
-  code followed by a disclaimer passes without weakening recall or session isolation.
-- Decode stock OMP RPC output and every Python tooling subprocess text stream explicitly as
-  strict UTF-8, including native Windows acceptance, rather than the host's locale code page.
-  Read acceptance evidence and helper text files as UTF-8 as well. AST invariants guard the
-  subprocess and file-read classes; real-child regression tests exercise UTF-8 smart quotes
-  under a `cp1252` locale and reject malformed UTF-8 without replacing protocol data.
-- Preserve native acceptance configuration binding and request-log commands on Windows
-  PowerShell 5.1 by keeping Python `-c` payloads free of double quotes and encoding nested
-  PowerShell log commands before passing them through Python's native argument boundary.
-  Contract tests sweep every PowerShell script and execute configuration binding through
-  `powershell.exe` on Windows.
+- Mark v0.16.0 as the published release across the README, quickstart banner, facts, roadmap,
+  release history, upstream watch, reference docs, site, and brand assets; front-door install links
+  return to the guide on `main`.
 
-## [0.16.0] - Prepared (not published)
+## [0.16.0] - 2026-11-01
 
 ### Added
 
-- Prepare native Windows **DFlash2 draft window 7 (`K=7`)** on both 24 GB lanes (`v0.8.0-qwen38-4090-beta.1`
+- Ship native Windows **DFlash2 draft window 7 (`K=7`)** on both 24 GB lanes (`v0.8.0-qwen38-4090-beta.1`
   package `06526bdb`, server `c6f59e9e`, config `f00cfac9`, and `v0.8.0-qwen38-3090-beta.1` package
   `040d5923`, server `72cd776b`, config `cbe67aae`) and **concurrency 2 (`C2`) over one shared
   131,072-token `INT8` KV pool** on the native RTX 3090 lane (`180 s` pending timeout, two extra
@@ -70,6 +55,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Bind promoted release-local profile snapshots byte-for-byte to the root profiles, and reject
+  partial carry-forward of a changed runtime source archive's byte count or checksum-set hash.
+  Correct the v0.16.0 RTX 5090 source pins and profile snapshots without changing accepted
+  executable guide blocks, runtime packages, or client identities.
+- Gate stock OMP parallel-session recall on the session's exact code at alphanumeric
+  boundaries and the absence of every other session's code, not on whole-answer formatting.
+  Keep the former equality result as non-gating `formatting_exact` evidence, so a correct
+  code followed by a disclaimer passes without weakening recall or session isolation.
+- Decode stock OMP RPC output and every Python tooling subprocess text stream explicitly as
+  strict UTF-8, including native Windows acceptance, rather than the host's locale code page.
+  Read acceptance evidence and helper text files as UTF-8 as well. AST invariants guard the
+  subprocess and file-read classes; real-child regression tests exercise UTF-8 smart quotes
+  under a `cp1252` locale and reject malformed UTF-8 without replacing protocol data.
+- Preserve native acceptance configuration binding and request-log commands on Windows
+  PowerShell 5.1 by keeping Python `-c` payloads free of double quotes and encoding nested
+  PowerShell log commands before passing them through Python's native argument boundary.
+  Contract tests sweep every PowerShell script and execute configuration binding through
+  `powershell.exe` on Windows.
 - Materialize immutable `StateImage` replicas into the counted Host arena and release device state
   replicas before off-worker durable checkpoint disk serialization (`StateImageStore::prepare_host_export`,
   `8c639fe0` / `80c0af77`, `EXP-105`), cutting post-resume first-fork server TTFT from `5.03 s` to
@@ -136,9 +139,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Stage and prepare the `v0.16.0` release candidate across the release notes, prepared quickstart,
+- Stage and bind the `v0.16.0` release composition, fresh five-route / three-platform acceptance,
+  and closed G4 fork and product-tooling council dispositions across the release notes, quickstart,
   facts, roadmap, release history, performance and benchmark docs, compatibility matrix, and
-  upstream watch while keeping `v0.15.0` as the published release until founder publication.
+  upstream watch.
 
 ## [0.15.0] - 2026-10-30
 

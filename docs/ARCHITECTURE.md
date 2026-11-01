@@ -4,7 +4,7 @@ Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release l
 (inference engine) → Qwen3.8 27B (served model).
 
 OMP NInfer is an integration and release product, not a third inference runtime. Each published
-release (`v0.15.0`) binds an exact Oh My Pi (OMP) client, NInfer runtime, shared Qwen3.8 27B
+release (`v0.16.0`) binds an exact Oh My Pi (OMP) client, NInfer runtime, shared Qwen3.8 27B
 artifact, hardware profile, loopback topology, and qualification summary.
 
 ## Runtime topology
@@ -45,20 +45,23 @@ Every listener endpoint is loopback-only:
   and a shared 20,867.734375 MiB (21,881,405,440-byte) Host context budget, mounting
   `/checkpoints-v013` from host directory `checkpoints-v013`.
 - **Native Windows RTX 4090 and RTX 3090 lanes (`127.0.0.1:18082`):** Both native packages
-  (`v0.7.0-qwen38-4090-beta.3` and `v0.7.0-qwen38-3090-beta.3`, source `2c6f423b` on upstream
+  (`v0.8.0-qwen38-4090-beta.1` and `v0.8.0-qwen38-3090-beta.1`, source `26fa28d0` on upstream
   `Neroued/ninfer` master `64d10fbf`) install on one two-GPU Windows 11 host under
   `%ProgramData%\NInfer\qwen38-4090-native` and `%ProgramData%\NInfer\qwen38-3090-native`. Each
   installer binds its card by GPU UUID (`Control-GpuOwner.ps1`) rather than device ordinal. Both
-  lanes share `http://127.0.0.1:18082/v1` and run sequentially, one lane at a time and one request
-  in flight (`concurrency: 1`, 30 s pending timeout, INT8 KV, `Group64` A8 off, MTP3 with
-  `--lm-head-draft`, mandatory `--session-checkpoint-require-origin-auth`, release-isolated schema 3
+  lanes share `http://127.0.0.1:18082/v1` and run sequentially, one lane at a time (INT8 KV,
+  DFlash2 draft window 7 with `proposal: "artifact-default"`, `Q4_G64_FP16` draft MLP `gate`/`up`
+  weights and host-mapped `token_embedding`, `Group64` A8 and FP32 head logits off, 1,024-token
+  prefill chunk, mandatory `--session-checkpoint-require-origin-auth`, release-isolated schema 3
   checkpoint directory `cache/<release-instance-id>/session-checkpoints-v3` where
   `<release-instance-id>` is the installed release ID such as
-  `qwen38-4090-native-v0.7.0-beta.3-2c6f423bd817`, `14,787.734375 MiB` / `15,506,063,360-byte`
-  shared Host budget with `640 MiB` admission headroom and two extra device-state slots on RTX 4090,
-  and `11,715.734375 MiB` / `12,284,837,888-byte` shared Host budget with `768 MiB` admission
-  headroom and four extra device-state slots on RTX 3090). This is not multi-GPU inference or
-  concurrent native serving. A managed stop (`Control-Release.ps1 -Action Stop`) signals
+  `qwen38-4090-native-v0.8.0-beta.1-26fa28d0e783`, one active request / `C1` with a 30 s pending
+  timeout, `15,747.734375 MiB` / `16,512,696,320-byte` shared Host budget, `640 MiB` admission
+  headroom, and two extra device-state slots on RTX 4090, and two active requests / `C2` over one
+  shared 131,072-token pool with a 180 s pending timeout, `20,867.734375 MiB` /
+  `21,881,405,440-byte` shared Host budget, `768 MiB` admission headroom, and two extra
+  device-state slots on RTX 3090). This is not multi-GPU inference or
+  simultaneous RTX 4090 and RTX 3090 serving. A managed stop (`Control-Release.ps1 -Action Stop`) signals
   `stop-event` (900 s graceful wait), flushes live sessions to checkpoints, records the stop in
   `last-stop.json`, releases the GPU lease, and on the RTX 3090 restores the default 370 W power
   limit from its 350 W serving cap.
@@ -67,7 +70,7 @@ Every listener endpoint is loopback-only:
   at pinned revision `1cbd84e7` (`81f924d4`, 20,437,521,664 bytes, downloaded to
   `qwen3_8_27b-v3.ninfer`; the RTX 5090 container lane enables vision, tools, DFlash2 K=7,
   JSON-schema output, and preserved thinking, while the native Windows RTX 4090 and RTX 3090 lanes
-  serve text, tools, JSON-schema output, and preserved thinking under MTP3 with vision disabled).
+  serve text, tools, JSON-schema output, and preserved thinking under DFlash2 K=7 with vision disabled).
 
 SSH (where used) authenticates the machine path; a separate bearer token always authenticates the
 HTTP endpoint (`~/.config/omp-ninfer/api-key` mounted at `/run/secrets/ninfer_api_key` for the
@@ -105,7 +108,7 @@ See [operator guidance and receipts](FACTS.md#checkpoint-transport-and-nas-repli
 
 ## Identity chain
 
-The [published release manifest](../releases/v0.15.0/manifest.json) binds:
+The [published release manifest](../releases/v0.16.0/manifest.json) binds:
 
 1. product release and support channel;
 2. upstream OMP 18.14.0 source revision, platform binaries, byte counts, and SHA-256 pins;
@@ -151,9 +154,9 @@ subcommands. Through v0.7.4, a downstream fork and the `alphastorm/homebrew-omp`
 
 Owns the `.ninfer` engine and server, CUDA execution, Qwen3.8 runtime, Responses state and
 checkpoint store, authenticated status, numerical behavior, container and native packages, and
-runtime qualification. The RTX 5090 container runtime (`v0.7.0-qwen38-5090-beta.3`) and the
-UUID-bound native Windows RTX 4090 (`v0.7.0-qwen38-4090-beta.3`) and RTX 3090
-(`v0.7.0-qwen38-3090-beta.3`) packages (shared source `2c6f423b` on upstream `Neroued/ninfer` master
+runtime qualification. The RTX 5090 container runtime (`v0.7.0-qwen38-5090-beta.4`) and the
+UUID-bound native Windows RTX 4090 (`v0.8.0-qwen38-4090-beta.1`) and RTX 3090
+(`v0.8.0-qwen38-3090-beta.1`) packages (shared source `26fa28d0` on upstream `Neroued/ninfer` master
 `64d10fbf`) are published under
 [alphastorm/ninfer](https://github.com/alphastorm/ninfer), retaining their upstream lineage and
 separate hardware contracts.

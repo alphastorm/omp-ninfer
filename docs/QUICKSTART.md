@@ -1,9 +1,6 @@
 # Quickstart
 
-> **Prepared guide: v0.16.0 · stock Oh My Pi 18.14.0 · candidate route acceptance passed; product council binding outstanding**
->
-> Published installation remains on the [immutable v0.15.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.15.0/docs/QUICKSTART.md)
-> until publication. This candidate guide is not a published installation recommendation.
+> **Versioned guide: v0.16.0 · stock Oh My Pi 18.14.0 · Qualified on RTX 5090 · 4090 · 3090**
 
 OMP NInfer is the qualified local inference appliance and release layer connecting the
 [Oh My Pi](https://github.com/can1357/oh-my-pi) (OMP) coding-agent client over authenticated
@@ -15,8 +12,8 @@ loopback to the NInfer inference engine serving Qwen3.8 27B on your GPU.
 | --- | --- | --- |
 | RTX 5090 container on Windows 11 + Docker Desktop / WSL2 | Native Windows x64 client over local loopback `127.0.0.1:18089` | [RTX 5090 Windows route](#ready-route-native-windows-and-docker-desktop-wsl2) |
 | RTX 5090 container on Windows 11 / WSL2 or Linux | macOS arm64 client over a manual SSH tunnel (preview) | [macOS manual SSH route (preview)](#macos-client-over-a-manual-ssh-tunnel-preview) |
-| RTX 4090 native Windows 11 (alone or beside RTX 3090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; v0.8.0-beta.1 DFlash2 K=7, C1; fresh client/route acceptance passed | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) |
-| RTX 3090 native Windows 11 (alone or beside RTX 4090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; v0.8.0-beta.1 DFlash2 K=7, C2 over one shared 131,072-token pool; fresh client/route acceptance passed | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
+| RTX 4090 native Windows 11 (alone or beside RTX 3090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; `v0.8.0-qwen38-4090-beta.1` DFlash2 K=7, one request at a time (`C1`); fresh client/route acceptance passed | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) |
+| RTX 3090 native Windows 11 (alone or beside RTX 4090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; `v0.8.0-qwen38-3090-beta.1` DFlash2 K=7, two requests in flight (`C2`) over one shared 131,072-token pool; fresh client/route acceptance passed | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
 | RTX 5090 container with Linux x64 client under WSL2 only | WSL2 shell client over local loopback `127.0.0.1:18089` (no native Linux OS qualification) | [WSL2 Linux client](#wsl2-linux-client-over-local-loopback) |
 | Other GPU, non-WSL Linux client, or concurrent native serving | Unsupported | [Compatibility boundary](COMPATIBILITY.md) |
 
@@ -163,7 +160,7 @@ exact assets and served identities (`qwen38-4090-native-v0.8.0-beta.1-26fa28d0e7
 `qwen38-3090-native-v0.8.0-beta.1-26fa28d0e783`): each anonymously verified seven manifest assets
 and the closed 10-entry checksum set, ran the downloaded installer with outcome `already_installed`,
 accepted the exact qualified bytes without changing lifecycle pointers, and passed authenticated
-status/completion and anonymous-status refusal. The promoted N16 roots and stages were preserved;
+status/completion and anonymous-status refusal. The promoted `v0.8.0-beta.1` roots and stages were preserved;
 these first-lineage routes claim no predecessor upgrade or rollback.
 [Independent restoration](measurements/2026-11-01-v0160-acceptance-restoration.json) passed:
 the RTX 5090 hold was **412.552 s**; native driver windows were **499.977 s** on RTX 4090 and
@@ -213,10 +210,10 @@ same-source second builds are not bit-identical. See the
   ([troubleshooting](TROUBLESHOOTING.md#a-turn-fails-with-request_queue_timeout-late-in-a-long-session)).
 - **Native two-GPU UUID topology and rollback:** Both native packages bind their GPU UUID and PCI
   address on a two-GPU Windows 11 host and serve sequentially on port `18082`. Upgrading an
-  existing `v0.7.0-beta.3` install preserves `v0.7.0-beta.3` as `previous_release` for
+  existing `v0.7.0-qwen38-{4090,3090}-beta.3` install preserves it as `previous_release` for
   `Control-Release.ps1 -Action Rollback`
   (separate predecessor rehearsals passed all three scenarios on both native lanes;
-  final public-install checks passed as `already_installed` on the promoted N16 packages),
+  final public-install checks passed as `already_installed` on the promoted `v0.8.0-beta.1` packages),
   while each package's isolated 15-phase scratch qualification runs in a fresh scratch root with
   no predecessor (`not_applicable`, zero rollback directions).
 - **RTX 3090 power and upgrade:** the serving cap is 350 W, with 370 W owner restoration on the

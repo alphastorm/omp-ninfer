@@ -1,17 +1,14 @@
 # OMP NInfer — canonical facts
 
-> Prepared v0.16.0 candidate: not a published product. Fresh candidate acceptance passed on 2026-11-01; product-council binding and the final manifest pin remain separate gates. Published installation remains on the [immutable v0.15.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.15.0/docs/QUICKSTART.md).
-
-
-Prepared successor: v0.16.0 · Published release: v0.15.0 (2026-10-30) · stock Oh My Pi 18.14.0
+Updated: 2026-11-01 · Published release: v0.16.0 (2026-11-01) · stock Oh My Pi 18.14.0
 
 Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release layer) → NInfer
 (inference engine) → Qwen3.8 27B (served model).
 
 **Qualified on RTX 5090 · 4090 · 3090**, bound to the exact profiles in
 [`releases/v0.16.0/manifest.json`](../releases/v0.16.0/manifest.json).
-[Published installation guide](https://github.com/alphastorm/omp-ninfer/blob/v0.15.0/docs/QUICKSTART.md) ·
-[Download v0.15.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.15.0)
+[Get started](QUICKSTART.md) ·
+[Download v0.16.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.16.0)
 
 ## What it is
 
@@ -53,7 +50,7 @@ See the [decision guide](DECISION_GUIDE.md) for the side-by-side comparison.
 
 ## Current release
 
-Prepared runtime candidate **v0.16.0** (not published; intended to supersede `v0.15.0` and the
+Published release **v0.16.0** (2026-11-01, GitHub `Latest`; superseding `v0.15.0` and the
 planned `v0.15.1` patch) retains unmodified upstream
 Oh My Pi **18.14.0** (`31147f9d`, tree `9a63b5bf`, upstream binaries rebuilt with Bun 1.4.4 for
 CVE-2026-91403 and CVE-2026-111497; upstream `18.14.1` and `18.14.2` are deferred to a separate

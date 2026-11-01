@@ -52,7 +52,7 @@ release-gate evidence instead of relabeling the receipt.
 
 ### `release manifest is not installable`
 
-Use a clean clone of the current public release tag (`v0.15.0`) and run
+Use a clean clone of the current public release tag (`v0.16.0`) and run
 `python3 scripts/verify_release.py --require-ready`. Moving `main`, an older tag, or a partially
 staged manifest is not installable. A `draft` or `candidate` manifest retains explicit blockers; do
 not fill missing component identities from a local cache.
@@ -60,7 +60,7 @@ not fill missing component identities from a local cache.
 ### Model byte count or SHA-256 mismatch
 
 Every lane binds the same artifact URL, revision, byte count, and SHA-256 in
-[`releases/v0.15.0/manifest.json`](../releases/v0.15.0/manifest.json): all three lanes serve
+[`releases/v0.16.0/manifest.json`](../releases/v0.16.0/manifest.json): all three lanes serve
 `components.model` (`81f924d4`, 20,437,521,664 bytes, downloaded to `qwen3_8_27b-v3.ninfer`; prior
 native releases through `v0.13.0` served `eec39564` at 18,210,531,328 bytes, which stays in
 `qwen3_8_27b.ninfer` for historical recovery).
@@ -78,7 +78,7 @@ use another `.ninfer` file with the same filename.
 ### NInfer image or binary mismatch
 
 The container image reference must contain `@sha256:`. A binary or package mismatch means the local
-bytes do not match the qualified release (`v0.15.0`), even if a mutable tag or filename looks
+bytes do not match the qualified release (`v0.16.0`), even if a mutable tag or filename looks
 correct. Preserve the expected and actual SHA-256 values, remove no unrelated images, and report
 the release and profile IDs together with those two content-safe digests.
 
@@ -265,7 +265,7 @@ server is listening inside the VM, and neither Windows nor WSL2 can reach it
 
 The RTX 5090 route runs the container on Docker `bridge` (`--host 0.0.0.0 --port 8080` inside the
 container) and publishes that port on the inference host's loopback (`--publish
-127.0.0.1:18089:8080`), which both Windows and WSL2 reach. Use the current `v0.15.0` release tag
+127.0.0.1:18089:8080`), which both Windows and WSL2 reach. Use the current `v0.16.0` release tag
 rather than editing ports or bind addresses by hand: the profile's configuration SHA-256 covers
 them, and the launcher refuses any modified profile.
 
@@ -349,7 +349,7 @@ readable local file, and that no local OMP configuration overlay stripped `image
 
 Stock Oh My Pi 18.14.0 includes upstream [#13687](https://github.com/can1357/oh-my-pi/pull/13687),
 which defaults custom and local OpenAI Responses endpoints to `detail: "auto"` for both live image
-turns and replayed compaction images. Current `v0.15.0` model fragments therefore need no
+turns and replayed compaction images. Current `v0.16.0` model fragments therefore need no
 image-detail override.
 
 **Legacy pre-18.8.7 clients only:** OMP compacts a 131,072-token session automatically at about
@@ -362,7 +362,7 @@ NInfer refuses:
 ```
 
 If you encounter this error, first verify that `omp --version` reports `omp/18.14.0` and that your
-`models.yml` matches the current `v0.15.0` fragment. On historical pre-18.8.7 releases (such as
+`models.yml` matches the current `v0.16.0` fragment. On historical pre-18.8.7 releases (such as
 `v0.10.0` / OMP 18.4.10; see [release history](RELEASES.md#version-identities)), the workaround was
 setting `supportsImageDetailOriginal: false` under the RTX 5090 model's `compat` mapping. The
 text-only native RTX 4090 and RTX 3090 lanes never compact sessions into images.
@@ -373,9 +373,10 @@ text-only native RTX 4090 and RTX 3090 lanes never compact sessions into images.
 503 inference request expired while waiting for admission
 ```
 
-In `v0.15.0`, the RTX 5090 profile serves up to two requests in flight (`--max-concurrency 2`,
-146,368-token automatic BF16 KV pool) with a 180 s pending timeout (`--pending-timeout-ms 180000`), while the
-native Windows RTX 4090 and RTX 3090 lanes each serve one request at a time with a 30 s pending
+In `v0.16.0`, the RTX 5090 profile (`146,368`-token automatic BF16 KV pool) and the native Windows
+RTX 3090 profile (`131,072`-token shared INT8 KV pool) each serve up to two requests in flight
+(`--max-concurrency 2` / `concurrency: 2`) with a 180 s pending timeout (`--pending-timeout-ms 180000`),
+while the native Windows RTX 4090 lane serves one request at a time with a 30 s pending
 timeout. A request arriving when a lane is full waits at the server and expires if admission takes
 longer than the lane's pending timeout.
 
@@ -396,15 +397,15 @@ providers:
   maxInFlightRequests:
     ninfer-beta: 2
     ninfer-native-4090: 1
-    ninfer-native-3090: 1
+    ninfer-native-3090: 2
     ninfer-main: 2
     ninfer-heavy: 1
 ```
 
 Include every provider ID you route to a NInfer lane (OMP leaves any provider omitted from the map
-unlimited). Keep `ninfer-beta: 2` and `ninfer-main: 2` only against a `v0.9.0` or newer RTX 5090
-server; against an older one-request-at-a-time server, a client limit of 2 queues the second
-request at the server's 30 s timeout. If your `config.yml` still carries the legacy `v0.8.6`
+unlimited). Keep `ninfer-beta: 2` and `ninfer-main: 2` only against a `v0.9.0` or newer RTX 5090 server, and
+keep `ninfer-native-3090: 2` only against `v0.8.0-qwen38-3090-beta.1` (`v0.16.0`) or newer; against
+an older one-request-at-a-time server, a client limit of 2 queues the second request at the server's 30 s timeout. If your `config.yml` still carries the legacy `v0.8.6`
 `compaction: asyncEnabled: false` setting, remove it once `maxInFlightRequests` is in place so
 compaction summaries run in the background while you read or type.
 
@@ -447,7 +448,7 @@ conversation content.
 
 ### Two long sessions and what survives a restart
 
-Current `v0.15.0` continuation and checkpoint recovery are bounded by each lane's qualified device
+Current `v0.16.0` continuation and checkpoint recovery are bounded by each lane's qualified device
 and host pools:
 
 - **RTX 5090 container lane (`qwen38-5090-v0.13.0`, configuration `751d22dc`):** 146,368-token
@@ -459,13 +460,17 @@ and host pools:
   prompts plus output reservations fit the 146,368-token pool. Admission saves a session's newest
   turn before evicting it, and checkpoint restore can save and reclaim reproducible resident
   sessions when host capacity is occupied.
-- **Native Windows RTX 4090 and RTX 3090 lanes (`qwen38-4090-native-v0.7.0-beta.3` and `qwen38-3090-native-v0.7.0-beta.3`):**
-  one request in flight (`concurrency: 1`), 30 s pending timeout, 131,072-token INT8 KV capacity,
-  mandatory `--session-checkpoint-require-origin-auth`, a 24,576 MiB checkpoint quota under
-  `cache/<release-instance-id>/session-checkpoints-v3` (schema 3, where `<release-instance-id>` is the installed release ID such as `qwen38-4090-native-v0.7.0-beta.3-2c6f423bd817`), and a shared 14,787.734375 MiB
-  (15,506,063,360-byte) Host context budget (640 MiB admission headroom, 2 extra device-state
-  slots) on RTX 4090 or a shared 11,715.734375 MiB (12,284,837,888-byte) Host context budget (768
-  MiB admission headroom, 4 extra device-state slots) on RTX 3090.
+- **Native Windows RTX 4090 and RTX 3090 lanes (`qwen38-4090-native-v0.8.0-beta.1` and `qwen38-3090-native-v0.8.0-beta.1`):**
+  one request in flight (`concurrency: 1`, 30 s pending timeout, `15,747.734375 MiB` /
+  `16,512,696,320-byte` shared Host context budget, 640 MiB admission headroom, 2 extra
+  device-state slots) on RTX 4090 and two requests in flight (`concurrency: 2`, 180 s pending
+  timeout, `20,867.734375 MiB` / `21,881,405,440-byte` shared Host context budget, 768 MiB admission
+  headroom, 2 extra device-state slots) sharing one 131,072-token INT8 KV pool on RTX 3090, with
+  mandatory `--session-checkpoint-require-origin-auth` and a 24,576 MiB checkpoint quota under
+  `cache/<release-instance-id>/session-checkpoints-v3` (schema 3, where `<release-instance-id>` is
+  the installed release ID such as `qwen38-4090-native-v0.8.0-beta.1-26fa28d0e783`; prior MTP3
+  checkpoints do not carry into DFlash2, so keep `previous_release` roots untouched for
+  `Control-Release.ps1 -Action Rollback` and let OMP replay transcripts for fresh sessions).
 
 Checkpointing remains best effort under live traffic. A crash, power loss, or expired graceful stop
 can leave unpublished work unsaved, and if the engine declines a checkpoint restore on startup:
@@ -487,10 +492,11 @@ When alternating long sessions repeatedly re-prefill from root, the cause is dev
 pool pressure rather than a lost OMP session. Active requests on the RTX 5090 share its
 146,368-token automatic BF16 device KV pool across at most two requests in flight (180 s pending timeout),
 while inactive resident continuations sit in the lane's host store (`20,867.734375 MiB` /
-`21,881,405,440-byte` shared Host context budget on RTX 5090, `14,787.734375 MiB` /
-`15,506,063,360-byte` shared Host budget on native RTX 4090, and `11,715.734375 MiB` /
-`12,284,837,888-byte` shared Host budget on native RTX 3090; native
-lanes serve one request at a time with a 30 s pending timeout). In the carried RTX 5090
+`21,881,405,440-byte` shared Host context budget on RTX 5090, `15,747.734375 MiB` /
+`16,512,696,320-byte` shared Host budget on native RTX 4090, and `20,867.734375 MiB` /
+`21,881,405,440-byte` shared Host budget on native RTX 3090; native RTX 3090 serves up to two
+requests in flight with a 180 s pending timeout over one shared 131,072-token pool and native RTX
+4090 serves one request at a time with a 30 s pending timeout). In the carried RTX 5090
 multisession control, 2 of 8 continuations and forks fell back to root prefill without server
 errors; universal warm reuse is not guaranteed.
 
