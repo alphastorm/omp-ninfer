@@ -132,9 +132,14 @@ unmet:
    `#49`) are closed across the `26fa28d0` runtime components and product tooling. The `v0.16.0` G4
    fork council (`CR-20261031T162716Z-26fa28d0`, ledger `b2871c36`, 4/4 seats) closed by
    disposition in round 1 with no in-scope residual P0/P1, and the G4 product-tooling council
-   (`⟦PENDING: v0.16.0 product-tooling G4 council review ID and ledger SHA-256, releases/v0.16.0/review/runtime-ledger.json⟧`)
-   has separate status in
+   (`CR-20261101T123454Z-56899320-product`, sequence `omp-ninfer-v0.16.0-product-56899320`,
+   subject `56899320`, 4/4 seats completed, 0 missing or aborted) also closed by disposition
+   in round 1 with no in-scope residual P0/P1. The combined ledger SHA-256 is
+   `ab195970955c58b584ddbcf2143072b56ced28e714251e975c0f67986722e627` in
    [`releases/v0.16.0/review/runtime-ledger.json`](releases/v0.16.0/review/runtime-ledger.json).
+   Product P2/P3 residuals are deferred in
+   [#128](https://github.com/alphastorm/omp-ninfer/issues/128), retaining
+   [#109](https://github.com/alphastorm/omp-ninfer/issues/109) for restore/action interleaving.
    Remaining open items are `omp-ninfer`
    [#88](https://github.com/alphastorm/omp-ninfer/issues/88)–[#90](https://github.com/alphastorm/omp-ninfer/issues/90),
    the five `alphastorm/ninfer` P2/P3 fork-council deferrals

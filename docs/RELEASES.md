@@ -149,9 +149,15 @@ without a manual stop), [#95](https://github.com/alphastorm/omp-ninfer/issues/95
 [#116](https://github.com/alphastorm/omp-ninfer/issues/116), and
 [#117](https://github.com/alphastorm/omp-ninfer/issues/117) (`alphastorm/ninfer#48` and `#49`).
 The G4 fork council (`CR-20261031T162716Z-26fa28d0`, ledger `b2871c36`, 4/4 seats) and G4
-product-tooling council (`⟦PENDING: v0.16.0 product-tooling G4 council review ID and ledger SHA-256, releases/v0.16.0/review/runtime-ledger.json⟧`)
-have separate status in [`review/runtime-ledger.json`](../releases/v0.16.0/review/runtime-ledger.json),
-with deferred items in [#88](https://github.com/alphastorm/omp-ninfer/issues/88)–[#90](https://github.com/alphastorm/omp-ninfer/issues/90)
+product-tooling council (`CR-20261101T123454Z-56899320-product`,
+sequence `omp-ninfer-v0.16.0-product-56899320`, subject `56899320`,
+4/4 seats completed, 0 missing or aborted) closed by disposition in round 1, with no in-scope
+residual P0/P1. The combined
+[`review/runtime-ledger.json`](../releases/v0.16.0/review/runtime-ledger.json) SHA-256 is
+`ab195970955c58b584ddbcf2143072b56ced28e714251e975c0f67986722e627`.
+Product P2/P3 residuals are deferred in [#128](https://github.com/alphastorm/omp-ninfer/issues/128),
+retaining [#109](https://github.com/alphastorm/omp-ninfer/issues/109); other deferred items remain
+in [#88](https://github.com/alphastorm/omp-ninfer/issues/88)–[#90](https://github.com/alphastorm/omp-ninfer/issues/90)
 and `alphastorm/ninfer`
 [#50](https://github.com/alphastorm/ninfer/issues/50)–[#54](https://github.com/alphastorm/ninfer/issues/54).
 Fresh acceptance passed on frozen candidate

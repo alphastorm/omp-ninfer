@@ -122,7 +122,7 @@
           "sha256": "1dbb936b72cfd44c360fed3a39e41352c422e997636d2fe51a426ef2c0793a76"
         }
       ],
-      "note": "Fresh five-route execution and candidate-profile native probes passed, with independent restoration and final audits. Exact stock client and N16 runtime/configuration/model identities were observed. Council binding, final immutable pins, strict ready verification and publication remain separate gates."
+      "note": "Fresh five-route execution and candidate-profile native probes passed, with independent restoration and final audits. Exact stock client and N16 runtime/configuration/model identities were observed. Closed fork/product G4 dispositions are bound separately from candidate acceptance; immutable-pin verification and founder-owned publication are independent controls."
     },
     "native_publication": {
       "repository_path": "releases/v0.16.0/qualification/native-publication.json",
@@ -138,9 +138,9 @@
   "status": "runtime-release-eligible",
   "publication_authorized": false,
   "external_installation_qualified": true,
-  "scope": "N16 common-engine runtime release: exact current RTX 5090 beta.4 and native RTX 3090/4090 beta.1 lane evidence; unchanged stock OMP 18.14.0 and model v3. Fresh five-route, three-platform, both native public-install and independent restoration acceptance passed on frozen candidate 56899320d416bafda5c15d7e454e9b593badc0a6 on 2026-11-01. Product-tooling council binding remains separate.",
+  "scope": "N16 common-engine runtime release: exact current RTX 5090 beta.4 and native RTX 3090/4090 beta.1 lane evidence; unchanged stock OMP 18.14.0 and model v3. Fresh five-route, three-platform, both native public-install and independent restoration acceptance passed on frozen candidate 56899320d416bafda5c15d7e454e9b593badc0a6 on 2026-11-01. Closed fork and product-tooling G4 dispositions are bound in observed_gates.g4_review.",
   "interpretation": "Each retained measurement names its actual source, public/scratch package and config. No predecessor hardware, client-route acceptance or product council is relabeled. The RTX 4090 speed failure and RTX 5090 restart-latency misses retain their raw verdicts and founder waivers.",
-  "eligibility_scope": "All three current runtime lanes, native quality screens and fit proofs, both predecessor upgrade/rollback/repair rehearsals, fresh candidate-bound external-installation acceptance and RTX 3090 C2 product probes passed. Product-tooling G4 closure/binding, final manifest pin, strict ready/check-pins verification and founder-owned publication remain separate gates.",
+  "eligibility_scope": "All three current runtime lanes, native quality screens and fit proofs, both predecessor upgrade/rollback/repair rehearsals, fresh candidate-bound external-installation acceptance and RTX 3090 C2 product probes passed. Fork and product-tooling G4 closure/binding are complete; strict ready/check-pins verification and founder-owned publication are independent controls.",
   "documented_route_acceptance": {
     "status": "passed",
     "scope": "All five fresh candidate-bound documented routes, three stock OMP 18.14.0 clients, both N16 native beta.1 public installs, and candidate-profile native probes. Linux is WSL2-scoped; macOS remains preview. No prior product-route or client acceptance is carried.",
@@ -215,12 +215,12 @@
       "scope": "release notes state that the first request after a server restart sometimes takes ~0.5 s instead of ~0.24 s in both engines, with the beta.4 runtime slow somewhat more often"
     },
     "g4_review": {
-      "status": "closed-fork-only",
+      "status": "passed",
       "repository_path": "releases/v0.16.0/review/runtime-ledger.json",
-      "sha256": "b4c0942ccab954e241a8a1ecf3e0699c51c06a66c0832c52fefe54194ac66bb2",
-      "scope": "Current N16 fork council closed by disposition; product-tooling council pending, not inherited.",
-      "ledger_status": "pending-product-tooling",
-      "approval_granted": false,
+      "sha256": "ab195970955c58b584ddbcf2143072b56ced28e714251e975c0f67986722e627",
+      "scope": "Current N16 fork and product-tooling councils closed by round-1 accountable-lead disposition; all four seats completed in each council, with no in-scope residual P0/P1 after lead-verified composition mitigation. Product subject 56899320d416bafda5c15d7e454e9b593badc0a6 is not relabeled as the later composition head. Product P2/P3 deferrals are tracked in #128, retaining #109; fork deferrals remain in alphastorm/ninfer#50-#54.",
+      "ledger_status": "closed-by-disposition",
+      "approval_granted": true,
       "publication_authorized": false,
       "public_route_acceptance_granted": false
     },

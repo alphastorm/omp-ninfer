@@ -527,7 +527,20 @@ observations alongside the `26fa28d0` runtime qualifications. The
   five issues in `alphastorm/ninfer` ([#50](https://github.com/alphastorm/ninfer/issues/50) for `L1`
   + `L2`, and [#51](https://github.com/alphastorm/ninfer/issues/51)–[#54](https://github.com/alphastorm/ninfer/issues/54)
   for `L3`–`L6`).
-- **G4 product-tooling council:** `⟦PENDING: v0.16.0 product-tooling G4 council review ID, sequence ID, frozen candidate commit, seat completion counts, ledger SHA-256, and any deferred product issues, releases/v0.16.0/review/runtime-ledger.json⟧`.
+- **G4 product-tooling council (`CR-20261101T123454Z-56899320-product`, sequence
+  `omp-ninfer-v0.16.0-product-56899320`, frozen candidate
+  `56899320d416bafda5c15d7e454e9b593badc0a6`):** All four selected seats (`daybreak-blue`,
+  `gemini-argon`, `gpt-astra`, `claude-mythos`) completed in round 1: **4/4 completed, 0 missing,
+  0 aborted**, no retry or remediation dispatch. Closed by accountable-lead disposition after
+  lead-verified composition mitigation of the source-pin/profile-snapshot P1; no in-scope residual
+  P0/P1 remains. All 21 source items (17 evidence and 4 questions) map to 16 disposition rows;
+  11 P2/P3 rows (`P4`–`P14`) are deferred in
+  [#128](https://github.com/alphastorm/omp-ninfer/issues/128), with `P4` also retaining
+  [#109](https://github.com/alphastorm/omp-ninfer/issues/109).
+  Product disposition ledger SHA-256:
+  `405c537aad60bfc5f81f38e979ce2f0c3afe42f80f27011ea11f97d4970427eb`;
+  combined public [`review/runtime-ledger.json`](review/runtime-ledger.json) SHA-256:
+  `ab195970955c58b584ddbcf2143072b56ced28e714251e975c0f67986722e627`.
 
 Final manifest evidence pins, strict ready verification, and founder-owned publication are separate
 controls; acceptance and G4 approval grant no publication authority.
