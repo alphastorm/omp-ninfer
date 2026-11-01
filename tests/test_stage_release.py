@@ -110,6 +110,17 @@ class StageReleaseTests(unittest.TestCase):
         self.save(source / "compatibility.json", compatibility)
         return root
 
+    def native_staging_copy(self) -> Path:
+        # Keep published native receipt bytes and their bindings intact; only
+        # release-note prose is outside this staging-mechanics fixture.
+        root = self.staging_copy(prepare_client_evidence=False, source_release="v0.16.0")
+        source = root / "releases/v0.16.0"
+        for profile in (source / "profiles").glob("*.json"):
+            shutil.copy2(profile, root / "profiles" / profile.name)
+        for path in source.glob("*.md"):
+            path.write_text("# Staging fixture\n", encoding="utf-8")
+        return root
+
     def stage(self, root: Path, descriptor: Path | None = DESCRIPTOR,
               *, require_clean_client: bool = False,
               source_release: str = SOURCE,
@@ -538,21 +549,57 @@ class StageReleaseTests(unittest.TestCase):
         releases = [target for target in targets if target.startswith("GitHub public release ")]
         self.assertEqual(releases, [f"GitHub public release {TARGET}"])
 
-    def test_staging_clears_predecessor_native_optional_evidence(self) -> None:
+    def test_staging_carries_native_quality_and_fit_bindings(self) -> None:
+        root = self.native_staging_copy()
+        source_path = root / "releases/v0.16.0/manifest.json"
+        source = self.load(source_path)
+        result = self.stage(root, None, source_release="v0.16.0")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        staged = self.load(root / "releases" / TARGET / "manifest.json")
+        for before, after in zip(source["components"]["ninfer_variants"],
+                                 staged["components"]["ninfer_variants"]):
+            for field in ("quality_screen", "fit"):
+                with self.subTest(variant=before["id"], field=field):
+                    self.assertEqual(after["qualification"].get(field),
+                                     before["qualification"][field])
+        self.assertEqual(self.load(source_path), source)
+
+    def test_staged_native_manifest_refuses_removed_quality_and_fit_bindings(self) -> None:
+        root = self.native_staging_copy()
+        result = self.stage(root, None, source_release="v0.16.0")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        path = root / "releases" / TARGET / "manifest.json"
+        manifest = self.load(path)
+        for variant in manifest["components"]["ninfer_variants"]:
+            for field in ("quality_screen", "fit"):
+                variant["qualification"].pop(field, None)
+        self.save(path, manifest)
+        result = subprocess.run(
+            [sys.executable, str(root / "scripts/verify_release.py"), "--release", TARGET,
+             "--require-installable", "--json"],
+            cwd=root, capture_output=True, text=True)
+        report = json.loads(result.stdout)
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        for variant in manifest["components"]["ninfer_variants"]:
+            for field in ("quality_screen", "fit"):
+                with self.subTest(variant=variant["id"], field=field):
+                    self.assertIn(
+                        f"{variant['id']}.qualification.{field} must match the carried predecessor binding",
+                        report["errors"])
+
+    def test_staging_clears_predecessor_native_t1_parity(self) -> None:
         root = self.staging_copy(source_release=CURRENT)
         source_path = root / "releases" / CURRENT / "manifest.json"
         source = self.load(source_path)
         for variant in source["components"]["ninfer_variants"]:
-            for field in ("quality_screen", "t1_parity", "fit"):
-                variant["qualification"][field] = {
-                    "path": f"releases/{CURRENT}/qualification/old-{field}.json", "sha256": "0" * 64}
+            variant["qualification"]["t1_parity"] = {
+                "path": f"releases/{CURRENT}/qualification/old-t1_parity.json", "sha256": "0" * 64}
         self.save(source_path, source)
         result = self.stage(root, None, source_release=CURRENT)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         staged = self.load(root / "releases" / TARGET / "manifest.json")
         for variant in staged["components"]["ninfer_variants"]:
-            for field in ("quality_screen", "t1_parity", "fit"):
-                self.assertNotIn(field, variant["qualification"])
+            self.assertNotIn("t1_parity", variant["qualification"])
         self.assertEqual(self.load(source_path), source)
 
 

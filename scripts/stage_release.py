@@ -41,6 +41,8 @@ An explicit --model-revision/--model-sha256/--model-bytes tuple changes the RTX 
 model (repository and artifact name are retained; the URL is derived). Carried
 native variants retain their effective predecessor model in components.native_model,
 omitted when it equals the new primary model. Native package/model hashes never change.
+Their quality-screen and fit bindings also carry unchanged, including predecessor paths;
+they are not fresh admission proofs against the successor's predecessor.
 Optional --sbom-dependency-url/--sbom-dependency-sha256 VARIANT=VALUE pairs attach
 an additional native CycloneDX dependency inventory without replacing the file SBOM.
 """
@@ -475,10 +477,9 @@ def main() -> int:
     for variant in manifest["components"].get("ninfer_variants", []):
         variant.update(dependency_pins.get(variant["id"], {}))
         qual = variant.get("qualification", {})
-        # Optional native admission proofs bind a release and its predecessor. Unchanged
-        # runtimes carry by identity; changed runtimes must supply fresh proofs at rebind.
-        for key in ("quality_screen", "t1_parity", "fit"):
-            qual.pop(key, None)
+        # Native runtimes are carried by identity. Keep their quality-screen and fit
+        # binding objects intact; a parity exemption remains predecessor-specific.
+        qual.pop("t1_parity", None)
         for key in ("release_spec", "server_config"):
             reference = qual.get(key)
             if isinstance(reference, dict) and isinstance(reference.get("path"), str):

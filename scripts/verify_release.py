@@ -6,6 +6,9 @@ components.native_model has the same pinned artifact shape and binds every nativ
 variant; omit it when identical to model. Historical manifests without it retain
 their shared model binding. Native variants must match the effective model hash,
 and split-model compatibility rows must publish its URL, byte length and SHA-256.
+Native quality-screen and fit bindings must match the receipts declared by the
+qualification summary. Carried runtimes retain their predecessor's exact bindings,
+without relabelling those proofs as fresh successor admission.
 """
 
 from __future__ import annotations
@@ -537,6 +540,30 @@ def validate_launch_identity(
             require(identity.get(key) == expected,
                     f"primary RTX 5090 qualification receipt identity.{key} must equal {source}",
                     errors)
+
+
+def validate_native_receipt_bindings(
+    manifest: dict[str, Any], qualification: dict[str, Any], errors: list[str],
+) -> None:
+    """Declared native screen/fit gates must bind the same receipts in the manifest."""
+    gates = qualification.get("observed_gates", {})
+    if not isinstance(gates, dict):
+        return
+    for variant in manifest.get("components", {}).get("ninfer_variants", []):
+        if not isinstance(variant, dict) or variant.get("id") not in NINFER_VARIANT_IDS:
+            continue
+        lane = variant["id"].split("-")[0]
+        bindings = variant.get("qualification", {})
+        for field in ("quality_screen", "fit"):
+            gate_name = f"{lane}_{field}"
+            reference = gates.get(gate_name)
+            # Historical releases need not invent gates they never declared.
+            if not isinstance(reference, dict) or "repository_path" not in reference:
+                continue
+            require(isinstance(bindings, dict) and bindings.get(field) == {
+                "path": reference["repository_path"], "sha256": reference.get("sha256")},
+                f"{variant['id']}.qualification.{field} must match "
+                f"qualification.observed_gates.{gate_name}", errors)
 
 
 def validate_ga_evidence_bindings(
@@ -1890,16 +1917,28 @@ def validate_native_quality(root: Path, release: str, variant: dict[str, Any], e
     if not isinstance(qualification, dict):
         return
     version = product_version(release)
-    if "quality_screen" in qualification:
-        validate_quality_screen(root, release, variant, errors, incoming_screen)
     if version is None or version < QUALITY_SCREEN_FROM:
+        if "quality_screen" in qualification:
+            validate_quality_screen(root, release, variant, errors, incoming_screen)
         return
     predecessor = predecessor_native_variant(root, release, variant["id"])
     shape = native_shape(root, variant)
     previous_shape = native_shape(root, predecessor) if predecessor is not None else None
     carried = unchanged_native_variant(variant, predecessor) and shape == previous_shape
     if carried:
+        previous_bindings = (predecessor or {}).get("qualification", {})
+        for field in ("quality_screen", "fit"):
+            if field in previous_bindings:
+                require(qualification.get(field) == previous_bindings[field],
+                        f"{variant['id']}.qualification.{field} must match the carried predecessor binding",
+                        errors)
+        # Inherited screens describe their original production/candidate pair,
+        # not a fresh comparison with this release's immediate predecessor.
+        if "quality_screen" in qualification and "quality_screen" not in previous_bindings:
+            validate_quality_screen(root, release, variant, errors, incoming_screen)
         return
+    if "quality_screen" in qualification:
+        validate_quality_screen(root, release, variant, errors, incoming_screen)
     require(isinstance(shape, dict) and shape.get("speculative_backend") in ("mtp", "dflash2")
             and isinstance(shape.get("fit"), dict) and set(shape["fit"]) == set(FIT_FIELDS),
             f"{variant['id']}.runtime_shape must bind backend and fit", errors)
@@ -2526,6 +2565,7 @@ def validate(
         errors,
         allow_pending=pending_allowed,
     )
+    validate_native_receipt_bindings(manifest, qualification, errors)
     for variant in compatibility.get("runtime_variants", []):
         # Historical authorities predate explicit model rows. Split-model releases
         # must publish them, and any row that includes them must bind all three.
