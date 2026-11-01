@@ -94,7 +94,7 @@
     "external_installation_acceptance": {
       "status": "passed",
       "repository_path": "releases/v0.16.0/acceptance/composed-external-installation.json",
-      "sha256": "fc8118d20ad94cf02a02f36d3616d831c89eb35d62f0d69b9e22003dd54d3622",
+      "sha256": "aa85102d6ab3b2bd9d1253e0fb5df14ba52079e29b9cf119ee7ef8b4aed0bf93",
       "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/46d3e6f23befa62954cb500de687d52947d2f856/releases/v0.16.0/acceptance/composed-external-installation.json",
       "as_of": "2026-11-01",
       "release": "v0.16.0",
@@ -107,7 +107,7 @@
       "windows_asset_sha256": "620a5935cdb6a9ed52d8b0c93892d6b5bb84155244a98f3be82af0455177bf29",
       "windows_binary_sha256": "620a5935cdb6a9ed52d8b0c93892d6b5bb84155244a98f3be82af0455177bf29",
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
-      "compatibility_sha256": "f9cffafce300d01c3b174121f7c480475ff2abd6acb99e0f4d992a137fa0e465",
+      "compatibility_sha256": "0bbf972981cee34970ad26c4ecac32a47f2eb6f877deb0b19128d60d4fda1806",
       "platform_receipts": [
         {
           "profile": "darwin-remote-ssh",
@@ -253,6 +253,6 @@
   },
   "receipt_audit": {
     "repository_path": "releases/v0.16.0/qualification/receipt-audit.json",
-    "sha256": "eef73a603fddcea20c7ec46faa687ac05a7d88a019e3d28858f87a944cbd2f98"
+    "sha256": "ccd0411884db03944cb36076602454183cf168f6b7bceae50c9cdccd0dc13a0c"
   }
 }

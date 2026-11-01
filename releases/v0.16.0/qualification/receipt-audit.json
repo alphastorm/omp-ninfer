@@ -221,7 +221,7 @@
     "status": "passed",
     "candidate_commit": "56899320d416bafda5c15d7e454e9b593badc0a6",
     "repository_path": "releases/v0.16.0/acceptance/composed-external-installation.json",
-    "sha256": "fc8118d20ad94cf02a02f36d3616d831c89eb35d62f0d69b9e22003dd54d3622",
+    "sha256": "aa85102d6ab3b2bd9d1253e0fb5df14ba52079e29b9cf119ee7ef8b4aed0bf93",
     "reason": "All five routes (31 blocks), three stock clients, both native public installs, RTX 3090 C2 product probes and independent restoration passed fresh on the frozen candidate on 2026-11-01. No predecessor or earlier-candidate acceptance transfers."
   }
 }
