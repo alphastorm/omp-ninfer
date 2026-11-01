@@ -19,6 +19,98 @@ Kernel and runtime changes land in [alphastorm/ninfer](https://github.com/alphas
 (a downstream fork of [Neroued/ninfer](https://github.com/Neroued/ninfer)); this page tracks the
 program so contributors can see the state of play in one place.
 
+## Gate-bound native speed comparisons
+
+[`scripts/speed_gate.py`](../scripts/speed_gate.py) owns the host-free reduction of the
+native ABBA speed gate. It uses the v0.16.0 rule unchanged: **weighted decode ratio
+`>= 1.08` and every case ratio `>= 0.95`**, versus the shipped incumbent on the same
+card. Both the role-only and combined role-plus-supplemental weighted ratios must
+clear `1.08`; the every-case floor covers the combined suite. There is no threshold
+override or built-in waiver. A separately recorded release waiver does not turn a
+failed numerical gate into a passing reduction.
+
+Before collecting candidate data, freeze one `gate.json` declaration:
+
+- `artifact_type: "omp_ninfer_speed_gate"` and integer `schema_version: 1`.
+- `comparator`: `binary_sha256` of the shipped incumbent executable and
+  `configuration_sha256` of its measured configuration. A candidate executable
+  configured for MTP3 is **not** the shipped-incumbent comparator.
+- `request_suite`: the complete list of `{id, request_sha256}` objects, including
+  every role/depth and any required supplemental request. Hash the exact request
+  payload used by the capture runner, not case source text or a list of case IDs.
+- `request_suite_sha256`: SHA-256 of that list sorted by `id`, serialized as UTF-8
+  JSON with sorted object keys, `separators=(",", ":")`, `ensure_ascii=False`, and no
+  trailing newline. The reducer recomputes this identity from each arm's requests;
+  a caller-supplied suite hash cannot substitute for those requests.
+- `role_case_ids`: unique IDs selecting the role suite within the full request
+  list; remaining requests are supplementals. For the v0.16.0 forms, that means
+  84 depth-0 roles, or 108 roles (84 at depth 0 plus 12 each at 32K/64K) and seven
+  supplementals. Declare the exact campaign form before measurement.
+
+Configuration identities use the same canonical JSON encoding above, over the
+capture's `identity.config` object. They are not the byte hash of a formatted
+configuration file. The declaration's binary identity should be obtained from the
+published incumbent package, not inferred from a source commit or version string.
+The EXP-097 [role-corpus measurement](measurements/2026-10-25-exp097-role-corpus.json)
+retains historical role request identities, but it is not interchangeable with a
+native gate's request suite: context depth, token limits, reasoning, and request
+construction are part of request identity.
+
+### Use one declaration for the pre-screen and gate
+
+`candidate.json` contains only the candidate's `binary_sha256` and canonical
+`configuration_sha256`. Generate the pre-screen plan:
+
+```sh
+python3 scripts/speed_gate.py prescreen \
+  --gate gate.json --candidate candidate.json --out prescreen-plan.json
+```
+
+The plan's `A` arm and complete request suite come **only** from `gate.json`; there
+is no comparator argument. `B` comes from `candidate.json`, and the order is ABBA.
+This command writes an identity plan, not a hardware launcher. A campaign operator
+must resolve those hashes to the actual files, check startup identities, and retain
+the plan with the measured captures. It does not authorize a hardware run.
+
+Collect four passed captures with `arm` (`A`, `B`, `B`, `A`), `index` (`0`..`3`),
+`status: "passed"`, measured `identity.binary_sha256`, and either `identity.config`
+or a measured canonical `identity.configuration_sha256`. Each `requests` entry
+contains `id`, `request_sha256`, positive integer `completion_tokens`, and positive
+finite `decode_seconds`. Native role/depth captures already use this shape.
+Reduce the pre-screen or final gate against the **same** declaration:
+
+```sh
+python3 scripts/speed_gate.py reduce --gate gate.json \
+  --capture A0.json --capture B1.json --capture B2.json --capture A3.json \
+  --out speed-result.json
+```
+
+Repeat `--capture` for disjoint depth/supplemental shards at each ABBA index.
+Every position must contain exactly the same unique case IDs, with no duplicate
+shards and one binary/configuration identity per position. Raw captures may remain
+private: the result retains only case IDs, measurement values and digests, including
+each arm's binary, configuration and recomputed request-suite identities and the
+capture digests. It does not copy configurations, prompts, outputs, paths, or GPU
+identifiers.
+
+Weighted throughput is pooled completion tokens divided by pooled decode seconds
+for each arm, then candidate divided by comparator. Each case's ratio uses the
+median of its two candidate rates divided by the median of its two comparator
+rates. These are the v0.16.0 reduction formulas, not averages of case ratios.
+
+`gate_predictive: true` means identities match the declared comparator binary,
+configuration, and complete request suite; it does **not** mean the thresholds
+passed or that hardware/release qualification is complete. Any comparator binary,
+configuration or arm's suite mismatch produces `status: "DIAGNOSTIC"`,
+`gate_predictive: false`, `gate_passed: false`, and field-specific
+`diagnostic_reasons`, even if `thresholds_passed` is true. Candidate-repeat identity
+drift is also diagnostic. Thus the v0.16.0 same-binary MTP3 pre-screen cannot claim
+to predict the shipped-incumbent gate; an isolated subset cannot claim the full
+role-suite gate either. Properly bound final RTX 4090 measurements still fail
+the `log-024@0` floor at `0.933832`, rather than inheriting the historical waiver.
+Exit status is `0` for a gate pass, `1` for a failure or diagnostic, and `2` for
+invalid/incomplete inputs.
+
 ## Current state
 
 Oh My Pi (coding-agent client) connects through OMP NInfer (qualified appliance and release layer)

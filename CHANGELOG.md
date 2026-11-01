@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Bind native speed-gate predictions and pre-screen plans to one declared shipped
+  comparator binary, configuration, and exact request suite. The host-free
+  `scripts/speed_gate.py` reducer records each ABBA arm's identities and labels
+  mismatches diagnostic without changing the `1.08` weighted / `0.95` every-case
+  thresholds ([#120](https://github.com/alphastorm/omp-ninfer/issues/120)).
+
 ### Changed
 
 - Mark v0.16.0 as the published release across the README, quickstart banner, facts, roadmap,

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Host-free reduction of native ABBA role-suite speed captures."""
+"""Plan gate-bound pre-screens and reduce native ABBA speed captures, without contacting hosts."""
 from __future__ import annotations
 
 import argparse
@@ -57,7 +57,8 @@ def arm_identity(value: Any) -> dict[str, str]:
 
 
 def declaration(value: Any) -> dict[str, Any]:
-    if not isinstance(value, dict) or value.get("artifact_type") != "omp_ninfer_speed_gate" or value.get("schema_version") != 1:
+    if (not isinstance(value, dict) or value.get("artifact_type") != "omp_ninfer_speed_gate"
+            or type(value.get("schema_version")) is not int or value["schema_version"] != 1):
         raise SpeedGateError("expected a schema-1 omp_ninfer_speed_gate declaration")
     suite = request_suite(value.get("request_suite"))
     if value.get("request_suite_sha256") != digest(suite):
@@ -69,6 +70,16 @@ def declaration(value: Any) -> dict[str, Any]:
     return {"artifact_type": "omp_ninfer_speed_gate", "schema_version": 1,
             "comparator": arm_identity(value.get("comparator")), "request_suite": suite,
             "request_suite_sha256": digest(suite), "role_case_ids": sorted(roles)}
+
+
+def prescreen(gate: dict[str, Any], candidate: dict[str, Any]) -> dict[str, Any]:
+    """There is no comparator argument: A always comes from the gate declaration."""
+    gate = declaration(gate)
+    return {"artifact_type": "omp_ninfer_speed_prescreen_plan", "schema_version": 1,
+            "gate_sha256": digest(gate), "order": list(ORDER),
+            "arms": {"A": gate["comparator"], "B": arm_identity(candidate)},
+            "request_suite": gate["request_suite"], "request_suite_sha256": gate["request_suite_sha256"],
+            "role_case_ids": gate["role_case_ids"]}
 
 
 def positive_number(value: Any, description: str) -> float:
@@ -102,6 +113,7 @@ def receipts(captures: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
             if type(tokens) is not int or tokens <= 0:
                 raise SpeedGateError("completion_tokens must be a positive integer")
             seconds = positive_number(row.get("decode_seconds"), "decode_seconds")
+            positive_number(tokens / seconds, "decode rate")
             arm["requests"].append({"id": row["id"], "request_sha256": row["request_sha256"],
                                     "completion_tokens": tokens, "decode_seconds": seconds})
     if set(arms) != set(range(4)):
@@ -133,6 +145,22 @@ def summarize(arms: Sequence[dict[str, Any]], case_ids: set[str]) -> dict[str, A
             "below_case_floor": [row["id"] for row in cases if row["ratio"] < EVERY_CASE_MINIMUM], "cases": cases}
 
 
+def identity_differences(gate: dict[str, Any], arms: Sequence[dict[str, Any]]) -> list[str]:
+    reasons = []
+    for arm in arms:
+        name = f"{arm['arm']}{arm['index']}"
+        if arm["arm"] == "A":
+            for field, expected in gate["comparator"].items():
+                if arm["identity"][field] != expected:
+                    reasons.append(f"{name}.{field} differs from gate comparator")
+        if arm["request_suite_sha256"] != gate["request_suite_sha256"]:
+            reasons.append(f"{name}.request_suite_sha256 differs from gate role suite")
+    for field in ("binary_sha256", "configuration_sha256"):
+        if arms[1]["identity"][field] != arms[2]["identity"][field]:
+            reasons.append(f"candidate {field} differs between B1 and B2")
+    return reasons
+
+
 def reduce(gate: dict[str, Any], captures: Sequence[dict[str, Any]]) -> dict[str, Any]:
     gate = declaration(gate)
     arms = receipts(captures)
@@ -140,11 +168,16 @@ def reduce(gate: dict[str, Any], captures: Sequence[dict[str, Any]]) -> dict[str
     role_ids = case_ids & set(gate["role_case_ids"])
     roles = summarize(arms, role_ids)
     all_cases = summarize(arms, case_ids)
+    reasons = identity_differences(gate, arms)
     passed = (roles is not None and roles["weighted_decode_ratio"] >= WEIGHTED_MINIMUM
               and all_cases["weighted_decode_ratio"] >= WEIGHTED_MINIMUM
               and all_cases["minimum_case_ratio"] >= EVERY_CASE_MINIMUM)
     return {"artifact_type": "omp_ninfer_speed_gate_result", "schema_version": 1,
-            "status": "PASS" if passed else "FAIL", "gate_sha256": digest(gate),
+            "status": "DIAGNOSTIC" if reasons else ("PASS" if passed else "FAIL"),
+            "gate_predictive": not reasons, "diagnostic_reasons": reasons,
+            "thresholds_passed": passed, "gate_passed": not reasons and passed,
+            "gate_sha256": digest(gate), "comparator": gate["comparator"],
+            "request_suite_sha256": gate["request_suite_sha256"],
             "thresholds": {"weighted_minimum": WEIGHTED_MINIMUM, "every_case_minimum": EVERY_CASE_MINIMUM},
             "role_suite": roles, "supplemental": summarize(arms, case_ids - role_ids), "all_cases": all_cases,
             "arms": arms}
@@ -159,17 +192,26 @@ def load(path: Path) -> dict[str, Any]:
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--gate", type=Path, required=True)
-    parser.add_argument("--capture", type=Path, action="append", required=True)
-    parser.add_argument("--out", type=Path, required=True)
+    commands = parser.add_subparsers(dest="command", required=True)
+    plan = commands.add_parser("prescreen", help="derive comparator A and requests from the gate declaration")
+    plan.add_argument("--candidate", type=Path, required=True, help="candidate binary/configuration SHA-256 JSON")
+    reduction = commands.add_parser("reduce", help="reduce complete ABBA capture files, including disjoint shards")
+    reduction.add_argument("--capture", type=Path, action="append", required=True)
+    for command in (plan, reduction):
+        command.add_argument("--gate", type=Path, required=True)
+        command.add_argument("--out", type=Path, required=True)
     args = parser.parse_args(argv)
     try:
-        result = reduce(load(args.gate), [load(path) for path in args.capture])
+        result = (prescreen(load(args.gate), load(args.candidate)) if args.command == "prescreen"
+                  else reduce(load(args.gate), [load(path) for path in args.capture]))
         args.out.write_text(json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
     except (OSError, ValueError) as exc:
         print(f"speed_gate: {exc}", file=sys.stderr)
         return 2
-    print(json.dumps({key: result[key] for key in ("status", "thresholds")}, sort_keys=True))
+    if args.command == "prescreen":
+        print(json.dumps({"gate_sha256": result["gate_sha256"]}, sort_keys=True))
+        return 0
+    print(json.dumps({key: result[key] for key in ("status", "gate_predictive", "thresholds")}, sort_keys=True))
     return 0 if result["status"] == "PASS" else 1
 
 
