@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Gate stock OMP parallel-session recall on the session's exact code at alphanumeric
+  boundaries and the absence of every other session's code, not on whole-answer formatting.
+  Keep the former equality result as non-gating `formatting_exact` evidence, so a correct
+  code followed by a disclaimer passes without weakening recall or session isolation.
 - Decode stock OMP RPC output and every Python tooling subprocess text stream explicitly as
   strict UTF-8, including native Windows acceptance, rather than the host's locale code page.
   Read acceptance evidence and helper text files as UTF-8 as well. AST invariants guard the

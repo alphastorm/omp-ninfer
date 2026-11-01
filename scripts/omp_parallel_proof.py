@@ -15,6 +15,8 @@ value by value when the result is JSON text), and task calls that returned no
 subagent results.
 sessions: two processes start together; each gets a different fact, then recalls
 it twice (three turns per process). A barrier aligns each pair of turns.
+Each recall must contain its own exact code at alphanumeric boundaries and no
+other session's code. Whole-answer formatting is recorded, not a passing gate.
 
 The pinned binary's `agents unpack` identifies scout's model as @smol (task uses
 @task). `config list --json` and v18.4.0 docs/tools/task.md describe task.batch,
@@ -286,12 +288,17 @@ def client(args, label, observe=None):
                 omp.stderr.close()
 
 
-def turn_record(turn, label, index, expected=None):
+def turn_record(turn, label, index, expected=None, *, other_codes=()):
     record = {"session": label, "index": index, "seconds": turn["seconds"],
               "stop": turn["stop"] if turn["stop"] in STOPS else "error",
               "completed": turn["stop"] == "stop"}
     if expected is not None:
-        record["recall_exact"] = turn["answer"].strip() == expected
+        answer = turn["answer"]
+        # [^\W_] matches Unicode alphanumerics, but not underscore separators.
+        record["own_recall"] = re.search(
+            rf"(?<![^\W_]){re.escape(expected)}(?![^\W_])", answer) is not None
+        record["isolation"] = not any(code in answer for code in other_codes)
+        record["formatting_exact"] = answer.strip() == expected
     return record
 
 
@@ -393,6 +400,7 @@ def run_sessions(args, root, shared, codes, record):
 
     def run_one(subargs, label, code):
         turns, session_id = [], None
+        other_codes = tuple(other for other in codes if other != code)
         try:
             with client(subargs, label) as omp:
                 prompts = [f"Remember this session's release fact exactly: {code}. Reply only OK.",
@@ -401,7 +409,8 @@ def run_sessions(args, root, shared, codes, record):
                 for index, prompt in enumerate(prompts, 1):
                     barrier.wait()
                     turn = omp.prompt(prompt, args.turn_timeout)
-                    turns.append(turn_record(turn, label, index, code if index > 1 else None))
+                    turns.append(turn_record(turn, label, index, code if index > 1 else None,
+                                             other_codes=other_codes))
                 session_id = omp.state()["session_id"]
             return {"turns": turns, "session_id": session_id, "error": None}
         except Exception as error:
@@ -417,8 +426,9 @@ def run_sessions(args, root, shared, codes, record):
         record["checks"][f"{label}_three_turns_completed"] = (
             result["error"] is None and len(result["turns"]) == 3
             and all(turn["completed"] for turn in result["turns"]))
-        record["checks"][f"{label}_both_recalls_exact"] = (
-            len(result["turns"]) == 3 and all(turn.get("recall_exact") for turn in result["turns"] if turn["index"] > 1))
+        record["checks"][f"{label}_both_recalls_correct"] = (
+            len(result["turns"]) == 3 and all(turn.get("own_recall") and turn.get("isolation")
+                                            for turn in result["turns"] if turn["index"] > 1))
         if result["error"]:
             record["errors"].append(result["error"])
     ids = [result["session_id"] for result in results]

@@ -1,11 +1,14 @@
 """Consumer-visible concurrency evidence, baseline comparability and config rewrites."""
 from __future__ import annotations
 
+from contextlib import contextmanager
 from copy import deepcopy
 import importlib.util
 import json
 from pathlib import Path
+from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "omp_parallel_proof.py"
 SPEC = importlib.util.spec_from_file_location("omp_parallel_proof", SCRIPT)
@@ -147,6 +150,109 @@ class SubagentResultTests(unittest.TestCase):
         self.assertFalse(observed([2], [alpha, {"ok": True, "codes": []}])["codes_delivered_by_subagents"])
         self.assertFalse(observed([], [])["first_task_call_dispatched_both"])
         self.assertFalse(proof.subagent_checks(proof.TaskObserver(), {"stop": "length", "answer": ""}, codes)["parent_completed"])
+
+
+class SessionRecallTests(unittest.TestCase):
+    codes = ("ALPHA-CODE=123456", "BETA-CODE=654321")
+
+    def sessions(self, answer, *, session="alpha", index=2, stop="stop"):
+        """Exercise the real session/check aggregation with synthetic in-memory RPC turns."""
+        args = SimpleNamespace(turn_timeout=1, log_cmd="synthetic", log_timeout=1,
+                               model="synthetic/q38-ninfer", max_in_flight=2)
+
+        @contextmanager
+        def fake_client(_args, label):
+            own = self.codes[("alpha", "beta").index(label)]
+            count = 0
+
+            def prompt(_prompt, _timeout):
+                nonlocal count
+                count += 1
+                selected = label == session and count == index
+                return {"answer": answer if selected else ("OK" if count == 1 else own),
+                        "stop": stop if selected else "stop", "seconds": 0.25}
+
+            yield SimpleNamespace(prompt=prompt, state=lambda: {"session_id": label})
+
+        rows = [request("request_start", 1, 1), request("request_done", 1, 3),
+                request("request_start", 2, 2), request("request_done", 2, 4)]
+        with patch.object(proof, "client_args", side_effect=lambda _args, _root, _shared, label: label), \
+             patch.object(proof, "client", fake_client), \
+             patch.object(proof, "fetch_log", return_value=rows), \
+             patch.object(proof.time, "time", side_effect=[0, 5]):
+            return proof.run_scenario(args, None, None, "sessions", self.codes)
+
+    def test_gates_recall_and_isolation_not_formatting(self):
+        for session, own, other in (("alpha", *self.codes), ("beta", *self.codes[::-1])):
+            cases = (
+                ("code_with_disclaimer", own + "\n\nSynthetic note: copied from the earlier prompt, "
+                 "not independently verified.", True),
+                ("missing_code", "I do not recall the synthetic marker.", False),
+                ("near_miss", own[:-1] + "0", False),
+                ("foreign_code", own + "\n" + other, False),
+                ("code_only", own, True),
+            )
+            for index in (2, 3):
+                for name, answer, expected in cases:
+                    with self.subTest(session=session, index=index, case=name):
+                        record = self.sessions(answer, session=session, index=index)
+                        self.assertEqual(record["passed"], expected)
+                        self.assertEqual(record["errors"], [])
+
+    def test_own_code_requires_alphanumeric_boundaries(self):
+        own = self.codes[0]
+        for answer in (f"`{own}`.", f"({own})", f"_{own}_", f"\n{own}\n"):
+            with self.subTest(answer=answer):
+                self.assertTrue(self.sessions(answer)["passed"])
+        for answer in ("X" + own, own + "7", own + "x", "é" + own, own + "٢"):
+            with self.subTest(answer=answer):
+                self.assertFalse(self.sessions(answer)["passed"])
+
+    def test_records_recall_isolation_and_non_gating_formatting_separately(self):
+        own, other = self.codes
+        for answer, recall, isolation, formatting in (
+                (own + "\n\nSynthetic disclaimer.", True, True, False),
+                ("unknown", False, True, False),
+                (own + "\n" + other, True, False, False),
+                (" \n" + own + "\n ", True, True, True)):
+            with self.subTest(answer=answer):
+                record = self.sessions(answer)
+                turn = next(row for row in record["turns"]
+                            if row["session"] == "alpha" and row["index"] == 2)
+                self.assertEqual((turn["own_recall"], turn["isolation"], turn["formatting_exact"]),
+                                 (recall, isolation, formatting))
+                self.assertNotIn("recall_exact", turn)
+                self.assertNotIn("answer", turn)
+                seed = next(row for row in record["turns"]
+                            if row["session"] == "alpha" and row["index"] == 1)
+                self.assertNotIn("formatting_exact", seed)
+                self.assertEqual(set(record["checks"]), {
+                    "alpha_three_turns_completed", "alpha_both_recalls_correct",
+                    "beta_three_turns_completed", "beta_both_recalls_correct", "separate_sessions",
+                    "logged_requests", "all_logged_requests_completed", "single_server_instance",
+                    "provider_limit_respected", "concurrency_expected",
+                })
+
+    def test_foreign_code_is_rejected_even_inside_a_longer_run(self):
+        own, other = self.codes
+        record = self.sessions(own + "\nX" + other + "7")
+        self.assertFalse(record["passed"])
+        turn = next(row for row in record["turns"]
+                    if row["session"] == "alpha" and row["index"] == 2)
+        self.assertTrue(turn["own_recall"])
+        self.assertFalse(turn["isolation"])
+
+    def test_correct_recall_does_not_bypass_completion_or_stop_checks(self):
+        for stop in ("length", "aborted", "error", "toolUse", "unexpected"):
+            with self.subTest(stop=stop):
+                record = self.sessions(self.codes[0], stop=stop)
+                self.assertFalse(record["passed"])
+                self.assertFalse(record["checks"]["alpha_three_turns_completed"])
+                turn = next(row for row in record["turns"]
+                            if row["session"] == "alpha" and row["index"] == 2)
+                self.assertEqual(turn["seconds"], 0.25)
+                self.assertEqual(turn["stop"], stop if stop in proof.STOPS else "error")
+                self.assertFalse(turn["completed"])
 
 
 class ConfigRewriteTests(unittest.TestCase):
