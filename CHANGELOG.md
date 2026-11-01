@@ -7,8 +7,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.16.0] - Prepared; publication date ⟦PENDING: v0.16.0 publication date, releases/v0.16.0/NINFER_RELEASE_NOTES.md⟧
+
+### Added
+
+- Prepare native Windows **DFlash2 draft window 7 (`K=7`)** on both 24 GB lanes (`v0.8.0-qwen38-4090-beta.1`
+  package `06526bdb`, server `c6f59e9e`, config `f00cfac9`, and `v0.8.0-qwen38-3090-beta.1` package
+  `040d5923`, server `72cd776b`, config `cbe67aae`) and **concurrency 2 (`C2`) over one shared
+  131,072-token `INT8` KV pool** on the native RTX 3090 lane (`180 s` pending timeout, two extra
+  device-state slots, `20,867.734375 MiB` / `21,881,405,440` B shared Host budget,
+  `ninfer-native-3090: 2` in `examples/manual-tunnel/fail-closed.yml`), built alongside the RTX 5090
+  container `v0.7.0-qwen38-5090-beta.4` (image `7a5a7bb8` on base `d4377ed0`, server `bab3fd77`,
+  kept profile `qwen38-5090-v0.13.0` / config `751d22dc`) from one frozen engine source
+  `26fa28d0e7834515508fc07ac503164a6effc820` on upstream `Neroued/ninfer` master `64d10fbf` with
+  unchanged stock Oh My Pi **18.14.0** (`31147f9d`) and shared model v3 `81f924d4` (`EXP-101`..`EXP-106`,
+  superseding `v0.15.1`).
+- Expose per-position speculative decoding counters in Prometheus (`/metrics`
+  `ninfer_spec_decode_position_tokens_total{position,kind}`) and additive optional
+  `request_done.speculative.attempted_per_position` in `requests.jsonl` while retaining request-log
+  schema `30` (`f6668a5d`).
+- Add authenticated packaged native policy consumption (`release-spec.json` schema 5 and
+  `server-config.json` schema 4) and the RTX 3090 `C2` acceptance arm (`concurrency_probe.py
+  --scenario fanout --fanout-concurrency 4`, stock OMP subagent/session overlap at limit 2, and two
+  automatic-compaction/control-recall epochs) across `scripts/verify_release.py`,
+  `scripts/bind_native_variant.py`, `scripts/compose_native_qualification.py`, and
+  `scripts/compose_route_acceptance.py` (`3de36942`).
+
 ### Fixed
 
+- Materialize immutable `StateImage` replicas into the counted Host arena and release device state
+  replicas before off-worker durable checkpoint disk serialization (`StateImageStore::prepare_host_export`,
+  `8c639fe0` / `80c0af77`, `EXP-105`), cutting post-resume first-fork server TTFT from `5.03 s` to
+  `0.11 s` on RTX 5090 and from `15.4–17.8 s` to `0.33–0.76 s` on RTX 3090.
+- Wait for in-flight off-worker checkpoint exports in `EngineCore::reserve_resident_units()`
+  (`ea2edc20`, `EXP-106`) instead of failing a resumed concurrent resident with HTTP 500 `oldest
+  resident cannot obtain its legal unit`, and enforce both physical and configured-budget headroom
+  at final startup readiness (`375f47c9`).
+- Replace unreferenced native checkpoint owners while readers are pinned (`c3911a14`), retain
+  binding waiters on failed state adoption (`alphastorm/ninfer#49` `e517dab8`), order response,
+  error, and cancellation delivery after engine-state retirement
+  ([#95](https://github.com/alphastorm/omp-ninfer/issues/95)), add media-decode range checks
+  ([#96](https://github.com/alphastorm/omp-ninfer/issues/96)), and allocate Linux `io_uring`
+  completion handles before worker publication with a 30 s fail-closed CQE cancellation/drain
+  teardown barrier (`40a1b2d0`, [#116](https://github.com/alphastorm/omp-ninfer/issues/116)
+  `GA-R2` / `GA-U1`).
+- Hand off the native Windows GPU-owner lease across running-lane upgrades, rollbacks, and
+  power-cap transitions (`577fecba`, `alphastorm/ninfer#48` `9cb741dc`, closing
+  [#94](https://github.com/alphastorm/omp-ninfer/issues/94) and
+  [#116](https://github.com/alphastorm/omp-ninfer/issues/116) and removing the historical
+  stop-before-upgrade prerequisite), journal directory-creation cleanup intent before `mkdir`,
+  refuse a non-running incumbent's retained inner GPU lease before cutover, publish pre-spawn
+  launch attribution with a process-image census guard, and block destructive transaction rollback
+  on an explicitly incomplete launch-bound shutdown report.
 - Bind a native quality screen's production package, server, configuration and model hashes
   to the immediately preceding published release's variant, not merely to its GPU lane
   ([#117](https://github.com/alphastorm/omp-ninfer/issues/117), P15-R06).
@@ -16,15 +66,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   a package; rebind accepts only the evidence explicitly supplied for that operation (P15-R07).
 - Require the native screen's exact frozen 1,120-prompt membership and first 80 determinism
   prompts in both arms, with duplicate-free scored/response membership seals (P15-R08).
-- Fail closed on an omitted G4 review binding in ready mode from v0.15.1; historical releases
-  that predate mandatory machine-bound review evidence remain unchanged (P15-R03).
+- Fail closed on an omitted G4 review binding in ready mode from v0.16.0 (superseding v0.15.1);
+  historical releases that predate mandatory machine-bound review evidence remain unchanged
+  (P15-R03).
 - Recheck a bound documented-routes receipt's release, passed status and current-release
   location even when its summary is absent (P15-R09).
 - Enforce every nested qualification `repository_path`/`sha256` binding against the
   repository's actual file bytes in draft, installable and ready verification (P15-R11).
-  From v0.15.1 every repository reference requires its hash; published path-only annotations
-  remain historical metadata rather than being rewritten as new evidence. The composer
-  refreshes qualification references to artifacts it authors, including its rewritten client
+  From v0.16.0 (superseding v0.15.1) every repository reference requires its hash; published
+  path-only annotations remain historical metadata rather than being rewritten as new evidence. The
+  composer refreshes qualification references to artifacts it authors, including its rewritten client
   descriptor, without changing bindings to independent evidence. Staging also discards prior
   documented-route evidence when the client binary is carried unchanged.
 - Refuse route composition unless the restored RTX 5090 image's digest equals the latest
@@ -50,9 +101,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Mark v0.15.0 as the published release across the README, quickstart banner, facts, roadmap,
-  release history, upstream watch, reference docs, site, and brand assets; front-door install links
-  return to the guide on `main`.
+- Mark v0.16.0 as the published release across the README, quickstart, facts, roadmap, release
+  history, performance and benchmark docs, compatibility matrix, and upstream watch.
 
 ## [0.15.0] - 2026-10-30
 
@@ -2676,7 +2726,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.15.0...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.16.0...HEAD
+[0.16.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.13.1...v0.14.0
 [0.13.1]: https://github.com/alphastorm/omp-ninfer/compare/v0.13.0...v0.13.1

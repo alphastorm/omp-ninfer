@@ -1,0 +1,393 @@
+{
+  "approval_granted": true,
+  "artifact_type": "omp_ninfer_review_ledger",
+  "as_of": "2026-10-31",
+  "native_runtime": {
+    "base_commit": "2af6b3dec467e61d284889c69e903eef464bda97",
+    "binding_status": "Original frozen N16 subject passed post-dispatch and final epoch rechecks with no drift. Frozen record, packet, manifest, resolver receipt and envelope are unchanged. Every returned finding/question is retained and mapped to L1-L6 with accountable-lead rationale/disposition verbatim. Closure is by disposition, not a new admitting epoch or code remediation.",
+    "ci_runs": [
+      {
+        "conclusion": "success",
+        "run_id": 41202282196,
+        "source_commit": "26fa28d0e7834515508fc07ac503164a6effc820",
+        "status": "completed",
+        "url": "https://github.com/alphastorm/ninfer/actions/runs/41202282196"
+      },
+      {
+        "conclusion": "success",
+        "run_id": 41202281991,
+        "source_commit": "26fa28d0e7834515508fc07ac503164a6effc820",
+        "status": "completed",
+        "url": "https://github.com/alphastorm/ninfer/actions/runs/41202281991"
+      },
+      {
+        "conclusion": "success",
+        "run_id": 41207365104,
+        "source_commit": "26fa28d0e7834515508fc07ac503164a6effc820",
+        "status": "completed",
+        "url": "https://github.com/alphastorm/ninfer/actions/runs/41207365104"
+      }
+    ],
+    "close_status": {
+      "epoch_digest_drift": [],
+      "epoch_recheck_exit_code": 0,
+      "frozen_record_gate_action": "full-council",
+      "frozen_record_gate_status": "ready",
+      "gate_note": "The unchanged initial record retains historical full-council admission; the gate does not consume outcome ledgers. No new dispatch is authorized by this close.",
+      "in_scope_residual_p01": [],
+      "method": "round1-accountable-lead-disposition",
+      "pending_rows": [],
+      "reason_codes": [],
+      "review_sequence_gate_exit_code": 0,
+      "sequence": "closed"
+    },
+    "deferred_issues": [
+      "https://github.com/alphastorm/ninfer/issues/50",
+      "https://github.com/alphastorm/ninfer/issues/51",
+      "https://github.com/alphastorm/ninfer/issues/52",
+      "https://github.com/alphastorm/ninfer/issues/53",
+      "https://github.com/alphastorm/ninfer/issues/54"
+    ],
+    "dispatch_subject_digest": "9aae652fbe67fff0d367c0f8525b42f3e6258a4309ae9922cc4064a78165ff1f",
+    "dispositions": {
+      "claude-mythos-R1": "L1; defer (issue); residual P2; Fail-open on absent evidence is real. After C-ROLLBACK, C-TXSCOPE, C-RECOMPUTE and C-PROCESS, the only reachable loss is the checkpoints of a candidate whose install never completed, deleted by transaction rollback/repair after an unclean candidate stop. That loss is cache-only, and the incumbent cannot consume a candidate's checkpoints anyway. Fixing it changes package bytes and therefore N, forcing a rebuild, re-cut and re-qualification of all three lanes: disproportionate to a bounded cache loss. Next release: treat a missing or invalid report and forced termination of a stop-event launch as incomplete, keep runtime.json and the candidate cache, and require an explicit operator reconcile. Add a red\u2192green Windows test.; https://github.com/alphastorm/ninfer/issues/50",
+      "claude-mythos-R2": "L6; defer (issue); residual P3; Uninstall is a deliberate whole-state-root removal. The card stays at the qualified cap, which is a safe limit, and an operator can restore the limit with nvidia-smi. Record it in the next release's uninstall notes and fix it with L1.; https://github.com/alphastorm/ninfer/issues/54",
+      "claude-mythos-U1": "L1; defer (issue); residual P2; Fail-open on absent evidence is real. After C-ROLLBACK, C-TXSCOPE, C-RECOMPUTE and C-PROCESS, the only reachable loss is the checkpoints of a candidate whose install never completed, deleted by transaction rollback/repair after an unclean candidate stop. That loss is cache-only, and the incumbent cannot consume a candidate's checkpoints anyway. Fixing it changes package bytes and therefore N, forcing a rebuild, re-cut and re-qualification of all three lanes: disproportionate to a bounded cache loss. Next release: treat a missing or invalid report and forced termination of a stop-event launch as incomplete, keep runtime.json and the candidate cache, and require an explicit operator reconcile. Add a red\u2192green Windows test.; https://github.com/alphastorm/ninfer/issues/50",
+      "claude-mythos-U2": "L3; defer (issue); residual P3; Under C-LOCKS a surviving candidate makes cleanup and the incumbent restart fail visibly. The installer runs elevated, so a blank ExecutablePath for the lane's own task child needs a protected or foreign-session process. No real-Windows evidence shows one; mythos U2 records the same gap. Next release: fail closed on blank-path processes named like the server, matching Control-Release.ps1:562-579.; https://github.com/alphastorm/ninfer/issues/51",
+      "daybreak-blue-R1": "L1; defer (issue); residual P2; Fail-open on absent evidence is real. After C-ROLLBACK, C-TXSCOPE, C-RECOMPUTE and C-PROCESS, the only reachable loss is the checkpoints of a candidate whose install never completed, deleted by transaction rollback/repair after an unclean candidate stop. That loss is cache-only, and the incumbent cannot consume a candidate's checkpoints anyway. Fixing it changes package bytes and therefore N, forcing a rebuild, re-cut and re-qualification of all three lanes: disproportionate to a bounded cache loss. Next release: treat a missing or invalid report and forced termination of a stop-event launch as incomplete, keep runtime.json and the candidate cache, and require an explicit operator reconcile. Add a red\u2192green Windows test.; https://github.com/alphastorm/ninfer/issues/50",
+      "daybreak-blue-R2": "L3; defer (issue); residual P3; Under C-LOCKS a surviving candidate makes cleanup and the incumbent restart fail visibly. The installer runs elevated, so a blank ExecutablePath for the lane's own task child needs a protected or foreign-session process. No real-Windows evidence shows one; mythos U2 records the same gap. Next release: fail closed on blank-path processes named like the server, matching Control-Release.ps1:562-579.; https://github.com/alphastorm/ninfer/issues/51",
+      "daybreak-blue-R3": "L2; defer (same issue as L1); residual P2; Same asset and consequence class as L1: candidate cache inside an unfinished install transaction, recomputable. The refused sessions were never saved, so a later rollback deletes nothing that the refusal was protecting beyond the candidate cache. Fix together with L1.; https://github.com/alphastorm/ninfer/issues/50",
+      "gemini-argon-R1": "L5; defer (issue); residual P3; FP32 head logits is default OFF in every shipped profile. The packaged config is hash-asserted at Start (Control-Release.ps1:1079, 1169), so product users cannot enable it. With the opt-in on, restores would be refused, which fails closed: recompute, no corruption. Next release: one-line fix plus a restore test with the opt-in.; https://github.com/alphastorm/ninfer/issues/53",
+      "gpt-astra-R1": "L1; defer (issue); residual P2; Fail-open on absent evidence is real. After C-ROLLBACK, C-TXSCOPE, C-RECOMPUTE and C-PROCESS, the only reachable loss is the checkpoints of a candidate whose install never completed, deleted by transaction rollback/repair after an unclean candidate stop. That loss is cache-only, and the incumbent cannot consume a candidate's checkpoints anyway. Fixing it changes package bytes and therefore N, forcing a rebuild, re-cut and re-qualification of all three lanes: disproportionate to a bounded cache loss. Next release: treat a missing or invalid report and forced termination of a stop-event launch as incomplete, keep runtime.json and the candidate cache, and require an explicit operator reconcile. Add a red\u2192green Windows test.; https://github.com/alphastorm/ninfer/issues/50",
+      "gpt-astra-R2": "L4; defer (issue); residual P3; The code is unchanged since F2. The P15 sequence reviewed it, so this is a gap in a file outside the delta. Triggering it needs `std::bad_alloc` for a small host allocation, i.e. process-wide memory exhaustion. The server is already failing then, and the controller's stop timeout ends in forced termination. Next release: reserve the retirement node before taking the lease, or retire inline on failure.; https://github.com/alphastorm/ninfer/issues/52",
+      "gpt-astra-R3": "L3; defer (issue); residual P3; Under C-LOCKS a surviving candidate makes cleanup and the incumbent restart fail visibly. The installer runs elevated, so a blank ExecutablePath for the lane's own task child needs a protected or foreign-session process. No real-Windows evidence shows one; mythos U2 records the same gap. Next release: fail closed on blank-path processes named like the server, matching Control-Release.ps1:562-579.; https://github.com/alphastorm/ninfer/issues/51"
+    },
+    "frozen_record_prior_general_review_pass_count": 0,
+    "general_review_pass_count": 1,
+    "initial_review_class": "full-council",
+    "initial_review_id": "CR-20261031T162716Z-26fa28d0",
+    "issue_groups": {
+      "L1-L2": {
+        "labels": [
+          "bug"
+        ],
+        "number": 50,
+        "title": "Retain incomplete managed-shutdown evidence until reconciliation",
+        "url": "https://github.com/alphastorm/ninfer/issues/50"
+      },
+      "L3": {
+        "labels": [
+          "bug"
+        ],
+        "number": 51,
+        "title": "Fail closed when installer repair cannot read a candidate image path",
+        "url": "https://github.com/alphastorm/ninfer/issues/51"
+      },
+      "L4": {
+        "labels": [
+          "bug"
+        ],
+        "number": 52,
+        "title": "Make checkpoint export retirement exception-safe",
+        "url": "https://github.com/alphastorm/ninfer/issues/52"
+      },
+      "L5": {
+        "labels": [
+          "bug"
+        ],
+        "number": 53,
+        "title": "Include FP32 head-logit mode in the durable engine identity",
+        "url": "https://github.com/alphastorm/ninfer/issues/53"
+      },
+      "L6": {
+        "labels": [
+          "bug"
+        ],
+        "number": 54,
+        "title": "Preserve paused-owner power metadata during uninstall",
+        "url": "https://github.com/alphastorm/ninfer/issues/54"
+      }
+    },
+    "ledger_sha256": "b2871c3664a0c4434dedc3aa2b3f2fdd7f5b301c9d3cecc7d1ce463c835aabe6",
+    "merged_dispositions": {
+      "L1": {
+        "change": "none",
+        "claim": "Stop-ManagedProcess returns success when a stop-event launch's shutdown report is missing, unreadable or wrong-launch (`graceful_unreported`), and after forced termination (`graceful_wait_expired`, `graceful_nonzero_exit`, `terminated`, `signal_failed`); only an explicit incomplete report throws",
+        "disposition": "defer (issue)",
+        "final_disposition": "defer",
+        "issue_url": "https://github.com/alphastorm/ninfer/issues/50",
+        "rationale": "Fail-open on absent evidence is real. After C-ROLLBACK, C-TXSCOPE, C-RECOMPUTE and C-PROCESS, the only reachable loss is the checkpoints of a candidate whose install never completed, deleted by transaction rollback/repair after an unclean candidate stop. That loss is cache-only, and the incumbent cannot consume a candidate's checkpoints anyway. Fixing it changes package bytes and therefore N, forcing a rebuild, re-cut and re-qualification of all three lanes: disproportionate to a bounded cache loss. Next release: treat a missing or invalid report and forced termination of a stop-event launch as incomplete, keep runtime.json and the candidate cache, and require an explicit operator reconcile. Add a red\u2192green Windows test.",
+        "residual_severity": "P2",
+        "result": "confirmed",
+        "reviewer_ids": [
+          "claude-mythos",
+          "daybreak-blue",
+          "gpt-astra"
+        ],
+        "source_ids": [
+          "claude-mythos-R1",
+          "daybreak-blue-R1",
+          "gpt-astra-R1",
+          "claude-mythos-U1"
+        ],
+        "verified": "YES (Control-Release.ps1:932-1054)"
+      },
+      "L2": {
+        "change": "none",
+        "claim": "A refused final save is not sticky across a later Start, so a later clean Stop can permit transaction rollback",
+        "disposition": "defer (same issue as L1)",
+        "final_disposition": "defer",
+        "issue_url": "https://github.com/alphastorm/ninfer/issues/50",
+        "rationale": "Same asset and consequence class as L1: candidate cache inside an unfinished install transaction, recomputable. The refused sessions were never saved, so a later rollback deletes nothing that the refusal was protecting beyond the candidate cache. Fix together with L1.",
+        "residual_severity": "P2",
+        "result": "confirmed",
+        "reviewer_ids": [
+          "daybreak-blue"
+        ],
+        "source_ids": [
+          "daybreak-blue-R3"
+        ],
+        "verified": "YES (Control-Release.ps1:1048-1054, 1068-1115)"
+      },
+      "L3": {
+        "change": "none",
+        "claim": "Repair's quiescence census drops processes whose ExecutablePath is unreadable when state no longer names the candidate",
+        "disposition": "defer (issue)",
+        "final_disposition": "defer",
+        "issue_url": "https://github.com/alphastorm/ninfer/issues/51",
+        "rationale": "Under C-LOCKS a surviving candidate makes cleanup and the incumbent restart fail visibly. The installer runs elevated, so a blank ExecutablePath for the lane's own task child needs a protected or foreign-session process. No real-Windows evidence shows one; mythos U2 records the same gap. Next release: fail closed on blank-path processes named like the server, matching Control-Release.ps1:562-579.",
+        "residual_severity": "P3",
+        "result": "confirmed",
+        "reviewer_ids": [
+          "claude-mythos",
+          "daybreak-blue",
+          "gpt-astra"
+        ],
+        "source_ids": [
+          "daybreak-blue-R2",
+          "gpt-astra-R3",
+          "claude-mythos-U2"
+        ],
+        "verified": "YES (Install-Release.ps1:964-979)"
+      },
+      "L4": {
+        "change": "none",
+        "claim": "Export retirement is not exception-safe if allocating the retirement command throws",
+        "disposition": "defer (issue)",
+        "final_disposition": "defer",
+        "issue_url": "https://github.com/alphastorm/ninfer/issues/52",
+        "rationale": "The code is unchanged since F2. The P15 sequence reviewed it, so this is a gap in a file outside the delta. Triggering it needs `std::bad_alloc` for a small host allocation, i.e. process-wide memory exhaustion. The server is already failing then, and the controller's stop timeout ends in forced termination. Next release: reserve the retirement node before taking the lease, or retire inline on failure.",
+        "residual_severity": "P3",
+        "result": "confirmed",
+        "reviewer_ids": [
+          "gpt-astra"
+        ],
+        "source_ids": [
+          "gpt-astra-R2"
+        ],
+        "verified": "YES (engine_checkpoint.inl:15-21, 94-136, 155-162)"
+      },
+      "L5": {
+        "change": "none",
+        "claim": "`engine_identity()` omits `fp32_head_logits`, so the checkpoint fingerprint disagrees when the opt-in is enabled",
+        "disposition": "defer (issue)",
+        "final_disposition": "defer",
+        "issue_url": "https://github.com/alphastorm/ninfer/issues/53",
+        "rationale": "FP32 head logits is default OFF in every shipped profile. The packaged config is hash-asserted at Start (Control-Release.ps1:1079, 1169), so product users cannot enable it. With the opt-in on, restores would be refused, which fails closed: recompute, no corruption. Next release: one-line fix plus a restore test with the opt-in.",
+        "residual_severity": "P3",
+        "result": "confirmed",
+        "reviewer_ids": [
+          "gemini-argon"
+        ],
+        "source_ids": [
+          "gemini-argon-R1"
+        ],
+        "verified": "YES (engine.cpp:55-82 vs session_checkpoint_service.cpp:54-62)"
+      },
+      "L6": {
+        "change": "none",
+        "claim": "Uninstall removes the inner GPU-owner lease record while the outer lease has prior_paused=true, losing the prior power limit",
+        "disposition": "defer (issue)",
+        "final_disposition": "defer",
+        "issue_url": "https://github.com/alphastorm/ninfer/issues/54",
+        "rationale": "Uninstall is a deliberate whole-state-root removal. The card stays at the qualified cap, which is a safe limit, and an operator can restore the limit with nvidia-smi. Record it in the next release's uninstall notes and fix it with L1.",
+        "residual_severity": "P3",
+        "result": "unresolved",
+        "reviewer_ids": [
+          "claude-mythos"
+        ],
+        "source_ids": [
+          "claude-mythos-R2"
+        ],
+        "verified": "PARTIAL (Control-Release.ps1:1439-1465, 476-481)"
+      }
+    },
+    "merged_row_counts": {
+      "by_disposition": {
+        "defer": 6
+      },
+      "by_result": {
+        "confirmed": 5,
+        "unresolved": 1
+      },
+      "by_severity": {
+        "P0": 0,
+        "P1": 0,
+        "P2": 2,
+        "P3": 4
+      },
+      "pending": 0,
+      "total": 6
+    },
+    "not_selected_ineligible": [],
+    "receipt_digests": {
+      "initial": {
+        "LEAD-DISPOSITIONS.md": "da74b8c812b5bf955d2ed14425fb43a5f974972ff05e76abed5ab8fb222b209d",
+        "claude-mythos.json": "6527ce45f2ccb65850c25dd703b3baec06265fa4ee143c81d6ecf3873dbaf51e",
+        "close-report.md": "500e04d54922b73e4777fcf09f050466738d7b3948816ab66c8c4626d847e035",
+        "close-tooling.json": "bd3dec58f5f3e58b071f3ec4094eafa284ab494718c1a47214bced55537dcfab",
+        "daybreak-blue.json": "c28e15bbbbcef19690283db4876ecf24f48938dfeddefd4d89f86a852cffa964",
+        "dispatch-result.json": "d612f0b802710b23ea3f2fcd09a234a889ee7c08190a8d0c267cca276e782cd7",
+        "finding-source-map.json": "a0cb191237b49bddd1faf64f8f11647221bca60419e0841ef8589bc78298143d",
+        "frozen-subject.json": "21e4f182481bed4d79f2b7a880a185878751236d4ebc3ac33cb6c560a1ad0cea",
+        "gemini-argon.json": "9bb8617a8ef9005235a545dcc15e66fa549cc629a3a7fb7b217f5cb0975c2452",
+        "gpt-astra.json": "e30b3a674dee24517874b31b02d5a5f6f2aa2646c75d8f2ed83fe0608f8bc102",
+        "ledger.md": "b2871c3664a0c4434dedc3aa2b3f2fdd7f5b301c9d3cecc7d1ce463c835aabe6",
+        "packet.md": "78db17902eb4bdc0a5e614e20a9da2536f9dd4344b53582b8989bf26fa0d6c7c",
+        "panel-selection.json": "72bdd99b93ad575ae9f6df8287d5497094f31aea0321fe1a4b043742a5b5bf1b",
+        "resolver-receipt.json": "1135d79a663bd2bf39d0a74f2c4e1f94b8cbd0f3ebab3374dd6312b26197a694",
+        "review-dispatch-envelope.attempt-1.json": "3e8335217529ba9e7f062e32c1640769e4b1da408690c2802573e600882b0173",
+        "review-dispatch-envelope.json": "2ba1af0fbe05d9a221573a89330ed4275248c23d0828970bfc952ea69e1d543c",
+        "review-record.json": "cbb0c780d3317a24286c82b4a5f2f0a05ca94dfd1b4b838107c3eaacab36b372"
+      }
+    },
+    "record_sha256": "cbb0c780d3317a24286c82b4a5f2f0a05ca94dfd1b4b838107c3eaacab36b372",
+    "remediation_review_id": null,
+    "remediation_seats": [],
+    "repository": "https://github.com/alphastorm/ninfer",
+    "required_scope": [
+      "Complete F2..N16 common-engine/runtime/native source delta and bound adjacent ownership/identity context for all three lanes.",
+      "Exact N16 Linux RTX5090 checked-first-build RC/startup/T1 and supported-platform CI; checked-first-build nonreproducibility exception is retained, not generalized to natives.",
+      "Exact N16 native two-clean-round43/43 identity, zero private-marker findings, closed assets/dual SBOMs/local cut preflight for RTX3090 F2c and RTX4090 D1; final GPU acceptance is separate.",
+      "Default-OFF FP32/RK4, explicit shared-pool/native headroom and unchanged exact rollback/origin/fingerprint boundaries."
+    ],
+    "residual_limits": [
+      "L1/L2: absent/invalid or forced-stop final-save evidence and later Start can permit loss of an unfinished-install candidate cache; client-held conversation is recomputable and incumbent checkpoint trees are not cleanup targets.",
+      "L3: protected/foreign-session unreadable image paths on real Windows remain unmeasured; image locks and port refusal make a surviving candidate fail cleanup/restart visibly.",
+      "L4: unchanged F2 adjacent export-retirement allocation path can fail during process-wide host memory exhaustion; no fault-injection evidence is claimed.",
+      "L5: FP32 head logits remain OFF in every shipped profile; opt-in durable identity mismatch refuses restore/recomputes rather than corrupting state.",
+      "L6: PARTIAL source-supported uninstall/prior-paused metadata claim; safe qualified cap remains and operator restoration is possible; no real-host experiment is claimed.",
+      "Both source unresolved questions remain deferred at bounded residual severity, not declared answered by a passing host run.",
+      "Next-release issue fixes and uninstall notes are not implemented by this close. Product release-note inclusion and release-ledger composition remain separate integration steps."
+    ],
+    "review_class": "full-council",
+    "review_id": "CR-20261031T162716Z-26fa28d0",
+    "review_ids": [
+      "CR-20261031T162716Z-26fa28d0"
+    ],
+    "review_mode": "initial",
+    "review_sequence_id": "omp-ninfer-v0.16.0-fork-26fa28d0",
+    "reviewed_commit": "26fa28d0e7834515508fc07ac503164a6effc820",
+    "reviewer_results": {
+      "claude-mythos": {
+        "authority": "supplemental_evidence",
+        "evidence_items": 2,
+        "model": "anthropic/claude-mythos-5-1:max",
+        "model_family": "claude",
+        "sha256": "6527ce45f2ccb65850c25dd703b3baec06265fa4ee143c81d6ecf3873dbaf51e",
+        "status": "completed",
+        "unresolved_items": 2
+      },
+      "daybreak-blue": {
+        "authority": "independent_evidence",
+        "evidence_items": 3,
+        "model": "openai-codex/gpt-6-sol:max",
+        "model_family": "gpt",
+        "sha256": "c28e15bbbbcef19690283db4876ecf24f48938dfeddefd4d89f86a852cffa964",
+        "status": "completed",
+        "unresolved_items": 0
+      },
+      "gemini-argon": {
+        "authority": "independent_evidence",
+        "evidence_items": 1,
+        "model": "google-antigravity/gemini-4-argon:high",
+        "model_family": "gemini",
+        "sha256": "9bb8617a8ef9005235a545dcc15e66fa549cc629a3a7fb7b217f5cb0975c2452",
+        "status": "completed",
+        "unresolved_items": 0
+      },
+      "gpt-astra": {
+        "authority": "supplemental_evidence",
+        "evidence_items": 3,
+        "model": "openai-codex/gpt-6-astra:max",
+        "model_family": "gpt",
+        "sha256": "e30b3a674dee24517874b31b02d5a5f6f2aa2646c75d8f2ed83fe0608f8bc102",
+        "status": "completed",
+        "unresolved_items": 0
+      }
+    },
+    "row_counts": {
+      "by_disposition": {
+        "accept": 0,
+        "defer": 11,
+        "mitigate": 0,
+        "reject": 0
+      },
+      "by_result": {
+        "confirmed": 8,
+        "unresolved": 3
+      },
+      "by_severity": {
+        "P0": 0,
+        "P1": 7,
+        "P2": 2,
+        "P3": 2
+      },
+      "by_source_severity_and_disposition": {
+        "P1": {
+          "defer": 7
+        },
+        "P2": {
+          "defer": 2
+        },
+        "P3": {
+          "defer": 2
+        }
+      },
+      "evidence_items": 9,
+      "pending": 0,
+      "residual_after_controls": {
+        "P0": 0,
+        "P1": 0,
+        "P2": 5,
+        "P3": 6
+      },
+      "severity_basis": "Reviewer source severities preserved; residual severity and six merged root-cause groups are reported separately.",
+      "total": 11,
+      "unresolved_items_returned": 2
+    },
+    "source_commit": "26fa28d0e7834515508fc07ac503164a6effc820",
+    "source_to_lead": {
+      "claude-mythos-R1": "L1",
+      "claude-mythos-R2": "L6",
+      "claude-mythos-U1": "L1",
+      "claude-mythos-U2": "L3",
+      "daybreak-blue-R1": "L1",
+      "daybreak-blue-R2": "L3",
+      "daybreak-blue-R3": "L2",
+      "gemini-argon-R1": "L5",
+      "gpt-astra-R1": "L1",
+      "gpt-astra-R2": "L4",
+      "gpt-astra-R3": "L3"
+    },
+    "status": "closed-without-remediation",
+    "subject_digest": "42d8473cc636cf700a16e4f9be13f0af865704f65287482d13af38838e8eda7d",
+    "targeted_refutation_used": false
+  },
+  "public_route_acceptance_granted": false,
+  "publication_authorized": false,
+  "release": "v0.16.0",
+  "schema_version": 1,
+  "scope": "G4 fork/common-engine source-council dispositions only. The single initial N16 full council completed all four selected seats; all11 source items map to six final deferred lead rows, with no in-scope residual P0/P1. No remediation epoch, N17, source/package change or re-cut. This artifact does not grant product-tooling approval, hardware acceptance, publication or public-route acceptance.",
+  "status": "closed-without-remediation"
+}

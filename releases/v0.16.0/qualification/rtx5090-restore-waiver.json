@@ -1,0 +1,41 @@
+{
+ "artifact_type": "p16_founder_gate_waiver",
+ "schema_version": 1,
+ "recorded_utc": "2026-11-01T01:51:52.615234+00:00",
+ "decision": "founder selected 'Ship beta.4 with disclosure' (Ask, 2026-11-01 ~01:55Z)",
+ "lane": "rtx5090",
+ "subject": {
+  "component": "v0.7.0-qwen38-5090-beta.4",
+  "source": "26fa28d0e7834515508fc07ac503164a6effc820",
+  "image": "ghcr.io/alphastorm/ninfer-runtime@sha256:7a5a7bb88966512bcab2f711c1a7515bf0b8b834aaf0abd5456643493babb016",
+  "server_sha256": "bab3fd77e8b5cafb792d0e4648e5e2b0d935105557a0b08fb2541799a25ffce7"
+ },
+ "waived": [
+  {
+   "probe": "two-restart restore",
+   "window": "5090-lane-beta4",
+   "position": "restore_0",
+   "incumbent_ttft_s": 0.241025486,
+   "candidate_ttft_s": 0.526062626,
+   "bound_s": 0.491025486
+  },
+  {
+   "probe": "two-restart restore",
+   "window": "5090-corrected-beta4 run 0",
+   "position": "restore_1",
+   "incumbent_ttft_s": 0.242417896,
+   "candidate_ttft_s": 0.519957554,
+   "bound_s": 0.492417896
+  }
+ ],
+ "context": "both engines show two-mode first-request-after-restart TTFT (fast ~0.21-0.24 s, slow ~0.39-0.53 s); slow mode incumbent 2/8, candidate 4/8 positions; all oracles passed; concurrency passed under p16-agent-parity/2",
+ "passed": {
+  "lane_gate_receipt_sha256": "2200fa4427868e572c79da5580c465f45519e4519f4d305bc115b655d8d09071",
+  "concurrency_p16_agent_parity_2": "5/5"
+ },
+ "evidence_report_sha256": {
+  "5090-lane-beta4/REPORT.md": "b44bf73a108405f1e90602323be7f4dc0804608e153814f6f7cda5e74a9c563b",
+  "5090-corrected-beta4/REPORT.md": "dab7b8e4d259b782948ace90fe00d4ec8233188adfc8da920c534a2a0eb4be9f"
+ },
+ "disclosure": "release notes state that the first request after a server restart sometimes takes ~0.5 s instead of ~0.24 s in both engines, with the beta.4 runtime slow somewhat more often"
+}

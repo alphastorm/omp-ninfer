@@ -1,0 +1,167 @@
+{
+  "artifact_type": "omp_ninfer_native_component_publication",
+  "schema_version": 1,
+  "release": "v0.16.0",
+  "as_of": "2026-11-01",
+  "status": "passed",
+  "identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "source_commit": "26fa28d0e7834515508fc07ac503164a6effc820",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+  },
+  "lanes": [
+    {
+      "lane": "rtx3090",
+      "component_tag": "v0.8.0-qwen38-3090-beta.1",
+      "source_commit": "26fa28d0e7834515508fc07ac503164a6effc820",
+      "published": true,
+      "published_at_lead_record_utc": "2026-11-01T06:01:42Z",
+      "publication_evidence_class": "immutable-github-release-asset-digests-and-authenticated-local-mirror",
+      "release_url": "https://github.com/alphastorm/ninfer/releases/tag/v0.8.0-qwen38-3090-beta.1",
+      "outer_checksums_sha256": "0fd18a355fbb4f9285bb1991e3fb2e804d7aafb58c7bccf2281805925ee64fa4",
+      "outer_hashed_entries": 10,
+      "total_distribution_files": 11,
+      "assets": [
+        {
+          "name": "Control-GpuOwner.ps1",
+          "sha256": "432f06a8e97743e46b1b7d9285e68d4bc361a93d5f25badeaa7c713f147f3334",
+          "bytes": 17391
+        },
+        {
+          "name": "Control-Release.ps1",
+          "sha256": "f6bbcef1f11a84edd3ecc74ed5ba32c3b01f7685e4610115b26bb80b1bfba3ae",
+          "bytes": 76428
+        },
+        {
+          "name": "Install-Release.ps1",
+          "sha256": "677c9aadab2081366df768c5bd0ce3cc683431f820a58d68ea4417246e4c1196",
+          "bytes": 87972
+        },
+        {
+          "name": "ninfer-rtx3090-native-v0.8.0-beta.1-source.tar.gz",
+          "sha256": "349641aacece4e9582bffbfd73c768572ed364a0ad1032a21f6c1cc72f87c5df",
+          "bytes": 12358849
+        },
+        {
+          "name": "ninfer-rtx3090-native-v0.8.0-beta.1-windows-x86_64-cuda13.3-rtx3090.cdx.json",
+          "sha256": "3b217f69580ca659611de65493a7c8474518168bd3d152a9c0c6b9629c3bb6de",
+          "bytes": 31203
+        },
+        {
+          "name": "ninfer-rtx3090-native-v0.8.0-beta.1-windows-x86_64-cuda13.3-rtx3090.SHA256SUMS",
+          "sha256": "854fbb50f7b1124f1ccf525ef7bb9e98dba3e5943989ec4bd25144990db75522",
+          "bytes": 404
+        },
+        {
+          "name": "ninfer-rtx3090-native-v0.8.0-beta.1-windows-x86_64-cuda13.3-rtx3090.spdx.json",
+          "sha256": "6f78e190b4316293bfb49867ab8c4579c098294ebddab8fb1afbd7b70e1c2f76",
+          "bytes": 34269
+        },
+        {
+          "name": "ninfer-rtx3090-native-v0.8.0-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz",
+          "sha256": "040d5923192a969dcb04bb63ff5c931f80bcf9a92f1f769f08e49e2121ad0e20",
+          "bytes": 1008976979
+        },
+        {
+          "name": "package-build-receipt.json",
+          "sha256": "9e194b8f5c369aed77dd609bc4d1b3e93f60218f6a0969cb15e2689da1938263",
+          "bytes": 4505
+        },
+        {
+          "name": "Protect-StateRoot.ps1",
+          "sha256": "d7b658187c20b5227374f96fedf7e9f85f35e03b50d5302c400e0b24b7114b36",
+          "bytes": 15203
+        }
+      ],
+      "checksums_asset": {
+        "name": "SHA256SUMS",
+        "sha256": "0fd18a355fbb4f9285bb1991e3fb2e804d7aafb58c7bccf2281805925ee64fa4",
+        "bytes": 1129
+      },
+      "actual_hardware_qualification": {
+        "repository_path": "releases/v0.16.0/qualification/rtx3090.json",
+        "sha256": "48c7f63572e38b279dcc941c9f1a2acbf858ec95f1ffe3f0eb8bbc20a8111702"
+      },
+      "public_package_executed_during_qualification": false,
+      "scope": "Published exact N16 component set. Managed 15-phase evidence uses the retained listen.port-only scratch derivative; first-lineage rollback is not_applicable, not predecessor rollback or product-route acceptance."
+    },
+    {
+      "lane": "rtx4090",
+      "component_tag": "v0.8.0-qwen38-4090-beta.1",
+      "source_commit": "26fa28d0e7834515508fc07ac503164a6effc820",
+      "published": true,
+      "published_at_lead_record_utc": "2026-11-01T06:04:33Z",
+      "publication_evidence_class": "immutable-github-release-asset-digests-and-authenticated-local-mirror",
+      "release_url": "https://github.com/alphastorm/ninfer/releases/tag/v0.8.0-qwen38-4090-beta.1",
+      "outer_checksums_sha256": "bf1650ebcdd2760b77be11140e8af3f6eb1adc9a2b8e534832f708383b7a60eb",
+      "outer_hashed_entries": 10,
+      "total_distribution_files": 11,
+      "assets": [
+        {
+          "name": "Control-GpuOwner.ps1",
+          "sha256": "432f06a8e97743e46b1b7d9285e68d4bc361a93d5f25badeaa7c713f147f3334",
+          "bytes": 17391
+        },
+        {
+          "name": "Control-Release.ps1",
+          "sha256": "f6bbcef1f11a84edd3ecc74ed5ba32c3b01f7685e4610115b26bb80b1bfba3ae",
+          "bytes": 76428
+        },
+        {
+          "name": "Install-Release.ps1",
+          "sha256": "677c9aadab2081366df768c5bd0ce3cc683431f820a58d68ea4417246e4c1196",
+          "bytes": 87972
+        },
+        {
+          "name": "ninfer-rtx4090-native-v0.8.0-beta.1-source.tar.gz",
+          "sha256": "b628ca5a5d55a91d89a705179885037a2ccd8b2a23f2809d00184e595b91cf5e",
+          "bytes": 12358724
+        },
+        {
+          "name": "ninfer-rtx4090-native-v0.8.0-beta.1-windows-x86_64-cuda13.3-rtx4090.cdx.json",
+          "sha256": "b8c8efcb7d562b4b29e1a41bd20ce68449e6c0bdc49a1d04f224916bc358f6ba",
+          "bytes": 31203
+        },
+        {
+          "name": "ninfer-rtx4090-native-v0.8.0-beta.1-windows-x86_64-cuda13.3-rtx4090.SHA256SUMS",
+          "sha256": "a134a60b1f21d645020f61b8d95a488fbd592d783156529ae9d99798f6337939",
+          "bytes": 404
+        },
+        {
+          "name": "ninfer-rtx4090-native-v0.8.0-beta.1-windows-x86_64-cuda13.3-rtx4090.spdx.json",
+          "sha256": "825a8d30df95fbe7b60299c17abaa2f9d7f7319da6569fa2aab7e2bde0d108b1",
+          "bytes": 34269
+        },
+        {
+          "name": "ninfer-rtx4090-native-v0.8.0-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz",
+          "sha256": "06526bdb630a87c860ceb0eaafb633df867181b596648897cb5a64a92e268f27",
+          "bytes": 991969490
+        },
+        {
+          "name": "package-build-receipt.json",
+          "sha256": "b0f94a57d2f0697b4e34558782cbd588796fce1694b97c1ff1d7bc1f8e5dcd9f",
+          "bytes": 4504
+        },
+        {
+          "name": "Protect-StateRoot.ps1",
+          "sha256": "d7b658187c20b5227374f96fedf7e9f85f35e03b50d5302c400e0b24b7114b36",
+          "bytes": 15203
+        }
+      ],
+      "checksums_asset": {
+        "name": "SHA256SUMS",
+        "sha256": "bf1650ebcdd2760b77be11140e8af3f6eb1adc9a2b8e534832f708383b7a60eb",
+        "bytes": 1129
+      },
+      "actual_hardware_qualification": {
+        "repository_path": "releases/v0.16.0/qualification/rtx4090.json",
+        "sha256": "69ebf60c3b4bee7a32ec92bc282c9a7ec6b735cc75cad822f041c5e89e35fb77"
+      },
+      "public_package_executed_during_qualification": false,
+      "scope": "Published exact N16 component set. Managed 15-phase evidence uses the retained listen.port-only scratch derivative; first-lineage rollback is not_applicable, not predecessor rollback or product-route acceptance."
+    }
+  ],
+  "publication_authorized_by_this_receipt": false,
+  "product_publication_authorized": false
+}

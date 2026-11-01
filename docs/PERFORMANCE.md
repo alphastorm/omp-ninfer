@@ -1,5 +1,8 @@
 # Performance program
 
+> Prepared v0.16.0 candidate: not a published product. Any acceptance or product-council section below is a plan until its pending evidence lands. Published installation remains on the [immutable v0.15.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.15.0/docs/QUICKSTART.md).
+
+
 The shipped profile is the floor, not the ceiling. This page is the public working surface for
 kernel and schedule optimization on the three qualified RTX runtime lanes: measured baselines, the
 profiling lane, an auditable ledger of what has been tried, and the open ideas backlog.
@@ -22,53 +25,71 @@ program so contributors can see the state of play in one place.
 ## Current state
 
 Oh My Pi (coding-agent client) connects through OMP NInfer (qualified appliance and release layer)
-to NInfer (inference engine) serving Qwen3.8 27B (served model). Published release **v0.15.0**
-(2026-10-30) pins unmodified upstream OMP 18.14.0 (`31147f9d`) and carries all three qualified
-`v0.14.0` GPU lanes — the RTX 5090 container runtime and the native Windows RTX 4090 and RTX 3090
-runtime packages — unchanged from `v0.14.0` (built from one frozen engine source `2c6f423b` on
-upstream `Neroued/ninfer` master `64d10fbf` with shared model container version 3 `81f924d4`; see
-[`FACTS.md`](FACTS.md) and [`BENCHMARKS.md`](BENCHMARKS.md)).
+to NInfer (inference engine) serving Qwen3.8 27B (served model). Release **v0.16.0**
+(`⟦PENDING: v0.16.0 publication date, releases/v0.16.0/NINFER_RELEASE_NOTES.md⟧`, superseding
+`v0.15.0` and the planned `v0.15.1` patch) retains unmodified upstream OMP 18.14.0 (`31147f9d`) and
+shared model container version 3 `81f924d4` while rebuilding all three qualified GPU lanes from one
+frozen engine source `26fa28d0` (`26fa28d0e7834515508fc07ac503164a6effc820`) on upstream
+`Neroued/ninfer` master `64d10fbf`: moving both native Windows 24 GB lanes (`RTX 4090` and
+`RTX 3090`) from `MTP3` to **DFlash2 draft window 7 (`K=7`)** with `INT8` KV, advancing the native
+RTX 3090 lane to **two requests in flight (`C2`)** over one shared 131,072-token pool, and
+shipping the RTX 5090 `beta.4` container rebuild (see [`FACTS.md`](FACTS.md) and
+[`BENCHMARKS.md`](BENCHMARKS.md)).
 
 - **Current runtimes:**
-  - **RTX 5090 container (`sm_120a`):** `v0.7.0-qwen38-5090-beta.3` (source `2c6f423b` on upstream
-    master `64d10fbf`, image `760fb6be`, server `55f0b95a`, model `81f924d4`, profile
-    `qwen38-5090-v0.13.0`, configuration `751d22dc`) with DFlash2 draft window 7, BF16 KV (146,368
-    automatic KV tokens), 131,072-token context, and two requests in flight
-    ([qualification receipt](../releases/v0.15.0/qualification/rtx5090.json)).
-  - **RTX 4090 and RTX 3090 native Windows (`sm_89` / `sm_86`):** `v0.7.0-qwen38-4090-beta.3`
-    (package `87038cfb`, server `5caa7780`, profile `qwen38-4090-native-v0.7.0-beta.3`,
-    configuration `b5cfbf50`) and `v0.7.0-qwen38-3090-beta.3` (package `a7637f66`, server
-    `fedce425`, profile `qwen38-3090-native-v0.7.0-beta.3`, configuration `d08d262b`, 350 W cap)
-    from shared source `2c6f423b` on upstream master `64d10fbf` and shared model `81f924d4`, with
-    MTP3 (`--lm-head-draft`), INT8 KV, `Group64` A8 off, 131,072-token context, and one request at a
-    time on a UUID-bound two-GPU host ([RTX 4090 receipt](../releases/v0.15.0/qualification/rtx4090.json),
-    [RTX 3090 receipt](../releases/v0.15.0/qualification/rtx3090.json)).
+  - **RTX 5090 container (`sm_120a`):** `v0.7.0-qwen38-5090-beta.4` (source `26fa28d0` on upstream
+    master `64d10fbf`, image `7a5a7bb8` on base `d4377ed0`, server `bab3fd77`, model `81f924d4`,
+    profile `qwen38-5090-v0.13.0`, configuration `751d22dc`) with DFlash2 draft window 7
+    (`--lm-head-draft`), BF16 KV (146,368 automatic KV tokens), 131,072-token context, and two
+    requests in flight ([qualification receipt](../releases/v0.16.0/qualification/rtx5090.json)).
+  - **RTX 4090 and RTX 3090 native Windows (`sm_89` / `sm_86`):** `v0.8.0-qwen38-4090-beta.1`
+    (package `06526bdb`, server `c6f59e9e`, profile `qwen38-4090-native-v0.8.0-beta.1`,
+    configuration `f00cfac9`, DFlash2 `K=7`, INT8 KV, `C1`, 30 s pending timeout, two extra
+    device-state slots, 1,024-token prefill chunk, `15,747.734375 MiB` / `16,512,696,320` B shared
+    Host budget, `640 MiB` admission headroom, 450 W owner baseline) and
+    `v0.8.0-qwen38-3090-beta.1` (package `040d5923`, server `72cd776b`, profile
+    `qwen38-3090-native-v0.8.0-beta.1`, configuration `cbe67aae`, DFlash2 `K=7`, INT8 KV, `C2`
+    sharing one 131,072-token pool, 180 s pending timeout, two extra device-state slots,
+    1,024-token prefill chunk, `20,867.734375 MiB` / `21,881,405,440` B shared Host budget,
+    `768 MiB` admission headroom, 350 W serving cap / 370 W restored) from shared source `26fa28d0`
+    on upstream master `64d10fbf` and shared model `81f924d4`, with `Q4_G64_FP16` draft MLP weights,
+    host-mapped token embedding, and `Group64` A8 and FP32 head logits off, serving one native lane
+    at a time on port `18082` on a UUID-bound two-GPU host
+    ([RTX 4090 receipt](../releases/v0.16.0/qualification/rtx4090.json),
+    [RTX 3090 receipt](../releases/v0.16.0/qualification/rtx3090.json)).
 - **Shipped from the ledger:** DFlash2 K=7 with BF16 KV shipped on the RTX 5090 in v0.10.0
   (EXP-078 to EXP-086, EXP-090). Single-launch 8-column verify attention (the shipped subset of
   EXP-092) plus small-T tensor-core Q4 query/key projections at 8 and 16 verify columns
   (EXP-094) shipped in v0.11.0 (`v0.6.16`, source `1302d639`, carried through v0.12.2), were ported
   onto upstream master `64d10fbf` in v0.13.0 (`v0.7.0-qwen38-5090-beta.2`, source `6d4d0a05`), and
-  ship from common engine source `2c6f423b` in v0.14.0–v0.15.0 (`v0.7.0-qwen38-5090-beta.3`, 101.62% serial
-  84-role median decode vs beta.2 in [`decode-parity.json`](../releases/v0.15.0/qualification/decode-parity.json)).
-  EXP-095 compared the superseded fork candidate `a59c13d0` against upstream `81c8ce09` in a local
-  fixed-KV rehearsal, and EXP-097 measured **101.09%** median decode parity across 84 serial role
-  cases for the rebased RTX 5090 runtime against v0.12.2's `1302d639`
+  shipped from common engine source `2c6f423b` in v0.14.0–v0.15.0 (`v0.7.0-qwen38-5090-beta.3`,
+  101.62% serial 84-role median decode vs beta.2 in
+  [`decode-parity.json`](../releases/v0.15.0/qualification/decode-parity.json)). EXP-095 compared
+  the superseded fork candidate `a59c13d0` against upstream `81c8ce09` in a local fixed-KV
+  rehearsal, and EXP-097 measured **101.09%** median decode parity across 84 serial role cases for
+  the rebased RTX 5090 runtime against v0.12.2's `1302d639`
   ([`UPSTREAM.md#v0130-sync-program`](UPSTREAM.md#v0130-sync-program),
   [`2026-10-25-exp097-role-corpus.json`](measurements/2026-10-25-exp097-role-corpus.json)).
   Byte-identical `sm_86`/`sm_89` attention prefill specializations (+4.96% on RTX 4090 and +5.40%
   on RTX 3090 at 130,048 tokens, EXP-100) and the native DFlash2 load-time fit seam (EXP-098)
-  shipped in `v0.14.0`, while the published `v0.14.0`–`v0.15.0` native lane profiles retain MTP3 with
-  `Group64` A8 off (EXP-089, EXP-098, EXP-099, EXP-100).
-- **Open work:** native DFlash2 K=7 and RTX 3090 `INT8` `C2` (`--max-concurrency 2`) lane-profile
-  qualification for the `v0.16.0` (`P16`) candidate (release gates in progress; `EXP-101` RTX 3090
-  and `EXP-102` RTX 4090 1,120-prompt powered screens registered in
-  [`scripts/quality_screen.py`](../scripts/quality_screen.py) with published `v0.14.0` incumbent
-  arms completed and seal-verified, RTX 4090 depth-0 case `log-024` (`log-024@0`, `0.95` per-case
-  decode-ratio floor vs `MTP3`) resolved on the `P16` engine in EXP-104 after `K=6`/`K=5` and
-  `--fp32-head-logits` were rejected in EXP-103 and EXP-104, and export-State residency and
-  export-pin liveness fixed in EXP-105 and EXP-106), `rk4v4` 4-bit KV true-cold continuation
-  divergence (at token 32 on `262,144`-token `C1` and tokens 16–32 on `245,760`/`229,376`-token `C2`)
-  blocking 262,144-token native context (EXP-107), root-cause numerics localization for the
+  shipped in `v0.14.0`. In `v0.16.0` (frozen source `26fa28d0`), native **DFlash2 `K=7`** ships on
+  both the RTX 3090 (`v0.8.0-qwen38-3090-beta.1`, EXP-098, EXP-101) and RTX 4090
+  (`v0.8.0-qwen38-4090-beta.1`, EXP-098, EXP-102, EXP-103, EXP-104; `254.27 tok/s` managed `C1`
+  decode vs `151.54 tok/s` under MTP3 in `v0.14.0`, and **×1.2736** 108-role / **×1.2741** 115-case
+  ABBA weighted decode vs `v0.14.0` MTP3 with depth-0 case `log-024@0` at **0.934** / `139.41 →
+  130.19 tok/s` waived by the founder with disclosure), **native `C2` (`--max-concurrency 2`)** over
+  one shared 131,072-token `INT8` pool ships on the RTX 3090 (`1.385×` paired aggregate decode,
+  `0.722×` pair completion wall, EXP-106), and **counted Host `StateImage` materialization before
+  off-worker checkpoint export** (`StateImageStore::prepare_host_export`, cutting post-resume
+  first-fork TTFT from `5.03 s` to `0.11 s` on RTX 5090 and from `15.4–17.8 s` to `0.33–0.76 s` on
+  RTX 3090, EXP-105) plus `io_uring`, checkpoint-owner, installer, and per-position speculative
+  metric fixes ship across all three lanes (`84/84` role-corpus output hashes at `347.20 → 346.95
+  tok/s`, `×0.999282`, on RTX 5090 `v0.7.0-qwen38-5090-beta.4`), while `Group64` A8 and opt-in
+  `--fp32-head-logits` stay off (EXP-089, EXP-099, EXP-100, EXP-103, EXP-104).
+- **Open work:** `rk4v4` 4-bit KV true-cold continuation divergence (at token 32 on `262,144`-token
+  `C1` and tokens 16–32 on `245,760`/`229,376`-token `C2`) blocking 262,144-token native context
+  (EXP-107), RTX 4090 `C2` (where `INT8` `C2` at 131,072 tokens exceeds the 24 GB device budget and
+  requires a smaller KV format such as `rk4v4`, EXP-106), root-cause numerics localization for the
   rejected `sm_86`/`sm_89` small-T (narrow token-batch) tensor-core decode (EXP-099) and `Group64`
   A8 prefill (EXP-100) candidates, selective upstream kernel/feature backports, verify-round
   boundary pipelining (EXP-058, EXP-092), Q4/Q5 epilogue fusion (EXP-056), warm-turn fragment
@@ -112,7 +133,7 @@ computed prefill tokens, and an exact 1,024-token completion at the 300 W profil
 Exact package, source, and phase hashes:
 [`2026-08-30-rtx3090-parity.json`](measurements/2026-08-30-rtx3090-parity.json). These numbers are
 historical v0.3.0 candidate evidence; current RTX 3090 qualification is in
-[`releases/v0.15.0/qualification/rtx3090.json`](../releases/v0.15.0/qualification/rtx3090.json).
+[`releases/v0.16.0/qualification/rtx3090.json`](../releases/v0.16.0/qualification/rtx3090.json).
 
 ## The profiling lane
 
@@ -142,10 +163,7 @@ branch. Current findings from the scripted captures:
 
 The auditable history: what was tried, the exact method, the measured result, and the verdict.
 Entries are append-only; verdicts are `kept`, `rejected`, `inconclusive`, or `open`. Evidence paths
-refer to the runtime repositories (`EXP-101` for RTX 3090 and `EXP-102` for RTX 4090 are reserved
-in [`scripts/quality_screen.py`](../scripts/quality_screen.py) for the native Windows 1,120-prompt
-powered quality screens whose `v0.16.0` (`P16`) candidate gates are still running, so completed
-`P16` experiments continue at `EXP-103`). As of 2026-10-31.
+refer to the runtime repositories. As of 2026-10-31.
 
 | ID | Area | Hypothesis | Result | Verdict |
 | --- | --- | --- | --- | --- |
@@ -209,13 +227,15 @@ powered quality screens whose `v0.16.0` (`P16`) candidate gates are still runnin
 | EXP-095 | RTX 5090 current upstream architecture versus the next fork candidate | Upstream `81c8ce09` at the common DFlash2 K=7/BF16/131,072/chunk-1,024 shape earns re-porting the fork's product features | Unmodified CUDA 13.1.115/sm_120a build; documented v2→v3 upgrade preserves **1,184/1,184 tensor payloads**. Automatic sizing refuses C2 by **561.47 MiB**; the labelled fixed-KV counterfactual completes A/B/B/A. Common 84 server-completed role cases: fork `a59c13d0` **299.71** versus upstream **251.29 tok/s** (+19.27% fork), rounds **15.12 vs 18.39 ms**; 29/84 channel payloads byte-identical (28/72 valid answers). Stored 32K follow-ups: **128/125 vs 307/77 ms**, mixed rather than a uniform cache win. Upstream JSON-schema **5/5 correct**, weighted decode time/token +2.51%; the seven-token tuple has +281.51% relative overhead. C4 with six total StateImages refuses by **1,501.32 MiB** ([receipt](measurements/2026-10-10-upstream-81c8ce09-rtx5090.json)) | rejected — architecture rebase; continue selective backport |
 
 | EXP-096 | Clean v0.6.16 RTX 5090 package and supported-profile rehearsal | Unchanged a59c13d0 can be packaged cleanly, tied to EXP-094's quality evidence and qualified under v0.10.0's fifteen criteria without changing the serving shape | Clean CUDA 13.1.115/sm_120a archive and cutter dry-run; 89/89 serial role signatures match EXP-094. Retrieval 58.917 s versus 58.738 s; 2048 decode 179.79 versus 161.39 tok/s. All 15 unchanged criteria pass, six restart sessions each cached 62404, amended OMP 18.8.7 parallel proof passes. Full ctest 110 pass/7 skip/1 fail; exact NVFP4 baseline eaf passes and 3a fails. BF16 solo/pair: 1/5 identical on both sources. External initial stop preserved; replacement is separate ([receipt](measurements/2026-10-10-v0616-rtx5090-package-local.json)) | qualified except ctest disposition; no publication |
-| EXP-098 | Native DFlash2 K=7 gates, 131K fit, and true-cold durability (`sm_86`, `sm_89`) | Removing the W8 static shared-memory link blocker and adding a load-time `sm_86`/`sm_89` DFlash2 fit seam (`Q8_G32_FP16` to `Q4_G64_FP16` draft MLP gate/up requantization plus host-mapped `token_embedding`) lets DFlash2 K=7 clear the 108-role decode gate (`>= 1.08` weighted, every case `>= 0.95`) and fit 131,072 INT8 tokens with true-cold checkpoint durability | On frozen `7a25cd72` controls (65,536 INT8 KV, C1, chunk 1,024, extra slots 0): RTX 3090 at 350 W passes the 108-role gate at **78.94 → 102.60 tok/s (×1.29968, min case 0.97987 on `log-024@0`)** and the 7 supplementals at **74.58 → 95.10 tok/s (×1.27512, min 1.10042)**; RTX 4090 at 450 W reaches **138.37 → 174.85 tok/s (×1.26362)** and **131.16 → 164.12 tok/s (×1.25136, min 1.05885)** on the 7 supplementals, but fails the `0.95` case floor on **`log-024@0` at 0.945889** (`135.03 → 127.73 tok/s`), reproduced in an isolated 4-arm ABBA at **0.9451** (`0.945090`, range `0.945011–0.945169`). On fit source `e456af37b` (rebased to `059e73b6`, parent of `2c6f423b`), RTX 3090 passes the mapped-loading GPU test (`17,852,965,376` B device weights, `1,350,860,800` B host-mapped embedding) and the **131,072-token INT8 fit and true-cold durability proof** at **21,968 MiB** peak VRAM (`376` samples) with **768 MiB** (`805,306,368` B) retained headroom, `0` extra device state slots, and byte-identical 32-token / 114-byte continuation (`07b8db1f`) across a 3,066-token authenticated checkpoint vs a zero-reuse cold process ([receipt](measurements/2026-10-27-native-dflash2-gates-and-fit.json)) | Historical RTX 3090 gates and 131K fit/durability pass; RTX 4090 stops on `log-024@0`; source merged into `2c6f423b` with DFlash2 off by default. Native profiles stay MTP3 in client-only v0.15.0; RTX 3090 DFlash2 is deferred to v0.15.1 after a fork-after-resume runtime defect |
+| EXP-098 | Native DFlash2 K=7 gates, 131K fit, and true-cold durability (`sm_86`, `sm_89`) | Removing the W8 static shared-memory link blocker and adding a load-time `sm_86`/`sm_89` DFlash2 fit seam (`Q8_G32_FP16` to `Q4_G64_FP16` draft MLP gate/up requantization plus host-mapped `token_embedding`) lets DFlash2 K=7 clear the 108-role decode gate (`>= 1.08` weighted, every case `>= 0.95`) and fit 131,072 INT8 tokens with true-cold checkpoint durability | On frozen `7a25cd72` controls (65,536 INT8 KV, C1, chunk 1,024, extra slots 0): RTX 3090 at 350 W passes the 108-role gate at **78.94 → 102.60 tok/s (×1.29968, min case 0.97987 on `log-024@0`)** and the 7 supplementals at **74.58 → 95.10 tok/s (×1.27512, min 1.10042)**; RTX 4090 at 450 W reaches **138.37 → 174.85 tok/s (×1.26362)** and **131.16 → 164.12 tok/s (×1.25136, min 1.05885)** on the 7 supplementals, but fails the `0.95` case floor on **`log-024@0` at 0.945889** (`135.03 → 127.73 tok/s`), reproduced in an isolated 4-arm ABBA at **0.9451** (`0.945090`, range `0.945011–0.945169`). On fit source `e456af37b` (rebased to `059e73b6`, parent of `2c6f423b`), RTX 3090 passes the mapped-loading GPU test (`17,852,965,376` B device weights, `1,350,860,800` B host-mapped embedding) and the **131,072-token INT8 fit and true-cold durability proof** at **21,968 MiB** peak VRAM (`376` samples) with **768 MiB** (`805,306,368` B) retained headroom, `0` extra device state slots, and byte-identical 32-token / 114-byte continuation (`07b8db1f`) across a 3,066-token authenticated checkpoint vs a zero-reuse cold process ([receipt](measurements/2026-10-27-native-dflash2-gates-and-fit.json)) | kept — fit seam merged in `2c6f423b`; after `c3911a14` fixed the fork-after-resume checkpoint-owner defect and `26fa28d0` resolved `log-024@0` and first-fork export waits (`EXP-104`, `EXP-105`), native DFlash2 K=7 ships on both RTX 3090 and RTX 4090 in `v0.16.0` (superseding `v0.15.1`) |
 | EXP-099 | Native `sm_86` and `sm_89` small-T tensor-core decode | Routing the native MTP3 decode/verify projections through the small-T tensor-core kernels clears the C1 decode bars and stays within the T2 rounding-only role-divergence bound (`<= 8` of 84) or passes the T3 behavioral screen | Candidate `dce5cf06` (rebased `e1c2f66f`) vs `v0.13.1` `7a25cd72`: FP64 op oracles `4/4` pass on both cards. Warm ABBA C1 decode (`4,541` prompt / `1,024` completion, `0` reuse): RTX 3090 **84.42 → 117.98 tok/s (×1.39764)** at 300 W and **90.79 → 126.81 tok/s (×1.39671)** at 350 W (all 4 arms byte-identical); RTX 4090 **151.23 → 163.76 tok/s (×1.08286)** at 450 W. Fails T2 84-role divergence on both cards (**55/84** on RTX 3090, **58/84** on RTX 4090 vs `<= 8`) and the 50-pair T3 early look (`4` new secret-leak cases each). On the 150-pair symmetric Application A retest (shards 1–3), RTX 4090 passes, but RTX 3090 fails added secret fingerprints (`a = 4`, `b = 12`, exact **p = 0.0384 < 0.05**); held T8 DFlash2 + tensor-core plans cancelled ([receipt](measurements/2026-10-27-native-small-t-tensor-core-decode.json)) | rejected — fails T2 on both cards and symmetric T3 on RTX 3090 |
 | EXP-100 | Native `sm_86` and `sm_89` attention prefill and `Group64` A8 prefill | Byte-identical `sm_86`/`sm_89` attention specializations and the opt-in `Group64` A8 prefill path (`NINFER_NATIVE_PREFILL_GROUP64_A8`) clear the C1 prefill bars, 130,048-token exact retrieval, held-out perplexity, and the 200-pair symmetric Application B screen | Source `254a586a` (rebased `7ee32e20`, merged into `2c6f423b`). With `Group64` A8 off, attention prefill gains **+4.96%** on RTX 4090 (`1,520.95 → 1,596.39 tok/s`, `85.50 → 81.46 s`) and **+5.40%** on RTX 3090 at 300 W (`622.63 → 656.24 tok/s`, `208.87 → 198.17 s`) on exact 130,048-token retrieval with byte-identical outputs. With `Group64` A8 on vs off: RTX 4090 C1 prefill **2,178.65 → 2,857.95 tok/s (×1.312)** and 130K retrieval **1,595.35 → 1,942.07 tok/s (×1.217, 81.52 → 66.96 s)**; RTX 3090 C1 prefill **919.37 → 1,480.76 tok/s (×1.611)** at 300 W, **978.27 → 1,582.48 tok/s (×1.618)** at 350 W, and 130K retrieval **657.05 → 897.39 tok/s (×1.366, 197.93 → 144.92 s)** at 300 W, all 4/4 retrieval arms exact and byte-identical. Held-out PPL matches to 6 decimals across `sm_89`/`sm_86` (`ΔNLL` `−0.000742` at 1,024, `+0.001453` at 2,048, worst domain `+0.005949`). On the 200-pair symmetric Application B screen at `2c6f423b`, RTX 4090 **fails** leak presence (`41/0/5/154`, `a = 0`, `b = 5`, **p = 1/32 = 0.03125**); RTX 3090 passes (`41/0/4/155`, `a = 0`, `b = 4`, **p = 1/16 = 0.0625**) on 4 of the same 5 `worklog-007`/`worklog-014` prompts ([receipt](measurements/2026-10-27-native-group64-a8-prefill.json)) | attention prefill kept and shipped in `v0.14.0`; `Group64` A8 rejected for `v0.14.0` (compiled off on both lanes) |
-| EXP-103 | RTX 4090 DFlash2 floor windows (`K=6`, `K=5`) and `K=7` 131K `INT8` fit (`sm_89`) | Under unchanged-prefix truncation of the recorded `K=7` per-position accepted-draft histogram `[197, 157, 121, 87, 68, 55, 47]` (positions 1..7) on depth-0 case `log-024@0`, config-only `DFlash2` draft windows `K=6` (`>= 5.09%` round-cost reduction required) or `K=5` (`>= 10.44%` required) lift `log-024@0` from `0.945889` (`0.9451` isolated) to the `>= 0.95` floor vs `MTP3`, while `DFlash2 K=7` fits `131,072` `INT8` KV tokens on the `v0.14.0` binary with `>= 640 MiB` (`671,088,640` B) headroom and exact true-cold checkpoint continuation | Isolated 4-arm `ABBA` on `log-024@0` (`4,536` prompt / `1,024` completion tokens, `0` cached, `450 W`, `v0.14.0` `2c6f423b` `sm_89` binary): **`K=6`** decodes at `116.98 / 116.97 tok/s` vs `MTP3` `135.37 / 135.63 tok/s`, candidate/control cross ratios **0.8625–0.8642** (`0.862462–0.864185`, median `0.863323`); **`K=5`** decodes at `117.61 / 117.63 tok/s` vs `MTP3` `135.62 / 135.69 tok/s`, cross ratios **0.8668–0.8673** (`0.866774–0.867336`, median `0.867055`), candidate arms byte-identical in both. Separate **`K=7` 131,072-token `INT8` `C1` fit** (`chunk 1,024`, `0` extra slots, `17,179,869,184` B Host) passes all 7 server launches with **`available_after_startup` = 1,449,132,032 B** (`>= 671,088,640` B RTX 4090 floor), `22,265.0 MiB` peak VRAM, `119,305`-token long prefill, and byte-identical `32`-token / `114`-byte true-cold vs `3,066`-token restored continuation (SHA-256 `07b8db1f`) | rejected — `K=6` and `K=5` below `0.95`; `K=7` 131K `INT8` fit and true-cold durability pass (diagnostic) |
-| EXP-104 | Opt-in `FP32` vocabulary-head logits (`--fp32-head-logits`) and RTX 4090 `DFlash2 K=7` floor on the `P16` engine | Retaining Qwen3.5-architecture (`Qwen3.8-27B`) target vocabulary-head logits in `FP32` (`engine.fp32_head_logits: true`, `+8,442,880` persistent bytes across `248,320` vocab × `8` verify columns × `2` requests plus `248,320 × 1` step logits) avoids `BF16` near-tie rounding during speculative draft acceptance and lifts RTX 4090 `DFlash2 K=7` above the `0.95` floor on `log-024@0` | On `P16` `sm_89` binary `31583e3f` (`70ec6fb6`, `450 W`, `65,536` `INT8` KV, `C1`, `chunk 1,024`), `ninfer_fp32_logits_test` and `ninfer_qwen3_5_head_logits_test` (`83` `FP32` reductions, max rel L2 `0.001722`) pass on both native cards. With **`fp32_head_logits: true`**, `DFlash2 K=7` decodes `log-024@0` at `122.29 / 122.26 tok/s` (`310` rounds, `713` accepted of `2,169` drafted tokens, output SHA-256 `1c50e039`) vs `MTP3` `135.50 / 135.61 tok/s` (`314` speculative rounds + `1` non-speculative fallback step, `708` accepted of `942` drafted, output `0fdce53c`), cross ratios **0.9016–0.9025** (`0.901591–0.902538`, median `0.902065`, FAIL). The default-off **`DFlash2 K=7` control** (`fp32_head_logits: false`) on the same `31583e3f` binary decodes at `130.53 / 130.56 tok/s` (`291` rounds, `732` accepted of `2,032` drafted, output `bbe977b9`) vs `MTP3` `135.51 / 135.60 tok/s`, passing with cross ratios **0.9627–0.9635** (`0.962668–0.963492`, median `0.963080`; `v0.14.0` measured `0.945889`), and passes again on the later `P16` integration build (`08257eec`, server `0412e97c`) at **0.96186–0.96294** (`130.60 / 130.50` vs `135.62 / 135.68 tok/s`, median `0.962401`) | rejected — `--fp32-head-logits` stays off in all profiles; default `DFlash2 K=7` passes `log-024@0` on the `P16` engine (open for `v0.16.0` lane gates) |
-| EXP-105 | Export-State residency fix (`StateImageStore::prepare_host_export`) | Materializing immutable `StateImage` replicas into the counted Host arena and dropping their Device replicas before acquiring off-worker durable checkpoint export `ReadLease`s (`ReadLease::host_view()`, `8c639fe0` / `80c0af77`) eliminates the multi-second first-fork admission wait on export-pinned Device states where adding two extra device-state slots alone failed | Before the fix, an off-worker durable export pinned all Device `StateImage` replicas through disk serialization: on RTX 3090 `DFlash2 K=7` (`131,072` `INT8` `C1`), adding **two extra device-state slots (`3` total at `31583e3f`, `21,881,405,440` B Host) alone did not help**, with all `3` Device states pinned (`source_wait` `14.86–17.22 s`) and first-fork/continuation server TTFT **15.4–17.8 s** (`15.388–17.771 s` with `2` extra slots, `14.345–17.731 s` with `0` extra slots on `c3911a14`); on RTX 5090 (`DFlash2 K=7`, `BF16`, `C2`, `2` extra / `4` total states), `resume-first` `fork_after_resume` measured **5.03 s TTFT / 4.85 s source wait** (`5.026 s` / `4.850 s` on `c3911a14`, `4.903 s` / `4.738 s` on `31583e3f`). After the fix (`08257eec`), RTX 3090 `131,072` `INT8` `C1` (`12/12` `warm_arrival` restart-and-fork requests) waits **<= 0.033 s** (`max 0.0327743 s`) with fork server TTFT **0.33–0.76 s** (`0.333701–0.759395 s`; `endpoint_resume_after_fork` `0.550 s`) and passes all `83/83` `C1` and `63/63` `C2` agent-probe requests (`0` cached-token delta across all `51/51` `agent_mix` turns); RTX 5090 `fork_after_resume` drops to **0.106 s TTFT** (`0.105796 s`, `source_wait` `0.00461 s`, client wall `5.450 → 0.637 s`) with `11/11` release-candidate qualification phases and `84/84` role-corpus output hashes passing (`0.9990` decode ratio) | kept in `P16` integration (`08257eec`); `v0.16.0` release qualification gates in progress |
-| EXP-106 | Native `C2` (`--max-concurrency 2`) on the RTX 3090 (`INT8` shared `131,072`-token pool) and RTX 4090 `INT8` `C2` fit | Enforcing physical and configured-budget headroom at final readiness (`startup_memory.cpp`) and waiting for in-flight off-worker checkpoint exports in `EngineCore::reserve_resident_units()` (`ea2edc20`) lets native `C2` (`2` extra / `4` total device states, `180,000 ms` pending timeout) serve two concurrent `~60K`-token requests on a shared `131,072`-token `INT8` pool | Before the export-pin liveness fix (`31583e3f`), two concurrent `75,063`-token requests on the RTX 3090 `INT8` `C2` `131,072`-token shared pool hit **HTTP 500 `oldest resident cannot obtain its legal unit`** when a completed sibling's off-worker export pinned `1,008` Device KV pages while the resumed resident (`1,040` pages at `66,560` tokens) needed `16` pages (`34,603,008` B) despite `19,114,072,064` B free Host capacity. After the fix (`08257eec`, RTX 3090 `DFlash2 K=7`, `INT8`, `C2`, shared `131,072` KV, `2` extra slots, `21,881,405,440` B Host, `768 MiB` / `805,306,368` B RTX 3090 headroom, `350 W`), startup (`1,110,441,984` B available, `22,584 MiB` peak) and two-session `59,866`-token true-cold durability pass (`32/32` tokens identical); calibrated two-concurrent `~60K` (`59,879 + 59,879` tokens) runs pass **6/6** requests per trial (**18/18** across `3` trials, `0` HTTP 500s); and `2,048`-token two-request decode vs `C1` (`pending_timeout_ms = 180000`) reaches **1.385×** summed aggregate decode (`57.68 → 79.90 tok/s`, `1.38515×`) and **0.722×** two-request completion wall (`71.01 → 51.26 s`, `0.72195×`; per-request concurrent `40.18 / 42.81` vs `57.58 / 58.26 tok/s`). On the **RTX 4090**, `INT8` `C2` at `131,072` tokens (`chunk 2,048`, `640 MiB` headroom) **does not fit 24 GB**: startup refused before readiness (`Device budget cannot hold the calibrated runtime and requested KV capacity`) | open — RTX 3090 `INT8` `C2` and export-pin liveness fix kept in `P16` candidate (`v0.16.0` gates running); RTX 4090 `INT8` `C2` at `131,072` tokens rejected (startup refused; needs a smaller KV format) |
+| EXP-101 | RTX 3090 `DFlash2 K=7` 1,120-prompt powered quality screen and 80-prompt determinism (`sm_86`) | On the shipping `v0.8.0-qwen38-3090-beta.1` package (`26fa28d0`, package `040d5923`, server `72cd776b`, config `cbe67aae`, `DFlash2 K=7`, `INT8` KV, `350 W`, port `18082`, 50-prompt shards at 1 request), the changed outputs against the sealed `v0.14.0` `MTP3` production arm (`fedce425` / `d08d262b`, 25 sealed holds, state `9a9213cf`) pass `EXP-085`'s preregistered non-inferiority bounds (`recall >= -2.5 pp`, `unsupported <= +2.0 pp`, `precision >= -2.5 pp`, `schema >= -1.0 pp`, `0` new secret leaks) and 80-prompt fresh-cache determinism | `PASS: 1,120 prompts; both arms 80/80 deterministic with 0 missing/error samples; 771/1,120 paired content/reasoning outputs changed. All 9 primary bounds passed: recall lower -0.0073 and precision lower -0.0070 (margin -0.02); unsupported upper 0.0089 (0.03); schema/tool-selection/tool-argument lower 0 (each -0.02); duplicate upper 0.0059 (0.02); redaction lower -0.0119 (-0.05); secret-leak ratio upper 1.0673 (1.10), counts 545 to 561, not zero`; `v0.8.0-qwen38-3090-beta.1` also passes 84-role depth-0 ABBA speed (`PASS: 84 depth-0 ABBA cases at 350 W; weighted 1.2683598277 (79.37 to 100.67 tok/s), minimum 0.9764424319 >= 0.95, no waived case; both within-engine repeats 84/84 identical, cross-engine 36/84 identical`) and 131,072-token `INT8` `C2` fit/durability (`PASS: 131,072-token INT8 C2, 1,110,441,984 B (1,059 MiB) available after startup >= 805,306,368 B (768 MiB); 22,584 MiB peak / 1,742 MiB min free. Two 59,866-token true-cold sessions restored at 59,840 cached + 26 computed tokens with 32/32 generated token IDs and UTF-8 bytes identical; converted device / host-mapped weights 473,497,600 / 1,350,860,800 B; 15/15 phases passed: C1 decode 148.43 tok/s, prefill 974.15 tok/s, DFlash2 acceptance 83.88%, exact 130,048-token retrieval 188.99 s; explicit-save/graceful-stop cached 1,647/1,650, restart 46.88 s; schema-2 normal/pressure product protocol and state_security passed; isolated rollback not_applicable (0 directions), 370 W restored`) | kept — shipped in `v0.16.0` (`v0.8.0-qwen38-3090-beta.1`) |
+| EXP-102 | RTX 4090 `DFlash2 K=7` 1,120-prompt powered quality screen and 80-prompt determinism (`sm_89`) | On the shipping `v0.8.0-qwen38-4090-beta.1` package (`26fa28d0`, package `06526bdb`, server `c6f59e9e`, config `f00cfac9`, `DFlash2 K=7`, `INT8` KV, `450 W`, port `18082`, 50-prompt shards), the changed outputs against the sealed `v0.14.0` `MTP3` production arm (`5caa7780` / `b5cfbf50`, 25 sealed holds, state `cc48a776`) pass `EXP-085`'s preregistered non-inferiority bounds and 80-prompt fresh-cache determinism | `PASS: 1,120 prompts; both arms 80/80 deterministic, 0 missing/error samples; 777/1,120 paired content/reasoning outputs changed. All 9 primary bounds passed: recall lower -0.0082 and precision lower -0.0093 (margin -0.02); unsupported upper 0.0045 (0.03); schema/tool-selection/tool-argument lower 0 (each -0.02); duplicate upper 0.0046 (0.02); redaction lower -0.0139 (-0.05); secret-leak ratio upper 1.0985 (1.10), counts 533 to 561, not zero`; `v0.8.0-qwen38-4090-beta.1` passes 131,072-token `INT8` `C1` fit/true-cold (`1,056,964,608` B available >= `671,088,640` B floor, `22,639 MiB` peak, `32/32` tokens identical), `83/83` agent-probe parity, `15/15` managed qualification (`254.27 tok/s` `C1` decode, `2,139.14 tok/s` prefill, `83.88%` acceptance, `83.35 s` 130,048-token retrieval in [`rtx4090.json`](../releases/v0.16.0/qualification/rtx4090.json)), and 108-role + 7-supplemental ABBA speed vs `v0.14.0` `MTP3` at `450 W` (**×1.2736** on the 108-case role corpus `role108` at **139.87 → 178.13 tok/s**, **×1.2741** across all `115` cases at **138.94 → 177.02 tok/s**, **×1.2778** / min **×1.0804** on the `7` supplementals, **115/115** repeats per engine and **43/115** cross-engine byte-identical; depth-0 case `log-024@0` decoded at **0.934** / **139.41 → 130.19 tok/s**, below the `0.95` every-case floor, and was **waived by the founder with disclosure**) | kept — shipped in `v0.16.0` (`v0.8.0-qwen38-4090-beta.1`) |
+| EXP-103 | RTX 4090 DFlash2 floor windows (`K=6`, `K=5`) and `K=7` 131K `INT8` fit (`sm_89`) | Under unchanged-prefix truncation of the recorded `K=7` per-position accepted-draft histogram `[197, 157, 121, 87, 68, 55, 47]` (positions 1..7) on depth-0 case `log-024@0`, config-only `DFlash2` draft windows `K=6` (`>= 5.09%` round-cost reduction required) or `K=5` (`>= 10.44%` required) lift `log-024@0` from `0.945889` (`0.9451` isolated) to the `>= 0.95` floor vs `MTP3`, while `DFlash2 K=7` fits `131,072` `INT8` KV tokens on the `v0.14.0` binary with `>= 640 MiB` (`671,088,640` B) headroom and exact true-cold checkpoint continuation | Isolated 4-arm `ABBA` on `log-024@0` (`4,536` prompt / `1,024` completion tokens, `0` cached, `450 W`, `v0.14.0` `2c6f423b` `sm_89` binary): **`K=6`** decodes at `116.98 / 116.97 tok/s` vs `MTP3` `135.37 / 135.63 tok/s`, candidate/control cross ratios **0.8625–0.8642** (`0.862462–0.864185`, median `0.863323`); **`K=5`** decodes at `117.61 / 117.63 tok/s` vs `MTP3` `135.62 / 135.69 tok/s`, cross ratios **0.8668–0.8673** (`0.866774–0.867336`, median `0.867055`), candidate arms byte-identical in both. Separate **`K=7` 131,072-token `INT8` `C1` fit** (`chunk 1,024`, `0` extra slots, `17,179,869,184` B Host) passes all 7 server launches with **`available_after_startup` = 1,449,132,032 B** (`>= 671,088,640` B RTX 4090 floor), `22,265.0 MiB` peak VRAM, `119,305`-token long prefill, and byte-identical `32`-token / `114`-byte true-cold vs `3,066`-token restored continuation (SHA-256 `07b8db1f`), and the shipping `26fa28d0` package (`06526bdb`, `+2` extra slots, `16,512,696,320` B Host) passes with **`1,056,964,608` B** available (`22,639 MiB` peak, `32/32` tokens identical) | rejected for `K=6` and `K=5`; kept for `DFlash2 K=7` 131K `INT8` fit — shipped in `v0.16.0` |
+| EXP-104 | Opt-in `FP32` vocabulary-head logits (`--fp32-head-logits`) and RTX 4090 `DFlash2 K=7` floor on the `P16` engine | Retaining Qwen3.5-architecture (`Qwen3.8-27B`) target vocabulary-head logits in `FP32` (`engine.fp32_head_logits: true`, `+8,442,880` persistent bytes across `248,320` vocab × `8` verify columns × `2` requests plus `248,320 × 1` step logits) avoids `BF16` near-tie rounding during speculative draft acceptance and lifts RTX 4090 `DFlash2 K=7` above the `0.95` floor on `log-024@0` | On `P16` `sm_89` binary `31583e3f` (`70ec6fb6`, `450 W`, `65,536` `INT8` KV, `C1`, `chunk 1,024`), `ninfer_fp32_logits_test` and `ninfer_qwen3_5_head_logits_test` (`83` `FP32` reductions, max rel L2 `0.001722`) pass on both native cards. With **`fp32_head_logits: true`**, `DFlash2 K=7` decodes `log-024@0` at `122.29 / 122.26 tok/s` (`310` rounds, `713` accepted of `2,169` drafted tokens, output SHA-256 `1c50e039`) vs `MTP3` `135.50 / 135.61 tok/s` (`314` speculative rounds + `1` non-speculative fallback step, `708` accepted of `942` drafted, output `0fdce53c`), cross ratios **0.9016–0.9025** (`0.901591–0.902538`, median `0.902065`, FAIL). With **`fp32_head_logits: false`** (the default) on the same `31583e3f` binary, `DFlash2 K=7` decodes at `130.53 / 130.56 tok/s` (`291` rounds, `732` accepted of `2,032` drafted, output `bbe977b9`) vs `MTP3` `135.51 / 135.60 tok/s`, passing with cross ratios **0.9627–0.9635** (`0.962668–0.963492`, median `0.963080`; `v0.14.0` measured `0.945889`), and passes again on the later `P16` integration build (`08257eec`, server `0412e97c`) at **0.96186–0.96294** (`130.60 / 130.50` vs `135.62 / 135.68 tok/s`, median `0.962401`); in the final `26fa28d0` shipping-package (`06526bdb`) 115-case ABBA speed gate at `131,072` `INT8` KV (`+2` extra slots), the 108-case role corpus (`role108`) reached **×1.2736** (`139.87 → 178.13 tok/s`, all `115` cases **×1.2741**) while `log-024@0` measured **0.934** (`139.41 → 130.19 tok/s`, below the `0.95` every-case floor) and was waived by the founder with disclosure | rejected for `--fp32-head-logits` (stays off in all profiles); kept for default `DFlash2 K=7` on RTX 4090 — shipped in `v0.16.0` (`26fa28d0`) |
+| EXP-105 | Export-State residency fix (`StateImageStore::prepare_host_export`) | Materializing immutable `StateImage` replicas into the counted Host arena and dropping their Device replicas before acquiring off-worker durable checkpoint export `ReadLease`s (`ReadLease::host_view()`, `8c639fe0` / `80c0af77`) eliminates the multi-second first-fork admission wait on export-pinned Device states where adding two extra device-state slots alone failed | Before the fix, an off-worker durable export pinned all Device `StateImage` replicas through disk serialization: on RTX 3090 `DFlash2 K=7` (`131,072` `INT8` `C1`), adding **two extra device-state slots (`3` total at `31583e3f`, `21,881,405,440` B Host) alone did not help**, with all `3` Device states pinned (`source_wait` `14.86–17.22 s`) and first-fork/continuation server TTFT **15.4–17.8 s** (`15.388–17.771 s` with `2` extra slots, `14.345–17.731 s` with `0` extra slots on `c3911a14`); on RTX 5090 (`DFlash2 K=7`, `BF16`, `C2`, `2` extra / `4` total states), `resume-first` `fork_after_resume` measured **5.03 s TTFT / 4.85 s source wait** (`5.026 s` / `4.850 s` on `c3911a14`, `4.903 s` / `4.738 s` on `31583e3f`). After the fix (`08257eec`, frozen in `26fa28d0`), RTX 3090 `131,072` `INT8` `C1` (`12/12` `warm_arrival` restart-and-fork requests) waits **<= 0.033 s** (`max 0.0327743 s`) with fork server TTFT **0.33–0.76 s** (`0.333701–0.759395 s`; `endpoint_resume_after_fork` `0.550 s`) and passes all `83/83` `C1` and `63/63` `C2` agent-probe requests (`0` cached-token delta across all `51/51` `agent_mix` turns; RTX 4090 `26fa28d0` shipping package `06526bdb` passes `83/83` with max `source_wait` `<= 0.0178 s`); RTX 5090 `fork_after_resume` drops to **0.106 s TTFT** (`0.105796 s`, `source_wait` `0.00461 s`, client wall `5.450 → 0.637 s`) with `11/11` `26fa28d0` release-candidate phases, `84/84` role-corpus output hashes (`347.20 → 346.95 tok/s`, ratio `0.999282`), published-image [`rtx5090.json`](../releases/v0.16.0/qualification/rtx5090.json) (`2200fa44`, `181.78 tok/s` server / `180.25 tok/s` wall decode at `2.71 tokens/round`, `56.62 s` wall / `56.51 s` server `130,048`-token prefill at `2,297.0 tok/s`, `agent_protocol` passed), and N16 agent probes (`warm_arrival` 12/12 with `fork_after_resume` `5.159 → 0.278 s`, `agent_mix` 51/51, `sibling_continue` 5/5, `fanout` 11/11 with `post_restart_branch_0` `5.437 → 0.300 s`, 4-way concurrent fanout 5/5 under rule `p16-agent-parity/2` — a judge correction pairing simultaneously submitted concurrent branches by server admission order — and two-restart `restore` waived at `0.526 vs 0.491 s` and `0.520 vs 0.492 s` with disclosure) | kept — shipped in `v0.16.0` (`26fa28d0`) across all three lanes |
+| EXP-106 | Native `C2` (`--max-concurrency 2`) on the RTX 3090 (`INT8` shared `131,072`-token pool) and RTX 4090 `INT8` `C2` fit | Enforcing physical and configured-budget headroom at final readiness (`startup_memory.cpp`) and waiting for in-flight off-worker checkpoint exports in `EngineCore::reserve_resident_units()` (`ea2edc20`) lets native `C2` (`2` extra / `4` total device states, `180,000 ms` pending timeout) serve two concurrent `~60K`-token requests on a shared `131,072`-token `INT8` pool | Before the export-pin liveness fix (`31583e3f`), two concurrent `75,063`-token requests on the RTX 3090 `INT8` `C2` `131,072`-token shared pool hit **HTTP 500 `oldest resident cannot obtain its legal unit`** when a completed sibling's off-worker export pinned `1,008` Device KV pages while the resumed resident (`1,040` pages at `66,560` tokens) needed `16` pages (`34,603,008` B) despite `19,114,072,064` B free Host capacity. After the fix (`08257eec`, frozen in `26fa28d0` RTX 3090 `DFlash2 K=7`, `INT8`, `C2`, shared `131,072` KV, `2` extra slots, `21,881,405,440` B Host, `768 MiB` / `805,306,368` B RTX 3090 headroom, `350 W`), startup (`1,110,441,984` B available, `22,584 MiB` peak) and two-session `59,866`-token true-cold durability pass (`32/32` tokens identical); calibrated two-concurrent `~60K` (`59,879 + 59,879` tokens) runs pass **6/6** requests per trial (**18/18** across `3` trials, `0` HTTP 500s); and `2,048`-token two-request decode vs `C1` (`pending_timeout_ms = 180000`) reaches **1.385×** summed aggregate decode (`57.68 → 79.90 tok/s`, `1.38515×`) and **0.722×** two-request completion wall (`71.01 → 51.26 s`, `0.72195×`; per-request concurrent `40.18 / 42.81` vs `57.58 / 58.26 tok/s`). On the **RTX 4090**, `INT8` `C2` at `131,072` tokens (`chunk 2,048`, `640 MiB` headroom) **does not fit 24 GB**: startup refused before readiness (`Device budget cannot hold the calibrated runtime and requested KV capacity`) | kept for RTX 3090 `INT8` `C2` (`v0.8.0-qwen38-3090-beta.1` shipped in `v0.16.0`); rejected for RTX 4090 `INT8` `C2` at `131,072` tokens (startup refused; needs a smaller KV format) |
 | EXP-107 | Native `rk4v4` 4-bit KV cache (`sm_86`, `sm_89`) | Porting head-dim-256 (`D256`) `rk4v4` (`rk4v4_h256_lloyd_g64_s4_g32_v1` from `ashalliants/ninfer-3090` `f5cec0a6`; `17,920` B/token vs `INT8` `33,792` B/token, `47.0%` smaller per-token KV) clears `FP64` op oracles, held-out perplexity (`ΔNLL <= 0.02`), `262,144`-token `C1` / `245,760`–`229,376`-token `C2` fit, and exact true-cold checkpoint durability on 24 GB native lanes | On `08257eec`, all `7/7` numerical/graph/store test executables (`44` `rk4v4` cases, `16` graph cases, `180` `FP64` reductions, max rel L2 `0.007773`) and held-out perplexity (`16,984` tokens, `32` windows at `1,024/512`: mean NLL `1.643463 → 1.646910`, **$\Delta\text{NLL} = 0.00345 \le 0.02$**, PPL `5.173052 → 5.190916`, max domain `+0.006273 <= 0.05`) pass on both `sm_86` and `sm_89`. On RTX 3090, `rk4v4` **fits at `262,144`-token `C1`** (`1,097,859,072` B available above the `805,306,368` B / `768 MiB` RTX 3090 floor; exact `130,048`- and `250,062`-token diagnostic retrieval in `197.86` and `503.57 s`), `245,760`-token `C2` (`1,135,607,808` B available), and `229,376`-token `C2` (`1,429,209,088` B available), while RTX 4090 (`chunk 2,048`, `640 MiB` floor) refuses `262,144`-token `C1` and `245,760`-token `C2` at startup and fits `229,376`-token `C2` (`952,107,008` B available). **The exact true-cold restore oracle fails on RTX 3090**: at `262,144`-token `C1` (`3,093` prompt, `3,066` cached) continuation diverges at **token 32** (cold token ID `48117` vs restored `3635` despite byte-exact `55,050,240`-byte CPU page-layout inversion, SHA-256 `53e8f8bc`), and at `245,760`- and `229,376`-token `C2` (`59,866` prompt, `59,840` cached) the first concurrent session diverges at **tokens 16–32** (second session `32/32` equal); cause unproven between GPU restore transport and width-dependent `rk4v4` prefill vs decode+restore numerics | open — deferred to a follow-up release; `--kv-dtype rk4v4` stays off in shipped profiles |
 
 Entry detail:
@@ -1510,6 +1530,60 @@ Entry detail:
       while retaining the RTX 3090 PASS verdict on record (selection receipt digest `4bd7714b`).
   Receipt: [native `Group64` A8 prefill](measurements/2026-10-27-native-group64-a8-prefill.json).
 
+- **EXP-101 — RTX 3090 `DFlash2 K=7` 1,120-prompt powered quality screen and 80-prompt fresh-cache
+  determinism on `v0.8.0-qwen38-3090-beta.1` (2026-10-31).** Preregistered in
+  [`scripts/quality_screen.py`](../scripts/quality_screen.py) under `EXP-085`'s unchanged paired
+  bootstrap non-inferiority rule ( margins in percentage points (`pp`): `recall >= -2.5 pp`,
+  `unsupported <= +2.0 pp`, `precision >= -2.5 pp`, `schema >= -1.0 pp`, `0` new secret-leak cases)
+  across the frozen 1,120-prompt role corpus (`23` shards of up to `50` prompts at `1` request in
+  flight, port `18082`, `350 W` serving cap / `370 W` restored) plus `80` fresh-cache determinism
+  prompts (`2` shards), comparing the shipping
+  `26fa28d0` RTX 3090 package (`v0.8.0-qwen38-3090-beta.1`, package `040d5923`, server `72cd776b`,
+  public config `cbe67aae`, `DFlash2 K=7`, `INT8` KV) against the sealed `v0.14.0` `MTP3` production
+  arm (`v0.7.0-qwen38-3090-beta.3`, server `fedce425`, config `d08d262b`, `25` sealed holds, state
+  `9a9213cf`): `PASS: 1,120 prompts; both arms 80/80 deterministic with 0 missing/error samples; 771/1,120 paired content/reasoning outputs changed. All 9 primary bounds passed: recall lower -0.0073 and precision lower -0.0070 (margin -0.02); unsupported upper 0.0089 (0.03); schema/tool-selection/tool-argument lower 0 (each -0.02); duplicate upper 0.0059 (0.02); redaction lower -0.0119 (-0.05); secret-leak ratio upper 1.0673 (1.10), counts 545 to 561, not zero`.
+  On the same `26fa28d0` package (`040d5923`), the 84-role depth-0 ABBA speed gate vs `v0.14.0`
+  `MTP3` at `350 W` measured `PASS: 84 depth-0 ABBA cases at 350 W; weighted 1.2683598277 (79.37 to 100.67 tok/s), minimum 0.9764424319 >= 0.95, no waived case; both within-engine repeats 84/84 identical, cross-engine 36/84 identical`
+  (earlier `31583e3f` predictive 108-role ABBA measured `×1.29122` weighted decode, min `0.97436`,
+  and `×1.27516` across the 7 supplementals, `115/115 >= 0.95`), and shipping-package `131,072`-token
+  `INT8` `C2` fit, true-cold durability, agent/concurrency probes, and 15-phase qualification
+  measured `PASS: 131,072-token INT8 C2, 1,110,441,984 B (1,059 MiB) available after startup >= 805,306,368 B (768 MiB); 22,584 MiB peak / 1,742 MiB min free. Two 59,866-token true-cold sessions restored at 59,840 cached + 26 computed tokens with 32/32 generated token IDs and UTF-8 bytes identical; converted device / host-mapped weights 473,497,600 / 1,350,860,800 B; 15/15 phases passed: C1 decode 148.43 tok/s, prefill 974.15 tok/s, DFlash2 acceptance 83.88%, exact 130,048-token retrieval 188.99 s; explicit-save/graceful-stop cached 1,647/1,650, restart 46.88 s; schema-2 normal/pressure product protocol and state_security passed; isolated rollback not_applicable (0 directions), 370 W restored; PASS: 83/83 positions (arrival 12, mix 51, sibling 5, two-restart restore 4, fleet 11) under p16-agent-parity/2, cache-gap deltas 0. Fanout-concurrency 4: 5/5 HTTP 200; calibrated 2 x 59,879-token test: 18/18 HTTP 200 across 3 trials; 0 HTTP 500`.
+
+- **EXP-102 — RTX 4090 `DFlash2 K=7` 1,120-prompt powered quality screen and 80-prompt fresh-cache
+  determinism on `v0.8.0-qwen38-4090-beta.1` (2026-10-31).** Preregistered in
+  [`scripts/quality_screen.py`](../scripts/quality_screen.py) under the same `EXP-085` paired
+  bootstrap rule across the frozen 1,120-prompt role corpus and 80-prompt fresh-cache determinism
+  set (`450 W`, port `18082`, 50-prompt shards), comparing the shipping `26fa28d0` RTX 4090 package
+  (`v0.8.0-qwen38-4090-beta.1`, package `06526bdb`, server `c6f59e9e`, public config `f00cfac9`,
+  `DFlash2 K=7`, `INT8` KV, `C1`) against the sealed `v0.14.0` `MTP3` production arm
+  (`v0.7.0-qwen38-4090-beta.3`, server `5caa7780`, config `b5cfbf50`, `25` sealed holds, state
+  `cc48a776`): `PASS: 1,120 prompts; both arms 80/80 deterministic, 0 missing/error samples; 777/1,120 paired content/reasoning outputs changed. All 9 primary bounds passed: recall lower -0.0082 and precision lower -0.0093 (margin -0.02); unsupported upper 0.0045 (0.03); schema/tool-selection/tool-argument lower 0 (each -0.02); duplicate upper 0.0046 (0.02); redaction lower -0.0139 (-0.05); secret-leak ratio upper 1.0985 (1.10), counts 533 to 561, not zero`.
+  On the shipping `06526bdb` package at `26fa28d0`, `131,072`-token `INT8` `C1` fit and true-cold
+  durability passed (`1,056,964,608` B available >= `671,088,640` B / `640 MiB` floor, `22,639 MiB`
+  peak, `1,504 MiB` min free, `32/32` token IDs and UTF-8 bytes identical between cold `3,093` and
+  restored `3,066+27`, exact `130,048`-token retrieval), `83/83` official agent-probe parity
+  positions passed (`min (cached - prompt) delta = 0`, `min TTFT bound margin = 0.219 s`,
+  `max source_wait <= 0.0178 s`), all `15/15` managed qualification phases passed in
+  [`rtx4090.json`](../releases/v0.16.0/qualification/rtx4090.json) (`69ebf60c`, **254.27 tok/s**
+  `C1` decode at **83.88%** DFlash2 acceptance, **2,139.14 tok/s** prefill, **83.35 s** exact
+  130,048-token retrieval, **1,647 / 1,650** cached tokens across **42.21 s** restart, `450 W`
+  restored), and the four 4-arm ABBA speed campaigns (`16` arms total) across the 108-case role
+  corpus (`role108`: `84` cases at `0` cached tokens + `12` at `32,000` + `12` at `64,000`) plus `7`
+  code/reasoning supplementals vs `v0.14.0` `MTP3` (`87038cfb` / `5caa7780`) at `450 W` measured
+  **×1.2736** (`1.273582×`) weighted decode on `role108` (**139.87 → 178.13 tok/s**, `139.8683 →
+  178.1337 tok/s`), **×1.2741** (`1.274085×`) across all `115` cases (**138.94 → 177.02 tok/s**),
+  and **×1.2778** (`1.277815×`) on the `7` supplementals (**131.68 → 168.26 tok/s**, minimum case
+  **×1.0804** on `reasoning-invariant` at `117.89 → 127.37 tok/s`), with retained
+  content/reasoning/ordered-tool-call UTF-8 output bytes **115/115** identical across within-engine
+  repeats (`A0=A3` and `B1=B2` across `84` depth-0, `12` depth-32K, `12` depth-64K, and `7`
+  supplemental cases) and **43/115** identical across engines (`31/84` at depth 0, `7/12` at 32K,
+  `5/12` at 64K, `0/7` supplemental). Out of all `115` cases (`114/115` clearing the `>= 0.95`
+  per-case decode ratio floor, lowest passing case `1.0128×`), depth-0 case `log-024@0` decoded at
+  **0.934** (`0.933832×`, **139.41 → 130.19 tok/s**, `139.4120 → 130.1874 tok/s`: `291` `DFlash2`
+  rounds with `732 / 2,032` accepted drafts vs `306` `MTP3` rounds with `717 / 918` accepted
+  drafts), below the `0.95` every-case floor; the founder waived the `log-024@0` floor case with
+  explicit disclosure.
+
 - **EXP-103 — RTX 4090 `DFlash2` draft windows `K=6` and `K=5` fail `log-024@0`; `K=7` passes
   131,072-token `INT8` fit on the `v0.14.0` binary (2026-10-30).** On `v0.14.0` (`2c6f423b`), RTX
   4090 `DFlash2 K=7` cleared the 108-role aggregate (`×1.26362` across `84` depth-0, `12` 32K, and
@@ -1562,8 +1636,13 @@ Entry detail:
   median `0.963080`) where the `v0.14.0` engine had measured **0.945889**. On the later `P16`
   integration build (`08257eec`, server `0412e97c`), the default-off `DFlash2 K=7` floor check
   passed again at **0.96186–0.96294** (`130.60 / 130.50` vs `135.62 / 135.68 tok/s`, median
-  `0.962401`). Receipt: RTX 4090 `fp32-on`, `fp32-off`, and round-2 `floor` ABBA summaries
-  (2026-10-31; diagnostic, `v0.16.0` lane qualification gates still running).
+  `0.962401`). In the final `26fa28d0` shipping-package (`06526bdb`) 115-case ABBA speed gate at
+  `131,072`-token `INT8` KV (`+2` extra slots), `role108` reached **×1.2736** (`139.87 → 178.13
+  tok/s`, all `115` cases **×1.2741**, `7` supplementals min **×1.0804**) while `log-024@0`
+  measured **0.934** (`139.41 → 130.19 tok/s`, `0.933832×`), which the founder waived with
+  disclosure, and the shipping `26fa28d0` RTX 4090 package (`06526bdb`) ships with default-off
+  `DFlash2 K=7` (`fp32_head_logits: false`). Receipt: RTX 4090 `fp32-on`, `fp32-off`, round-2
+  `floor`, and N16 final 115-case speed ABBA summaries (2026-10-31 / 2026-11-01).
 
 - **EXP-105 — releasing Device `StateImage` replicas to Host before durable export removes the
   15.4–17.8 s native and 5.03 s RTX 5090 first-fork stalls (2026-10-31).** Before `8c639fe0` /
@@ -1588,13 +1667,29 @@ Entry detail:
   requests) waits **<= 0.033 s** (`max 0.0327743 s`) with fork server TTFT **0.33–0.76 s**
   (`0.333701–0.759395 s`; `endpoint_resume_after_fork` `0.550 s`) and passes all `83/83` `C1` and
   `63/63` `C2` agent-probe requests (`0` cached-token delta across all `51/51` `agent_mix` turns;
-  RTX 4090 `131,072`-token `INT8` `C1` also passes `83/83` with max `source_wait` `<= 0.0172 s`),
-  and RTX 5090 `resume-first` `fork_after_resume` drops to **0.106 s TTFT** (`0.105796 s`,
-  `source_wait` `0.00461 s`, client wall `5.450 → 0.637 s`) with `11/11` release-candidate
-  qualification phases (`146,368` automatic KV tokens unchanged) and `84/84` role-corpus output
-  hashes passing (`347.59 → 347.24 tok/s`, ratio `0.9990`). Receipt: export-State residency report,
-  RTX 3090 `C1` pre/round-2 probe comparisons, and RTX 5090 `08257eec` diagnostic report
-  (2026-10-31).
+  RTX 4090 `131,072`-token `INT8` `C1` passes `83/83` on both `08257eec` and the shipping `26fa28d0`
+  package `06526bdb` with max `source_wait` `<= 0.0178 s`), and RTX 5090 `resume-first`
+  `fork_after_resume` drops to **0.106 s TTFT** (`0.105796 s`, `source_wait` `0.00461 s`, client
+  wall `5.450 → 0.637 s`) with `11/11` release-candidate qualification phases (`146,368` automatic
+  KV tokens unchanged) and `84/84` role-corpus output hashes passing (`347.59 → 347.24 tok/s`,
+  ratio `0.9990` on `08257eec`; `347.20 → 346.95 tok/s`, ratio `0.999282` on `26fa28d0`
+  `v0.7.0-qwen38-5090-beta.4`), and on the published `7a5a7bb8` image
+  ([`rtx5090.json`](../releases/v0.16.0/qualification/rtx5090.json) `2200fa44`: `181.78 tok/s`
+  server / `180.25 tok/s` wall decode at `0.244` acceptance and `2.71 tokens/round`, `56.62 s` wall
+  / `56.51 s` server `130,048`-token prefill at `2,297.0 tok/s`, `agent_protocol` passed, `30,398
+  MiB` idle VRAM) `warm_arrival` passed `12/12` (`resume-first/fork_after_resume` `5.159 → 0.278 s`,
+  `source_wait` `4.997 → 0.000 s`), `agent_mix` `51/51`, `sibling_continue` `5/5`, `fleet_probe`
+  `fanout` `11/11` (`post_restart_branch_0` `5.437 → 0.300 s`, `source_wait` `5.248 → 0.000 s`), and
+  4-way concurrent fanout `5/5` under parity rule `p16-agent-parity/2` (a judge correction that
+  pairs simultaneously submitted concurrent branches by server admission order
+  `request_start.timestamp_unix_ms` rather than client branch label), while two post-restart
+  positions in two-restart `restore` (`0.526 s` candidate vs `0.241 s` incumbent, `0.491 s` bound,
+  at `restore_0`; `0.520 s` candidate vs `0.242 s` incumbent, `0.492 s` bound, at `restore_1`) were
+  waived by the founder with disclosure that the first request after a server restart sometimes
+  takes `~0.5 s` instead of `~0.24 s` in both engines, with `beta.4` hitting the slow mode somewhat
+  more often (`4/8` post-restart requests across four two-restart runs vs `2/8` on the incumbent).
+  Receipt: export-State residency report, RTX 3090 `C1` pre/round-2 probe comparisons, and RTX 5090
+  `08257eec`/`26fa28d0` reports (2026-10-31 / 2026-11-01).
 
 - **EXP-106 — native `C2` (`--max-concurrency 2`) on the RTX 3090 (`INT8` shared `131,072`-token
   pool) reaches `1.385×` aggregate decode (`0.722×` pair wall) after the export-pin liveness fix;
@@ -1621,8 +1716,8 @@ Entry detail:
   **RTX 4090**, `INT8` `C2` at `131,072` tokens (`chunk 2,048`, `2` extra slots, `640 MiB` headroom)
   **does not fit 24 GB**: startup refused before readiness (`Device budget cannot hold the
   calibrated runtime and requested KV capacity`). Receipt: resident export-pin liveness report, RTX
-  3090 round-2 `C2` summary, and RTX 4090 pre-screen `C2` summary (2026-10-31; diagnostic, `v0.16.0`
-  release qualification gates still running).
+  3090 round-2 `C2` summary, and RTX 4090 pre-screen `C2` summary (2026-10-31; shipped on RTX 3090
+  in `v0.16.0` `v0.8.0-qwen38-3090-beta.1` at `26fa28d0`).
 
 - **EXP-107 — native `rk4v4` 4-bit KV passes held-out perplexity ($\Delta\text{NLL} = 0.00345$) and
   fits `262,144`-token `C1` on the RTX 3090, but fails the exact true-cold restore oracle at token
@@ -1665,32 +1760,34 @@ RTX 5090 lane, DFlash2 K=7 with BF16 KV and two requests in flight replaced MTP3
 the round-cost reductions from EXP-092 (single-launch 8-column verify attention only; not the
 experimental T=16 Q5 pair mixer) and EXP-094 (small-T tensor-core Q4 query/key projections) shipped in v0.11.0
 (`v0.6.16-qwen38-5090-beta.1`, source `1302d639`, carried through v0.12.2), were ported onto
-upstream master `64d10fbf` in v0.13.0 (`v0.7.0-qwen38-5090-beta.2`, source `6d4d0a05`, EXP-097), and
-ship on common engine source `2c6f423b` in v0.14.0–v0.15.0 (`v0.7.0-qwen38-5090-beta.3`).
-On the RTX 4090 and RTX 3090 native Windows lanes, MTP3 with INT8 KV, `Group64` A8 off, and one
-active request remains the published `v0.14.0`–`v0.15.0` stack (`v0.7.0-qwen38-4090-beta.3` and
-`v0.7.0-qwen38-3090-beta.3`, source `2c6f423b` on `64d10fbf`), carrying the byte-identical
-`sm_86`/`sm_89` attention prefill specializations (+4.96% and +5.40% on 130,048-token retrieval,
-EXP-100). On the `64d10fbf` lineage, the `EXP-089` `W8` link blocker is resolved and `2c6f423b`
-carries the `sm_86`/`sm_89` DFlash2 load-time fit seam (`Q4_G64_FP16` draft MLP gate/up +
-host-mapped `token_embedding`, EXP-098): RTX 3090 passed the 108-role decode gate on `7a25cd72`
-(`×1.29968`, min case `0.97987`) and the 131,072-token INT8 fit and true-cold durability proof on
-`e456af37b` (`21,968 MiB` peak, `768 MiB` headroom), while RTX 4090 cleared the aggregate bar
-(`×1.26362`) but missed the `0.95` floor on `log-024@0` (`0.945889`, reproduced at `0.9451`).
-In `v0.16.0` (`P16`) diagnostics (`EXP-103`..`EXP-107`, not yet release-qualified), RTX 4090 `K=6`
-(`0.8625–0.8642`) and `K=5` (`0.8668–0.8673`) and opt-in `--fp32-head-logits` (`0.9016–0.9025`)
-failed `log-024@0` and were rejected while default `DFlash2 K=7` on the RTX 4090 passed `log-024@0`
-on the `P16` engine (`0.9627–0.9635` on `31583e3f`, `0.96186–0.96294` on `08257eec`) and fit
-`131,072` `INT8` tokens (`1,449,132,032` B available on `2c6f423b` with `0` extra slots,
-`1,056,964,608` B with `+2` extra slots on `08257eec`); releasing Device `StateImage` replicas to
-Host before durable export (`EXP-105`) cut first-fork waits on RTX 3090 from `15.4–17.8 s` TTFT to
-`<= 0.033 s` wait / `0.33–0.76 s` TTFT and on RTX 5090 from `5.03 s` TTFT / `4.85 s` wait to
-`0.106 s` TTFT; waiting for in-flight exports in `reserve_resident_units()` (`EXP-106`) resolved the
-RTX 3090 `C2` HTTP 500 (`oldest resident cannot obtain its legal unit`) and yielded `1.385×`
-aggregate decode (`0.722×` pair wall) on a shared `131,072`-token `INT8` pool while RTX 4090 `INT8`
-`C2` at `131,072` tokens was refused at startup; and `rk4v4` 4-bit KV (`EXP-107`) passed held-out
-perplexity ($\Delta\text{NLL} = 0.00345$) and fit `262,144`-token `C1` on RTX 3090 but was deferred
-after true-cold restore diverged at token 32 (`C1`) and tokens `16–32` (`C2`).
+upstream master `64d10fbf` in v0.13.0 (`v0.7.0-qwen38-5090-beta.2`, source `6d4d0a05`, EXP-097),
+shipped from common engine source `2c6f423b` in v0.14.0–v0.15.0 (`v0.7.0-qwen38-5090-beta.3`), and
+ship from `26fa28d0` in `v0.16.0` (`v0.7.0-qwen38-5090-beta.4`, `84/84` role-corpus output hashes at
+`×0.999282` and post-resume first-fork TTFT cut from `5.03 s` to `0.11 s`, EXP-105).
+On the RTX 4090 and RTX 3090 native Windows lanes, `v0.16.0` (`v0.8.0-qwen38-4090-beta.1` and
+`v0.8.0-qwen38-3090-beta.1`, source `26fa28d0` on `64d10fbf`) switches both 24 GB profiles from MTP3
+to **DFlash2 `K=7`** with `INT8` KV, `Q4_G64_FP16` draft MLP `gate`/`up` weights, host-mapped
+`token_embedding`, `1,024`-token prefill chunks, two extra device-state slots, and `Group64` A8 and
+`FP32` head logits off, while carrying the byte-identical `sm_86`/`sm_89` attention prefill
+specializations (+4.96% and +5.40% on 130,048-token retrieval, EXP-100):
+- **RTX 4090 (`qwen38-4090-native-v0.8.0-beta.1`, `C1`):** Shorter draft windows `K=6` (`0.8625–0.8642`) and `K=5`
+  (`0.8668–0.8673`, EXP-103) and opt-in `--fp32-head-logits` (`0.9016–0.9025`, EXP-104) failed
+  `log-024@0` and were rejected, while default `DFlash2 K=7` passed `log-024@0` on the `P16` engine
+  (`0.9627–0.9635` on `31583e3f`, `0.96186–0.96294` on `08257eec`), passed 131,072-token `INT8` `C1`
+  fit/true-cold (`1,056,964,608` B available, `22,639 MiB` peak, `32/32` tokens), passed `83/83`
+  agent-probe parity (`max source_wait <= 0.0178 s`), and passed `15/15` managed qualification
+  phases (`254.27 tok/s` `C1` decode vs `151.54 tok/s` in `v0.14.0`, `2,139.14 tok/s` prefill,
+  `83.88%` acceptance, `83.35 s` 130,048-token retrieval in `rtx4090.json`, EXP-102).
+- **RTX 3090 (`qwen38-3090-native-v0.8.0-beta.1`, `C2`):** Releasing Device `StateImage` replicas to Host before durable export
+  (EXP-105) cut first-fork waits from `15.4–17.8 s` TTFT to `<= 0.033 s` wait / `0.33–0.76 s` TTFT,
+  and waiting for in-flight exports in `reserve_resident_units()` (EXP-106) resolved the `C2` HTTP
+  500 (`oldest resident cannot obtain its legal unit`), allowing RTX 3090 to ship `C2` over one
+  shared 131,072-token `INT8` pool (`1.385×` aggregate decode `57.68 → 79.90 tok/s`, `0.722×` pair
+  wall `71.01 → 51.26 s`, `0.70–0.73×` concurrent per-request decode, EXP-101, EXP-106), whereas RTX
+  4090 `INT8` `C2` at 131,072 tokens was refused at startup.
+Native `rk4v4` 4-bit KV (EXP-107) passed held-out perplexity ($\Delta\text{NLL} = 0.00345$) and fit
+`262,144`-token `C1` on RTX 3090 (`197.86 / 503.57 s` exact retrieval at `130,048 / 250,062` tokens)
+but was deferred after true-cold restore diverged at token 32 (`C1`) and tokens `16–32` (`C2`).
 Native `sm_86`/`sm_89` small-T tensor-core decode (`+39.8%` on RTX 3090, `+8.3%` on RTX 4090,
 EXP-099) failed the T2 role-divergence gate on both cards and the 150-pair symmetric screen on RTX
 3090 (`p = 0.0384`), and `Group64` A8 prefill (`×1.312` / `×1.618` C1, `×1.217` / `×1.366` 130K,
@@ -1700,12 +1797,12 @@ decision); both routes stay compiled off. EXP-095 compared the superseded fork c
 against upstream `81c8ce09` in a local fixed-KV rehearsal — not the selected `1302d639` runtime —
 before the [v0.13.0–v0.14.0 rebases](UPSTREAM.md#v0130-sync-program) re-ported the durable store
 and kernel routes onto `64d10fbf` (EXP-097: 101.09% median role-corpus decode vs `1302d639` on RTX
-5090; all three lanes unified at `2c6f423b` in `v0.14.0`). Open kernel work targets native DFlash2
-K=7 and RTX 3090 `INT8` `C2` lane-profile qualification (`EXP-101` and `EXP-102` screens and
-release gates in progress), `rk4v4` 4-bit KV true-cold continuation root cause (EXP-107), root-cause
-numerics localization for the rejected native small-T decode and `Group64` A8 routes (EXP-099,
-EXP-100), verify-round host-commit idle time (EXP-058, EXP-092), Q4/Q5 epilogue fusion (EXP-056),
-warm-turn fragment consolidation (EXP-059), and host-to-device KV prefetch.
+5090; all three lanes unified at `2c6f423b` in `v0.14.0` and at `26fa28d0` in `v0.16.0`). Open
+kernel work targets `rk4v4` 4-bit KV true-cold continuation root cause for 262,144-token native
+context and RTX 4090 `C2` (EXP-106, EXP-107), root-cause numerics localization for the rejected
+native small-T decode and `Group64` A8 routes (EXP-099, EXP-100), verify-round host-commit idle
+time (EXP-058, EXP-092), Q4/Q5 epilogue fusion (EXP-056), warm-turn fragment consolidation
+(EXP-059), and host-to-device KV prefetch.
 
 ## Ideas backlog
 
@@ -1715,7 +1812,7 @@ hypothesis and method before writing code.
 
 | Idea | Why it should work | Status |
 | --- | --- | --- |
-| Current upstream architecture versus selective backport | Upstream adds schema decoding and preemption, but the matched BF16 role corpus on `81c8ce09` was 251.29 versus the fork's 299.71 tok/s and the automatic C2 budget refused by 561.47 MiB; re-porting the kernel routes and schema 3 durable store onto master `64d10fbf` reached 101.09% median role-corpus decode against `1302d639` (EXP-097) | EXP-095 closed; RTX 5090 rebase shipped in v0.13.0 (`v0.7.0-qwen38-5090-beta.2`, source `6d4d0a05`, EXP-097), native Windows rebase shipped in v0.13.1 (`v0.7.0-qwen38-4090-beta.2` / `v0.7.0-qwen38-3090-beta.2`, source `7a25cd72`), and all three lanes ship from common source `2c6f423b` in v0.14.0–v0.15.0 (`v0.7.0-qwen38-{5090,4090,3090}-beta.3`) |
+| Current upstream architecture versus selective backport | Upstream adds schema decoding and preemption, but the matched BF16 role corpus on `81c8ce09` was 251.29 versus the fork's 299.71 tok/s and the automatic C2 budget refused by 561.47 MiB; re-porting the kernel routes and schema 3 durable store onto master `64d10fbf` reached 101.09% median role-corpus decode against `1302d639` (EXP-097) | EXP-095 closed; RTX 5090 rebase shipped in v0.13.0 (`v0.7.0-qwen38-5090-beta.2`, source `6d4d0a05`, EXP-097), native Windows rebase shipped in v0.13.1 (`v0.7.0-qwen38-4090-beta.2` / `v0.7.0-qwen38-3090-beta.2`, source `7a25cd72`), and all three lanes ship from common source `2c6f423b` in v0.14.0–v0.15.0 and `26fa28d0` in v0.16.0 (`v0.7.0-qwen38-5090-beta.4`, `v0.8.0-qwen38-{4090,3090}-beta.1`) |
 | Fuse Q4/Q5 GEMV/MMA epilogues with adjacent normalization | Removes a full activation round trip per layer at decode shapes; EXP-056 measured the target at 297 normalization and gating kernels, 0.47 ms of a 26K RTX 5090 MTP3 round (1.4–1.7 µs each) | open |
 | Keep the next MTP3 verify round queued ahead of the host commit | At the round boundary the RTX 5090 idles 302–320 µs per 26K round (1.8–1.9%) while the host commits the round, launches the replay fold, waits for it and spends 235–239 µs of CPU in `cudaGraphLaunch` (EXP-058); the state-pressure demotion needs a compute-stream fence before the host may stop waiting for the fold. DFlash2 K=7 rounds idle 324–350 µs each, 1.4–2.2% of a round (EXP-092) | open |
 | Q4 query/key projections on the tensor cores at verify widths | The GDN and attention query/key projections took 1.68 ms of every one-request DFlash2 round (2.67 ms in a pair) on SIMT at 28–31% of DRAM bandwidth, and no byte-identical schedule is faster (EXP-093). On the Q4 small-T tensor-core kernel they take 0.82 ms, rounds are 0.8 ms shorter (1.9 ms in a pair), and the changed outputs pass EXP-085's powered screen (EXP-094) | shipped RTX 5090 v0.11.0 (`v0.6.16`, source `1302d639`; ported into v0.13.0 `v0.7.0-qwen38-5090-beta.2`, source `6d4d0a05`) |
@@ -1730,8 +1827,8 @@ hypothesis and method before writing code.
 | Durable session checkpoints → process-restart continuation | All three lanes bind passing restart evidence: 102K restored continuation on RTX 4090, 310 MB checkpoint restoration on RTX 3090, and a 109K-token hot restore across an RTX 5090 container restart | released on all three lanes |
 | MTP depth-and-corpus ablation for Qwen3.8 | Measured on 2026-09-04 with one binary and model per lane and a deterministic 24-request agent corpus; MTP3 won on every lane and repetition | completed; retain MTP3 |
 | Deeper MTP drafting (K=7) on 27B | K7 completed on all lanes but trailed MTP3 by 20.17–24.72% | rejected for current artifacts |
-| DFlash2 block drafting (K=7) on 27B | One masked-block pass drafts seven tokens. EXP-078 on the RTX 5090: +28.2% role-corpus decode over MTP3 on the same upstream binary, +20.8% to +56.4% at 32K–120K context, prefill unchanged; 1.65 GiB of weights, and two fewer device state slots at two requests. Ported onto the fork: +21.4% role-corpus decode over shipped v0.9.0 at one request (EXP-081), a two-request pair 8.4% above shipped's (EXP-082), sessions on the durable store with exact restores (EXP-083), MTP3 byte-identical. With BF16 KV DFlash2 passed the powered quality screen, 1,091 of 1,120 outputs byte-identical to shipped (EXP-085); NVFP4 KV (four slots, 262,144 tokens, EXP-084) failed it on unsupported claims and secret leaks (EXP-085), and FP8 KV (four slots, 249,216 tokens, EXP-087) on secret leaks (EXP-088). The BF16 profile passed v0.9.0's probes but decodes free-form reasoning 2-5% slower solo and 21-27% slower in pairs, and lost one session's reuse across a restart (EXP-086). One verify attention pass per layer (and, in the experimental stack only, the pair's mixer outputs on the tensor cores) shortens RTX 5090 rounds 8–19% behind 32K–120K tokens and 8% in pairs, byte-identical; K=15 drafting does not pay (EXP-092). The 8- and 16-column Q4 query/key projections on the tensor cores take another 0.8 ms off every one-request round and 1.9 ms off a pair's, with outputs changed but inside EXP-085's powered screen (EXP-094). On the 24 GB native lanes, `EXP-089`'s `W8` link failure is gone on `64d10fbf` and `2c6f423b` carries the `sm_86`/`sm_89` load-time fit seam (`Q4_G64_FP16` draft MLP gate/up + host-mapped `token_embedding`, EXP-098): RTX 3090 passed the 108-role gate on `7a25cd72` (`×1.29968`, min `0.97987`) and the 131,072-token INT8 fit and true-cold durability proof on `e456af37b` (`21,968 MiB` peak, `768 MiB` headroom); RTX 4090 reached `×1.26362` aggregate on `7a25cd72` but failed the `0.95` floor on `log-024@0` (`0.945889`, reproduced at `0.9451`), and shorter windows `K=6` (`0.8625–0.8642`) and `K=5` (`0.8668–0.8673`, EXP-103) plus opt-in `--fp32-head-logits` (`0.9016–0.9025`, EXP-104) were rejected while default `DFlash2 K=7` passed `log-024@0` on the `P16` engine (`0.9627–0.9635` on `31583e3f`, `0.96186–0.96294` on `08257eec`, EXP-104), `K=7` 131K `INT8` fit passed on RTX 4090 (`1,449,132,032` B available on `2c6f423b`, EXP-103), and Host export-State materialization removed the 15.4–17.8 s native and 5.03 s RTX 5090 first-fork stalls (`<= 0.033 s` wait / `0.33–0.76 s` TTFT on RTX 3090, `0.106 s` TTFT on RTX 5090, EXP-105) | shipped RTX 5090 v0.10.0 (BF16, two device state slots, 131,520 KV tokens); the single-launch 8-column verify attention subset of EXP-092 plus EXP-094 shipped in v0.11.0 (`v0.6.16`, source `1302d639`); native profiles remain MTP3 in published v0.15.0, with native `DFlash2 K=7` (`EXP-101` / `EXP-102` screens and release gates) in progress |
-| Native `C2` shared-pool concurrency and `rk4v4` 4-bit KV (`sm_86`, `sm_89`) | Waiting for in-flight checkpoint exports in `reserve_resident_units()` (`ea2edc20`) resolves the `oldest resident cannot obtain its legal unit` HTTP 500 under shared-pool pressure: on RTX 3090 (`08257eec`), `INT8` `C2` on a shared `131,072`-token pool (`2` extra device states) passes calibrated two-concurrent `~60K` runs (`6/6` per trial across `3` trials) and reaches `1.385×` aggregate decode (`0.722×` pair wall vs `C1`), while RTX 4090 `INT8` `C2` at `131,072` tokens is refused at startup (EXP-106). Native `rk4v4` 4-bit KV (`17,920` B/token, `47.0%` smaller than `INT8`) passes held-out perplexity ($\Delta\text{NLL} = 0.00345$) and fits `262,144` `C1` on RTX 3090, but its restored continuation diverges from the true-cold reference at tokens `16–32` (EXP-107) | RTX 3090 `INT8` `C2` in progress (release gates running); RTX 4090 `INT8` `C2` at 131K rejected (needs smaller KV format); `rk4v4` / 262K native context deferred to follow-up on the true-cold restore blocker |
+| DFlash2 block drafting (K=7) on 27B | One masked-block pass drafts seven tokens. EXP-078 on the RTX 5090: +28.2% role-corpus decode over MTP3 on the same upstream binary, +20.8% to +56.4% at 32K–120K context, prefill unchanged; 1.65 GiB of weights, and two fewer device state slots at two requests. Ported onto the fork: +21.4% role-corpus decode over shipped v0.9.0 at one request (EXP-081), a two-request pair 8.4% above shipped's (EXP-082), sessions on the durable store with exact restores (EXP-083), MTP3 byte-identical. With BF16 KV DFlash2 passed the powered quality screen, 1,091 of 1,120 outputs byte-identical to shipped (EXP-085); NVFP4 KV (four slots, 262,144 tokens, EXP-084) failed it on unsupported claims and secret leaks (EXP-085), and FP8 KV (four slots, 249,216 tokens, EXP-087) on secret leaks (EXP-088). The BF16 profile passed v0.9.0's probes but decodes free-form reasoning 2-5% slower solo and 21-27% slower in pairs, and lost one session's reuse across a restart (EXP-086). One verify attention pass per layer (and, in the experimental stack only, the pair's mixer outputs on the tensor cores) shortens RTX 5090 rounds 8–19% behind 32K–120K tokens and 8% in pairs, byte-identical; K=15 drafting does not pay (EXP-092). The 8- and 16-column Q4 query/key projections on the tensor cores take another 0.8 ms off every one-request round and 1.9 ms off a pair's, with outputs changed but inside EXP-085's powered screen (EXP-094). On the 24 GB native lanes, `EXP-089`'s `W8` link failure is gone on `64d10fbf` and `2c6f423b` carries the `sm_86`/`sm_89` load-time fit seam (`Q4_G64_FP16` draft MLP gate/up + host-mapped `token_embedding`, EXP-098): RTX 3090 passed the 108-role gate on `7a25cd72` (`×1.29968`, min `0.97987`) and the 131,072-token INT8 fit and true-cold durability proof on `e456af37b` (`21,968 MiB` peak, `768 MiB` headroom); RTX 4090 reached `×1.26362` aggregate on `7a25cd72` but failed the `0.95` floor on `log-024@0` (`0.945889`, reproduced at `0.9451`), and shorter windows `K=6` (`0.8625–0.8642`) and `K=5` (`0.8668–0.8673`, EXP-103) plus opt-in `--fp32-head-logits` (`0.9016–0.9025`, EXP-104) were rejected while default `DFlash2 K=7` passed `log-024@0` on the `P16` engine (`0.9627–0.9635` on `31583e3f`, `0.96186–0.96294` on `08257eec`, EXP-104), `K=7` 131K `INT8` fit passed on RTX 4090 (`1,449,132,032` B available on `2c6f423b`, `1,056,964,608` B on `26fa28d0`, EXP-103), and Host export-State materialization removed the 15.4–17.8 s native and 5.03 s RTX 5090 first-fork stalls (`<= 0.033 s` wait / `0.33–0.76 s` TTFT on RTX 3090, `0.106 s` TTFT on RTX 5090, EXP-105) | shipped RTX 5090 v0.10.0 (BF16, two device state slots, 131,520 KV tokens); the single-launch 8-column verify attention subset of EXP-092 plus EXP-094 shipped in v0.11.0 (`v0.6.16`, source `1302d639`); native `DFlash2 K=7` shipped on both RTX 3090 (`v0.8.0-qwen38-3090-beta.1`, EXP-101) and RTX 4090 (`v0.8.0-qwen38-4090-beta.1`, EXP-102) in `v0.16.0` (`26fa28d0`) |
+| Native `C2` shared-pool concurrency and `rk4v4` 4-bit KV (`sm_86`, `sm_89`) | Waiting for in-flight checkpoint exports in `reserve_resident_units()` (`ea2edc20`) resolves the `oldest resident cannot obtain its legal unit` HTTP 500 under shared-pool pressure: on RTX 3090 (`08257eec`, frozen in `26fa28d0`), `INT8` `C2` on a shared `131,072`-token pool (`2` extra device states) passes calibrated two-concurrent `~60K` runs (`6/6` per trial across `3` trials) and reaches `1.385×` aggregate decode (`0.722×` pair wall vs `C1`), while RTX 4090 `INT8` `C2` at `131,072` tokens is refused at startup (EXP-106). Native `rk4v4` 4-bit KV (`17,920` B/token, `47.0%` smaller than `INT8`) passes held-out perplexity ($\Delta\text{NLL} = 0.00345$) and fits `262,144` `C1` on RTX 3090, but its restored continuation diverges from the true-cold reference at token 32 (`C1`) and tokens `16–32` (`C2`, EXP-107) | shipped RTX 3090 `INT8` `C2` in `v0.16.0` (`v0.8.0-qwen38-3090-beta.1`, `26fa28d0`); RTX 4090 `INT8` `C2` at 131K rejected (needs smaller KV format); `rk4v4` / 262K native context deferred to follow-up on the true-cold restore blocker |
 | Native `sm_86` and `sm_89` small-T tensor-core decode numerics | Small-T tensor-core decode raised C1 decode by +39.8% on RTX 3090 (`84.42 → 117.98 tok/s` at 300 W; `90.79 → 126.81 tok/s` at 350 W) and +8.3% on RTX 4090 (`151.23 → 163.76 tok/s` at 450 W), but diverged on 55/84 and 58/84 role cases (T2 bar `<= 8`) and failed the 150-pair symmetric screen on RTX 3090 added secret fingerprints (`p = 0.0384`, EXP-099); isolating the divergent projection schedule unlocks the route | rejected for v0.14.0 (EXP-099); root-cause numerics investigation open |
 | Native `sm_86` and `sm_89` `Group64` A8 prefill leak-flip localization | `Group64` A8 prefill speeds up C1 prefill `×1.312` on RTX 4090 and `×1.611`/`×1.618` on RTX 3090 and 130,048-token exact retrieval `×1.217` and `×1.366` with matching held-out perplexity, but flips secret-leak presence one way on five `worklog-007`/`worklog-014` prompts on RTX 4090 (`p = 1/32 = 0.03125`) and four of the same five on RTX 3090 (`p = 1/16 = 0.0625`, EXP-100) | byte-identical attention prefill shipped in v0.14.0; `Group64` A8 compiled off (EXP-100), leak-flip root-cause investigation open |
 | RTX 5090 `nvfp4` artifact swap | Measured on 2026-09-04 (`bb336052`, `21,492,695,040` B): 2.22× prefill and −3.5% decode with INT8 KV, refuses to start with BF16 KV at 131,072 context; two-case grounding shift on the private screen. Upstream's 2026-09-15 v3 republish (`74d2c571`) grew to `23,719,715,844` B (`22.09 GiB`, `+2.07 GiB` over v2 and `+3.06 GiB` over shipped `81f924d4`), which still does not fit the RTX 5090 `DFlash2 K=7` `BF16` `C2` profile | rejected |
