@@ -39,7 +39,70 @@ def fixture():
     return gate, captures
 
 
+def plan_for(gate, captures):
+    candidate = next(arm["identity"] for arm in captures if arm["arm"] == "B")
+    return SPEED.prescreen(gate, {"binary_sha256": candidate["binary_sha256"],
+                                  "configuration_sha256": digest(candidate["config"])})
+
+
 class SpeedGateTests(unittest.TestCase):
+    def test_changed_role_partition_from_prescreen_is_diagnostic(self):
+        gate, captures = fixture()
+        gate["role_case_ids"] = ["log-024@0"]
+        plan = plan_for(gate, captures)
+        for arm in captures:
+            for row, tokens in zip(arm["requests"], (100, 100) if arm["arm"] == "A" else (107, 1000)):
+                row.update(completion_tokens=tokens, decode_seconds=1)
+        unchanged = SPEED.reduce(gate, captures, plan)
+        self.assertEqual(unchanged["status"], "FAIL")
+        self.assertTrue(unchanged["gate_predictive"])
+        gate["role_case_ids"] = ["role-002@0"]
+        result = SPEED.reduce(gate, captures, plan)
+        self.assertTrue(result["thresholds_passed"])
+        self.assertEqual(result["status"], "DIAGNOSTIC")
+        self.assertFalse(result["gate_predictive"])
+        self.assertFalse(result["gate_passed"])
+        reasons = " ".join(result["diagnostic_reasons"])
+        self.assertIn("plan.gate_sha256", reasons)
+        self.assertIn("plan.role_case_ids", reasons)
+        self.assertEqual(result["plan_sha256"], digest(plan))
+        self.assertNotEqual(result["gate_sha256"], plan["gate_sha256"])
+
+    def test_each_plan_declaration_identity_mismatch_is_diagnostic(self):
+        for field, value in (("gate_sha256", "f" * 64),
+                             ("role_case_ids", ["log-024@0"]),
+                             ("request_suite_sha256", "f" * 64),
+                             ("request_suite", [{"id": "log-024@0", "request_sha256": "3" * 64}]),
+                             ("order", ["B", "A", "A", "B"])):
+            with self.subTest(field=field):
+                gate, captures = fixture()
+                plan = plan_for(gate, captures)
+                plan[field] = value
+                result = SPEED.reduce(gate, captures, plan)
+                self.assertEqual(result["status"], "DIAGNOSTIC")
+                self.assertFalse(result["gate_predictive"])
+                self.assertFalse(result["gate_passed"])
+                self.assertIn("plan." + field, " ".join(result["diagnostic_reasons"]))
+
+    def test_plan_arm_identity_drift_is_diagnostic(self):
+        for arm in ("A", "B"):
+            for field in ("binary_sha256", "configuration_sha256"):
+                with self.subTest(arm=arm, field=field):
+                    gate, captures = fixture()
+                    plan = plan_for(gate, captures)
+                    plan["arms"][arm][field] = "f" * 64
+                    result = SPEED.reduce(gate, captures, plan)
+                    self.assertFalse(result["gate_predictive"])
+                    self.assertIn("plan", " ".join(result["diagnostic_reasons"]))
+
+    def test_reduction_requires_the_recorded_prescreen_plan(self):
+        gate, captures = fixture()
+        with self.assertRaises(TypeError):
+            SPEED.reduce(gate, captures)
+        with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as rejected:
+            SPEED.main(["reduce", "--gate", "gate.json", "--capture", "A0.json", "--out", "result.json"])
+        self.assertEqual(rejected.exception.code, 2)
+
     def test_candidate_binary_mtp_prescreen_is_diagnostic_not_gate_predictive(self):
         # P16's shape: MTP3 uses the candidate binary, not the shipped incumbent.
         # The isolated case clears 0.95 at ~130.55 / 135.55, unlike the final
@@ -50,7 +113,7 @@ class SpeedGateTests(unittest.TestCase):
             rates = (135.55, 100) if arm["arm"] == "A" else (130.55, 200)
             for row, rate in zip(arm["requests"], rates):
                 row["decode_seconds"] = row["completion_tokens"] / rate
-        result = SPEED.reduce(gate, captures)
+        result = SPEED.reduce(gate, captures, plan_for(gate, captures))
         self.assertGreater(result["all_cases"]["weighted_decode_ratio"], 1.08)
         self.assertGreater(result["all_cases"]["minimum_case_ratio"], 0.95)
         self.assertEqual(result["status"], "DIAGNOSTIC")
@@ -59,7 +122,7 @@ class SpeedGateTests(unittest.TestCase):
 
     def test_final_gate_shape_passes_and_receipts_bind_each_arm(self):
         gate, captures = fixture()
-        result = SPEED.reduce(gate, captures)
+        result = SPEED.reduce(gate, captures, plan_for(gate, captures))
         self.assertEqual(result["status"], "PASS")
         self.assertTrue(result["gate_predictive"])
         self.assertTrue(result["gate_passed"])
@@ -76,7 +139,7 @@ class SpeedGateTests(unittest.TestCase):
             for row, rate in zip(arm["requests"], (139.4120056820121, 100) if arm["arm"] == "A"
                                  else (130.18738833254372, 200)):
                 row["decode_seconds"] = row["completion_tokens"] / rate
-        result = SPEED.reduce(gate, captures)
+        result = SPEED.reduce(gate, captures, plan_for(gate, captures))
         self.assertTrue(result["gate_predictive"])
         self.assertFalse(result["gate_passed"])
         self.assertEqual(result["status"], "FAIL")
@@ -90,7 +153,7 @@ class SpeedGateTests(unittest.TestCase):
                 for arm in captures:
                     if arm["arm"] in labels:
                         arm["requests"][0]["request_sha256"] = "3" * 64
-                result = SPEED.reduce(gate, captures)
+                result = SPEED.reduce(gate, captures, plan_for(gate, captures))
                 self.assertEqual(result["status"], "DIAGNOSTIC")
                 self.assertFalse(result["gate_predictive"])
                 self.assertFalse(result["gate_passed"])
@@ -100,7 +163,7 @@ class SpeedGateTests(unittest.TestCase):
         gate, captures = fixture()
         for arm in captures:
             arm["requests"].pop()
-        result = SPEED.reduce(gate, captures)
+        result = SPEED.reduce(gate, captures, plan_for(gate, captures))
         self.assertFalse(result["gate_predictive"])
         self.assertEqual(result["status"], "DIAGNOSTIC")
 
@@ -110,7 +173,7 @@ class SpeedGateTests(unittest.TestCase):
             with self.subTest(index=index, field=field):
                 gate, captures = fixture()
                 captures[index]["identity"][field] = value
-                result = SPEED.reduce(gate, captures)
+                result = SPEED.reduce(gate, captures, plan_for(gate, captures))
                 self.assertFalse(result["gate_predictive"])
                 self.assertIn("configuration_sha256" if field == "config" else field,
                               " ".join(result["diagnostic_reasons"]))
@@ -122,7 +185,7 @@ class SpeedGateTests(unittest.TestCase):
                 for arm in captures:
                     for row in arm["requests"]:
                         row.update(completion_tokens=100 if arm["arm"] == "A" else candidate_tokens, decode_seconds=1)
-                result = SPEED.reduce(gate, captures)
+                result = SPEED.reduce(gate, captures, plan_for(gate, captures))
                 self.assertEqual(result["thresholds"], {"weighted_minimum": 1.08, "every_case_minimum": 0.95})
                 self.assertEqual(result["status"], expected)
         for floor_tokens, expected in ((95, "PASS"), (94, "FAIL")):
@@ -131,15 +194,15 @@ class SpeedGateTests(unittest.TestCase):
                 for arm in captures:
                     for row, tokens in zip(arm["requests"], (100, 100) if arm["arm"] == "A" else (floor_tokens, 140)):
                         row.update(completion_tokens=tokens, decode_seconds=1)
-                self.assertEqual(SPEED.reduce(gate, captures)["status"], expected)
+                self.assertEqual(SPEED.reduce(gate, captures, plan_for(gate, captures))["status"], expected)
 
     def test_weighting_is_pooled_tokens_over_seconds_and_case_floor_uses_medians(self):
         gate, captures = fixture()
-        result = SPEED.reduce(gate, captures)
+        result = SPEED.reduce(gate, captures, plan_for(gate, captures))
         self.assertAlmostEqual(result["all_cases"]["weighted_decode_ratio"], 2 / (1 / 110 + 1 / 120) / 100)
         captures[1]["requests"][0]["decode_seconds"] = 1024 / 90
         captures[2]["requests"][0]["decode_seconds"] = 1024 / 110
-        result = SPEED.reduce(gate, captures)
+        result = SPEED.reduce(gate, captures, plan_for(gate, captures))
         self.assertAlmostEqual(result["all_cases"]["cases"][0]["ratio"], 1.0)
 
     def test_role_and_combined_weighted_bars_both_remain_binding(self):
@@ -148,7 +211,7 @@ class SpeedGateTests(unittest.TestCase):
         for arm in captures:
             for row, tokens in zip(arm["requests"], (100, 100) if arm["arm"] == "A" else (107, 1000)):
                 row.update(completion_tokens=tokens, decode_seconds=1)
-        result = SPEED.reduce(gate, captures)
+        result = SPEED.reduce(gate, captures, plan_for(gate, captures))
         self.assertGreater(result["all_cases"]["weighted_decode_ratio"], 1.08)
         self.assertEqual(result["status"], "FAIL")
         self.assertEqual(result["role_suite"]["case_count"], 1)
@@ -162,12 +225,12 @@ class SpeedGateTests(unittest.TestCase):
                 shard = deepcopy(capture)
                 shard["requests"] = [row]
                 shards.append(shard)
-        result = SPEED.reduce(gate, shards)
+        result = SPEED.reduce(gate, shards, plan_for(gate, shards))
         self.assertEqual(result["status"], "PASS")
-        self.assertEqual(result["all_cases"], SPEED.reduce(gate, captures)["all_cases"])
+        self.assertEqual(result["all_cases"], SPEED.reduce(gate, captures, plan_for(gate, captures))["all_cases"])
         self.assertTrue(all(len(arm["capture_sha256s"]) == 2 for arm in result["arms"]))
         with self.assertRaisesRegex(SPEED.SpeedGateError, "duplicate"):
-            SPEED.reduce(gate, shards + [shards[0]])
+            SPEED.reduce(gate, shards + [shards[0]], plan_for(gate, shards + [shards[0]]))
 
     def test_public_receipt_projects_identities_without_copying_private_capture_fields(self):
         gate, captures = fixture()
@@ -176,7 +239,7 @@ class SpeedGateTests(unittest.TestCase):
             arm["identity"]["private_metadata"] = "must-not-export"
             for row in arm["requests"]:
                 row["output_text"] = "must-not-export"
-        result = SPEED.reduce(gate, captures)
+        result = SPEED.reduce(gate, captures, plan_for(gate, captures))
         self.assertNotIn("must-not-export", json.dumps(result))
         self.assertNotIn("config", result["arms"][0]["identity"])
         self.assertEqual(set(result["arms"][0]["identity"]), {"binary_sha256", "configuration_sha256"})
@@ -187,13 +250,13 @@ class SpeedGateTests(unittest.TestCase):
                 gate, captures = fixture()
                 captures[0]["requests"][0][field] = value
                 with self.assertRaises(SPEED.SpeedGateError):
-                    SPEED.reduce(gate, captures)
+                    SPEED.reduce(gate, captures, plan_for(gate, captures))
         gate, captures = fixture()
         with self.assertRaisesRegex(SPEED.SpeedGateError, "four"):
-            SPEED.reduce(gate, captures[:-1])
+            SPEED.reduce(gate, captures[:-1], plan_for(gate, captures[:-1]))
         captures[0]["status"] = "failed"
         with self.assertRaisesRegex(SPEED.SpeedGateError, "passed"):
-            SPEED.reduce(gate, captures)
+            SPEED.reduce(gate, captures, plan_for(gate, captures))
         gate["request_suite_sha256"] = "f" * 64
         with self.assertRaisesRegex(SPEED.SpeedGateError, "bind"):
             SPEED.declaration(gate)
@@ -205,7 +268,7 @@ class SpeedGateTests(unittest.TestCase):
         plan = SPEED.prescreen(gate, candidate)
         self.assertEqual(plan["arms"], {"A": gate["comparator"], "B": candidate})
         self.assertEqual(plan["request_suite_sha256"], gate["request_suite_sha256"])
-        self.assertEqual(plan["gate_sha256"], SPEED.reduce(gate, captures)["gate_sha256"])
+        self.assertEqual(plan["gate_sha256"], SPEED.reduce(gate, captures, plan_for(gate, captures))["gate_sha256"])
         self.assertEqual(plan["order"], ["A", "B", "B", "A"])
         with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as rejected:
             SPEED.main(["prescreen", "--gate", "gate.json", "--candidate", "candidate.json",
@@ -221,7 +284,8 @@ class SpeedGateTests(unittest.TestCase):
                 (root / f"{name}.json").write_text(json.dumps(value), encoding="utf-8")
             self.assertEqual(SPEED.main(["prescreen", "--gate", str(root / "gate.json"), "--candidate",
                                         str(root / "candidate.json"), "--out", str(root / "plan.json")]), 0)
-            argv = ["reduce", "--gate", str(root / "gate.json"), "--out", str(root / "result.json")]
+            argv = ["reduce", "--gate", str(root / "gate.json"), "--plan", str(root / "plan.json"),
+                    "--out", str(root / "result.json")]
             for i in range(4):
                 argv += ["--capture", str(root / f"{i}.json")]
             self.assertEqual(SPEED.main(argv), 0)
@@ -229,6 +293,13 @@ class SpeedGateTests(unittest.TestCase):
             (root / "0.json").write_text(json.dumps(captures[0]), encoding="utf-8")
             self.assertEqual(SPEED.main(argv), 1)
             self.assertFalse(json.loads((root / "result.json").read_text())["gate_predictive"])
+            (root / "0.json").write_text(json.dumps(fixture()[1][0]), encoding="utf-8")
+            gate["role_case_ids"] = ["log-024@0"]
+            (root / "gate.json").write_text(json.dumps(gate), encoding="utf-8")
+            self.assertEqual(SPEED.main(argv), 1)
+            result = json.loads((root / "result.json").read_text())
+            self.assertFalse(result["gate_predictive"])
+            self.assertIn("plan.role_case_ids", " ".join(result["diagnostic_reasons"]))
             (root / "gate.json").write_text("{}", encoding="utf-8")
             with redirect_stderr(io.StringIO()):
                 self.assertEqual(SPEED.main(argv), 2)
