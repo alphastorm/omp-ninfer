@@ -247,6 +247,18 @@ logical weights label; both the artifact digest and architecture remain bound. S
 is not accepted as a substitute startup record. The checked-in schema fixtures use synthetic
 values and source-grounded field sets, not claimed live inference receipts.
 
+### Deferred v0.16.1 client review — OMP 18.14.2
+
+The [2026-11-01 host-free review](measurements/2026-11-01-omp-18142-client-upgrade-review.json)
+rechecks upstream stable `v18.14.2` (`7efd7721`) against `v18.14.0`, including all 394 comparison
+commits and the uncapped tagged-tree diff. It records published asset identities, carried Responses
+provider/state and models-schema blobs, conditional header/retry changes, the Qwen exact-loop guard's
+new line-repetition floor, and rejection of length-truncated compaction summaries. It claims no
+executable rehearsal or NInfer qualification. [Issue #123](https://github.com/alphastorm/omp-ninfer/issues/123)
+plans a client-only `v0.16.1` after `v0.16.0` publication: no successor is staged, no predecessor
+acceptance transfers, and fresh platform/routes, native public installs, restoration and founder
+grants remain required. Never adopt `18.14.1` alone; `v0.16.0` keeps its `18.14.0` client.
+
 ### v0.15.0–v0.16.0 client binding — OMP 18.14.0
 
 Published releases **v0.15.0** (2026-10-30) and **v0.16.0** (2026-11-01) pin unmodified upstream
