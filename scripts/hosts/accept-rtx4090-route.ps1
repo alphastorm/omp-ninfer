@@ -73,18 +73,19 @@ function DocumentedProvider {
     [pscustomobject]@{fragment=$fragment;selector="$provider/$($ids[0])"}
 }
 function CandidateConfiguration {
+    # Windows PowerShell 5.1 strips double quotes from native -c arguments.
     $code=@'
 import json, sys
 from pathlib import Path
 sys.path.insert(0, sys.argv[1])
 from verify_release import native_profile
 root, release, lane = Path(sys.argv[2]), sys.argv[3], sys.argv[4]
-manifest = json.loads((root / "releases" / release / "manifest.json").read_text())
-variant = next(row for row in manifest["components"]["ninfer_variants"] if row["id"] == lane + "-windows-native")
+manifest = json.loads((root / 'releases' / release / 'manifest.json').read_text())
+variant = next(row for row in manifest['components']['ninfer_variants'] if row['id'] == lane + '-windows-native')
 errors = []
 configuration = native_profile(root, release, variant, errors)
 if errors or configuration is None:
-    raise SystemExit("; ".join(errors))
+    raise SystemExit('; '.join(errors))
 print(json.dumps(configuration))
 '@
     $json=@(& py -3 -c $code "$Clone\scripts" $Clone $Release $Lane)
@@ -336,7 +337,9 @@ if($Mode -eq 'NativeProbes') {
     $state=ReadJson "$StateRoot\state.json";$installed=$state.releases.([string]$state.active_release)
     $requests=@(Get-ChildItem $installed.release_root -Filter requests.jsonl -Recurse -File)
     if($requests.Count -ne 1){throw 'native probes require the candidate request log'}
-    $logCommand='powershell.exe -NoProfile -NonInteractive -Command "Get-Content -LiteralPath '+(Quote $requests[0].FullName)+' -Encoding UTF8"'
+    # This payload also crosses py's native argv boundary; keep it quote-free.
+    $logCode='Get-Content -LiteralPath '+(Quote $requests[0].FullName)+' -Encoding UTF8'
+    $logCommand='powershell.exe -NoProfile -NonInteractive -EncodedCommand '+[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($logCode))
     # This is the existing sequential regression. --branches 4 does not make it concurrent.
     & py -3 "$Clone\scripts\fleet_probe.py" --lane "$Lane-sequential-regression" --base-url http://127.0.0.1:18082 --api-key-file $KeyFile --model $configuration.public_model_id --branches 4 --log-cmd $logCommand --receipt "$Workspace\fleet-probe.json"
     if($LASTEXITCODE -ne 0){throw 'native sequential fleet regression failed'}

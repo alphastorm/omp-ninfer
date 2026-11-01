@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import base64
 import contextlib
 import hashlib
 import importlib.util
@@ -598,9 +599,16 @@ function py {
                 self.assertTrue(calls[0][1].endswith("fleet_probe.py"))
                 self.assertEqual(calls[0][calls[0].index("--branches") + 1], "4")
                 self.assertEqual(calls[0][calls[0].index("--model") + 1], configuration["public_model_id"])
+                log_command = calls[0][calls[0].index("--log-cmd") + 1]
+                self.assertNotIn('"', log_command, "Windows PowerShell 5.1 strips native argv double quotes")
+                self.assertTrue(log_command.startswith("powershell.exe -NoProfile -NonInteractive -EncodedCommand "))
+                log_code = base64.b64decode(log_command.rsplit(" ", 1)[1]).decode("utf-16-le")
+                request_log = str(workspace / "installed/requests.jsonl").replace("'", "''")
+                self.assertEqual(log_code, f"Get-Content -LiteralPath '{request_log}' -Encoding UTF8")
                 if lane == "rtx3090":
                     self.assertIn("accept-concurrency", calls[1])
                     self.assertEqual(calls[2][calls[2].index("--max-in-flight") + 1], "2")
+                    self.assertEqual(calls[2][calls[2].index("--log-cmd") + 1], log_command)
                     self.assertEqual(calls[3][calls[3].index("--compactions") + 1], "2")
 
 

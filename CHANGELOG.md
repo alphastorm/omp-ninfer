@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Preserve native acceptance configuration binding and request-log commands on Windows
+  PowerShell 5.1 by keeping Python `-c` payloads free of double quotes and encoding nested
+  PowerShell log commands before passing them through Python's native argument boundary.
+  Contract tests sweep every PowerShell script and execute configuration binding through
+  `powershell.exe` on Windows.
+
 ## [0.16.0] - Prepared; publication date ⟦PENDING: v0.16.0 publication date, releases/v0.16.0/NINFER_RELEASE_NOTES.md⟧
 
 ### Added
