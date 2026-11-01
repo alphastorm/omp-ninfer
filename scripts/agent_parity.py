@@ -162,7 +162,7 @@ def pair_positions(job, base):
     pairing = {label: (label, 'label', None, None, None) for label in by_label}
     receipts = job.get('concurrent_receipts')
     if receipts:
-        arms = {arm: receipt_phases(json.loads((base / receipts[arm]).read_text())) for arm in ('incumbent', 'candidate')}
+        arms = {arm: receipt_phases(json.loads((base / receipts[arm]).read_text(encoding='utf-8'))) for arm in ('incumbent', 'candidate')}
         old, old_labels = arms['incumbent']
         new, new_labels = arms['candidate']
         if old.keys() != new.keys() or old_labels != new_labels or old_labels != set(by_label):
