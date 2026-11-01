@@ -163,7 +163,7 @@ Lifecycle and cut rules: [releases](docs/RELEASES.md).
 | [Compatibility](docs/COMPATIBILITY.md) | Qualified client and runtime combinations (generated) |
 | [Architecture](docs/ARCHITECTURE.md) | State ownership, loopback topology, identity chain |
 | [Benchmarks](docs/BENCHMARKS.md) | Receipts, method, charts, model quality, community results |
-| [Performance](docs/PERFORMANCE.md) | Kernel and schedule experiment ledger (`EXP-001`..`EXP-107`) |
+| [Performance](docs/PERFORMANCE.md) | Kernel and schedule experiment ledger (`EXP-001`..`EXP-108`) |
 | [Security](docs/SECURITY.md) | Threat model and boundaries |
 | [Troubleshooting](docs/TROUBLESHOOTING.md) | Failure signatures and recovery |
 | [Related work](docs/RELATED_WORK.md) | Prior art and the NInfer port family |
