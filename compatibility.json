@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "authority_id": "omp-ninfer-v0.7.3-qualified-1",
-  "product_release": "v0.16.0",
+  "product_release": "v0.16.1",
   "composition": {
-    "status": "qualified",
+    "status": "v0.16.1 upstream OMP v18.15.0 client acceptance pending",
     "lifecycle_repository": "https://github.com/can1357/oh-my-pi",
-    "lifecycle_source_release": "https://github.com/can1357/oh-my-pi/releases/tag/v18.14.0",
-    "lifecycle_source_commit": "31147f9d1a76608549821c3759f8487b4d66c72d",
+    "lifecycle_source_release": "https://github.com/can1357/oh-my-pi/releases/tag/v18.15.0",
+    "lifecycle_source_commit": "3fedf8d53267e32a6d7521ce725fdcc4a36fdc67",
     "ninfer_lifecycle_source_commit": "26fa28d0e7834515508fc07ac503164a6effc820",
-    "request_compatibility_source_commit": "31147f9d1a76608549821c3759f8487b4d66c72d",
+    "request_compatibility_source_commit": "3fedf8d53267e32a6d7521ce725fdcc4a36fdc67",
     "blockers": [],
-    "composed_source_commit": "31147f9d1a76608549821c3759f8487b4d66c72d"
+    "composed_source_commit": "3fedf8d53267e32a6d7521ce725fdcc4a36fdc67"
   },
   "profiles": [
     {
@@ -31,7 +31,7 @@
       "silent_cloud_fallback": false,
       "installable": false,
       "support_owner": "alphastorm/omp-ninfer",
-      "product_release": "v0.16.0",
+      "product_release": "v0.16.1",
       "aliases": [
         "macos-arm64-remote-ssh"
       ],
@@ -45,32 +45,31 @@
         "The RTX 5090 checked first build ships under an explicit founder-approved reproducibility exception. Native profiles use INT8 DFlash2 K7 with `Group64` A8 and FP32 head logits off; RTX 3090 uses C2 over one shared 131072-token pool and a 350 W cap.",
         "Fresh stock OMP 18.14.0 platform and five-route acceptance passed on frozen v0.16.0 candidate 56899320d416bafda5c15d7e454e9b593badc0a6 on 2026-11-01; predecessor acceptance does not transfer. macOS remains preview and Linux client evidence is WSL2-scoped."
       ],
-      "blockers": [],
-      "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/330689f953cf44b9220a6a0876efb838c1684496/releases/v0.16.0/acceptance/darwin-arm64-18.14.0.json",
-        "sha256": "1e5c32d2ccc045b4ed2c0a270b5e6675b7b29abff11bdd03e92b5ffaa2af4d54"
-      },
+      "blockers": [
+        "upstream OMP v18.15.0 client acceptance is pending"
+      ],
+      "acceptance_receipt": null,
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
-        "upstream_tag": "v18.14.0",
-        "upstream_commit": "31147f9d1a76608549821c3759f8487b4d66c72d",
+        "upstream_tag": "v18.15.0",
+        "upstream_commit": "3fedf8d53267e32a6d7521ce725fdcc4a36fdc67",
         "os": "macOS 27",
         "architecture": "arm64",
         "published": true,
         "asset_name": "omp-darwin-arm64",
-        "asset_bytes": 214816912,
-        "asset_sha256": "608843959ab34295d52460dd09dd7d548b6c903c08a83c67954c2d4c36fd1f5a",
-        "binary_sha256": "608843959ab34295d52460dd09dd7d548b6c903c08a83c67954c2d4c36fd1f5a",
-        "release_id": 428242783,
-        "asset_id": 689493880,
-        "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.14.0/omp-darwin-arm64"
+        "asset_bytes": 215295120,
+        "asset_sha256": "d36dfabf0ee52d6f08efadb59c46f0349545c6f6975522417adae29646e73e34",
+        "binary_sha256": "d36dfabf0ee52d6f08efadb59c46f0349545c6f6975522417adae29646e73e34",
+        "release_id": 430630500,
+        "asset_id": 698539455,
+        "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.15.0/omp-darwin-arm64"
       },
       "gpu_qualification": {
         "profile": "qwen38-5090-v0.13.0",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/9e2697b09ed40083799e15de0a1a85258793bb9a/releases/v0.16.0/qualification/rtx5090.json",
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/b5bd3f8c9f1011e2e5ee0be23c1e853e29e75553/releases/v0.16.1/qualification/rtx5090.json",
           "sha256": "2200fa4427868e572c79da5580c465f45519e4519f4d305bc115b655d8d09071"
         }
       },
@@ -120,7 +119,7 @@
     {
       "id": "windows-docker-local",
       "adapter": "windows-docker-local",
-      "status": "qualified",
+      "status": "preview",
       "transport": "local-loopback",
       "commands": [
         "doctor",
@@ -133,9 +132,9 @@
         "support-bundle"
       ],
       "silent_cloud_fallback": false,
-      "installable": true,
+      "installable": false,
       "support_owner": "alphastorm/omp-ninfer",
-      "product_release": "v0.16.0",
+      "product_release": "v0.16.1",
       "aliases": [
         "windows-11-x64-docker-desktop"
       ],
@@ -149,32 +148,31 @@
         "The RTX 5090 checked first build ships under an explicit founder-approved reproducibility exception. Native profiles use INT8 DFlash2 K7 with `Group64` A8 and FP32 head logits off; RTX 3090 uses C2 over one shared 131072-token pool and a 350 W cap.",
         "Fresh stock OMP 18.14.0 platform and five-route acceptance passed on frozen v0.16.0 candidate 56899320d416bafda5c15d7e454e9b593badc0a6 on 2026-11-01; predecessor acceptance does not transfer. macOS remains preview and Linux client evidence is WSL2-scoped."
       ],
-      "blockers": [],
-      "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/330689f953cf44b9220a6a0876efb838c1684496/releases/v0.16.0/acceptance/windows-x64-18.14.0.json",
-        "sha256": "b6c19635e9deb2fcc2d5736c6da8be89c61e687834f68e6c40a0e8ce5a9e3299"
-      },
+      "blockers": [
+        "upstream OMP v18.15.0 client acceptance is pending"
+      ],
+      "acceptance_receipt": null,
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
-        "upstream_tag": "v18.14.0",
-        "upstream_commit": "31147f9d1a76608549821c3759f8487b4d66c72d",
+        "upstream_tag": "v18.15.0",
+        "upstream_commit": "3fedf8d53267e32a6d7521ce725fdcc4a36fdc67",
         "os": "Windows 11",
         "architecture": "x64",
         "published": true,
         "asset_name": "omp-windows-x64.exe",
-        "asset_bytes": 242797056,
-        "asset_sha256": "620a5935cdb6a9ed52d8b0c93892d6b5bb84155244a98f3be82af0455177bf29",
-        "binary_sha256": "620a5935cdb6a9ed52d8b0c93892d6b5bb84155244a98f3be82af0455177bf29",
-        "release_id": 428242783,
-        "asset_id": 689493879,
-        "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.14.0/omp-windows-x64.exe"
+        "asset_bytes": 243250176,
+        "asset_sha256": "978846a816cb77f44a55e32b16493375ca837fbf87e0aec35a9c1c934bff0cd0",
+        "binary_sha256": "978846a816cb77f44a55e32b16493375ca837fbf87e0aec35a9c1c934bff0cd0",
+        "release_id": 430630500,
+        "asset_id": 698539443,
+        "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.15.0/omp-windows-x64.exe"
       },
       "gpu_qualification": {
         "profile": "qwen38-5090-v0.13.0",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/9e2697b09ed40083799e15de0a1a85258793bb9a/releases/v0.16.0/qualification/rtx5090.json",
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/b5bd3f8c9f1011e2e5ee0be23c1e853e29e75553/releases/v0.16.1/qualification/rtx5090.json",
           "sha256": "2200fa4427868e572c79da5580c465f45519e4519f4d305bc115b655d8d09071"
         }
       },
@@ -224,7 +222,7 @@
     {
       "id": "linux-docker-local",
       "adapter": "linux-docker-local",
-      "status": "qualified",
+      "status": "preview",
       "transport": "local-loopback",
       "commands": [
         "doctor",
@@ -237,9 +235,9 @@
         "support-bundle"
       ],
       "silent_cloud_fallback": false,
-      "installable": true,
+      "installable": false,
       "support_owner": "alphastorm/omp-ninfer",
-      "product_release": "v0.16.0",
+      "product_release": "v0.16.1",
       "aliases": [
         "linux-x64-docker"
       ],
@@ -253,32 +251,31 @@
         "The RTX 5090 checked first build ships under an explicit founder-approved reproducibility exception. Native profiles use INT8 DFlash2 K7 with `Group64` A8 and FP32 head logits off; RTX 3090 uses C2 over one shared 131072-token pool and a 350 W cap.",
         "Fresh stock OMP 18.14.0 platform and five-route acceptance passed on frozen v0.16.0 candidate 56899320d416bafda5c15d7e454e9b593badc0a6 on 2026-11-01; predecessor acceptance does not transfer. macOS remains preview and Linux client evidence is WSL2-scoped."
       ],
-      "blockers": [],
-      "acceptance_receipt": {
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/330689f953cf44b9220a6a0876efb838c1684496/releases/v0.16.0/acceptance/linux-x64-18.14.0.json",
-        "sha256": "1dbb936b72cfd44c360fed3a39e41352c422e997636d2fe51a426ef2c0793a76"
-      },
+      "blockers": [
+        "upstream OMP v18.15.0 client acceptance is pending"
+      ],
+      "acceptance_receipt": null,
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
-        "upstream_tag": "v18.14.0",
-        "upstream_commit": "31147f9d1a76608549821c3759f8487b4d66c72d",
+        "upstream_tag": "v18.15.0",
+        "upstream_commit": "3fedf8d53267e32a6d7521ce725fdcc4a36fdc67",
         "os": "Ubuntu 24.04",
         "architecture": "x64",
         "published": true,
         "asset_name": "omp-linux-x64",
-        "asset_bytes": 276244656,
-        "asset_sha256": "e7dd2b606c4ebe9d1a7bcfad1b8820db968cd6b05409fed1c6bc8db0b6a95a8f",
-        "binary_sha256": "e7dd2b606c4ebe9d1a7bcfad1b8820db968cd6b05409fed1c6bc8db0b6a95a8f",
-        "release_id": 428242783,
-        "asset_id": 689493890,
-        "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.14.0/omp-linux-x64"
+        "asset_bytes": 276785328,
+        "asset_sha256": "6737ee2415555a3656cc7b89c14d1c25c18658ee4c0fd4f7309705149ccb7b0f",
+        "binary_sha256": "6737ee2415555a3656cc7b89c14d1c25c18658ee4c0fd4f7309705149ccb7b0f",
+        "release_id": 430630500,
+        "asset_id": 698539441,
+        "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.15.0/omp-linux-x64"
       },
       "gpu_qualification": {
         "profile": "qwen38-5090-v0.13.0",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/9e2697b09ed40083799e15de0a1a85258793bb9a/releases/v0.16.0/qualification/rtx5090.json",
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/b5bd3f8c9f1011e2e5ee0be23c1e853e29e75553/releases/v0.16.1/qualification/rtx5090.json",
           "sha256": "2200fa4427868e572c79da5580c465f45519e4519f4d305bc115b655d8d09071"
         }
       },
@@ -344,8 +341,8 @@
       "package_bytes": 1008976979,
       "maximum_context_tokens": 131072,
       "qualification_receipt": {
-        "path": "releases/v0.16.0/qualification/rtx3090.json",
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/9e2697b09ed40083799e15de0a1a85258793bb9a/releases/v0.16.0/qualification/rtx3090.json",
+        "path": "releases/v0.16.1/qualification/rtx3090.json",
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/b5bd3f8c9f1011e2e5ee0be23c1e853e29e75553/releases/v0.16.1/qualification/rtx3090.json",
         "sha256": "48c7f63572e38b279dcc941c9f1a2acbf858ec95f1ffe3f0eb8bbc20a8111702"
       },
       "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/1cbd84e7221e51186bd7f093a149912d2489625b/qwen3_8_27b.ninfer",
@@ -384,8 +381,8 @@
       "package_bytes": 991969490,
       "maximum_context_tokens": 131072,
       "qualification_receipt": {
-        "path": "releases/v0.16.0/qualification/rtx4090.json",
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/9e2697b09ed40083799e15de0a1a85258793bb9a/releases/v0.16.0/qualification/rtx4090.json",
+        "path": "releases/v0.16.1/qualification/rtx4090.json",
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/b5bd3f8c9f1011e2e5ee0be23c1e853e29e75553/releases/v0.16.1/qualification/rtx4090.json",
         "sha256": "69ebf60c3b4bee7a32ec92bc282c9a7ec6b735cc75cad822f041c5e89e35fb77"
       },
       "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/1cbd84e7221e51186bd7f093a149912d2489625b/qwen3_8_27b.ninfer",
