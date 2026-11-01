@@ -46,6 +46,15 @@ class ContractVersionError(ValueError):
         super().__init__('contract-version error: ' + message)
 
 
+def finite_number(value):
+    if type(value) not in (int, float):
+        return False
+    try:
+        return math.isfinite(value)
+    except OverflowError:
+        return False
+
+
 def input_contract(document):
     if not isinstance(document, dict):
         raise ContractVersionError('comparison must be an object')
@@ -65,6 +74,14 @@ def input_contract(document):
     for job, value in jobs.items():
         if not isinstance(value, dict):
             raise ContractVersionError(f'job {job} must be an object')
+        if version == 2 and 'concurrent_receipts' in value:
+            receipts = value['concurrent_receipts']
+            if (not isinstance(receipts, dict) or set(receipts) != {'incumbent', 'candidate'}
+                    or any(not isinstance(path, str) or not path or Path(path).is_absolute()
+                           for path in receipts.values())):
+                raise ContractVersionError(f'job {job} concurrent_receipts must name incumbent and candidate relative receipt files')
+            if 'positions' not in value:
+                raise ContractVersionError(f'job {job} concurrent_receipts requires nonempty positions')
         if 'positions' not in value:  # A driver-only job is explicitly unjudged.
             continue
         positions = value['positions']
@@ -73,10 +90,18 @@ def input_contract(document):
         for row in positions:
             if not isinstance(row, dict) or 'position' not in row or any(key not in row for key in metrics):
                 raise ContractVersionError(f'job {job} needs position and all six parity metrics on every row')
-            if any(type(row[key]) not in (int, float) or not math.isfinite(row[key]) for key in metrics):
+            if any(not finite_number(row[key]) for key in metrics):
                 raise ContractVersionError(f'job {job} parity metrics must be finite numbers')
-            if version == 2 and (not isinstance(row.get('label'), str) or not row['label']):
-                raise ContractVersionError(f'job {job} contract 2 requires a nonempty semantic label on every row')
+            if version == 2:
+                if not (type(row['position']) is int or isinstance(row['position'], str) and row['position']):
+                    raise ContractVersionError(f'job {job} contract 2 position must be an integer or nonempty string')
+                if not isinstance(row.get('label'), str) or not row['label']:
+                    raise ContractVersionError(f'job {job} contract 2 requires a nonempty semantic label on every row')
+        if version == 2:
+            if len({str(row['position']) for row in positions}) != len(positions):
+                raise ContractVersionError(f'job {job} contract 2 positions must be unique')
+            if len({row['label'] for row in positions}) != len(positions):
+                raise ContractVersionError(f'job {job} contract 2 labels must be unique')
     return version, rule
 
 
@@ -93,24 +118,83 @@ def judge_position(row: dict) -> list[str]:
     return failures
 
 
+def receipt_object(value, description):
+    if not isinstance(value, dict):
+        raise ValueError(f'{description} must be an object')
+    return value
+
+
+def receipt_array(value, description):
+    if not isinstance(value, list) or not value:
+        raise ValueError(f'{description} must be a nonempty array')
+    return value
+
+
+def receipt_name(value, description):
+    if not isinstance(value, str) or not value:
+        raise ValueError(f'{description} must be a nonempty string')
+    return value
+
+
+def event_timestamp(event, path):
+    value = event
+    for key in path:
+        if not isinstance(value, dict):
+            raise ValueError('server admission/start timestamp containers must be objects')
+        if key not in value:
+            return None  # Absent evidence may use the documented client-order fallback.
+        value = value[key]
+    if not finite_number(value):
+        raise ValueError('server admission/start timestamps must be finite numbers')
+    return value
+
+
+def validate_server_evidence(request):
+    events = request.get('server_request_done', [])
+    if not isinstance(events, list):
+        raise ValueError('server_request_done must be an array')
+    for event in events:
+        receipt_object(event, 'server_request_done event')
+        for path in SERVER_ORDER_PATHS:
+            event_timestamp(event, path)
+
+
 def receipt_phases(receipt):
+    receipt_object(receipt, 'receipt')
     groups = {}
     labels = []
-    for index, scenario in enumerate(receipt['scenarios']):
-        requests = scenario['requests']
-        members = {request['label']: request for request in requests}
-        if len(members) != len(requests):
-            raise ValueError('duplicate request label in receipt')
+    for index, scenario in enumerate(receipt_array(receipt.get('scenarios'), 'receipt scenarios')):
+        receipt_object(scenario, 'receipt scenario')
+        name = receipt_name(scenario.get('name'), 'scenario name')
+        if 'repeat' in scenario and type(scenario['repeat']) is not int:
+            raise ValueError('scenario repeat must be an integer when present')
+        requests = receipt_array(scenario.get('requests'), 'scenario requests')
+        members = {}
+        for request in requests:
+            receipt_object(request, 'receipt request')
+            label = receipt_name(request.get('label'), 'request label')
+            receipt_name(request.get('phase'), 'request phase')
+            for field in ('submitted_monotonic_s', 'first_output_monotonic_s'):
+                if not finite_number(request.get(field)):
+                    raise ValueError(f'{field} must be a finite number on every receipt request')
+            validate_server_evidence(request)
+            if label in members:
+                raise ValueError('duplicate request label in receipt')
+            members[label] = request
         covered = []
-        for phase in scenario['phases']:
-            phase_labels = [row['label'] for row in phase['summary']['per_request']]
+        for phase in receipt_array(scenario.get('phases'), 'scenario phases'):
+            receipt_object(phase, 'receipt phase')
+            phase_name = receipt_name(phase.get('name'), 'phase name')
+            summary = receipt_object(phase.get('summary'), 'phase summary')
+            phase_labels = [receipt_name(receipt_object(row, 'phase request').get('label'), 'phase request label')
+                            for row in receipt_array(summary.get('per_request'), 'phase per_request')]
             selected = [members[label] for label in phase_labels]
-            if any(request['phase'] != phase['name'] for request in selected):
+            if any(request['phase'] != phase_name for request in selected):
                 raise ValueError('receipt phase membership mismatch')
             covered.extend(phase_labels)
             simultaneous = len(selected) > 1 and max(request['submitted_monotonic_s'] for request in selected) < min(
                 request['first_output_monotonic_s'] for request in selected)
-            key = (index, scenario['name'], scenario.get('repeat'), phase['name'])
+            key = (index, name, scenario.get('repeat'), phase_name)
             if key in groups:
                 raise ValueError('duplicate receipt phase')
             groups[key] = (selected, simultaneous)
@@ -123,13 +207,10 @@ def receipt_phases(receipt):
 
 
 def server_order(request, path):
-    events = request.get('server_request_done') or []
+    events = request.get('server_request_done', [])
     if len(events) != 1:
         return None
-    value = events[0]
-    for key in path:
-        value = value.get(key) if isinstance(value, dict) else None
-    return value if isinstance(value, (int, float)) and math.isfinite(value) else None
+    return event_timestamp(events[0], path)
 
 
 def admission_pairs(incumbent, candidate):
@@ -147,7 +228,7 @@ def admission_pairs(incumbent, candidate):
         def order(row):
             return (row['first_output_monotonic_s'],)
     for arm in (incumbent, candidate):
-        if any(not all(isinstance(value, (int, float)) and math.isfinite(value) for value in order(row)) for row in arm):
+        if any(not all(finite_number(value) for value in order(row)) for row in arm):
             raise ValueError('missing finite admission-order evidence')
         if len({order(row) for row in arm}) != len(arm):
             raise ValueError('indistinguishable admission ranks')
@@ -160,8 +241,8 @@ def pair_positions(job, base):
     if len(by_label) != len(positions):
         raise ValueError('duplicate comparison label')
     pairing = {label: (label, 'label', None, None, None) for label in by_label}
-    receipts = job.get('concurrent_receipts')
-    if receipts:
+    if 'concurrent_receipts' in job:
+        receipts = job['concurrent_receipts']
         arms = {arm: receipt_phases(json.loads((base / receipts[arm]).read_text(encoding='utf-8'))) for arm in ('incumbent', 'candidate')}
         old, old_labels = arms['incumbent']
         new, new_labels = arms['candidate']
@@ -197,10 +278,10 @@ def judge_comparison(document, base, source):
     identity = {'contract_version': version, 'rule': rule}
     verdict = {**identity, 'source': source, 'jobs': {}, 'passed': True}
     for job, value in document['jobs'].items():
-        positions = value.get('positions')
-        if positions is None:
+        if 'positions' not in value:
             verdict['jobs'][job] = {**identity, 'judged': False, 'note': 'no per-position rows; driver verdict applies'}
             continue
+        positions = value['positions']
         failing = {}
         if rule == RULE_ONE:
             # The original /1 loop: compare the metrics already paired on each row.

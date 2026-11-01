@@ -167,6 +167,10 @@ Every input and output names `contract_version` and `rule` explicitly:
 | `2` | The same rows, each with a nonempty semantic `label`; optional `concurrent_receipts` naming incumbent/candidate receipt JSON files relative to the comparison | `/1` keeps positional comparisons; `p16-agent-parity/2` pairs sequential positions by label and simultaneous phase members by admission rank. |
 
 The six finite numeric metrics are `{incumbent,candidate}_{prompt_tokens,cached_tokens,server_ttft_seconds}`.
+Contract `2` requires unique positions (integer or nonempty string identifiers) and unique
+nonempty string labels. Receipt scenarios, requests, phases, summaries and phase members
+must have their declared object/array shapes, with nonempty string names and labels;
+an optional scenario `repeat` must be an integer.
 Both rules keep the same bounds: candidate `(cached − prompt)` ≥ incumbent's, and
 candidate server TTFT ≤ incumbent TTFT + max(0.25 s, 25% of incumbent TTFT).
 Rule `/2` derives simultaneous membership from receipt `scenarios[].requests[].phase`,
@@ -175,6 +179,11 @@ server admission/start timestamp field when every member of both arms has it; ot
 both arms use client first-output order. Tied server timestamps use client first-output
 order; indistinguishable ranks are invalid. Completion times and engine request IDs
 are never ordering evidence. Verdict rows retain the chosen labels, rank, source and bounds.
+Every receipt submission/first-output timestamp, and every declared server admission/start
+timestamp, must be a finite real number before phase classification, including sequential
+phases. Booleans, strings, null, NaN and infinities are invalid, not missing evidence.
+Absent server timestamps (or an absent/empty `server_request_done` array) retain the
+client-order fallback; malformed event containers or declared timestamps do not.
 
 To replay a legacy unlabeled comparison, explicitly add `"contract_version": 1` and
 `"rule": "p16-agent-parity/1"`. There is **no inferred-label compatibility path**:
@@ -184,7 +193,12 @@ and any concurrent phase evidence from retained receipts, then declare contract 
 Missing/unsupported versions or rules, invalid pairing evidence, and empty position
 arrays fail with exit `2` and an error document, never an empty or partial judgement.
 Valid comparisons exit `0` for parity pass or `1` for parity failure. A driver-only job
-omits `positions` and is reported as unjudged; its driver verdict still applies.
+omits both `positions` and `concurrent_receipts` and is reported as unjudged; its driver
+verdict still applies. In contract `2`, a present `concurrent_receipts` must contain
+exactly `incumbent` and `candidate`, each naming a nonempty relative receipt path, and
+requires nonempty `positions`. Empty, null, false or wrong-shaped declarations are
+contract errors (exit `2`), never an implicit switch to label-only or driver-only judging.
+Omitting `concurrent_receipts` keeps the documented label-only comparison shape.
 
 This judge is only the numerical parity gate. Every probe oracle must also pass with
 no errors/timeouts; the probe drivers retain that responsibility. A parity pass alone
