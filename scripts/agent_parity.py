@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Apply p16-agent-parity/2 to incumbent/candidate per-position comparisons.
+"""Replay versioned p16-agent-parity rules on per-position comparisons.
 
 Bounds and driver oracles are unchanged: candidate cached-minus-prompt >= incumbent;
 candidate server TTFT <= incumbent + max(0.25 s, 25% of incumbent TTFT).
@@ -13,9 +13,12 @@ otherwise use client first_output_monotonic_s identically on both arms. Request-
 timestamps and engine request IDs are not admission timestamps. Equal server times
 use client first-output order as a tie-breaker; indistinguishable ranks fail closed.
 
-usage: agent-parity.py <comparison.json> [--out verdict.json]
-The input retains the P16 jobs.<probe>.positions[] shape. Every verdict records the
-rule ID; paired_positions carries the actual pairs and unchanged bounds for audit.
+usage: agent_parity.py <comparison.json> [--out verdict.json]
+Inputs require contract_version and rule. Contract 1 accepts the original positional
+shape under rule /1. Contract 2 requires semantic labels and supports /1 or /2.
+Unversioned, unsupported or incompatible inputs exit 2 with a contract-version error,
+never an empty or partial pairing verdict. Rule /1 retains positional comparisons;
+rule /2 retains receipt-backed admission pairing. Probe drivers still own all oracles.
 """
 import argparse
 import json
@@ -23,7 +26,8 @@ import math
 import sys
 from pathlib import Path
 
-RULE = 'p16-agent-parity/2'
+RULE_ONE = 'p16-agent-parity/1'
+RULE_TWO = 'p16-agent-parity/2'
 TTFT_ABSOLUTE_SLACK_S = 0.25
 TTFT_RELATIVE_SLACK = 0.25
 SERVER_ORDER_PATHS = (
@@ -35,6 +39,45 @@ SERVER_ORDER_PATHS = (
     ('started_monotonic_s',), ('started_unix_ms',),
     ('start_timestamp_unix_ms',), ('request_start_unix_ms',),
 )
+
+
+class ContractVersionError(ValueError):
+    def __init__(self, message):
+        super().__init__('contract-version error: ' + message)
+
+
+def input_contract(document):
+    if not isinstance(document, dict):
+        raise ContractVersionError('comparison must be an object')
+    version = document.get('contract_version')
+    rule = document.get('rule')
+    if type(version) is not int or version not in (1, 2):
+        raise ContractVersionError('contract_version must be 1 or 2')
+    if rule not in (RULE_ONE, RULE_TWO):
+        raise ContractVersionError('rule must be p16-agent-parity/1 or p16-agent-parity/2')
+    if version == 1 and rule != RULE_ONE:
+        raise ContractVersionError('contract 1 supports only rule /1; /2 needs contract 2 and semantic labels')
+    jobs = document.get('jobs')
+    if not isinstance(jobs, dict) or not jobs:
+        raise ContractVersionError('jobs must be a nonempty object')
+    metrics = tuple(prefix + suffix for prefix in ('incumbent_', 'candidate_')
+                    for suffix in ('prompt_tokens', 'cached_tokens', 'server_ttft_seconds'))
+    for job, value in jobs.items():
+        if not isinstance(value, dict):
+            raise ContractVersionError(f'job {job} must be an object')
+        if 'positions' not in value:  # A driver-only job is explicitly unjudged.
+            continue
+        positions = value['positions']
+        if not isinstance(positions, list) or not positions:
+            raise ContractVersionError(f'job {job} positions must be a nonempty array; omit it for driver-only jobs')
+        for row in positions:
+            if not isinstance(row, dict) or 'position' not in row or any(key not in row for key in metrics):
+                raise ContractVersionError(f'job {job} needs position and all six parity metrics on every row')
+            if any(type(row[key]) not in (int, float) or not math.isfinite(row[key]) for key in metrics):
+                raise ContractVersionError(f'job {job} parity metrics must be finite numbers')
+            if version == 2 and (not isinstance(row.get('label'), str) or not row['label']):
+                raise ContractVersionError(f'job {job} contract 2 requires a nonempty semantic label on every row')
+    return version, rule
 
 
 def judge_position(row: dict) -> list[str]:
@@ -149,37 +192,66 @@ def pair_positions(job, base):
     return paired
 
 
+def judge_comparison(document, base, source):
+    version, rule = input_contract(document)
+    identity = {'contract_version': version, 'rule': rule}
+    verdict = {**identity, 'source': source, 'jobs': {}, 'passed': True}
+    for job, value in document['jobs'].items():
+        positions = value.get('positions')
+        if positions is None:
+            verdict['jobs'][job] = {**identity, 'judged': False, 'note': 'no per-position rows; driver verdict applies'}
+            continue
+        failing = {}
+        if rule == RULE_ONE:
+            # The original /1 loop: compare the metrics already paired on each row.
+            for row in positions:
+                reasons = judge_position(row)
+                if reasons:
+                    failing[str(row['position'])] = reasons
+            judged = {**identity, 'judged': True, 'positions': len(positions)}
+        else:
+            try:
+                paired = pair_positions(value, base)
+            except (KeyError, ValueError, TypeError, AttributeError, IndexError, OSError) as error:
+                detail = type(error).__name__ if isinstance(error, OSError) else str(error)
+                raise ContractVersionError(f'job {job} incompatible /2 pairing evidence: {detail}') from error
+            if not paired or len(paired) != len(positions):
+                raise ContractVersionError(f'job {job} /2 must pair every position exactly once')
+            for row in paired:
+                reasons = judge_position(row)
+                row.update(**identity, passed=not reasons, failures=reasons)
+                if reasons:
+                    failing[str(row['position'])] = reasons
+            judged = {**identity, 'judged': True, 'positions': len(positions), 'paired_positions': paired}
+        verdict['jobs'][job] = {**judged, 'failing': failing, 'passed': not failing}
+        verdict['passed'] = verdict['passed'] and not failing
+    return verdict
+
+
 def main() -> int:
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('comparison', type=Path)
     parser.add_argument('--out', type=Path)
     args = parser.parse_args()
-    document = json.loads(args.comparison.read_text())
-    verdict = {'rule': RULE, 'source': args.comparison.name, 'jobs': {}, 'passed': True}
-    for job, value in document['jobs'].items():
-        positions = value.get('positions') if isinstance(value, dict) else None
-        if not positions:
-            verdict['jobs'][job] = {'rule': RULE, 'judged': False, 'note': 'no per-position rows; driver verdict applies'}
-            continue
-        failing = {}
-        paired = []
+    document = None
+    try:
         try:
-            paired = pair_positions(value, args.comparison.parent)
-            for row in paired:
-                reasons = judge_position(row)
-                row.update(rule=RULE, passed=not reasons, failures=reasons)
-                if reasons:
-                    failing[str(row['position'])] = reasons
-        except (KeyError, ValueError, TypeError, OSError) as error:
-            failing['pairing'] = [str(error)]
-        verdict['jobs'][job] = {'rule': RULE, 'judged': True, 'positions': len(positions), 'paired_positions': paired,
-                                'failing': failing, 'passed': not failing}
-        verdict['passed'] = verdict['passed'] and not failing
+            document = json.loads(args.comparison.read_text(encoding='utf-8'))
+        except (OSError, ValueError) as error:
+            raise ContractVersionError('comparison must be readable UTF-8 JSON') from error
+        verdict = judge_comparison(document, args.comparison.parent, args.comparison.name)
+        code = 0 if verdict['passed'] else 1
+    except ContractVersionError as error:
+        supplied = document if isinstance(document, dict) else {}
+        verdict = {'contract_version': supplied.get('contract_version'), 'rule': supplied.get('rule'),
+                   'source': args.comparison.name, 'passed': False,
+                   'error': {'code': 'contract-version', 'message': str(error)}}
+        code = 2
     text = json.dumps(verdict, indent=2) + '\n'
     if args.out:
-        args.out.write_text(text)
+        args.out.write_text(text, encoding='utf-8')
     sys.stdout.write(text)
-    return 0 if verdict['passed'] else 1
+    return code
 
 
 if __name__ == '__main__':

@@ -155,6 +155,42 @@ branch. Current findings from the scripted captures:
   **1.227×** the latency of `M=1` with effectively identical DRAM traffic (96.7 MB vs 96.6 MB per
   layer pass). That asymmetry is why drafting 3 tokens per round wins.
 
+## Agent-probe parity gate
+
+`python3 scripts/agent_parity.py comparison.json --out verdict.json` replays the
+retained agent-probe parity rules offline; it does not contact an inference server.
+Every input and output names `contract_version` and `rule` explicitly:
+
+| Contract | Accepted input shape | Supported rules and behavior |
+| --- | --- | --- |
+| `1` | `jobs.<probe>.positions[]` with `position` and the six metrics below; labels optional | `p16-agent-parity/1`: compare the incumbent/candidate metrics already paired on each row. |
+| `2` | The same rows, each with a nonempty semantic `label`; optional `concurrent_receipts` naming incumbent/candidate receipt JSON files relative to the comparison | `/1` keeps positional comparisons; `p16-agent-parity/2` pairs sequential positions by label and simultaneous phase members by admission rank. |
+
+The six finite numeric metrics are `{incumbent,candidate}_{prompt_tokens,cached_tokens,server_ttft_seconds}`.
+Both rules keep the same bounds: candidate `(cached − prompt)` ≥ incumbent's, and
+candidate server TTFT ≤ incumbent TTFT + max(0.25 s, 25% of incumbent TTFT).
+Rule `/2` derives simultaneous membership from receipt `scenarios[].requests[].phase`,
+`phases[].summary.per_request`, and submission/first-output timestamps. It uses a common
+server admission/start timestamp field when every member of both arms has it; otherwise
+both arms use client first-output order. Tied server timestamps use client first-output
+order; indistinguishable ranks are invalid. Completion times and engine request IDs
+are never ordering evidence. Verdict rows retain the chosen labels, rank, source and bounds.
+
+To replay a legacy unlabeled comparison, explicitly add `"contract_version": 1` and
+`"rule": "p16-agent-parity/1"`. There is **no inferred-label compatibility path**:
+requesting `/2` with contract `1`, or merely stamping contract `2` onto unlabeled rows,
+fails with an explicit `contract-version` error. To use `/2`, recover the semantic labels
+and any concurrent phase evidence from retained receipts, then declare contract `2`.
+Missing/unsupported versions or rules, invalid pairing evidence, and empty position
+arrays fail with exit `2` and an error document, never an empty or partial judgement.
+Valid comparisons exit `0` for parity pass or `1` for parity failure. A driver-only job
+omits `positions` and is reported as unjudged; its driver verdict still applies.
+
+This judge is only the numerical parity gate. Every probe oracle must also pass with
+no errors/timeouts; the probe drivers retain that responsibility. A parity pass alone
+does not qualify a lane. Sanitized replay fixtures and contract regressions live in
+`tests/test_agent_parity.py` and `tests/fixtures/agent_parity/`.
+
 ## Experiment ledger
 
 The auditable history: what was tried, the exact method, the measured result, and the verdict.

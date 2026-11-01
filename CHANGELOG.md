@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Version the repository-owned agent-probe parity judge's input contract and preserve
+  rules `/1` and `/2`, rejecting incompatible inputs explicitly rather than returning
+  empty pairings. Add sanitized retained-receipt regressions without changing cache-gap
+  or TTFT bounds.
 ### Changed
 
 - Mark v0.16.0 as the published release across the README, quickstart banner, facts, roadmap,
