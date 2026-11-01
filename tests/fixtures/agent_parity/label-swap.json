@@ -1,0 +1,19 @@
+{
+  "contract_version": 2,
+  "rule": "p16-agent-parity/2",
+  "jobs": {
+    "concurrency": {
+      "positions": [
+        {"position": 1, "label": "fanout-base", "incumbent_prompt_tokens": 82027, "incumbent_cached_tokens": 0, "incumbent_server_ttft_seconds": 30.900677151, "candidate_prompt_tokens": 82027, "candidate_cached_tokens": 0, "candidate_server_ttft_seconds": 30.948622371000003},
+        {"position": 2, "label": "branch-0", "incumbent_prompt_tokens": 82095, "incumbent_cached_tokens": 82072, "incumbent_server_ttft_seconds": 1.109535538, "candidate_prompt_tokens": 82095, "candidate_cached_tokens": 82072, "candidate_server_ttft_seconds": 1.0198112049999999},
+        {"position": 3, "label": "branch-1", "incumbent_prompt_tokens": 82095, "incumbent_cached_tokens": 82066, "incumbent_server_ttft_seconds": 0.28615729300000003, "candidate_prompt_tokens": 82095, "candidate_cached_tokens": 82072, "candidate_server_ttft_seconds": 1.182951015},
+        {"position": 4, "label": "branch-2", "incumbent_prompt_tokens": 82095, "incumbent_cached_tokens": 82066, "incumbent_server_ttft_seconds": 0.232018785, "candidate_prompt_tokens": 82095, "candidate_cached_tokens": 82066, "candidate_server_ttft_seconds": 0.23913560900000003},
+        {"position": 5, "label": "branch-3", "incumbent_prompt_tokens": 82095, "incumbent_cached_tokens": 82072, "incumbent_server_ttft_seconds": 0.975780348, "candidate_prompt_tokens": 82095, "candidate_cached_tokens": 82066, "candidate_server_ttft_seconds": 0.293969085}
+      ],
+      "concurrent_receipts": {
+        "incumbent": "control.json",
+        "candidate": "candidate.json"
+      }
+    }
+  }
+}

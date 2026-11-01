@@ -1,0 +1,46 @@
+{
+  "scenarios": [
+    {
+      "name": "fanout",
+      "repeat": 1,
+      "requests": [
+        {"label": "fanout-base", "phase": "base", "submitted_monotonic_s": 29622.195556124, "first_output_monotonic_s": 29653.056166386, "server_request_done": [{"started_unix_ms": 1793496210431}]},
+        {"label": "branch-0", "phase": "branches", "submitted_monotonic_s": 29653.241205132, "first_output_monotonic_s": 29653.476850226, "server_request_done": [{"started_unix_ms": 1793496241471}]},
+        {"label": "branch-1", "phase": "branches", "submitted_monotonic_s": 29653.24134537, "first_output_monotonic_s": 29654.431244319, "server_request_done": [{"started_unix_ms": 1793496242519}]},
+        {"label": "branch-2", "phase": "branches", "submitted_monotonic_s": 29653.241480876, "first_output_monotonic_s": 29654.244785347, "server_request_done": [{"started_unix_ms": 1793496242332}]},
+        {"label": "branch-3", "phase": "branches", "submitted_monotonic_s": 29653.241122432, "first_output_monotonic_s": 29653.53127179, "server_request_done": [{"started_unix_ms": 1793496241525}]}
+      ],
+      "phases": [
+        {
+          "name": "base",
+          "summary": {
+            "per_request": [
+              {
+                "label": "fanout-base"
+              }
+            ]
+          }
+        },
+        {
+          "name": "branches",
+          "summary": {
+            "per_request": [
+              {
+                "label": "branch-0"
+              },
+              {
+                "label": "branch-1"
+              },
+              {
+                "label": "branch-2"
+              },
+              {
+                "label": "branch-3"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
