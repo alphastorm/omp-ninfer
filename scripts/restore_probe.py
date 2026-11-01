@@ -121,7 +121,7 @@ def main() -> int:
     if args.model is None:
         from client_acceptance import documented_model_id
         args.model = documented_model_id("rtx5090-macos-client")
-    api_key = args.api_key_file.read_text().strip()
+    api_key = args.api_key_file.read_text(encoding="utf-8").strip()
     session = hashlib.sha256(
         f"restore-probe-{args.lane}-{dt.datetime.now(dt.UTC).isoformat()}".encode()).hexdigest()
     lane = Lane(args.base_url, api_key, session, args.model)
@@ -181,7 +181,8 @@ def main() -> int:
         subprocess.run(args.stop_cmd, shell=True, check=True, capture_output=True, timeout=600)
         try:
             flipped = subprocess.run(args.tamper_cmd, shell=True, check=True,
-                                     capture_output=True, text=True, timeout=120).stdout.strip()
+                                     capture_output=True, text=True, encoding="utf-8",
+                                     errors="strict", timeout=120).stdout.strip()
         finally:
             subprocess.run(args.start_cmd, shell=True, check=True, capture_output=True,
                            timeout=600)

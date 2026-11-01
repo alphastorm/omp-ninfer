@@ -131,7 +131,8 @@ def run_to_files(argv: list[str], timeout: float, stdout_path: Path | None = Non
         with open(out_path, "wb") as out, open(err_path, "wb") as err:
             code = subprocess.run(argv, stdin=subprocess.DEVNULL, stdout=out, stderr=err,
                                   timeout=timeout).returncode
-        text = "" if stdout_path else out_path.read_text("utf-8", "replace")
+        text = "" if stdout_path else out_path.read_text(encoding="utf-8", errors="strict")
+        # stderr is diagnostic-only; stdout carries the size/hash/join protocol and must decode exactly.
         return code, text, err_path.read_text("utf-8", "replace")
 
 

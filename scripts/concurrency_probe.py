@@ -351,7 +351,8 @@ def fixture_input(path: Path) -> Any:
 
 
 def run_command(command: str, timeout: float) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(command, shell=True, capture_output=True, text=True, timeout=timeout)
+    return subprocess.run(command, shell=True, capture_output=True, text=True,
+                          encoding="utf-8", errors="strict", timeout=timeout)
 
 
 class VramSampler:

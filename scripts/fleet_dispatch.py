@@ -97,7 +97,7 @@ def parse_lane(spec: str) -> Lane:
     name, base_url, key_file, model = parts
     if name not in ROLE_FALLBACK:
         raise SystemExit(f"lane name must be one of {sorted(ROLE_FALLBACK)}, got {name!r}")
-    return Lane(name, base_url, Path(key_file).expanduser().read_text().strip(), model)
+    return Lane(name, base_url, Path(key_file).expanduser().read_text(encoding="utf-8").strip(), model)
 
 
 def build_jobs() -> list[tuple[str, int]]:

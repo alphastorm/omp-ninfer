@@ -45,10 +45,11 @@ def run(argv: list[str], *, cwd: Path | None = None, timeout: int = 120,
     if log:
         with log.open("w", encoding="utf-8") as output:
             result = subprocess.run(argv, cwd=cwd, stdin=subprocess.DEVNULL, stdout=output,
-                                    stderr=subprocess.STDOUT, text=True, timeout=timeout)
+                                    stderr=subprocess.STDOUT, text=True, encoding="utf-8",
+                                    errors="strict", timeout=timeout)
     else:
         result = subprocess.run(argv, cwd=cwd, stdin=subprocess.DEVNULL, capture_output=True,
-                                text=True, timeout=timeout)
+                                text=True, encoding="utf-8", errors="strict", timeout=timeout)
     if check and result.returncode:
         raise RuntimeError(f"{argv[0]} failed ({result.returncode}); inspect {log or 'private command output'}")
     return result
@@ -89,7 +90,7 @@ def request_shape(completed: list[dict]) -> dict[str, bool]:
 def documented_model(bundle: Path, clone: Path) -> str:
     """The model the bundle's documented provider step configures from the candidate clone, which
     every documented request names. The candidate documents it; no lane table here can drift."""
-    steps = json.loads((bundle / "manifest.json").read_text())["steps"]
+    steps = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))["steps"]
     provider = [step for step in steps if step["slug"] == "provider"]
     if len(provider) != 1:
         raise ValueError("bundle must hold exactly one documented provider step")
@@ -114,9 +115,9 @@ def assess_evidence(evidence: Path, clone: Path, bundle: Path, release: str, can
                 parsed.append(row)
         return parsed
 
-    manifest = json.loads((clone / "releases" / release / "manifest.json").read_text())
+    manifest = json.loads((clone / "releases" / release / "manifest.json").read_text(encoding="utf-8"))
     expected = next(v for v in manifest["components"]["ninfer_variants"] if v["id"] == f"{lane}-windows-native")
-    blocks = json.loads((bundle / "manifest.json").read_text())
+    blocks = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))
     route = load("route.json")
     health, recovery, installed = load("recovery-health.json"), load("recovery-status.json"), load("installed-identity.json")
     identity = recovery["server"]["identity"]
@@ -186,7 +187,7 @@ def assess_evidence(evidence: Path, clone: Path, bundle: Path, release: str, can
     qualification_path = expected.get("qualification", {}).get("summary")
     qualification_file = (clone / qualification_path if qualification_path and qualification_path.startswith("releases/")
                           else clone / "releases" / release / str(qualification_path))
-    qualification = json.loads(qualification_file.read_text()) if qualification_path else {}
+    qualification = json.loads(qualification_file.read_text(encoding="utf-8")) if qualification_path else {}
     if first_release_rollback(qualification.get("rollback")):
         preparation = load("preparation.json")
         checks["first_release_preparation_has_no_predecessor"] = (
@@ -310,7 +311,7 @@ foreach($name in @('baseline','preflight-snapshot')) {if(Test-Path (Join-Path $w
             raise RuntimeError("candidate clone must be clean")
         if not bundle.exists():
             run([sys.executable, str(clone / "scripts/documented_route.py"), "bundle", "--lane", route_lane, "--output", str(bundle)])
-        manifest = json.loads((bundle / "manifest.json").read_text())
+        manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))
         if manifest["lane"] != route_lane:
             raise RuntimeError("bundle lane differs from selected native lane")
         if manifest["document_sha256"] != sha(clone / manifest["document"]):
@@ -332,7 +333,7 @@ foreach($name in @('baseline','preflight-snapshot')) {if(Test-Path (Join-Path $w
             "document_sha256": manifest["document_sha256"], "steps": manifest["steps"]}, indent=2) + "\n")
     elif a.mode == "validate":
         # Revalidate changed orchestration without repeating a successful installation/download.
-        preflight = json.loads((w / "driver-preflight.json").read_text())
+        preflight = json.loads((w / "driver-preflight.json").read_text(encoding="utf-8"))
         if preflight["plan"]["candidate"] != a.candidate or preflight["plan"]["client_install"]["lane"] != route_lane:
             raise RuntimeError("candidate changed since preflight")
         selector = f"{provider}/{documented_model(bundle, clone)}"
@@ -352,7 +353,7 @@ $binary=Join-Path $env:LOCALAPPDATA 'OMP\omp.exe';if(-not (Test-Path $binary -Pa
         (w / "driver-preflight.json").write_text(json.dumps(preflight, indent=2) + "\n")
         collect()
     elif a.mode == "accept":
-        preflight = json.loads((w / "driver-preflight.json").read_text())
+        preflight = json.loads((w / "driver-preflight.json").read_text(encoding="utf-8"))
         if preflight["plan"]["candidate"] != a.candidate or preflight["plan"]["client_install"]["lane"] != route_lane or preflight["orchestrator_sha256"] != sha(orchestrator) or preflight["probe_sha256"] != sha(probe) or preflight["gpu_helper_sha256"] != sha(gpu_helper):
             raise RuntimeError("preflighted script or candidate changed; stage and exercise preflight again before acceptance")
         if (w / "driver-window.json").exists():

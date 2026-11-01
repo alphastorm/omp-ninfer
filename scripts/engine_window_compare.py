@@ -118,7 +118,8 @@ def output_text(document: dict[str, Any]) -> str:
 
 
 def request_log(log_cmd: str, since_ms: int) -> list[dict[str, Any]]:
-    result = subprocess.run(log_cmd, shell=True, capture_output=True, text=True, timeout=300)
+    result = subprocess.run(log_cmd, shell=True, capture_output=True, text=True,
+                            encoding="utf-8", errors="strict", timeout=300)
     records = []
     for line in result.stdout.splitlines():
         try:

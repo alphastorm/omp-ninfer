@@ -72,7 +72,7 @@ def save(path, value):
 def load_config(p):
     if not private_file(p["config"]):
         raise TunnelError("managed configuration missing or not private; run install")
-    config = json.loads(p["config"].read_text())
+    config = json.loads(p["config"].read_text(encoding="utf-8"))
     if config.get("label") != LABEL or config.get("schema_version") != SCHEMA:
         raise TunnelError("unrecognized managed configuration")
     validate(config)
@@ -117,7 +117,7 @@ def plist(p):
 
 def launchctl(*arguments):
     return subprocess.run(["/bin/launchctl", *arguments], stdin=subprocess.DEVNULL,
-                          capture_output=True, text=True, timeout=20)
+                          capture_output=True, text=True, encoding="utf-8", errors="strict", timeout=20)
 
 
 def domain():
@@ -211,7 +211,7 @@ def uninstall(p):
 
 def listener_owned(port, pid):
     result = subprocess.run(["/usr/sbin/lsof", "-nP", f"-iTCP:{port}", "-sTCP:LISTEN", "-Fpn"],
-                            capture_output=True, text=True, timeout=10)
+                            capture_output=True, text=True, encoding="utf-8", errors="strict", timeout=10)
     if result.returncode not in (0, 1):
         raise TunnelError("listener inventory unavailable")
     owner, listeners = None, []
@@ -238,7 +238,7 @@ def snapshot(p, offline=False):
     if current["loaded"]:
         state["status"] = "starting"
         try:
-            runtime = json.loads(p["runtime"].read_text())
+            runtime = json.loads(p["runtime"].read_text(encoding="utf-8"))
         except (OSError, ValueError):
             runtime = {}
         # A prior launch's last good status never proves current readiness.
@@ -257,7 +257,7 @@ def authenticated_endpoint(config):
     path = Path(config["key_file"])
     if not private_file(path) or not path.stat().st_size:
         raise TunnelError("bearer file must be nonempty, owner-owned, private and not a symlink")
-    token = path.read_text().strip()
+    token = path.read_text(encoding="utf-8").strip()
     if not token or any(c.isspace() for c in token):
         raise TunnelError("bearer file must contain one nonempty token")
     request = urllib.request.Request(f"http://127.0.0.1:{config['local_port']}/v1/models",

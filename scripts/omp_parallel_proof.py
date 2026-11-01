@@ -218,7 +218,7 @@ def config_command(args, home, action, key, value=None):
         command.append(json.dumps(value))
     command.append("--json")
     result = subprocess.run(command, env=dict(os.environ, HOME=str(home), USERPROFILE=str(home), NO_COLOR="1"),
-                            cwd=home, capture_output=True, text=True, timeout=60)
+                            cwd=home, capture_output=True, text=True, encoding="utf-8", errors="strict", timeout=60)
     if result.returncode:
         raise RuntimeError("OMP config command failed")
     return json.loads(result.stdout)
@@ -426,7 +426,8 @@ def run_sessions(args, root, shared, codes, record):
 
 
 def fetch_log(command, timeout):
-    result = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=timeout)
+    result = subprocess.run(command, shell=True, capture_output=True, text=True,
+                            encoding="utf-8", errors="strict", timeout=timeout)
     if result.returncode:
         raise RuntimeError("request log command failed")
     records = [json.loads(line) for line in result.stdout.splitlines() if line.strip()]
@@ -569,7 +570,7 @@ def main(argv=None):
         actual = hashlib.file_digest(binary, "sha256").hexdigest()
     if actual != expected_sha256:
         parser.error("--omp does not match the expected client binary SHA-256")
-    baseline = json.loads(args.baseline.read_text()) if args.baseline else None
+    baseline = json.loads(args.baseline.read_text(encoding="utf-8")) if args.baseline else None
     receipt = {"artifact_type": "omp_ninfer_parallel_proof", "schema_version": 1,
                "omp": {"path": str(args.omp), "sha256": actual, "version": None,
                        "expected_version": expected_version, "identity": identity_source},
@@ -584,7 +585,8 @@ def main(argv=None):
         with tempfile.TemporaryDirectory(prefix="omp-parallel-proof-") as temporary, isolated_environment():
             root = Path(temporary)
             version = subprocess.run([str(args.omp), "--version"], env=dict(os.environ, HOME=str(root)),
-                                     capture_output=True, text=True, check=True, timeout=60).stdout.strip()
+                                     capture_output=True, text=True, encoding="utf-8", errors="strict",
+                                     check=True, timeout=60).stdout.strip()
             receipt["omp"]["version"] = version
             if version != expected_version:
                 raise RuntimeError("client version differs from the expected identity")

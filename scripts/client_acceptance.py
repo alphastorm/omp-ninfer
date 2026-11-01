@@ -104,7 +104,7 @@ class StubHandler(http.server.BaseHTTPRequestHandler):
             return
         payload = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
         with self.server.lock:
-            saved = json.loads(self.server.store.read_text()) if self.server.store.exists() else {}
+            saved = json.loads(self.server.store.read_text(encoding="utf-8")) if self.server.store.exists() else {}
             previous = payload.get("previous_response_id")
             if previous and previous not in saved:
                 self.send_error(404)
@@ -196,7 +196,7 @@ class Stub:
         while time.monotonic() < deadline:
             if ready.exists():
                 try:
-                    self.port = json.loads(ready.read_text())["port"]
+                    self.port = json.loads(ready.read_text(encoding="utf-8"))["port"]
                     return
                 except json.JSONDecodeError:
                     pass
@@ -317,8 +317,8 @@ def main(argv=None):
     native_configuration = None
     if args.lane in ("rtx3090-native", "rtx4090-native") and not args.local_rehearsal:
         from verify_release import native_profile, product_version
-        release = args.release or json.loads((ROOT / "compatibility.json").read_text())["product_release"]
-        manifest = json.loads((ROOT / "releases" / release / "manifest.json").read_text())
+        release = args.release or json.loads((ROOT / "compatibility.json").read_text(encoding="utf-8"))["product_release"]
+        manifest = json.loads((ROOT / "releases" / release / "manifest.json").read_text(encoding="utf-8"))
         variant = next(row for row in manifest["components"]["ninfer_variants"]
                        if row["id"] == args.lane.removesuffix("-native") + "-windows-native")
         errors = []
@@ -329,7 +329,7 @@ def main(argv=None):
             path = ROOT / "releases" / release / "profiles" / args.lane.removesuffix("-native") / "server-config.json"
             if not path.is_file() or sha256(path) != variant["configuration_sha256"]:
                 parser.error("historical native config must match its manifest hash")
-            config = json.loads(path.read_text())
+            config = json.loads(path.read_text(encoding="utf-8"))
             native_configuration = {"max_context": config["engine"]["max_context"],
                                     "concurrency": config["engine"]["max_concurrency"],
                                     "public_model_id": config["model_id"]}
@@ -357,7 +357,7 @@ def main(argv=None):
                                    dict(client_environment(args.omp_version), HOME=str(home), USERPROFILE=str(home)))
             if version.returncode or version.stdout.strip() != args.omp_version:
                 raise RuntimeError("stock client version mismatch")
-            key = secrets.token_hex(32) if args.local_rehearsal else args.key_file.read_text().strip()
+            key = secrets.token_hex(32) if args.local_rehearsal else args.key_file.read_text(encoding="utf-8").strip()
             if not key:
                 raise RuntimeError("bearer file is empty")
             stub = Stub(home, key) if args.local_rehearsal else None

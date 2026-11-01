@@ -214,7 +214,8 @@ def stream_chat(args, api_key, payload, row):
 
 
 def load_log(command):
-    result = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=300)
+    result = subprocess.run(command, shell=True, capture_output=True, text=True,
+                            encoding="utf-8", errors="strict", timeout=300)
     if result.returncode:
         raise ValueError(f"log command exited {result.returncode}")
     records = []

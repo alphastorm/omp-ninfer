@@ -637,6 +637,7 @@ def main() -> int:
         [sys.executable, "scripts/verify_release.py",
          "--release", args.release, "--json"],
         cwd=ROOT, capture_output=True, text=True,
+        encoding="utf-8", errors="strict",
     )
     report = json.loads(verify.stdout)
     errors = report.get("errors", [])

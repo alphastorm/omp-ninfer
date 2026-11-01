@@ -41,7 +41,7 @@ DECODE_PROMPT = (
 
 def run_cmd(cmd: str, timeout: float) -> str:
     completed = subprocess.run(cmd, shell=True, check=True, capture_output=True, timeout=timeout)
-    return completed.stdout.decode(errors="replace")
+    return completed.stdout.decode("utf-8", errors="strict")
 
 
 def vram_mib(cmd: str | None) -> int | None:
@@ -200,7 +200,7 @@ def main() -> int:
     parser.add_argument("--vram-cmd")
     parser.add_argument("--receipt", type=Path, required=True)
     args = parser.parse_args()
-    api_key = Path(args.api_key_file).expanduser().read_text().strip()
+    api_key = Path(args.api_key_file).expanduser().read_text(encoding="utf-8").strip()
     stamp = dt.datetime.now(dt.UTC).isoformat()
 
     def lane_for(gate: str) -> Lane:

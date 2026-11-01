@@ -54,7 +54,7 @@ def documented_model(bundle, clone):
     of the shipped fragment that step installs. The window asks each structured client for it and the
     summary expects it, so no model kept here can drift from the candidate (omp-ninfer#98)."""
     bundle = Path(bundle)
-    steps = [step for step in json.loads((bundle / 'manifest.json').read_text())['steps'] if step['slug'] == 'provider']
+    steps = [step for step in json.loads((bundle / 'manifest.json').read_text(encoding="utf-8"))['steps'] if step['slug'] == 'provider']
     assert len(steps) == 1, 'bundle must hold exactly one documented provider step'
     return documented_route.provider_model_id((bundle / steps[0]['file']).read_text(encoding='utf-8'), Path(clone))
 
@@ -97,7 +97,7 @@ def correction_records(prior):
     A corrected attempt must not start — or later summarize — without them."""
     path = Path(prior) / 'corrections.json'
     assert path.exists(), 'corrected attempt requires ' + str(path) + ' before the window opens'
-    records = json.loads(path.read_text())
+    records = json.loads(path.read_text(encoding="utf-8"))
     assert isinstance(records, list) and records, 'corrections.json must be a non-empty JSON array'
     for index, record in enumerate(records):
         assert isinstance(record, dict), 'corrections.json record %d must be an object' % index
@@ -137,7 +137,7 @@ def main():
     windows = a.windows_workspace
     wsl = a.wsl_workspace
     watchdog_seconds = 3000
-    timings = json.loads((root / 'timings.json').read_text()) if (root / 'timings.json').exists() else []
+    timings = json.loads((root / 'timings.json').read_text(encoding="utf-8")) if (root / 'timings.json').exists() else []
     def save(name, value):
         (root / name).write_text(json.dumps(value, indent=2) + '\n')
     def run(argv, label, timeout=120, env=None, capture=False, cwd=None):
@@ -146,9 +146,10 @@ def main():
         start = time.monotonic()
         started = now()
         if capture:
-            r = subprocess.run([str(x) for x in argv], stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=timeout, env=env, cwd=cwd)
+            r = subprocess.run([str(x) for x in argv], stdin=subprocess.DEVNULL, capture_output=True,
+                               text=True, encoding="utf-8", errors="strict", timeout=timeout, env=env, cwd=cwd)
         else:
-            with (root / (label + '.log')).open('w') as log:
+            with (root / (label + '.log')).open('w', encoding='utf-8') as log:
                 r = subprocess.run([str(x) for x in argv], stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT, timeout=timeout, env=env, cwd=cwd)
         timings.append({'phase': label, 'started_utc': started, 'seconds': round(time.monotonic() - start, 3), 'exit': r.returncode})
         save('timings.json', timings)
@@ -227,8 +228,8 @@ def main():
             result['corrections'] = correction_records(a.prior_workspace)
         result['script_sha256'] = {path: sha(path) for path in result['new_scripts']}
         for label, count in (('host', 2), ('mac', 10), ('windows', 5)):
-            receipt = json.loads((root / (label + '-route.json')).read_text())
-            manifest = json.loads((root / (label + '-bundle/manifest.json')).read_text())
+            receipt = json.loads((root / (label + '-route.json')).read_text(encoding="utf-8"))
+            manifest = json.loads((root / (label + '-bundle/manifest.json')).read_text(encoding="utf-8"))
             assert receipt['status'] == 'passed' and len(receipt['steps']) == count
             assert receipt['document_sha256'] == manifest['document_sha256']
             assert all(step['block_sha256'] == step['executed_sha256'] == expected['sha256'] and step['status'] in ('passed', 'substituted') for step, expected in zip(receipt['steps'], manifest['steps']))
@@ -236,7 +237,7 @@ def main():
         documented = documented_models()
         for label, folder in (('linux', 'remote-linux-structured'), ('mac', 'mac-structured'), ('windows', 'windows-structured')):
             evidence_root = Path(a.windows_evidence) if label == 'windows' and a.windows_evidence else root
-            receipt = json.loads((evidence_root / folder / 'receipt.json').read_text())
+            receipt = json.loads((evidence_root / folder / 'receipt.json').read_text(encoding="utf-8"))
             receipt['receipt_path'] = str(evidence_root / folder / 'receipt.json')
             assert receipt['status'] == 'passed'
             stream_audit = {}
@@ -275,8 +276,8 @@ def main():
                 stream_audit[phase] = {'providers': sorted(providers), 'models': sorted(models), 'input_image_records': images, 'only_selected_provider_and_model': True, 'decode_encoding': encoding, 'transcript_sha256': hashlib.sha256(raw).hexdigest()}
             receipt['full_stream_audit'] = stream_audit
             result['clients'][label] = receipt
-        runtime = json.loads((root / 'runtime-observed.json').read_text())
-        authority = json.loads((clone / 'compatibility.json').read_text())
+        runtime = json.loads((root / 'runtime-observed.json').read_text(encoding="utf-8"))
+        authority = json.loads((clone / 'compatibility.json').read_text(encoding="utf-8"))
         expected = next(v['runtime'] for v in authority['profiles'] if v['id'] == 'linux-docker-local')
         assert runtime['configured_image'] == expected['image_reference'] and expected['image_reference'] in runtime['repo_digests']
         assert runtime['binary_sha256'] == expected['server_binary_sha256']
@@ -285,7 +286,7 @@ def main():
             receipt['live_acceptance'].update({'runtime_image_digest': runtime['configured_image'].split('@', 1)[1], 'runtime_variant': 'rtx5090-container', 'profile_runtime_qualified_by_this_receipt': False})
             if label == 'linux':
                 receipt['live_acceptance']['execution_context'] = receipt['execution_context']
-        result['restoration'] = json.loads((root / 'restoration.json').read_text())
+        result['restoration'] = json.loads((root / 'restoration.json').read_text(encoding="utf-8"))
         assert_host_restored(result['restoration'])
         before, after = [json.loads((root / name).read_text(encoding='utf-8-sig')) for name in ('windows-baseline.json', 'windows-final.json')]
         assert_windows_host_unchanged(before, after)
@@ -294,14 +295,14 @@ def main():
         assert result['restoration']['window_seconds'] <= 3600
         if a.windows_evidence:
             completion = Path(a.windows_evidence)
-            completed = json.loads((completion / 'completion-summary.json').read_text())
+            completed = json.loads((completion / 'completion-summary.json').read_text(encoding="utf-8"))
             assert completed['status'] == 'passed'
             result['previous_window_restoration'] = result['restoration']
             result['restoration'] = completed['restoration']
             assert_host_restored(result['restoration'])
             result['windows_completion_setup'] = completed['setup']
-            result['timings'].extend(json.loads((completion / 'timings.json').read_text()))
-            prior_seconds = json.loads((Path(a.prior_workspace) / 'restoration.json').read_text())['window_seconds'] if a.prior_workspace else 0
+            result['timings'].extend(json.loads((completion / 'timings.json').read_text(encoding="utf-8")))
+            prior_seconds = json.loads((Path(a.prior_workspace) / 'restoration.json').read_text(encoding="utf-8"))['window_seconds'] if a.prior_workspace else 0
             result['aggregate_window_seconds'] = prior_seconds + result['previous_window_restoration']['window_seconds'] + result['restoration']['window_seconds']
             assert result['aggregate_window_seconds'] < 3600
         smoke = list((routehome / 'tmp').glob('*/durable.txt'))
@@ -313,7 +314,8 @@ def main():
             # Match both this route's time interval and the exact seed the candidate's documented
             # restart step builds before moving only the directory this run created into the
             # private evidence root.
-            temp_root = Path(subprocess.check_output(['getconf', 'DARWIN_USER_TEMP_DIR'], text=True).strip())
+            temp_root = Path(subprocess.check_output(['getconf', 'DARWIN_USER_TEMP_DIR'], text=True,
+                                                    encoding="utf-8", errors="strict").strip())
             context_hash = hashlib.sha256(documented_route.restart_seed(macclone / 'docs' / 'QUICKSTART.md', macclone))
             route = result['routes']['mac']['receipt']
             start = datetime.datetime.fromisoformat(route['started_utc'].replace('Z', '+00:00')).timestamp()
@@ -322,16 +324,16 @@ def main():
             assert len(matches) == 1, 'cannot uniquely bind Mac smoke directory to this route'
             shutil.move(str(matches[0].parent), str(collected_smoke))
             smoke = [collected_smoke / 'durable.txt']
-        assert len(smoke) == 1 and smoke[0].read_text().strip() == NONCE, 'documented restart did not return exact nonce'
-        assert (smoke[0].parent / 'resume.txt').read_text().strip() == NONCE
-        tool_output = (smoke[0].parent / 'tool.txt').read_text().strip()
+        assert len(smoke) == 1 and smoke[0].read_text(encoding="utf-8").strip() == NONCE, 'documented restart did not return exact nonce'
+        assert (smoke[0].parent / 'resume.txt').read_text(encoding="utf-8").strip() == NONCE
+        tool_output = (smoke[0].parent / 'tool.txt').read_text(encoding="utf-8").strip()
         assert MARKER_TOKEN.search(tool_output), 'documented tool marker absent'
         result['routes']['mac']['tool_marker_observed'] = True
         result['routes']['mac']['plain_stdout_exact_marker'] = tool_output == 'OMP_NINFER_TOOL_OK'
         result['routes']['mac']['smoke_artifact_directory'] = str(smoke[0].parent)
         result['routes']['mac']['exact_restart_nonce'] = True
         result['clients']['mac']['live_acceptance']['documented_server_restart_nonce_returned'] = True
-        result['routes']['windows'].update(windows_route_answers((root / 'windows-route.log').read_text().splitlines()))
+        result['routes']['windows'].update(windows_route_answers((root / 'windows-route.log').read_text(encoding="utf-8").splitlines()))
         result['private_root'] = str(root)
         save('final-summary.json', result)
         return result
@@ -351,11 +353,11 @@ def main():
             run(['git', 'clone', '-q', '--no-hardlinks', clone, macclone], 'mac-clone')
             run(['git', '-C', macclone, 'checkout', '-q', a.candidate], 'mac-checkout')
         documented = documented_models()
-        comp = json.loads((clone / 'compatibility.json').read_text())
+        comp = json.loads((clone / 'compatibility.json').read_text(encoding="utf-8"))
         dist = next(v['client_distribution'] for v in comp['profiles'] if v['id'] == 'darwin-remote-ssh')
         assert dist['distribution_kind'] == 'upstream-release', 'stock upstream client required'
         bundle = root / 'mac-bundle'
-        install = next(step for step in json.loads((bundle / 'manifest.json').read_text())['steps'] if step['slug'] == 'client-install')
+        install = next(step for step in json.loads((bundle / 'manifest.json').read_text(encoding="utf-8"))['steps'] if step['slug'] == 'client-install')
         assert sha(bundle / install['file']) == install['sha256'], 'client-install block differs from bundle'
         prehome = root / 'mac-preflight-home'
         prehome.mkdir(exist_ok=True)
@@ -379,19 +381,19 @@ def main():
         host('restore', dry=True)
         win('Release', dry=True)
         save('preflight.json', {'status': 'passed', 'release': a.release, 'candidate': a.candidate, 'completed_utc': now(),
-             'mac_asset_url': dist['asset_url'], 'mac_asset_sha256': sha(asset), 'mac_binary_sha256': sha(binary), 'bundles': {label: json.loads((root / (label + '-bundle/manifest.json')).read_text()) for label in ('host', 'mac', 'windows')}})
+             'mac_asset_url': dist['asset_url'], 'mac_asset_sha256': sha(asset), 'mac_binary_sha256': sha(binary), 'bundles': {label: json.loads((root / (label + '-bundle/manifest.json')).read_text(encoding="utf-8")) for label in ('host', 'mac', 'windows')}})
     elif a.action == 'windows-live-only':
-        assert json.loads((root / 'preflight.json').read_text())['status'] == 'passed'
+        assert json.loads((root / 'preflight.json').read_text(encoding="utf-8"))['status'] == 'passed'
         documented = documented_models()
         assert a.prior_workspace, 'completion requires the restored route evidence root'
         prior = Path(a.prior_workspace)
-        assert all(json.loads((prior / (label + '-route.json')).read_text())['status'] == 'passed' for label in ('host', 'mac', 'windows'))
-        restored = json.loads((prior / 'restoration.json').read_text())
+        assert all(json.loads((prior / (label + '-route.json')).read_text(encoding="utf-8"))['status'] == 'passed' for label in ('host', 'mac', 'windows'))
+        restored = json.loads((prior / 'restoration.json').read_text(encoding="utf-8"))
         assert_host_restored(restored)
         spent = restored['window_seconds']
-        earlier = json.loads((prior / 'window-attempt.json').read_text()).get('prior_workspace')
+        earlier = json.loads((prior / 'window-attempt.json').read_text(encoding="utf-8")).get('prior_workspace')
         if earlier:
-            spent += json.loads((Path(earlier) / 'restoration.json').read_text())['window_seconds']
+            spent += json.loads((Path(earlier) / 'restoration.json').read_text(encoding="utf-8"))['window_seconds']
         watchdog_seconds = int(3600 - spent - 600)
         assert watchdog_seconds > 0, 'insufficient remaining envelope including restoration reserve'
         assert not (prior / 'windows-completion-attempt.json').exists(), 'Windows-only completion already attempted'
@@ -415,14 +417,14 @@ def main():
         collect(narrow=True)
         if error:
             raise RuntimeError(error + '; Windows-only completion restored before reporting failure')
-        client = json.loads((root / 'windows-structured/receipt.json').read_text())
+        client = json.loads((root / 'windows-structured/receipt.json').read_text(encoding="utf-8"))
         assert client['status'] == 'passed'
-        restored = json.loads((root / 'restoration.json').read_text())
+        restored = json.loads((root / 'restoration.json').read_text(encoding="utf-8"))
         assert_host_restored(restored)
         before, after = [json.loads((root / name).read_text(encoding='utf-8-sig')) for name in ('windows-baseline.json', 'windows-final.json')]
         assert_windows_host_unchanged(before, after)
         restored.update({'windows_markers_tasks_unchanged': True, 'windows_health': after['windows_health18088']})
-        save('completion-summary.json', {'status': 'passed', 'client': client, 'restoration': restored, 'setup': json.loads((root / 'setup.json').read_text()), 'runtime_observed': json.loads((root / 'runtime-observed.json').read_text())})
+        save('completion-summary.json', {'status': 'passed', 'client': client, 'restoration': restored, 'setup': json.loads((root / 'setup.json').read_text(encoding="utf-8")), 'runtime_observed': json.loads((root / 'runtime-observed.json').read_text(encoding="utf-8"))})
     elif a.action == 'summarize':
         summarize()
     elif a.action in ('restore', 'collect'):
@@ -432,9 +434,9 @@ def main():
         if all((root / (label + '-route.json')).exists() for label in ('host', 'mac', 'windows')):
             summarize()
         else:
-            save('partial-summary.json', {'status': 'restored-incomplete', 'restoration': json.loads((root / 'restoration.json').read_text()), 'first_failure': json.loads((root / 'first-failure.json').read_text()) if (root / 'first-failure.json').exists() else None})
+            save('partial-summary.json', {'status': 'restored-incomplete', 'restoration': json.loads((root / 'restoration.json').read_text(encoding="utf-8")), 'first_failure': json.loads((root / 'first-failure.json').read_text(encoding="utf-8")) if (root / 'first-failure.json').exists() else None})
     else:
-        assert json.loads((root / 'preflight.json').read_text())['status'] == 'passed', 'preflight required'
+        assert json.loads((root / 'preflight.json').read_text(encoding="utf-8"))['status'] == 'passed', 'preflight required'
         assert not (root / 'window-attempt.json').exists(), 'window already attempted; no implicit retry'
         # Derived before any attempt is recorded or a host changes.
         documented = documented_models()
@@ -442,8 +444,8 @@ def main():
         if a.attempt == 'corrected':
             assert a.prior_workspace, 'corrected attempt requires its restored initial evidence'
             prior = Path(a.prior_workspace)
-            assert json.loads((prior / 'window-attempt.json').read_text())['attempt'] == 'initial'
-            restoration = json.loads((prior / 'restoration.json').read_text())
+            assert json.loads((prior / 'window-attempt.json').read_text(encoding="utf-8"))['attempt'] == 'initial'
+            restoration = json.loads((prior / 'restoration.json').read_text(encoding="utf-8"))
             assert_host_restored(restoration)
             # The corrected attempt is authorized by records written beforehand; summarize() reads
             # the same file, so a window can never be spent on corrections that are added later.
@@ -471,7 +473,7 @@ def main():
             run(['bash', macclone / 'scripts/hosts/run-documented-route.sh', root / 'mac-bundle', macclone, root / 'mac-route.json'], 'mac-route', 1000, env)
             # The runner closed its documented forward. Prove the structured client fail-closed there.
             macprobe('outage', documented['mac'])
-            tunnel_log = (root / 'structured-tunnel.log').open('w')
+            tunnel_log = (root / 'structured-tunnel.log').open('w', encoding='utf-8')
             tunnel = subprocess.Popen(['ssh', '-N', '-o', 'BatchMode=yes', '-o', 'ExitOnForwardFailure=yes', '-o', 'ServerAliveInterval=10', '-L', '127.0.0.1:18089:127.0.0.1:18089', a.route_ssh_destination], stdin=subprocess.DEVNULL, stdout=tunnel_log, stderr=tunnel_log)
             for _ in range(30):
                 if tunnel.poll() is not None:
@@ -485,7 +487,7 @@ def main():
             macprobe('live', documented['mac'])
             # A prior passed outage plus live evidence completes this client's result without a second probe.
             path = root / 'mac-structured/receipt.json'
-            receipt = json.loads(path.read_text())
+            receipt = json.loads(path.read_text(encoding="utf-8"))
             assert receipt['live_acceptance']['fail_closed']['no_model_response']
             receipt['status'] = 'passed'; path.write_text(json.dumps(receipt, indent=2) + '\n')
             tunnel.terminate(); tunnel.wait(timeout=15); tunnel = None; tunnel_log.close()
@@ -511,7 +513,7 @@ def main():
             raise RuntimeError(error + '; restoration completed before reporting failure')
         # Normalize combined phase status, never infer acceptance from process exit alone.
         path = root / 'windows-structured/receipt.json'
-        receipt = json.loads(path.read_text())
+        receipt = json.loads(path.read_text(encoding="utf-8"))
         assert receipt['live_acceptance']['fail_closed']['no_model_response'] and receipt['live_acceptance']['continuation_exact_nonce']
         receipt['status'] = 'passed'; path.write_text(json.dumps(receipt, indent=2) + '\n')
         summarize()

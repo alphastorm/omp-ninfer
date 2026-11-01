@@ -216,7 +216,7 @@ def main() -> int:
     parser.add_argument("--receipt", type=Path)
     args = parser.parse_args()
 
-    api_key = args.api_key_file.read_text().strip()
+    api_key = args.api_key_file.read_text(encoding="utf-8").strip()
     orders = list(ORDERS) if args.order == "both" else [args.order]
     identity: dict[str, Any] | None = None
     runs: dict[str, Any] = {}

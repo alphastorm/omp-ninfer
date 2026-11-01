@@ -77,7 +77,7 @@ import json
 import sys
 from pathlib import Path
 
-print(json.loads(Path(sys.argv[1]).read_text())["server"].get("checkpoint_host_directory", ""))
+print(json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))["server"].get("checkpoint_host_directory", ""))
 PY
 )
 if [[ -n "$CHECKPOINT_HOST_DIRECTORY" ]]; then

@@ -56,11 +56,11 @@ write_receipt() {
   python3 - "$RECEIPT" "$MANIFEST" "$CLONE_COMMIT" "$STARTED" "$STATUS" "${RECORDS[@]}" <<'PY'
 import json, sys, datetime, pathlib, platform
 receipt, manifest_path, commit, started, status, *records = sys.argv[1:]
-manifest = json.load(open(manifest_path))
+manifest = json.load(open(manifest_path, encoding="utf-8"))
 release = pathlib.Path("/etc/os-release")
 host_os = ""
 if release.is_file():
-    for line in release.read_text().splitlines():
+    for line in release.read_text(encoding="utf-8").splitlines():
         if line.startswith("PRETTY_NAME="):
             host_os = line.split("=", 1)[1].strip().strip('"')
 elif platform.system() == "Darwin":
@@ -73,7 +73,7 @@ out = {
     "host_os": host_os, "clone_commit": commit,
     "steps": [json.loads(r) for r in records], "status": status,
 }
-with open(receipt, "w") as handle:
+with open(receipt, "w", encoding="utf-8") as handle:
     json.dump(out, handle, indent=2); handle.write("\n")
 PY
 }
@@ -132,10 +132,10 @@ on_error() {
 steps() {
   python3 -c '
 import json, sys
-for s in json.load(open(sys.argv[1]))["steps"]:
+for s in json.load(open(sys.argv[1], encoding="utf-8"))["steps"]:
     print("\t".join([str(s["position"]), s["slug"], s["heading"], str(s["index"]), s["sha256"], s["file"]]))' "$MANIFEST"
 }
-lane() { python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["lane"])' "$MANIFEST"; }
+lane() { python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["lane"])' "$MANIFEST"; }
 
 trap on_error ERR
 # The step list is read up front and iterated as an array: a block that starts a background

@@ -227,7 +227,8 @@ def verified_restart(lane: Lane, command: str) -> dict[str, Any]:
 
 def reuse_classes(log_cmd: str, since_unix_ms: int) -> list[dict[str, Any]]:
     """Best-effort join: request_done records at/after the probe start."""
-    result = subprocess.run(log_cmd, shell=True, capture_output=True, text=True, timeout=120)
+    result = subprocess.run(log_cmd, shell=True, capture_output=True, text=True,
+                            encoding="utf-8", errors="strict", timeout=120)
     records: list[dict[str, Any]] = []
     for line in result.stdout.splitlines():
         try:
@@ -272,7 +273,7 @@ def main() -> int:
     if args.model is None:
         from client_acceptance import documented_model_id
         args.model = documented_model_id("rtx5090-macos-client")
-    api_key = args.api_key_file.read_text().strip()
+    api_key = args.api_key_file.read_text(encoding="utf-8").strip()
     session = hashlib.sha256(
         f"fleet-probe-{args.lane}-{dt.datetime.now(dt.UTC).isoformat()}".encode()).hexdigest()
     lane = Lane(args.base_url, api_key, session, args.model)

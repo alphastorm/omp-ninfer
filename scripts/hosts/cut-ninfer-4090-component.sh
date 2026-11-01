@@ -88,7 +88,7 @@ for name, expected in entries.items():
         if hashlib.file_digest(stream, "sha256").hexdigest() != expected:
             raise SystemExit(f"checksum mismatch: {name}")
 
-receipt = json.loads((root / "package-build-receipt.json").read_text())
+receipt = json.loads((root / "package-build-receipt.json").read_text(encoding="utf-8"))
 for key in ("release_id", "release_version", "deployment_profile", "build_profile"):
     if receipt.get(key) != spec.get(key):
         raise SystemExit(f"package receipt {key} disagrees with the lane specification")
@@ -107,7 +107,7 @@ if (dependency.get("name") != dependency_sbom
         or dependency.get("sha256") != entries[dependency_sbom]
         or dependency.get("format") != "CycloneDX-1.5"):
     raise SystemExit("package receipt does not bind the dependency CycloneDX SBOM")
-inventory = json.loads((root / dependency_sbom).read_text())
+inventory = json.loads((root / dependency_sbom).read_text(encoding="utf-8"))
 if inventory.get("bomFormat") != "CycloneDX" or inventory.get("specVersion") != "1.5":
     raise SystemExit("dependency SBOM must be CycloneDX 1.5, not the package SPDX")
 component = inventory.get("metadata", {}).get("component", {})
@@ -181,7 +181,7 @@ for name, key in support_keys.items():
     if receipt["support_assets"].get(key) != entries[name]:
         raise SystemExit(f"package receipt does not name {name}")
 inner = {}
-for line in (root / inner_sums).read_text().splitlines():
+for line in (root / inner_sums).read_text(encoding="utf-8").splitlines():
     digest, name = line.split("  ", 1)
     inner[name] = digest
 if inner != {package: entries[package], source: entries[source], sbom: entries[sbom]}:

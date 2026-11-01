@@ -80,7 +80,7 @@ from pathlib import Path
 sys.path.insert(0, sys.argv[1])
 from verify_release import native_profile
 root, release, lane = Path(sys.argv[2]), sys.argv[3], sys.argv[4]
-manifest = json.loads((root / 'releases' / release / 'manifest.json').read_text())
+manifest = json.loads((root / 'releases' / release / 'manifest.json').read_text(encoding='utf-8'))
 variant = next(row for row in manifest['components']['ninfer_variants'] if row['id'] == lane + '-windows-native')
 errors = []
 configuration = native_profile(root, release, variant, errors)

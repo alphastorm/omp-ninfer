@@ -125,12 +125,13 @@ def main():
     def run(argv, timeout=60, env=None):
         # Children never read this script's stdin: run over ssh, it is the operator's terminal,
         # which never ends, and a client that inherits it waits for it before it starts.
-        r = subprocess.run([str(s) for s in argv], stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=timeout, env=env)
+        r = subprocess.run([str(s) for s in argv], stdin=subprocess.DEVNULL, capture_output=True,
+                           text=True, encoding="utf-8", errors="strict", timeout=timeout, env=env)
         if r.returncode:
             raise RuntimeError('command failed: ' + str(argv[0]) + ' (exit ' + str(r.returncode) + '): ' + r.stderr[-1200:])
         return r.stdout.strip()
     def logged(name, argv, timeout, env=None):
-        with (root / name).open('w') as log:
+        with (root / name).open('w', encoding='utf-8') as log:
             r = subprocess.run([str(s) for s in argv], stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT, timeout=timeout, env=env)
         assert r.returncode == 0, name + ' failed: exit ' + str(r.returncode)
     def inspect(name):
@@ -192,7 +193,7 @@ def main():
     def restore():
         with restore_lock():
             if (root / 'restoration.json').exists():
-                previous = json.loads((root / 'restoration.json').read_text())
+                previous = json.loads((root / 'restoration.json').read_text(encoding="utf-8"))
                 assert not previous.get('retained_window_created_parents'), 'window-created parents retained; restoration proof failed'
                 return
             if not (root / 'baseline.json').exists():
@@ -200,7 +201,7 @@ def main():
                 ps('Release')
                 save('restoration.json', {'completed_utc': now(), 'production_untouched': True, 'own_hold_released': True})
                 return
-            b = json.loads((root / 'baseline.json').read_text())
+            b = json.loads((root / 'baseline.json').read_text(encoding="utf-8"))
             result = {'started_utc': now()}
             subprocess.run(['docker', 'rm', '-f', 'omp-ninfer-beta'], capture_output=True, timeout=120)
             d = inspect(a.production)
@@ -276,7 +277,7 @@ def main():
         bundle = root / 'host-bundle'
         if not bundle.exists():
             run([sys.executable, clone / 'scripts/documented_route.py', 'bundle', '--lane', 'rtx5090-container-host', '--output', bundle])
-        comp = json.loads((clone / 'compatibility.json').read_text())
+        comp = json.loads((clone / 'compatibility.json').read_text(encoding="utf-8"))
         profile = next(v for v in comp['profiles'] if v['id'] == 'linux-docker-local')
         runtime, dist = profile['runtime'], profile['client_distribution']
         dockerconfig = root / 'anonymous-docker'
@@ -303,7 +304,7 @@ def main():
             assert 0 < a.restore_after_seconds <= 3000
             b = baseline(); b['start_epoch'] = time.time(); b['restore_deadline_epoch'] = time.time() + a.restore_after_seconds
             save('baseline.json', b)
-            with (root / 'watchdog.log').open('w') as log:
+            with (root / 'watchdog.log').open('w', encoding='utf-8') as log:
                 command = [sys.executable, __file__, *sys.argv[1:]]
                 command[command.index('begin')] = 'watchdog'
                 process = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=log, stderr=log, start_new_session=True)
@@ -321,7 +322,7 @@ def main():
                 restore()
                 raise
     elif a.action == 'watchdog':
-        b = json.loads((root / 'baseline.json').read_text())
+        b = json.loads((root / 'baseline.json').read_text(encoding="utf-8"))
         while time.time() < b['restore_deadline_epoch']:
             if (root / 'restoration.json').exists():
                 return
@@ -345,7 +346,7 @@ def main():
         d = inspect('omp-ninfer-beta')
         image = inspect(d['Image'])
         binary = run(['docker', 'exec', 'omp-ninfer-beta', 'sha256sum', '/usr/local/bin/ninfer-serve']).split()[0]
-        request = urllib.request.Request('http://127.0.0.1:18089/v1/ninfer/status', headers={'Authorization': 'Bearer ' + key.read_text().strip()})
+        request = urllib.request.Request('http://127.0.0.1:18089/v1/ninfer/status', headers={'Authorization': 'Bearer ' + key.read_text(encoding="utf-8").strip()})
         with urllib.request.urlopen(request, timeout=15) as r:
             status = json.load(r)
         save('runtime-observed.json', {'timestamp': now(), 'configured_image': d['Config']['Image'], 'repo_digests': image['RepoDigests'], 'image_id': d['Image'], 'binary_sha256': binary, 'served': status})

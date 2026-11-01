@@ -74,7 +74,7 @@ git -C "$ROOT" push --dry-run -q origin "$commit:refs/tags/$release" \
 work=$(mktemp -d)
 trap 'git -C "$ROOT" worktree remove --force "$work/tree" >/dev/null 2>&1 || true; rm -rf "$work"' EXIT
 git -C "$ROOT" worktree add -q --detach "$work/tree" "$commit"
-[[ $(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["product_release"])' \
+[[ $(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["product_release"])' \
       "$work/tree/compatibility.json") == "$release" ]] \
   || { echo "compatibility.json at $commit is not $release" >&2; exit 1; }
 (cd "$work/tree" && python3 scripts/verify_release.py --release "$release" --require-ready --check-pins)

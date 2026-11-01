@@ -58,7 +58,8 @@ class Omp:
         (args.home / "work").mkdir(parents=True, exist_ok=True)
         self.stderr = open(args.home / f"omp-{label}.stderr", "w", encoding="utf-8")
         self.proc = subprocess.Popen(command, cwd=args.home / "work", env=env, stdin=subprocess.PIPE,
-                                     stdout=subprocess.PIPE, stderr=self.stderr, text=True, bufsize=1)
+                                     stdout=subprocess.PIPE, stderr=self.stderr, text=True,
+                                     encoding="utf-8", errors="strict", bufsize=1)
         assert self.proc.stdin is not None and self.proc.stdout is not None
         self.stdin, self.stdout = self.proc.stdin, self.proc.stdout
         self.events = queue.Queue()
@@ -134,7 +135,7 @@ class Omp:
 def restart(args):
     started = time.monotonic()
     result = subprocess.run(["bash", "-c", args.restart_cmd], capture_output=True, text=True,
-                            timeout=args.restart_timeout)
+                            encoding="utf-8", errors="strict", timeout=args.restart_timeout)
     return {"exit_code": result.returncode, "seconds": round(time.monotonic() - started, 1),
             "output_tail": (result.stdout + result.stderr)[-600:]}
 
@@ -186,6 +187,7 @@ def main(argv=None):
     if not (args.home / ".omp/agent/models.yml").is_file():
         parser.error(f"{args.home}/.omp/agent/models.yml is missing")
     version = subprocess.run([str(args.omp), "--version"], capture_output=True, text=True,
+                             encoding="utf-8", errors="strict",
                              env=dict(os.environ, HOME=str(args.home)), timeout=60).stdout.strip()
     args.omp_version = version
 

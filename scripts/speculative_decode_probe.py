@@ -100,7 +100,8 @@ def chat(base_url: str, api_key: str, model: str, messages: list[dict[str, str]]
 
 
 def log_records(log_cmd: str) -> list[dict[str, Any]]:
-    result = subprocess.run(log_cmd, shell=True, capture_output=True, text=True, timeout=300)
+    result = subprocess.run(log_cmd, shell=True, capture_output=True, text=True,
+                            encoding="utf-8", errors="strict", timeout=300)
     records = []
     for line in result.stdout.splitlines():
         try:

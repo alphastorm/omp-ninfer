@@ -102,7 +102,7 @@ def launch(argv, cwd, timeout, environment):
     # before its first request, and a probe run over ssh from a terminal that never closes has a
     # stdin that never ends: v0.9.0's second RTX 5090 window hung there.
     return subprocess.run(argv, cwd=cwd, stdin=subprocess.DEVNULL, capture_output=True, text=True, encoding="utf-8",
-                          errors="replace", timeout=timeout, env=environment)
+                          errors="strict", timeout=timeout, env=environment)
 
 
 def expected_client_version(clone, release, client_component=None):

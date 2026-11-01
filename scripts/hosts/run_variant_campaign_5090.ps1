@@ -366,7 +366,7 @@ try {
         (Join-Path $env:USERPROFILE 'variant-5090-combine.stderr.log')
     $decisionJson = Invoke-Wsl @(
         'python3', '-c',
-        "import json; print(json.dumps(json.load(open('$laneReceipt'))['decision']))"
+        "import json; print(json.dumps(json.load(open('$laneReceipt', encoding='utf-8'))['decision']))"
     )
     $decision = (($decisionJson -join [Environment]::NewLine) | ConvertFrom-Json)
     [ordered]@{

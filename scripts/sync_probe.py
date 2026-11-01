@@ -53,7 +53,8 @@ class ProbeError(RuntimeError):
 def run_command(template: str, fields: dict[str, str], timeout: float = 7200.0) -> dict[str, Any]:
     command = template.format(**fields)
     started = now()
-    completed = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=timeout)
+    completed = subprocess.run(command, shell=True, capture_output=True, text=True,
+                               encoding="utf-8", errors="strict", timeout=timeout)
     return {"command_sha256": hashlib.sha256(template.encode("utf-8")).hexdigest()[:16],
             "returncode": completed.returncode, "wall_s": round(now() - started, 3),
             "stdout_tail": completed.stdout.strip()[-400:], "stderr_tail": completed.stderr.strip()[-400:]}
@@ -100,7 +101,7 @@ def main() -> int:
     parser.add_argument("--receipt", type=Path)
     args = parser.parse_args()
 
-    api_key = args.api_key_file.read_text().strip()
+    api_key = args.api_key_file.read_text(encoding="utf-8").strip()
     session = hashlib.sha256(
         f"sync-probe-{args.lane}-{dt.datetime.now(dt.UTC).isoformat()}".encode()).hexdigest()
     lane = Lane(args.base_url, api_key, session, args.model)

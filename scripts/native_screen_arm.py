@@ -130,7 +130,7 @@ def measured_power(release: dict[str, Any], spec: dict[str, Any], expected: floa
     result = subprocess.run(["nvidia-smi", "--id=" + release["gpu_uuid"],
                              "--query-gpu=name,power.limit", "--format=csv,noheader,nounits"],
                             stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-                            text=True, check=True, timeout=30)
+                            text=True, encoding="utf-8", errors="strict", check=True, timeout=30)
     name, power = [part.strip() for part in result.stdout.strip().split(",")]
     if name != release["gpu_name"] or float(power) != expected:
         raise ScreenError("measured GPU name/power differs from the qualified arm")

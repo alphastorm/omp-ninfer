@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Decode stock OMP RPC output and every Python tooling subprocess text stream explicitly as
+  strict UTF-8, including native Windows acceptance, rather than the host's locale code page.
+  Read acceptance evidence and helper text files as UTF-8 as well. AST invariants guard the
+  subprocess and file-read classes; real-child regression tests exercise UTF-8 smart quotes
+  under a `cp1252` locale and reject malformed UTF-8 without replacing protocol data.
 - Preserve native acceptance configuration binding and request-log commands on Windows
   PowerShell 5.1 by keeping Python `-c` payloads free of double quotes and encoding nested
   PowerShell log commands before passing them through Python's native argument boundary.

@@ -65,6 +65,8 @@ def run_command(command: Sequence[str], *, cwd: Path | None = None) -> CommandRe
         cwd=cwd,
         check=False,
         text=True,
+        encoding="utf-8",
+        errors="strict",
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )

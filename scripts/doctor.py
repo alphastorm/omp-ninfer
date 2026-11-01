@@ -42,7 +42,7 @@ def run(argv):
     encoding = "utf-16le" if b"\x00" in result.stdout else "utf-8-sig"
     if result.returncode:
         raise RuntimeError("probe command failed")
-    return result.stdout.decode(encoding, errors="replace").strip()
+    return result.stdout.decode(encoding, errors="strict").strip()
 
 
 def powershell(source):
@@ -125,7 +125,7 @@ def listener_addresses(port):
                 if len(parts := line.split()) >= 4 and parts[3].rsplit(":", 1)[-1] == str(port)]
     # macOS is useful for checking the client-side loopback/tunnel, not runtime qualification.
     result = subprocess.run(["lsof", "-nP", f"-iTCP:{port}", "-sTCP:LISTEN", "-Fn"],
-                            capture_output=True, text=True, timeout=15)
+                            capture_output=True, text=True, encoding="utf-8", errors="strict", timeout=15)
     if result.returncode not in (0, 1):
         raise RuntimeError("listener inventory failed")
     return [line[1:].rsplit(":", 1)[0].strip("[]") for line in result.stdout.splitlines() if line.startswith("n")]

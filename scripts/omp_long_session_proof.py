@@ -229,6 +229,7 @@ def main(argv=None):
     if not (args.home / ".omp/agent/models.yml").is_file():
         parser.error(f"{args.home}/.omp/agent/models.yml is missing")
     version = subprocess.run([str(args.omp), "--version"], capture_output=True, text=True,
+                             encoding="utf-8", errors="strict",
                              env=dict(os.environ, HOME=str(args.home), USERPROFILE=str(args.home)), timeout=60).stdout.strip()
     args.omp_version = version
 
