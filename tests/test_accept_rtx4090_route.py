@@ -478,6 +478,44 @@ class DocumentedModelTests(unittest.TestCase):
     model that candidate's native server serves. It keeps no lane table of its own (omp-ninfer#98):
     the scripts run from the operator's checkout against a frozen candidate."""
 
+    def assert_request_log_command(self, command: str, request_log: Path) -> None:
+        match = re.fullmatch(r"Get-Content -LiteralPath '((?:[^']|'')*)' -Encoding UTF8", command)
+        self.assertIsNotNone(match, "Keep the exact log command, quoting and UTF8 encoding")
+        actual = Path(match.group(1).replace("''", "'"))
+        self.assertTrue(actual.is_absolute(), "The log command must use an absolute path")
+        # resolve() expands Windows 8.3 aliases (and macOS /tmp) before comparing paths.
+        self.assertEqual(actual.resolve(strict=True), request_log.resolve(strict=True))
+
+    def test_request_log_command_normalizes_absolute_paths_without_weakening_command(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            request_log = root / "operator's checkout with spaces" / "requests.jsonl"
+            request_log.parent.mkdir()
+            request_log.write_text("")
+            (root / "alias").mkdir()
+            alias = root / "alias" / ".." / request_log.parent.name / request_log.name
+            for path in (request_log, request_log.resolve(), alias):
+                escaped = str(path).replace("'", "''")
+                self.assert_request_log_command(
+                    f"Get-Content -LiteralPath '{escaped}' -Encoding UTF8", request_log
+                )
+            wrong_log = request_log.with_name("other.jsonl")
+            wrong_log.write_text("")
+            escaped = str(request_log).replace("'", "''")
+            valid = f"Get-Content -LiteralPath '{escaped}' -Encoding UTF8"
+            invalid = (
+                valid.replace("Get-Content", "Get-Item"),
+                valid.replace("-LiteralPath", "-Path"),
+                valid.replace("UTF8", "ASCII"),
+                valid + " -Raw",
+                valid + "; Write-Output 'extra command'",
+                valid.replace(escaped, str(wrong_log).replace("'", "''")),
+                valid.replace(escaped, request_log.name),
+            )
+            for command in invalid:
+                with self.subTest(command=command), self.assertRaises(AssertionError):
+                    self.assert_request_log_command(command, request_log)
+
     LIVE = r'''
 param($Source,$Workspace,$Bundle,$Clone,$Lane)
 $ErrorActionPreference='Stop'
@@ -603,8 +641,7 @@ function py {
                 self.assertNotIn('"', log_command, "Windows PowerShell 5.1 strips native argv double quotes")
                 self.assertTrue(log_command.startswith("powershell.exe -NoProfile -NonInteractive -EncodedCommand "))
                 log_code = base64.b64decode(log_command.rsplit(" ", 1)[1]).decode("utf-16-le")
-                request_log = str(workspace / "installed/requests.jsonl").replace("'", "''")
-                self.assertEqual(log_code, f"Get-Content -LiteralPath '{request_log}' -Encoding UTF8")
+                self.assert_request_log_command(log_code, workspace / "installed/requests.jsonl")
                 if lane == "rtx3090":
                     self.assertIn("accept-concurrency", calls[1])
                     self.assertEqual(calls[2][calls[2].index("--max-in-flight") + 1], "2")
