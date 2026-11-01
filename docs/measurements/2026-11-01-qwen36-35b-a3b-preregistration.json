@@ -1,0 +1,192 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-108",
+  "title": "Preregister Qwen3.6-35B-A3B as an auxiliary fast-tier candidate: resident RTX 5090 DFlash K7 and RTX 4090 host-expert MTP3",
+  "generated_utc": "2026-11-01",
+  "status": "preregistered",
+  "question": "Can the official groupwise-int Qwen3.6-35B-A3B artifact sustain a 131,072-token single-request profile, clear the fixed lane decode floors, and retain the incumbent's powered role-corpus quality floor?",
+  "answer": "Not measured. This record authorizes neither hardware work nor adoption; it freezes the experiment before any candidate data. No model payload was downloaded and no GPU was contacted for this preregistration.",
+  "decision": {
+    "action": "adopt-candidate: evaluate, do not deploy",
+    "verdict": "open",
+    "tier": "Auxiliary subagent/triage use only; never the default answer model, even if both arms pass.",
+    "assurance": "Bounded experiment; direct lead verification. Documentation only now. Later effects require separately admitted exclusive windows, fixed deadlines, isolated scratch state, and predecessor restoration.",
+    "non_goals": [
+      "No default model, provider, route, compatibility manifest, release profile, or publication change.",
+      "No sm_86/RTX 3090 port, build, or measurement.",
+      "No NVFP4 weights or KV, FP8 KV, quantization search, Ornith/abliterated finetune, or EAGLE integration.",
+      "No concurrency sweep, host-expert 5090 arm, native DFlash 4090 arm, or claim of durable-session/managed-release qualification."
+    ],
+    "immutable_rule": "Do not tune thresholds, exclude difficult cases, swap binaries, change precision, or expand windows after seeing outputs. A changed source/configuration/corpus needs a dated preregistration amendment before new candidate data; retain all failed and incomplete evidence."
+  },
+  "artifact": {
+    "repository": "neroued/Qwen3.6-35B-A3B-NInfer",
+    "revision": "0e575082eeb52f50d0932d46fac40c68b97e49b6",
+    "filename": "qwen3_6_35b_a3b.ninfer",
+    "bytes": 22790484480,
+    "gib_rounded": 21.23,
+    "sha256": "3e33297645dc33557751be1a3c407a74ed7c00f34909b5d4e8cfdce91b3dbe84",
+    "container_version": 3,
+    "architecture": "Qwen3_5MoeForCausalLM",
+    "components": ["text", "vision", "mtp", "dflash"],
+    "precision": "Groupwise integer: routed gate/up Q4, down Q5/Q6; Q8 shared experts and mixer projections. Optional Vision and speculative components load only when selected; file size is not device-resident weight size.",
+    "license": "Apache-2.0 for the converted artifact, base model, and DFlash companion. Retain LICENSE and attribution when redistributing; runtime/dependency notices remain separately applicable.",
+    "base": "Qwen/Qwen3.6-35B-A3B@995ad96eacd98c81ed38be0c5b274b04031597b0",
+    "dflash": "z-lab/Qwen3.6-35B-A3B-DFlash@f181eece646affea2c38b2765f1aaa01a9734ccd",
+    "minimum_upstream_revision": "98dada0e03cb073fd07f905400b5904bc6e82759",
+    "download_url": "https://huggingface.co/neroued/Qwen3.6-35B-A3B-NInfer/resolve/0e575082eeb52f50d0932d46fac40c68b97e49b6/qwen3_6_35b_a3b.ninfer",
+    "future_download_command": "hf download neroued/Qwen3.6-35B-A3B-NInfer qwen3_6_35b_a3b.ninfer --revision 0e575082eeb52f50d0932d46fac40c68b97e49b6 --local-dir models/exp108",
+    "staging": "Download directly into each approved runtime host's scratch model directory, outside installed model/state roots; verify exact bytes and SHA-256 before a window. One complete 22,790,484,480-byte copy per host (45,580,968,960 bytes total); reserve at least 50 GiB free disk per host for payload, temporary download/cache duplication and evidence, plus separate build space. Never relay the payload through the operator workstation."
+  },
+  "binary_support": {
+    "upstream": {
+      "repository": "Neroued/ninfer",
+      "revision": "1882c6adbc98043fcf89f3589aa5addb3742777a",
+      "availability": "Source build, not a downloadable upstream release. The upstream releases API returned an empty list, and the official model card explicitly says there is no packaged binary/install target.",
+      "support": "Official Linux sm_120a path for this v3 artifact, MTP and DFlash. Source-backed support is not an observed load on our hosts. The card's 487f8977 performance numbers are a historical campaign, not a binary pin for this experiment.",
+      "build": "Linux x86-64, CUDA 13.4 development toolkit, C++20, CMake >=3.28, Ninja, pkg-config, libjpeg, FFmpeg development libraries, hwloc >=2.5, liburing >=2.5, libcurl >=7.85; cmake --preset rtx5090-release; cmake --build build/rtx5090-release --parallel. Not selected as an alternate mid-run."
+    },
+    "our_fork": {
+      "repository": "alphastorm/ninfer",
+      "revision": "e295313563e4cdef68e12b95843c9d1b88f64063",
+      "selected_for": "RTX 5090 resident arm",
+      "support": "The MoE architecture, v3 loader, MTP, DFlash-v1, CPU expert placement and calibrated 35B expert priorities are already in this source. git merge-base --is-ancestor confirmed the artifact's minimum upstream revision is an ancestor. This corrects the watch note's claim that the priority/offload code is absent. No claim that this exact model has been run or qualified by our release is made.",
+      "evidence": [
+        "src/models/registry.cpp:26-27 resolves Qwen3_5MoeForCausalLM/qwen3_5_moe_text.",
+        "src/runtime/engine/model_construction.cpp:140-144 constructs qwen3_5::Startup for the MoE architecture.",
+        "src/models/qwen3_5/config.cpp:211-283,313-327 parses DFlashDraftModel separately from DFlash2 and selects Qwen3_5MoeMTP.",
+        "src/models/qwen3_5/load.cpp:72-124 binds text, MTP, the selected draft and proposal weights; describe_placement places routed expert banks on CPU or GPU.",
+        "src/models/qwen3_5/startup.cpp:9-82 plans resident/host experts and defaults offloaded prefill to 4096 unless explicitly overridden.",
+        "src/models/qwen3_5/program/planning/moe_priority.cpp:695-705 contains the calibrated 40-layer, 256-expert, top-8 35B table.",
+        "src/serve/serve_options.cpp:190-245,458-485 exposes --spec dflash and --draft-tokens, with --lm-head-draft for the optimized proposal head; its parser does NOT expose --expert-residency."
+      ],
+      "limitation": "Automatic CPU placement exists, but --expert-residency host is not our fork's CLI. Do not pass that flag to e2953135 or treat automatic fallback as a resident result. The 5090 startup must report resident experts; any offload invalidates that configuration.",
+      "build": "Clean Linux x86-64 Release at the exact revision, CMAKE_CUDA_ARCHITECTURES=120a, existing CUDA 13.1.115/GCC 13.3 lane toolchain and dependencies. Configure: cmake -S . -B build-exp108 -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CUDA_ARCHITECTURES=120a -DBUILD_TESTING=OFF -DNINFER_BUILD_BENCHMARKS=OFF; build: cmake --build build-exp108 --target ninfer-serve --parallel. Preserve the build's runtime libraries and record compiler, source cleanliness and executable/library hashes before admission. No build is performed by this PR."
+    },
+    "host_expert_fork": {
+      "repository": "iamwavecut/ninfer-all",
+      "revision": "9651586f75db6a949dec0c2045d2a779efd100a0",
+      "selected_for": "RTX 4090 native Windows host-expert arm; experimental community runtime only",
+      "support": "README and Windows archive guide list the official Qwen3.6-35B-A3B artifact; src/serve/serve_options.cpp:1124-1148 parses --expert-residency host and --expert-cache-mib auto. docs/performance.md reports RTX 4090 131,072-token host-expert MTP3 on Linux, not qualification of our Windows host.",
+      "build": "Clean native Windows x64 Release at the exact revision, MSVC 2022 v143/14.44 and CUDA 12.8, CMake >=3.28, Ninja and vcpkg FFmpeg/curl dependencies. Use the pinned docs/build-windows.md recipe: scripts/build.ps1 -Arch 89 -Target ninfer-serve. Preserve dependent DLLs; record exact toolchain, binary/DLL hashes and source identity before admission. An unpinned latest installer or release is not an alternative.",
+      "limits": "sm_89 source/build support is documented; this exact Windows artifact/host combination remains unmeasured. Build or startup failure blocks this arm, not permission to port sm_86 or substitute a Linux/WSL arm. Windows WDDM pinned-memory accounting may differ from the published Linux result. Runtime is Apache-2.0; CUDA and dependency notices are separate."
+    }
+  },
+  "baseline": {
+    "product_commit": "af355e1506be17f6f4a5fde0b5a646041ef2f31e",
+    "release": "v0.16.0",
+    "model_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "historical_decode_floors_tok_s": {"rtx5090": 182.49, "rtx4090": 151.54},
+    "floor_provenance": "These requested floors are the v0.15.0 qualification receipts (4090 MTP3), NOT current v0.16.0 throughput or role-corpus aggregates. v0.16.0 reports 181.78 tok/s on 5090 and 254.27 tok/s on 4090, whose shipping backend is now DFlash2 K7. Keep the requested floors fixed but also report matched current-incumbent comparisons; passing 151.54 alone is not a claim of beating the published 4090.",
+    "current_controls": {
+      "rtx5090": "Published v0.7.0-qwen38-5090-beta.4, source 26fa28d0, binary bab3fd77, BF16, DFlash2 K7, max-context 131072, chunk 1024, configured concurrency 2 but one request issued at a time.",
+      "rtx4090": "Published v0.8.0-qwen38-4090-beta.1, source 26fa28d0, binary c6f59e9e, INT8, DFlash2 K7, max-context/KV 131072, chunk 1024, concurrency 1."
+    },
+    "control_policy": "Use isolated copies of the exact published incumbent binaries/model and lane configurations, not an in-place production change. Preserve current incumbent quality as the paired reference. Record both configured concurrency and actual serial request count. Freeze binary/config/model/corpus hashes before the first request."
+  },
+  "method": {
+    "shared": {
+      "request_concurrency": 1,
+      "sampling": "Temperature 0, fixed seed 57004, reasoning low; same task text, output budgets and scoring on both models. Use each artifact's native template/tokenizer, record rendered-token counts and hashes, and do not mistake different tokenizers or outputs for arithmetic-only differences.",
+      "isolation": "Text only (no --vision), CUDA graphs on, one GPU, loopback-only scratch listener, no client routing, no installed lifecycle state or checkpoint store. No disk checkpoint directory for candidate. Disable cross-request prefix reuse for cold performance measurements. Retain two extra device-state slots and the lane's Host-context budget so fit is not bought by hiding those reservations.",
+      "backend_selection": "5090 uses DFlash v1, not DFlash2. 4090 uses exactly three MTP drafts, not adaptive drafting or supplemental n-gram proposals; pass --ngram-draft-tokens 0 to the community runtime. Log the resolved backend/proposal policy and reject silently changed settings.",
+      "logging": "Keep exact argv, build/model/config/corpus hashes, startup/load plan, actual KV tokens and bytes, loaded component weights, resident/offloaded experts, Host allocation, free/peak VRAM, CPU/RAM/PCIe topology, power, request telemetry, output hashes and all refusal/error records. Public receipts contain counts/hashes, never prompts, outputs, synthetic secrets or machine identifiers."
+    },
+    "arms": [
+      {
+        "id": "rtx5090-resident-dflash7",
+        "binary": "alphastorm/ninfer@e295313563e4cdef68e12b95843c9d1b88f64063",
+        "platform": "Linux x86-64 runtime on the existing RTX 5090 appliance; sm_120a, 32,607 MiB reported VRAM",
+        "flags": "--spec dflash --draft-tokens 7 --lm-head-draft --kv-dtype bf16 --max-concurrency 1 --max-context C --kv-capacity C --prefill-chunk 1024 --device-state-slots 2 --host-context-mib 20867.734375 --admission-headroom-mib 1024 --no-prefix-reuse --preserve-thinking",
+        "context_selection": "Start C=131072. If startup safely refuses resident capacity, try 114688, 98304, 81920, 65536 in that order until one passes; then bisect the interval to the preceding refusal in 128-token increments, at most 12 total starts and 20 minutes. Retain the greatest demonstrated resident C <=131072, never an untested estimate. If the cap is reached before maximality is established, report the achieved lower bound and unresolved interval. No C below 65536, offload, KV-precision change or headroom reduction. A CUDA/OOM crash stops the arm rather than entering the sizing search.",
+        "fit": "[INFERENCE] The old watch's 21.23 GiB + 11.1 GiB calculation used the whole artifact and another architecture's runtime, so it is not a fit proof. Current 5090 receipt is 30,398 MiB idle, 146,368 auto BF16 KV tokens at configured C2; simply swapping whole-file bytes would add about 2,244 MiB and exceed 32,607 MiB before the 1,024 MiB reserve. C1 and text-only may recover room, and the 35B's actual KV/state/selected weights differ. Startup calibration and exact 130K retrieval, not this arithmetic, decide whether 131072 fits. Host RAM must preserve the 28,672 MiB lane floor and the 20,867.734375 MiB shared Host budget; no host-expert fallback is admitted.",
+        "full_context_pass": "Actual KV capacity >=131072 and exact cold retrieval after 130048 rendered input tokens. A lower-context speed/quality result is labelled partial/inconclusive for this 131K arm; never present a skipped 130K probe as a pass."
+      },
+      {
+        "id": "rtx4090-host-mtp3",
+        "binary": "iamwavecut/ninfer-all@9651586f75db6a949dec0c2045d2a779efd100a0",
+        "platform": "Native Windows x64, one RTX 4090 selected explicitly on the shared native host; sm_89, 24 GB class; 128 GiB host RAM is the recorded inventory, to be rechecked at admission",
+        "flags": "--expert-residency host --expert-cache-mib auto --spec mtp --draft-tokens 3 --lm-head-draft --ngram-draft-tokens 0 --kv-dtype int8 --max-concurrency 1 --max-context 131072 --kv-capacity 131072 --prefill-chunk 1024 --use-original-prefix-caching --device-state-slots 2 --host-cache-mib 15748 --no-prefix-reuse --preserve-thinking",
+        "cache_translation": "This community fork uses --host-cache-mib (integer MiB), not our --host-context-mib. Pin 15748 MiB, rounding the product's 15747.734375 MiB upward by 0.265625 MiB. Select --use-original-prefix-caching explicitly for legacy --device-state-slots; the community default is a different hybrid cache. Record its resolved Host KV/state split; this is a documented experimental translation, not our qualified runtime. Keep the optimized proposal head explicit.",
+        "fit": "[INFERENCE] Plausible, not qualified: the community's Linux RTX 4090 host-expert 131K MTP3 run used 22,860 MiB device memory (21.23 GiB artifact on disk); short-prompt INT8 decode was 213-254 tok/s. That is a different CPU/NUMA/runtime environment and not our role corpus. Our current DFlash2 4090 profile reserves 640 MiB admission headroom and 15,747.734375 MiB shared Host context; its measured 1,008 MiB available and 473,497,600 converted-device / 1,350,860,800 mapped-host bytes belong to the 27B fit seam, not to 35B MTP. Preserve at least 640 MiB physical free VRAM after startup and throughout the run. Retain any stronger runtime reserve; do not enable --wddm-evictable-budget to manufacture fit.",
+        "host_budget": "Require >=64 GiB available physical Host RAM before startup, no paging pressure, and >=8 GiB available throughout: conservatively covers a full 21.23 GiB artifact's host weights, 15.38 GiB Host context and staging/OS margin. The existing 32 GiB minimum native-host contract alone is not enough to assume offload fit. Record CPU cores/affinity, PCIe link and expert CPU/DMA policy; no tuning sweep.",
+        "full_context_pass": "Actual KV capacity >=131072, confirmed host-expert placement with bounded cache, >=640 MiB physical VRAM reserve, and exact cold retrieval after 130048 rendered input tokens. Startup refusal ends this arm; no smaller-context substitute."
+      }
+    ],
+    "measurements": {
+      "performance_order": "For each lane run current incumbent A, candidate B, candidate B, incumbent A on fresh processes, same frozen corpus order, serial requests. Each B uses the one fixed context selected by the fit phase. Keep all cases and repetitions; do not select the faster B.",
+      "role_corpus": "The frozen 89-case qualification corpus (84 historical counted role cases; cases SHA-256 prefix 7be1bd85), using the existing run_qualification.py/score_qualification.py corpus tooling. Resolve the full corpus and harness hashes and verify the historical counted IDs before admission; no private corpus is added to this repository. The five historical JSON-schema transport controls are reported separately, not silently dropped as runtime failures. No new exclusions.",
+      "decode": "For each repetition and case record completion tokens, server decode seconds, server prefill seconds, wall time, reasoning/content hashes and finish status. Primary corpus rate is sum(completion tokens)/sum(server decode seconds) over all 84 counted cases, not mean of per-case rates. Report median per-case decode, matched candidate/incumbent ratios, each case and both cross-order comparisons separately. Changes in tokenization/output length remain visible via bytes/s and completion counts.",
+      "acceptance": "Record backend, drafted/accepted token totals and ratio, tokens per round, rounds, fallback steps, and attempted/accepted counts by draft position (K7 or K3). Aggregate from raw counts, not averaged request percentages. Acceptance is diagnostic, not an independently tuned pass threshold.",
+      "prefill": "Cold exact-input probes at 7680 and 130048 rendered tokens, temperature 0, zero reused input, three repetitions per available configuration, at least 1024 context tokens left after the long prompt. Record actual token count, prefill phase/wall seconds, tok/s, TTFT, peak VRAM and exact planted-key retrieval. Tokenize/calibrate the same deterministic filler separately for each model; record both fixtures' hashes. A smaller 5090 context reports 130048 as not run: capacity failure, not a substituted shorter prompt.",
+      "historical_fixture_check": "Also run the same archived qualification decode fixtures that produced the 182.49 and 151.54 numbers, preserving their generation lengths (5090 2048 output tokens; native 4090 4541 input/1024 output). Report these separately from role-corpus rates; a speed pass must clear the fixed floor on both statistics in each candidate repetition.",
+      "identity": "Report cross-model byte-identity counts without requiring equality between different models. Require candidate and incumbent to reproduce their own 80-prompt fresh-process determinism subsets exactly. The host-expert numerics risk is judged by the quality screen, not dismissed because the token sequence differs from a different model or older SiLU implementation."
+    },
+    "quality_screen": {
+      "rule_source": "scripts/quality_screen.py PREREGISTRATION (EXP-085) at product af355e1506be17f6f4a5fde0b5a646041ef2f31e, applied unchanged to a fresh current-incumbent and candidate arm per lane; this record supplies the new model/source/config identities, not the old EXP-085 production identities.",
+      "sample": "1120 unique prompts per arm: 84 counted cases x 8 task-whitespace variants, seven redaction controls x 72 variants, with 56 overlapping control variants; 672 gate pairs and 504 redaction pairs. First 80 prompts rerun on a fresh process/cache for each arm. Temperature 0, low reasoning, one request; seal raw evidence privately and verify every resumed identity. 50-prompt contiguous shards may resume only with unchanged seals/configuration.",
+      "statistics": "Paired by prompt ID; one-sided 95% percentile paired bootstrap resampling variants within each case, 20000 resamples, seed 20261001. Candidate minus incumbent differences, except leak ratio.",
+      "higher_is_better_lower_bound_strictly_above": {"required_fact_recall": -0.02, "evidence_precision": -0.02, "schema_valid_rate": -0.02, "tool_selection_accuracy": -0.02, "tool_argument_accuracy": -0.02, "redaction_control_pass_rate": -0.05},
+      "lower_is_better_upper_bound_strictly_below": {"unsupported_claim_rate": 0.03, "duplicate_rate": 0.02, "secret_leak_ratio": 1.10},
+      "validity": "Every counted prompt scored in both arms; error fraction <=0.01; >=50% of counted cases perturbed in each arm; every primary denominator nonempty; 80/80 determinism outputs byte-identical within each arm. Any invalidity gives no verdict, not a pass. Critical misses, forbidden claims, output length and per-class metrics remain reported secondary outcomes. No waiver or model-specific widening of the incumbent's margins."
+    }
+  },
+  "pass_rules": {
+    "rtx5090": "Both candidate performance repetitions exceed 182.49 tok/s on the 84-role weighted rate AND the historical 2048-token decode fixture; full 131072 resident KV/130048 retrieval gate passes; both prefill lengths complete exactly; powered quality screen valid and all nine bounds pass; no safety/identity/error stop.",
+    "rtx4090": "Both candidate performance repetitions exceed 151.54 tok/s on the 84-role weighted rate AND the historical native decode fixture; host-expert 131072 KV/130048 retrieval gate passes; both prefill lengths complete exactly; powered quality screen valid and all nine bounds pass; no safety/identity/error stop.",
+    "relevance": "Always publish matched current-v0.16.0 incumbent role-corpus and fixture ratios. A historical-floor pass with a current-incumbent slowdown is not a fast-tier adoption recommendation. Any later recommendation must separately justify that trade; this preregistration cannot change the default or qualify a product route.",
+    "failure": "A completed valid gate outside its fixed bound is rejected. Missing binary/corpus, unsupported flags, timeout, incomplete fit search, missing long-context result or invalid screen is inconclusive/blocked, never kept. Preserve partial data and precise stop reason.",
+    "prefill_and_acceptance": "Prefill throughput and acceptance are reported, with no fabricated throughput floor or vendor-number parity claim. Exact input length/retrieval and complete telemetry are mandatory."
+  },
+  "windows": {
+    "effects_now": "None: no hardware access, build, artifact download, server, lease or hostlock in this PR.",
+    "prestage": "Build/download/verify all candidate and incumbent bits, corpus and harness; freeze exact hashes and commands outside production downtime. Failed preflight means no window. GPU-dependent loading/smokes happen only inside the later admitted window.",
+    "per_lane_caps_minutes": {"fit_and_performance": 90, "incumbent_powered_screen_and_determinism": 180, "candidate_powered_screen_and_determinism": 180, "total_maximum": 450},
+    "total_campaign_cap_minutes": 900,
+    "restoration_reserve_minutes_per_window": 15,
+    "scheduling": "Three separately admitted windows per lane, never overlapping other GPU work. Each cap includes drain, load, evidence capture and restoration, not just inference. Stop new requests 15 minutes before the hard deadline; an unfinished screen remains inconclusive, with no automatic extension or extra window. Run screens only if the fit/performance gate merits them.",
+    "rtx5090_requirements": "Exclusive production-down lease and supervisor hold; drain then stop the real incumbent under the existing guarded window procedure, identify it by bound state, and retain its exact restoration plan. Scratch loopback endpoint only. The active-window marker must cover the whole interval; no operator-workstation bind on 127.0.0.1:18089, ROUTE_TUNNEL_PORT unset, and no local product test runner. Restore the recorded predecessor state, verify real incumbent health/identity and only then release the hold; never recreate production or edit fleet control.",
+    "rtx4090_requirements": "Exclusive shared-native-host hostlock (private lane report maps the host), same owner for GPU selection and cleanup; coordinate both installed native lanes so no other 4090/3090 server, qualification or build runs. Bind only the selected RTX 4090, preserve the 450 W serving cap and restore the previous power/console/lifecycle state. Never touch the other off-limits host or promote this community build into the installed lane.",
+    "stop_rules": [
+      "Before effects: missing authorization/lease/hostlock, active conflicting lane, insufficient disk/Host RAM, binary/model/corpus hash mismatch, unsupported required flag, unknown GPU or missing restore owner/dead-man => do not start.",
+      "During work: CUDA error, allocation/OOM crash, driver reset, paging pressure, host memory below 8 GiB available on the offload arm, wrong GPU, unintended expert placement, another GPU process, violated headroom, or production route exposure => stop requests, preserve evidence and restore immediately.",
+      "A normal resident-capacity refusal may use only the preregistered 5090 sizing search; never rerun the unchanged failed input under the same hypothesis. The 4090 131K refusal ends its arm.",
+      "Any missing/error performance request, nonexact planted-key retrieval, incomplete/mismatched telemetry or failed screen determinism blocks a pass. Do not silently discard failures, switch precision/backend, or substitute vendor benchmarks.",
+      "At deadline minus 15 minutes, stop admission and restore. If restoration cannot prove the predecessor state/identity, retain the hold/hostlock and escalate with the exact blocker; never release an uncertain host."
+    ]
+  },
+  "sources": [
+    {"id": "official-manifest", "url": "https://huggingface.co/neroued/Qwen3.6-35B-A3B-NInfer/raw/0e575082eeb52f50d0932d46fac40c68b97e49b6/artifact-manifest.json", "supports": "Exact artifact identity, bytes, SHA-256, architecture, v3, upstream minimum, base and companion revisions/licenses."},
+    {"id": "official-checksum", "url": "https://huggingface.co/neroued/Qwen3.6-35B-A3B-NInfer/raw/0e575082eeb52f50d0932d46fac40c68b97e49b6/SHA256SUMS", "supports": "Published payload digest, independently agrees with manifest and Hugging Face LFS metadata; payload not downloaded."},
+    {"id": "official-card", "url": "https://huggingface.co/neroued/Qwen3.6-35B-A3B-NInfer/blob/0e575082eeb52f50d0932d46fac40c68b97e49b6/README.md", "supports": "DFlash K7 flags, MTP range, selected-component residency, Linux/sm_120a source-build requirement and historical non-comparable performance."},
+    {"id": "upstream-releases", "url": "https://api.github.com/repos/Neroued/ninfer/releases", "supports": "Empty release list observed 2026-11-01; do not invent an upstream binary download."},
+    {"id": "upstream-build", "url": "https://github.com/Neroued/ninfer/blob/1882c6adbc98043fcf89f3589aa5addb3742777a/README.md#build", "supports": "Current official source build and v3 model support."},
+    {"id": "fork-registry", "url": "https://github.com/alphastorm/ninfer/blob/e295313563e4cdef68e12b95843c9d1b88f64063/src/models/registry.cpp#L26-L27", "supports": "Our fork implements the MoE architecture; not just a dense-model loader."},
+    {"id": "fork-model", "url": "https://github.com/alphastorm/ninfer/blob/e295313563e4cdef68e12b95843c9d1b88f64063/src/runtime/engine/model_construction.cpp#L140-L144", "supports": "Executable engine construction route."},
+    {"id": "fork-draft", "url": "https://github.com/alphastorm/ninfer/blob/e295313563e4cdef68e12b95843c9d1b88f64063/src/models/qwen3_5/config.cpp#L211-L327", "supports": "Distinct DFlash-v1 and MoE MTP parsing."},
+    {"id": "fork-loader", "url": "https://github.com/alphastorm/ninfer/blob/e295313563e4cdef68e12b95843c9d1b88f64063/src/models/qwen3_5/load.cpp#L72-L124", "supports": "Selective component binding and expert-bank placement."},
+    {"id": "fork-offload", "url": "https://github.com/alphastorm/ninfer/blob/e295313563e4cdef68e12b95843c9d1b88f64063/src/models/qwen3_5/startup.cpp#L9-L82", "supports": "Resident and host expert planning already exists."},
+    {"id": "fork-priorities", "url": "https://github.com/alphastorm/ninfer/blob/e295313563e4cdef68e12b95843c9d1b88f64063/src/models/qwen3_5/program/planning/moe_priority.cpp#L695-L705", "supports": "35B expert-priority calibration already exists; corrects the watch inference."},
+    {"id": "fork-cli", "url": "https://github.com/alphastorm/ninfer/blob/e295313563e4cdef68e12b95843c9d1b88f64063/src/serve/serve_options.cpp", "supports": "DFlash/MTP/proposal flags; no explicit --expert-residency option."},
+    {"id": "community-cli", "url": "https://github.com/iamwavecut/ninfer-all/blob/9651586f75db6a949dec0c2045d2a779efd100a0/src/serve/serve_options.cpp#L1124-L1217", "supports": "Explicit host expert/cache and fixed MTP/ngram options."},
+    {"id": "community-windows-build", "url": "https://github.com/iamwavecut/ninfer-all/blob/9651586f75db6a949dec0c2045d2a779efd100a0/docs/build-windows.md", "supports": "Native sm_89 build recipe, Windows support limits, WDDM memory caveat; compile support is not inference qualification."},
+    {"id": "community-windows-artifact", "url": "https://github.com/iamwavecut/ninfer-all/blob/9651586f75db6a949dec0c2045d2a779efd100a0/docs/release-archive-windows.md", "supports": "Official qwen36-35b-a3b Windows artifact/launcher support and runtime/dependency license requirements."},
+    {"id": "community-host-expert-result", "url": "https://github.com/iamwavecut/ninfer-all/blob/9651586f75db6a949dec0c2045d2a779efd100a0/docs/performance.md#host-experts-on-one-rtx-4090", "supports": "Linux 131K MTP3 offload performance/22860 MiB precedent and correctly-rounded SiLU warning; not our host's measurement."},
+    {"id": "historical-5090-floor", "path": "releases/v0.15.0/qualification/rtx5090.json", "supports": "182.49 tok/s requested fixed floor."},
+    {"id": "historical-4090-floor", "path": "releases/v0.15.0/qualification/rtx4090.json", "supports": "151.54126942332869 tok/s requested fixed floor; 22847 MiB peak is historical MTP, not current DFlash2."},
+    {"id": "current-5090", "path": "releases/v0.16.0/qualification/rtx5090.json", "supports": "Current source/identity, 181.78 tok/s, 30398 MiB idle and 146368 automatic BF16 KV tokens."},
+    {"id": "current-5090-profile", "path": "releases/v0.16.0/profiles/qwen38-rtx5090-manual-tunnel.json", "supports": "BF16/C2/chunk1024, Host-context budget and runtime memory floor; C1/text-only is an explicit experimental delta."},
+    {"id": "current-4090", "path": "releases/v0.16.0/qualification/rtx4090.json", "supports": "Current DFlash2 254.27 tok/s, not MTP3 151.54."},
+    {"id": "current-4090-profile", "path": "releases/v0.16.0/profiles/rtx4090/server-config.json", "supports": "Current INT8/C1/chunk1024, 640 MiB headroom and shared Host budget."},
+    {"id": "current-4090-fit", "path": "releases/v0.16.0/qualification/rtx4090-windows-native.fit.json", "supports": "Current 27B-only converted/mapped weight accounting and 1008 MiB measured headroom."},
+    {"id": "quality-rule", "path": "scripts/quality_screen.py", "supports": "Unchanged EXP-085 noninferiority margins, pairing, sample counts, bootstrap and validity rules."}
+  ],
+  "observations": [],
+  "limitations": [
+    "Source and published evidence only; neither selected candidate binary has been built or loaded by this task.",
+    "The model watch was written against older profiles and a source-free product checkout. Its claimed absent MoE calibration and MTP3-as-current-4090 baseline are superseded here by pinned engine source and v0.16.0 receipts.",
+    "Published vendor/community tok/s are different workloads, precision, operating systems and hardware settings, not expected performance or acceptance evidence for either arm.",
+    "A passing auxiliary screen does not erase the published agentic quality gap, prove tool-use product qualification, or authorize default routing."
+  ]
+}

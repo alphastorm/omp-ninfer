@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Preregister [EXP-108](docs/measurements/2026-11-01-qwen36-35b-a3b-preregistration.json):
+  Qwen3.6-35B-A3B auxiliary-only evaluation on resident RTX 5090 DFlash K7 and RTX 4090
+  host-expert MTP3, with pinned sources/artifact, fixed speed and quality gates, and bounded
+  future windows. No hardware runs, model downloads, default-model change, or release adoption.
+
 ### Changed
 
 - Mark v0.16.0 as the published release across the README, quickstart banner, facts, roadmap,
