@@ -1,0 +1,46 @@
+{
+  "scenarios": [
+    {
+      "name": "fanout",
+      "repeat": 1,
+      "requests": [
+        {"label": "fanout-base", "phase": "base", "submitted_monotonic_s": 27123.851885036, "first_output_monotonic_s": 27154.75869111},
+        {"label": "branch-0", "phase": "branches", "submitted_monotonic_s": 27154.943821517, "first_output_monotonic_s": 27156.056183815},
+        {"label": "branch-1", "phase": "branches", "submitted_monotonic_s": 27154.943974358, "first_output_monotonic_s": 27155.232479657},
+        {"label": "branch-2", "phase": "branches", "submitted_monotonic_s": 27154.943886621, "first_output_monotonic_s": 27155.178230989},
+        {"label": "branch-3", "phase": "branches", "submitted_monotonic_s": 27154.943743266, "first_output_monotonic_s": 27155.922027971}
+      ],
+      "phases": [
+        {
+          "name": "base",
+          "summary": {
+            "per_request": [
+              {
+                "label": "fanout-base"
+              }
+            ]
+          }
+        },
+        {
+          "name": "branches",
+          "summary": {
+            "per_request": [
+              {
+                "label": "branch-0"
+              },
+              {
+                "label": "branch-1"
+              },
+              {
+                "label": "branch-2"
+              },
+              {
+                "label": "branch-3"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
