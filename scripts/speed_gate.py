@@ -107,7 +107,6 @@ def receipts(captures: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
                                       "capture_sha256s": [], "requests": []})
         if arm["identity"] != safe_identity:
             raise SpeedGateError("one ABBA position has inconsistent shard binary/configuration identities")
-        arm["capture_sha256s"].append(digest(capture))
         for row in rows:
             tokens = row.get("completion_tokens")
             if type(tokens) is not int or tokens <= 0:
@@ -116,6 +115,7 @@ def receipts(captures: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
             positive_number(tokens / seconds, "decode rate")
             arm["requests"].append({"id": row["id"], "request_sha256": row["request_sha256"],
                                     "completion_tokens": tokens, "decode_seconds": seconds})
+        arm["capture_sha256s"].append(digest(capture))
     if set(arms) != set(range(4)):
         raise SpeedGateError("all four ABBA positions are required")
     result = [arms[index] for index in range(4)]
