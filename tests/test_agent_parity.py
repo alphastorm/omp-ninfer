@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from copy import deepcopy
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "agent_parity.py"
@@ -155,6 +156,159 @@ class AgentParityTests(unittest.TestCase):
         self.assertEqual(code, 0, verdict)
         self.assertFalse(verdict["jobs"]["driver-only"]["judged"])
         self.assertEqual(verdict["jobs"]["driver-only"]["note"], "no per-position rows; driver verdict applies")
+
+    def test_declared_receipts_require_nonempty_positions(self):
+        for positions in ("missing", None, False, 0, "", {}, []):
+            with self.subTest(positions=positions):
+                document = fixture("label-swap")
+                job = document["jobs"]["concurrency"]
+                if positions == "missing":
+                    del job["positions"]
+                else:
+                    job["positions"] = positions
+                self.contract_error(document)
+
+    def test_present_receipt_declarations_are_not_optional_by_truthiness(self):
+        malformed = ({}, [], False, None, 0, "", "control.json", 1,
+                     {"incumbent": "control.json"},
+                     {"candidate": "candidate.json"},
+                     {"old": "control.json", "new": "candidate.json"},
+                     {"incumbent": "control.json", "candidate": "candidate.json", "extra": "control.json"})
+        for receipts in malformed:
+            with self.subTest(receipts=receipts):
+                document = fixture("label-swap")
+                for row in document["jobs"]["concurrency"]["positions"]:
+                    for suffix in ("prompt_tokens", "cached_tokens", "server_ttft_seconds"):
+                        row["candidate_" + suffix] = row["incumbent_" + suffix]
+                document["jobs"]["concurrency"]["concurrent_receipts"] = receipts
+                self.contract_error(document)
+        for arm in ("incumbent", "candidate"):
+            for value in ("", None, False, 0, [], {}):
+                with self.subTest(arm=arm, path=value):
+                    document = fixture("label-swap")
+                    document["jobs"]["concurrency"]["concurrent_receipts"][arm] = value
+                    self.contract_error(document)
+
+    def test_omitted_receipts_keep_legitimate_label_only_comparisons(self):
+        code, verdict = self.judge(fixture("labeled-arrival"))
+        self.assertEqual(code, 0, verdict)
+        self.assertTrue(all(row["pairing"] == "label"
+                            for row in verdict["jobs"]["arrival"]["paired_positions"]))
+
+    def test_all_client_timestamps_are_finite_numbers_before_phase_classification(self):
+        originals = deepcopy(self.receipts)
+        for arm in ("control", "candidate"):
+            for index in (0, 1):  # Single-request and multi-request phases both need valid evidence.
+                for field in ("submitted_monotonic_s", "first_output_monotonic_s"):
+                    for value in (None, False, True, "9", "", [], {}, float("nan"), float("inf"), -float("inf")):
+                        with self.subTest(arm=arm, index=index, field=field, value=value):
+                            self.receipts = deepcopy(originals)
+                            self.receipts[arm]["scenarios"][0]["requests"][index][field] = value
+                            self.contract_error(fixture("label-swap"))
+                    with self.subTest(arm=arm, index=index, missing=field):
+                        self.receipts = deepcopy(originals)
+                        del self.receipts[arm]["scenarios"][0]["requests"][index][field]
+                        self.contract_error(fixture("label-swap"))
+
+    def test_string_and_nan_phases_cannot_downgrade_to_label_pairing(self):
+        originals = deepcopy(self.receipts)
+        for submitted, first in (("9", "10"), (float("nan"), 10)):
+            with self.subTest(submitted=submitted):
+                self.receipts = deepcopy(originals)
+                document = fixture("label-swap")
+                for row in document["jobs"]["concurrency"]["positions"]:
+                    for suffix in ("prompt_tokens", "cached_tokens", "server_ttft_seconds"):
+                        row["candidate_" + suffix] = row["incumbent_" + suffix]
+                for arm in ("control", "candidate"):
+                    for request in self.receipts[arm]["scenarios"][0]["requests"]:
+                        request.update(submitted_monotonic_s=submitted, first_output_monotonic_s=first)
+                self.contract_error(document)
+
+    def test_finite_sequential_receipts_keep_label_pairing(self):
+        document = fixture("label-swap")
+        for row in document["jobs"]["concurrency"]["positions"]:
+            for suffix in ("prompt_tokens", "cached_tokens", "server_ttft_seconds"):
+                row["candidate_" + suffix] = row["incumbent_" + suffix]
+        for arm in ("control", "candidate"):
+            for index, request in enumerate(self.receipts[arm]["scenarios"][0]["requests"]):
+                request.update(submitted_monotonic_s=2 * index, first_output_monotonic_s=2 * index + 1)
+                request["server_request_done"] = []
+        code, verdict = self.judge(document)
+        self.assertEqual(code, 0, verdict)
+        self.assertTrue(all(row["pairing"] == "label"
+                            for row in verdict["jobs"]["concurrency"]["paired_positions"]))
+
+    def test_every_declared_server_order_timestamp_is_finite_and_not_bool(self):
+        paths = (("generation", "admission", "admitted_monotonic_s"),
+                 ("generation", "admission", "admitted_unix_ms"),
+                 ("generation", "admission", "started_monotonic_s"),
+                 ("generation", "admission", "started_unix_ms"),
+                 ("admitted_monotonic_s",), ("admitted_unix_ms",),
+                 ("started_monotonic_s",), ("started_unix_ms",),
+                 ("start_timestamp_unix_ms",), ("request_start_unix_ms",))
+        originals = deepcopy(self.receipts)
+        for path in paths:
+            for value in (None, False, True, "9", [], {}, float("nan"), float("inf"), -float("inf")):
+                with self.subTest(path=path, value=value):
+                    self.receipts = deepcopy(originals)
+                    event = {}
+                    parent = event
+                    for key in path[:-1]:
+                        parent = parent.setdefault(key, {})
+                    parent[path[-1]] = value
+                    # Reject malformed optional evidence even on a sequential phase,
+                    # where no admission_pairs call would otherwise validate it.
+                    self.receipts["control"]["scenarios"][0]["requests"][0]["server_request_done"] = [event]
+                    self.contract_error(fixture("label-swap"))
+
+    def test_contract_two_receipt_containers_and_identifiers_are_explicitly_typed(self):
+        paths = ((), ("scenarios",), ("scenarios", 0),
+                 ("scenarios", 0, "name"), ("scenarios", 0, "repeat"),
+                 ("scenarios", 0, "requests"), ("scenarios", 0, "requests", 0),
+                 ("scenarios", 0, "requests", 0, "label"),
+                 ("scenarios", 0, "requests", 0, "phase"),
+                 ("scenarios", 0, "requests", 0, "server_request_done"),
+                 ("scenarios", 0, "phases"), ("scenarios", 0, "phases", 0),
+                 ("scenarios", 0, "phases", 0, "name"),
+                 ("scenarios", 0, "phases", 0, "summary"),
+                 ("scenarios", 0, "phases", 0, "summary", "per_request"),
+                 ("scenarios", 0, "phases", 0, "summary", "per_request", 0),
+                 ("scenarios", 0, "phases", 0, "summary", "per_request", 0, "label"))
+        originals = deepcopy(self.receipts)
+        for path in paths:
+            for value in (None, False, "", {}):
+                with self.subTest(path=path, value=value):
+                    self.receipts = deepcopy(originals)
+                    if not path:
+                        self.receipts["control"] = value
+                    else:
+                        parent = self.receipts["control"]
+                        for key in path[:-1]:
+                            parent = parent[key]
+                        parent[path[-1]] = value
+                    self.contract_error(fixture("label-swap"))
+        for event in (None, False, 0, "", [], {"generation": False},
+                      {"generation": {"admission": []}}):
+            with self.subTest(event=event):
+                self.receipts = deepcopy(originals)
+                self.receipts["control"]["scenarios"][0]["requests"][0]["server_request_done"] = [event]
+                self.contract_error(fixture("label-swap"))
+
+    def test_contract_two_position_identifiers_and_metrics_are_explicitly_typed(self):
+        for field in ("position", "label", "incumbent_prompt_tokens", "candidate_prompt_tokens",
+                      "incumbent_cached_tokens", "candidate_cached_tokens",
+                      "incumbent_server_ttft_seconds", "candidate_server_ttft_seconds"):
+            for value in (None, False, True, "", [], {}, float("nan"), float("inf")):
+                with self.subTest(field=field, value=value):
+                    document = fixture("label-swap")
+                    document["jobs"]["concurrency"]["positions"][0][field] = value
+                    self.contract_error(document)
+        for field in ("position", "label"):
+            with self.subTest(duplicate=field):
+                document = fixture("label-swap")
+                rows = document["jobs"]["concurrency"]["positions"]
+                rows[1][field] = rows[0][field]
+                self.contract_error(document)
 
     def test_renamed_labels_and_phases_keep_receipt_derived_membership(self):
         document = fixture("label-swap")
