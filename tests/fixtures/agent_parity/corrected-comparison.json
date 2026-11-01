@@ -1,0 +1,43 @@
+{
+  "contract_version": 2,
+  "rule": "p16-agent-parity/2",
+  "jobs": {
+    "concurrency": {
+      "positions": [
+        {"position": 1, "label": "fanout-base", "incumbent_prompt_tokens": 82027, "incumbent_cached_tokens": 0, "incumbent_server_ttft_seconds": 30.853863942, "candidate_prompt_tokens": 82027, "candidate_cached_tokens": 0, "candidate_server_ttft_seconds": 30.90189211},
+        {"position": 2, "label": "branch-0", "incumbent_prompt_tokens": 82095, "incumbent_cached_tokens": 82066, "incumbent_server_ttft_seconds": 0.233909731, "candidate_prompt_tokens": 82095, "candidate_cached_tokens": 82072, "candidate_server_ttft_seconds": 1.164984767},
+        {"position": 3, "label": "branch-1", "incumbent_prompt_tokens": 82095, "incumbent_cached_tokens": 82072, "incumbent_server_ttft_seconds": 1.1877160379999998, "candidate_prompt_tokens": 82095, "candidate_cached_tokens": 82072, "candidate_server_ttft_seconds": 1.002659077},
+        {"position": 4, "label": "branch-2", "incumbent_prompt_tokens": 82095, "incumbent_cached_tokens": 82072, "incumbent_server_ttft_seconds": 1.0011524600000001, "candidate_prompt_tokens": 82095, "candidate_cached_tokens": 82066, "candidate_server_ttft_seconds": 0.231665507},
+        {"position": 5, "label": "branch-3", "incumbent_prompt_tokens": 82095, "incumbent_cached_tokens": 82066, "incumbent_server_ttft_seconds": 0.28764828600000003, "candidate_prompt_tokens": 82095, "candidate_cached_tokens": 82066, "candidate_server_ttft_seconds": 0.28607878999999997}
+      ],
+      "concurrent_receipts": {
+        "incumbent": "corrected-control.json",
+        "candidate": "corrected-candidate.json"
+      }
+    },
+    "restore-run-0": {
+      "positions": [
+        {"position": 1, "label": "base_prefill", "incumbent_prompt_tokens": 57889, "incumbent_cached_tokens": 0, "incumbent_server_ttft_seconds": 20.213580024000002, "candidate_prompt_tokens": 57889, "candidate_cached_tokens": 0, "candidate_server_ttft_seconds": 20.153424954000002},
+        {"position": 2, "label": "control_retrieval", "incumbent_prompt_tokens": 57977, "incumbent_cached_tokens": 57928, "incumbent_server_ttft_seconds": 0.148531364, "candidate_prompt_tokens": 57977, "candidate_cached_tokens": 57928, "candidate_server_ttft_seconds": 0.149924532},
+        {"position": 3, "label": "restore_0", "incumbent_prompt_tokens": 58200, "incumbent_cached_tokens": 58152, "incumbent_server_ttft_seconds": 0.386562978, "candidate_prompt_tokens": 58200, "candidate_cached_tokens": 58152, "candidate_server_ttft_seconds": 0.232937873},
+        {"position": 4, "label": "restore_1", "incumbent_prompt_tokens": 58352, "incumbent_cached_tokens": 58304, "incumbent_server_ttft_seconds": 0.242417896, "candidate_prompt_tokens": 58347, "candidate_cached_tokens": 58299, "candidate_server_ttft_seconds": 0.519957554}
+      ]
+    },
+    "restore-run-1": {
+      "positions": [
+        {"position": 1, "label": "base_prefill", "incumbent_prompt_tokens": 57889, "incumbent_cached_tokens": 0, "incumbent_server_ttft_seconds": 20.158531003, "candidate_prompt_tokens": 57889, "candidate_cached_tokens": 0, "candidate_server_ttft_seconds": 20.133528491},
+        {"position": 2, "label": "control_retrieval", "incumbent_prompt_tokens": 57977, "incumbent_cached_tokens": 57928, "incumbent_server_ttft_seconds": 0.148396167, "candidate_prompt_tokens": 57977, "candidate_cached_tokens": 57928, "candidate_server_ttft_seconds": 0.149713766},
+        {"position": 3, "label": "restore_0", "incumbent_prompt_tokens": 58194, "incumbent_cached_tokens": 58146, "incumbent_server_ttft_seconds": 0.211873345, "candidate_prompt_tokens": 58203, "candidate_cached_tokens": 58155, "candidate_server_ttft_seconds": 0.21216596699999998},
+        {"position": 4, "label": "restore_1", "incumbent_prompt_tokens": 58283, "incumbent_cached_tokens": 58235, "incumbent_server_ttft_seconds": 0.45975648799999996, "candidate_prompt_tokens": 58373, "candidate_cached_tokens": 58325, "candidate_server_ttft_seconds": 0.486373105}
+      ]
+    },
+    "restore-run-2": {
+      "positions": [
+        {"position": 1, "label": "base_prefill", "incumbent_prompt_tokens": 57889, "incumbent_cached_tokens": 0, "incumbent_server_ttft_seconds": 20.137815133, "candidate_prompt_tokens": 57889, "candidate_cached_tokens": 0, "candidate_server_ttft_seconds": 20.138236856},
+        {"position": 2, "label": "control_retrieval", "incumbent_prompt_tokens": 57977, "incumbent_cached_tokens": 57928, "incumbent_server_ttft_seconds": 0.147887836, "candidate_prompt_tokens": 57977, "candidate_cached_tokens": 57928, "candidate_server_ttft_seconds": 0.147976412},
+        {"position": 3, "label": "restore_0", "incumbent_prompt_tokens": 58199, "incumbent_cached_tokens": 58151, "incumbent_server_ttft_seconds": 0.22532007599999998, "candidate_prompt_tokens": 58194, "candidate_cached_tokens": 58146, "candidate_server_ttft_seconds": 0.450096065},
+        {"position": 4, "label": "restore_1", "incumbent_prompt_tokens": 58433, "incumbent_cached_tokens": 58385, "incumbent_server_ttft_seconds": 0.242949058, "candidate_prompt_tokens": 58283, "candidate_cached_tokens": 58235, "candidate_server_ttft_seconds": 0.242922125}
+      ]
+    }
+  }
+}

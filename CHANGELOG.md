@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Version the repository-owned agent-probe parity judge's input contract and preserve
+  rules `/1` and `/2`, rejecting incompatible inputs explicitly rather than returning
+  empty pairings. Add sanitized retained-receipt regressions without changing cache-gap
+  or TTFT bounds, and decode concurrent receipts explicitly as UTF-8. Reject malformed
+  contract-2 fields and declared receipts without positions; validate all receipt timing
+  evidence before phase classification instead of silently falling back to label pairing.
+
 ### Changed
 
 - Mark v0.16.0 as the published release across the README, quickstart banner, facts, roadmap,
