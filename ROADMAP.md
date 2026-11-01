@@ -101,7 +101,7 @@ unmet:
    and [`scripts/doctor.py`](scripts/doctor.py) provide host-free client rehearsals, live owner-lane
    checks, and named-cause WSL/Docker/loopback preflight, while full 31-block documented-route
    release qualification still requires live maintainer GPU-host windows
-   (`releases/v0.16.0/acceptance/documented-routes.json` (planned `releases/v0.16.0/acceptance/documented-routes.json`; pending)).
+   ([v0.16.0 documented-route acceptance](releases/v0.16.0/acceptance/documented-routes.json)).
    The earlier route-lifecycle tracker [#15](https://github.com/alphastorm/omp-ninfer/issues/15) is
    closed; it is historical context, not an open tracker for these additions.
 4. **Distribution signing and notarization.**

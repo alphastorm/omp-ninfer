@@ -94,7 +94,7 @@
     "external_installation_acceptance": {
       "status": "passed",
       "repository_path": "releases/v0.16.0/acceptance/composed-external-installation.json",
-      "sha256": "3256f94077267d69d4a06f478c3d546049ad1f2b7656059b1388845f3837ba08",
+      "sha256": "fc8118d20ad94cf02a02f36d3616d831c89eb35d62f0d69b9e22003dd54d3622",
       "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/5497b20f0155a1149b4e970519d6cc99c71378c5/releases/v0.16.0/acceptance/composed-external-installation.json",
       "as_of": "2026-11-01",
       "release": "v0.16.0",
@@ -107,7 +107,7 @@
       "windows_asset_sha256": "620a5935cdb6a9ed52d8b0c93892d6b5bb84155244a98f3be82af0455177bf29",
       "windows_binary_sha256": "620a5935cdb6a9ed52d8b0c93892d6b5bb84155244a98f3be82af0455177bf29",
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
-      "compatibility_sha256": "2f1a397c1d014b034f739c2ad7ce2eb8fae3531d50a16847036537ef02902d85",
+      "compatibility_sha256": "f9cffafce300d01c3b174121f7c480475ff2abd6acb99e0f4d992a137fa0e465",
       "platform_receipts": [
         {
           "profile": "darwin-remote-ssh",
@@ -138,9 +138,9 @@
   "status": "runtime-release-eligible",
   "publication_authorized": false,
   "external_installation_qualified": true,
-  "scope": "N16 common-engine runtime release: exact current RTX 5090 beta.4 and native RTX 3090/4090 beta.1 lane evidence; unchanged stock OMP 18.14.0 and model v3. Candidate-bound external-install acceptance and product-tooling council remain separate.",
+  "scope": "N16 common-engine runtime release: exact current RTX 5090 beta.4 and native RTX 3090/4090 beta.1 lane evidence; unchanged stock OMP 18.14.0 and model v3. Fresh five-route, three-platform, both native public-install and independent restoration acceptance passed on frozen candidate 56899320d416bafda5c15d7e454e9b593badc0a6 on 2026-11-01. Product-tooling council binding remains separate.",
   "interpretation": "Each retained measurement names its actual source, public/scratch package and config. No predecessor hardware, client-route acceptance or product council is relabeled. The RTX 4090 speed failure and RTX 5090 restart-latency misses retain their raw verdicts and founder waivers.",
-  "eligibility_scope": "Lane candidate with all three current lanes, both native powered quality screens and authenticated native fit proofs bound. RTX 4090 upgrade evidence, candidate external-installation acceptance, product-tooling G4, composition, final pins and founder publication remain separate and binding.",
+  "eligibility_scope": "All three current runtime lanes, native quality screens and fit proofs, both predecessor upgrade/rollback/repair rehearsals, fresh candidate-bound external-installation acceptance and RTX 3090 C2 product probes passed. Product-tooling G4 closure/binding, final manifest pin, strict ready/check-pins verification and founder-owned publication remain separate gates.",
   "documented_route_acceptance": {
     "status": "passed",
     "scope": "All five fresh candidate-bound documented routes, three stock OMP 18.14.0 clients, both N16 native beta.1 public installs, and candidate-profile native probes. Linux is WSL2-scoped; macOS remains preview. No prior product-route or client acceptance is carried.",
@@ -218,7 +218,11 @@
       "status": "closed-fork-only",
       "repository_path": "releases/v0.16.0/review/runtime-ledger.json",
       "sha256": "b4c0942ccab954e241a8a1ecf3e0699c51c06a66c0832c52fefe54194ac66bb2",
-      "scope": "Current N16 fork council closed by disposition; product-tooling council pending, not inherited."
+      "scope": "Current N16 fork council closed by disposition; product-tooling council pending, not inherited.",
+      "ledger_status": "pending-product-tooling",
+      "approval_granted": false,
+      "publication_authorized": false,
+      "public_route_acceptance_granted": false
     },
     "rtx3090_upgrade": {
       "status": "passed",
@@ -249,6 +253,6 @@
   },
   "receipt_audit": {
     "repository_path": "releases/v0.16.0/qualification/receipt-audit.json",
-    "sha256": "496cb2219ae37c5f24c3915db88a3c81cd921ea37cfe40440ffbca716d1db687"
+    "sha256": "eef73a603fddcea20c7ec46faa687ac05a7d88a019e3d28858f87a944cbd2f98"
   }
 }

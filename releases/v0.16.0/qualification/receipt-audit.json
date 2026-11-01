@@ -4,7 +4,7 @@
   "release": "v0.16.0",
   "as_of": "2026-11-01",
   "source_release": "v0.15.0",
-  "status": "lane-staged",
+  "status": "composed-through-acceptance",
   "policy": "Keep only explicitly unchanged client/model/base subjects under their original dates. Replace every changed runtime receipt with N16 evidence. Drop predecessor product-route acceptance, runtime build/gate records and product council. Bind founder waivers without rewriting raw failed measurements. No publication authority transfers.",
   "files": [
     {
@@ -16,9 +16,9 @@
     {
       "file": "client-components.json",
       "predecessor_sha256": "82497f76a1788d78e9934fa2f2adfdfb3f99f0be5c4840dd1ab20842cf7965f6",
-      "staged_sha256": "087af2629541433c0d36069cef8dea74c016f60fa80f838382c0cb29a93a45b7",
-      "disposition": "replaced",
-      "reason": "Retarget only the descriptor release metadata to v0.16.0; all three stock OMP 18.14.0 binary/asset/source identities remain byte-for-byte values from the v0.15.0 descriptor. Composition will rewrite metadata, so file bytes are not immutable client identities."
+      "staged_sha256": "16f6f0a361e66cab4b0b5629d15b48962cb63dadcf1871a44b1ba76593078050",
+      "disposition": "composed-by-acceptance",
+      "reason": "Acceptance recomposed release metadata around unchanged stock OMP 18.14.0 identities. All three complete platform records and every OMP source/asset/binary field equal the frozen 56899320 candidate and v0.15.0 descriptor; compatibility URL metadata is not a client binary identity."
     },
     {
       "file": "component-cut-dry-run.json",
@@ -214,11 +214,14 @@
   "review_ledger": {
     "file": "review/runtime-ledger.json",
     "disposition": "replaced-current-fork-only",
-    "reason": "Current N16 fork dispositions copied byte-identically; product-tooling council remains pending and no predecessor product council approval transfers."
+    "reason": "Current N16 fork dispositions remain unchanged inside the ledger; a pending product-tooling entry binds frozen acceptance subject 56899320 only. Product council closure and joint binding remain separate; no predecessor product approval transfers."
   },
   "public_acceptance": {
-    "disposition": "dropped-pending-fresh-candidate-acceptance",
-    "status": "pending",
-    "reason": "All predecessor acceptance files were removed by stage_release. Five documented routes, three stock client platforms, both native public installs, C2 product probes and independent restoration must run on the same frozen candidate."
+    "disposition": "replaced-fresh-candidate-acceptance",
+    "status": "passed",
+    "candidate_commit": "56899320d416bafda5c15d7e454e9b593badc0a6",
+    "repository_path": "releases/v0.16.0/acceptance/composed-external-installation.json",
+    "sha256": "fc8118d20ad94cf02a02f36d3616d831c89eb35d62f0d69b9e22003dd54d3622",
+    "reason": "All five routes (31 blocks), three stock clients, both native public installs, RTX 3090 C2 product probes and independent restoration passed fresh on the frozen candidate on 2026-11-01. No predecessor or earlier-candidate acceptance transfers."
   }
 }

@@ -443,8 +443,8 @@ v0.7.4. v0.10.0 introduced upstream OMP 18.4.10 binaries and no client cask; v0.
 pinned stock OMP 18.8.7, v0.12.1 pinned 18.10.1, and v0.12.2 pinned 18.12.1; `v0.13.0` through
 `v0.14.0` pinned stock OMP 18.12.6, and `v0.15.0` through `v0.16.0` pin stock OMP 18.14.0. All five
 documented routes and fresh platform-client acceptance passed on the published components; see
-documented-route acceptance (planned `../releases/v0.16.0/acceptance/documented-routes.json`; pending) and
-composed acceptance (planned `../releases/v0.16.0/acceptance/composed-external-installation.json`; pending).
+[documented-route acceptance](../releases/v0.16.0/acceptance/documented-routes.json) and
+[composed acceptance](../releases/v0.16.0/acceptance/composed-external-installation.json).
 
 ### Post-v0.4.7 development evidence (shipped in v0.4.8 where noted)
 

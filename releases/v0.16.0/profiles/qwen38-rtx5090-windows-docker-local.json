@@ -149,7 +149,7 @@
     "two-long-session-reuse"
   ],
   "structured_output": {
-    "json_schema": "acceptance-pending",
+    "json_schema": "qualified",
     "implementation": "upstream-xgrammar"
   },
   "unsupported": [

@@ -42,8 +42,8 @@
         "Strict origin authentication is mandatory. MACs authenticate origin/content, not monotonic freshness.",
         "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and never share the principal among mutually untrusted clients.",
         "Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.",
-        "The RTX 5090 checked first build ships under an explicit founder-approved reproducibility exception. Native profiles remain MTP3, A8 off; RTX 3090 uses a 350 W cap.",
-        "Stock OMP 18.14.0 has host-free source review and macOS stub rehearsals only; fresh platform/public-route acceptance is required and predecessor acceptance does not transfer."
+        "The RTX 5090 checked first build ships under an explicit founder-approved reproducibility exception. Native profiles use INT8 DFlash2 K7 with Group64 A8 and FP32 head logits off; RTX 3090 uses C2 over one shared 131072-token pool and a 350 W cap.",
+        "Fresh stock OMP 18.14.0 platform and five-route acceptance passed on frozen v0.16.0 candidate 56899320d416bafda5c15d7e454e9b593badc0a6 on 2026-11-01; predecessor acceptance does not transfer. macOS remains preview and Linux client evidence is WSL2-scoped."
       ],
       "blockers": [],
       "acceptance_receipt": {
@@ -146,8 +146,8 @@
         "Strict origin authentication is mandatory. MACs authenticate origin/content, not monotonic freshness.",
         "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and never share the principal among mutually untrusted clients.",
         "Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.",
-        "The RTX 5090 checked first build ships under an explicit founder-approved reproducibility exception. Native profiles remain MTP3, A8 off; RTX 3090 uses a 350 W cap.",
-        "Stock OMP 18.14.0 has host-free source review and macOS stub rehearsals only; fresh platform/public-route acceptance is required and predecessor acceptance does not transfer."
+        "The RTX 5090 checked first build ships under an explicit founder-approved reproducibility exception. Native profiles use INT8 DFlash2 K7 with Group64 A8 and FP32 head logits off; RTX 3090 uses C2 over one shared 131072-token pool and a 350 W cap.",
+        "Fresh stock OMP 18.14.0 platform and five-route acceptance passed on frozen v0.16.0 candidate 56899320d416bafda5c15d7e454e9b593badc0a6 on 2026-11-01; predecessor acceptance does not transfer. macOS remains preview and Linux client evidence is WSL2-scoped."
       ],
       "blockers": [],
       "acceptance_receipt": {
@@ -246,12 +246,12 @@
       "local_port": 18089,
       "container_port": 8080,
       "limitations": [
-        "The qualified client boundary is Ubuntu 24.04 x64, including WSL2 with a local Docker Linux engine and NVIDIA Container Toolkit.",
+        "Linux x64 client acceptance covers Ubuntu 24.04 under WSL2 on the Windows 11 container host only; no separately qualified native Linux OS or Linux vision claim.",
         "Strict origin authentication is mandatory. MACs authenticate origin/content, not monotonic freshness.",
         "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and never share the principal among mutually untrusted clients.",
         "Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.",
-        "The RTX 5090 checked first build ships under an explicit founder-approved reproducibility exception. Native profiles remain MTP3, A8 off; RTX 3090 uses a 350 W cap.",
-        "Stock OMP 18.14.0 has host-free source review and macOS stub rehearsals only; fresh platform/public-route acceptance is required and predecessor acceptance does not transfer."
+        "The RTX 5090 checked first build ships under an explicit founder-approved reproducibility exception. Native profiles use INT8 DFlash2 K7 with Group64 A8 and FP32 head logits off; RTX 3090 uses C2 over one shared 131072-token pool and a 350 W cap.",
+        "Fresh stock OMP 18.14.0 platform and five-route acceptance passed on frozen v0.16.0 candidate 56899320d416bafda5c15d7e454e9b593badc0a6 on 2026-11-01; predecessor acceptance does not transfer. macOS remains preview and Linux client evidence is WSL2-scoped."
       ],
       "blockers": [],
       "acceptance_receipt": {
