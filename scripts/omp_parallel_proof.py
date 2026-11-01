@@ -10,13 +10,20 @@ per-model compat for 18.8.x and later, PI_OPENAI_STATEFUL=1 for historical 18.4.
 
 subagents: one parent must call task once with two scout items, each reading its
 own ~20 KB file and returning a random code. The parent must return both codes.
-The receipt records each subagent's outcome and the codes in its result (searched
-value by value when the result is JSON text), and task calls that returned no
-subagent results.
+Deliveries are bound to dispatched task labels through the tool-call identity and
+result index; duplicate or unmatched result identities cannot replace a task.
+The receipt records each subagent's outcome and code observations (searched value
+by value when the result is JSON text), and task calls that returned no results.
 sessions: two processes start together; each gets a different fact, then recalls
 it twice (three turns per process). A barrier aligns each pair of turns.
-Each recall must contain its own exact code at alphanumeric boundaries and no
-other session's code. Whole-answer formatting is recorded, not a passing gate.
+Each recall/delivery must contain the correct value attributed to its code label
+at alphanumeric boundaries; equals, colon and whitespace separators are equivalent.
+Every session turn and scout result must be nonempty and contain no foreign code
+VALUE, even embedded or relabeled. Completion, topology, identity, request-log and
+concurrency checks remain mandatory. Exact-marker and whole-answer formatting are
+non-gating `compliance` observations, not literal-extraction/recall guarantees or
+a general prose-quality proof. Tests enumerate the gating predicates and prohibit
+pure exact-text model-output gates.
 
 The pinned binary's `agents unpack` identifies scout's model as @smol (task uses
 @task). `config list --json` and v18.4.0 docs/tools/task.md describe task.batch,
@@ -81,6 +88,8 @@ from stock_omp_session_proof import Omp  # noqa: E402
 from omp_client_environment import client_environment, stateful_environment  # noqa: E402
 
 CODE = re.compile(r"(?<![\w-])(?:ALPHA|BETA)-CODE=\d{6}(?![\w-])")
+DELIVERY_CODE = re.compile(
+    r"(?<![^\W_])((?:ALPHA|BETA)-CODE)(?:\s*[:=]\s*|\s+)([0-9]{6})(?![^\W_])")
 STOPS = {"stop", "length", "toolUse", "aborted", "error"}
 
 
@@ -289,21 +298,23 @@ def client(args, label, observe=None):
 
 
 def turn_record(turn, label, index, expected=None, *, other_codes=()):
+    answer = turn["answer"]
     record = {"session": label, "index": index, "seconds": turn["seconds"],
               "stop": turn["stop"] if turn["stop"] in STOPS else "error",
-              "completed": turn["stop"] == "stop"}
+              "completed": turn["stop"] == "stop", "nonempty": bool(answer.strip()),
+              "isolation": not any(code.split("=", 1)[1] in answer for code in other_codes)}
     if expected is not None:
-        answer = turn["answer"]
-        # [^\W_] matches Unicode alphanumerics, but not underscore separators.
-        record["own_recall"] = re.search(
-            rf"(?<![^\W_]){re.escape(expected)}(?![^\W_])", answer) is not None
-        record["isolation"] = not any(code in answer for code in other_codes)
-        record["formatting_exact"] = answer.strip() == expected
+        record["own_recall"] = expected in delivered_codes(answer)
+        record["compliance"] = {
+            # Preserve the previous exact-marker and whole-answer oracles as observations.
+            "marker_exact": re.search(
+                rf"(?<![^\W_]){re.escape(expected)}(?![^\W_])", answer) is not None,
+            "formatting_exact": answer.strip() == expected}
     return record
 
 
-def result_codes(output):
-    """Codes in one subagent result. A structured result arrives as JSON text whose strings escape
+def result_strings(output):
+    """String values in one result. A structured result arrives as JSON text whose strings escape
     newlines, and the `n` of an escaped newline before a code reads as a word character (EXP-090),
     so search each decoded string value."""
     value = output
@@ -312,37 +323,93 @@ def result_codes(output):
             value = json.loads(output)
         except ValueError:
             value = output
-    found, pending = set(), [value]
+    found, pending = [], [value]
     while pending:
         node = pending.pop()
         if isinstance(node, str):
-            found.update(CODE.findall(node))
+            found.append(node)
         elif isinstance(node, dict):
             pending.extend(node.values())
         elif isinstance(node, list):
             pending.extend(node)
-    return sorted(found)
+    return found
+
+
+def result_codes(output):
+    """Legacy exact-marker observations, used only for non-gating compliance."""
+    return sorted({code for text in result_strings(output) for code in CODE.findall(text)})
+
+
+def delivered_codes(output):
+    """Canonical label/value pairs, independent of the marker's separator formatting."""
+    return sorted({f"{label}={value}" for text in result_strings(output)
+                   for label, value in DELIVERY_CODE.findall(text)})
 
 
 class TaskObserver:
-    """The parent's task calls: items per call, calls that returned no subagent results, and each
-    subagent's outcome with the codes its result carries."""
+    """Bind stock OMP's indexed results to their dispatch; retain only allowlisted evidence."""
 
-    def __init__(self):
+    def __init__(self, codes=()):
         self.batches, self.completed, self.without_results = [], [], 0
+        self.codes, self.tools, self.calls, self.result_ids = codes, [], {}, set()
+        self.initial_tasks, self.attributable = [], True
 
     def __call__(self, event):
+        if event.get("type") == "tool_execution_start":
+            self.tools.append(event.get("toolName"))
         if event.get("toolName") != "task":
             return
+        call_id = event.get("toolCallId")
         if event.get("type") == "tool_execution_start":
-            self.batches.append(len((event.get("args") or {}).get("tasks") or []))
+            tasks = (event.get("args") or {}).get("tasks") or []
+            self.batches.append(len(tasks))
+            dispatched = [{"label": str(item.get("name", "")).casefold(),
+                           "agent": item.get("agent")} for item in tasks]
+            if len(self.batches) == 1:
+                self.initial_tasks = dispatched
+            if not isinstance(call_id, str) or not call_id or call_id in self.calls:
+                self.attributable = False
+            self.calls[call_id] = (len(self.batches), dispatched)
         elif event.get("type") == "tool_execution_end":
             results = ((event.get("result") or {}).get("details") or {}).get("results") or []
             self.without_results += not results
-            self.completed.extend({"ok": item.get("exitCode") == 0 and not item.get("aborted")
-                                   and not item.get("error"), "codes": result_codes(item.get("output", ""))}
-                                  for item in results)
-
+            call, dispatched = self.calls.pop(call_id, (None, []))
+            self.attributable &= call is not None
+            indices = set()
+            for item in results:
+                index, result_id = item.get("index"), item.get("id")
+                task = (dispatched[index] if type(index) is int and 0 <= index < len(dispatched)
+                        else {})
+                label = task.get("label")
+                identity = (bool(task) and label in {"alpha", "beta"}
+                            and task.get("agent") == item.get("agent") == "scout"
+                            and isinstance(result_id, str) and bool(result_id.strip())
+                            and result_id not in self.result_ids and index not in indices)
+                if isinstance(result_id, str):
+                    self.result_ids.add(result_id)
+                if type(index) is int:
+                    indices.add(index)
+                output = item.get("output", "")
+                texts = result_strings(output)
+                # Inspect decoded strings and the full serialized result: a foreign value in a
+                # JSON key or numeric leaf is still contamination, not harmless formatting.
+                visible = texts + [json.dumps(output, ensure_ascii=False)]
+                expected = next((code for code in self.codes
+                                 if code.split("-", 1)[0].casefold() == label), None)
+                self.completed.append({
+                    "session": label if label in {"alpha", "beta"} else None,
+                    "call": call, "index": index if type(index) is int else None,
+                    "id_sha256": hashlib.sha256(result_id.encode()).hexdigest()
+                    if isinstance(result_id, str) else None,
+                    "attributable": identity,
+                    "ok": item.get("exitCode") == 0 and not item.get("aborted") and not item.get("error"),
+                    "nonempty": any(text.strip() for text in texts),
+                    "codes": result_codes(output), "delivered_codes": delivered_codes(output),
+                    "isolation": not any(code.split("=", 1)[1] in text
+                                         for code in self.codes if code != expected for text in visible),
+                    "compliance": {"marker_exact": expected in result_codes(output),
+                                   "formatting_exact": expected is not None
+                                   and any(text.strip() == expected for text in texts)}})
 
 
 def run_subagents(args, root, shared, codes, record):
@@ -353,7 +420,7 @@ def run_subagents(args, root, shared, codes, record):
                   for n in range(360)]
         filler.insert(rng.randrange(100, 260), code + "\n")
         (subargs.home / "work" / f"{label}.txt").write_text("".join(filler), encoding="utf-8")
-    observer = TaskObserver()
+    observer = TaskObserver(codes)
 
     prompt = ("This is a parallel file-reading proof. Do not read the files yourself. Your FIRST "
               "action must be ONE task call with context and exactly TWO items in tasks. Use "
@@ -369,6 +436,11 @@ def run_subagents(args, root, shared, codes, record):
         turn = omp.prompt(prompt, args.turn_timeout)
         record["turns"].append(turn_record(turn, "parent", 1))
         record["checks"].update(subagent_checks(observer, turn, codes))
+        record["compliance"].update(
+            codes_exact=sorted(set(CODE.findall(turn["answer"]))) == sorted(codes),
+            codes_delivered_by_subagents=sorted(
+                {code for item in observer.completed for code in item["codes"]}) == sorted(codes),
+            parent_formatting_exact=turn["answer"].strip() == "\n".join(codes))
         record["task_batch_sizes"] = observer.batches
         record["task_calls_without_results"] = observer.without_results
         record["recovered_dispatch"] = observer.batches != [2]
@@ -376,22 +448,33 @@ def run_subagents(args, root, shared, codes, record):
 
 
 def subagent_checks(observer, turn, codes):
-    """What the subagents scenario proves: the parent's first action dispatched both items in one
-    task call, so the engine's measured overlap came from parallel subagents; every subagent the
-    parent ran finished without error; the codes reached the parent through subagent results, not
-    through the parent reading the files itself; and the parent's answer is exact. Stock OMP's
-    recovery from its own task-call nondeterminism is not a failure: eaf221ac's fourth window saw
-    a first task call return no results and be re-issued ([2, 2]), and a scout answer without its
-    code and be re-dispatched alone ([2, 1]), both with every engine request completed under the
-    expected concurrency. A sequential dispatch ([1, 1]) or a parent that read the files itself
-    still fails, because then the overlap is not the subagents'."""
-    returned = sorted(set(CODE.findall(turn["answer"])))
+    """Require two attributable, nonempty, isolated deliveries, not literal model formatting.
+
+    Stock OMP recovery batches ([2, 2] or [2, 1]) remain permitted: a completed result without its
+    own value may be followed by a correctly attributed recovery, but a different task, duplicate
+    result identity, empty output, or foreign value cannot stand in for either scout.
+    """
+    returned = set(delivered_codes(turn["answer"]))
     completed = observer.completed
-    delivered = sorted({code for item in completed for code in item["codes"]})
-    return dict(parent_completed=turn["stop"] == "stop", codes_exact=returned == sorted(codes),
-                first_task_call_dispatched_both=observer.batches[:1] == [2],
+    return dict(parent_completed=turn["stop"] == "stop",
+                parent_nonempty=bool(turn["answer"].strip()),
+                first_task_call_dispatched_both=observer.batches[:1] == [2]
+                and observer.tools[:1] == ["task"],
+                parent_only_task_calls=bool(observer.tools) and set(observer.tools) == {"task"},
+                task_results_attributable=observer.attributable and not observer.calls
+                and len(observer.initial_tasks) == 2
+                and {task["label"] for task in observer.initial_tasks} == {"alpha", "beta"}
+                and all(task["agent"] == "scout" for task in observer.initial_tasks)
+                and bool(completed) and all(item["attributable"] for item in completed),
                 subagents_completed=bool(completed) and all(item["ok"] for item in completed),
-                codes_delivered_by_subagents=delivered == sorted(codes))
+                subagent_results_nonempty=bool(completed) and all(item["nonempty"] for item in completed),
+                parent_codes_delivered=all(code in returned for code in codes),
+                subagent_codes_delivered=all(
+                    any(item["attributable"] and item["session"] == label
+                        and code in item["delivered_codes"] for item in completed)
+                    for label, code in zip(("alpha", "beta"), codes)),
+                subagent_isolation=all(item["isolation"] for item in completed),
+                parent_code_isolation=returned <= set(codes))
 
 
 def run_sessions(args, root, shared, codes, record):
@@ -426,9 +509,15 @@ def run_sessions(args, root, shared, codes, record):
         record["checks"][f"{label}_three_turns_completed"] = (
             result["error"] is None and len(result["turns"]) == 3
             and all(turn["completed"] for turn in result["turns"]))
+        record["checks"][f"{label}_turns_nonempty"] = (
+            len(result["turns"]) == 3 and all(turn["nonempty"] for turn in result["turns"]))
+        record["checks"][f"{label}_isolation"] = all(turn["isolation"] for turn in result["turns"])
         record["checks"][f"{label}_both_recalls_correct"] = (
             len(result["turns"]) == 3 and all(turn.get("own_recall") and turn.get("isolation")
                                             for turn in result["turns"] if turn["index"] > 1))
+        record["compliance"][f"{label}_both_recalls_marker_exact"] = (
+            len(result["turns"]) == 3
+            and all(turn["compliance"]["marker_exact"] for turn in result["turns"] if turn["index"] > 1))
         if result["error"]:
             record["errors"].append(result["error"])
     ids = [result["session_id"] for result in results]
@@ -447,7 +536,7 @@ def fetch_log(command, timeout):
 
 
 def run_scenario(args, root, shared, scenario, codes):
-    record = {"scenario": scenario, "codes": codes, "turns": [], "checks": {}, "errors": [],
+    record = {"scenario": scenario, "codes": codes, "turns": [], "checks": {}, "compliance": {}, "errors": [],
               "max_in_flight": None, "overlap_seconds": None, "request_count": None}
     wall_start, started = math.floor(time.time() * 1000) / 1000, time.monotonic()
     try:
