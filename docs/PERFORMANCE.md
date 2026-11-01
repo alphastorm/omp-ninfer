@@ -77,10 +77,10 @@ Collect four passed captures with `arm` (`A`, `B`, `B`, `A`), `index` (`0`..`3`)
 or a measured canonical `identity.configuration_sha256`. Each `requests` entry
 contains `id`, `request_sha256`, positive integer `completion_tokens`, and positive
 finite `decode_seconds`. Native role/depth captures already use this shape.
-Reduce the pre-screen or final gate against the **same** declaration:
+Reduce the pre-screen or final gate against the **same** declaration and recorded plan:
 
 ```sh
-python3 scripts/speed_gate.py reduce --gate gate.json \
+python3 scripts/speed_gate.py reduce --gate gate.json --plan prescreen-plan.json \
   --capture A0.json --capture B1.json --capture B2.json --capture A3.json \
   --out speed-result.json
 ```
@@ -91,7 +91,8 @@ shards and one binary/configuration identity per position. Raw captures may rema
 private: the result retains only case IDs, measurement values and digests, including
 each arm's binary, configuration and recomputed request-suite identities and the
 capture digests. It does not copy configurations, prompts, outputs, paths, or GPU
-identifiers.
+identifiers. The recorded plan is required: the result binds its canonical `plan_sha256`
+and `plan_gate_sha256` alongside the declaration's `gate_sha256` and `role_case_ids`.
 
 Weighted throughput is pooled completion tokens divided by pooled decode seconds
 for each arm, then candidate divided by comparator. Each case's ratio uses the
@@ -99,12 +100,16 @@ median of its two candidate rates divided by the median of its two comparator
 rates. These are the v0.16.0 reduction formulas, not averages of case ratios.
 
 `gate_predictive: true` means identities match the declared comparator binary,
-configuration, and complete request suite; it does **not** mean the thresholds
+configuration, complete request suite, and recorded plan; it does **not** mean the thresholds
 passed or that hardware/release qualification is complete. Any comparator binary,
 configuration or arm's suite mismatch produces `status: "DIAGNOSTIC"`,
 `gate_predictive: false`, `gate_passed: false`, and field-specific
 `diagnostic_reasons`, even if `thresholds_passed` is true. Candidate-repeat identity
-drift is also diagnostic. Thus the v0.16.0 same-binary MTP3 pre-screen cannot claim
+drift is also diagnostic. A changed plan/declaration digest, role/supplemental partition,
+request suite, ABBA order, or planned arm identity is diagnostic through the same
+mechanism, even when captures match the comparator and complete request list.
+The declaration remains the campaign authority; the reducer does not hardcode a corpus.
+Thus the v0.16.0 same-binary MTP3 pre-screen cannot claim
 to predict the shipped-incumbent gate; an isolated subset cannot claim the full
 role-suite gate either. Properly bound final RTX 4090 measurements still fail
 the `log-024@0` floor at `0.933832`, rather than inheriting the historical waiver.

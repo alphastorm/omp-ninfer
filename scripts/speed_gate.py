@@ -145,8 +145,23 @@ def summarize(arms: Sequence[dict[str, Any]], case_ids: set[str]) -> dict[str, A
             "below_case_floor": [row["id"] for row in cases if row["ratio"] < EVERY_CASE_MINIMUM], "cases": cases}
 
 
-def identity_differences(gate: dict[str, Any], arms: Sequence[dict[str, Any]]) -> list[str]:
+def identity_differences(gate: dict[str, Any], arms: Sequence[dict[str, Any]],
+                         plan: dict[str, Any]) -> list[str]:
+    if (not isinstance(plan, dict) or plan.get("artifact_type") != "omp_ninfer_speed_prescreen_plan"
+            or type(plan.get("schema_version")) is not int or plan["schema_version"] != 1):
+        raise SpeedGateError("expected a schema-1 omp_ninfer_speed_prescreen_plan")
+    require_sha256(plan.get("gate_sha256"), "plan gate_sha256")
+    planned_arms = plan.get("arms")
+    if not isinstance(planned_arms, dict) or set(planned_arms) != {"A", "B"}:
+        raise SpeedGateError("plan arms must declare A and B identities")
+    planned_arms = {label: arm_identity(value) for label, value in planned_arms.items()}
+    expected_plan = prescreen(gate, planned_arms["B"])
     reasons = []
+    for field in ("gate_sha256", "role_case_ids", "request_suite", "request_suite_sha256", "order"):
+        if plan.get(field) != expected_plan[field]:
+            reasons.append(f"plan.{field} differs from gate declaration")
+    if planned_arms["A"] != gate["comparator"]:
+        reasons.append("plan.arms.A differs from gate comparator")
     for arm in arms:
         name = f"{arm['arm']}{arm['index']}"
         if arm["arm"] == "A":
@@ -155,20 +170,24 @@ def identity_differences(gate: dict[str, Any], arms: Sequence[dict[str, Any]]) -
                     reasons.append(f"{name}.{field} differs from gate comparator")
         if arm["request_suite_sha256"] != gate["request_suite_sha256"]:
             reasons.append(f"{name}.request_suite_sha256 differs from gate role suite")
+        for field, expected in planned_arms[arm["arm"]].items():
+            if arm["identity"][field] != expected:
+                reasons.append(f"{name}.{field} differs from plan arm {arm['arm']}")
     for field in ("binary_sha256", "configuration_sha256"):
         if arms[1]["identity"][field] != arms[2]["identity"][field]:
             reasons.append(f"candidate {field} differs between B1 and B2")
     return reasons
 
 
-def reduce(gate: dict[str, Any], captures: Sequence[dict[str, Any]]) -> dict[str, Any]:
+def reduce(gate: dict[str, Any], captures: Sequence[dict[str, Any]],
+           plan: dict[str, Any]) -> dict[str, Any]:
     gate = declaration(gate)
     arms = receipts(captures)
     case_ids = {row["id"] for row in arms[0]["requests"]}
     role_ids = case_ids & set(gate["role_case_ids"])
     roles = summarize(arms, role_ids)
     all_cases = summarize(arms, case_ids)
-    reasons = identity_differences(gate, arms)
+    reasons = identity_differences(gate, arms, plan)
     passed = (roles is not None and roles["weighted_decode_ratio"] >= WEIGHTED_MINIMUM
               and all_cases["weighted_decode_ratio"] >= WEIGHTED_MINIMUM
               and all_cases["minimum_case_ratio"] >= EVERY_CASE_MINIMUM)
@@ -177,6 +196,8 @@ def reduce(gate: dict[str, Any], captures: Sequence[dict[str, Any]]) -> dict[str
             "gate_predictive": not reasons, "diagnostic_reasons": reasons,
             "thresholds_passed": passed, "gate_passed": not reasons and passed,
             "gate_sha256": digest(gate), "comparator": gate["comparator"],
+            "plan_sha256": digest(plan), "plan_gate_sha256": plan["gate_sha256"],
+            "role_case_ids": gate["role_case_ids"],
             "request_suite_sha256": gate["request_suite_sha256"],
             "thresholds": {"weighted_minimum": WEIGHTED_MINIMUM, "every_case_minimum": EVERY_CASE_MINIMUM},
             "role_suite": roles, "supplemental": summarize(arms, case_ids - role_ids), "all_cases": all_cases,
@@ -197,13 +218,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     plan.add_argument("--candidate", type=Path, required=True, help="candidate binary/configuration SHA-256 JSON")
     reduction = commands.add_parser("reduce", help="reduce complete ABBA capture files, including disjoint shards")
     reduction.add_argument("--capture", type=Path, action="append", required=True)
+    reduction.add_argument("--plan", type=Path, required=True, help="recorded pre-screen identity plan")
     for command in (plan, reduction):
         command.add_argument("--gate", type=Path, required=True)
         command.add_argument("--out", type=Path, required=True)
     args = parser.parse_args(argv)
     try:
         result = (prescreen(load(args.gate), load(args.candidate)) if args.command == "prescreen"
-                  else reduce(load(args.gate), [load(path) for path in args.capture]))
+                  else reduce(load(args.gate), [load(path) for path in args.capture], load(args.plan)))
         args.out.write_text(json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
     except (OSError, ValueError) as exc:
         print(f"speed_gate: {exc}", file=sys.stderr)
