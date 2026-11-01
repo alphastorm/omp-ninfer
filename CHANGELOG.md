@@ -15,6 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   or TTFT bounds, and decode concurrent receipts explicitly as UTF-8. Reject malformed
   contract-2 fields and declared receipts without positions; validate all receipt timing
   evidence before phase classification instead of silently falling back to label pairing.
+- Bind native speed-gate predictions and pre-screen plans to one declared shipped
+  comparator binary, configuration, and exact request suite. The host-free
+  `scripts/speed_gate.py` reducer records each ABBA arm's identities and labels
+  mismatches diagnostic without changing the `1.08` weighted / `0.95` every-case
+  thresholds ([#120](https://github.com/alphastorm/omp-ninfer/issues/120)). Require
+  the recorded pre-screen plan during reduction and diagnose plan/declaration digest,
+  role partition, request suite, order, or planned-arm identity drift.
 
 ### Changed
 
