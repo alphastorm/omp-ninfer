@@ -247,6 +247,30 @@ logical weights label; both the artifact digest and architecture remain bound. S
 is not accepted as a substitute startup record. The checked-in schema fixtures use synthetic
 values and source-grounded field sets, not claimed live inference receipts.
 
+### Deferred v0.16.1 client reviews — OMP 18.14.2 and 18.15.0
+
+The [18.15.0 incremental review](measurements/2026-11-01-omp-18150-client-upgrade-review.json)
+recommends newest stable `v18.15.0` (`3fedf8d5`, release `430630500`) for the future
+client-only `v0.16.1`. All 235 commits in `v18.14.2...v18.15.0` and the uncapped 257-path
+tagged-tree diff were inventoried, with focused source inspection. Independent downloads of the
+Darwin arm64, Windows x64 and Linux x64 binaries and `SHA256SUMS.txt` match API byte counts/digests;
+the three executable hashes also match the checksum rows. No client executable was run.
+The receipt distinguishes carried provider/state/schema/Qwen guard blobs from changed shared
+replay sanitization, missing-credential fallback, manual-compaction delivery and optional
+background-caption requests. No blocking regression was identified for the documented static
+local routes; the additional risk probes and all fresh qualification gates remain unperformed.
+
+The [earlier 18.14.2 review](measurements/2026-11-01-omp-18142-client-upgrade-review.json)
+rechecks upstream stable `v18.14.2` (`7efd7721`) against `v18.14.0`, including all 394 comparison
+commits and the uncapped tagged-tree diff. It records published asset identities, carried Responses
+provider/state and models-schema blobs, conditional header/retry changes, the Qwen exact-loop guard's
+new line-repetition floor, and rejection of length-truncated compaction summaries. It claims no
+executable rehearsal or NInfer qualification. [Issue #123](https://github.com/alphastorm/omp-ninfer/issues/123)
+plans a client-only successor to published `v0.16.0`: no successor is staged, no predecessor
+acceptance transfers, and fresh platform/routes, native public installs, restoration and
+candidate-bound founder grants remain required. Never adopt `18.14.1` alone; published `v0.16.0`
+keeps its `18.14.0` client.
+
 ### v0.15.0–v0.16.0 client binding — OMP 18.14.0
 
 Published releases **v0.15.0** (2026-10-30) and **v0.16.0** (2026-11-01) pin unmodified upstream

@@ -1,0 +1,154 @@
+{
+  "artifact_type": "omp_ninfer_client_upgrade_review",
+  "schema_version": 1,
+  "as_of": "2026-11-01",
+  "product_release": "v0.16.1",
+  "provenance": {
+    "review": "Host-free source and published-metadata review of v18.14.0...v18.14.2 for issue #123. Both tagged Git trees were compared locally; all 394 comparison commits were enumerated through four API pages (100/100/100/94), and the uncapped tree diff contains 421 paths. No client executable, semantic rehearsal, server, GPU or acceptance driver was run. Product CI is reported by the review pull request, not claimed by this source receipt.",
+    "implementation_commits": [],
+    "ci": null,
+    "ci_conclusion": "not-claimed",
+    "ci_head": null
+  },
+  "client_upgrade": {
+    "from": "18.14.0",
+    "to": "18.14.2",
+    "reason": "Prepare a client-only v0.16.1 after v0.16.0 is published, retaining every v0.16.0 runtime, model and serving profile. Adopt the loop-guard false-positive fix and refusal of incomplete summaries together; never adopt 18.14.1 alone. The latest-release endpoint, ten-release census and ten-tag census still identify v18.14.2 as the newest stable release on the review date. This receipt does not stage the successor or authorize a window or publication.",
+    "upstream_commit": "7efd77219374ca4e8767979809835e4aa90666ba",
+    "upstream_tree": "dc3c80e8a0e954361b71f10a21fccb4e9eefa8d4",
+    "release_id": 430094429,
+    "published_at": "2026-10-31T17:56:02Z",
+    "stable_releases_reviewed": ["18.14.0", "18.14.1", "18.14.2"]
+  },
+  "descriptor_inputs": "releases/v0.16.0/qualification/client-components.json",
+  "host_free_checks": {
+    "asset_identity": {
+      "method": "Metadata review only: the three proposed platform identities below match both the GitHub release API digests and the fetched SHA256SUMS.txt rows. The checksum-file digest is the API-published digest, not an independently computed download hash. No executable was downloaded or hashed; independently download, count and hash all three assets before constructing the v0.16.1 descriptor. descriptor_inputs names the predecessor's shape, not a staged target descriptor.",
+      "release_checksum_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.14.2/SHA256SUMS.txt",
+      "release_checksum_sha256": "12d0ef1940e3f2dda966044deb642f33e6d6268e0cda5e6280892e37ce0bdedb",
+      "assets": [
+        {"name": "omp-darwin-arm64", "asset_id": 696073843, "bytes": 215195792, "sha256": "9b7bda0bd8ec8d1fd8f8deda076180deef2d4921ee60e7d2f39044ee7d9437ee", "sha256sums_match": true, "api_digest_match": true},
+        {"name": "omp-windows-x64.exe", "asset_id": 696073835, "bytes": 243099136, "sha256": "aa04e4ff3b2d97d604839edf1bcf5a0085818389d9fc8c1a18875ee7b5e3b0f8", "sha256sums_match": true, "api_digest_match": true},
+        {"name": "omp-linux-x64", "asset_id": 696073838, "bytes": 276646064, "sha256": "cde0bc4ac8ec333c4880039a5242ff33dbfc6544747d67aeb99bb077874aeec1", "sha256sums_match": true, "api_digest_match": true}
+      ]
+    },
+    "semantic_rehearsals": {
+      "execution_kind": "not executed; source and metadata review only",
+      "guide_sha256": null,
+      "binary_version": null,
+      "binary_sha256": null,
+      "checks": [],
+      "runs": [],
+      "scope_limit": "No executable or loopback-stub result is imported from the 18.14.0 receipt. Platform rehearsals, real NInfer loop-guard and truncated-compaction probes, five fresh documented routes and both native public installs remain separate, authorized work after predecessor publication. No socket or route port was opened."
+    }
+  },
+  "behavior_review": [
+    {
+      "id": "responses-provider-and-state",
+      "predicate": "The v18.14.0 and v18.14.2 blobs are identical for openai-responses.ts (c143d36f5224a4433e177150b668630d04fd4aa0) and openai-responses-state.ts (7f52d1a19ede6211a6297ed1ec083a3ae56bdd61). Stateful enablement still honors the per-call option, PI_OPENAI_STATEFUL, compat.statefulResponses and endpoint default in that order; previous_response_id chaining and history-replay ownership are carried.",
+      "lane_effect": "All five routes still use the custom openai-responses provider. Shared helpers and outer stream behavior do change, so identical provider/state blobs do not establish complete request-byte or end-to-end equivalence.",
+      "action": "Keep statefulResponses=true, unique session cache keys and exact provider/model IDs; clear PI_OPENAI_STATEFUL. Re-exercise linked tool history, same-process chaining, cross-process continuation and checkpoint restart on the frozen candidate.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/compare/v18.14.0...v18.14.2",
+        "https://github.com/can1357/oh-my-pi/blob/7efd77219374ca4e8767979809835e4aa90666ba/packages/ai/src/providers/openai-responses.ts#L515-L527",
+        "https://github.com/can1357/oh-my-pi/blob/7efd77219374ca4e8767979809835e4aa90666ba/packages/ai/src/providers/openai-responses-state.ts"
+      ]
+    },
+    {
+      "id": "models-schema-and-compat-keys",
+      "predicate": "models-config-schema.ts (053ffa107e8941ab237eed11dbbb44ceacfd6c01) and models-config-schema-bundle.ts (fada9dc8f3fe386e0d21f12c322b31149b98913c) are byte-carried between tags. The bundle still declares authHeader, statefulResponses and supportsReasoningSummary. includeEncryptedReasoning remains consumed by the Responses compatibility policy; it is not separately enumerated in the sparse bundle at either tag. The reviewed openai-shared.ts diff changes header merging, not these policy consumers.",
+      "lane_effect": "All five shipped fragment files keep authHeader=true, statefulResponses=true, includeEncryptedReasoning=false and supportsReasoningSummary=false. No fragment adds discovery, effortMap, custom headers or thinkingLoopGuard.",
+      "action": "Keep the fragments unchanged. Do not describe the retired compat.thinkingLoopGuard as a supported override: 883431d5 moves the control to a catalog axis and removes it from compat types. Remove that key from operator-authored copies rather than inventing a replacement models.yml key; do not disable the stock guard.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/7efd77219374ca4e8767979809835e4aa90666ba/packages/coding-agent/src/config/models-config-schema-bundle.ts#L54-L100",
+        "https://github.com/can1357/oh-my-pi/blob/7efd77219374ca4e8767979809835e4aa90666ba/packages/coding-agent/src/config/models-config-schema-bundle.ts#L376-L387",
+        "https://github.com/can1357/oh-my-pi/blob/7efd77219374ca4e8767979809835e4aa90666ba/packages/ai/src/providers/openai-shared.ts#L1081-L1102",
+        "https://github.com/can1357/oh-my-pi/blob/7efd77219374ca4e8767979809835e4aa90666ba/packages/ai/src/providers/openai-shared.ts#L4160-L4196",
+        "https://github.com/can1357/oh-my-pi/commit/883431d5fa14d9c23416d862c54cd567cf86996f"
+      ]
+    },
+    {
+      "id": "exact-selectors-and-effort-aliases",
+      "predicate": "18.14.1 resolves thinking.effortMap aliases before the distance ladder and retains advertised reasoning_effort_map/reasoning_required on discovery. The shipped static fragments declare [low, medium, xhigh], no effortMap and no discovery; the Qwen class rules are byte-carried (d38c1d34fa9fb38f5bf248cacba3b6786ea8e3e4). The model-resolver delta adds exact-only per-call task selection, not a rewrite of the existing provider-qualified CLI selection path.",
+      "lane_effect": "Source-derived expectation: high still clamps to medium and off to low on these static local models. task.perCallModel defaults off; operator-authored per-call models are newly subject to the exact allowlist and effort ceiling. The existing fleet front-matter selector is not a request to enable that feature.",
+      "action": "Retain ninfer-beta/q38-ninfer, ninfer-native-3090/q38-ninfer, ninfer-native-4090/qwen3.8-27b and ninfer-heavy/qwen3.8-27b:medium. Add neither effortMap nor per-call-model opt-ins. Preserve the stock replace/hashline distinction by served ID and verify selector/effort resolution in later acceptance.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/commit/d5844bc430045dabbe14134e5a1e138a08f611ee",
+        "https://github.com/can1357/oh-my-pi/commit/1e3b6c6bb27ea40fa2dc628715d595638e7490bf",
+        "https://github.com/can1357/oh-my-pi/blob/7efd77219374ca4e8767979809835e4aa90666ba/packages/catalog/src/model-thinking.ts#L43-L90",
+        "https://github.com/can1357/oh-my-pi/commit/c30b1bbc22c94716451b6793511f08b64f427675",
+        "https://github.com/can1357/oh-my-pi/pull/12229"
+      ]
+    },
+    {
+      "id": "headers-and-fail-closed-retry-policy",
+      "predicate": "ee1215df and follow-up d7edc82c merge model, OpenRouter and per-call headers case-insensitively, with the later source winning. 489fb46e changes provider error-body/retry-hint formatting. The retry settings' enabled/modelFallback/fallbackRevertPolicy definitions and the retry-disabled early return are carried; account-policy credential rotation and per-call model fallback restrictions do change elsewhere in recovery.",
+      "lane_effect": "No shipped fragment supplies custom or per-call headers. The local bearer-key, retry.enabled=false, retry.modelFallback=false, fallbackRevertPolicy=never route does not opt into credential pools or model fallback. This is a scoped source conclusion, not a claim that every upstream retry file or error string is unchanged.",
+      "action": "Keep fail-closed settings and assert no cloud/provider switch, no successful model response during outage and no hidden extra requests beyond documented turns plus actual tool calls. Do not match the old provider error text. Auth-gateway nullable Responses controls are server-side and do not migrate the direct NInfer client route.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/commit/ee1215dfcc94e90c39fa8c147af08c274aa881f5",
+        "https://github.com/can1357/oh-my-pi/commit/d7edc82c77d0908227ec5bc4f46eb93b9c8f3658",
+        "https://github.com/can1357/oh-my-pi/commit/489fb46e341a23f7ec7a1ea86f6c0222d93b607f",
+        "https://github.com/can1357/oh-my-pi/commit/5b9bd932f66310186291466e01028940b2e76613",
+        "https://github.com/can1357/oh-my-pi/blob/7efd77219374ca4e8767979809835e4aa90666ba/packages/coding-agent/src/session/turn-recovery.ts#L2640-L2647",
+        "https://github.com/can1357/oh-my-pi/blob/7efd77219374ca4e8767979809835e4aa90666ba/packages/coding-agent/src/session/settings.ts#L723-L940"
+      ]
+    },
+    {
+      "id": "qwen-loop-guard-catalog-axis",
+      "predicate": "883431d5 replaces isLoopGuardedModel with loopGuardLevel and resolves thinking-loop-guard from catalog policy on every host: Claude off, Gemini/DeepSeek/Grok semantic, unassigned models exact. Qwen and opaque local aliases have no off/semantic assignment. PI_NO_THINKING_LOOP_GUARD=1 or loopGuard.enabled=false still explicitly disables it. A short exact cycle containing a newline now needs at least 1024 repeated characters instead of 180; its four-repeat count remains. Non-newline short cycles retain four repeats/180 characters; long cycles retain three repeats/1024 characters.",
+      "lane_effect": "All NInfer routes retain exact detection, including preserved-thinking custom Responses streams, but repeated status lines below the new floor no longer discard a turn. Both reasoning and visible assistant text are guarded by default. This reduces a false-positive class without proving Qwen long-loop behavior on the real runtime.",
+      "action": "Keep the guard enabled. Preregister short repeated-status-line success, sufficiently long exact-loop failure, non-newline stutter and continued tool/nonce success for q38-ninfer and qwen3.8-27b. Do not import predecessor long-loop or inference qualification.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/commit/883431d5fa14d9c23416d862c54cd567cf86996f",
+        "https://github.com/can1357/oh-my-pi/blob/7efd77219374ca4e8767979809835e4aa90666ba/packages/ai/src/utils/thinking-loop.ts#L68-L84",
+        "https://github.com/can1357/oh-my-pi/blob/7efd77219374ca4e8767979809835e4aa90666ba/packages/ai/src/utils/thinking-loop.ts#L135-L150",
+        "https://github.com/can1357/oh-my-pi/blob/7efd77219374ca4e8767979809835e4aa90666ba/packages/ai/src/utils/thinking-loop.ts#L605-L637",
+        "https://github.com/can1357/oh-my-pi/blob/7efd77219374ca4e8767979809835e4aa90666ba/packages/catalog/src/compat/axes.ts#L454-L467"
+      ]
+    },
+    {
+      "id": "compaction-refuses-length-truncated-summaries",
+      "predicate": "bc8a9b2d, merged as cc3e8d57, rejects stopReason=length for local main summaries, turn-prefix summaries, handoffs and branch summaries; an incomplete display-only short summary is omitted without discarding a completed full summary. The budget/threshold functions are unchanged: at window 131072, reserve=max(floor(0.15*window),16384)=19660 and automatic compaction triggers strictly above 111412. Local main-summary output is separately bounded by min(floor(0.8*reserve),16384), not automatically the route's 32768 maximum output limit.",
+      "lane_effect": "A real local summary hitting its output budget now fails visibly rather than being accepted as complete context. Numeric trigger and runtime configuration do not change. Queueable /compact also ships in 18.14.1; it changes scheduling when deliberately queued, not that boundary.",
+      "action": "Preregister main/turn-prefix/handoff/branch length-stop rejection, completed-main plus truncated-short success, transcript preservation and successful later continuation on the NInfer lanes. Keep normal threshold, output limits and assertions unchanged; never mark an uninduced length stop as a passed negative probe.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/commit/bc8a9b2dddd29496507e6601948cef302d501d4c",
+        "https://github.com/can1357/oh-my-pi/commit/cc3e8d57fcf2f2d1d93e869ea63c034493f4f61e",
+        "https://github.com/can1357/oh-my-pi/blob/7efd77219374ca4e8767979809835e4aa90666ba/packages/agent/src/compaction/compaction.ts#L328-L428",
+        "https://github.com/can1357/oh-my-pi/blob/7efd77219374ca4e8767979809835e4aa90666ba/packages/agent/src/compaction/compaction.ts#L915-L923",
+        "https://github.com/can1357/oh-my-pi/blob/7efd77219374ca4e8767979809835e4aa90666ba/packages/agent/src/compaction/compaction.ts#L1065-L1088",
+        "https://github.com/can1357/oh-my-pi/blob/7efd77219374ca4e8767979809835e4aa90666ba/packages/agent/src/compaction/compaction.ts#L1308-L1345",
+        "https://github.com/can1357/oh-my-pi/blob/7efd77219374ca4e8767979809835e4aa90666ba/packages/agent/src/compaction/branch-summarization.ts#L382-L395"
+      ]
+    },
+    {
+      "id": "platform-and-non-route-changes",
+      "predicate": "18.14.1 adds non-owning session-lease queries and Windows native filesystem fixes; 18.14.2 also fixes OAuth refresh retention, ACP session handles, MCP recovery and operator/tool UI behavior. Neither release body advertises a new security fix; the Bun runtime fixes already motivated 18.14.0. These release-note observations are not a comprehensive security audit.",
+      "lane_effect": "Lease/restart behavior deserves a later Windows and Linux process-ownership probe even though the Responses transport files are carried. Other-provider and auth-gateway fixes do not qualify direct NInfer behavior.",
+      "action": "Download and accept all three new platform binaries. Include ownership-preserving lease observation, sibling continuation and checkpoint-owner restart in the authorized plan; keep macOS preview and Linux evidence WSL2-scoped. Do not execute a binary or contact hardware as part of this review.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/commit/1b2627eb82ded2a5cdb540aef0acae10698a957f",
+        "https://github.com/can1357/oh-my-pi/pull/17428",
+        "https://github.com/can1357/oh-my-pi/releases/tag/v18.14.1",
+        "https://github.com/can1357/oh-my-pi/releases/tag/v18.14.2"
+      ]
+    }
+  ],
+  "verdict": {
+    "host_free_blocker_found": false,
+    "qualification_claimed": false,
+    "new_client_inference_qualification_claimed": false,
+    "predecessor_acceptance_transferred": false,
+    "scope_limit": "Source and published-metadata review only; asset-download hashing, stock executable rehearsals, real loop-guard/compaction behavior, fresh platform and five-route acceptance, native public installs, independent restoration, product review and founder publication are unperformed separate gates. v0.16.0 remains on 18.14.0; no v0.16.1 release tree, compatibility authority or profile has been staged or repinned. No new runtime upgrade/rollback is qualified."
+  },
+  "sources": [
+    "https://github.com/alphastorm/omp-ninfer/issues/123",
+    "https://api.github.com/repos/can1357/oh-my-pi/releases/latest",
+    "https://api.github.com/repos/can1357/oh-my-pi/releases?per_page=10",
+    "https://api.github.com/repos/can1357/oh-my-pi/tags?per_page=10",
+    "https://github.com/can1357/oh-my-pi/releases/tag/v18.14.1",
+    "https://github.com/can1357/oh-my-pi/releases/tag/v18.14.2",
+    "https://github.com/can1357/oh-my-pi/compare/v18.14.0...v18.14.2"
+  ]
+}
