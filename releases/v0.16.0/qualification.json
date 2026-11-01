@@ -92,31 +92,91 @@
       }
     },
     "external_installation_acceptance": {
-      "status": "pending",
-      "note": "rerun against the published v0.7.0-qwen38-5090-beta.4 component (image 7a5a7bb8) before the cut; the receipt lands at releases/v0.16.0/acceptance/composed-external-installation.json"
+      "status": "passed",
+      "repository_path": "releases/v0.16.0/acceptance/composed-external-installation.json",
+      "sha256": "619e47cecfa58d1c0434bacbb89f0944d956cd15dcf969f12dafd7f49005eb0f",
+      "public_url": null,
+      "as_of": "2026-11-01",
+      "release": "v0.16.0",
+      "component_release_tag": "v18.14.0",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "620a5935cdb6a9ed52d8b0c93892d6b5bb84155244a98f3be82af0455177bf29",
+      "windows_binary_sha256": "620a5935cdb6a9ed52d8b0c93892d6b5bb84155244a98f3be82af0455177bf29",
+      "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+      "compatibility_sha256": "3acf06411a857943dedc8f7a04e90ae2e79636c4875e2761b72e379e07ebbe3c",
+      "platform_receipts": [
+        {
+          "profile": "darwin-remote-ssh",
+          "sha256": "1e5c32d2ccc045b4ed2c0a270b5e6675b7b29abff11bdd03e92b5ffaa2af4d54"
+        },
+        {
+          "profile": "windows-docker-local",
+          "sha256": "b6c19635e9deb2fcc2d5736c6da8be89c61e687834f68e6c40a0e8ce5a9e3299"
+        },
+        {
+          "profile": "linux-docker-local",
+          "sha256": "1dbb936b72cfd44c360fed3a39e41352c422e997636d2fe51a426ef2c0793a76"
+        }
+      ],
+      "note": "Fresh five-route execution and candidate-profile native probes passed, with independent restoration and final audits. Exact stock client and N16 runtime/configuration/model identities were observed. Council binding, final immutable pins, strict ready verification and publication remain separate gates."
     },
     "native_publication": {
       "repository_path": "releases/v0.16.0/qualification/native-publication.json",
       "sha256": "502a0f5eccc141e2fc4f58f639637eb874d36fb0259d181c9cfa144711aaded6"
+    },
+    "documented_route_acceptance": {
+      "status": "passed",
+      "repository_path": "releases/v0.16.0/acceptance/documented-routes.json",
+      "sha256": "cd61c512ce4a0600df69aa310465e9ab8ab463de372a8ef53b589c709b9b71c1"
     }
   },
   "as_of": "2026-11-01",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
+  "external_installation_qualified": true,
   "scope": "N16 common-engine runtime release: exact current RTX 5090 beta.4 and native RTX 3090/4090 beta.1 lane evidence; unchanged stock OMP 18.14.0 and model v3. Candidate-bound external-install acceptance and product-tooling council remain separate.",
   "interpretation": "Each retained measurement names its actual source, public/scratch package and config. No predecessor hardware, client-route acceptance or product council is relabeled. The RTX 4090 speed failure and RTX 5090 restart-latency misses retain their raw verdicts and founder waivers.",
   "eligibility_scope": "Lane candidate with all three current lanes, both native powered quality screens and authenticated native fit proofs bound. RTX 4090 upgrade evidence, candidate external-installation acceptance, product-tooling G4, composition, final pins and founder publication remain separate and binding.",
   "documented_route_acceptance": {
-    "status": "pending"
+    "status": "passed",
+    "scope": "All five fresh candidate-bound documented routes, three stock OMP 18.14.0 clients, both N16 native beta.1 public installs, and candidate-profile native probes. Linux is WSL2-scoped; macOS remains preview. No prior product-route or client acceptance is carried.",
+    "candidate_commit": "56899320d416bafda5c15d7e454e9b593badc0a6",
+    "evidence_commit_changes_candidate": false,
+    "evidence_path": "releases/v0.16.0/acceptance/documented-routes.json",
+    "evidence_sha256": "cd61c512ce4a0600df69aa310465e9ab8ab463de372a8ef53b589c709b9b71c1",
+    "document_change": "Only later non-executable release-state prose may change; composer must independently require every executed block to remain byte-identical.",
+    "documented_route_steps": {
+      "rtx5090-container-host": "2/2",
+      "rtx5090-macos-client": "10/10",
+      "rtx5090-windows-client": "5/5",
+      "rtx4090-native": "7/7",
+      "rtx3090-native": "7/7"
+    },
+    "platform_receipts": [
+      "releases/v0.16.0/acceptance/darwin-arm64-18.14.0.json",
+      "releases/v0.16.0/acceptance/windows-x64-18.14.0.json",
+      "releases/v0.16.0/acceptance/linux-x64-18.14.0.json"
+    ],
+    "fresh_product_acceptance": true,
+    "restoration": {
+      "path": "docs/measurements/2026-11-01-v0160-acceptance-restoration.json",
+      "status": "passed",
+      "driver_hold_s": 412.552,
+      "production_upgrade_activated": false,
+      "documented_directory_presence_restored": true,
+      "native_documented_stage_restored": true,
+      "native_driver_window_s": {
+        "rtx4090": 499.9772412776947,
+        "rtx3090": 1225.3077449798584
+      }
+    },
+    "composition_run": true
   },
-  "remaining_release_gates": [
-    "RTX 4090 running upgrade, forced first-Start rollback and repair rehearsal",
-    "candidate-bound external-install acceptance for all five routes, three stock client platforms, both native public installs and independent restoration",
-    "RTX 3090 C2 fanout, real stock-client overlap and two automatic-compaction/control-recall epochs on the frozen product candidate",
-    "product-tooling G4 and joint council binding",
-    "composition, immutable final pins, strict ready/check-pins verification and founder-owned publication"
-  ],
+  "remaining_release_gates": [],
   "observed_gates": {
     "rtx5090_lane": {
       "status": "passed",
@@ -157,7 +217,7 @@
     "g4_review": {
       "status": "closed-fork-only",
       "repository_path": "releases/v0.16.0/review/runtime-ledger.json",
-      "sha256": "a86d40d9d638f0e222f02696b42c487254b84e81bcf4d776bbf0ec8763e11275",
+      "sha256": "b4c0942ccab954e241a8a1ecf3e0699c51c06a66c0832c52fefe54194ac66bb2",
       "scope": "Current N16 fork council closed by disposition; product-tooling council pending, not inherited."
     },
     "rtx3090_upgrade": {

@@ -1,6 +1,6 @@
 # Releases
 
-> Prepared v0.16.0 candidate: not a published product. Any acceptance or product-council section below is a plan until its pending evidence lands. Published installation remains on the [immutable v0.15.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.15.0/docs/QUICKSTART.md).
+> Prepared v0.16.0 candidate: not a published product. Fresh candidate acceptance passed on 2026-11-01; product-council binding and the final manifest pin remain separate gates. Published installation remains on the [immutable v0.15.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.15.0/docs/QUICKSTART.md).
 
 
 Oh My Pi (coding-agent client) connects through OMP NInfer (qualified appliance and release layer)
@@ -8,8 +8,8 @@ to NInfer (inference engine) serving Qwen3.8 27B (served model). OMP NInfer vers
 product; component repositories keep their own versions and tags, and the product manifest binds
 the exact combination.
 
-**Navigation:** [Current release (v0.16.0)](#v0160--native-dflash2-k7-rtx-3090-concurrency-2-and-unified-engine-fixes) ·
-[Previous v0.15.0](#v0150--stock-omp-18140-with-unchanged-gpu-lanes) ·
+**Navigation:** [Prepared v0.16.0](#v0160--native-dflash2-k7-rtx-3090-concurrency-2-and-unified-engine-fixes) ·
+[Current release (v0.15.0)](#v0150--stock-omp-18140-with-unchanged-gpu-lanes) ·
 [Channels](#channels) · [Version identities](#version-identities) ·
 [Release state transition](#release-state-transition) · [Candidate freeze](#candidate-freeze) ·
 [Next native release sequencing](#next-native-release-sequencing) ·
@@ -18,9 +18,8 @@ the exact combination.
 
 ## v0.16.0 — native DFlash2 K7, RTX 3090 concurrency 2, and unified engine fixes
 
-Prepared **v0.16.0**; publication date **⟦PENDING: v0.16.0 publication date, releases/v0.16.0/NINFER_RELEASE_NOTES.md⟧**
-(`⟦PENDING: v0.16.0 publication timestamp UTC, GitHub release ID, and annotated tag commit SHA, releases/v0.16.0/NINFER_RELEASE_NOTES.md⟧`)
-is not published; the current product remains `v0.15.0` (published 2026-10-30) and superseding the `v0.15.1`
+Prepared **v0.16.0** is not published; the current published product remains `v0.15.0` (published
+2026-10-30), and `v0.16.0` supersedes the `v0.15.1`
 native-DFlash2 patch referenced in the `v0.15.0` release notes and roadmap. All three qualified GPU
 lanes bind one frozen engine source `26fa28d0e7834515508fc07ac503164a6effc820` (`26fa28d0`, tag
 `rebase/ckpt-native-n16`) on upstream `Neroued/ninfer` master
@@ -50,26 +49,76 @@ off:
   agent-probe parity (`max source_wait <= 0.0178 s`), `15/15` managed qualification phases in
   [`rtx4090.json`](../releases/v0.16.0/qualification/rtx4090.json) (`69ebf60c`, **254.27 tok/s** `C1`
   decode at **83.88%** DFlash2 acceptance, **2,139.14 tok/s** prefill, **83.35 s** exact
-  130,048-token retrieval, **1,647 / 1,650** cached tokens across **42.21 s** restart, `450 W`
-  restored; isolated scratch-lineage rollback `not_applicable`), the 1,120-prompt `EXP-102` powered
-  quality screen (`PASS: 1,120 prompts; both arms 80/80 deterministic, 0 missing/error samples; 777/1,120 paired content/reasoning outputs changed. All 9 primary bounds passed: recall lower -0.0082 and precision lower -0.0093 (margin -0.02); unsupported upper 0.0045 (0.03); schema/tool-selection/tool-argument lower 0 (each -0.02); duplicate upper 0.0046 (0.02); redaction lower -0.0139 (-0.05); secret-leak ratio upper 1.0985 (1.10), counts 533 to 561, not zero`),
-  108-role + 7-supplemental ABBA speed vs `v0.14.0` MTP3 (108-case role corpus `role108`: `84` cases at `0` cached tokens + `12` at `32,000` + `12` at `64,000` weighted **×1.2736** at `139.87 → 178.13 tok/s`, all `115` cases **×1.2741** at `138.94 → 177.02 tok/s`, `7` supplementals **×1.2778** / min **×1.0804**, `115/115` repeats per build and `43/115` cross-build byte-identical, with depth-0 case `log-024@0` at **0.934** / `139.41 → 130.19 tok/s` below the `0.95` per-case decode ratio floor waived by the founder with disclosure),
-  and `v0.7.0-beta.3` upgrade/rollback/repair rehearsal (`⟦PENDING: N16 FINAL RTX 4090 upgrade, rollback, and repair rehearsal from v0.7.0-qwen38-4090-beta.3, window/final-4090/⟧`).
+  130,048-token retrieval, **1,647** explicit-save and **1,650** graceful-stop cached tokens across
+  **42.21 s** restart, `450 W` restored; isolated scratch-lineage rollback `not_applicable`), the
+  1,120-prompt `EXP-102` powered quality screen
+  ([`rtx4090-windows-native.quality-screen.json`](../releases/v0.16.0/qualification/rtx4090-windows-native.quality-screen.json)
+  `6231dccd`: **PASS**, `1,120` unique prompts, `672` gate + `504` redaction pairs overlapping on
+  `56` control variants, both arms `80/80` deterministic with `0` missing/error samples, `777/1,120`
+  paired outputs changed, **9/9** primary bounds passed: `recall` lower `-0.0082`, `precision` lower
+  `-0.0093` vs `-0.02`; `unsupported` upper `+0.0045` vs `+0.03`;
+  `schema`/`tool_selection`/`tool_argument` lower `0` vs `-0.02`; `duplicate` upper `+0.0046` vs
+  `+0.02`; `redaction` lower `-0.0139` vs `-0.05`; `secret_leak` ratio `1.0525`, upper `1.0985 <
+  1.10`, counts `533 → 561`, not zero),
+  108-role + 7-supplemental ABBA speed vs `v0.14.0` MTP3
+  ([`rtx4090-speed.json`](../releases/v0.16.0/qualification/rtx4090-speed.json) `32acdecc`,
+  [`rtx4090-speed-waiver.json`](../releases/v0.16.0/qualification/rtx4090-speed-waiver.json)
+  `92b94c4a`: 108-case role corpus `role108` weighted **×1.2736** at `139.87 → 178.13 tok/s`, all
+  `115` cases **×1.2741** at `138.94 → 177.02 tok/s`, `7` supplementals **×1.2778** / min
+  **×1.0804**, `115/115` repeats per build and `43/115` cross-build byte-identical, with depth-0
+  case `log-024@0` at **0.934** / `139.41 → 130.19 tok/s` below the `0.95` per-case decode ratio
+  floor waived by the founder with disclosure),
+  and `v0.7.0-beta.3` upgrade/rollback/repair rehearsal (**PASS 3/3 scenarios** from
+  `v0.7.0-qwen38-4090-beta.3` `87038cfb` → `06526bdb`, summary `38a3a380`: `1c` running-lane
+  upgrade in `211.93 s`, `2c` forced post-activation first-`Start` port-ownership refusal with
+  rollback in `211.37 s` deleting `4/4` transaction-created targets, and `3c` interrupted install
+  then `-RepairInterruptedInstall` deleting `4/4` targets and same-instance reinstall in `309.80 s`;
+  canonical states unchanged, `450 W` restored; no product-route acceptance is inferred).
 - **RTX 3090 (`v0.8.0-qwen38-3090-beta.1`, profile `qwen38-3090-native-v0.8.0-beta.1`):**
   package `040d5923` (`1,008,976,979` B), server `72cd776b`, public config `cbe67aae`, **`C2` (two
   active requests sharing one 131,072-token `INT8` KV pool, 180 s pending timeout,
   `ninfer-native-3090: 2` in `fail-closed.yml`)**, `20,867.734375 MiB` (`21,881,405,440` B) shared
   Host budget, `768 MiB` admission headroom, keep-warm off, 350 W serving cap / 370 W restored.
   Passed `43/43` two-round EXE/DLL byte comparisons, `EXP-101` 1,120-prompt powered quality screen
-  (`PASS: 1,120 prompts; both arms 80/80 deterministic with 0 missing/error samples; 771/1,120 paired content/reasoning outputs changed. All 9 primary bounds passed: recall lower -0.0073 and precision lower -0.0070 (margin -0.02); unsupported upper 0.0089 (0.03); schema/tool-selection/tool-argument lower 0 (each -0.02); duplicate upper 0.0059 (0.02); redaction lower -0.0119 (-0.05); secret-leak ratio upper 1.0673 (1.10), counts 545 to 561, not zero`),
-  84-role depth-0 ABBA speed (`PASS: 84 depth-0 ABBA cases at 350 W; weighted 1.2683598277 (79.37 to 100.67 tok/s), minimum 0.9764424319 >= 0.95, no waived case; both within-engine repeats 84/84 identical, cross-engine 36/84 identical`),
-  131,072-token `INT8` `C2` fit/true-cold, agent/concurrency probes, and 15-phase qualification in
+  ([`rtx3090-windows-native.quality-screen.json`](../releases/v0.16.0/qualification/rtx3090-windows-native.quality-screen.json)
+  `671659f0`: **PASS**, `1,120` unique prompts, `672` gate + `504` redaction pairs overlapping on
+  `56` control variants, both arms `80/80` deterministic with `0` missing/error samples, `771/1,120`
+  paired outputs changed, **9/9** primary bounds passed: `recall` lower
+  `-0.0073`, `precision` lower `-0.0070` vs `-0.02`; `unsupported` upper `+0.0089` vs `+0.03`;
+  `schema`/`tool_selection`/`tool_argument` lower `0` vs `-0.02`; `duplicate` upper `+0.0059` vs
+  `+0.02`; `redaction` lower `-0.0119` vs `-0.05`; `secret_leak` ratio `1.0294`, upper `1.0673 <
+  1.10`, counts `545 → 561`, not zero),
+  84-role depth-0 ABBA speed
+  ([`rtx3090-speed.json`](../releases/v0.16.0/qualification/rtx3090-speed.json) `c904d341`: **PASS**,
+  84 depth-0 cases at 350 W, weighted **×1.2684** / `1.268360×` at `79.37 → 100.67 tok/s`, minimum
+  **0.9764×** / `0.976442× >= 0.95` on `log-024@0`, zero waived cases, `84/84` within-engine and
+  `36/84` cross-engine byte-identical),
+  131,072-token `INT8` `C2` fit/true-cold
+  ([`rtx3090-windows-native.fit.json`](../releases/v0.16.0/qualification/rtx3090-windows-native.fit.json)
+  `662619d7`: `1,110,441,984` B / `1,059 MiB` available >= `805,306,368` B / `768 MiB` floor,
+  `22,584 MiB` peak, `1,742 MiB` min free, two `59,866`-token true-cold sessions restored at
+  `59,840 + 26` tokens with `32/32` token IDs and UTF-8 bytes identical; converted device /
+  host-mapped weights `473,497,600` / `1,350,860,800` B), `83/83` agent-probe parity positions under
+  `p16-agent-parity/2` (`0` cache-gap deltas, min TTFT bound margin `0.169 s`, `C2`
+  `fanout-concurrency 4` `5/5` HTTP 200, calibrated `2 × 59,879`-token test `18/18` HTTP 200 across
+  3 trials, `0` HTTP 500; summary `8218925c`), and `15/15` managed qualification phases in
   [`rtx3090.json`](../releases/v0.16.0/qualification/rtx3090.json)
-  (`PASS: 131,072-token INT8 C2, 1,110,441,984 B (1,059 MiB) available after startup >= 805,306,368 B (768 MiB); 22,584 MiB peak / 1,742 MiB min free. Two 59,866-token true-cold sessions restored at 59,840 cached + 26 computed tokens with 32/32 generated token IDs and UTF-8 bytes identical; converted device / host-mapped weights 473,497,600 / 1,350,860,800 B; 15/15 phases passed: C1 decode 148.43 tok/s, prefill 974.15 tok/s, DFlash2 acceptance 83.88%, exact 130,048-token retrieval 188.99 s; explicit-save/graceful-stop cached 1,647/1,650, restart 46.88 s; schema-2 normal/pressure product protocol and state_security passed; isolated rollback not_applicable (0 directions), 370 W restored; PASS: 83/83 positions (arrival 12, mix 51, sibling 5, two-restart restore 4, fleet 11) under p16-agent-parity/2, cache-gap deltas 0. Fanout-concurrency 4: 5/5 HTTP 200; calibrated 2 x 59,879-token test: 18/18 HTTP 200 across 3 trials; 0 HTTP 500`;
-  paired 2,048-token `C2` vs `C1` decode reaches **1.385×** median aggregate `57.68 → 79.90 tok/s`,
-  **0.722×** pair wall `71.01 → 51.26 s`, and **0.70–0.73×** concurrent per-request decode,
-  `EXP-106`, with post-resume first-fork TTFT cut from **15.4–17.8 s** to **0.33–0.76 s**,
-  `EXP-105`), and `v0.7.0-beta.3` upgrade/rollback/repair rehearsal (`PASS: 1c running-lane upgrade, 2c forced post-activation first-Start failure with rollback, 3c interrupted install/repair/same-instance reinstall from true v0.14.0 beta.3; all 3 scenarios passed once, candidate transaction-created targets removed, canonical states unchanged, 370 W restored; no product-route acceptance is inferred`).
+  (public sanitized `48c7f635`, raw `038fe713`: **148.43 tok/s** `C1` decode, **974.15 tok/s**
+  prefill, **83.88%** DFlash2 acceptance, **188.99 s** exact 130,048-token retrieval, **1,647**
+  explicit-save and **1,650** graceful-stop cached tokens across **46.88 s** restart, schema 2
+  normal and `17,878.578125 MiB` pressure product protocol under the founder-approved
+  `agent_protocol.py` `C2` precondition override `317b98ee` in
+  [alphastorm/ninfer#56](https://github.com/alphastorm/ninfer/pull/56), `state_security` `898 ms`,
+  isolated rollback `not_applicable` with `0` directions, `370 W` restored; paired 2,048-token `C2`
+  vs `C1` decode reaches **1.385×** median aggregate `57.68 → 79.90 tok/s`, **0.722×** pair wall
+  `71.01 → 51.26 s`, and **0.70–0.73×** concurrent per-request decode, `EXP-106`, with post-resume
+  first-fork TTFT cut from **15.4–17.8 s** to **0.33–0.76 s**, `EXP-105`), and `v0.7.0-beta.3`
+  upgrade/rollback/repair rehearsal (**PASS 3/3 scenarios** from
+  `v0.7.0-qwen38-3090-beta.3` `a7637f66` → `040d5923`, summary `631428b5`: `1c` running-lane
+  upgrade at 350 W in `220.32 s`, `2c` forced post-activation first-`Start` failure with rollback
+  in `206.96 s` deleting `4/4` transaction targets, and `3c` interrupted install then repair
+  deleting `4/4` targets and same-instance reinstall in `322.25 s`; canonical states unchanged, `370
+  W` restored; no product-route acceptance is inferred).
 - **RTX 5090 (`v0.7.0-qwen38-5090-beta.4`):** OCI image `7a5a7bb8` on reused runtime base
   `d4377ed0` (`runtime-base-04b603aa-20261025`), checked first-build server `bab3fd77`, binary
   archive `f3a35cdb` (`579,765,099` B), SPDX `b09ad9a7`, source archive `1ef87d52` (`12,656,433` B,
@@ -105,13 +154,19 @@ have separate status in [`review/runtime-ledger.json`](../releases/v0.16.0/revie
 with deferred items in [#88](https://github.com/alphastorm/omp-ninfer/issues/88)–[#90](https://github.com/alphastorm/omp-ninfer/issues/90)
 and `alphastorm/ninfer`
 [#50](https://github.com/alphastorm/ninfer/issues/50)–[#54](https://github.com/alphastorm/ninfer/issues/54).
-Fresh acceptance is pending on frozen candidate
-`⟦PENDING: v0.16.0 frozen product candidate commit SHA, releases/v0.16.0/acceptance/composed-external-installation.json⟧`
-will exercise all five documented routes (31 blocks), three stock OMP 18.14.0 clients, both
+Fresh acceptance passed on frozen candidate
+`56899320d416bafda5c15d7e454e9b593badc0a6`
+on **2026-11-01** (completed `2026-11-01T12:30:58Z`), covering all five documented routes
+(host `2/2`, macOS `10/10`, Windows `5/5`, both native routes `7/7`; **31/31 blocks**),
+three stock OMP 18.14.0 clients, both
 `v0.8.0-beta.1` native public installs, RTX 3090 `C2` probes, and independent host restoration
-(`⟦PENDING: v0.16.0 acceptance completion date, route/public-install outcomes, and restoration hold durations, releases/v0.16.0/acceptance/composed-external-installation.json⟧`;
-documented routes (planned `../releases/v0.16.0/acceptance/documented-routes.json`; pending),
-composed acceptance (planned `../releases/v0.16.0/acceptance/composed-external-installation.json`; pending),
+(both native lanes **22/22 behavior gates**, public installers `already_installed` with exact
+qualified bytes and unchanged pointers; first-lineage rollback `not_applicable`, zero directions;
+RTX 5090 hold **412.552 s**, native RTX 4090 / RTX 3090 windows **499.977 / 1,225.308 s**,
+**18/18 Restore and 18/18 final Audit checks per native lane**, stopped **450 / 370 W** restored;
+[documented routes](../releases/v0.16.0/acceptance/documented-routes.json),
+[composed acceptance](../releases/v0.16.0/acceptance/composed-external-installation.json),
+[restoration](measurements/2026-11-01-v0160-acceptance-restoration.json),
 [release notes](../releases/v0.16.0/NINFER_RELEASE_NOTES.md),
 [manifest](../releases/v0.16.0/manifest.json),
 [qualification](../releases/v0.16.0/qualification.json)).
@@ -120,7 +175,7 @@ composed acceptance (planned `../releases/v0.16.0/acceptance/composed-external-i
 
 Published **2026-10-30** (`2026-10-30T21:10:42Z`, GitHub release ID `429493153`, annotated tag
 `v0.15.0` → `dff3622fd34d2e5726c508380229de87d402842e`) as GitHub `Latest`, succeeding `v0.14.0`
-(published 2026-10-28); superseded by `v0.16.0` on `⟦PENDING: v0.16.0 publication date, releases/v0.16.0/NINFER_RELEASE_NOTES.md⟧`. Unmodified upstream OMP **18.14.0** (`31147f9d`, tree `9a63b5bf`, release ID
+(published 2026-10-28); prepared successor `v0.16.0` is not published. Unmodified upstream OMP **18.14.0** (`31147f9d`, tree `9a63b5bf`, release ID
 `428242783`, upstream binaries rebuilt with Bun 1.4.4 for CVE-2026-91403 and CVE-2026-111497;
 `qwen3.8-27b` on native RTX 4090 defaults to stock `replace` edit-tool mode while the opaque
 `q38-ninfer` alias on RTX 5090 and native RTX 3090 stays `hashline`) replaces 18.12.6 across macOS
@@ -380,7 +435,7 @@ native public installs, with independent restoration and production left unchang
 
 | Channel | Meaning | Recorded baseline |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.16.0`, published `⟦PENDING: v0.16.0 publication date, releases/v0.16.0/NINFER_RELEASE_NOTES.md⟧` (`Latest`); predecessor `v0.15.0` (2026-10-30) |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.15.0`, published 2026-10-30 (`Latest`); prepared successor `v0.16.0` (not published) |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release.
 The historical fork client used separate `omp-beta` and stable `omp` Homebrew casks through
@@ -405,12 +460,10 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
-### v0.16.0 public release — native DFlash2 K7, RTX 3090 concurrency 2, and unified engine fixes
+### v0.16.0 prepared release — native DFlash2 K7, RTX 3090 concurrency 2, and unified engine fixes
 
-Published `⟦PENDING: v0.16.0 publication date, releases/v0.16.0/NINFER_RELEASE_NOTES.md⟧`
-(`⟦PENDING: v0.16.0 publication timestamp UTC, GitHub release ID, and annotated tag commit SHA, releases/v0.16.0/NINFER_RELEASE_NOTES.md⟧`);
-the current GitHub `Latest` release (predecessor `v0.15.0`, published 2026-10-30; supersedes the
-planned `v0.15.1` patch).
+Prepared candidate (not published; the current GitHub `Latest` release remains `v0.15.0`, published
+2026-10-30; `v0.16.0` supersedes the planned `v0.15.1` patch).
 
 The [release notes](../releases/v0.16.0/NINFER_RELEASE_NOTES.md) and
 [manifest](../releases/v0.16.0/manifest.json) bind all three GPU lanes to one frozen engine source
@@ -476,9 +529,23 @@ model container version 3 `81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd35813
   release ID `qwen38-4090-native-v0.8.0-beta.1-26fa28d0e783`
   ([lane receipt](../releases/v0.16.0/qualification/rtx4090.json), SHA-256 `69ebf60c`: 254.27 tok/s
   C1 decode at 83.88% DFlash2 K=7 acceptance, 2,139.14 tok/s prefill, 83.35 s exact 130,048-token
-  retrieval, 1,647/1,650-token restart reuse across 42.213 s restart, canonical schema 2 protocol at
-  full 15,747.734375 MiB and reduced 12,758.578125 MiB shared Host budgets, `Group64` A8 and FP32
-  head logits off, isolated scratch-lineage rollback `not_applicable`, 450 W restored on stop; 108-role + 7-supplemental ABBA speed `role108` weighted `×1.2736` at `139.87 → 178.13 tok/s`, all `115` cases `×1.2741`, `7` supplementals min `×1.0804`, `115/115` repeats per build and `43/115` cross-build byte-identical, with `log-024@0` at `0.934` / `139.41 → 130.19 tok/s` below the `0.95` per-case floor waived by the founder with disclosure):
+  retrieval, `1,647` explicit-save and `1,650` graceful-stop cached tokens across `42.213 s`
+  restart, canonical schema 2 protocol at full 15,747.734375 MiB and reduced 12,758.578125 MiB
+  shared Host budgets, `Group64` A8 and FP32 head logits off, isolated scratch-lineage rollback
+  `not_applicable`, 450 W restored on stop;
+  [`EXP-102`](../releases/v0.16.0/qualification/rtx4090-windows-native.quality-screen.json)
+  `6231dccd` 1,120-prompt quality screen `9/9` primary bounds and `80/80` determinism passed;
+  [`fit`](../releases/v0.16.0/qualification/rtx4090-windows-native.fit.json) `44c50008` `1,008 MiB`
+  available >= `640 MiB` floor and `32/32` true-cold tokens identical; `83/83` agent-probe parity;
+  `v0.7.0-beta.3` upgrade rehearsal `38a3a380` `3/3` scenarios (`1c` running upgrade `211.93 s`,
+  `2c` forced first-`Start` rollback `211.37 s`, `3c` interrupted-install repair and reinstall
+  `309.80 s`) passed; 108-role + 7-supplemental ABBA speed
+  [`rtx4090-speed.json`](../releases/v0.16.0/qualification/rtx4090-speed.json) `32acdecc` `role108`
+  weighted `×1.2736` at `139.87 → 178.13 tok/s`, all `115` cases `×1.2741`, `7` supplementals min
+  `×1.0804`, `115/115` repeats per build and `43/115` cross-build byte-identical, with `log-024@0`
+  at `0.934` / `139.41 → 130.19 tok/s` below the `0.95` per-case floor waived by the founder in
+  [`rtx4090-speed-waiver.json`](../releases/v0.16.0/qualification/rtx4090-speed-waiver.json)
+  `92b94c4a`):
 
 | RTX 4090 asset (`v0.8.0-qwen38-4090-beta.1`) | Asset ID | SHA-256 | Bytes |
 | --- | ---: | --- | ---: |
@@ -504,9 +571,28 @@ model container version 3 `81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd35813
   `72cd776be6caa99148757a88db8dca046f2c1fba67166975c8b4f2f84d94c624` (`342,580,224` bytes),
   `ninfer.exe` `871aff5093845bb116f800c249b79e5ba6ba4888462d15ee2a30ac8c2518e11b`,
   `ninfer_bench.exe` `0cb5d222b994bde1bb86d494a4c8310c0498480203c9d643b77352110f518f74`, installed
-  release ID `qwen38-3090-native-v0.8.0-beta.1-26fa28d0e783`
-  ([lane receipt](../releases/v0.16.0/qualification/rtx3090.json):
-  `15/15 phases passed: C1 decode 148.43 tok/s, prefill 974.15 tok/s, DFlash2 acceptance 83.88%, exact 130,048-token retrieval 188.99 s; explicit-save/graceful-stop cached 1,647/1,650, restart 46.88 s; schema-2 normal/pressure product protocol and state_security passed; isolated rollback not_applicable (0 directions), 370 W restored`):
+  release ID `qwen38-3090-native-v0.8.0-beta.1-26fa28d0e783` (scratch port-only qualified
+  configuration `d114ddbbf187c22e1c5c2ce6699b4521e74fef21537c009859d176e0d1377271`, scratch
+  package `c962422232df32db5d1bdd2bd678f93f93af35d799a377db72c3ce0864f613d0`;
+  [lane receipt](../releases/v0.16.0/qualification/rtx3090.json), public sanitized SHA-256
+  `48c7f635`, raw `038fe713`: `15/15` phases passed, `148.43 tok/s` C1 decode at `83.88%` DFlash2
+  K=7 acceptance, `974.15 tok/s` prefill, `188.99 s` exact 130,048-token retrieval, `1,647`
+  explicit-save and `1,650` graceful-stop cached tokens across `46.882 s` restart, schema 2 normal
+  and `17,878.578125 MiB` pressure product protocol under the founder-approved `agent_protocol.py`
+  `C2` precondition override `317b98ee` in
+  [alphastorm/ninfer#56](https://github.com/alphastorm/ninfer/pull/56), `state_security` `898 ms`,
+  isolated scratch-lineage rollback `not_applicable`, 370 W restored on stop;
+  [`EXP-101`](../releases/v0.16.0/qualification/rtx3090-windows-native.quality-screen.json)
+  `671659f0` 1,120-prompt quality screen `9/9` primary bounds and `80/80` determinism passed;
+  84-role depth-0 ABBA speed [`rtx3090-speed.json`](../releases/v0.16.0/qualification/rtx3090-speed.json)
+  `c904d341` weighted `×1.2684` at `79.37 → 100.67 tok/s`, min `0.9764× >= 0.95` on `log-024@0`,
+  zero waived cases, `84/84` within-build and `36/84` cross-build byte-identical;
+  [`fit`](../releases/v0.16.0/qualification/rtx3090-windows-native.fit.json) `662619d7` `1,059 MiB`
+  available >= `768 MiB` floor and two `59,866`-token true-cold sessions `32/32` tokens identical;
+  `83/83` agent-probe parity under `p16-agent-parity/2` plus `C2` `fanout-concurrency 4` `5/5` and
+  `2 × 59,879`-token `18/18` HTTP 200 in `8218925c`; `v0.7.0-beta.3` upgrade rehearsal `631428b5`
+  `3/3` scenarios (`1c` running upgrade `220.32 s`, `2c` forced first-`Start` rollback `206.96 s`,
+  `3c` interrupted-install repair and reinstall `322.25 s`) passed, 370 W restored):
 
 | RTX 3090 asset (`v0.8.0-qwen38-3090-beta.1`) | Asset ID | SHA-256 | Bytes |
 | --- | ---: | --- | ---: |
@@ -528,16 +614,16 @@ model container version 3 `81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd35813
   `omp-windows-x64.exe` `620a5935`, 242,797,056 bytes; `omp-linux-x64` `e7dd2b60`, 276,244,656
   bytes in [`client-components.json`](../releases/v0.16.0/qualification/client-components.json)).
 
-Documented routes (planned `../releases/v0.16.0/acceptance/documented-routes.json`; pending) ·
-Composed acceptance (planned `../releases/v0.16.0/acceptance/composed-external-installation.json`; pending) ·
+[Documented routes](../releases/v0.16.0/acceptance/documented-routes.json) ·
+[Composed acceptance](../releases/v0.16.0/acceptance/composed-external-installation.json) ·
 [Qualification](../releases/v0.16.0/qualification.json) ·
 [Review ledger](../releases/v0.16.0/review/runtime-ledger.json).
 
 ### v0.15.0 public release — stock OMP 18.14.0 with unchanged GPU lanes
 
 Published 2026-10-30 (`2026-10-30T21:10:42Z`, GitHub release ID `429493153`, annotated tag
-`v0.15.0` → `dff3622fd34d2e5726c508380229de87d402842e`); superseded as GitHub `Latest` by
-`v0.16.0` (predecessor `v0.14.0`, published 2026-10-28).
+`v0.15.0` → `dff3622fd34d2e5726c508380229de87d402842e`); the current GitHub `Latest` release
+(predecessor `v0.14.0`, published 2026-10-28; prepared successor `v0.16.0` is not published).
 
 The [release notes](../releases/v0.15.0/NINFER_RELEASE_NOTES.md) and
 [manifest](../releases/v0.15.0/manifest.json) bind unmodified upstream OMP **18.14.0** (upstream

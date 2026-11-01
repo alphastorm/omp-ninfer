@@ -1,6 +1,6 @@
 # OMP NInfer v0.16.0 — native DFlash2 K7, RTX 3090 concurrency 2, and unified engine fixes
 
-**Prepared composition: final hardware qualification, candidate route acceptance, and product-tooling four-seat critical-review council (`G4`, `review/runtime-ledger.json`) in progress; not published.**
+**Prepared composition: fresh candidate route acceptance passed; product-tooling four-seat critical-review council (`G4`, `review/runtime-ledger.json`) binding outstanding; not published.**
 This is not a published product release. All three runtime components in **v0.16.0**
 build from one frozen engine release-candidate source `26fa28d0e7834515508fc07ac503164a6effc820`
 (`26fa28d0`, referred to below as `N16`, tag `rebase/ckpt-native-n16` in `alphastorm/ninfer`) on
@@ -21,7 +21,7 @@ three-lane engine rebuild, `v0.16.0` supersedes the `v0.15.1` patch previously r
 The published product remains [v0.15.0](../v0.15.0/NINFER_RELEASE_NOTES.md); use its
 [immutable installation guide](https://github.com/alphastorm/omp-ninfer/blob/v0.15.0/docs/QUICKSTART.md)
 until publication. The [prepared guide](../../docs/QUICKSTART.md) is bound to frozen candidate
-`⟦PENDING: v0.16.0 frozen product candidate commit SHA, releases/v0.16.0/acceptance/composed-external-installation.json⟧`;
+`56899320d416bafda5c15d7e454e9b593badc0a6`;
 it is not an installation recommendation before publication. Component publication, runtime
 qualification, candidate-bound external installation, independent G4 review, and founder-owned
 product publication are distinct gates; no predecessor hardware or client-route receipt is relabeled.
@@ -37,7 +37,7 @@ to NInfer (inference engine) serving Qwen3.8 27B on one user-owned GPU.
 
 | Component | Exact identity | Serving boundary |
 | --- | --- | --- |
-| Oh My Pi | Unmodified upstream `v18.14.0`, source `31147f9d1a76608549821c3759f8487b4d66c72d`, tree `9a63b5bfbb5971962c44fca660744b0d75dcd2c2` | Carried stock client (`omp-darwin-arm64` `60884395`, `omp-windows-x64.exe` `620a5935`, `omp-linux-x64` `e7dd2b60`); fresh three-platform and five-route acceptance `⟦PENDING: v0.16.0 three-platform and five-route acceptance status, releases/v0.16.0/acceptance/documented-routes.json⟧`; macOS remains preview |
+| Oh My Pi | Unmodified upstream `v18.14.0`, source `31147f9d1a76608549821c3759f8487b4d66c72d`, tree `9a63b5bfbb5971962c44fca660744b0d75dcd2c2` | Carried stock client (`omp-darwin-arm64` `60884395`, `omp-windows-x64.exe` `620a5935`, `omp-linux-x64` `e7dd2b60`); fresh three-platform and five-route acceptance **PASS, 31/31 blocks on 2026-11-01** ([routes](acceptance/documented-routes.json)); macOS remains preview |
 | RTX 5090 container | `v0.7.0-qwen38-5090-beta.4` (`v0.7.0-qwen38-5090-runtime-beta.4`, `v0.7.0-qwen38-5090-source.4`); server `bab3fd77`, archive `f3a35cdb`, SPDX `b09ad9a7`, checksums `cca65f0d`, source archive `1ef87d52`, image `sha256:7a5a7bb88966512bcab2f711c1a7515bf0b8b834aaf0abd5456643493babb016` on base `d4377ed0` | Kept `qwen38-5090-v0.13.0` (config `751d22dc`, only `--binary-sha256` changed from `55f0b95a` to `bab3fd77`): BF16 KV (146,368 automatic tokens), 131,072 context, DFlash2 K7 (`--lm-head-draft`), two active requests (`C2`) + 2 extra device-state slots, 1,024-token prefill chunk, 180 s (`180000 ms`) pending timeout, 20,867.734375 MiB (`21,881,405,440` B) shared Host budget, 28,672 MiB host RAM floor, 60,000 ms keep-warm, `/checkpoints-v013` (`24,576 MiB` quota, `256 MiB` staging, mandatory `--session-checkpoint-require-origin-auth`), vision + tools + JSON-schema output + preserved thinking; checked-first-build reproducibility exception remains specific to this lane |
 | RTX 4090 native Windows | `v0.8.0-qwen38-4090-beta.1`; package `06526bdb` (`991,969,490` B), server `c6f59e9e`, public config `f00cfac9`, release-spec `aab7a74d`, SPDX `825a8d30`, CycloneDX `b8c8efcb`, outer `SHA256SUMS` `bf1650eb` | Profile `qwen38-4090-native-v0.8.0-beta.1`: INT8 KV, DFlash2 K7 (`Q4_G64_FP16` draft MLP, host-mapped token embedding, `proposal: "artifact-default"`), one active request (`C1`) + 2 extra device-state slots, 131,072 context/KV, 1,024-token prefill chunk, 30 s (`30000 ms`) pending timeout, 15,747.734375 MiB (`16,512,696,320` B) shared Host budget, 640 MiB admission headroom, 32,768 MiB host RAM floor, `Group64` A8 and FP32 head logits off, 60,000 ms keep-warm, 450 W owner baseline, text + tools + JSON-schema output (no vision) |
 | RTX 3090 native Windows | `v0.8.0-qwen38-3090-beta.1`; package `040d5923` (`1,008,976,979` B), server `72cd776b`, public config `cbe67aae`, release-spec `7d2406a3`, SPDX `6f78e190`, CycloneDX `3b217f69`, outer `SHA256SUMS` `0fd18a35` | Profile `qwen38-3090-native-v0.8.0-beta.1`: INT8 KV, DFlash2 K7 (`Q4_G64_FP16` draft MLP, host-mapped token embedding, `proposal: "artifact-default"`), two active requests (`C2`) over one shared 131,072-token KV pool + 2 extra device-state slots, 1,024-token prefill chunk, 180 s (`180000 ms`) pending timeout, 20,867.734375 MiB (`21,881,405,440` B) shared Host budget, 768 MiB admission headroom, `Group64` A8 and FP32 head logits off, keep-warm off, 350 W serving cap (370 W restored on stop), text + tools + JSON-schema output (no vision) |
@@ -173,8 +173,8 @@ and [`ROADMAP.md`](../../ROADMAP.md#deferred-and-rejected-decisions).
 
 | Entry | Recorded result | Release boundary |
 | --- | --- | --- |
-| EXP-101 — RTX 3090 DFlash2 K7 powered quality screen | Preregistered 1,120-prompt screen and 80-prompt fresh-cache determinism run on `v0.8.0-qwen38-3090-beta.1` (`26fa28d0`, package `040d5923`, server `72cd776b`, config `cbe67aae`, 350 W, port 18082, 50-prompt shards at 1 request) vs the sealed `v0.14.0` MTP3 production arm (`fedce425` / `d08d262b`, state `9a9213cf`): `PASS: 1,120 prompts; both arms 80/80 deterministic with 0 missing/error samples; 771/1,120 paired content/reasoning outputs changed. All 9 primary bounds passed: recall lower -0.0073 and precision lower -0.0070 (margin -0.02); unsupported upper 0.0089 (0.03); schema/tool-selection/tool-argument lower 0 (each -0.02); duplicate upper 0.0059 (0.02); redaction lower -0.0119 (-0.05); secret-leak ratio upper 1.0673 (1.10), counts 545 to 561, not zero`. | Governing quality gate for the shipping RTX 3090 DFlash2 K7 `C2` package. |
-| EXP-102 — RTX 4090 DFlash2 K7 powered quality screen | Preregistered 1,120-prompt screen and 80-prompt fresh-cache determinism run on `v0.8.0-qwen38-4090-beta.1` (`26fa28d0`, package `06526bdb`, server `c6f59e9e`, config `f00cfac9`, 450 W, port 18082, 50-prompt shards) vs the sealed `v0.14.0` MTP3 production arm (`5caa7780` / `b5cfbf50`, 25 sealed holds, state `cc48a776`): `PASS: 1,120 prompts; both arms 80/80 deterministic, 0 missing/error samples; 777/1,120 paired content/reasoning outputs changed. All 9 primary bounds passed: recall lower -0.0082 and precision lower -0.0093 (margin -0.02); unsupported upper 0.0045 (0.03); schema/tool-selection/tool-argument lower 0 (each -0.02); duplicate upper 0.0046 (0.02); redaction lower -0.0139 (-0.05); secret-leak ratio upper 1.0985 (1.10), counts 533 to 561, not zero`. | Governing quality gate for the shipping RTX 4090 DFlash2 K7 `C1` package. |
+| EXP-101 — RTX 3090 DFlash2 K7 powered quality screen | Preregistered 1,120-prompt screen and 80-prompt fresh-cache determinism run on `v0.8.0-qwen38-3090-beta.1` (`26fa28d0`, package `040d5923`, server `72cd776b`, config `cbe67aae`, 350 W, port 18082, 50-prompt shards at 1 request) vs the sealed `v0.14.0` MTP3 production arm (`fedce425` / `d08d262b`, 25 sealed holds, state `9a9213cf`): **PASS** ([receipt](qualification/rtx3090-windows-native.quality-screen.json), SHA-256 `671659f0`): `1,120` unique prompts (`672` gate + `504` redaction pairs, overlapping on `56` control variants), both arms **80/80** deterministic with `0` missing/error samples, `771/1,120` paired content/reasoning outputs changed, and all **9/9** primary one-sided 95% bounds passed: recall lower `-0.0073` and precision lower `-0.0070` (margin `> -0.02`), unsupported upper `+0.0089` (`< +0.03`), schema/tool-selection/tool-argument lower `0` (each `> -0.02`), duplicate upper `+0.0059` (`< +0.02`), redaction lower `-0.0119` (`> -0.05`), secret-leak ratio `1.0294` with upper bound `1.0673` (`< 1.10`, counts `545 → 561`, not zero). | Governing quality gate for the shipping RTX 3090 DFlash2 K7 `C2` package. |
+| EXP-102 — RTX 4090 DFlash2 K7 powered quality screen | Preregistered 1,120-prompt screen and 80-prompt fresh-cache determinism run on `v0.8.0-qwen38-4090-beta.1` (`26fa28d0`, package `06526bdb`, server `c6f59e9e`, config `f00cfac9`, 450 W, port 18082, 50-prompt shards at 1 request) vs the sealed `v0.14.0` MTP3 production arm (`5caa7780` / `b5cfbf50`, 25 sealed holds, state `cc48a776`): **PASS** ([receipt](qualification/rtx4090-windows-native.quality-screen.json), SHA-256 `6231dccd`): `1,120` unique prompts (`672` gate + `504` redaction pairs, overlapping on `56` control variants), both arms **80/80** deterministic with `0` missing/error samples, `777/1,120` paired content/reasoning outputs changed, and all **9/9** primary one-sided 95% bounds passed: recall lower `-0.0082` and precision lower `-0.0093` (margin `> -0.02`), unsupported upper `+0.0045` (`< +0.03`), schema/tool-selection/tool-argument lower `0` (each `> -0.02`), duplicate upper `+0.0046` (`< +0.02`), redaction lower `-0.0139` (`> -0.05`), secret-leak ratio `1.0525` with upper bound `1.0985` (`< 1.10`, counts `533 → 561`, not zero). | Governing quality gate for the shipping RTX 4090 DFlash2 K7 `C1` package. |
 | EXP-103 — RTX 4090 `K=6`/`K=5` draft windows and `K=7` 131K INT8 fit | On `v0.14.0` binary `5caa7780`, config-only `K=6` (`0.8625–0.8642` cross ratios, median `0.8633`) and `K=5` (`0.8668–0.8673`, median `0.8671`) failed the `>= 0.95` floor on depth-0 case `log-024@0` vs MTP3. `DFlash2 K=7` 131,072-token INT8 `C1` fit passed (`1,449,132,032` B available >= `671,088,640` B floor, `22,265.0 MiB` peak, 32-token / 114-byte true-cold continuation `07b8db1f`). | `K=6` and `K=5` rejected; RTX 4090 uses `K=7`. |
 | EXP-104 — Opt-in FP32 head logits (`--fp32-head-logits`) and RTX 4090 floor | `--fp32-head-logits` (`+8,442,880` persistent bytes at `K=7`/`C=2`) passed `2/2` numerical tests on `sm_86`/`sm_89` (`83` FP32 reductions, max rel L2 `0.001722`), but `fp32_head_logits: true` failed `log-024@0` on `31583e3f` at `0.9016–0.9025` (median `0.9021`). With `--fp32-head-logits` off (the default), `DFlash2 K=7` passed `log-024@0` at `0.9627–0.9635` (`31583e3f`) and `0.96186–0.96294` (`08257eec`); in the final `26fa28d0` shipping-package (`06526bdb`) 115-case ABBA speed gate at 131,072-token INT8 KV (`+2` extra slots), the 108-case role corpus (`role108`) reached **×1.2736** (`139.87 → 178.13 tok/s`, all 115 cases **×1.2741**) while `log-024@0` measured **0.934** (`139.41 → 130.19 tok/s`) and was waived by the founder with disclosure. | `--fp32-head-logits` rejected for shipping profiles and stays opt-in and off (`false`); default `DFlash2 K=7` adopted on RTX 4090. |
 | EXP-105 — Export-State residency (`prepare_host_export`) | Materializing immutable device `StateImage` replicas to Host before off-worker disk serialization cut first-fork `source_wait` on RTX 3090 (`08257eec`) from `14.86–17.22 s` (`15.4–17.8 s` TTFT) to `<= 0.033 s` (`0.33–0.76 s` TTFT) and on RTX 5090 (`08257eec`) from `4.85 s` (`5.03 s` TTFT) to `0.005 s` (`0.106 s` TTFT). | Shipped in `26fa28d0` across all three lanes. |
@@ -201,34 +201,45 @@ unchanged.
 | Gate at `26fa28d0` | RTX 4090 (`v0.8.0-qwen38-4090-beta.1`, `C1`) | RTX 3090 (`v0.8.0-qwen38-3090-beta.1`, `C2`) |
 | --- | --- | --- |
 | Deterministic 2-round build & scans | **43/43 EXE/DLL byte-identical**; 0 private markers | **43/43 EXE/DLL byte-identical**; 0 private markers |
-| Shipping-package 131,072-token INT8 fit & true-cold durability | **PASS** (`1,056,964,608` B available >= `671,088,640` B / `640 MiB` floor; `22,639 MiB` peak, `1,504 MiB` min free; `473,497,600` B converted device + `1,350,860,800` B host-mapped weights; cold `3,093` vs restored `3,066+27` **32/32 token IDs & UTF-8 bytes identical**; exact 130,048-token retrieval) | `PASS: 131,072-token INT8 C2, 1,110,441,984 B (1,059 MiB) available after startup >= 805,306,368 B (768 MiB); 22,584 MiB peak / 1,742 MiB min free. Two 59,866-token true-cold sessions restored at 59,840 cached + 26 computed tokens with 32/32 generated token IDs and UTF-8 bytes identical; converted device / host-mapped weights 473,497,600 / 1,350,860,800 B` |
-| Role-corpus ABBA speed gate vs `v0.14.0` MTP3 | **PASS with founder waiver on `log-024@0`**: 108-case role corpus (`role108`: `84` cases at `0` cached tokens + `12` at `32,000` + `12` at `64,000`) weighted **×1.2736** (`139.87 → 178.13 tok/s`), all `115` cases (`108` role + `7` code/reasoning supplementals) weighted **×1.2741** (`138.94 → 177.02 tok/s`), `7` supplementals weighted **×1.2778** (`131.68 → 168.26 tok/s`, min **×1.0804** on `reasoning-invariant`); `114/115` cases clear the `>= 0.95` per-case decode ratio floor (lowest passing case `1.0128×`), while depth-0 case `log-024@0` measured **0.934** (`139.41 → 130.19 tok/s`, `0.933832×`) below `0.95` and was **waived by the founder with disclosure**; retained content/reasoning/tool-call UTF-8 output bytes are **115/115** identical across within-engine repeats (`A0=A3`, `B1=B2`) and **43/115** identical across engines (`31/84` at depth 0, `7/12` at 32K, `5/12` at 64K, `0/7` supplemental) | `PASS: 84 depth-0 ABBA cases at 350 W; weighted 1.2683598277 (79.37 to 100.67 tok/s), minimum 0.9764424319 >= 0.95, no waived case; both within-engine repeats 84/84 identical, cross-engine 36/84 identical` |
-| Powered 1,120-prompt quality screen (EXP-102 / EXP-101) | `PASS: 1,120 prompts; both arms 80/80 deterministic, 0 missing/error samples; 777/1,120 paired content/reasoning outputs changed. All 9 primary bounds passed: recall lower -0.0082 and precision lower -0.0093 (margin -0.02); unsupported upper 0.0045 (0.03); schema/tool-selection/tool-argument lower 0 (each -0.02); duplicate upper 0.0046 (0.02); redaction lower -0.0139 (-0.05); secret-leak ratio upper 1.0985 (1.10), counts 533 to 561, not zero` | `PASS: 1,120 prompts; both arms 80/80 deterministic with 0 missing/error samples; 771/1,120 paired content/reasoning outputs changed. All 9 primary bounds passed: recall lower -0.0073 and precision lower -0.0070 (margin -0.02); unsupported upper 0.0089 (0.03); schema/tool-selection/tool-argument lower 0 (each -0.02); duplicate upper 0.0059 (0.02); redaction lower -0.0119 (-0.05); secret-leak ratio upper 1.0673 (1.10), counts 545 to 561, not zero` |
-| Agent-probe parity vs `v0.14.0` (`p16-agent-parity/1` / `/2`: all probe oracles pass with 0 errors/timeouts, per-position `cached - prompt` >= incumbent, fork/resume server TTFT <= incumbent + `max(0.25 s, 25%)`) | **PASS 83/83 positions** (`warm_arrival` 12/12 both orders, `agent_mix` 51/51, `sibling_continue` 5/5, two-restart `restore` 4/4, `fleet_probe` `fanout` 11/11 across two 4-branch fanout rounds; min `(cached - prompt)` delta `0`, min TTFT bound margin `0.219 s`, max `source_wait` `<= 0.0178 s`) | `PASS: 83/83 positions (arrival 12, mix 51, sibling 5, two-restart restore 4, fleet 11) under p16-agent-parity/2, cache-gap deltas 0. Fanout-concurrency 4: 5/5 HTTP 200; calibrated 2 x 59,879-token test: 18/18 HTTP 200 across 3 trials; 0 HTTP 500` |
-| Upgrade, rollback, and repair rehearsal from `v0.14.0` `v0.7.0-qwen38-{4090,3090}-beta.3` | `⟦PENDING: N16 FINAL RTX 4090 upgrade rehearsal from v0.7.0-qwen38-4090-beta.3 (running-lane upgrade, forced post-activation first-Start failure with rollback, interrupted install then repair and same-instance reinstall), window/final-4090/⟧` | `PASS: 1c running-lane upgrade, 2c forced post-activation first-Start failure with rollback, 3c interrupted install/repair/same-instance reinstall from true v0.14.0 beta.3; all 3 scenarios passed once, candidate transaction-created targets removed, canonical states unchanged, 370 W restored; no product-route acceptance is inferred` |
+| Shipping-package 131,072-token INT8 fit & true-cold durability | **PASS** ([receipt](qualification/rtx4090-windows-native.fit.json), `44c50008`: `1,056,964,608` B / `1,008 MiB` available >= `671,088,640` B / `640 MiB` floor; `22,639 MiB` peak, `1,504 MiB` min free; `473,497,600` B converted device + `1,350,860,800` B host-mapped weights; cold `3,093` vs restored `3,066+27` **32/32 token IDs & UTF-8 bytes identical**; exact 130,048-token retrieval) | **PASS** ([receipt](qualification/rtx3090-windows-native.fit.json), `662619d7`: `1,110,441,984` B / `1,059 MiB` available >= `805,306,368` B / `768 MiB` floor; `22,584 MiB` peak, `1,742 MiB` min free; `473,497,600` B converted device + `1,350,860,800` B host-mapped weights; two `59,866`-token true-cold sessions restored at `59,840` cached + `26` computed tokens with **32/32 token IDs & UTF-8 bytes identical**; exact 130,048-token retrieval) |
+| Role-corpus ABBA speed gate vs `v0.14.0` MTP3 | **PASS with founder waiver on `log-024@0`** ([speed](qualification/rtx4090-speed.json) `32acdecc`, [waiver](qualification/rtx4090-speed-waiver.json) `92b94c4a`): 108-case role corpus (`role108`: `84` cases at `0` cached tokens + `12` at `32,000` + `12` at `64,000`) weighted **×1.2736** (`139.87 → 178.13 tok/s`), all `115` cases (`108` role + `7` code/reasoning supplementals) weighted **×1.2741** (`138.94 → 177.02 tok/s`), `7` supplementals weighted **×1.2778** (`131.68 → 168.26 tok/s`, min **×1.0804** on `reasoning-invariant`); `114/115` cases clear the `>= 0.95` per-case decode ratio floor (lowest passing case `1.0128×`), while depth-0 case `log-024@0` measured **0.934** (`139.41 → 130.19 tok/s`, `0.933832×`) below `0.95` and was **waived by the founder with disclosure**; retained content/reasoning/tool-call UTF-8 output bytes are **115/115** identical across within-engine repeats (`A0=A3`, `B1=B2`) and **43/115** identical across engines (`31/84` at depth 0, `7/12` at 32K, `5/12` at 64K, `0/7` supplemental) | **PASS** ([receipt](qualification/rtx3090-speed.json), `c904d341`): 84 depth-0 ABBA cases at 350 W vs `v0.14.0` MTP3 (`fedce425` / `d08d262b`); weighted **×1.2684** (`1.268360×`, `79.37 → 100.67 tok/s`), minimum **0.9764×** (`0.976442×` on `log-024@0`, `76.77/76.68 → 74.86/74.97 tok/s`) `>= 0.95` with no waived case; within-engine repeats **84/84** byte-identical in both arms (`A0=A3`, `B1=B2`) and cross-engine **36/84** byte-identical |
+| Powered 1,120-prompt quality screen (EXP-102 / EXP-101) | **PASS** ([receipt](qualification/rtx4090-windows-native.quality-screen.json), `6231dccd`): `1,120` unique prompts (`672` gate + `504` redaction pairs, overlapping on `56` control variants); both arms **80/80** deterministic, `0` missing/error samples; `777/1,120` paired content/reasoning outputs changed; **9/9** primary bounds passed (`recall` lower `-0.0082`, `precision` lower `-0.0093` vs `-0.02`; `unsupported` upper `+0.0045` vs `+0.03`; `schema`/`tool_selection`/`tool_argument` lower `0` vs `-0.02`; `duplicate` upper `+0.0046` vs `+0.02`; `redaction` lower `-0.0139` vs `-0.05`; `secret_leak` ratio `1.0525`, upper `1.0985 < 1.10`, counts `533 → 561`, not zero) | **PASS** ([receipt](qualification/rtx3090-windows-native.quality-screen.json), `671659f0`): `1,120` unique prompts (`672` gate + `504` redaction pairs, overlapping on `56` control variants); both arms **80/80** deterministic, `0` missing/error samples; `771/1,120` paired content/reasoning outputs changed; **9/9** primary bounds passed (`recall` lower `-0.0073`, `precision` lower `-0.0070` vs `-0.02`; `unsupported` upper `+0.0089` vs `+0.03`; `schema`/`tool_selection`/`tool_argument` lower `0` vs `-0.02`; `duplicate` upper `+0.0059` vs `+0.02`; `redaction` lower `-0.0119` vs `-0.05`; `secret_leak` ratio `1.0294`, upper `1.0673 < 1.10`, counts `545 → 561`, not zero) |
+| Agent-probe parity vs `v0.14.0` (`p16-agent-parity/1` / `/2`: all probe oracles pass with 0 errors/timeouts, per-position `cached - prompt` >= incumbent, fork/resume server TTFT <= incumbent + `max(0.25 s, 25%)`) | **PASS 83/83 positions** (`warm_arrival` 12/12 both orders, `agent_mix` 51/51, `sibling_continue` 5/5, two-restart `restore` 4/4, `fleet_probe` `fanout` 11/11 across two 4-branch fanout rounds; min `(cached - prompt)` delta `0`, min TTFT bound margin `0.219 s`, max `source_wait` `<= 0.0178 s`) | **PASS 83/83 positions** (`warm_arrival` 12/12 both orders, `agent_mix` 51/51, `sibling_continue` 5/5, two-restart `restore` 4/4, `fleet_probe` `fanout` 11/11 under `p16-agent-parity/2`; all `(cached - prompt)` deltas `0`, min TTFT bound margin `0.169 s`; `C2` `concurrency_probe --fanout-concurrency 4` **5/5** HTTP 200; calibrated `2 × 59,879`-token concurrent test **18/18** HTTP 200 across 3 trials, `0` HTTP 500; summary `8218925c`) |
+| Upgrade, rollback, and repair rehearsal from `v0.14.0` `v0.7.0-qwen38-{4090,3090}-beta.3` | **PASS 3/3 scenarios** from `v0.7.0-qwen38-4090-beta.3` (`87038cfb`, server `5caa7780`, config `b5cfbf50` → `06526bdb`, summary `38a3a380`): (`1c`) running-lane upgrade (`211.93 s`, incumbent leases retired on managed `Stop`, candidate healthy with `previous_release` preserved), (`2c`) forced post-activation first-`Start` port-ownership refusal with rollback (`211.37 s`, `4/4` transaction-created release/secret/cache/stage targets deleted, incumbent restored healthy), and (`3c`) interrupted install at `candidate_activated` before task registration followed by `-RepairInterruptedInstall` (`4/4` targets deleted) and same-instance reinstall (`309.80 s`); canonical states unchanged, `450 W` restored; no product-route acceptance is inferred | **PASS 3/3 scenarios** from `v0.7.0-qwen38-3090-beta.3` (`a7637f66`, server `fedce425`, config `d08d262b` → `040d5923`, summary `631428b5`): (`1c`) running-lane upgrade at 350 W (`220.32 s`, incumbent leases retired on managed `Stop`, candidate healthy with `previous_release` preserved), (`2c`) forced post-activation first-`Start` port-ownership refusal with rollback (`206.96 s`, `4/4` transaction-created targets deleted, incumbent restored healthy), and (`3c`) interrupted install at `candidate_activated` followed by `-RepairInterruptedInstall` (`4/4` targets deleted) and same-instance reinstall (`322.25 s`); canonical states unchanged, `370 W` restored; no product-route acceptance is inferred |
 
 ### Managed 15-phase native qualification
 
-Each native package runs the 15-phase hardware qualification chain (`tools/qualification/qualify_native.py` in `alphastorm/ninfer`: (1) `preflight`, (2) `neutral_build`, (3) `private_path_scan`, (4) `package`, (5) `transfer_install`, (6) normal `protocol` and (7) pool-pressure `pressure_protocol` authenticated schema 2 smokes, (8) `context_128k` exact 130,048-token retrieval, (9) `restart` explicit-save and graceful-stop process restart, (10) `rollback`, (11) `security` state-root ACL regression, (12) `omp` stock client end-to-end turn, (13) `benchmark_c1` at the qualified power cap, (14) `receipt` binding, and (15) `restore` owner power restoration); the table below summarizes the primary measured phase outputs in `rtx4090.json` (`69ebf60c`, qualified `2026-10-31T21:22:21Z`) and `rtx3090.json`:
+Each native package runs the 15-phase hardware qualification chain (`tools/qualification/qualify_native.py` in `alphastorm/ninfer`: (1) `preflight`, (2) `neutral_build`, (3) `private_path_scan`, (4) `package`, (5) `transfer_install`, (6) normal `protocol` and (7) pool-pressure `pressure_protocol` authenticated schema 2 smokes, (8) `context_128k` exact 130,048-token retrieval, (9) `restart` explicit-save and graceful-stop process restart, (10) `rollback`, (11) `security` state-root ACL regression, (12) `omp` stock client end-to-end turn, (13) `benchmark_c1` at the qualified power cap, (14) `receipt` binding, and (15) `restore` owner power restoration); the table below summarizes the primary measured phase outputs in [`rtx4090.json`](qualification/rtx4090.json) (`69ebf60c`, qualified `2026-10-31T21:22:21Z`) and [`rtx3090.json`](qualification/rtx3090.json) (public sanitized `48c7f635`, raw `038fe713`, qualified `2026-11-01T05:56:27Z`):
 
 | Managed scratch qualification at `26fa28d0` | RTX 4090 (`rtx4090.json`) | RTX 3090 (`rtx3090.json`) |
 | --- | ---: | ---: |
-| C1 decode, 4,541 prompt / 1,024 completion tokens (DFlash2 K7) | **254.27 tok/s** (`83.88%` DFlash2 acceptance, `6.21 s` wall, `22,639 MiB` peak) | `148.43 tok/s; 83.88% DFlash2 acceptance` |
-| C1 prefill | **2,139.14 tok/s** | `974.15 tok/s` |
-| Exact 130,048-token retrieval | **83.35 s** (`83.352 s`, exact `ORCHID=493817; COLOR=COBALT`) | `188.99 s` |
-| Explicit save / graceful-stop cached tokens | **1,647 / 1,650** (`643,966,448` B save; `6.315 s` stop-event flush) | `1,647 / 1,650 tokens` |
-| Process restart | **42.21 s** (`42.213 s`, `10` files / `643,998,587` B) | `46.88 s` |
-| Normal / pressure schema 2 protocol & state security | **passed / passed** (`12,758.578125 MiB` pressure Host; `910 ms` populated-root status, DACL protected) | `PASS: schema-2 product protocol in both arms and schema-2 state_security` |
-| Rollback directions & owner power restored | **`not_applicable` (`0` directions, isolated scratch lineage) / 450 W** (`0` processes, lease inactive, task `Ready`) | `not_applicable, 0 directions (first scratch lineage); 370 W restored` |
+| C1 decode, 4,541 prompt / 1,024 completion tokens (DFlash2 K7) | **254.27 tok/s** (`83.88%` DFlash2 acceptance, `6.21 s` wall, `22,639 MiB` peak, `460.2 W` peak) | **148.43 tok/s** (`83.88%` DFlash2 acceptance, `11.69 s` wall, `22,584 MiB` peak, `350.5 W` peak) |
+| C1 prefill | **2,139.14 tok/s** | **974.15 tok/s** |
+| Exact 130,048-token retrieval | **83.35 s** (`83.352 s`, exact `ORCHID=493817; COLOR=COBALT`) | **188.99 s** (`188.994 s`, exact `ORCHID=493817; COLOR=COBALT`) |
+| Explicit save / graceful-stop cached tokens | **1,647 / 1,650** (`643,966,448` B save; `6.315 s` stop-event flush) | **1,647 / 1,650** (`643,966,448` B save; `7.34 s` stop-event flush) |
+| Process restart | **42.21 s** (`42.213 s`, `10` files / `643,998,587` B) | **46.88 s** (`46.882 s`, `10` files / `643,998,585` B) |
+| Normal / pressure schema 2 protocol & state security | **passed / passed** (`12,758.578125 MiB` pressure Host; `910 ms` populated-root status, DACL protected) | **passed / passed** (`17,878.578125 MiB` pressure Host at `370 W`, `C2` tool override `317b98ee`; `898 ms` populated-root status, DACL protected) |
+| Rollback directions & owner power restored | **`not_applicable` (`0` directions, isolated scratch lineage) / 450 W** (`0` processes, lease inactive, task `Ready`) | **`not_applicable` (`0` directions, isolated scratch lineage) / 370 W** (`0` processes, lease inactive, task `Ready`) |
 
 Public native packages retain port `18082`; installed scratch qualification equivalents change only
 `listen.port` (`18210` and pressure `18200` on RTX 4090, yielding scratch config `418687a4` and
-scratch package `1f23e5d2`; `18211` and pressure `18201` on RTX 3090) and do not execute or
+scratch package `1f23e5d2`; `18211` and pressure `18201` on RTX 3090, yielding scratch config
+`d114ddbb` and scratch package `c9624222`) and do not execute or
 activate the canonical public route. On RTX
 4090, two pre-GPU setup attempts were infrastructure-invalid (the initial CPU hold lacked a private
 host-lock environment marker before any phase ran, and the initial package step omitted the
 referenced `installed/` license/SPDX input tree) and each was corrected once in a fresh output root
-without repeating any passed phase or GPU workload. The isolated 15-phase chain installs into a
+without repeating any passed phase or GPU workload. On RTX 3090, because the frozen `26fa28d0`
+`tools/smoke/agent_protocol.py` helper asserted `max_concurrency == 1` in `--contract product`, the
+normal `protocol` and pool-pressure `pressure_protocol` phases ran with the founder-approved
+`agent_protocol.py` `C2` session-isolation precondition correction (SHA-256
+`317b98ee0fe110dbefd59b50a4508c2a27da5e7b457f2b819ad98ecd48868913`, `qualify_native.py` wrapper
+`c06ad19eb7c776cb574734a4bc2d043740574bc11f752b3a04c7d5c1fa0b2ab1`, open fork PR
+[alphastorm/ninfer#56](https://github.com/alphastorm/ninfer/pull/56) at `10a258bb`), relaxing only
+the two `max_concurrency == 1` equality predicates to `int >= 1` while keeping all quiescence and
+request-correlated `committed_decode_tokens` delta checks unchanged; the committed public receipt
+[`rtx3090.json`](qualification/rtx3090.json) (`48c7f635`) is a documented privacy-sanitized copy of
+raw receipt `038fe713`. The isolated 15-phase chain installs into a
 fresh scratch root with no predecessor (`rollback: not_applicable`, `0` directions), so predecessor
 upgrade/rollback against `v0.7.0-beta.3` is proven separately by the upgrade rehearsal and
 public-install promotion gates. Both `v0.8.0-beta.1` native packages bind their packaged
@@ -312,7 +323,8 @@ N16 agent-probe campaign against the `v0.14.0` incumbent (`v0.7.0-qwen38-5090-be
   vs `0.241 s` incumbent, `0.491 s` bound, at `restore_0` in the initial run; `0.520 s` candidate vs
   `0.242 s` incumbent, `0.492 s` bound, at `restore_1` in run 0 of the corrected three-run capture,
   while runs 1 and 2 passed `4/4` positions each) and were **waived by the founder with
-  disclosure**: the first request after a server restart sometimes takes `~0.5 s` (`0.39–0.53 s`)
+  disclosure** ([`rtx5090-restore-waiver.json`](qualification/rtx5090-restore-waiver.json), SHA-256
+  `66ba8104`): the first request after a server restart sometimes takes `~0.5 s` (`0.39–0.53 s`)
   instead of `~0.24 s` (`0.21–0.24 s`) in both engines, and the `beta.4` runtime hits the slow case
   somewhat more often (`4/8` post-restart `restore_0`/`restore_1` requests across four two-restart
   runs vs `2/8` on the incumbent). Both qualification runs restored the production `v0.14.0`
@@ -387,10 +399,12 @@ Windows NTFS `ntfs-write-through` is not POSIX `fsync` or a power-loss guarantee
   two-restart `restore` probe exceeded the per-position TTFT parity bound `incumbent + max(0.25 s,
   25%)` (`0.526 s` candidate vs `0.241 s` incumbent, `0.491 s` bound, at `restore_0`; `0.520 s`
   candidate vs `0.242 s` incumbent, `0.492 s` bound, at `restore_1`, while all probe checks and
-  exact planted-key retrievals passed) and were waived by the founder with this disclosure.
+  exact planted-key retrievals passed) and were waived by the founder with this disclosure
+  ([`rtx5090-restore-waiver.json`](qualification/rtx5090-restore-waiver.json), SHA-256 `66ba8104`).
 - **RTX 4090 single-case decode floor waiver on `log-024@0` (`0.934` vs `v0.14.0` MTP3):** Across
   the four 4-arm ABBA speed campaigns (`16` arms total at 450 W) on `v0.8.0-qwen38-4090-beta.1`
-  (`06526bdb`), DFlash2 `K=7` raised weighted decode throughput to **×1.2736** on the 108-case role
+  (`06526bdb`, [`rtx4090-speed.json`](qualification/rtx4090-speed.json) `32acdecc`), DFlash2 `K=7`
+  raised weighted decode throughput to **×1.2736** on the 108-case role
   corpus (`role108`: `84` cases at `0` cached tokens + `12` at `32,000` + `12` at `64,000`, `139.87
   → 178.13 tok/s`), **×1.2741** across all 115 cases (`138.94 → 177.02 tok/s`), and **×1.2778** on
   the 7 code/reasoning supplementals (min **×1.0804**), with `114/115` cases clearing the `>= 0.95`
@@ -398,7 +412,8 @@ Windows NTFS `ntfs-write-through` is not POSIX `fsync` or a power-loss guarantee
   (**43/115** cross-engine) byte-identical. Depth-0 case `log-024@0` decoded at **0.934** (`139.41 →
   130.19 tok/s`, `0.933832×`), below the `0.95` every-case floor (`291` DFlash2 rounds with `732 /
   2,032` accepted drafts vs `306` MTP3 rounds with `717 / 918` accepted drafts), and was waived by
-  the founder with this disclosure.
+  the founder with this disclosure
+  ([`rtx4090-speed-waiver.json`](qualification/rtx4090-speed-waiver.json), SHA-256 `92b94c4a`).
 - **RTX 3090 `C2` shared-pool capacity and per-request decode trade-off:** The two concurrent
   requests on `v0.8.0-qwen38-3090-beta.1` share one 131,072-token `INT8` KV pool
   (`kv_capacity: 131072`), not 131,072 resident tokens per request (two ~60K-token requests fit
@@ -449,36 +464,68 @@ Windows NTFS `ntfs-write-through` is not POSIX `fsync` or a power-loss guarantee
      pre-serving power limit and leaving the card at its safe qualified cap (`350 W` on RTX 3090);
      operators can restore the default limit after uninstall with `nvidia-smi -i <gpu> -pl 370`.
 
-The RTX 3090 normal and pressure protocol phases used the founder-approved C2 session-isolation precondition correction (`agent_protocol.py`, SHA-256 `317b98ee0fe110dbefd59b50a4508c2a27da5e7b457f2b819ad98ecd48868913`); quiescence and request-correlated token-delta checks were unchanged. Its raw lane receipt SHA-256 `038fe7132d3188ec4b1259c2933f3dacb23ec066345e723ce1b9baad873fef53` remains private. The public receipt SHA-256 `48c7f63572e38b279dcc941c9f1a2acbf858ec95f1ffe3f0eb8bbc20a8111702` removes the 15 host-lock resource names and replaces both qualification-tool path fields with the basename `agent_protocol.py`; all other JSON values, tool reason/hash, phase outcomes, thresholds and identities are unchanged.
+- **RTX 3090 15-phase `agent_protocol` `C2` precondition override and sanitized public receipt
+  ([alphastorm/ninfer#56](https://github.com/alphastorm/ninfer/pull/56)):** The RTX 3090 normal
+  (`protocol`) and pool-pressure (`pressure_protocol`, at the `370 W` baseline restored by the
+  preceding managed `Stop`) 15-phase qualification smokes used the founder-approved `C2`
+  session-isolation
+  precondition correction (`agent_protocol.py` SHA-256
+  `317b98ee0fe110dbefd59b50a4508c2a27da5e7b457f2b819ad98ecd48868913`, `qualify_native.py` wrapper
+  `c06ad19eb7c776cb574734a4bc2d043740574bc11f752b3a04c7d5c1fa0b2ab1`, fork PR
+  [alphastorm/ninfer#56](https://github.com/alphastorm/ninfer/pull/56) `10a258bb`); quiescence and
+  request-correlated `committed_decode_tokens` delta checks were unchanged. Its raw lane receipt
+  SHA-256 `038fe7132d3188ec4b1259c2933f3dacb23ec066345e723ce1b9baad873fef53` remains private; the
+  committed public receipt [`rtx3090.json`](qualification/rtx3090.json) (SHA-256
+  `48c7f63572e38b279dcc941c9f1a2acbf858ec95f1ffe3f0eb8bbc20a8111702`) removes the 15 host-lock
+  resource names and replaces both qualification-tool path fields with the basename
+  `agent_protocol.py`, leaving all other JSON values, tool reason/hash, phase outcomes, thresholds,
+  and identities unchanged.
 
 ## Fresh candidate acceptance and G4 review
 
-Fresh acceptance is pending; it will run on frozen candidate
-`⟦PENDING: v0.16.0 frozen product candidate commit SHA, releases/v0.16.0/acceptance/composed-external-installation.json⟧`
-on `⟦PENDING: v0.16.0 acceptance completion date UTC, releases/v0.16.0/acceptance/composed-external-installation.json⟧`.
-Runtime qualifications name the current component cuts. Client/route acceptance must still be
-executed on the frozen `v0.16.0` product candidate, not inherited from `v0.15.0`. The table below
-is the acceptance plan, not a claim that its pending receipts exist. Owner-operated receipts
-are tester-equivalent evidence, not independent external-user outcomes.
+Fresh acceptance **passed** on frozen candidate
+`56899320d416bafda5c15d7e454e9b593badc0a6`
+on **2026-11-01**, completed at `2026-11-01T12:30:58Z`.
+Runtime qualifications name the current component cuts; every client/route and native public-install
+receipt is fresh for this product candidate, not inherited from `v0.15.0` or an earlier candidate.
+All final windows passed their first attempt: RTX 4090 once, RTX 3090 once, and RTX 5090 one initial
+attempt with no corrected window. Owner-operated receipts are tester-equivalent evidence, not
+independent external-user outcomes.
 
 | Acceptance evidence | Observed result |
 | --- | --- |
-| Exact stock OMP 18.14.0 platform and live tool/continuation/restart/resume/fail-closed checks | All three newly downloaded stock binaries must match their published asset hashes and `omp/18.14.0`. Typed read-tool/result, exact continuation, and unavailable-route fail-closed checks on macOS arm64 (planned `acceptance/darwin-arm64-18.14.0.json`; pending) (preview), Windows x64 (planned `acceptance/windows-x64-18.14.0.json`; pending), and Linux x64 under WSL2 (planned `acceptance/linux-x64-18.14.0.json`; pending): `⟦PENDING: v0.16.0 platform acceptance details and macOS server-restart nonce resume confirmation, releases/v0.16.0/acceptance/{darwin-arm64,windows-x64,linux-x64}-18.14.0.json⟧`. Image input must be checked on macOS/Windows against RTX 5090 only. |
-| Final-candidate guide execution: five routes / 31 executable quickstart blocks plus WSL2 checks | All five routes (planned `acceptance/documented-routes.json`; pending): `⟦PENDING: v0.16.0 documented-route block counts (RTX 5090 host 2/2, macOS 10/10, Windows 5/5, native RTX 4090 7/7, native RTX 3090 7/7) and WSL2 Linux client checks, releases/v0.16.0/acceptance/documented-routes.json⟧`. Pre-publication candidate-clone substitutions are explicit. Subsequent guide edits are prose-only; executable blocks are unchanged. |
-| RTX 4090 and RTX 3090 public-install identities, upgrade/rollback, and RTX 3090 `C2` route probes | Separate RTX 4090 (planned `acceptance/rtx4090-public-install.json`; pending) and RTX 3090 (planned `acceptance/rtx3090-public-install.json`; pending) public-URL checks verify all manifest asset hashes and served identities (`06526bdb` / `040d5923`): `⟦PENDING: v0.16.0 native public-install, canonical promotion, rollback-direction, and RTX 3090 C2 fanout/parallel-OMP/compaction probe outcomes, releases/v0.16.0/acceptance/rtx{4090,3090}-public-install.json⟧`. |
-| Independent container and native restoration audits and observed hold durations | Independent restoration (`../../docs/measurements/<date>-v0160-acceptance-restoration.json`): `⟦PENDING: v0.16.0 acceptance restoration filename, RTX 5090 container restoration digest and hold duration s, and RTX 4090 / RTX 3090 native driver window durations s and restored power baselines 450/370 W, docs/measurements/*-v0160-acceptance-restoration.json⟧`. |
+| Exact stock OMP 18.14.0 platform and live tool/continuation/restart/resume/fail-closed checks | **PASS** on freshly downloaded [macOS arm64](acceptance/darwin-arm64-18.14.0.json) (preview), [Windows x64](acceptance/windows-x64-18.14.0.json), and [Linux x64 under WSL2](acceptance/linux-x64-18.14.0.json): published binary hashes and `omp/18.14.0` matched; one typed read and linked result per client, visible marker, completed turn, exact continuation nonce, runtime identity, and fail-closed outage without model response or provider fallback. The macOS documented server restart returned its exact durable nonce. macOS and Windows each recorded three image inputs against the bound RTX 5090 runtime; no Linux/native vision claim. |
+| Final-candidate guide execution: five routes / 31 executable quickstart blocks plus WSL2 checks | **PASS 31/31** in [documented routes](acceptance/documented-routes.json): RTX 5090 host **2/2**, macOS **10/10**, Windows **5/5**, native RTX 4090 **7/7**, native RTX 3090 **7/7**; Linux/WSL2 stock-client checks also passed. Every `clone_commit` is `56899320d416bafda5c15d7e454e9b593badc0a6`. Pre-publication candidate-clone substitutions are explicit. Subsequent guide edits are prose-only; every executable block remains byte-identical. |
+| RTX 4090 and RTX 3090 public-install identities and RTX 3090 `C2` route probes | **PASS** in separate [RTX 4090](acceptance/rtx4090-public-install.json) and [RTX 3090](acceptance/rtx3090-public-install.json) public-URL checks: seven anonymously downloaded manifest assets per lane, closed 10-entry checksum sets, all hashes and served identities (`06526bdb` / `040d5923`) matched. The downloaded installers returned `already_installed`, accepted exact qualified bytes without lifecycle-pointer changes or install-time start requests, then authenticated status/completion returned HTTP 200 and anonymous status HTTP 401. Both routes passed **22/22 behavior gates**, sequential four-branch regression with zero transient retries; RTX 3090 also passed four-way fanout under `C2`, both stock OMP parallel scenarios, two committed automatic compactions with control recall, and structured outage. Promoted N16 canonical roots/stages were preserved/restored; first-lineage rollback is `not_applicable`, zero directions, not a predecessor upgrade/rollback claim. |
+| Independent container and native restoration audits and observed hold durations | **PASS** in [restoration](../../docs/measurements/2026-11-01-v0160-acceptance-restoration.json): RTX 5090 hold **412.552 s**, the same incumbent container and image `sha256:760fb6bea925eb26d4fa53ab87a126494b69ba7bcfed515d23dee7afa65cdb2a`, unchanged checkpoint mounts, HTTP 200, healthy Fleet and `unless-stopped`; native driver windows **499.977 s** RTX 4090 / **1,225.308 s** RTX 3090, **18/18 independent Restore and 18/18 final Audit checks per lane**, exact stopped canonical states/stages and **450 / 370 W** restored. |
 
-The composed acceptance (planned `acceptance/composed-external-installation.json`; pending) will bind fresh
+**Private-infrastructure deviation:** the owner-approved temporary RTX 5090 acceptance backend
+restore arm updated/started only the exact incumbent container, with no remove/create/run/relaunch
+fallback. Candidate drivers and called backend scripts were unchanged. After health, Fleet
+reconciliation and restart-policy checks, the backend's original bytes were restored and the
+temporary key revoked. This is a same-container infrastructure restoration deviation, not a
+runtime/component change or a publication authorization.
+
+**Stock-OMP parallel-proof oracle correction:** acceptance gates engine/lane properties,
+attributable value delivery and session isolation; exact marker punctuation and whole-answer
+formatting are recorded as non-gating compliance observations. The final RTX 3090 subagents proof
+passed despite non-exact parent and scout formatting, while both scouts' values reached their own
+results and the parent and no cross-session value leaked. The sessions scenario passed all four
+own recalls with separate session IDs. No retry, output filtering, special input case or weakened
+isolation/attribution gate was used.
+
+The [composed acceptance](acceptance/composed-external-installation.json) binds these fresh
 observations alongside the `26fa28d0` runtime qualifications. The
 [bound review ledger](review/runtime-ledger.json) records:
 - **G4 fork council (`CR-20261031T162716Z-26fa28d0`, sequence `omp-ninfer-v0.16.0-fork-26fa28d0`,
   base `2af6b3de` → `26fa28d0`):** All four selected seats (`daybreak-blue`, `gemini-argon`,
   `gpt-astra`, `claude-mythos`) completed in round 1 with zero aborts or truncations; closed without
-  remediation by accountable-lead disposition (ledger SHA-256
-  `b2871c3664a0c4434dedc3aa2b3f2fdd7f5b301c9d3cecc7d1ce463c835aabe6`, record SHA-256 `cbb0c780`,
-  subject digest `42d8473c`), with no in-scope residual P0/P1 and six deferred P2/P3 rows (`L1`–`L6`)
-  filed across five issues in `alphastorm/ninfer` ([#50](https://github.com/alphastorm/ninfer/issues/50)
-  for `L1` + `L2`, and [#51](https://github.com/alphastorm/ninfer/issues/51)–[#54](https://github.com/alphastorm/ninfer/issues/54)
+  remediation by accountable-lead disposition (fork-council ledger SHA-256
+  `b2871c3664a0c4434dedc3aa2b3f2fdd7f5b301c9d3cecc7d1ce463c835aabe6`, bound in
+  [`review/runtime-ledger.json`](review/runtime-ledger.json), record SHA-256 `cbb0c780`,
+  subject digest `42d8473c`), with no in-scope residual P0/P1 and six deferred P2/P3 rows (`L1`–`L6`) filed across
+  five issues in `alphastorm/ninfer` ([#50](https://github.com/alphastorm/ninfer/issues/50) for `L1`
+  + `L2`, and [#51](https://github.com/alphastorm/ninfer/issues/51)–[#54](https://github.com/alphastorm/ninfer/issues/54)
   for `L3`–`L6`).
 - **G4 product-tooling council:** `⟦PENDING: v0.16.0 product-tooling G4 council review ID, sequence ID, frozen candidate commit, seat completion counts, ledger SHA-256, and any deferred product issues, releases/v0.16.0/review/runtime-ledger.json⟧`.
 
@@ -501,9 +548,11 @@ This release closes `omp-ninfer` [#94](https://github.com/alphastorm/omp-ninfer/
 [#117](https://github.com/alphastorm/omp-ninfer/issues/117) (and incorporates `alphastorm/ninfer`
 `#48` and `#49` across all three shipped runtime components). Carried runtime/tooling deferrals
 [#88](https://github.com/alphastorm/omp-ninfer/issues/88)–[#90](https://github.com/alphastorm/omp-ninfer/issues/90),
-deterministic RTX 5090 `nvcc` module IDs, a corrected repeated native `Group64` A8 screen, and the
+deterministic RTX 5090 `nvcc` module IDs, a corrected repeated native `Group64` A8 screen, the
 new fork-council P2/P3 deferrals in `alphastorm/ninfer`
-[#50](https://github.com/alphastorm/ninfer/issues/50)–[#54](https://github.com/alphastorm/ninfer/issues/54)
+[#50](https://github.com/alphastorm/ninfer/issues/50)–[#54](https://github.com/alphastorm/ninfer/issues/54),
+and post-release fork hygiene PRs
+[#55](https://github.com/alphastorm/ninfer/pull/55)–[#56](https://github.com/alphastorm/ninfer/pull/56)
 remain open.
 
 **Next:** root-cause the `rk4v4` 4-bit KV true-cold restore divergence (preregistered

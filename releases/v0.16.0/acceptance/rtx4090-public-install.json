@@ -1,0 +1,261 @@
+{
+  "artifact_type": "omp_ninfer_native_public_install_acceptance",
+  "schema_version": 1,
+  "release": "v0.16.0",
+  "lane": "rtx4090-windows-native",
+  "as_of": "2026-11-01",
+  "status": "passed",
+  "candidate_commit": "56899320d416bafda5c15d7e454e9b593badc0a6",
+  "client": {
+    "distribution_kind": "upstream-release",
+    "upstream_repository": "https://github.com/can1357/oh-my-pi",
+    "upstream_tag": "v18.14.0",
+    "upstream_commit": "31147f9d1a76608549821c3759f8487b4d66c72d",
+    "os": "Windows 11",
+    "architecture": "x64",
+    "published": true,
+    "asset_name": "omp-windows-x64.exe",
+    "asset_bytes": 242797056,
+    "asset_sha256": "620a5935cdb6a9ed52d8b0c93892d6b5bb84155244a98f3be82af0455177bf29",
+    "binary_sha256": "620a5935cdb6a9ed52d8b0c93892d6b5bb84155244a98f3be82af0455177bf29",
+    "release_id": 428242783,
+    "asset_id": 689493879,
+    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.14.0/omp-windows-x64.exe",
+    "version": "omp/18.14.0"
+  },
+  "runtime": {
+    "tag": "v0.8.0-qwen38-4090-beta.1",
+    "source_commit": "26fa28d0e7834515508fc07ac503164a6effc820",
+    "package_bytes": 991969490,
+    "package_sha256": "06526bdb630a87c860ceb0eaafb633df867181b596648897cb5a64a92e268f27",
+    "binary_sha256": "c6f59e9e7da2fafb8c2ded9e2cfaa63d8be5c9a91e4dbf615af42ffb4698be71",
+    "configuration_sha256": "f00cfac96000cf6f4e11676242d09e7a3bfdefba1d5e6b768a6c4ab7785ddbc5",
+    "model_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "configuration": {
+      "max_context": 131072,
+      "kv_capacity": 131072,
+      "kv_dtype": "int8",
+      "concurrency": 1,
+      "pending_timeout_ms": 30000,
+      "prefill_chunk": 1024,
+      "device_state_slots": 2,
+      "admission_headroom_mib": 640,
+      "host_context_mib": "15747.734375",
+      "host_context_bytes": 16512696320,
+      "speculative_backend": "dflash2",
+      "speculative_draft_tokens": 7,
+      "public_model_id": "qwen3.8-27b"
+    },
+    "runtime_shape": {
+      "max_concurrency": 1,
+      "speculative_backend": "dflash2",
+      "draft_tokens": {
+        "min": 7,
+        "max": 7
+      },
+      "proposal": "artifact-default",
+      "fit": {
+        "device_state_slots": 2,
+        "admission_headroom_mib": 640,
+        "draft_mlp_device_format": "Q4_G64_FP16",
+        "token_embedding_residency": "host-mapped"
+      }
+    }
+  },
+  "probe_acceptance": {
+    "fleet": {
+      "sha256": "d17c5ae5195b38693c09b61c117e77600f7b0fac04f64e05c10854a67d727e95",
+      "artifact_type": "omp_ninfer_fleet_fanout_probe",
+      "identity": {
+        "binary_sha256": "c6f59e9e7da2fafb8c2ded9e2cfaa63d8be5c9a91e4dbf615af42ffb4698be71",
+        "config_sha256": "f00cfac96000cf6f4e11676242d09e7a3bfdefba1d5e6b768a6c4ab7785ddbc5",
+        "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+        "model_id": "qwen3.8-27b",
+        "source_dirty": false
+      },
+      "branches": 4,
+      "transient_retries": 0,
+      "steps": [
+        "base_prefill",
+        "warm_edit",
+        "checkpoint_save",
+        "branch_0",
+        "branch_1",
+        "branch_2",
+        "branch_3",
+        "session_delete"
+      ]
+    }
+  },
+  "preparation": {
+    "lineage_mode": "first_release",
+    "previous_release_present": false,
+    "qualification_installed_instance_preserved": true,
+    "documented_stage_preserved": true,
+    "documented_install": "Fresh temporary first-lineage install; the promoted N16 canonical root and documented stage were preserved and restored. Separate public-URL installer acceptance followed on that same canonical package.",
+    "two_gpu_host": true,
+    "one_native_lane_at_a_time": true,
+    "shared_port": 18082,
+    "public_install_model_reference": "Manifest-bound published v3 model; no predecessor checkpoint import."
+  },
+  "observations": {
+    "exact_tool_marker": true,
+    "server_tool_calls": 1,
+    "linked_tool_history": true,
+    "exact_continuation_nonce": true,
+    "continuation_reuse": "private_endpoint",
+    "offline_request_failed_without_model_response": true,
+    "recovery_health_and_bound_runtime_identity_passed": true,
+    "local_reasoning_compatibility_retries": 0,
+    "cloud_fallback_observed": false,
+    "structured_client": {
+      "omp_version": "omp/18.14.0",
+      "event_counts": {
+        "session": 1,
+        "agent_start": 1,
+        "turn_start": 2,
+        "message_start": 4,
+        "message_end": 4,
+        "message_update": 21,
+        "tool_execution_start": 1,
+        "tool_execution_end": 1,
+        "turn_end": 2,
+        "agent_end": 1
+      },
+      "typed_read_tool_calls": 1,
+      "linked_tool_results": 1,
+      "tool_result_marker": true,
+      "exact_visible_final_answer": true,
+      "agent_end": true,
+      "continuation_exact_nonce": true,
+      "runtime_identity_bound": true,
+      "runtime_server_binary_sha256": "c6f59e9e7da2fafb8c2ded9e2cfaa63d8be5c9a91e4dbf615af42ffb4698be71",
+      "runtime_configuration_sha256": "f00cfac96000cf6f4e11676242d09e7a3bfdefba1d5e6b768a6c4ab7785ddbc5",
+      "model_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+      "providers": [
+        "ninfer-native-4090"
+      ],
+      "models": [
+        "qwen3.8-27b"
+      ],
+      "raw_transcript_included": false,
+      "fail_closed": {
+        "exit_code": 1,
+        "no_model_response": true,
+        "only_selected_local_provider_observed": true,
+        "providers": [
+          "ninfer-native-4090"
+        ],
+        "models": [
+          "qwen3.8-27b"
+        ],
+        "errors": [
+          "Couldn't connect to 127.0.0.1:18082 (connection refused). Check that the server is running and reachable."
+        ],
+        "endpoint": "http://127.0.0.1:18082/v1",
+        "method": "configured route unavailable; no provider configuration changes"
+      }
+    },
+    "documented_marker_bare_line": false,
+    "rollback": {
+      "status": "not_applicable",
+      "directions": 0,
+      "reason": "first release of the lineage"
+    },
+    "retained_previous_release": "",
+    "public_install": {
+      "status": "passed",
+      "integrity": {
+        "checksum_set_sha256": "bf1650ebcdd2760b77be11140e8af3f6eb1adc9a2b8e534832f708383b7a60eb",
+        "checksum_entries": 10,
+        "assets": {
+          "package": {
+            "sha256": "06526bdb630a87c860ceb0eaafb633df867181b596648897cb5a64a92e268f27",
+            "bytes": 991969490,
+            "in_checksum_set": true
+          },
+          "sbom": {
+            "sha256": "825a8d30df95fbe7b60299c17abaa2f9d7f7319da6569fa2aab7e2bde0d108b1",
+            "bytes": 34269,
+            "in_checksum_set": true
+          },
+          "source_archive": {
+            "sha256": "b628ca5a5d55a91d89a705179885037a2ccd8b2a23f2809d00184e595b91cf5e",
+            "bytes": 12358724,
+            "in_checksum_set": true
+          },
+          "installer": {
+            "sha256": "677c9aadab2081366df768c5bd0ce3cc683431f820a58d68ea4417246e4c1196",
+            "bytes": 87972,
+            "in_checksum_set": true
+          },
+          "controller": {
+            "sha256": "f6bbcef1f11a84edd3ecc74ed5ba32c3b01f7685e4610115b26bb80b1bfba3ae",
+            "bytes": 76428,
+            "in_checksum_set": true
+          },
+          "gpu_owner_controller": {
+            "sha256": "432f06a8e97743e46b1b7d9285e68d4bc361a93d5f25badeaa7c713f147f3334",
+            "bytes": 17391,
+            "in_checksum_set": true
+          },
+          "state_protection": {
+            "sha256": "d7b658187c20b5227374f96fedf7e9f85f35e03b50d5302c400e0b24b7114b36",
+            "bytes": 15203,
+            "in_checksum_set": true
+          }
+        },
+        "all_manifest_assets_downloaded_from_public_urls": true,
+        "all_manifest_asset_hashes_verified": true
+      },
+      "installed": {
+        "release_id": "qwen38-4090-native-v0.8.0-beta.1-26fa28d0e783",
+        "server_binary_sha256": "c6f59e9e7da2fafb8c2ded9e2cfaa63d8be5c9a91e4dbf615af42ffb4698be71",
+        "configuration_sha256": "f00cfac96000cf6f4e11676242d09e7a3bfdefba1d5e6b768a6c4ab7785ddbc5",
+        "matches_manifest": true
+      },
+      "install": {
+        "execution_source": "downloaded-public-url",
+        "outcome": "already_installed",
+        "release_id": "qwen38-4090-native-v0.8.0-beta.1-26fa28d0e783",
+        "package_sha256": "06526bdb630a87c860ceb0eaafb633df867181b596648897cb5a64a92e268f27",
+        "exact_qualified_bytes_accepted": true,
+        "lifecycle_pointers_changed": false,
+        "runtime_start_requested": false
+      },
+      "smoke": {
+        "authenticated_status_http": 200,
+        "status_ms": 2,
+        "served_identity_matches_installed": true,
+        "anonymous_status_http": 401,
+        "completion_http": 200,
+        "completion_ms": 141.8,
+        "completion_tokens": 3,
+        "output_sha256": "25ab960d578e9fb9c7cb17ddbf211f8188564f13e24e64ad515b1a22cbf51f1c",
+        "output_contains_marker": true,
+        "speculative_backend": "dflash2",
+        "public_model_id": "qwen3.8-27b"
+      },
+      "restoration": {
+        "process_state": "stopped",
+        "endpoint_state": "unavailable",
+        "prior_state_restored": true,
+        "power_limit_w": 450,
+        "active_release": "qwen38-4090-native-v0.8.0-beta.1-26fa28d0e783"
+      }
+    }
+  },
+  "documented_route": {
+    "repository_path": "docs/measurements/2026-11-01-v0160-rtx4090-native-run.json",
+    "sha256": "3f96a13fdc3b199ce1b97ce431095e5770ed15ad984bee4d8951cadd844d8f44"
+  },
+  "restoration": {
+    "repository_path": "docs/measurements/2026-11-01-v0160-acceptance-restoration.json",
+    "sha256": "6458ef38eed4a90b499ecaa1d4cb8b027d97d6df4eee32d6b3f9ccc51e8bf2e9"
+  },
+  "limitations": [
+    "One two-GPU Windows host, native serving sequential on shared port 18082.",
+    "First-lineage route acceptance has no predecessor; rollback not_applicable, zero directions. This is not running-lane upgrade/rollback qualification.",
+    "No native vision or additional runtime performance claim; N16 component qualification remains separate."
+  ]
+}

@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Contract tests sweep every PowerShell script and execute configuration binding through
   `powershell.exe` on Windows.
 
-## [0.16.0] - Prepared; publication date ⟦PENDING: v0.16.0 publication date, releases/v0.16.0/NINFER_RELEASE_NOTES.md⟧
+## [0.16.0] - Prepared (not published)
 
 ### Added
 
@@ -38,7 +38,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   kept profile `qwen38-5090-v0.13.0` / config `751d22dc`) from one frozen engine source
   `26fa28d0e7834515508fc07ac503164a6effc820` on upstream `Neroued/ninfer` master `64d10fbf` with
   unchanged stock Oh My Pi **18.14.0** (`31147f9d`) and shared model v3 `81f924d4` (`EXP-101`..`EXP-106`,
-  superseding `v0.15.1`).
+  superseding the planned `v0.15.1` patch): bind 15-phase native receipts
+  `releases/v0.16.0/qualification/rtx4090.json` (`69ebf60c`, `254.27 tok/s` `C1` decode, `83.35 s`
+  130,048-token retrieval) and `releases/v0.16.0/qualification/rtx3090.json` (public sanitized
+  `48c7f635`, raw `038fe713`, `148.43 tok/s` `C1` decode, `188.99 s` retrieval, qualified with the
+  founder-approved `agent_protocol.py` `C2` session-isolation precondition override `317b98ee`,
+  `alphastorm/ninfer#56`), `EXP-101` (`671659f0` on RTX 3090) and `EXP-102` (`6231dccd` on RTX 4090)
+  1,120-prompt quality screens, RTX 3090 84-role (`c904d341`, `×1.2684`, min `0.9764× >= 0.95`) and
+  RTX 4090 115-case (`32acdecc`, `role108` `×1.2736`, `all115` `×1.2741`, with founder waiver
+  `92b94c4a` on `log-024@0` at `0.934 < 0.95`) ABBA speed gates vs `v0.14.0` MTP3, `v0.7.0-beta.3`
+  running-lane upgrade (`1c`), forced first-`Start` rollback (`2c`), and interrupted-install
+  repair/reinstall (`3c`) rehearsals (`38a3a380` on RTX 4090, `631428b5` on RTX 3090), RTX 5090
+  `rtx5090.json` (`2200fa44`, `181.78 tok/s` decode, `56.62 s` cold retrieval) and
+  `p16-agent-parity/2` probe campaign (with founder waiver `66ba8104` on two-restart `restore`), and
+  round-1 G4 fork council closure (`CR-20261031T162716Z-26fa28d0`, ledger `b2871c36`, deferred
+  `alphastorm/ninfer` issues `#50`–`#54`).
 - Expose per-position speculative decoding counters in Prometheus (`/metrics`
   `ninfer_spec_decode_position_tokens_total{position,kind}`) and additive optional
   `request_done.speculative.attempted_per_position` in `requests.jsonl` while retaining request-log
@@ -118,8 +132,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Mark v0.16.0 as the published release across the README, quickstart, facts, roadmap, release
-  history, performance and benchmark docs, compatibility matrix, and upstream watch.
+- Stage and prepare the `v0.16.0` release candidate across the release notes, prepared quickstart,
+  facts, roadmap, release history, performance and benchmark docs, compatibility matrix, and
+  upstream watch while keeping `v0.15.0` as the published release until founder publication.
 
 ## [0.15.0] - 2026-10-30
 

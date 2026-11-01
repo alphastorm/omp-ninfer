@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.16.0",
-  "status": "candidate",
+  "status": "ready",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -15,7 +15,7 @@
     "omp": {
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
       "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/84ddcc0af40e6cf58720e47da18c0560b8376451/compatibility.json",
-      "compatibility_sha256": "0dcfc763cb7bdd0c7987aea6f3536a09a22ffbc1c4619489f29e26a86047aabb",
+      "compatibility_sha256": "3acf06411a857943dedc8f7a04e90ae2e79636c4875e2761b72e379e07ebbe3c",
       "distribution_kind": "upstream-release",
       "upstream_repository": "https://github.com/can1357/oh-my-pi",
       "upstream_tag": "v18.14.0",
@@ -217,10 +217,10 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "85c67a92195fc021d48e64d62c9e6a6def67e8fcd55a82d9a1d4a615cdd490ad",
+    "summary_sha256": "3eb51d64972de679e1c49ac6c1acd7b380f28737bc28920bfcf585a1681d7169",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/84ddcc0af40e6cf58720e47da18c0560b8376451/releases/v0.16.0/qualification.json",
     "runtime_release_eligible": true,
-    "external_installation_passed": false
+    "external_installation_passed": true
   },
   "installation": {
     "mode": "native-windows-docker-local",
@@ -250,10 +250,7 @@
       "NInfer native RTX 3090 v0.8.0-qwen38-3090-beta.1",
       "NInfer native RTX 4090 v0.8.0-qwen38-4090-beta.1"
     ],
-    "blockers": [
-      "external-installation acceptance has not run on this exact v0.16.0 product candidate; product-tooling council and final composition/pins remain separate",
-      "RTX 4090 upgrade/rollback/repair evidence remains pending"
-    ],
-    "external_installation_qualified": false
+    "blockers": [],
+    "external_installation_qualified": true
   }
 }

@@ -1,6 +1,6 @@
 # Quickstart
 
-> **Prepared guide: v0.16.0 · stock Oh My Pi 18.14.0 · candidate route acceptance pending**
+> **Prepared guide: v0.16.0 · stock Oh My Pi 18.14.0 · candidate route acceptance passed; product council binding outstanding**
 >
 > Published installation remains on the [immutable v0.15.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.15.0/docs/QUICKSTART.md)
 > until publication. This candidate guide is not a published installation recommendation.
@@ -15,8 +15,8 @@ loopback to the NInfer inference engine serving Qwen3.8 27B on your GPU.
 | --- | --- | --- |
 | RTX 5090 container on Windows 11 + Docker Desktop / WSL2 | Native Windows x64 client over local loopback `127.0.0.1:18089` | [RTX 5090 Windows route](#ready-route-native-windows-and-docker-desktop-wsl2) |
 | RTX 5090 container on Windows 11 / WSL2 or Linux | macOS arm64 client over a manual SSH tunnel (preview) | [macOS manual SSH route (preview)](#macos-client-over-a-manual-ssh-tunnel-preview) |
-| RTX 4090 native Windows 11 (alone or beside RTX 3090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; v0.8.0-beta.1 DFlash2 K=7, C1; fresh client/route acceptance pending | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) |
-| RTX 3090 native Windows 11 (alone or beside RTX 4090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; v0.8.0-beta.1 DFlash2 K=7, C2 over one shared 131,072-token pool; fresh client/route acceptance pending | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
+| RTX 4090 native Windows 11 (alone or beside RTX 3090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; v0.8.0-beta.1 DFlash2 K=7, C1; fresh client/route acceptance passed | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) |
+| RTX 3090 native Windows 11 (alone or beside RTX 4090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; v0.8.0-beta.1 DFlash2 K=7, C2 over one shared 131,072-token pool; fresh client/route acceptance passed | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
 | RTX 5090 container with Linux x64 client under WSL2 only | WSL2 shell client over local loopback `127.0.0.1:18089` (no native Linux OS qualification) | [WSL2 Linux client](#wsl2-linux-client-over-local-loopback) |
 | Other GPU, non-WSL Linux client, or concurrent native serving | Unsupported | [Compatibility boundary](COMPATIBILITY.md) |
 
@@ -135,34 +135,45 @@ predicates and two macOS semantic stub rehearsals, not fresh live route acceptan
 ## Acceptance evidence
 
 **v0.16.0 fresh acceptance** on frozen candidate
-`⟦PENDING: v0.16.0 frozen product candidate commit SHA, releases/v0.16.0/acceptance/composed-external-installation.json⟧`
-on `⟦PENDING: v0.16.0 acceptance completion date UTC, releases/v0.16.0/acceptance/composed-external-installation.json⟧`
-exercises all three stock client platforms, all five documented routes, both `v0.8.0-beta.1` native
+`56899320d416bafda5c15d7e454e9b593badc0a6`
+passed on **2026-11-01** (completed `2026-11-01T12:30:58Z`), exercising all three stock client
+platforms, all five documented routes, both `v0.8.0-beta.1` native
 public installs, RTX 3090 `C2` fanout / stock-client overlap / compaction, and independent host
 restoration. No predecessor client, runtime, or product-route receipt is relabeled.
 
 | Documented route | Fresh acceptance |
 | --- | --- |
-| RTX 5090 Windows 11 + Docker Desktop/WSL2 host | `⟦PENDING: v0.16.0 RTX 5090 host route block count (2/2), releases/v0.16.0/acceptance/documented-routes.json⟧` |
-| macOS arm64 client over manual SSH tunnel | `⟦PENDING: v0.16.0 macOS route block count (10/10), releases/v0.16.0/acceptance/documented-routes.json⟧`; platform remains preview |
-| Windows x64 client over RTX 5090 loopback | `⟦PENDING: v0.16.0 Windows x64 route block count (5/5), releases/v0.16.0/acceptance/documented-routes.json⟧` |
-| Native RTX 4090 on the two-GPU host | `⟦PENDING: v0.16.0 native RTX 4090 route block count (7/7), route-behavior check count, and rollback directions, releases/v0.16.0/acceptance/documented-routes.json⟧` |
-| Native RTX 3090 on the two-GPU host | `⟦PENDING: v0.16.0 native RTX 3090 route block count (7/7), route-behavior check count, C2 fanout/overlap/compaction checks, and rollback directions, releases/v0.16.0/acceptance/documented-routes.json⟧` |
+| RTX 5090 Windows 11 + Docker Desktop/WSL2 host | **PASS 2/2 blocks** |
+| macOS arm64 client over manual SSH tunnel | **PASS 10/10 blocks**; platform remains preview |
+| Windows x64 client over RTX 5090 loopback | **PASS 5/5 blocks** |
+| Native RTX 4090 on the two-GPU host | **PASS 7/7 blocks, 22/22 behavior gates**; first-lineage rollback `not_applicable`, zero directions |
+| Native RTX 3090 on the two-GPU host | **PASS 7/7 blocks, 22/22 behavior gates**, four-way fanout under `C2`, both stock OMP parallel-proof scenarios at limit 2, two committed automatic-compaction/control-recall epochs; first-lineage rollback `not_applicable`, zero directions |
 
-All three newly downloaded stock OMP 18.14.0 clients run runtime-bound typed tool/result, exact
-continuation, and unavailable-route fail-closed checks
-(`⟦PENDING: v0.16.0 platform acceptance details and macOS server-restart nonce resume confirmation, releases/v0.16.0/acceptance/{darwin-arm64,windows-x64,linux-x64}-18.14.0.json⟧`).
+All three newly downloaded stock OMP 18.14.0 clients passed runtime-bound typed tool/result,
+exact continuation, and unavailable-route fail-closed checks:
+[macOS arm64](../releases/v0.16.0/acceptance/darwin-arm64-18.14.0.json),
+[Windows x64](../releases/v0.16.0/acceptance/windows-x64-18.14.0.json), and
+[Linux x64](../releases/v0.16.0/acceptance/linux-x64-18.14.0.json).
+The macOS documented server restart returned the exact durable nonce.
 Linux runs under WSL2, not a separately qualified native Linux OS. Image input is qualified on
 macOS and Windows against RTX 5090 only; there is no native-lane or Linux vision claim. Separate
-RTX 4090 (planned `../releases/v0.16.0/acceptance/rtx4090-public-install.json`; pending) and
-RTX 3090 (planned `../releases/v0.16.0/acceptance/rtx3090-public-install.json`; pending) public-URL checks verify the
+[RTX 4090](../releases/v0.16.0/acceptance/rtx4090-public-install.json) and
+[RTX 3090](../releases/v0.16.0/acceptance/rtx3090-public-install.json) public-URL checks passed for the
 exact assets and served identities (`qwen38-4090-native-v0.8.0-beta.1-26fa28d0e783` and
-`qwen38-3090-native-v0.8.0-beta.1-26fa28d0e783`:
-`⟦PENDING: v0.16.0 native public-install, canonical promotion, and rollback-direction outcomes, releases/v0.16.0/acceptance/rtx{4090,3090}-public-install.json⟧`).
-Independent restoration audits both the RTX 5090 container and both sequential native baselines
-(`⟦PENDING: v0.16.0 acceptance restoration filename, RTX 5090 hold duration s, and RTX 4090 / RTX 3090 native driver window durations s and restored 450/370 W baselines, docs/measurements/*-v0160-acceptance-restoration.json⟧`).
-Documented routes (planned `../releases/v0.16.0/acceptance/documented-routes.json`; pending) and
-composed acceptance (planned `../releases/v0.16.0/acceptance/composed-external-installation.json`; pending) bind all
+`qwen38-3090-native-v0.8.0-beta.1-26fa28d0e783`): each anonymously verified seven manifest assets
+and the closed 10-entry checksum set, ran the downloaded installer with outcome `already_installed`,
+accepted the exact qualified bytes without changing lifecycle pointers, and passed authenticated
+status/completion and anonymous-status refusal. The promoted N16 roots and stages were preserved;
+these first-lineage routes claim no predecessor upgrade or rollback.
+[Independent restoration](measurements/2026-11-01-v0160-acceptance-restoration.json) passed:
+the RTX 5090 hold was **412.552 s**; native driver windows were **499.977 s** on RTX 4090 and
+**1,225.308 s** on RTX 3090, with **18/18 Restore and 18/18 final Audit checks per native lane**,
+stopped **450 / 370 W** baselines restored. The same incumbent container/image and checkpoint
+mounts were retained, HTTP 200 and Fleet healthy were rechecked, and `unless-stopped` restored.
+An owner-approved temporary private same-container restore arm was used and its original bytes
+restored; this private-infrastructure deviation did not alter the candidate driver.
+[Documented routes](../releases/v0.16.0/acceptance/documented-routes.json) and
+[composed acceptance](../releases/v0.16.0/acceptance/composed-external-installation.json) bind all
 31 executable route blocks; subsequent acceptance-summary edits change prose only. These are
 owner-operated tester-equivalent observations, not independent external-user outcomes. This release
 closes [#94](https://github.com/alphastorm/omp-ninfer/issues/94)–[#96](https://github.com/alphastorm/omp-ninfer/issues/96),
@@ -204,7 +215,8 @@ same-source second builds are not bit-identical. See the
   address on a two-GPU Windows 11 host and serve sequentially on port `18082`. Upgrading an
   existing `v0.7.0-beta.3` install preserves `v0.7.0-beta.3` as `previous_release` for
   `Control-Release.ps1 -Action Rollback`
-  (`⟦PENDING: v0.16.0 native public-install and rollback-direction outcomes, releases/v0.16.0/acceptance/rtx{4090,3090}-public-install.json⟧`),
+  (separate predecessor rehearsals passed all three scenarios on both native lanes;
+  final public-install checks passed as `already_installed` on the promoted N16 packages),
   while each package's isolated 15-phase scratch qualification runs in a fresh scratch root with
   no predecessor (`not_applicable`, zero rollback directions).
 - **RTX 3090 power and upgrade:** the serving cap is 350 W, with 370 W owner restoration on the

@@ -1,7 +1,7 @@
 {
-  "approval_granted": true,
+  "approval_granted": false,
   "artifact_type": "omp_ninfer_review_ledger",
-  "as_of": "2026-10-31",
+  "as_of": "2026-11-01",
   "native_runtime": {
     "base_commit": "2af6b3dec467e61d284889c69e903eef464bda97",
     "binding_status": "Original frozen N16 subject passed post-dispatch and final epoch rechecks with no drift. Frozen record, packet, manifest, resolver receipt and envelope are unchanged. Every returned finding/question is retained and mapped to L1-L6 with accountable-lead rationale/disposition verbatim. Closure is by disposition, not a new admitting epoch or code remediation.",
@@ -384,10 +384,18 @@
     "subject_digest": "42d8473cc636cf700a16e4f9be13f0af865704f65287482d13af38838e8eda7d",
     "targeted_refutation_used": false
   },
+  "product_tooling": {
+    "repository": "https://github.com/alphastorm/omp-ninfer",
+    "branch": "release/v0.16.0",
+    "stage_commit": "56899320d416bafda5c15d7e454e9b593badc0a6",
+    "status": "pending",
+    "approval_granted": false,
+    "binding_status": "Frozen acceptance subject only. The product-tooling council is separate from the closed N16 fork council; no product review outcome, standing, or approval is asserted."
+  },
   "public_route_acceptance_granted": false,
   "publication_authorized": false,
   "release": "v0.16.0",
   "schema_version": 1,
-  "scope": "G4 fork/common-engine source-council dispositions only. The single initial N16 full council completed all four selected seats; all11 source items map to six final deferred lead rows, with no in-scope residual P0/P1. No remediation epoch, N17, source/package change or re-cut. This artifact does not grant product-tooling approval, hardware acceptance, publication or public-route acceptance.",
-  "status": "closed-without-remediation"
+  "scope": "The N16 fork/common-engine council is closed: all four selected seats completed, all 11 source items map to six final deferred lead rows, and no in-scope residual P0/P1 remains. The product-tooling entry binds only frozen acceptance subject 56899320d416bafda5c15d7e454e9b593badc0a6, not a council outcome. No remediation epoch, N17, source/package change or re-cut. This artifact grants neither product-tooling approval nor hardware acceptance, publication or public-route acceptance.",
+  "status": "pending-product-tooling"
 }

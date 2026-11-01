@@ -1,0 +1,219 @@
+{
+  "artifact_type": "omp_ninfer_composed_external_installation",
+  "schema_version": 1,
+  "release": "v0.16.0",
+  "as_of": "2026-11-01",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "Fresh five-route acceptance on frozen v0.16.0 candidate 56899320d416bafda5c15d7e454e9b593badc0a6, N16 beta.1 native packages and published RTX 5090 beta.4 runtime; both canonical native lanes and the same incumbent production container restored.",
+  "client": {
+    "distribution_kind": "upstream-release",
+    "component_release_tag": "v18.14.0",
+    "upstream_repository": "https://github.com/can1357/oh-my-pi",
+    "upstream_commit": "31147f9d1a76608549821c3759f8487b4d66c72d",
+    "upstream_tree": "9a63b5bfbb5971962c44fca660744b0d75dcd2c2",
+    "note": "Stock OMP 18.14.0 is unchanged; every client was freshly downloaded and accepted against the candidate-bound runtime identities."
+  },
+  "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+  "compatibility_sha256": "3acf06411a857943dedc8f7a04e90ae2e79636c4875e2761b72e379e07ebbe3c",
+  "windows_asset_sha256": "620a5935cdb6a9ed52d8b0c93892d6b5bb84155244a98f3be82af0455177bf29",
+  "windows_binary_sha256": "620a5935cdb6a9ed52d8b0c93892d6b5bb84155244a98f3be82af0455177bf29",
+  "platform_receipts": [
+    {
+      "profile": "darwin-remote-ssh",
+      "sha256": "1e5c32d2ccc045b4ed2c0a270b5e6675b7b29abff11bdd03e92b5ffaa2af4d54"
+    },
+    {
+      "profile": "windows-docker-local",
+      "sha256": "b6c19635e9deb2fcc2d5736c6da8be89c61e687834f68e6c40a0e8ce5a9e3299"
+    },
+    {
+      "profile": "linux-docker-local",
+      "sha256": "1dbb936b72cfd44c360fed3a39e41352c422e997636d2fe51a426ef2c0793a76"
+    }
+  ],
+  "steps": {
+    "public_client_downloads": {
+      "status": "passed",
+      "anonymous": true,
+      "assets": 3,
+      "downloads": [
+        {
+          "profile": "darwin-remote-ssh",
+          "url": "https://github.com/can1357/oh-my-pi/releases/download/v18.14.0/omp-darwin-arm64",
+          "sha256": "608843959ab34295d52460dd09dd7d548b6c903c08a83c67954c2d4c36fd1f5a"
+        },
+        {
+          "profile": "windows-docker-local",
+          "url": "https://github.com/can1357/oh-my-pi/releases/download/v18.14.0/omp-windows-x64.exe",
+          "sha256": "620a5935cdb6a9ed52d8b0c93892d6b5bb84155244a98f3be82af0455177bf29"
+        },
+        {
+          "profile": "linux-docker-local",
+          "url": "https://github.com/can1357/oh-my-pi/releases/download/v18.14.0/omp-linux-x64",
+          "sha256": "e7dd2b606c4ebe9d1a7bcfad1b8820db968cd6b05409fed1c6bc8db0b6a95a8f"
+        }
+      ]
+    },
+    "rtx5090-container-host": {
+      "status": "passed",
+      "blocks": 2
+    },
+    "rtx5090-macos-client": {
+      "status": "passed",
+      "blocks": 10
+    },
+    "rtx5090-windows-client": {
+      "status": "passed",
+      "blocks": 5
+    },
+    "rtx4090-native": {
+      "status": "passed",
+      "blocks": 7
+    },
+    "rtx3090-native": {
+      "status": "passed",
+      "blocks": 7
+    },
+    "linux_live_client": {
+      "status": "passed",
+      "profile": "linux-docker-local",
+      "omp_version": "omp/18.14.0",
+      "binary_sha256": "e7dd2b606c4ebe9d1a7bcfad1b8820db968cd6b05409fed1c6bc8db0b6a95a8f",
+      "scope": "Fresh stock OMP 18.14.0 Linux x64 client under WSL2; no separate native Linux OS or Linux vision claim.",
+      "structured_stream_audit": {
+        "tool": {
+          "providers": [
+            "ninfer-beta"
+          ],
+          "models": [
+            "q38-ninfer"
+          ],
+          "input_image_records": 0,
+          "only_selected_provider_and_model": true,
+          "decode_encoding": "utf-8",
+          "transcript_sha256": "266931751173646d3c8abe9a2111e5058a32478d4f0a068213d4b799ef60a437"
+        },
+        "state": {
+          "providers": [
+            "ninfer-beta"
+          ],
+          "models": [
+            "q38-ninfer"
+          ],
+          "input_image_records": 0,
+          "only_selected_provider_and_model": true,
+          "decode_encoding": "utf-8",
+          "transcript_sha256": "d8a3ccb1858abc0bbe320f92df201a267ac0a05beec2a18a17492bbda12ec202"
+        },
+        "continuation": {
+          "providers": [
+            "ninfer-beta"
+          ],
+          "models": [
+            "q38-ninfer"
+          ],
+          "input_image_records": 0,
+          "only_selected_provider_and_model": true,
+          "decode_encoding": "utf-8",
+          "transcript_sha256": "a57fac6c0c2c8e0160105c449f13c6332b83c2388cc1d64eea9eb6d6408a15ae"
+        },
+        "fail-closed": {
+          "providers": [
+            "ninfer-beta"
+          ],
+          "models": [
+            "q38-ninfer"
+          ],
+          "input_image_records": 0,
+          "only_selected_provider_and_model": true,
+          "decode_encoding": "utf-8",
+          "transcript_sha256": "e9d6da8fd0dc7d57cbd9c2779e56271a1b7b92cbe9936e30617292f3592fa6ec"
+        }
+      },
+      "fail_closed": {
+        "exit_code": 1,
+        "no_model_response": true,
+        "only_selected_local_provider_observed": true,
+        "providers": [
+          "ninfer-beta"
+        ],
+        "models": [
+          "q38-ninfer"
+        ],
+        "errors": [
+          "Couldn't connect to 127.0.0.1:18089 (connection refused). Check that the server is running and reachable."
+        ],
+        "endpoint": "http://127.0.0.1:18089/v1",
+        "method": "configured route unavailable; no provider configuration changes"
+      }
+    }
+  },
+  "tools": true,
+  "vision": true,
+  "vision_scope": {
+    "darwin-remote-ssh": {
+      "status": "passed",
+      "input_image_records": 3,
+      "input_sha256": "8dc618562e82300e3b68ab9236ab520455a6b5b09f81c6403e9afbf4aad9f592"
+    },
+    "windows-docker-local": {
+      "status": "passed",
+      "input_image_records": 3,
+      "input_sha256": "8dc618562e82300e3b68ab9236ab520455a6b5b09f81c6403e9afbf4aad9f592"
+    },
+    "linux-docker-local": "Not exercised; no Linux vision claim.",
+    "rtx4090-native": "No native vision claim.",
+    "rtx3090-native": "No native vision claim."
+  },
+  "stateful_resume": true,
+  "fail_closed": true,
+  "runtime_incumbent_restored": true,
+  "runtime_qualification": {
+    "rtx5090-container": {
+      "status": "passed",
+      "repository_path": "releases/v0.16.0/qualification/rtx5090.json",
+      "scope": "Published beta.4 component qualification; fresh acceptance additionally binds exact runtime identity."
+    },
+    "rtx3090-windows-native": {
+      "status": "passed",
+      "repository_path": "releases/v0.16.0/qualification/rtx3090.json",
+      "scope": "N16 beta.1 component qualification; fresh route/public-install/probe acceptance and restored promoted canonical instance."
+    },
+    "rtx4090-windows-native": {
+      "status": "passed",
+      "repository_path": "releases/v0.16.0/qualification/rtx4090.json",
+      "scope": "N16 beta.1 component qualification; fresh route/public-install/probe acceptance and restored promoted canonical instance."
+    }
+  },
+  "evidence": {
+    "documented_routes": {
+      "repository_path": "releases/v0.16.0/acceptance/documented-routes.json",
+      "sha256": "cd61c512ce4a0600df69aa310465e9ab8ab463de372a8ef53b589c709b9b71c1"
+    },
+    "rtx4090_public_install": {
+      "repository_path": "releases/v0.16.0/acceptance/rtx4090-public-install.json",
+      "sha256": "3ac3014e994cf2ec5c9e78c65c903a47adfa46474b32d09efeb3d92802b84814"
+    },
+    "rtx3090_public_install": {
+      "repository_path": "releases/v0.16.0/acceptance/rtx3090-public-install.json",
+      "sha256": "87da6f4af30213f3378753ccf5b83dcec2fc4991089fd36cb70de2001e0a9d30"
+    },
+    "restoration": {
+      "repository_path": "docs/measurements/2026-11-01-v0160-acceptance-restoration.json",
+      "sha256": "6458ef38eed4a90b499ecaa1d4cb8b027d97d6df4eee32d6b3f9ccc51e8bf2e9"
+    },
+    "published_client_components": {
+      "repository_path": "releases/v0.16.0/qualification/client-components.json",
+      "sha256": "16f6f0a361e66cab4b0b5629d15b48962cb63dadcf1871a44b1ba76593078050"
+    }
+  },
+  "limitations": [
+    "Owner-operated tester-equivalent, not independent external-user outcomes.",
+    "macOS arm64 manual SSH preview; Linux x64 evidence is WSL2-scoped.",
+    "Native first-release route acceptance does not claim running-lane upgrade/rollback; component qualification is separate.",
+    "Image input covers macOS and Windows against RTX 5090 only; no native or Linux vision claim.",
+    "Same-container restoration used an owner-approved temporary private restore arm, with original infrastructure bytes restored afterwards; candidate driver unchanged."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}

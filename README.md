@@ -82,7 +82,7 @@ desktop GUI ([LM Studio](https://lmstudio.ai)), the widest hardware reach or App
 | --- | --- | --- | --- |
 | **RTX 5090** | Windows 11 + Docker Desktop/WSL2 container; Windows client local, macOS over a manual SSH tunnel (preview), Linux client under WSL2 | 131,072-token context, two requests in flight, DFlash2 draft window 7, JSON-schema output, vision + tools + preserved thinking | 181.78 tok/s decode (180.25 tok/s wall); exact 130,048-token retrieval in 56.62 s cold (56.51 s server prefill) ([receipt](releases/v0.16.0/qualification/rtx5090.json)) |
 | **RTX 4090** | Native Windows 11 package; Windows client local | 131,072-token context, one request at a time, DFlash2 draft window 7, JSON-schema output, text + tools | 254.27 tok/s C1 decode; exact 130,048-token retrieval in 83.35 s ([receipt](releases/v0.16.0/qualification/rtx4090.json)) |
-| **RTX 3090** | Native Windows 11 package; Windows client local | 131,072-token context, two requests in flight (shared 131,072-token pool), DFlash2 draft window 7, 350 W serving cap, JSON-schema output, text + tools | `148.43 tok/s C1 decode; exact 130,048-token retrieval in 188.99 s` ([receipt](releases/v0.16.0/qualification/rtx3090.json)) |
+| **RTX 3090** | Native Windows 11 package; Windows client local | 131,072-token context, two requests in flight (shared 131,072-token pool), DFlash2 draft window 7, 350 W serving cap, JSON-schema output, text + tools | 148.43 tok/s C1 decode; exact 130,048-token retrieval in 188.99 s ([receipt](releases/v0.16.0/qualification/rtx3090.json)) |
 
 Both native lanes install on one two-GPU host, each bound to its GPU UUID, and run one at a time on
 port 18082; all three lanes serve the same 20.4 GB Qwen3.8 27B model container version 3 artifact
@@ -138,7 +138,7 @@ Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release l
 
 ## Measured, not estimated
 
-![Qualification receipts for v0.16.0: RTX 5090 181.78 tok/s and 56.62 s exact retrieval; RTX 4090 254.27 tok/s and 83.35 s; RTX 3090 148.43 tok/s C1 decode; exact 130,048-token retrieval in 188.99 s](assets/benchmarks.png)
+![Qualification receipts for v0.16.0: RTX 5090 181.78 tok/s and 56.62 s exact retrieval; RTX 4090 254.27 tok/s and 83.35 s; RTX 3090 148.43 tok/s and 188.99 s](assets/benchmarks.png)
 
 Each lane is measured on its own gate, machine, and profile; the strip is not a ranking. Method,
 per-lane charts, the warm-versus-cold boundary rules, model quality, and the community table:

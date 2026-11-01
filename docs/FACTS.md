@@ -1,6 +1,6 @@
 # OMP NInfer — canonical facts
 
-> Prepared v0.16.0 candidate: not a published product. Any acceptance or product-council section below is a plan until its pending evidence lands. Published installation remains on the [immutable v0.15.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.15.0/docs/QUICKSTART.md).
+> Prepared v0.16.0 candidate: not a published product. Fresh candidate acceptance passed on 2026-11-01; product-council binding and the final manifest pin remain separate gates. Published installation remains on the [immutable v0.15.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.15.0/docs/QUICKSTART.md).
 
 
 Prepared successor: v0.16.0 · Published release: v0.15.0 (2026-10-30) · stock Oh My Pi 18.14.0
@@ -53,8 +53,8 @@ See the [decision guide](DECISION_GUIDE.md) for the side-by-side comparison.
 
 ## Current release
 
-Prepared runtime candidate **v0.16.0** (`⟦PENDING: v0.16.0 publication date, releases/v0.16.0/NINFER_RELEASE_NOTES.md⟧`,
-not published; intended to supersede `v0.15.0` and the planned `v0.15.1` patch) retains unmodified upstream
+Prepared runtime candidate **v0.16.0** (not published; intended to supersede `v0.15.0` and the
+planned `v0.15.1` patch) retains unmodified upstream
 Oh My Pi **18.14.0** (`31147f9d`, tree `9a63b5bf`, upstream binaries rebuilt with Bun 1.4.4 for
 CVE-2026-91403 and CVE-2026-111497; upstream `18.14.1` and `18.14.2` are deferred to a separate
 `v0.16.1` client patch) and shared published model container version 3 `81f924d4`
@@ -104,9 +104,18 @@ immutable after the freeze, and the publication record is this section,
   [#94](https://github.com/alphastorm/omp-ninfer/issues/94) (the `v0.14.0`–`v0.15.0` RTX 3090
   stop-before-upgrade prerequisite is dropped) and retaining `v0.7.0-qwen38-{4090,3090}-beta.3` as
   `previous_release` for `Control-Release.ps1 -Action Rollback`
-  (`RTX 3090 PASS: 1c running-lane upgrade, 2c forced post-activation first-Start failure with rollback, 3c interrupted install/repair/same-instance reinstall from true v0.14.0 beta.3; all 3 scenarios passed once, candidate transaction-created targets removed, canonical states unchanged, 370 W restored; no product-route acceptance is inferred; RTX 4090 ⟦PENDING: N16 FINAL RTX 4090 upgrade, rollback, and repair rehearsal from v0.7.0-qwen38-4090-beta.3, window/final-4090/⟧`;
-  each package's isolated 15-phase scratch qualification runs in a fresh scratch root with no
-  predecessor and records `rollback: not_applicable`, `0` directions). Prior MTP3 checkpoints are
+  (**PASS 3/3 scenarios on both native lanes** from published `v0.14.0`
+  `v0.7.0-qwen38-{4090,3090}-beta.3`: RTX 4090 `87038cfb` → `06526bdb`, summary `38a3a380`, passed
+  `1c` running-lane upgrade in `211.93 s`, `2c` forced post-activation first-`Start`
+  port-ownership refusal with rollback in `211.37 s` deleting `4/4` transaction-created targets,
+  and `3c` interrupted install then `-RepairInterruptedInstall` deleting `4/4` targets and
+  same-instance reinstall in `309.80 s` with `450 W` restored; RTX 3090 `a7637f66` → `040d5923`,
+  summary `631428b5`, passed `1c` running-lane upgrade at 350 W in `220.32 s`, `2c` forced
+  post-activation first-`Start` failure with rollback in `206.96 s` deleting `4/4` targets, and
+  `3c` interrupted install then repair deleting `4/4` targets and same-instance reinstall in
+  `322.25 s` with `370 W` restored; canonical states unchanged; each package's isolated 15-phase
+  scratch qualification runs in a fresh scratch root with no predecessor and records
+  `rollback: not_applicable`, `0` directions). Prior MTP3 checkpoints are
   not imported into DFlash2; keep prior checkpoint roots untouched for rollback and replay
   authoritative OMP transcripts for fresh sessions.
 - **Admission on the RTX 5090 and 24 GB native lanes:** Two requests run together on the RTX 5090
@@ -146,17 +155,22 @@ immutable after the freeze, and the publication record is this section,
   5090-only reproducibility exception (`502/1,242` ELF files differed across two clean WSL2 builds
   under `nvcc` 13.1.115; deterministic module IDs remain a follow-up).
 - **Fresh runtime qualification, route acceptance, and G4 councils:** Fresh `v0.16.0` acceptance on
-  frozen candidate `⟦PENDING: v0.16.0 frozen product candidate commit SHA, releases/v0.16.0/acceptance/composed-external-installation.json⟧`
-  exercises all five documented routes (31 blocks), all three stock 18.14.0 clients, and both
+  frozen candidate `56899320d416bafda5c15d7e454e9b593badc0a6` passed on **2026-11-01**:
+  all five documented routes (host `2/2`, macOS `10/10`, Windows `5/5`, native `7/7` each;
+  **31/31 blocks**), all three stock 18.14.0 clients, and both
   `v0.8.0-beta.1` native public installs (including RTX 3090 `C2` fanout, parallel stock OMP
   overlap at limit 2, and two automatic-compaction/control-recall epochs), with independent host
-  restoration (`⟦PENDING: v0.16.0 documented-route block counts, native public-install outcomes, and RTX 5090 / RTX 4090 / RTX 3090 restoration window durations, releases/v0.16.0/acceptance/composed-external-installation.json⟧`;
-  `documented-routes.json` (planned `../releases/v0.16.0/acceptance/documented-routes.json`; pending),
-  `composed-external-installation.json` (planned `../releases/v0.16.0/acceptance/composed-external-installation.json`; pending),
-  `docs/measurements/⟦PENDING: v0.16.0 acceptance restoration filename, docs/measurements/*-v0160-acceptance-restoration.json⟧`).
+  restoration. Both native lanes passed **22/22 behavior gates**, their public installers returned
+  `already_installed` with exact qualified bytes and unchanged pointers, and each passed
+  **18/18 Restore plus 18/18 final Audit checks**. First-lineage rollback is `not_applicable`,
+  zero directions. RTX 5090 hold **412.552 s**; RTX 4090 / RTX 3090 driver windows
+  **499.977 / 1,225.308 s**, stopped **450 / 370 W** restored
+  ([documented routes](../releases/v0.16.0/acceptance/documented-routes.json),
+  [composed acceptance](../releases/v0.16.0/acceptance/composed-external-installation.json),
+  [restoration](measurements/2026-11-01-v0160-acceptance-restoration.json)).
   The G4 fork council (`CR-20261031T162716Z-26fa28d0`, ledger `b2871c36`, 4/4 seats) and G4
   product-tooling council (`⟦PENDING: v0.16.0 product-tooling G4 council review ID and ledger SHA-256, releases/v0.16.0/review/runtime-ledger.json⟧`)
-  are bound in [`review/runtime-ledger.json`](../releases/v0.16.0/review/runtime-ledger.json), with
+  have separate status in [`review/runtime-ledger.json`](../releases/v0.16.0/review/runtime-ledger.json), with
   `omp-ninfer` [#94](https://github.com/alphastorm/omp-ninfer/issues/94)–[#96](https://github.com/alphastorm/omp-ninfer/issues/96),
   [#116](https://github.com/alphastorm/omp-ninfer/issues/116), and
   [#117](https://github.com/alphastorm/omp-ninfer/issues/117) closed and remaining deferrals tracked
@@ -286,22 +300,64 @@ capabilities to another):
 | --- | --- | --- | --- | --- |
 | RTX 5090 (`v0.7.0-qwen38-5090-beta.4`, DFlash2 K=7, BF16 KV, `C2`) | Exact in **56.62 s** cold (`56.617 s`, **2,297.0 tok/s** wall; **56.51 s** / `56.505 s` server) | **181.78 tok/s** server-side (**180.25 tok/s** wall) over 2,048 tokens | **0.244** DFlash2 acceptance, **2.71** tokens/round | [`rtx5090.json`](../releases/v0.16.0/qualification/rtx5090.json) (2026-11-01) |
 | RTX 4090 native (`v0.8.0-qwen38-4090-beta.1`, DFlash2 K=7, INT8 KV, `C1`) | Exact in **83.35 s** (83.352 s) | **254.27 tok/s** C1 decode (4,541 prompt / 1,024 completion tokens); prefill **2,139.14 tok/s** | **83.88%** DFlash2 acceptance | [`rtx4090.json`](../releases/v0.16.0/qualification/rtx4090.json) (2026-10-31) |
-| RTX 3090 native (`v0.8.0-qwen38-3090-beta.1`, DFlash2 K=7, INT8 KV, `C2` shared pool, 350 W cap) | `188.99 s` | `148.43 / 974.15 tok/s decode / prefill` | `83.88%` | [`rtx3090.json`](../releases/v0.16.0/qualification/rtx3090.json) |
+| RTX 3090 native (`v0.8.0-qwen38-3090-beta.1`, DFlash2 K=7, INT8 KV, `C2` shared pool, 350 W cap) | Exact in **188.99 s** (188.994 s) | **148.43 tok/s** C1 decode (4,541 prompt / 1,024 completion tokens); prefill **974.15 tok/s** | **83.88%** DFlash2 acceptance | [`rtx3090.json`](../releases/v0.16.0/qualification/rtx3090.json) (2026-11-01) |
 
 - **v0.16.0 (`26fa28d0`) native DFlash2 K=7, RTX 3090 `C2`, and first-fork export-State residency:**
   On frozen source `26fa28d0` and shared model `81f924d4`, RTX 4090 (`06526bdb`) passed 131,072-token
-  INT8 `C1` fit/true-cold (`1,056,964,608` B available >= `671,088,640` B floor, `22,639 MiB` peak,
+  INT8 `C1` fit/true-cold ([`rtx4090-windows-native.fit.json`](../releases/v0.16.0/qualification/rtx4090-windows-native.fit.json)
+  `44c50008`: `1,056,964,608` B / `1,008 MiB` available >= `671,088,640` B floor, `22,639 MiB` peak,
   `32/32` tokens identical), `83/83` agent-probe parity (`max source_wait <= 0.0178 s`), `15/15`
   managed qualification phases (**254.27 tok/s** `C1` decode, **2,139.14 tok/s** prefill, **83.88%**
-  acceptance, **83.35 s** retrieval, **1,647 / 1,650** cached tokens across **42.21 s** restart,
-  `450 W` restored in [`rtx4090.json`](../releases/v0.16.0/qualification/rtx4090.json)), the
-  1,120-prompt `EXP-102` powered quality screen (`PASS: 1,120 prompts; both arms 80/80 deterministic, 0 missing/error samples; 777/1,120 paired content/reasoning outputs changed. All 9 primary bounds passed: recall lower -0.0082 and precision lower -0.0093 (margin -0.02); unsupported upper 0.0045 (0.03); schema/tool-selection/tool-argument lower 0 (each -0.02); duplicate upper 0.0046 (0.02); redaction lower -0.0139 (-0.05); secret-leak ratio upper 1.0985 (1.10), counts 533 to 561, not zero`),
-  and the 108-role + 7-supplemental ABBA speed gate vs `v0.14.0` MTP3 (108-case role corpus `role108`: `84` cases at `0` cached tokens + `12` at `32,000` + `12` at `64,000` weighted **×1.2736** at `139.87 → 178.13 tok/s`, all `115` cases **×1.2741** at `138.94 → 177.02 tok/s`, `7` supplementals **×1.2778** / min **×1.0804**, `115/115` repeats per build and `43/115` cross-build byte-identical, with depth-0 case `log-024@0` at **0.934** / `139.41 → 130.19 tok/s` below the `0.95` per-case decode ratio floor waived by the founder with disclosure).
-  RTX 3090 (`040d5923`, `C2` over one shared 131,072-token INT8 pool) passed the `EXP-101`
-  1,120-prompt powered screen (`PASS: 1,120 prompts; both arms 80/80 deterministic with 0 missing/error samples; 771/1,120 paired content/reasoning outputs changed. All 9 primary bounds passed: recall lower -0.0073 and precision lower -0.0070 (margin -0.02); unsupported upper 0.0089 (0.03); schema/tool-selection/tool-argument lower 0 (each -0.02); duplicate upper 0.0059 (0.02); redaction lower -0.0119 (-0.05); secret-leak ratio upper 1.0673 (1.10), counts 545 to 561, not zero`),
-  84-role depth-0 ABBA speed (`PASS: 84 depth-0 ABBA cases at 350 W; weighted 1.2683598277 (79.37 to 100.67 tok/s), minimum 0.9764424319 >= 0.95, no waived case; both within-engine repeats 84/84 identical, cross-engine 36/84 identical`),
-  and shipping-package `C2` fit/true-cold, agent/concurrency probes, and 15-phase qualification
-  (`PASS: 131,072-token INT8 C2, 1,110,441,984 B (1,059 MiB) available after startup >= 805,306,368 B (768 MiB); 22,584 MiB peak / 1,742 MiB min free. Two 59,866-token true-cold sessions restored at 59,840 cached + 26 computed tokens with 32/32 generated token IDs and UTF-8 bytes identical; converted device / host-mapped weights 473,497,600 / 1,350,860,800 B; 15/15 phases passed: C1 decode 148.43 tok/s, prefill 974.15 tok/s, DFlash2 acceptance 83.88%, exact 130,048-token retrieval 188.99 s; explicit-save/graceful-stop cached 1,647/1,650, restart 46.88 s; schema-2 normal/pressure product protocol and state_security passed; isolated rollback not_applicable (0 directions), 370 W restored; PASS: 83/83 positions (arrival 12, mix 51, sibling 5, two-restart restore 4, fleet 11) under p16-agent-parity/2, cache-gap deltas 0. Fanout-concurrency 4: 5/5 HTTP 200; calibrated 2 x 59,879-token test: 18/18 HTTP 200 across 3 trials; 0 HTTP 500`),
+  acceptance, **83.35 s** retrieval, **1,647** explicit-save and **1,650** graceful-stop cached
+  tokens across **42.21 s** restart, `450 W` restored in
+  [`rtx4090.json`](../releases/v0.16.0/qualification/rtx4090.json) `69ebf60c`), `3/3`
+  `v0.7.0-beta.3` upgrade/rollback/repair rehearsals (`38a3a380`: `1c` running-lane upgrade `211.93
+  s`, `2c` forced first-`Start` rollback `211.37 s`, `3c` interrupted-install repair and reinstall
+  `309.80 s`, `450 W` restored), the 1,120-prompt `EXP-102` powered quality screen
+  ([`rtx4090-windows-native.quality-screen.json`](../releases/v0.16.0/qualification/rtx4090-windows-native.quality-screen.json)
+  `6231dccd`: `1,120` prompts, both arms `80/80` deterministic with `0` missing/error samples,
+  `777/1,120` paired outputs changed, **9/9** primary bounds passed: `recall` lower `-0.0082`,
+  `precision` lower `-0.0093` vs `-0.02`; `unsupported` upper `+0.0045` vs `+0.03`;
+  `schema`/`tool_selection`/`tool_argument` lower `0` vs `-0.02`; `duplicate` upper `+0.0046` vs
+  `+0.02`; `redaction` lower `-0.0139` vs `-0.05`; `secret_leak` ratio `1.0525`, upper `1.0985 <
+  1.10`, counts `533 → 561`, not zero), and the 108-role + 7-supplemental ABBA speed gate vs
+  `v0.14.0` MTP3 ([`rtx4090-speed.json`](../releases/v0.16.0/qualification/rtx4090-speed.json)
+  `32acdecc`, [`rtx4090-speed-waiver.json`](../releases/v0.16.0/qualification/rtx4090-speed-waiver.json)
+  `92b94c4a`: 108-case role corpus `role108` weighted **×1.2736** at `139.87 → 178.13 tok/s`, all
+  `115` cases **×1.2741** at `138.94 → 177.02 tok/s`, `7` supplementals **×1.2778** / min
+  **×1.0804**, `115/115` repeats per build and `43/115` cross-build byte-identical, with depth-0
+  case `log-024@0` at **0.934** / `139.41 → 130.19 tok/s` below the `0.95` per-case decode ratio
+  floor waived by the founder with disclosure). RTX 3090 (`040d5923`, `C2` over one shared
+  131,072-token INT8 pool) passed the `EXP-101` 1,120-prompt powered screen
+  ([`rtx3090-windows-native.quality-screen.json`](../releases/v0.16.0/qualification/rtx3090-windows-native.quality-screen.json)
+  `671659f0`: `1,120` prompts, both arms `80/80` deterministic with `0` missing/error samples,
+  `771/1,120` paired outputs changed, **9/9** primary bounds passed: `recall` lower `-0.0073`,
+  `precision` lower `-0.0070` vs `-0.02`; `unsupported` upper `+0.0089` vs `+0.03`;
+  `schema`/`tool_selection`/`tool_argument` lower `0` vs `-0.02`; `duplicate` upper `+0.0059` vs
+  `+0.02`; `redaction` lower `-0.0119` vs `-0.05`; `secret_leak` ratio `1.0294`, upper `1.0673 <
+  1.10`, counts `545 → 561`, not zero), 84-role depth-0 ABBA speed
+  ([`rtx3090-speed.json`](../releases/v0.16.0/qualification/rtx3090-speed.json) `c904d341`: 84
+  depth-0 cases at 350 W, weighted **×1.2684** / `1.268360×` at `79.37 → 100.67 tok/s`, minimum
+  **0.9764×** / `0.976442×` on `log-024@0 >= 0.95`, zero waived cases, `84/84` within-engine and
+  `36/84` cross-engine byte-identical), shipping-package `C2` fit/true-cold
+  ([`rtx3090-windows-native.fit.json`](../releases/v0.16.0/qualification/rtx3090-windows-native.fit.json)
+  `662619d7`: `1,110,441,984` B / `1,059 MiB` available >= `805,306,368` B / `768 MiB` floor,
+  `22,584 MiB` peak, `1,742 MiB` min free, two `59,866`-token true-cold sessions restored at
+  `59,840 + 26` tokens with `32/32` token IDs and UTF-8 bytes identical), `83/83` agent-probe
+  parity positions under `p16-agent-parity/2` (`0` cache-gap deltas, min TTFT bound margin `0.169
+  s`, `C2` `fanout-concurrency 4` `5/5` HTTP 200, calibrated `2 × 59,879`-token test `18/18` HTTP
+  200 across 3 trials, `0` HTTP 500; summary `8218925c`), `3/3` `v0.7.0-beta.3`
+  upgrade/rollback/repair rehearsals (`631428b5`: `1c` running-lane upgrade `220.32 s`, `2c` forced
+  first-`Start` rollback `206.96 s`, `3c` interrupted-install repair and reinstall `322.25 s`, `370
+  W` restored), and `15/15` managed qualification phases in
+  [`rtx3090.json`](../releases/v0.16.0/qualification/rtx3090.json) (public sanitized `48c7f635`,
+  raw `038fe713`: **148.43 tok/s** `C1` decode, **974.15 tok/s** prefill, **83.88%** DFlash2
+  acceptance, **188.99 s** exact 130,048-token retrieval, **1,647** explicit-save and **1,650**
+  graceful-stop cached tokens across **46.88 s** restart, schema 2 normal and `17,878.578125 MiB`
+  pressure product protocol under the
+  founder-approved `agent_protocol.py` `C2` precondition override `317b98ee` in
+  [alphastorm/ninfer#56](https://github.com/alphastorm/ninfer/pull/56), `state_security` `898 ms`,
+  isolated rollback `not_applicable` with `0` directions, `370 W` restored),
   with paired 2,048-token `C2` vs `C1` decode reaching **1.385×** median aggregate (`57.68 → 79.90
   tok/s`), **0.722×** pair completion wall (`71.01 → 51.26 s`), and **0.70–0.73×** concurrent
   per-request decode (`EXP-106`), and post-resume first-fork TTFT dropping from **15.4–17.8 s** to

@@ -1,0 +1,201 @@
+{
+  "artifact_type": "omp_ninfer_acceptance_restoration",
+  "schema_version": 1,
+  "release": "v0.16.0",
+  "as_of": "2026-11-01",
+  "status": "passed",
+  "candidate_commit": "56899320d416bafda5c15d7e454e9b593badc0a6",
+  "rtx5090": {
+    "original_runtime_healthy": true,
+    "original_image_retained": true,
+    "original_image": "ghcr.io/alphastorm/ninfer-runtime@sha256:760fb6bea925eb26d4fa53ab87a126494b69ba7bcfed515d23dee7afa65cdb2a",
+    "restart_policy": "unless-stopped",
+    "checkpoint_mount_retained": true,
+    "documented_route_key_restored": true,
+    "original_checkout_restored": true,
+    "route_container_absent": true,
+    "window_hold_removed": true,
+    "preexisting_markers_and_supervisors_unchanged": true,
+    "documented_directories_restored": true,
+    "retained_window_created_parents": [],
+    "windows_health_ok": true,
+    "wsl_health_ok": true,
+    "same_container_retained": true,
+    "fleet_phase": "Fleet",
+    "fleet_healthy": true,
+    "completed_utc": "2026-11-01T12:25:55.894533+00:00",
+    "window_hold_seconds": [
+      412.552
+    ],
+    "production_windows": 1,
+    "source_summary": {
+      "evidence_name": "rtx5090/final-summary.json",
+      "sha256": "85fe95c9faaaf41dbaa82572b5b1360d6fedaac864fb26d3e213fcc952663534"
+    },
+    "source_restoration": {
+      "evidence_name": "rtx5090/restoration.json",
+      "sha256": "6dcaaaa9ead3667ef6859a6096c2e42c4964c7af61b3615813e19cacdbe42b14"
+    },
+    "accepted_window_hold_seconds": 412.552
+  },
+  "rtx4090": {
+    "status": "passed",
+    "restoration_checks": {
+      "state_bytes_identical": true,
+      "state_acl_identical": true,
+      "root_acl_identical": true,
+      "task_xml_identical": true,
+      "task_ready": true,
+      "no_process": true,
+      "no_listener": true,
+      "no_lease": true,
+      "power_identical": true,
+      "pointers_identical": true,
+      "holds_identical": true,
+      "client_files_identical": true,
+      "support_identical": true,
+      "support_inventory_identical": true,
+      "directory_acls_identical": true,
+      "directory_presence_identical": true,
+      "pending_preserved_moves": true,
+      "documented_stage_identical": true
+    },
+    "final_audit_checks": {
+      "state_bytes_identical": true,
+      "state_acl_identical": true,
+      "root_acl_identical": true,
+      "task_xml_identical": true,
+      "task_ready": true,
+      "no_process": true,
+      "no_listener": true,
+      "no_lease": true,
+      "power_identical": true,
+      "pointers_identical": true,
+      "holds_identical": true,
+      "client_files_identical": true,
+      "support_identical": true,
+      "support_inventory_identical": true,
+      "directory_acls_identical": true,
+      "directory_presence_identical": true,
+      "pending_preserved_moves": true,
+      "documented_stage_identical": true
+    },
+    "window_hold_seconds": 499.9772412776947,
+    "power_limit_w": 450,
+    "public_install_restored": true,
+    "canonical_cross_lane_census_identical": true,
+    "holds_and_client_files_unchanged": true,
+    "documented_directory_presence_restored": true,
+    "documented_stage_restored": true,
+    "active_release": "qwen38-4090-native-v0.8.0-beta.1-26fa28d0e783",
+    "state_sha256": "67df083044c098b06e9d8b0d113a45ae59c47d2b65f1cbe4c0e224d1d71cfbd9",
+    "task_state": "Ready",
+    "processes": 0,
+    "listeners": 0,
+    "lease_entries": 0,
+    "sources": [
+      {
+        "evidence_name": "rtx4090/evidence/restoration.json",
+        "sha256": "97681ebc964b784817b373bace285143853bcb4dc2a11261c50a02af261bec2d"
+      },
+      {
+        "evidence_name": "rtx4090/evidence/final-audit.json",
+        "sha256": "0f5ec2448b71a897c3bc6f22e4e58b4bd738ae0db4709c09b8c7a1d635a668e6"
+      },
+      {
+        "evidence_name": "rtx4090/driver-window.json",
+        "sha256": "da14cf5e29dcfe03a04ea2d6c49744c76d6d4eb160123a8deead9e4e3c8c7e50"
+      },
+      {
+        "evidence_name": "rtx4090/public-install.json",
+        "sha256": "c7068550eca92e03978dfe24cfb3fd4cd9a8c761be4141558b043a0fe5b3c0f5"
+      },
+      {
+        "evidence_name": "native-final.json",
+        "sha256": "0401b8bb308bd07b027a1e97c4ea18c8da21cdd9ca8f49e76c7b12a4974346ab"
+      }
+    ],
+    "scope": "Restored the same newly promoted N16 beta.1 stopped canonical root and stage; pre-N16 lineage remains preserved separately, not reactivated."
+  },
+  "rtx3090": {
+    "status": "passed",
+    "restoration_checks": {
+      "state_bytes_identical": true,
+      "state_acl_identical": true,
+      "root_acl_identical": true,
+      "task_xml_identical": true,
+      "task_ready": true,
+      "no_process": true,
+      "no_listener": true,
+      "no_lease": true,
+      "power_identical": true,
+      "pointers_identical": true,
+      "holds_identical": true,
+      "client_files_identical": true,
+      "support_identical": true,
+      "support_inventory_identical": true,
+      "directory_acls_identical": true,
+      "directory_presence_identical": true,
+      "pending_preserved_moves": true,
+      "documented_stage_identical": true
+    },
+    "final_audit_checks": {
+      "state_bytes_identical": true,
+      "state_acl_identical": true,
+      "root_acl_identical": true,
+      "task_xml_identical": true,
+      "task_ready": true,
+      "no_process": true,
+      "no_listener": true,
+      "no_lease": true,
+      "power_identical": true,
+      "pointers_identical": true,
+      "holds_identical": true,
+      "client_files_identical": true,
+      "support_identical": true,
+      "support_inventory_identical": true,
+      "directory_acls_identical": true,
+      "directory_presence_identical": true,
+      "pending_preserved_moves": true,
+      "documented_stage_identical": true
+    },
+    "window_hold_seconds": 1225.3077449798584,
+    "power_limit_w": 370,
+    "public_install_restored": true,
+    "canonical_cross_lane_census_identical": true,
+    "holds_and_client_files_unchanged": true,
+    "documented_directory_presence_restored": true,
+    "documented_stage_restored": true,
+    "active_release": "qwen38-3090-native-v0.8.0-beta.1-26fa28d0e783",
+    "state_sha256": "06fa50017fbffd011cc2d5da6726bc1f68d420b40a3456d05596bedd95ea6b97",
+    "task_state": "Ready",
+    "processes": 0,
+    "listeners": 0,
+    "lease_entries": 0,
+    "sources": [
+      {
+        "evidence_name": "rtx3090/evidence/restoration.json",
+        "sha256": "37695c909502f6abbe9abbf15b7bf2582f0587b34b96d639c5a13c41e6ab20ab"
+      },
+      {
+        "evidence_name": "rtx3090/evidence/final-audit.json",
+        "sha256": "496a86a318edb2ea534d2f763b3423c3af0f409a9589d2afd3ccff3b09829eed"
+      },
+      {
+        "evidence_name": "rtx3090/driver-window.json",
+        "sha256": "3b25c2a84362b0e70a59329db1b308ec2f9c59ec7e6c94129482d2dfad9eb7ba"
+      },
+      {
+        "evidence_name": "rtx3090/public-install.json",
+        "sha256": "3c838555e95b22acbd609ad3b37025e6b588da977527a2617191810685c16e1e"
+      },
+      {
+        "evidence_name": "native-final.json",
+        "sha256": "0401b8bb308bd07b027a1e97c4ea18c8da21cdd9ca8f49e76c7b12a4974346ab"
+      }
+    ],
+    "scope": "Restored the same newly promoted N16 beta.1 stopped canonical root and stage; pre-N16 lineage remains preserved separately, not reactivated."
+  },
+  "production_upgrade_activated": false,
+  "raw_private_paths_credentials_or_outputs_included": false
+}

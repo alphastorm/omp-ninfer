@@ -3,7 +3,7 @@
   "authority_id": "omp-ninfer-v0.7.3-qualified-1",
   "product_release": "v0.16.0",
   "composition": {
-    "status": "v0.16.0 upstream OMP v18.14.0 client acceptance pending",
+    "status": "qualified",
     "lifecycle_repository": "https://github.com/can1357/oh-my-pi",
     "lifecycle_source_release": "https://github.com/can1357/oh-my-pi/releases/tag/v18.14.0",
     "lifecycle_source_commit": "31147f9d1a76608549821c3759f8487b4d66c72d",
@@ -45,10 +45,11 @@
         "The RTX 5090 checked first build ships under an explicit founder-approved reproducibility exception. Native profiles remain MTP3, A8 off; RTX 3090 uses a 350 W cap.",
         "Stock OMP 18.14.0 has host-free source review and macOS stub rehearsals only; fresh platform/public-route acceptance is required and predecessor acceptance does not transfer."
       ],
-      "blockers": [
-        "upstream OMP v18.14.0 client acceptance is pending"
-      ],
-      "acceptance_receipt": null,
+      "blockers": [],
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/56899320d416bafda5c15d7e454e9b593badc0a6/releases/v0.16.0/acceptance/darwin-arm64-18.14.0.json",
+        "sha256": "1e5c32d2ccc045b4ed2c0a270b5e6675b7b29abff11bdd03e92b5ffaa2af4d54"
+      },
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
@@ -119,7 +120,7 @@
     {
       "id": "windows-docker-local",
       "adapter": "windows-docker-local",
-      "status": "preview",
+      "status": "qualified",
       "transport": "local-loopback",
       "commands": [
         "doctor",
@@ -132,7 +133,7 @@
         "support-bundle"
       ],
       "silent_cloud_fallback": false,
-      "installable": false,
+      "installable": true,
       "support_owner": "alphastorm/omp-ninfer",
       "product_release": "v0.16.0",
       "aliases": [
@@ -148,10 +149,11 @@
         "The RTX 5090 checked first build ships under an explicit founder-approved reproducibility exception. Native profiles remain MTP3, A8 off; RTX 3090 uses a 350 W cap.",
         "Stock OMP 18.14.0 has host-free source review and macOS stub rehearsals only; fresh platform/public-route acceptance is required and predecessor acceptance does not transfer."
       ],
-      "blockers": [
-        "upstream OMP v18.14.0 client acceptance is pending"
-      ],
-      "acceptance_receipt": null,
+      "blockers": [],
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/56899320d416bafda5c15d7e454e9b593badc0a6/releases/v0.16.0/acceptance/windows-x64-18.14.0.json",
+        "sha256": "b6c19635e9deb2fcc2d5736c6da8be89c61e687834f68e6c40a0e8ce5a9e3299"
+      },
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
@@ -222,7 +224,7 @@
     {
       "id": "linux-docker-local",
       "adapter": "linux-docker-local",
-      "status": "preview",
+      "status": "qualified",
       "transport": "local-loopback",
       "commands": [
         "doctor",
@@ -235,7 +237,7 @@
         "support-bundle"
       ],
       "silent_cloud_fallback": false,
-      "installable": false,
+      "installable": true,
       "support_owner": "alphastorm/omp-ninfer",
       "product_release": "v0.16.0",
       "aliases": [
@@ -251,10 +253,11 @@
         "The RTX 5090 checked first build ships under an explicit founder-approved reproducibility exception. Native profiles remain MTP3, A8 off; RTX 3090 uses a 350 W cap.",
         "Stock OMP 18.14.0 has host-free source review and macOS stub rehearsals only; fresh platform/public-route acceptance is required and predecessor acceptance does not transfer."
       ],
-      "blockers": [
-        "upstream OMP v18.14.0 client acceptance is pending"
-      ],
-      "acceptance_receipt": null,
+      "blockers": [],
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/56899320d416bafda5c15d7e454e9b593badc0a6/releases/v0.16.0/acceptance/linux-x64-18.14.0.json",
+        "sha256": "1dbb936b72cfd44c360fed3a39e41352c422e997636d2fe51a426ef2c0793a76"
+      },
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
