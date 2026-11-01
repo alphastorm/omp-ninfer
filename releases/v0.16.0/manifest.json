@@ -52,8 +52,8 @@
       "binary_archive_bytes": 579765099,
       "runtime_base_reference": "ghcr.io/alphastorm/ninfer@sha256:d4377ed01a5be949a90d3b403a3be2c5867a083cb1669379f60b25969ab7f22e",
       "runtime_base_receipt_release": "runtime-base-04b603aa-20261025",
-      "source_archive_bytes": 12538488,
-      "checksums_sha256": "9f5ed2e607345c23e97f7616ebba8f59ed18293a614e1fd337ffe4084c4366cc"
+      "source_archive_bytes": 12656433,
+      "checksums_sha256": "cca65f0d3d3b3f0da14ebce077dbc7e31a2402059c86e6f5e86238a2304eada6"
     },
     "model": {
       "repository": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer",
@@ -217,7 +217,7 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "3f6af780222ebfd0855205ab06556ea48a3b2242ba079461619c121f65186a1c",
+    "summary_sha256": "ffe8e7849431a2df6055e16e53cadc9a1c809c61aad1189fbf1356294ace1768",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/84ddcc0af40e6cf58720e47da18c0560b8376451/releases/v0.16.0/qualification.json",
     "runtime_release_eligible": true,
     "external_installation_passed": true

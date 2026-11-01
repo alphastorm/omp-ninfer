@@ -253,6 +253,6 @@
   },
   "receipt_audit": {
     "repository_path": "releases/v0.16.0/qualification/receipt-audit.json",
-    "sha256": "ccd0411884db03944cb36076602454183cf168f6b7bceae50c9cdccd0dc13a0c"
+    "sha256": "20fa2fe2d48469fb1e58f23fe726146f9803b580836a2eb8cc01b658b39c0974"
   }
 }

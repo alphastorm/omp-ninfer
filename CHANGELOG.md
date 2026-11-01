@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Bind promoted release-local profile snapshots byte-for-byte to the root profiles, and reject
+  partial carry-forward of a changed runtime source archive's byte count or checksum-set hash.
+  Correct the v0.16.0 RTX 5090 source pins and profile snapshots without changing accepted
+  executable guide blocks, runtime packages, or client identities.
 - Gate stock OMP parallel-session recall on the session's exact code at alphanumeric
   boundaries and the absence of every other session's code, not on whole-answer formatting.
   Keep the former equality result as non-gating `formatting_exact` evidence, so a correct

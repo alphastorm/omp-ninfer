@@ -105,8 +105,8 @@
       "file": "rtx4090-windows-native.SHA256SUMS",
       "predecessor_sha256": "c96df5263c3ee04f0efc8a07a6368d7605a6c52e07d88df813d2b13205d1a379",
       "staged_sha256": "bf1650ebcdd2760b77be11140e8af3f6eb1adc9a2b8e534832f708383b7a60eb",
-      "disposition": "kept-unchanged-subject",
-      "reason": "Unchanged explicitly audited subject; original identity and date retained."
+      "disposition": "replaced",
+      "reason": "Fresh N16 subject or current release metadata derived through stage/binder/rebind; no predecessor runtime qualification transfers."
     },
     {
       "file": "rtx4090.json",

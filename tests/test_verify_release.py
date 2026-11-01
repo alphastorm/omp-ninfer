@@ -30,6 +30,78 @@ REBIND_RELEASE = importlib.util.module_from_spec(REBIND_SPEC)
 REBIND_SPEC.loader.exec_module(REBIND_RELEASE)
 
 
+class ReleaseIdentitySnapshotTests(unittest.TestCase):
+    def test_current_release_identity_snapshots_match(self) -> None:
+        release = json.loads((ROOT / "compatibility.json").read_text(encoding="utf-8"))[
+            "product_release"]
+        manifest = json.loads((ROOT / "releases" / release / "manifest.json").read_text(
+            encoding="utf-8"))
+        errors = []
+        VERIFY_RELEASE.validate_release_identity_snapshots(ROOT, release, manifest, errors)
+        self.assertEqual(errors, [])
+
+    def test_promoted_profile_snapshots_require_exact_root_bytes(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "releases/v0.16.0/profiles").mkdir(parents=True)
+            (root / "profiles").mkdir()
+            current = root / "profiles/client.json"
+            snapshot = root / "releases/v0.16.0/profiles/client.json"
+            current.write_bytes(b'{"release":"v0.16.0"}\n')
+            manifest = {"status": "candidate"}
+            for data in (current.read_bytes(), b'{"release":"v0.15.0"}\n',
+                         b'{ "release": "v0.16.0" }\n'):
+                with self.subTest(snapshot=data):
+                    snapshot.write_bytes(data)
+                    errors = []
+                    VERIFY_RELEASE.validate_release_identity_snapshots(
+                        root, "v0.16.0", manifest, errors)
+                    self.assertEqual(bool(errors), data != current.read_bytes())
+                    if errors:
+                        self.assertIn("must byte-equal profiles/client.json", errors[0])
+            current.unlink()
+            errors = []
+            VERIFY_RELEASE.validate_release_identity_snapshots(root, "v0.16.0", manifest, errors)
+            self.assertEqual(len(errors), 1)
+
+    def test_draft_profile_snapshots_do_not_require_root_promotion(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "releases/v0.16.0/profiles").mkdir(parents=True)
+            (root / "releases/v0.16.0/profiles/client.json").write_bytes(
+                b'{"release":"v0.16.0"}\n')
+            errors = []
+            VERIFY_RELEASE.validate_release_identity_snapshots(
+                root, "v0.16.0", {"status": "draft"}, errors)
+            self.assertEqual(errors, [])
+
+    def test_changed_runtime_source_requires_both_pins_to_change(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            previous = root / "releases/v0.15.0/manifest.json"
+            previous.parent.mkdir(parents=True)
+            old = {"source_archive_url": "https://example.invalid/previous.tar.gz",
+                   "source_archive_bytes": 100, "checksums_sha256": "a" * 64}
+            previous.write_text(json.dumps({"components": {"ninfer": old}}), encoding="utf-8")
+            current = {**old, "source_archive_url": "https://example.invalid/current.tar.gz",
+                       "source_archive_bytes": 200, "checksums_sha256": "b" * 64}
+            for carried in ((), ("source_archive_bytes",), ("checksums_sha256",),
+                            ("source_archive_bytes", "checksums_sha256")):
+                with self.subTest(carried=carried):
+                    runtime = {**current, **{field: old[field] for field in carried}}
+                    errors = []
+                    VERIFY_RELEASE.validate_release_identity_snapshots(
+                        root, "v0.16.0", {"components": {"ninfer": runtime}}, errors)
+                    self.assertEqual(len(errors), len(carried), errors)
+                    for field in carried:
+                        self.assertTrue(any(f"components.ninfer.{field} must differ" in error
+                                            for error in errors), errors)
+            errors = []
+            VERIFY_RELEASE.validate_release_identity_snapshots(
+                root, "v0.16.0", {"components": {"ninfer": old}}, errors)
+            self.assertEqual(errors, [])
+
+
 class DependencySbomContractTests(unittest.TestCase):
     def setUp(self) -> None:
         self.release = ROOT / "releases" / PUBLIC_RELEASE

@@ -1671,7 +1671,7 @@ def product_version(release: str) -> tuple[int, int, int] | None:
     return tuple(map(int, match.groups())) if match else None
 
 
-def predecessor_native_variant(root: Path, release: str, variant_id: str) -> dict[str, Any] | None:
+def predecessor_manifest(root: Path, release: str) -> dict[str, Any] | None:
     """The immediately preceding GA directory owns the predecessor, not a CLI-supplied row."""
     current = product_version(release)
     candidates = [(product_version(path.name), path) for path in (root / "releases").iterdir()
@@ -1682,8 +1682,41 @@ def predecessor_native_variant(root: Path, release: str, variant_id: str) -> dic
     path = max(older, key=lambda value: value[0])[1] / "manifest.json"
     if not path.is_file():
         return None
-    return next((row for row in load_json(path).get("components", {}).get("ninfer_variants", [])
+    return load_json(path)
+
+
+def predecessor_native_variant(root: Path, release: str, variant_id: str) -> dict[str, Any] | None:
+    predecessor = predecessor_manifest(root, release)
+    return next((row for row in (predecessor or {}).get("components", {}).get("ninfer_variants", [])
                  if isinstance(row, dict) and row.get("id") == variant_id), None)
+
+
+def validate_release_identity_snapshots(
+    root: Path, release: str, manifest: dict[str, Any], errors: list[str],
+) -> None:
+    """P16 onward binds the promoted profile snapshots and the whole runtime source cut."""
+    if (product_version(release) or (0, 0, 0)) < (0, 16, 0):
+        return
+    # A draft intentionally keeps the root profiles on the published predecessor. Once cut,
+    # its release-local snapshots must be the same bytes, not stale pre-promotion templates.
+    if manifest.get("status") in {"candidate", "ready"}:
+        for snapshot in sorted((root / "releases" / release / "profiles").glob("*.json")):
+            current = root / "profiles" / snapshot.name
+            require(current.is_file() and snapshot.read_bytes() == current.read_bytes(),
+                    f"{snapshot.relative_to(root)} must byte-equal profiles/{snapshot.name}",
+                    errors)
+    predecessor = predecessor_manifest(root, release)
+    if predecessor is None:
+        return
+    runtime = manifest.get("components", {}).get("ninfer", {})
+    previous_runtime = predecessor.get("components", {}).get("ninfer", {})
+    if runtime.get("source_archive_url") != previous_runtime.get("source_archive_url"):
+        for field in ("source_archive_bytes", "checksums_sha256"):
+            require(runtime.get(field) is not None
+                    and runtime.get(field) != previous_runtime.get(field),
+                    f"components.ninfer.{field} must differ from the predecessor "
+                    "when source_archive_url changes",
+                    errors)
 
 
 def unchanged_native_variant(variant: dict[str, Any], predecessor: dict[str, Any] | None) -> bool:
@@ -2215,6 +2248,7 @@ def validate(
     status = manifest.get("status")
     require(status in {"draft", "candidate", "ready"},
             "manifest status must be draft, candidate, or ready", errors)
+    validate_release_identity_snapshots(root, selected_release, manifest, errors)
     pending_allowed = status == "draft" and not require_installable and not require_ready
     release_posture = (manifest.get("channel"), manifest.get("audience"))
     require(
