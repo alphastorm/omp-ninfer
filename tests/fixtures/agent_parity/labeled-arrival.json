@@ -1,0 +1,22 @@
+{
+  "contract_version": 2,
+  "rule": "p16-agent-parity/2",
+  "jobs": {
+    "arrival": {
+      "positions": [
+        {"position": 1, "label": "resume-first/base_prefill", "incumbent_prompt_tokens": 67717, "incumbent_cached_tokens": 0, "incumbent_server_ttft_seconds": 83.06403610000001, "candidate_prompt_tokens": 67717, "candidate_cached_tokens": 0, "candidate_server_ttft_seconds": 83.46740729999999},
+        {"position": 2, "label": "resume-first/pre_restart_fork", "incumbent_prompt_tokens": 67785, "incumbent_cached_tokens": 67756, "incumbent_server_ttft_seconds": 0.4685787, "candidate_prompt_tokens": 67785, "candidate_cached_tokens": 67756, "candidate_server_ttft_seconds": 0.501426},
+        {"position": 3, "label": "resume-first/control_retrieval", "incumbent_prompt_tokens": 67913, "incumbent_cached_tokens": 67864, "incumbent_server_ttft_seconds": 0.46852279999999996, "candidate_prompt_tokens": 67913, "candidate_cached_tokens": 67864, "candidate_server_ttft_seconds": 0.4803399},
+        {"position": 4, "label": "resume-first/endpoint_resume_first", "incumbent_prompt_tokens": 68047, "incumbent_cached_tokens": 68002, "incumbent_server_ttft_seconds": 0.9492651, "candidate_prompt_tokens": 68132, "candidate_cached_tokens": 68087, "candidate_server_ttft_seconds": 0.9197958},
+        {"position": 5, "label": "resume-first/fork_after_resume", "incumbent_prompt_tokens": 67785, "incumbent_cached_tokens": 67762, "incumbent_server_ttft_seconds": 0.4261744, "candidate_prompt_tokens": 67785, "candidate_cached_tokens": 67762, "candidate_server_ttft_seconds": 0.4421022},
+        {"position": 6, "label": "resume-first/fork_second", "incumbent_prompt_tokens": 67785, "incumbent_cached_tokens": 67762, "incumbent_server_ttft_seconds": 0.3304639, "candidate_prompt_tokens": 67785, "candidate_cached_tokens": 67762, "candidate_server_ttft_seconds": 0.2924333},
+        {"position": 7, "label": "fork-first/base_prefill", "incumbent_prompt_tokens": 67717, "incumbent_cached_tokens": 0, "incumbent_server_ttft_seconds": 83.3517012, "candidate_prompt_tokens": 67717, "candidate_cached_tokens": 0, "candidate_server_ttft_seconds": 83.962377},
+        {"position": 8, "label": "fork-first/pre_restart_fork", "incumbent_prompt_tokens": 67785, "incumbent_cached_tokens": 67756, "incumbent_server_ttft_seconds": 0.5223396, "candidate_prompt_tokens": 67785, "candidate_cached_tokens": 67756, "candidate_server_ttft_seconds": 0.5175328},
+        {"position": 9, "label": "fork-first/control_retrieval", "incumbent_prompt_tokens": 67913, "incumbent_cached_tokens": 67864, "incumbent_server_ttft_seconds": 0.4648797, "candidate_prompt_tokens": 67913, "candidate_cached_tokens": 67864, "candidate_server_ttft_seconds": 0.4667425},
+        {"position": 10, "label": "fork-first/fork_first", "incumbent_prompt_tokens": 67785, "incumbent_cached_tokens": 67762, "incumbent_server_ttft_seconds": 0.913639, "candidate_prompt_tokens": 67785, "candidate_cached_tokens": 67762, "candidate_server_ttft_seconds": 0.8323204999999999},
+        {"position": 11, "label": "fork-first/endpoint_resume_after_fork", "incumbent_prompt_tokens": 68132, "incumbent_cached_tokens": 68087, "incumbent_server_ttft_seconds": 0.47671329999999995, "candidate_prompt_tokens": 68131, "candidate_cached_tokens": 68086, "candidate_server_ttft_seconds": 0.5568529999999999},
+        {"position": 12, "label": "fork-first/fork_after_resume", "incumbent_prompt_tokens": 67785, "incumbent_cached_tokens": 67762, "incumbent_server_ttft_seconds": 0.3165072, "candidate_prompt_tokens": 67785, "candidate_cached_tokens": 67762, "candidate_server_ttft_seconds": 0.334597}
+      ]
+    }
+  }
+}
