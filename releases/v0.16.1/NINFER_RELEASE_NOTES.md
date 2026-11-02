@@ -7,6 +7,8 @@ upstream **Oh My Pi 18.15.0** for macOS arm64, Windows x64 and Linux x64. It doe
 promote or change any NInfer runtime package, model, serving profile or checkpoint format.
 The published release remains **v0.16.0** until founder-owned publication of this release.
 
+For the manual-tunnel route, this client-only patch keeps the running v0.16.0 container; if a restart is needed, stop it with the v0.16.0 stop script.
+
 The source and asset-integrity reviews are complete. Fresh candidate-bound platform execution,
 five documented routes, both native public installs, independent restoration, product review,
 immutable evidence pins and strict ready verification are separate release gates. This prepared
