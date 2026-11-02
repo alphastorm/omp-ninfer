@@ -99,7 +99,7 @@ All lanes keep common source `26fa28d0e7834515508fc07ac503164a6effc820` on upstr
 | Native RTX 4090 | `v0.8.0-qwen38-4090-beta.1`, package `06526bdb`, server `c6f59e9e`, config `f00cfac9` | INT8 KV, DFlash2 K7, C1, 131072 context, 640 MiB admission headroom, 16512696320 B shared Host budget, 30 s pending timeout |
 | Native RTX 3090 | `v0.8.0-qwen38-3090-beta.1`, package `040d5923`, server `72cd776b`, config `cbe67aae` | INT8 KV, DFlash2 K7, C2 over one 131072-token pool, 768 MiB headroom, 21881405440 B shared Host budget, 180 s timeout, 350 W serving cap |
 
-Native profiles retain two extra device-state slots; Group64 A8 and FP32 head logits remain off.
+Native profiles retain two extra device-state slots; `Group64` A8 and FP32 head logits remain off.
 Both native lanes serve sequentially on port **18082**. No native promotion, runtime build,
 model import, checkpoint migration or new performance result is part of this client patch.
 

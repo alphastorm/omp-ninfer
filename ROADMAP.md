@@ -88,7 +88,7 @@ tree `48bc72ba2418c0b78163d9769e91a0d8683e642b`, release `430630500`.
 [Prepared notes](releases/v0.16.1/NINFER_RELEASE_NOTES.md) and the
 [source/integrity review](docs/measurements/2026-11-01-omp-18150-client-upgrade-review.json)
 cover guard/summary behavior, replay sanitization, missing-key fallback, async manual compaction
-and optional side-request accounting. This is not a native-runtime upgrade, rk4v4 adoption,
+and optional side-request accounting. This is not a native-runtime upgrade, `rk4v4` adoption,
 canonical promotion, checkpoint migration or new performance claim. All published v0.16.0
 measurements, waivers and subject identities remain historical authorities. No new Shipped row
 is recorded before publication.
