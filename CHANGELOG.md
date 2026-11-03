@@ -25,10 +25,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Prepare v0.16.1 with stock Oh My Pi 18.15.0 (`3fedf8d5`, tree `48bc72ba`) for all three
-  client platforms, carrying v0.16.0 runtime/model/profile bytes unchanged. Bind the complete
+- Prepare v0.16.2 from published v0.16.0 with common runtime source `a87de361`: published
+  RTX 5090 `v0.7.0-qwen38-5090-beta.5`, planned native RTX 3090 / RTX 4090 `v0.8.0-beta.2`,
+  and stock Oh My Pi 18.15.0 (`3fedf8d5`, tree `48bc72ba`) for all three client platforms.
+  Include byte-proven durable-generation Host reclaim, export-retirement reservation,
+  opt-in FP32 identity repair, deterministic RDC builds and native repair/power/gate-driver
+  corrections, without changing model or serving shapes. Retarget the prepared guide to
+  v0.16.2 while published entry points stay on immutable v0.16.0. Bind the complete
   18.14.0→18.14.2 and 18.14.2→18.15.0 source reviews and independent asset-integrity evidence;
-  fresh candidate-bound execution and publication are separate gates, not carried acceptance.
+  fresh runtime/native/client execution and publication are separate gates, not carried acceptance.
 - Retain Qwen exact-loop detection with a 1024-character floor for short newline-spanning cycles;
   reject length-truncated main/handoff/branch summaries while preserving a completed main
   summary if only the optional short summary truncates. Retire operator `compat.thinkingLoopGuard`,

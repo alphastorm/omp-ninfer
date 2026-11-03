@@ -48,18 +48,28 @@ All of these should be materially true:
 
 See the [decision guide](DECISION_GUIDE.md) for the side-by-side comparison.
 
-## Prepared next — v0.16.1 / OMP 18.15.0
+## Prepared next — v0.16.2 / Host reclaim and OMP 18.15.0
 
-**Prepared next: v0.16.1 / stock OMP 18.15.0.** This client-only successor keeps all v0.16.0
-runtime packages, model and serving profiles byte-identical. Source and independently downloaded
-asset-integrity reviews are complete; no v0.16.0 client or route acceptance transfers to the new
-candidate. Fresh platform/five-route/native-install/restoration evidence, exact-head product review,
-immutable pins and founder-owned publication remain separate gates.
+**Prepared next: v0.16.2 / stock OMP 18.15.0.** This successor to published v0.16.0 rebuilds
+all three runtimes at `a87de3613c17bced777b446fb545f872d8395ec1`: published RTX 5090
+`v0.7.0-qwen38-5090-beta.5` (server `cc99a460`, image `a0cbb8a5`) and planned native
+`v0.8.0-qwen38-{3090,4090}-beta.2`. It includes byte-proven durable-generation Host reclaim
+before export refusal, export-retirement reservation, opt-in FP32 identity repair, deterministic
+bounded RDC builds and native repair/power/qualification-driver fixes. The model and serving
+shapes stay unchanged, including RTX 5090 deployment profile `qwen38-5090-v0.13.0`.
+Native version/instance identities advance; checkpoint compatibility is not inferred.
+
+The published 5090 component reports a same-path double-build match (661 artifacts / 3 package
+outputs), not a renewed v0.16.0 reproducibility exception. Its published-image lane receipt,
+both native qualifications/cuts, all fresh product/client/restore observations, exact-subject
+reviews, immutable pins and founder-owned product publication remain separate gates. No v0.16.0
+runtime proof, acceptance or waiver is relabeled. The held v0.16.1 client-only candidate is not
+the staging base.
 
 The selected upstream release is `v18.15.0` (release `430630500`, source
 `3fedf8d53267e32a6d7521ce725fdcc4a36fdc67`, tree
 `48bc72ba2418c0b78163d9769e91a0d8683e642b`). The proposed
-[client descriptor](../releases/v0.16.1/qualification/client-components.json) records:
+[prepared notes](../releases/v0.16.2/NINFER_RELEASE_NOTES.md#stock-omp-18150) record:
 
 | Client platform | Raw asset / ID | Bytes | Asset = binary SHA-256 |
 | --- | --- | ---: | --- |

@@ -5,7 +5,7 @@ to NInfer (inference engine) serving Qwen3.8 27B (served model). OMP NInfer vers
 product; component repositories keep their own versions and tags, and the product manifest binds
 the exact combination.
 
-**Navigation:** [Prepared v0.16.1](#prepared-v0161--stock-omp-18150-unchanged-gpu-lanes) · [Current release (v0.16.0)](#v0160--native-dflash2-k7-rtx-3090-concurrency-2-and-unified-engine-fixes) ·
+**Navigation:** [Prepared v0.16.2](#prepared-v0162--durable-export-host-reclaim-and-stock-omp-18150) · [Current release (v0.16.0)](#v0160--native-dflash2-k7-rtx-3090-concurrency-2-and-unified-engine-fixes) ·
 [Previous v0.15.0](#v0150--stock-omp-18140-with-unchanged-gpu-lanes) ·
 [Channels](#channels) · [Version identities](#version-identities) ·
 [Release state transition](#release-state-transition) · [Candidate freeze](#candidate-freeze) ·
@@ -13,17 +13,25 @@ the exact combination.
 [External-install acceptance](#external-install-acceptance) · [Cut procedure](#cut-procedure) ·
 [Release notes](#release-notes)
 
-## Prepared v0.16.1 — stock OMP 18.15.0, unchanged GPU lanes
+## Prepared v0.16.2 — durable-export Host reclaim and stock OMP 18.15.0
 
-**Prepared next: v0.16.1 / stock OMP 18.15.0.** This client-only successor keeps all v0.16.0
-runtime packages, model and serving profiles byte-identical. Source and independently downloaded
-asset-integrity reviews are complete; no v0.16.0 client or route acceptance transfers to the new
-candidate. Fresh platform/five-route/native-install/restoration evidence, exact-head product review,
-immutable pins and founder-owned publication remain separate gates.
+**Prepared next: v0.16.2 / stock OMP 18.15.0.** Stage from published v0.16.0, not the held
+v0.16.1 client-only candidate. All three runtimes target source
+`a87de3613c17bced777b446fb545f872d8395ec1`: RTX 5090 `v0.7.0-qwen38-5090-beta.5` is
+published (server `cc99a460`, image `a0cbb8a5`, base receipt `runtime-base-a87de361-20261103`);
+native RTX 3090 / RTX 4090 `v0.8.0-qwen38-{3090,4090}-beta.2` still need qualification and cuts.
+The shared model and serving policy are unchanged, including `qwen38-5090-v0.13.0`.
+
+The runtime delta reclaims redundant Host state only after proving and protecting its durable
+generation, reserves retirement before an export lease, aligns opt-in FP32 head identity,
+makes bounded RDC builds deterministic and fixes native repair/power and state-bound gate
+drivers. The published 5090 component's 661-artifact / 3-package reproducibility result is not
+a published-image lane or product-acceptance result. Fresh lane/native/client/five-route/
+native-install/restoration evidence, exact-subject reviews, immutable pins and founder-owned
+publication remain separate gates. No old measurement, waiver or approval transfers.
 
 Published **v0.16.0** remains GitHub `Latest`. The
-[prepared notes](../releases/v0.16.1/NINFER_RELEASE_NOTES.md) and
-[descriptor](../releases/v0.16.1/qualification/client-components.json) select upstream release
+[prepared notes](../releases/v0.16.2/NINFER_RELEASE_NOTES.md) select upstream release
 `430630500` (`2026-11-01T14:17:08Z`), commit `3fedf8d53267e32a6d7521ce725fdcc4a36fdc67`,
 tree `48bc72ba2418c0b78163d9769e91a0d8683e642b`.
 
@@ -40,7 +48,8 @@ records all four independent downloads and 235 commits/257 paths after the earli
 review. It is not a sixth accepted route or a fresh live qualification receipt. The selected client
 retains the Qwen exact guard and incomplete-summary rejection, and changes shared replay cleanup,
 missing-key fallback gating, manual-compaction result delivery and optional caption accounting.
-No runtime package/profile/model or original waiver subject changes. The five routes remain
+Unlike the held client patch, this release changes every runtime binary; model and serving
+shapes stay fixed, and original v0.16.0 waivers remain historical only. The five routes remain
 2/10/5/7/7 blocks, macOS preview and Linux WSL2-only; both native public installs and exact
 restoration must be evidenced anew before composition and immutable pins.
 

@@ -87,13 +87,15 @@ port 18082; all three lanes serve the same 20.4 GB Qwen3.8 27B model container v
 credentials. Exact component, source, and model identities: [facts](docs/FACTS.md#current-release) ·
 [glossary](docs/FACTS.md#glossary) · [manifest](releases/v0.16.0/manifest.json).
 
-## Next on main — prepared v0.16.1
+## Next on main — prepared v0.16.2
 
-**Prepared next: v0.16.1 / stock OMP 18.15.0.** This client-only successor keeps all v0.16.0
-runtime packages, model and serving profiles byte-identical. Source and independently downloaded
-asset-integrity reviews are complete; no v0.16.0 client or route acceptance transfers to the new
-candidate. Fresh platform/five-route/native-install/restoration evidence, exact-head product review,
-immutable pins and founder-owned publication remain separate gates.
+**Prepared next: v0.16.2 / stock OMP 18.15.0.** Rebuild all three runtimes at `a87de361`:
+published RTX 5090 `v0.7.0-qwen38-5090-beta.5` and planned native RTX 3090 / RTX 4090
+`v0.8.0-beta.2`, including durable-export Host reclaim and deterministic RDC builds.
+The model and serving shapes stay unchanged. New lane/native qualifications and cuts, fresh
+client/five-route/native-install/restoration observations, exact-subject reviews, immutable pins
+and founder-owned product publication remain separate gates. No v0.16.0 result or waiver is
+relabeled, and the held v0.16.1 client-only candidate is not the staging base.
 
 The client update retains Qwen's exact loop guard with the 1 KiB whole-line repetition floor and
 rejects incomplete length-stopped summaries. It also changes shared Responses replay sanitization,
@@ -102,7 +104,7 @@ missing-key fallback gating and manual-compaction/background-result delivery. Ke
 effort clamps; remove obsolete operator `compat.thinkingLoopGuard`, not the guard itself.
 Optional job-caption roles may make separately attributable requests and can use inherited smol
 credentials independently of the retry opt-out: acceptance uses isolated local-only auth.
-See the [prepared notes](releases/v0.16.1/NINFER_RELEASE_NOTES.md) and
+See the [prepared notes](releases/v0.16.2/NINFER_RELEASE_NOTES.md) and
 [18.15.0 source/integrity review](docs/measurements/2026-11-01-omp-18150-client-upgrade-review.json).
 Until publication, use the [published v0.16.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.16.0/docs/QUICKSTART.md).
 

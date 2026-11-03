@@ -8,13 +8,17 @@ watch manifest is [`upstream-watch.json`](../upstream-watch.json); the watch too
 [`scripts/upstream_watch.py`](../scripts/upstream_watch.py); dated reports land in
 [`docs/measurements/`](measurements/).
 
-## Prepared v0.16.1 client binding — OMP 18.15.0
+## Prepared v0.16.2 runtime and client binding
 
-**Prepared next: v0.16.1 / stock OMP 18.15.0.** This client-only successor keeps all v0.16.0
-runtime packages, model and serving profiles byte-identical. Source and independently downloaded
-asset-integrity reviews are complete; no v0.16.0 client or route acceptance transfers to the new
-candidate. Fresh platform/five-route/native-install/restoration evidence, exact-head product review,
-immutable pins and founder-owned publication remain separate gates.
+**Prepared next: v0.16.2 / stock OMP 18.15.0.** Runtime source
+`a87de3613c17bced777b446fb545f872d8395ec1` on upstream `64d10fbf` supplies published RTX
+5090 `v0.7.0-qwen38-5090-beta.5` and planned native `v0.8.0-qwen38-{3090,4090}-beta.2`.
+The delta includes byte-proven durable-generation Host reclaim, export retirement, opt-in FP32
+identity repair, deterministic RDC builds and native repair/power/qualification-driver fixes.
+Model and serving shapes are retained, not runtime bytes. New lane/native qualification and
+cuts, client/five-route/native-install/restoration evidence, exact-subject reviews, immutable pins
+and founder-owned product publication remain separate gates. The held v0.16.1 manifest and
+v0.16.0 execution results are not carried as current proof.
 
 Chosen upstream: [`v18.15.0`](https://github.com/can1357/oh-my-pi/releases/tag/v18.15.0),
 commit `3fedf8d53267e32a6d7521ce725fdcc4a36fdc67`, tree
