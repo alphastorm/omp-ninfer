@@ -82,8 +82,36 @@ restart restore, product-shape gate, exact release profile, product smokes and t
 double build matched **661 build artifacts and all 3 package outputs** bit for bit.
 
 These are component-build/RC observations, not a published-image lane receipt, a reclaim-latency
-measurement, native Windows qualification or product-route acceptance. No new token-rate,
-restart-latency or reclaim-cost result is asserted here.
+measurement, native Windows qualification or product-route acceptance. These component reports
+do not assert a new token-rate, restart-latency or reclaim-cost result.
+
+The separate [published-image lane receipt](qualification/rtx5090.json), SHA-256
+`bfd0ec1a76c323adf3f58a176112b0731694e7ce69b62aebbf05093cf59a2f22`, passed on the
+published beta.5 image on 2026-11-03. It binds the source, server, model and retained
+configuration above; it does not complete the remaining agent probes or product routes.
+
+### Restore-position founder waivers and pending native binding
+
+- **RTX 5090 first-request-after-restart TTFT (founder waiver on two-restart `restore`):**
+  Position **3**, `restore_0`, on `v0.7.0-qwen38-5090-beta.5` exceeded the per-position
+  TTFT bound `incumbent + max(0.25 s, 25%)`: **0.481856409 s** candidate versus
+  **0.231568998 s** incumbent and a **0.481568998 s** bound, an excess of
+  **0.000287411 s**. That measured failure was **waived by the founder with disclosure**
+  ([waiver](qualification/rtx5090-restore-position-waiver.json)); it is not rewritten as a measured
+  pass. Every oracle passed and `cached - prompt` was equal at **−48 / −48**.
+  This waiver applies only to that one failing position with exactly these values.
+  Every other gate remains binding, and the remaining corrected probes are still pending.
+- **RTX 4090 restore cache-gap waiver — pending exact-package evidence binding:**
+  For the `v0.8.0-qwen38-4090-beta.2` candidate package, two-restart `restore` position
+  **4**, `restore_1`, recorded `cached - prompt` **−52** candidate versus **−48**
+  incumbent, below the rule `candidate >= incumbent`. Candidate prompt/cached tokens
+  were **58,539 / 58,487**, versus incumbent **58,327 / 58,279**. Server TTFT was
+  **0.642947 s** candidate versus **0.5589493 s** incumbent and stayed within its bound.
+  The founder waived only this cache-gap failure with disclosure; the incumbent
+  capture is hash-proved reused evidence for the published beta.1 package, not a fresh
+  paired run. **Native qualification completion, publication and authenticated beta.2
+  receipt binding remain pending.** No native gate pass or published-package acceptance
+  is inferred from this marker; any other failure or changed value fails closed.
 
 ## Stock OMP 18.15.0
 
@@ -147,6 +175,9 @@ keep the running container is inapplicable because this release changes the serv
 The [v0.16.0 notes](../v0.16.0/NINFER_RELEASE_NOTES.md) retain their original measurements and
 waivers: RTX 4090 `log-024@0` speed, two RTX 5090 first-request-after-restart latency misses and
 the RTX 5090 second-build exception. None is renewed for v0.16.2 by copying its receipt.
+The native beta.1 files retained in this draft are explicitly quarantined predecessor
+material in the [receipt audit](qualification/receipt-audit.json), not current beta.2
+qualification. Both native rows remain preview and non-installable until fresh binding.
 
 ## Outstanding qualification and release gates
 
@@ -155,8 +186,9 @@ not prose substitutions in these notes. Before final composition, the release au
 the actual new evidence and remove the corresponding outstanding-gate disclosure only when
 its bound receipt exists:
 
-- Published beta.5 image lane qualification; current-incumbent parity/probes, reclaim-path
-  timing and stock-client checkpoint-request observations.
+- Remaining current-incumbent parity/probes, reclaim-path timing and stock-client
+  checkpoint-request observations on the published beta.5 image; the lane receipt
+  itself has passed and the single restore-position waiver is disclosed above.
 - Both exact-source beta.2 native 15-phase qualifications, powered quality screens, fit/probe/
   concurrency and speed evidence, running-upgrade/rollback/repair, independent restoration,
   published component cuts and authenticated package identities.

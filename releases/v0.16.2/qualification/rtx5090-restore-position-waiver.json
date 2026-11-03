@@ -1,0 +1,32 @@
+{
+  "artifact_type": "omp_ninfer_founder_gate_waiver",
+  "schema_version": 1,
+  "recorded_utc": "2026-11-03T14:47:31.897842+00:00",
+  "decision": "Founder waived only the named RTX 5090 restore-position TTFT failure with disclosure; no other gate was changed.",
+  "lane": "rtx5090",
+  "subject": {
+    "component": "v0.7.0-qwen38-5090-beta.5",
+    "source": "a87de3613c17bced777b446fb545f872d8395ec1",
+    "image": "ghcr.io/alphastorm/ninfer-runtime@sha256:a0cbb8a5f933ec8aeec9a7defa07d78a835c1093d1d98f5f842267287efa3f71",
+    "server_sha256": "cc99a46097b6da5f9ec3ce671a7818d29754013ba520800f756110b9211bb06e"
+  },
+  "waived": [
+    {
+      "probe": "two-restart restore",
+      "position": 3,
+      "label": "restore_0",
+      "rule": "p16-agent-parity/2 candidate TTFT <= incumbent + max(0.25 s, 25%)",
+      "incumbent_ttft_s": 0.231568998,
+      "candidate_ttft_s": 0.481856409,
+      "bound_s": 0.481568998,
+      "excess_s": 0.000287411
+    }
+  ],
+  "context": "All probe oracles passed; cached-minus-prompt was equal at -48/-48. Raw failing measurements remain failures.",
+  "application_rule": "Apply only when the failing set is exactly position 3 restore_0 with precisely the recorded measured values; any other failure or changed value fails closed.",
+  "provenance": {
+    "source_sha256": "b8dac132b30d874a3112bdd2064f07dba961c234dec854ea430f8f4ca7b5a231",
+    "projection": "Private window identifiers and decision-context strings omitted. Exact component identities, measured values, rule and decision scope preserved."
+  },
+  "disclosure_required": "Release notes disclose the single waived restore position and its measured values."
+}
