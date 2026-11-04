@@ -134,9 +134,9 @@
   "status": "runtime-release-eligible",
   "publication_authorized": false,
   "external_installation_qualified": true,
-  "scope": "Fresh 2026-11-04 acceptance on frozen candidate c6fc8465611a89fd85730f0653f670d2a314a721: all five documented routes (31 blocks), three stock OMP 18.15.0 clients and RTX 4090 native public-install/probe/restoration checks passed. RTX 3090's later native campaign failed at structured-outage managed Stop under its exact founder waiver; no completed behavior, passing wrapper restoration audit or anonymous public install is claimed. Current F2 component identities, model and serving shapes remain separately bound.",
-  "interpretation": "The three original agent-parity failures remain failed-founder-waived, and the native speed rule explicitly supersedes the earlier 1.08 floor with no regression against published beta.1. RTX 3090's passed seven-block route is distinct from its failed campaign: graceful_incomplete_shutdown, saved 1/skipped 8/refused 1, reason capacity, reclaimed Host bytes 0; residual #78 also present on published beta.1, avoided in v0.16.0 only by timing. Lead empty-session Start/Stop recovery is separately bound, not a wrapper restoration pass. Exact-source runtime full council and focused product reviews closed by disposition; finalization controls are separate from review findings. No predecessor proof transfers and publication authority stays false.",
-  "eligibility_scope": "Windows x64 and Linux x64 under WSL2 qualified within measured scope; macOS arm64 manual SSH remains preview; vision covers macOS/Windows against RTX 5090 only. Native routes are first-lineage with zero-direction not_applicable rollback; separate predecessor rehearsals are not route rollback. Owner-operated tester-equivalent observations are not independent external-user acceptance.",
+  "scope": "Fresh 2026-11-04 acceptance on frozen candidate c6fc8465611a89fd85730f0653f670d2a314a721: all five documented routes (31 blocks), three stock OMP 18.15.0 clients and RTX 4090 native public-install/probe/restoration checks passed. RTX 3090's later native campaign failed at structured-outage managed Stop under its exact founder waiver; no completed behavior, passing wrapper restoration audit or anonymous public install is claimed. Current F2 component identities, model and serving shapes remain separately bound. The exact-source runtime full council, focused accepted-product review and separate remediation-scope focused review are closed by disposition; review approval and all four runtime composition controls are verified without granting publication or independent public-route authority.",
+  "interpretation": "The three original agent-parity failures remain failed-founder-waived, and the native speed rule explicitly supersedes the earlier 1.08 floor with no regression against published beta.1. RTX 3090's passed seven-block route is distinct from its failed campaign: graceful_incomplete_shutdown, saved 1/skipped 8/refused 1, reason capacity, reclaimed Host bytes 0; residual #78 also present on published beta.1, avoided in v0.16.0 only by timing. Lead empty-session Start/Stop recovery is separately bound, not a wrapper restoration pass. Exact-source runtime full council and focused product reviews closed by disposition; the four runtime finalization controls are verified from content-addressed observations, separately from review findings; GE-R1/GE-R4 are mitigated in composition and product deferrals use issue #138. No predecessor proof transfers and publication authority stays false.",
+  "eligibility_scope": "Windows x64 and Linux x64 under WSL2 qualified within measured scope; macOS arm64 manual SSH remains preview; vision covers macOS/Windows against RTX 5090 only. Native routes are first-lineage with zero-direction not_applicable rollback; separate predecessor rehearsals are not route rollback. Owner-operated tester-equivalent observations are not independent external-user acceptance. Closed review approval covers only the bound subjects and completed composition controls, not publication.",
   "documented_route_acceptance": {
     "status": "passed",
     "scope": "All five candidate-bound documented routes and three stock OMP 18.15.0 clients passed. RTX 4090 native public-install and candidate-profile probes passed. rtx3090-native: all seven documented blocks passed; the later native campaign failed at structured-outage managed Stop and was waived by the founder. Behavior completion, wrapper restoration and anonymous public-install acceptance are not claimed; the documented controller lead recovery is separately bound. rtx3090-native: documented blocks passed, but the post-route structured-outage managed Stop failed and was waived by the founder. Native behavior completion, wrapper restoration audit and anonymous public-install acceptance are not claimed; lead recovery is bound by the waiver.",
@@ -198,7 +198,7 @@
   "observed_gates": {
     "changed_client_acceptance": {
       "status": "passed-with-founder-waiver",
-      "scope": "Fresh three-platform stock OMP 18.15.0 structured tools/continuation/fail-closed acceptance and all five documented routes passed on c6fc8465. RTX 4090 public install and native behavior completed. RTX 3090 fleet/fanout/parallel/two compactions passed before its failed, founder-waived structured-outage managed Stop; behavior completion, wrapper restoration audit and anonymous public install are not claimed. Exact-source runtime full council and focused product reviews are bound separately; product deferrals use https://github.com/alphastorm/omp-ninfer/issues/138."
+      "scope": "Fresh three-platform stock OMP 18.15.0 structured tools/continuation/fail-closed acceptance and all five documented routes passed on c6fc8465. RTX 4090 public install and native behavior completed. RTX 3090 fleet/fanout/parallel/two compactions passed before its failed, founder-waived structured-outage managed Stop; behavior completion, wrapper restoration audit and anonymous public install are not claimed. Exact-source runtime full council and focused product reviews are bound separately; product deferrals use https://github.com/alphastorm/omp-ninfer/issues/138. Closed review approval and verified runtime finalization controls bind separately from these live-client results; no publication authority is granted."
     },
     "rtx5090_lane": {
       "status": "passed",
@@ -321,14 +321,14 @@
       "scope": "Only uncapped-lane assertions change: outer.qualified_power_limit_w == 0 and Power() == owner_power_limit_w. Every other assertion is unchanged; native tooling follow-up is alphastorm/ninfer#88."
     },
     "g4_review": {
-      "status": "not-finalized",
+      "status": "passed",
       "repository_path": "releases/v0.16.2/review/runtime-ledger.json",
-      "sha256": "5f4e3f49c69a4f0d833ddc9e573c72f2882ecda6b50f9f4deebccd3ba9ecb20f",
-      "ledger_status": "awaiting-finalization",
-      "approval_granted": false,
+      "sha256": "374fce061c037b61e320abb53a852c5dd2467f6e640fa687e399d9aa7cfbfeb1",
+      "ledger_status": "closed-by-disposition",
+      "approval_granted": true,
       "publication_authorized": false,
       "public_route_acceptance_granted": false,
-      "scope": "Exact runtime full council, focused product subject and separate remediation-scope focused review are bound; finalization controls and composition mitigations precede G4 approval."
+      "scope": "Closed exact-source runtime full council and focused product review; original reviewer severities and lead dispositions retained; GE-R1/GE-R4 mitigated in composition; remaining product items tracked in the bound follow-up issue and fork #87/#88. Composition controls verified; immutable pin ancestry and publication are independent controls."
     },
     "rtx3090_quality_screen": {
       "status": "passed",
@@ -373,6 +373,6 @@
   "remaining_release_gates": [],
   "receipt_audit": {
     "repository_path": "releases/v0.16.2/qualification/receipt-audit.json",
-    "sha256": "0bb584c89e6b3e1d446eb030cddc05fff144af8e31840e44f0f7b13af58947af"
+    "sha256": "28e2c83c3e52316f4fa4b4cd58bf360ea57533868081f38996495738fdf002f2"
   }
 }

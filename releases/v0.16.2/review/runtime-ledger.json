@@ -3,11 +3,11 @@
   "schema_version": 1,
   "release": "v0.16.2",
   "as_of": "2026-11-04",
-  "status": "awaiting-finalization",
-  "approval_granted": false,
+  "status": "closed-by-disposition",
+  "approval_granted": true,
   "publication_authorized": false,
   "public_route_acceptance_granted": false,
-  "scope": "Closed runtime full council and focused product-tooling reviews on their original frozen subjects; composition controls and data mitigations are finalized separately. No review grants publication or route acceptance.",
+  "scope": "Closed exact-F2 runtime full council and focused product-tooling review on frozen candidate c6fc8465611a89fd85730f0653f670d2a314a721; no confirmed in-scope residual P0/P1 after accountable-lead dispositions and the two composition data mitigations. This is not approval of a later executable subject, publication, or independent public-user acceptance.",
   "native_runtime": {
     "review_id": "CR-20261103T055202Z-a87de361",
     "review_class": "full-council",
@@ -281,11 +281,28 @@
     ]
   },
   "finalization_controls": {
-    "status": "required-at-finalization",
-    "requirements": [
-      "Admit runtime close-report controls: task-absence census, native state/finish content-address pairs, attempt-name bound, and NYC-B reclaim timings versus 900 s.",
-      "Apply GE-R1 and GE-R4 without changing executable candidate bytes.",
-      "Verify nested public-install identities and all immutable-pin ancestors before publication."
-    ]
+    "status": "composition-controls-verified",
+    "runtime_control_evidence_sha256": "7aa6d66a51287ab8e99c9fe5eaa17fc308f61bf357c9b167558e4429f887d6f0",
+    "native_public_install_identity": {
+      "rtx4090": "verified-against-current-manifest",
+      "rtx3090": "not-exercised-founder-waived"
+    },
+    "documented_blocks": 31,
+    "GE-R1": {
+      "running": "c4059a325832524600115f7fe59b14e488a3c298f59ab11ad7f7807645600cab",
+      "rollback": "292a57713f95a931c5a058155c85a2253b4c34b8c3920387cf4c9ce246069757",
+      "repair": "32b66c5a85ffc366bae01fdfd28c436664d54a668e35bcff1a2d6104425db600"
+    },
+    "GE-R1-rtx4090": {
+      "running": "04d3faa2e2eb553e8b64b6c7cdbd5b8338097191c24a7f1c9f085b1e1d03ea53",
+      "rollback": "928b69212ac9e951a6e9d45c8fc3da55612b158da11977b16dc0d15b7ee82a02",
+      "repair": "4b585fd640480278f4f699913faaea7d10d21614e88149c5a6b903315d969d2a"
+    },
+    "GE-R4": {
+      "repository_path": "releases/v0.16.2/qualification/client-components.json",
+      "sha256": "917e759c228bc5cff906514aa43cbdfbc9f9f10e7b660afbffc2a963ae324f4c",
+      "disposition": "composed-by-acceptance"
+    },
+    "pin_ancestry": "required-before-publication; checked separately on the final pushed head"
   }
 }

@@ -105,8 +105,10 @@ wrapper restoration audit and anonymous public install are not claimed. The note
 using `Control-Release.ps1 -Action Start` then `-Action Stop` without client sessions, and
 fork [#89](https://github.com/alphastorm/ninfer/issues/89) / [#90](https://github.com/alphastorm/ninfer/issues/90).
 The exact-source runtime full council and focused product reviews closed by disposition;
-the [ledger](releases/v0.16.2/review/runtime-ledger.json) separates composition controls from
-review dispositions. Product deferrals use [#138](https://github.com/alphastorm/omp-ninfer/issues/138).
+the [closed, approved ledger](releases/v0.16.2/review/runtime-ledger.json) separates composition
+controls from review dispositions. Task-absence evidence, both full native-state/finish digest
+pairs, admitted attempt names (maximum 12, bound 23) and measured small-fixture reclaim/Stop
+times below 900 s are verified. Product deferrals use [#138](https://github.com/alphastorm/omp-ninfer/issues/138).
 Immutable evidence pins and review approval do not authorize founder-owned publication.
 No v0.16.0 runtime proof, route result or waiver transfers.
 

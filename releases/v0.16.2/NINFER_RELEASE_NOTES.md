@@ -336,7 +336,18 @@ That source/integrity review is not live-client acceptance. Remaining product it
 existing [product follow-up #138](https://github.com/alphastorm/omp-ninfer/issues/138);
 runtime/native follow-ups remain fork [#87](https://github.com/alphastorm/ninfer/issues/87) and
 [#88](https://github.com/alphastorm/ninfer/issues/88), alongside #89/#90 above.
-Review approval is separate from the runtime finalization controls and immutable-pin checks.
+The ledger is **closed by disposition and approved for its review scope**. Composition admitted
+the runtime council's four controls from actual, content-addressed observations: task absence after
+the native/rehearsal cleanups (including repair and preserved failed-attempt cleanup), both full
+native `state.json` / chain finish pairs against an independent saved digest inventory with all
+15 phase payloads verified per lane, admitted attempt names **at most 12 characters** against the
+**23-character** bound, and the paired small-fixture reclaim/Stop measurements against **900 s**.
+The finish receipt's shallow state hash alone was not treated as a full-state binding.
+In that bounded fixture, explicit Save was **1.266313505 s** control / **1.956727405 s** pressure;
+Stop was **4.224008060 s** / **2.370026503 s**, complete with zero refused. Proof-only cost was
+not isolated; these observations are not a general worst-case or release-profile latency guarantee.
+Only the private control-admission record's SHA-256 is public in the ledger.
+Review approval is separate from immutable-pin checks and publication.
 No review, component publication or local qualification grants founder-owned product publication;
 checked-in publication and independent public-user acceptance authority remain **false**.
 

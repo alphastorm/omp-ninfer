@@ -40,8 +40,10 @@ wrapper restoration audit and anonymous public install are not claimed. The note
 [#89](https://github.com/alphastorm/ninfer/issues/89) / [#90](https://github.com/alphastorm/ninfer/issues/90)
 track residual export capacity and incomplete-Stop owner restoration.
 The exact-source runtime full council and focused product reviews closed by disposition;
-the [ledger](../releases/v0.16.2/review/runtime-ledger.json) separates their subjects and composition
-controls. GE-R1 summary receipts are lane-agnostic, with lane-distinct archive provenance;
+the [closed, approved ledger](../releases/v0.16.2/review/runtime-ledger.json) separates their subjects.
+Composition verified task absence after native/rehearsal cleanups, both full native-state/finish
+digest pairs, attempt names (maximum 12, bound 23), and measured small-fixture reclaim/Stop
+times below 900 s. GE-R1 summary receipts are lane-agnostic, with lane-distinct archive provenance;
 GE-R4 binds source/download review rather than live acceptance. Product deferrals use
 [#138](https://github.com/alphastorm/omp-ninfer/issues/138). Publication is founder-owned.
 The held v0.16.1 manifest and v0.16.0 execution results are not carried as current proof.

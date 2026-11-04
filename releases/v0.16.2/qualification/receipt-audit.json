@@ -17,9 +17,10 @@
       "file": "NINFER_RELEASE_NOTES.md",
       "predecessor_sha256": "04eb5b765044a79d3fd7b9bfbf97aad7c13a3aefc8254d19680208dacc88d7c6",
       "disposition": "composed-by-acceptance",
-      "reason": "Author current release identity, scope and evidence bindings from v0.16.0 plus actual new inputs; discard predecessor execution claims and preserve only explicit unchanged model/serving constants. Composition reconciliation: actual candidate-bound route/client results, failed RTX 3090 founder waiver and lead recovery, exact-subject reviews and GE-R1/GE-R4 are disclosed; original measurements and predecessor provenance remain.",
-      "staged_sha256": "787db26a5ad913e7e7eb64de201c881436b8dccd8326febad448e3c111284c77",
-      "composition_previous_staged_sha256": "4ccc7fe6dff29fe61ea17706064a3ace5ed60db43430801fda492ab5695ea491"
+      "reason": "Author current release identity, scope and evidence bindings from v0.16.0 plus actual new inputs; discard predecessor execution claims and preserve only explicit unchanged model/serving constants. Composition reconciliation: actual candidate-bound route/client results, failed RTX 3090 founder waiver and lead recovery, exact-subject reviews and GE-R1/GE-R4 are disclosed; original measurements and predecessor provenance remain. Finalization binds the closed review scope and four measured runtime controls, without changing accepted route blocks or raw results.",
+      "staged_sha256": "490961aab631e731587555dd32d5a115f7cc014fbfbaeacbf82e2848f3d2aae4",
+      "composition_previous_staged_sha256": "4ccc7fe6dff29fe61ea17706064a3ace5ed60db43430801fda492ab5695ea491",
+      "finalization_previous_staged_sha256": "787db26a5ad913e7e7eb64de201c881436b8dccd8326febad448e3c111284c77"
     },
     {
       "file": "acceptance/composed-external-installation.json",
@@ -2659,9 +2660,10 @@
       "file": "qualification.json",
       "pointer": "/eligibility_scope",
       "disposition": "replaced",
-      "reason": "Predecessor result/provenance/acceptance/waiver/review binding is not current proof. Composition binds actual scope and GE-R1 lane-distinct archive provenance beside lane-agnostic summaries, or GE-R4 source/download-only review and unchanged client identity; no raw verdict is changed.",
+      "reason": "Predecessor result/provenance/acceptance/waiver/review binding is not current proof. Composition binds actual scope and GE-R1 lane-distinct archive provenance beside lane-agnostic summaries, or GE-R4 source/download-only review and unchanged client identity; no raw verdict is changed. Finalization snapshot: exact-subject closed review and all four content-addressed runtime controls verified; independent publication and public-route authority remain false.",
       "predecessor_value_sha256": "4bf018a8305e1a63f96fb5079d62050ef6ced32271476d261852daadb6a50454",
-      "staged_value_sha256": "598b8aae77b5514e46f0779a7eb37274e8c64a532fed4884583e22e95537ec49"
+      "staged_value_sha256": "8e7f89a4e5d19afb85dda5a60e49f06004fa58558d1e71c0075d1170bca13873",
+      "finalization_previous_staged_value_sha256": "598b8aae77b5514e46f0779a7eb37274e8c64a532fed4884583e22e95537ec49"
     },
     {
       "file": "qualification.json",
@@ -2676,10 +2678,11 @@
       "file": "qualification.json",
       "pointer": "/interpretation",
       "disposition": "composed-by-acceptance",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings. Finalization snapshot: exact-subject closed review and all four content-addressed runtime controls verified; independent publication and public-route authority remain false.",
       "predecessor_value_sha256": "973e8394f63d4f2c6812c0015ecac7dcd117c0d1bee6a0bdf034af53a0fc04ea",
-      "staged_value_sha256": "138b017dc51bb874c77be670c1036211833c06f08ad10f36187b5bd2179ce567",
-      "composition_previous_staged_value_sha256": "420b7bd1ffa27159d8df36f00234cabc9c145aafdedecbd3adbf7fd33a68d301"
+      "staged_value_sha256": "de440086e8449bdc15fd288876a0e5f057abff496f95e09301d36759629dfadc",
+      "composition_previous_staged_value_sha256": "420b7bd1ffa27159d8df36f00234cabc9c145aafdedecbd3adbf7fd33a68d301",
+      "finalization_previous_staged_value_sha256": "138b017dc51bb874c77be670c1036211833c06f08ad10f36187b5bd2179ce567"
     },
     {
       "file": "qualification.json",
@@ -2716,16 +2719,18 @@
     {
       "file": "qualification.json",
       "pointer": "/observed_gates/g4_review/approval_granted",
-      "disposition": "dropped",
-      "reason": "Predecessor result/provenance/acceptance/waiver/review binding is not current proof.",
-      "predecessor_value_sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
+      "disposition": "replaced",
+      "reason": "Predecessor result/provenance/acceptance/waiver/review binding is not current proof. Finalization binds exact closed review-ledger bytes and approval state; no publication or independent public-route authority is granted.",
+      "predecessor_value_sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+      "staged_value_sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
     },
     {
       "file": "qualification.json",
       "pointer": "/observed_gates/g4_review/ledger_status",
-      "disposition": "dropped",
-      "reason": "Predecessor result/provenance/acceptance/waiver/review binding is not current proof.",
-      "predecessor_value_sha256": "a633f5e2b485ed349a63faf8808dd23f9207dd98ea733aa444dd4bfdcdc19fe9"
+      "disposition": "replaced",
+      "reason": "Predecessor result/provenance/acceptance/waiver/review binding is not current proof. Finalization binds exact closed review-ledger bytes and approval state; no publication or independent public-route authority is granted.",
+      "predecessor_value_sha256": "a633f5e2b485ed349a63faf8808dd23f9207dd98ea733aa444dd4bfdcdc19fe9",
+      "staged_value_sha256": "a633f5e2b485ed349a63faf8808dd23f9207dd98ea733aa444dd4bfdcdc19fe9"
     },
     {
       "file": "qualification.json",
@@ -2752,26 +2757,29 @@
       "file": "qualification.json",
       "pointer": "/observed_gates/g4_review/scope",
       "disposition": "composed-by-acceptance",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings. Finalization snapshot: exact-subject closed review and all four content-addressed runtime controls verified; independent publication and public-route authority remain false.",
       "predecessor_value_sha256": "a3cb2a65f7c2cdd471e5dec59d671ac5fbe19cd47703bebb625ef20b0f43e448",
-      "staged_value_sha256": "1d0720ee94a21120eb1a2bd5955b6b9c565c937b4a16e9d3d92ea9ea7146b54b",
-      "composition_previous_staged_value_sha256": "93faf1f4ce75bf3f43be795338f53b2a506aa67350fdf7946823f80b29d8a055"
+      "staged_value_sha256": "78ca592bc814833405c225e6e3172082e723aceee30659980e1a309b09a91a05",
+      "composition_previous_staged_value_sha256": "93faf1f4ce75bf3f43be795338f53b2a506aa67350fdf7946823f80b29d8a055",
+      "finalization_previous_staged_value_sha256": "1d0720ee94a21120eb1a2bd5955b6b9c565c937b4a16e9d3d92ea9ea7146b54b"
     },
     {
       "file": "qualification.json",
       "pointer": "/observed_gates/g4_review/sha256",
-      "disposition": "dropped",
-      "reason": "Predecessor result/provenance/acceptance/waiver/review binding is not current proof.",
-      "predecessor_value_sha256": "6b297619fec15e36e165ac11d6865ccba66a8786ec85dc108fb7b1eb295f5dd6"
+      "disposition": "replaced",
+      "reason": "Predecessor result/provenance/acceptance/waiver/review binding is not current proof. Finalization binds exact closed review-ledger bytes and approval state; no publication or independent public-route authority is granted.",
+      "predecessor_value_sha256": "6b297619fec15e36e165ac11d6865ccba66a8786ec85dc108fb7b1eb295f5dd6",
+      "staged_value_sha256": "ea0c5aefee0108767b221f567a0d5512444db6189e0a84ec4074c2699a796096"
     },
     {
       "file": "qualification.json",
       "pointer": "/observed_gates/g4_review/status",
       "disposition": "composed-by-acceptance",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings. Finalization snapshot: exact-subject closed review and all four content-addressed runtime controls verified; independent publication and public-route authority remain false.",
       "predecessor_value_sha256": "559532ad927252eed5d9b6687d55203a96b956d822055f4570f196a93a42bece",
-      "staged_value_sha256": "fc87f02145b87111bc40656a83f781a98c90461b3ba66f7b2c4b86eea81d3b35",
-      "composition_previous_staged_value_sha256": "12adac54ac6f7140109391b670b3cbcd51f083d8f5ee62ce26857c794ed67d36"
+      "staged_value_sha256": "559532ad927252eed5d9b6687d55203a96b956d822055f4570f196a93a42bece",
+      "composition_previous_staged_value_sha256": "12adac54ac6f7140109391b670b3cbcd51f083d8f5ee62ce26857c794ed67d36",
+      "finalization_previous_staged_value_sha256": "fc87f02145b87111bc40656a83f781a98c90461b3ba66f7b2c4b86eea81d3b35"
     },
     {
       "file": "qualification.json",
@@ -3722,10 +3730,11 @@
       "file": "qualification.json",
       "pointer": "/scope",
       "disposition": "composed-by-acceptance",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings. Finalization snapshot: exact-subject closed review and all four content-addressed runtime controls verified; independent publication and public-route authority remain false.",
       "predecessor_value_sha256": "f1b9d8d4febf394d7483ad4179eb008bf3a3382c09ce68991951f65a93910df3",
-      "staged_value_sha256": "5a4ca57e1a67fb84c0cd6b82c27059b7952051578cf2f2b2efae9454aab8269a",
-      "composition_previous_staged_value_sha256": "72d6b7b90c55d1371dcba6006fab918e6713adb15ec806ed1f315fac4ae421b0"
+      "staged_value_sha256": "f856a4fa47a030fc96e8990636c781cedc23c495048f2804959973af9212e6f5",
+      "composition_previous_staged_value_sha256": "72d6b7b90c55d1371dcba6006fab918e6713adb15ec806ed1f315fac4ae421b0",
+      "finalization_previous_staged_value_sha256": "5a4ca57e1a67fb84c0cd6b82c27059b7952051578cf2f2b2efae9454aab8269a"
     },
     {
       "file": "qualification.json",
@@ -6361,8 +6370,9 @@
       "file": "qualification.json",
       "pointer": "/observed_gates/changed_client_acceptance/scope",
       "disposition": "added",
-      "reason": "Composition binds actual scope and GE-R1 lane-distinct archive provenance beside lane-agnostic summaries, or GE-R4 source/download-only review and unchanged client identity; no raw verdict is changed.",
-      "staged_value_sha256": "c90fd408323a05c5a24a50a3d1d09b386c32293c0f15d7f5fb0e33ea0d16e7b3"
+      "reason": "Composition binds actual scope and GE-R1 lane-distinct archive provenance beside lane-agnostic summaries, or GE-R4 source/download-only review and unchanged client identity; no raw verdict is changed. Finalization snapshot: exact-subject closed review and all four content-addressed runtime controls verified; independent publication and public-route authority remain false.",
+      "staged_value_sha256": "895501ac19f002a978b2be0649dc0cca4338cc74c4ca74ad61192a94fb61c2d2",
+      "finalization_previous_staged_value_sha256": "c90fd408323a05c5a24a50a3d1d09b386c32293c0f15d7f5fb0e33ea0d16e7b3"
     },
     {
       "file": "qualification.json",

@@ -90,8 +90,10 @@ public-install result is claimed. Empty-session `Control-Release.ps1 -Action Sta
 or lease, tasks Ready, no server or listener. Follow-ups:
 [#89](https://github.com/alphastorm/ninfer/issues/89) / [#90](https://github.com/alphastorm/ninfer/issues/90).
 The exact-source runtime full council and focused product reviews closed by disposition; the
-[ledger](../releases/v0.16.2/review/runtime-ledger.json) binds their separate subjects and
-composition controls. GE-R1 summary receipts are lane-agnostic; lane-distinct archive digests
+[closed, approved ledger](../releases/v0.16.2/review/runtime-ledger.json) binds their separate subjects.
+Composition verified task absence after the native/rehearsal cleanups, full native-state/finish
+content-address pairs, attempt names (maximum 12, bound 23) and NYC-B's small-fixture
+reclaim/Stop times below 900 s. GE-R1 summary receipts are lane-agnostic; lane-distinct archive digests
 supply provenance. GE-R4 binds source/download review, not live acceptance. Product deferrals:
 [#138](https://github.com/alphastorm/omp-ninfer/issues/138). Publication is founder-owned.
 No v0.16.0 runtime proof, acceptance or waiver is relabeled; held v0.16.1 is not the staging base.

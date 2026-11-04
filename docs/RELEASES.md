@@ -76,8 +76,10 @@ avoided it by timing. Behavior completion, wrapper restoration audit and anonymo
 install are not claimed. The notes bind empty-session Start/Stop owner/power recovery and
 fork [#89](https://github.com/alphastorm/ninfer/issues/89) / [#90](https://github.com/alphastorm/ninfer/issues/90).
 The exact-source runtime full council and focused product reviews closed by disposition;
-the [ledger](../releases/v0.16.2/review/runtime-ledger.json) binds their subjects and separate
-composition controls. GE-R1 adds lane-distinct archive digests to lane-agnostic summaries;
+the [closed, approved ledger](../releases/v0.16.2/review/runtime-ledger.json) binds their subjects.
+Composition admits task-absence evidence, both full native-state/finish digest pairs,
+attempt names (maximum 12, bound 23), and NYC-B's measured small-fixture reclaim/Stop times
+below the 900 s bound. GE-R1 adds lane-distinct archive digests to lane-agnostic summaries;
 GE-R4 binds the stock-client source/download review, not live acceptance.
 Deferred product work uses [#138](https://github.com/alphastorm/omp-ninfer/issues/138).
 Review approval and immutable evidence pins do not grant publication. No old measurement,
