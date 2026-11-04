@@ -15,7 +15,7 @@
     "note": "Every stock OMP 18.15.0 client was freshly downloaded and accepted against the candidate-bound rebuilt runtime identities."
   },
   "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
-  "compatibility_sha256": "c7782222c349c0418df957a563d9da50154f17bb4351967b22a5030025254fbf",
+  "compatibility_sha256": "4421c04f274575ac39f17c28399458cbd1c80279b04ed3c5b620fa70c2867b16",
   "windows_asset_sha256": "978846a816cb77f44a55e32b16493375ca837fbf87e0aec35a9c1c934bff0cd0",
   "windows_binary_sha256": "978846a816cb77f44a55e32b16493375ca837fbf87e0aec35a9c1c934bff0cd0",
   "platform_receipts": [
