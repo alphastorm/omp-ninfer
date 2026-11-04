@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Mark v0.16.2 as the published release across the README, quickstart banner, facts, roadmap,
+  release history, upstream watch, reference docs, site, and brand assets; front-door install links
+  return to the guide on `main`.
+
+## [0.16.2] - 2026-11-04
+
 ### Fixed
 
 - Version the repository-owned agent-probe parity judge's input contract and preserve
@@ -31,8 +39,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Include byte-proven durable-generation Host reclaim and its managed-Stop capacity fix
   ([fork #78](https://github.com/alphastorm/ninfer/issues/78)), export-retirement reservation,
   opt-in FP32 identity repair, deterministic RDC builds and native repair/power/gate-driver
-  corrections, without changing model or serving shapes. Retarget the prepared guide to
-  v0.16.2 while published entry points stay on immutable v0.16.0. Bind the complete
+  corrections, without changing model or serving shapes. Retarget the guide to
+  v0.16.2. Bind the complete
   18.14.0→18.14.2 and 18.14.2→18.15.0 source reviews and independent asset-integrity evidence;
   fresh candidate-bound acceptance is recorded separately from founder-owned publication,
   not carried from predecessor execution.
@@ -2835,7 +2843,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.16.0...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.16.2...HEAD
+[0.16.2]: https://github.com/alphastorm/omp-ninfer/compare/v0.16.0...v0.16.2
 [0.16.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.13.1...v0.14.0

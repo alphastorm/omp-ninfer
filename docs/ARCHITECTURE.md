@@ -4,7 +4,7 @@ Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release l
 (inference engine) → Qwen3.8 27B (served model).
 
 OMP NInfer is an integration and release product, not a third inference runtime. Each published
-release (`v0.16.0`) binds an exact Oh My Pi (OMP) client, NInfer runtime, shared Qwen3.8 27B
+release (`v0.16.2`) binds an exact Oh My Pi (OMP) client, NInfer runtime, shared Qwen3.8 27B
 artifact, hardware profile, loopback topology, and qualification summary.
 
 ## Runtime topology
@@ -12,7 +12,7 @@ artifact, hardware profile, loopback topology, and qualification summary.
 ```mermaid
 sequenceDiagram
     participant User
-    participant OMP as OMP 18.14.0 client (Windows/macOS/Linux)
+    participant OMP as OMP 18.15.0 client (Windows/macOS/Linux)
     participant Route as Loopback route (local or SSH forward)
     participant NInfer as NInfer on a qualified GPU lane
     participant GPU as Shared Qwen3.8 27B artifact
@@ -45,7 +45,7 @@ Every listener endpoint is loopback-only:
   and a shared 20,867.734375 MiB (21,881,405,440-byte) Host context budget, mounting
   `/checkpoints-v013` from host directory `checkpoints-v013`.
 - **Native Windows RTX 4090 and RTX 3090 lanes (`127.0.0.1:18082`):** Both native packages
-  (`v0.8.0-qwen38-4090-beta.1` and `v0.8.0-qwen38-3090-beta.1`, source `26fa28d0` on upstream
+  (`v0.8.0-qwen38-4090-beta.2` and `v0.8.0-qwen38-3090-beta.2`, source `a87de361` on upstream
   `Neroued/ninfer` master `64d10fbf`) install on one two-GPU Windows 11 host under
   `%ProgramData%\NInfer\qwen38-4090-native` and `%ProgramData%\NInfer\qwen38-3090-native`. Each
   installer binds its card by GPU UUID (`Control-GpuOwner.ps1`) rather than device ordinal. Both
@@ -55,7 +55,7 @@ Every listener endpoint is loopback-only:
   prefill chunk, mandatory `--session-checkpoint-require-origin-auth`, release-isolated schema 3
   checkpoint directory `cache/<release-instance-id>/session-checkpoints-v3` where
   `<release-instance-id>` is the installed release ID such as
-  `qwen38-4090-native-v0.8.0-beta.1-26fa28d0e783`, one active request / `C1` with a 30 s pending
+  `qwen38-4090-native-v0.8.0-beta.2-a87de3613c17`, one active request / `C1` with a 30 s pending
   timeout, `15,747.734375 MiB` / `16,512,696,320-byte` shared Host budget, `640 MiB` admission
   headroom, and two extra device-state slots on RTX 4090, and two active requests / `C2` over one
   shared 131,072-token pool with a 180 s pending timeout, `20,867.734375 MiB` /
@@ -108,10 +108,10 @@ See [operator guidance and receipts](FACTS.md#checkpoint-transport-and-nas-repli
 
 ## Identity chain
 
-The [published release manifest](../releases/v0.16.0/manifest.json) binds:
+The [published release manifest](../releases/v0.16.2/manifest.json) binds:
 
 1. product release and support channel;
-2. upstream OMP 18.14.0 source revision, platform binaries, byte counts, and SHA-256 pins;
+2. upstream OMP 18.15.0 source revision, platform binaries, byte counts, and SHA-256 pins;
 3. primary RTX 5090 NInfer source, server binary, OCI digest, and SBOM plus each UUID-bound native
    variant package, source archive, SPDX and CycloneDX dependency SBOMs, installer/controller
    scripts, configuration, and qualification receipt;
@@ -139,8 +139,8 @@ OMP session semantics, or another request proxy.
 ### OMP
 
 Owns the coding-agent UX, transcript, tools, and model configuration. The client is unmodified
-[upstream Oh My Pi 18.14.0](https://github.com/can1357/oh-my-pi/releases/tag/v18.14.0) (source
-`31147f9d1a76608549821c3759f8487b4d66c72d`), pinned by byte count and SHA-256 across Windows x64,
+[upstream Oh My Pi 18.15.0](https://github.com/can1357/oh-my-pi/releases/tag/v18.15.0) (source
+`3fedf8d53267e32a6d7521ce725fdcc4a36fdc67`), pinned by byte count and SHA-256 across Windows x64,
 macOS arm64 (preview), and Linux x64 (WSL2). Each NInfer model entry sets
 `compat.statefulResponses: true` for OpenAI Responses chaining (`previous_response_id` and
 `prompt_cache_key`) with `PI_OPENAI_STATEFUL` unset, and `examples/manual-tunnel/fail-closed.yml`
@@ -154,9 +154,9 @@ subcommands. Through v0.7.4, a downstream fork and the `alphastorm/homebrew-omp`
 
 Owns the `.ninfer` engine and server, CUDA execution, Qwen3.8 runtime, Responses state and
 checkpoint store, authenticated status, numerical behavior, container and native packages, and
-runtime qualification. The RTX 5090 container runtime (`v0.7.0-qwen38-5090-beta.4`) and the
-UUID-bound native Windows RTX 4090 (`v0.8.0-qwen38-4090-beta.1`) and RTX 3090
-(`v0.8.0-qwen38-3090-beta.1`) packages (shared source `26fa28d0` on upstream `Neroued/ninfer` master
+runtime qualification. The RTX 5090 container runtime (`v0.7.0-qwen38-5090-beta.5`) and the
+UUID-bound native Windows RTX 4090 (`v0.8.0-qwen38-4090-beta.2`) and RTX 3090
+(`v0.8.0-qwen38-3090-beta.2`) packages (shared source `a87de361` on upstream `Neroued/ninfer` master
 `64d10fbf`) are published under
 [alphastorm/ninfer](https://github.com/alphastorm/ninfer), retaining their upstream lineage and
 separate hardware contracts.
