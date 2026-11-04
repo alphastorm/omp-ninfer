@@ -300,7 +300,7 @@
     },
     "GE-R4": {
       "repository_path": "releases/v0.16.2/qualification/client-components.json",
-      "sha256": "8aa18a1deb951c1bc277e645bf9f4e03313f80eac79bf7ab192be89e7464119f",
+      "sha256": "eb08fbb92ebc222fc84399495f053a955afb53719dbcb5aed58299abb13b7116",
       "disposition": "composed-by-acceptance"
     },
     "pin_ancestry": "required-before-publication; checked separately on the final pushed head"

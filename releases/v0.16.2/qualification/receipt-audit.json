@@ -122,10 +122,11 @@
       "file": "qualification/client-components.json",
       "predecessor_sha256": "16f6f0a361e66cab4b0b5629d15b48962cb63dadcf1871a44b1ba76593078050",
       "disposition": "composed-by-acceptance",
-      "reason": "Replace with actual F2-bound lane, package/checksum, powered screen, fit, current-incumbent speed or publication evidence of the same role; no predecessor runtime assertion carries. Composition reconciliation: compatibility metadata belongs to fresh acceptance; stock OMP 18.15.0 source, assets and executable identities remain unchanged, and the descriptor bytes currently match the staged digest. Final recomposition after the guide public-install prose correction changes only compatibility-URL metadata; stock OMP source, asset and binary identities are unchanged. Original stage and composition digests remain above.",
-      "staged_sha256": "8aa18a1deb951c1bc277e645bf9f4e03313f80eac79bf7ab192be89e7464119f",
+      "reason": "Replace with actual F2-bound lane, package/checksum, powered screen, fit, current-incumbent speed or publication evidence of the same role; no predecessor runtime assertion carries. Composition reconciliation: compatibility metadata belongs to fresh acceptance; stock OMP 18.15.0 source, assets and executable identities remain unchanged, and the descriptor bytes currently match the staged digest. Final recomposition after the guide public-install prose correction changes only compatibility-URL metadata; stock OMP source, asset and binary identities are unchanged. Original stage and composition digests remain above. Banner reconciliation retains the established Prepared guide grammar before publication and refreshes compatibility-URL metadata only; no executable block, stock client identity or reviewer verdict changes.",
+      "staged_sha256": "eb08fbb92ebc222fc84399495f053a955afb53719dbcb5aed58299abb13b7116",
       "composition_previous_staged_sha256": "917e759c228bc5cff906514aa43cbdfbc9f9f10e7b660afbffc2a963ae324f4c",
-      "finalization_previous_staged_sha256": "917e759c228bc5cff906514aa43cbdfbc9f9f10e7b660afbffc2a963ae324f4c"
+      "finalization_previous_staged_sha256": "917e759c228bc5cff906514aa43cbdfbc9f9f10e7b660afbffc2a963ae324f4c",
+      "banner_previous_staged_sha256": "8aa18a1deb951c1bc277e645bf9f4e03313f80eac79bf7ab192be89e7464119f"
     },
     {
       "file": "qualification/native-publication.json",
@@ -2768,10 +2769,11 @@
       "file": "qualification.json",
       "pointer": "/observed_gates/g4_review/sha256",
       "disposition": "replaced",
-      "reason": "Predecessor result/provenance/acceptance/waiver/review binding is not current proof. Finalization binds exact closed review-ledger bytes and approval state; no publication or independent public-route authority is granted. Final recomposition refreshes only the descriptor/closed-ledger content-address binding after non-executable guide prose reconciliation.",
+      "reason": "Predecessor result/provenance/acceptance/waiver/review binding is not current proof. Finalization binds exact closed review-ledger bytes and approval state; no publication or independent public-route authority is granted. Final recomposition refreshes only the descriptor/closed-ledger content-address binding after non-executable guide prose reconciliation. Existing guide-banner grammar reconciliation refreshes this content address; source findings and live outcomes remain unchanged.",
       "predecessor_value_sha256": "6b297619fec15e36e165ac11d6865ccba66a8786ec85dc108fb7b1eb295f5dd6",
-      "staged_value_sha256": "27fd785b16f6f4be2d33bdb4daad8e69f291730a9f47512f1445e2f8e360bdc9",
-      "recomposition_previous_staged_value_sha256": "ea0c5aefee0108767b221f567a0d5512444db6189e0a84ec4074c2699a796096"
+      "staged_value_sha256": "2cd088c8ea5019256fb75df1ddc2c40356f217242546956e716a08747fd14789",
+      "recomposition_previous_staged_value_sha256": "ea0c5aefee0108767b221f567a0d5512444db6189e0a84ec4074c2699a796096",
+      "banner_previous_staged_value_sha256": "27fd785b16f6f4be2d33bdb4daad8e69f291730a9f47512f1445e2f8e360bdc9"
     },
     {
       "file": "qualification.json",
@@ -6436,9 +6438,10 @@
       "file": "qualification.json",
       "pointer": "/observed_gates/stock_client_review/descriptor/sha256",
       "disposition": "added",
-      "reason": "Composition binds actual scope and GE-R1 lane-distinct archive provenance beside lane-agnostic summaries, or GE-R4 source/download-only review and unchanged client identity; no raw verdict is changed. Final recomposition refreshes only the descriptor/closed-ledger content-address binding after non-executable guide prose reconciliation.",
-      "staged_value_sha256": "08dd2c50452d00374dc27459ef017cf076322d30f8da5371a28b8d849c73164b",
-      "recomposition_previous_staged_value_sha256": "e389eebee434aba6f79545931936a2ebf0940c08ed3f97899b34f1cc82c597a3"
+      "reason": "Composition binds actual scope and GE-R1 lane-distinct archive provenance beside lane-agnostic summaries, or GE-R4 source/download-only review and unchanged client identity; no raw verdict is changed. Final recomposition refreshes only the descriptor/closed-ledger content-address binding after non-executable guide prose reconciliation. Existing guide-banner grammar reconciliation refreshes this content address; source findings and live outcomes remain unchanged.",
+      "staged_value_sha256": "438bfd84d5d9a09a81a54ad575a86904cff7f084ef658781639a0ca363c259e5",
+      "recomposition_previous_staged_value_sha256": "e389eebee434aba6f79545931936a2ebf0940c08ed3f97899b34f1cc82c597a3",
+      "banner_previous_staged_value_sha256": "08dd2c50452d00374dc27459ef017cf076322d30f8da5371a28b8d849c73164b"
     },
     {
       "file": "qualification.json",

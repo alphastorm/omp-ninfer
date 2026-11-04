@@ -1,6 +1,6 @@
 # Quickstart
 
-> **Qualified successor guide: v0.16.2 · stock Oh My Pi 18.15.0 · five documented routes passed**
+> **Prepared guide: v0.16.2 · stock Oh My Pi 18.15.0 · five documented routes passed**
 >
 > Published release remains **v0.16.0**. Until publication, use the
 > [immutable v0.16.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.16.0/docs/QUICKSTART.md).
