@@ -33,6 +33,9 @@ or nothing is written. An explicit --native-route-waiver LANE=REPO_PATH admits o
 post-route structured-outage native campaign. Its documented blocks must still pass unchanged,
 and its candidate policy/probes still pass; only native observations, the public install and the
 wrapper restoration audit are replaced by a hash-bound founder decision and lead recovery.
+The collector's window-failure observations and digest must match that decision. Lead recovery
+must prove a graceful empty Stop and the stopped owner's census power; the aggregate restoration
+then says passed-with-founder-waiver, never passed.
 Documented-route status stays passed, the native campaign stays failed, and external installation
 is waived-by-founder, not passed. The immutable URL pins that follow are scripts/rebind_release.py's:
 commit these files, then --stage platform, acceptance, manifest.
@@ -57,7 +60,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from verify_release import (  # pyright: ignore[reportMissingImports]
     OMP_PROFILE_PLATFORMS, effective_native_model, validate_upstream_client_bindings,
     validate_upstream_omp_component, ga_release, product_version, OCI_DIGEST_RE,
-    bound_file, native_profile, validate_native_route_waiver,
+    bound_file, native_profile, validate_native_route_waiver, validate_native_lead_recovery,
     NATIVE_ROUTE_LANES as NATIVE_LANES,
 )
 from rebind_release import RAW  # pyright: ignore[reportMissingImports]
@@ -307,6 +310,11 @@ def check_restoration(restoration: Any, lanes: tuple[str, ...], candidate: str,
             require(isinstance(native, dict) and native.get("status") == "restored-by-lead"
                     and native.get("founder_waiver") == waived[lane]["founder_waiver"],
                     f"{gpu} restoration must retain the founder-bound lead recovery, not a passed audit")
+            errors: list[str] = []
+            validate_native_lead_recovery(
+                native, waived[lane]["stopped_owner_census"]["power_limit_w"],
+                f"{gpu} lead restoration", errors)
+            require(not errors, "; ".join(errors))
             continue
         require(isinstance(native, dict) and native.get("status") == "passed",
                 f"{gpu} restoration did not pass")
@@ -329,7 +337,7 @@ def restoration_summary(restoration: dict, lanes: tuple[str, ...], path: str,
     incumbent = restoration["rtx5090"]
     summary: dict[str, Any] = {
         "path": path,
-        "status": "passed",
+        "status": "passed-with-founder-waiver" if waived else "passed",
         # The accepted window is the last: a corrected attempt follows the restored failure.
         "driver_hold_s": incumbent["window_hold_seconds"][-1],
         "production_upgrade_activated": False,
@@ -487,10 +495,13 @@ def main() -> int:
         require(path is not None, f"{lane}: native campaign waiver file is missing")
         reference = {"repository_path": waiver_paths[lane], "sha256": sha256(path.read_bytes())}
         campaign = {"status": native.get("status"), "failed_phase": native.get("failed_phase"),
-                    "founder_waiver": reference}
+                    "founder_waiver": reference, "window_failure": native.get("window_failure"),
+                    "stopped_owner_census": native.get("stopped_owner_census")}
         errors = []
         validate_native_route_waiver(ROOT, args.release, candidate, lane,
-                                    campaign["failed_phase"], reference, errors)
+                                    campaign["failed_phase"], reference, errors,
+                                    window_failure=campaign["window_failure"],
+                                    stopped_owner_census=campaign["stopped_owner_census"])
         require(not errors, "; ".join(errors))
         require(campaign["status"] == "failed" and native.get("founder_waiver") == reference,
                 f"{lane}: waiver requires the failed campaign and matching founder binding")
@@ -569,7 +580,7 @@ def main() -> int:
         "schema_version": 1,
         "release": args.release,
         "as_of": args.as_of,
-        "status": "passed",
+        "status": "passed-with-founder-waiver" if waived else "passed",
         **evidence["restoration"],
         "production_upgrade_activated": False,
         "raw_private_paths_credentials_or_outputs_included": False,

@@ -129,11 +129,32 @@ def campaign_waiver(release: str, candidate: str, route_sha256: str) -> dict:
         "release": release, "candidate": candidate, "lane": "rtx3090-native",
         "status": "waived-by-founder", "observed_status": "failed",
         "documented_route_status": "passed", "failed_phase": "structured-outage",
-        "restoration_summary": {"status": "restored-by-lead"},
+        "observed_summary": {
+            "action": "Control-Release.ps1 -Action Stop after structured live and native probes",
+            "outcome": "graceful_incomplete_shutdown", "sessions_saved": 1, "sessions_skipped": 8,
+            "sessions_refused": 1, "shutdown_complete": False,
+            "final_durable_save_reason": "capacity", "reclaimed_host_bytes": 0},
+        "restoration_summary": {
+            "status": "restored-by-lead", "outcome": "graceful", "sessions_refused": 0,
+            "runtime_record_absent": True, "gpu_owner_lease_absent": True, "power_limit_w": 370,
+            "all_native_tasks_ready": True, "server_processes": 0, "port_18082_listeners": 0},
         "provenance": {"source_sha256": "7" * 64},
         "evidence_sha256": {"documented-route.json": route_sha256,
                             "window-failure.json": "8" * 64, "driver-window.json": "9" * 64,
-                            "lead-restoration.out": "a" * 64},
+                            "lead-restoration.out": "a" * 64, "pre-window-census.json": "b" * 64},
+    }
+
+
+def waived_campaign_evidence(waiver: dict) -> dict:
+    """Content-safe collector projections retain their original private source digests."""
+    return {
+        "window_failure": {"evidence_name": "rtx3090/evidence/window-failure.json",
+                           "sha256": waiver["evidence_sha256"]["window-failure.json"],
+                           "boundary": "structured-outage",
+                           "observed_summary": deepcopy(waiver["observed_summary"])},
+        "stopped_owner_census": {"evidence_name": "native-pre-window-census.json",
+                                 "sha256": waiver["evidence_sha256"]["pre-window-census.json"],
+                                 "lane": "rtx3090", "power_limit_w": 370},
     }
 
 
@@ -734,15 +755,17 @@ class UpstreamCompositionTests(unittest.TestCase):
         self.add_3090(evidence=False)
         route = self.root / "rtx3090-native.json"
         path = self.release_root / "qualification/rtx3090-route-waiver.json"
-        MODULE.save(path, campaign_waiver(self.release, CANDIDATE, MODULE.sha256(route.read_bytes())))
+        waiver = campaign_waiver(self.release, CANDIDATE, MODULE.sha256(route.read_bytes()))
+        MODULE.save(path, waiver)
         binding = {"repository_path": path.relative_to(self.root).as_posix(),
                    "sha256": MODULE.sha256(path.read_bytes())}
         evidence = MODULE.load(self.root / "evidence.json")
         evidence["rtx3090"] = {
             "status": "failed", "failed_phase": "structured-outage", "founder_waiver": binding,
+            **waived_campaign_evidence(waiver),
             "preparation": {"lineage_mode": "first_release", "previous_release_present": False},
             "observations": {"rollback": deepcopy(FIRST_RELEASE["rollback"])}}
-        evidence["restoration"]["rtx3090"] = {"status": "restored-by-lead", "founder_waiver": binding}
+        evidence["restoration"]["rtx3090"] = {**waiver["restoration_summary"], "founder_waiver": binding}
         MODULE.save(self.root / "evidence.json", evidence)
         self.bind_native_policies()
         self.argv += ["--native-route-waiver", f"rtx3090-native={binding['repository_path']}"]
@@ -769,6 +792,14 @@ class UpstreamCompositionTests(unittest.TestCase):
                          "waived-by-founder")
         self.assertEqual(external["steps"]["rtx3090-native"]["status"], "failed")
         self.assertEqual(external["steps"]["rtx4090-native"]["status"], "passed")
+        restoration = MODULE.load(self.root / routes["restoration_receipt"]["repository_path"])
+        self.assertEqual(restoration["status"], "passed-with-founder-waiver")
+        self.assertEqual(restoration["rtx3090"]["status"], "restored-by-lead")
+        self.assertEqual(restoration["rtx4090"]["status"], "passed")
+        self.assertEqual(restoration["rtx3090"]["power_limit_w"],
+                         campaign["stopped_owner_census"]["power_limit_w"])
+        self.assertEqual(qualification["documented_route_acceptance"]["restoration"]["status"],
+                         "passed-with-founder-waiver")
         self.assertNotIn("rtx3090_public_install", external["evidence"])
         self.assertFalse((self.release_root / "acceptance/rtx3090-public-install.json").exists())
         errors = []
@@ -776,6 +807,85 @@ class UpstreamCompositionTests(unittest.TestCase):
         validate_native_route_policy(self.root, self.release,
                                      MODULE.load(self.release_root / "manifest.json"), qualification, errors)
         self.assertEqual(errors, [])
+
+    def test_waiver_requires_the_specific_refused_managed_stop_observations(self) -> None:
+        path = self.waive_3090()
+        original = MODULE.load(path)
+        source = MODULE.load(self.root / "evidence.json")
+        for field, value in (("action", "Control-Release.ps1 -Action Start"), ("outcome", "forced"),
+                             ("sessions_refused", 0), ("sessions_refused", True),
+                             ("sessions_refused", 1.0), ("shutdown_complete", True),
+                             ("outcome", None)):
+            with self.subTest(field=field, value=value):
+                waiver, evidence = deepcopy(original), deepcopy(source)
+                if value is None:
+                    waiver["observed_summary"].pop(field)
+                else:
+                    waiver["observed_summary"][field] = value
+                MODULE.save(path, waiver)
+                binding = {"repository_path": path.relative_to(self.root).as_posix(),
+                           "sha256": MODULE.sha256(path.read_bytes())}
+                evidence["rtx3090"]["founder_waiver"] = binding
+                evidence["restoration"]["rtx3090"]["founder_waiver"] = binding
+                MODULE.save(self.root / "evidence.json", evidence)
+                with self.assertRaisesRegex(SystemExit, "observed_summary"):
+                    self.compose()
+                self.assertFalse((self.release_root / "acceptance").exists())
+
+    def test_waiver_requires_matching_hash_bound_window_failure_observations(self) -> None:
+        self.waive_3090()
+        original = MODULE.load(self.root / "evidence.json")
+        for field, value in (("sha256", "0" * 64), ("boundary", "behavior-evidence"),
+                             ("action", "Control-Release.ps1 -Action Start"), ("outcome", "forced"),
+                             ("sessions_refused", 0), ("shutdown_complete", True)):
+            with self.subTest(field=field):
+                evidence = deepcopy(original)
+                failure = evidence["rtx3090"]["window_failure"]
+                target = failure if field in ("sha256", "boundary") else failure["observed_summary"]
+                target[field] = value
+                MODULE.save(self.root / "evidence.json", evidence)
+                with self.assertRaisesRegex(SystemExit, "window-failure"):
+                    self.compose()
+                self.assertFalse((self.release_root / "acceptance").exists())
+
+    def test_waived_restoration_requires_lead_observations_and_stopped_owner_power(self) -> None:
+        path = self.waive_3090()
+        original, source = MODULE.load(path), MODULE.load(self.root / "evidence.json")
+        for target in ("waiver", "restoration"):
+            for field, value in (("outcome", None), ("outcome", "forced"), ("sessions_refused", 1),
+                                 ("sessions_refused", False), ("runtime_record_absent", False),
+                                 ("gpu_owner_lease_absent", False), ("all_native_tasks_ready", False),
+                                 ("server_processes", 1), ("port_18082_listeners", 1),
+                                 ("power_limit_w", 350)):
+                with self.subTest(target=target, field=field, value=value):
+                    waiver, evidence = deepcopy(original), deepcopy(source)
+                    recovery = (waiver["restoration_summary"] if target == "waiver"
+                                else evidence["restoration"]["rtx3090"])
+                    if value is None:
+                        recovery.pop(field)
+                    else:
+                        recovery[field] = value
+                    MODULE.save(path, waiver)
+                    binding = {"repository_path": path.relative_to(self.root).as_posix(),
+                               "sha256": MODULE.sha256(path.read_bytes())}
+                    evidence["rtx3090"]["founder_waiver"] = binding
+                    evidence["restoration"]["rtx3090"]["founder_waiver"] = binding
+                    MODULE.save(self.root / "evidence.json", evidence)
+                    with self.assertRaisesRegex(SystemExit, field):
+                        self.compose()
+                    self.assertFalse((self.release_root / "acceptance").exists())
+
+    def test_waived_restoration_requires_the_hash_bound_lane_census(self) -> None:
+        self.waive_3090()
+        original = MODULE.load(self.root / "evidence.json")
+        for field, value in (("sha256", "0" * 64), ("lane", "rtx4090"), ("power_limit_w", None)):
+            with self.subTest(field=field):
+                evidence = deepcopy(original)
+                evidence["rtx3090"]["stopped_owner_census"][field] = value
+                MODULE.save(self.root / "evidence.json", evidence)
+                with self.assertRaisesRegex(SystemExit, "native census evidence"):
+                    self.compose()
+                self.assertFalse((self.release_root / "acceptance").exists())
 
     def test_unwaived_failed_native_campaign_is_refused(self) -> None:
         self.waive_3090()

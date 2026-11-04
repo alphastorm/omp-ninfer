@@ -828,11 +828,31 @@ def validate_review_ledger(
                 f"{label}.{field} must equal the review ledger's {source}", errors)
 
 
+def validate_native_lead_recovery(summary: Any, stopped_owner_power: Any,
+                                  label: str, errors: list[str]) -> None:
+    """A lead recovery is observed stopped state, not a replacement wrapper-audit pass."""
+    if not isinstance(summary, dict):
+        errors.append(f"{label} must carry lead recovery observations")
+        return
+    for field, expected in (
+        ("status", "restored-by-lead"), ("outcome", "graceful"), ("sessions_refused", 0),
+        ("runtime_record_absent", True), ("gpu_owner_lease_absent", True),
+        ("all_native_tasks_ready", True), ("server_processes", 0), ("port_18082_listeners", 0),
+    ):
+        require(type(summary.get(field)) is type(expected) and summary[field] == expected,
+                f"{label}.{field} must be {expected!r}", errors)
+    power = summary.get("power_limit_w")
+    require(isinstance(power, (int, float)) and not isinstance(power, bool)
+            and power == stopped_owner_power,
+            f"{label}.power_limit_w must equal the stopped owner power from native census evidence",
+            errors)
+
+
 def validate_native_route_waiver(
     root: Path, release: str, candidate: str, lane: str, failed_phase: Any,
-    reference: Any, errors: list[str],
+    reference: Any, errors: list[str], *, window_failure: Any, stopped_owner_census: Any,
 ) -> bool:
-    """Only a hash-bound founder decision can admit this post-route campaign failure."""
+    """Bind the specific refused managed Stop and the census-backed lead recovery."""
     before = len(errors)
     label = f"{lane} native campaign waiver"
     require(lane in NATIVE_ROUTE_LANES and failed_phase == "structured-outage",
@@ -863,12 +883,44 @@ def validate_native_route_waiver(
             f"{label} candidate must be a full commit", errors)
     require_sha(waiver.get("provenance", {}).get("source_sha256"),
                 f"{label} founder record SHA-256", errors)
-    require(waiver.get("restoration_summary", {}).get("status") == "restored-by-lead",
-            f"{label} must bind lead recovery without relabelling the wrapper audit", errors)
+    observed = waiver.get("observed_summary")
+    if not isinstance(observed, dict):
+        errors.append(f"{label} must identify the observed managed Stop failure")
+        observed = {}
+    action = observed.get("action")
+    require(isinstance(action, str)
+            and re.fullmatch(r"Control-Release\.ps1 -Action Stop(?: after .+)?", action) is not None,
+            f"{label} observed_summary.action must identify Control-Release.ps1 -Action Stop", errors)
+    require(observed.get("outcome") == "graceful_incomplete_shutdown",
+            f"{label} observed_summary.outcome must be graceful_incomplete_shutdown", errors)
+    refused = observed.get("sessions_refused")
+    require(isinstance(refused, int) and not isinstance(refused, bool) and refused >= 1,
+            f"{label} observed_summary.sessions_refused must be an integer >= 1", errors)
+    require(observed.get("shutdown_complete") is False,
+            f"{label} observed_summary.shutdown_complete must be false", errors)
+    evidence = waiver.get("evidence_sha256", {})
     for name in ("documented-route.json", "window-failure.json", "driver-window.json",
-                 "lead-restoration.out"):
-        require_sha(waiver.get("evidence_sha256", {}).get(name),
-                    f"{label} {name} SHA-256", errors)
+                 "lead-restoration.out", "pre-window-census.json"):
+        require_sha(evidence.get(name), f"{label} {name} SHA-256", errors)
+    failure = window_failure if isinstance(window_failure, dict) else {}
+    require(failure.get("sha256") == evidence.get("window-failure.json")
+            and failure.get("boundary") == failed_phase,
+            f"{label} window-failure must bind the original failure digest and phase", errors)
+    failure_observed = failure.get("observed_summary", {})
+    require(isinstance(failure_observed, dict) and all(
+        field in observed and field in failure_observed
+        and type(failure_observed[field]) is type(observed[field])
+        and failure_observed[field] == observed[field]
+        for field in ("action", "outcome", "sessions_refused", "shutdown_complete")),
+        f"{label} window-failure observations must agree with observed_summary", errors)
+    census = stopped_owner_census if isinstance(stopped_owner_census, dict) else {}
+    power = census.get("power_limit_w")
+    require(census.get("sha256") == evidence.get("pre-window-census.json")
+            and census.get("lane") == lane.removesuffix("-native")
+            and isinstance(power, (int, float)) and not isinstance(power, bool) and power > 0,
+            f"{label} must bind the lane's stopped owner power from native census evidence", errors)
+    validate_native_lead_recovery(waiver.get("restoration_summary"), power,
+                                  f"{label} restoration_summary", errors)
     return len(errors) == before
 
 
@@ -899,7 +951,8 @@ def validate_native_campaigns(root: Path, release: str, routes: dict[str, Any],
                 f"{lane} native campaign must preserve its failed status", errors)
         validate_native_route_waiver(
             root, release, routes.get("candidate_commit"), lane, campaign.get("failed_phase"),
-            campaign.get("founder_waiver"), errors)
+            campaign.get("founder_waiver"), errors, window_failure=campaign.get("window_failure"),
+            stopped_owner_census=campaign.get("stopped_owner_census"))
         row = route_rows.get(lane, {})
         binding = campaign.get("founder_waiver")
         waiver_path = bound_file(root, binding.get("repository_path") if isinstance(binding, dict) else None)
@@ -933,6 +986,46 @@ def validate_native_campaigns(root: Path, release: str, routes: dict[str, Any],
     return waived
 
 
+def validate_native_restoration(root: Path, release: str, routes: dict[str, Any],
+                                waived: dict[str, dict], errors: list[str]) -> None:
+    """Never aggregate a lead-restored lane as a passing wrapper restoration audit."""
+    reference = routes.get("restoration_receipt")
+    if not isinstance(reference, dict):
+        require(not waived, "waived native campaigns must bind a restoration receipt", errors)
+        return
+    path = bound_file(root, reference.get("repository_path"))
+    require(path is not None and sha256_file(path) == reference.get("sha256"),
+            "native restoration must bind the checked-in receipt bytes", errors)
+    if path is None:
+        return
+    restoration = load_json(path)
+    expected_status = "passed-with-founder-waiver" if waived else "passed"
+    require(restoration.get("status") == expected_status,
+            f"aggregate restoration status must be {expected_status}", errors)
+    require(restoration.get("release") == release,
+            "native restoration must match the routes' release", errors)
+    # Published restoration evidence predates candidate and per-lane status fields. A new
+    # lead recovery must carry both; historical all-passed receipts are not rewritten.
+    if waived or "candidate_commit" in restoration:
+        require(restoration.get("candidate_commit") == routes.get("candidate_commit"),
+                "native restoration must match the routes' candidate", errors)
+    for lane in NATIVE_ROUTE_LANES:
+        native = restoration.get(lane.removesuffix("-native"))
+        if lane not in routes.get("routes", {}) and native is None:
+            continue
+        if lane not in waived:
+            require(isinstance(native, dict) and native.get("status", "passed") == "passed",
+                    f"{lane} unwaived restoration must be passed", errors)
+            continue
+        campaign = waived[lane]
+        require(isinstance(native, dict)
+                and native.get("founder_waiver") == campaign["founder_waiver"],
+                f"{lane} restoration must retain the founder waiver binding", errors)
+        validate_native_lead_recovery(
+            native, campaign["stopped_owner_census"]["power_limit_w"],
+            f"{lane} lead restoration", errors)
+
+
 def composed_native_waivers(root: Path, release: str, qualification: dict[str, Any],
                             composed: dict[str, Any], errors: list[str]) -> dict[str, dict]:
     """The external installation may be founder-waived, never an all-campaigns pass."""
@@ -940,14 +1033,31 @@ def composed_native_waivers(root: Path, release: str, qualification: dict[str, A
     path = bound_file(root, reference.get("repository_path"))
     if path is None or sha256_file(path) != reference.get("sha256"):
         return {}
-    waived = validate_native_campaigns(root, release, load_json(path), errors)
-    for lane, campaign in waived.items():
+    routes = load_json(path)
+    waived = validate_native_campaigns(root, release, routes, errors)
+    validate_native_restoration(root, release, routes, waived, errors)
+    if "restoration_receipt" in routes:
+        require(composed.get("evidence", {}).get("restoration") == routes["restoration_receipt"],
+                "composed acceptance must bind the documented routes' restoration receipt", errors)
+    campaigns = routes.get("native_campaigns", {})
+    for lane in set(routes.get("routes", {})).intersection(NATIVE_ROUTE_LANES):
+        # Historical receipts predate separate campaign rows and record the passed lane directly.
+        campaign = campaigns.get(lane, {}) if isinstance(campaigns, dict) else {}
+        if "native_campaigns" not in routes:
+            campaign = {"status": routes["routes"][lane].get("status")}
         require(composed.get("evidence", {}).get("documented_routes") == {
                     "repository_path": reference.get("repository_path"), "sha256": reference.get("sha256")},
-                f"{lane} waived campaign must bind the same documented routes as qualification", errors)
+                f"{lane} composed campaign must bind the same documented routes as qualification", errors)
         step = composed.get("steps", {}).get(lane, {})
-        require(all(step.get(key) == value for key, value in campaign.items()),
-                f"{lane} composed native campaign must preserve the failed founder-waived result", errors)
+        require(isinstance(campaign, dict) and isinstance(step, dict)
+                and step.get("status") == campaign.get("status")
+                and all(step.get(key) == value for key, value in campaign.items()),
+                f"{lane} composed native campaign must equal the documented-routes campaign", errors)
+        if lane not in waived:
+            require(isinstance(campaign, dict) and campaign.get("status") == "passed"
+                    and isinstance(step, dict) and step.get("status") == "passed",
+                    f"{lane} unwaived composed native campaign must be passed", errors)
+            continue
         gpu = lane.removesuffix("-native")
         public_path = root / "releases" / release / "acceptance" / f"{gpu}-public-install.json"
         require(f"{gpu}_public_install" not in composed.get("evidence", {})
@@ -990,6 +1100,7 @@ def validate_documented_route_acceptance(
     require(routes.get("status") == "passed",
             f"{label} receipt status must be passed", errors)
     waived = validate_native_campaigns(root, str(release), routes, errors)
+    validate_native_restoration(root, str(release), routes, waived, errors)
     if summary is None:
         return
     if not isinstance(summary, dict):
@@ -1006,6 +1117,11 @@ def validate_documented_route_acceptance(
     for lane in waived:
         require(lane in summary.get("scope", ""),
                 f"{lane} waived native campaign must be named in the acceptance scope", errors)
+    restoration = summary.get("restoration")
+    if waived or isinstance(restoration, dict):
+        require(isinstance(restoration, dict)
+                and restoration.get("status") == ("passed-with-founder-waiver" if waived else "passed"),
+                "qualification restoration summary must preserve the aggregate restoration status", errors)
 
 
 def validate_exact_lane_set(

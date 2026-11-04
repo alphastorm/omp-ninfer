@@ -1849,18 +1849,28 @@ class ReleaseContractTest(unittest.TestCase):
 
     def bind_failed_native_campaign(self, root: Path) -> tuple[Path, Path, Path]:
         """Admit the campaign separately; retain the original passed documented blocks."""
-        from test_compose_route_acceptance import campaign_waiver
+        from test_compose_route_acceptance import campaign_waiver, waived_campaign_evidence
         release_root = root / "releases" / PUBLIC_RELEASE
         routes_path = release_root / "acceptance/documented-routes.json"
         routes = self.load(routes_path)
         path = release_root / "qualification/rtx3090-route-waiver.json"
-        self.save(path, campaign_waiver(PUBLIC_RELEASE, routes["candidate_commit"],
-                                       routes["routes"]["rtx3090-native"]["sha256"]))
+        waiver = campaign_waiver(PUBLIC_RELEASE, routes["candidate_commit"],
+                                 routes["routes"]["rtx3090-native"]["sha256"])
+        self.save(path, waiver)
         campaign = {"status": "failed", "failed_phase": "structured-outage",
+                    **waived_campaign_evidence(waiver),
                     "founder_waiver": {"repository_path": path.relative_to(root).as_posix(),
                                        "sha256": VERIFY_RELEASE.sha256_file(path)}}
         routes["native_campaigns"] = {"rtx4090-native": {"status": "passed"},
                                      "rtx3090-native": campaign}
+        restoration_path = root / routes["restoration_receipt"]["repository_path"]
+        restoration = self.load(restoration_path)
+        restoration["status"] = "passed-with-founder-waiver"
+        restoration["candidate_commit"] = routes["candidate_commit"]
+        restoration["rtx3090"] = {**waiver["restoration_summary"],
+                                  "founder_waiver": campaign["founder_waiver"]}
+        self.save(restoration_path, restoration)
+        routes["restoration_receipt"]["sha256"] = VERIFY_RELEASE.sha256_file(restoration_path)
         self.save(routes_path, routes)
         routes_ref = {"repository_path": routes_path.relative_to(root).as_posix(),
                       "sha256": VERIFY_RELEASE.sha256_file(routes_path)}
@@ -1869,6 +1879,7 @@ class ReleaseContractTest(unittest.TestCase):
         external["status"] = "waived-by-founder"
         external["steps"]["rtx3090-native"] = {**campaign, "blocks": 7}
         external["evidence"]["documented_routes"] = routes_ref
+        external["evidence"]["restoration"] = deepcopy(routes["restoration_receipt"])
         del external["evidence"]["rtx3090_public_install"]
         external["limitations"].append("rtx3090-native campaign failed and was waived by the founder.")
         self.save(external_path, external)
@@ -1883,14 +1894,25 @@ class ReleaseContractTest(unittest.TestCase):
             qualification["documented_route_acceptance"] = {
                 "status": "passed", "candidate_commit": routes["candidate_commit"],
                 "evidence_path": routes_ref["repository_path"], "evidence_sha256": routes_ref["sha256"],
-                "scope": "Passed documented blocks; rtx3090-native post-route campaign failed and was founder-waived."}
+                "scope": "Passed documented blocks; rtx3090-native post-route campaign failed and was founder-waived.",
+                "restoration": {"path": routes["restoration_receipt"]["repository_path"],
+                                 "status": "passed-with-founder-waiver"}}
 
         self.rebind_qualification(release_root, update)
         return path, routes_path, external_path
 
     def rebind_failed_native_campaign(self, root: Path, routes_path: Path, external_path: Path) -> None:
         """Update only enclosing digests so each refusal targets semantics, not stale parent bytes."""
+        routes = self.load(routes_path)
+        restoration_ref = routes["restoration_receipt"]
+        restoration_path = root / restoration_ref["repository_path"]
+        restoration = self.load(restoration_path)
+        restoration["rtx3090"]["founder_waiver"] = routes["native_campaigns"]["rtx3090-native"].get("founder_waiver")
+        self.save(restoration_path, restoration)
+        restoration_ref["sha256"] = VERIFY_RELEASE.sha256_file(restoration_path)
+        self.save(routes_path, routes)
         external = self.load(external_path)
+        external["evidence"]["restoration"] = deepcopy(restoration_ref)
         external["evidence"]["documented_routes"]["sha256"] = VERIFY_RELEASE.sha256_file(routes_path)
         self.save(external_path, external)
 
@@ -1910,6 +1932,132 @@ class ReleaseContractTest(unittest.TestCase):
         routes = self.load(routes_path)
         self.assertEqual(routes["routes"]["rtx3090-native"]["status"], "passed")
         self.assertEqual(routes["native_campaigns"]["rtx3090-native"]["status"], "failed")
+
+    def test_require_ready_refuses_waivers_for_other_managed_stop_failures(self) -> None:
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        path, routes_path, external_path = self.bind_failed_native_campaign(root)
+        original = self.load(path)
+        for field, value in (("action", "Control-Release.ps1 -Action Start"), ("outcome", "forced"),
+                             ("sessions_refused", 0), ("sessions_refused", True),
+                             ("sessions_refused", 1.0), ("shutdown_complete", True),
+                             ("observed_summary", None)):
+            with self.subTest(field=field, value=value):
+                waiver = deepcopy(original)
+                if field == "observed_summary":
+                    waiver.pop(field)
+                else:
+                    waiver["observed_summary"][field] = value
+                self.save(path, waiver)
+                routes, external = self.load(routes_path), self.load(external_path)
+                campaign = routes["native_campaigns"]["rtx3090-native"]
+                campaign["founder_waiver"]["sha256"] = VERIFY_RELEASE.sha256_file(path)
+                # Even an agreeing projection cannot turn a different failure into the waived one.
+                campaign["window_failure"]["observed_summary"] = waiver.get("observed_summary", {})
+                external["steps"]["rtx3090-native"] = {**campaign, "blocks": 7}
+                self.save(routes_path, routes)
+                self.save(external_path, external)
+                self.rebind_failed_native_campaign(root, routes_path, external_path)
+                _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+                self.assertTrue(any("observed_summary" in error or "observed managed Stop" in error
+                                    for error in errors), errors)
+
+    def test_require_ready_refuses_incomplete_lead_recovery_or_wrong_owner_power(self) -> None:
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        path, routes_path, external_path = self.bind_failed_native_campaign(root)
+        original = self.load(path)
+        restoration_path = root / self.load(routes_path)["restoration_receipt"]["repository_path"]
+        original_restoration = self.load(restoration_path)
+        for target in ("waiver", "restoration"):
+            for field, value in (("outcome", None), ("outcome", "forced"), ("sessions_refused", 1),
+                                 ("sessions_refused", False), ("runtime_record_absent", False),
+                                 ("gpu_owner_lease_absent", False), ("all_native_tasks_ready", False),
+                                 ("server_processes", 1), ("port_18082_listeners", 1),
+                                 ("power_limit_w", 350)):
+                with self.subTest(target=target, field=field, value=value):
+                    waiver, restoration = deepcopy(original), deepcopy(original_restoration)
+                    recovery = waiver["restoration_summary"] if target == "waiver" else restoration["rtx3090"]
+                    if value is None:
+                        recovery.pop(field)
+                    else:
+                        recovery[field] = value
+                    self.save(path, waiver)
+                    self.save(restoration_path, restoration)
+                    routes, external = self.load(routes_path), self.load(external_path)
+                    campaign = routes["native_campaigns"]["rtx3090-native"]
+                    campaign["founder_waiver"]["sha256"] = VERIFY_RELEASE.sha256_file(path)
+                    external["steps"]["rtx3090-native"] = {**campaign, "blocks": 7}
+                    self.save(routes_path, routes)
+                    self.save(external_path, external)
+                    self.rebind_failed_native_campaign(root, routes_path, external_path)
+                    _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+                    self.assertTrue(any(field in error for error in errors), errors)
+
+    def test_require_ready_refuses_passed_aggregate_with_a_lead_restored_lane(self) -> None:
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        _, routes_path, external_path = self.bind_failed_native_campaign(root)
+        path = root / self.load(routes_path)["restoration_receipt"]["repository_path"]
+        restoration = self.load(path)
+        restoration["status"] = "passed"
+        self.save(path, restoration)
+        self.rebind_failed_native_campaign(root, routes_path, external_path)
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+        self.assertIn("aggregate restoration status must be passed-with-founder-waiver", errors)
+
+    def test_require_ready_refuses_waived_aggregate_without_a_valid_waiver(self) -> None:
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        _, routes_path, external_path = self.bind_failed_native_campaign(root)
+        routes = self.load(routes_path)
+        routes["native_campaigns"]["rtx3090-native"] = {"status": "passed"}
+        self.save(routes_path, routes)
+        external = self.load(external_path)
+        external["steps"]["rtx3090-native"] = {"status": "passed", "blocks": 7}
+        self.save(external_path, external)
+        self.rebind_failed_native_campaign(root, routes_path, external_path)
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+        self.assertIn("aggregate restoration status must be passed", errors)
+        self.assertIn("rtx3090-native unwaived restoration must be passed", errors)
+
+    def test_require_ready_refuses_contradictory_unwaived_composed_campaign(self) -> None:
+        for waived in (False, True):
+            temporary, root = self.public_draft_copy()
+            try:
+                if waived:
+                    _, routes_path, external_path = self.bind_failed_native_campaign(root)
+                else:
+                    release_root = root / "releases" / PUBLIC_RELEASE
+                    routes_path = release_root / "acceptance/documented-routes.json"
+                    routes = self.load(routes_path)
+                    routes["native_campaigns"] = {lane: {"status": "passed"}
+                                                  for lane in VERIFY_RELEASE.NATIVE_ROUTE_LANES}
+                    self.save(routes_path, routes)
+                    external_path = release_root / "acceptance/composed-external-installation.json"
+                original = self.load(external_path)
+                for status in ("failed", None):
+                    with self.subTest(waived=waived, status=status):
+                        external = deepcopy(original)
+                        if status is None:
+                            del external["steps"]["rtx4090-native"]
+                        else:
+                            external["steps"]["rtx4090-native"]["status"] = status
+                        external["evidence"]["documented_routes"]["sha256"] = VERIFY_RELEASE.sha256_file(routes_path)
+                        self.save(external_path, external)
+
+                        def update(qualification):
+                            qualification["composition"]["documented_route_acceptance"]["sha256"] = VERIFY_RELEASE.sha256_file(routes_path)
+                            qualification["composition"]["external_installation_acceptance"]["sha256"] = VERIFY_RELEASE.sha256_file(external_path)
+                            if "documented_route_acceptance" in qualification:
+                                qualification["documented_route_acceptance"]["evidence_sha256"] = VERIFY_RELEASE.sha256_file(routes_path)
+
+                        self.rebind_qualification(root / "releases" / PUBLIC_RELEASE, update)
+                        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+                        self.assertIn("rtx4090-native composed native campaign must equal the documented-routes campaign", errors)
+                        self.assertIn("rtx4090-native unwaived composed native campaign must be passed", errors)
+            finally:
+                temporary.cleanup()
 
     def test_require_ready_refuses_invalid_native_campaign_waivers(self) -> None:
         cases = ("passed-campaign", "passed-install", "release", "candidate", "lane", "phase",
