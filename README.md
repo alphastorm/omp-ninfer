@@ -87,9 +87,9 @@ port 18082; all three lanes serve the same 20.4 GB Qwen3.8 27B model container v
 credentials. Exact component, source, and model identities: [facts](docs/FACTS.md#current-release) ·
 [glossary](docs/FACTS.md#glossary) · [manifest](releases/v0.16.0/manifest.json).
 
-## Next on main — prepared v0.16.2
+## Next on main — qualified v0.16.2 successor
 
-**Prepared next: v0.16.2 / stock OMP 18.15.0.** Rebuild all three runtimes at `a87de361`:
+**Qualified successor: v0.16.2 / stock OMP 18.15.0.** Rebuild all three runtimes at `a87de361`:
 published RTX 5090 `v0.7.0-qwen38-5090-beta.5` and now-published native RTX 3090 / RTX 4090
 `v0.8.0-beta.2`, including durable-export Host reclaim, the
 [managed-Stop capacity fix](https://github.com/alphastorm/ninfer/issues/78) and deterministic RDC
@@ -103,9 +103,21 @@ The notes disclose the exact RTX 5090 `restore_0`, RTX 4090 `restore_1` and RTX 
 position 1 `base` failures under new founder waivers, plus the RTX 4090 uncapped-power-only
 rehearsal-harness fix. Raw failures remain failures. Follow-ups are
 [runtime #87](https://github.com/alphastorm/ninfer/issues/87) and
-[native tooling #88](https://github.com/alphastorm/ninfer/issues/88). Fresh
-candidate-bound client/five-route/native-public-install/restoration acceptance, exact-subject
-reviews, final immutable pins and founder-owned product publication remain pending.
+[native tooling #88](https://github.com/alphastorm/ninfer/issues/88).
+On **2026-11-04**, candidate `c6fc8465` passed all five documented routes (**31/31 blocks**),
+all three stock clients and RTX 4090 public-install/probe/restoration acceptance
+([routes](releases/v0.16.2/acceptance/documented-routes.json) ·
+[composition](releases/v0.16.2/acceptance/composed-external-installation.json)).
+The later RTX 3090 campaign **failed**, founder-waived, at the structured-outage managed Stop:
+`graceful_incomplete_shutdown`, saved 1 / skipped 8 / refused 1, reason `capacity`, reclaimed 0.
+Its seven route blocks passed; behavior completion, wrapper restoration audit and anonymous public
+install are not claimed. The [notes](releases/v0.16.2/NINFER_RELEASE_NOTES.md#rtx-3090-failed-native-campaign-and-operator-recovery)
+bind the empty-session Start/Stop recovery and residual fork [#89](https://github.com/alphastorm/ninfer/issues/89)
+/ [#90](https://github.com/alphastorm/ninfer/issues/90).
+The exact-source runtime full council and focused product reviews closed by disposition;
+composition controls are bound separately in the [ledger](releases/v0.16.2/review/runtime-ledger.json).
+Product deferrals use [#138](https://github.com/alphastorm/omp-ninfer/issues/138).
+Qualification and immutable evidence pins do not authorize founder-owned publication.
 No v0.16.0 result or waiver is relabeled, and the held v0.16.1 client-only candidate is not the staging base.
 
 The client update retains Qwen's exact loop guard with the 1 KiB whole-line repetition floor and
@@ -115,7 +127,7 @@ missing-key fallback gating and manual-compaction/background-result delivery. Ke
 effort clamps; remove obsolete operator `compat.thinkingLoopGuard`, not the guard itself.
 Optional job-caption roles may make separately attributable requests and can use inherited smol
 credentials independently of the retry opt-out: acceptance uses isolated local-only auth.
-See the [prepared notes](releases/v0.16.2/NINFER_RELEASE_NOTES.md) and
+See the [release notes](releases/v0.16.2/NINFER_RELEASE_NOTES.md) and
 [18.15.0 source/integrity review](docs/measurements/2026-11-01-omp-18150-client-upgrade-review.json).
 Until publication, use the [published v0.16.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.16.0/docs/QUICKSTART.md).
 

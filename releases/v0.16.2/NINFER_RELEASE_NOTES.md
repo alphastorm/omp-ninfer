@@ -1,8 +1,8 @@
 # OMP NInfer v0.16.2 — durable-export Host reclaim and stock OMP 18.15.0
 
-## Prepared release scope
+## Qualified successor scope
 
-This is the prepared runtime-and-client successor to published **v0.16.0**, not a release of
+This is the qualified runtime-and-client successor to published **v0.16.0**, not a release of
 the held v0.16.1 client-only candidate. Published installation remains **v0.16.0**; use its
 [immutable guide](https://github.com/alphastorm/omp-ninfer/blob/v0.16.0/docs/QUICKSTART.md)
 until founder-owned publication of this release.
@@ -189,7 +189,10 @@ SHA-256 is `0e673f07a9458d5b6440b8255d925141ab689cb0cdcd0cdb79f98680b7f4f710`.
 This is a disclosed qualification-harness fix, not a change to the shipped runtime or a weakened
 product gate. Follow-ups remain [runtime-council deferrals #87](https://github.com/alphastorm/ninfer/issues/87)
 and [native tooling defects #88](https://github.com/alphastorm/ninfer/issues/88); neither issue
-substitutes for the release's still-pending exact-subject review binding.
+substitutes for the exact-subject review ledger or candidate-bound acceptance below.
+The three per-scenario summary receipts are **lane-agnostic**, despite separate capture;
+GE-R1 binds each lane's distinct running/rollback/repair evidence-archive digest for provenance.
+It does not requalify archive contents or change raw verdicts.
 
 ## Stock OMP 18.15.0
 
@@ -257,20 +260,85 @@ The [receipt audit](qualification/receipt-audit.json) replaces the quarantined b
 subjects with authenticated current beta.2 bytes. Both native rows are qualified/installable for
 the lane candidate; runtime eligibility does not grant public product acceptance or publication.
 
-## Outstanding qualification and release gates
+## Fresh candidate-bound route and client acceptance
 
-No result placeholders are embedded: the route composer writes structured acceptance records,
-not prose substitutions in these notes. Before final composition, the release author must add
-the actual new evidence and remove the corresponding outstanding-gate disclosure only when
-its bound receipt exists:
+On **2026-11-04**, frozen product candidate
+`c6fc8465611a89fd85730f0653f670d2a314a721` passed all five documented routes and their
+**31/31 executable blocks**. The composition retains the original passed route receipts,
+including the narrowly declared candidate-instead-of-tag substitutions, without changing any
+executed block. All three exact stock OMP **18.15.0** clients were freshly downloaded,
+hash-checked and exercised against the rebuilt candidate runtime identities.
 
-- One frozen product candidate running all **five routes / 31 executable blocks**, all three
-  exact stock OMP clients and both native public-URL installs. Keep C1 RTX 4090 fleet and C2
-  RTX 3090 fanout/parallel/compaction obligations; an uninduced boundary is unexercised.
-- Exact-subject runtime and product-tooling review binding, final composition and immutable
-  evidence pins, and strict ready/pin verification. Component follow-ups #87/#88 are not a
-  product-review or acceptance receipt.
-- Founder-owned product publication. No prepared text or component publication grants it.
+| Route / additional acceptance | Actual result |
+| --- | --- |
+| RTX 5090 container host | **2/2 blocks passed** |
+| macOS arm64 over manual SSH | **10/10 blocks passed**, tool/continuation/restart/fail-closed and image input; preview |
+| Native Windows x64 against RTX 5090 | **5/5 blocks passed**, tool/continuation/fail-closed and image input |
+| Linux x64 against RTX 5090 | Fresh structured tool/continuation/fail-closed acceptance under **WSL2 only**; no native Linux OS or Linux vision claim |
+| Native RTX 4090 | **7/7 blocks**, native campaign, C1 fleet probe, public-URL install and independent restoration **passed** |
+| Native RTX 3090 | **7/7 blocks passed**; four-way fanout under C2, both stock OMP parallel-proof scenarios at limit 2 and two committed automatic-compaction/control-recall epochs passed; later campaign **failed**, founder-waived as disclosed below |
+
+Receipts: [documented routes](acceptance/documented-routes.json),
+[composed external installation](acceptance/composed-external-installation.json),
+[RTX 4090 public install](acceptance/rtx4090-public-install.json), and
+[independent restoration](../../docs/measurements/2026-11-04-v0162-acceptance-restoration.json).
+The RTX 4090 public installer returned `already_installed`, accepted the exact current package,
+server and configuration bytes, and changed no lifecycle pointers; its start/smoke/stop restored
+the prior stopped state and **450 W**. Both native documented routes are first-lineage:
+rollback `not_applicable`, zero directions, not the separate 3/3 predecessor rehearsals.
+
+The RTX 5090 **accepted hold and all-attempt total are both 418.529 s** (one window).
+Independent closure retained the same healthy production container and digest-pinned image,
+`unless-stopped`, identical checkpoint mounts and healthy unreserved fleet service; temporary
+route container, hold, key/checkout changes and documented directories were undone.
+RTX 4090 campaign elapsed/hold time was **512.5491440296173 s**; the failed RTX 3090 campaign
+elapsed **1294.0950541496277 s**, not a successful restored hold. The completed RTX 4090
+cross-lane census matches its pre-window baseline; the subsequent RTX 3090 recovery has its own
+binding, not an invented final campaign-wide census.
+
+### RTX 3090 failed native campaign and operator recovery
+
+After all seven documented blocks passed, the separate **structured-outage managed Stop**
+returned **`graceful_incomplete_shutdown`**: **saved 1 / skipped 8 / refused 1**,
+**shutdown complete false**, final durable-save reason **capacity**, **reclaimed Host bytes 0**.
+The [founder waiver](qualification/rtx3090-route-waiver.json) binds the original failed driver,
+window-failure, final audit and preserved shutdown evidence. The native campaign stays **failed**;
+external installation is **waived-by-founder**, not passed. **Behavior completion, a passing
+wrapper restoration audit and anonymous public-install acceptance are not claimed**; no RTX 3090
+public-install receipt is authored.
+
+This is the remaining export-side capacity residual of [fork #78](https://github.com/alphastorm/ninfer/issues/78)
+after #82, also present in the published beta.1 runtime. Published v0.16.0 avoided it only by
+timing, not by a stronger completion guarantee. The refused session loses only warm restore;
+the authoritative OMP transcript remains replayable for a fresh prefill.
+
+The operator preserved the failure evidence, then used **`Control-Release.ps1 -Action Start`**
+followed by **`Control-Release.ps1 -Action Stop` with no client sessions**. That empty Stop was
+**graceful**, refused **0**, removed the runtime record and GPU-owner lease, restored **370 W**,
+left native tasks **Ready**, and left **no server process or port-18082 listener**.
+This lead recovery is not a passing wrapper restoration audit or a rerun of acceptance.
+Track [export-capacity residual #89](https://github.com/alphastorm/ninfer/issues/89) and
+[incomplete-Stop owner restoration #90](https://github.com/alphastorm/ninfer/issues/90).
+
+## Exact-subject review and publication boundary
+
+The runtime **full council** `CR-20261103T055202Z-a87de361` closed on exact source
+`a87de3613c17bced777b446fb545f872d8395ec1`. The **focused product-tooling review** closed by
+accountable-lead disposition on frozen candidate `c6fc8465`; a separate focused review of the
+waiver tooling on `ff0f3811` closed by lead verification of fixes in `3ad37ea8`.
+These are not two full product councils, and no later executable subject is silently substituted.
+The [review ledger](review/runtime-ledger.json) preserves original reviewer findings/severities,
+resolver standing, source digests and distinct lead dispositions.
+
+Composition applies **GE-R1** lane-distinct archive provenance beside lane-agnostic summary
+receipts and **GE-R4** stock-client source/download-review and descriptor binding.
+That source/integrity review is not live-client acceptance. Remaining product items use the
+existing [product follow-up #138](https://github.com/alphastorm/omp-ninfer/issues/138);
+runtime/native follow-ups remain fork [#87](https://github.com/alphastorm/ninfer/issues/87) and
+[#88](https://github.com/alphastorm/ninfer/issues/88), alongside #89/#90 above.
+Review approval is separate from the runtime finalization controls and immutable-pin checks.
+No review, component publication or local qualification grants founder-owned product publication;
+checked-in publication and independent public-user acceptance authority remain **false**.
 
 macOS remains manual-SSH preview; Linux remains WSL2-scoped, not native Linux OS qualification.
 Vision remains macOS/Windows against RTX 5090 only. No native/Linux vision, RTX 4090 C2, smaller

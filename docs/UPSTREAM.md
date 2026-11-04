@@ -8,9 +8,9 @@ watch manifest is [`upstream-watch.json`](../upstream-watch.json); the watch too
 [`scripts/upstream_watch.py`](../scripts/upstream_watch.py); dated reports land in
 [`docs/measurements/`](measurements/).
 
-## Prepared v0.16.2 runtime and client binding
+## Qualified successor v0.16.2 runtime and client binding
 
-**Prepared next: v0.16.2 / stock OMP 18.15.0.** Runtime source
+**Qualified successor: v0.16.2 / stock OMP 18.15.0.** Runtime source
 `a87de3613c17bced777b446fb545f872d8395ec1` on upstream `64d10fbf` supplies published RTX
 5090 `v0.7.0-qwen38-5090-beta.5` and published native `v0.8.0-qwen38-{3090,4090}-beta.2`.
 The delta includes byte-proven durable-generation Host reclaim and the
@@ -28,9 +28,23 @@ The [notes](../releases/v0.16.2/NINFER_RELEASE_NOTES.md) disclose the original f
 hashes and RTX 4090's private uncapped-power-only rehearsal fix. Follow-ups are
 [runtime-council deferrals #87](https://github.com/alphastorm/ninfer/issues/87) and
 [native tooling defects #88](https://github.com/alphastorm/ninfer/issues/88).
-Fresh candidate-bound client/five-route/native-public-install/restoration acceptance,
-exact-subject review binding, final composition/pins and founder-owned product publication
-remain pending. The held v0.16.1 manifest and v0.16.0 execution results are not carried as current proof.
+Fresh **2026-11-04** acceptance on `c6fc8465` passed five routes (**31/31 blocks**), three stock
+clients, and RTX 4090 public-install/probe/restoration checks
+([routes](../releases/v0.16.2/acceptance/documented-routes.json) ·
+[composition](../releases/v0.16.2/acceptance/composed-external-installation.json)).
+RTX 3090's seven route blocks passed; the later native campaign failed at structured-outage
+managed Stop (`graceful_incomplete_shutdown`, saved 1 / skipped 8 / refused 1, `capacity`, reclaimed 0),
+founder-waived as a residual of #78 also present on published beta.1. Behavior completion,
+wrapper restoration audit and anonymous public install are not claimed. The notes bind empty-session
+`Control-Release.ps1 -Action Start` then `-Action Stop` recovery; fork
+[#89](https://github.com/alphastorm/ninfer/issues/89) / [#90](https://github.com/alphastorm/ninfer/issues/90)
+track residual export capacity and incomplete-Stop owner restoration.
+The exact-source runtime full council and focused product reviews closed by disposition;
+the [ledger](../releases/v0.16.2/review/runtime-ledger.json) separates their subjects and composition
+controls. GE-R1 summary receipts are lane-agnostic, with lane-distinct archive provenance;
+GE-R4 binds source/download review rather than live acceptance. Product deferrals use
+[#138](https://github.com/alphastorm/omp-ninfer/issues/138). Publication is founder-owned.
+The held v0.16.1 manifest and v0.16.0 execution results are not carried as current proof.
 
 Chosen upstream: [`v18.15.0`](https://github.com/can1357/oh-my-pi/releases/tag/v18.15.0),
 commit `3fedf8d53267e32a6d7521ce725fdcc4a36fdc67`, tree

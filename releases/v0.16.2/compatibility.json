@@ -3,16 +3,13 @@
   "authority_id": "omp-ninfer-v0.7.3-qualified-1",
   "product_release": "v0.16.2",
   "composition": {
-    "status": "v0.16.2 runtime lanes bound: published RTX 5090 beta.5 and native beta.2 at common source a87de361; stock OMP 18.15.0 product acceptance remains pending",
+    "status": "qualified",
     "lifecycle_repository": "https://github.com/can1357/oh-my-pi",
     "lifecycle_source_release": "https://github.com/can1357/oh-my-pi/releases/tag/v18.15.0",
     "lifecycle_source_commit": "3fedf8d53267e32a6d7521ce725fdcc4a36fdc67",
     "ninfer_lifecycle_source_commit": "a87de3613c17bced777b446fb545f872d8395ec1",
     "request_compatibility_source_commit": "3fedf8d53267e32a6d7521ce725fdcc4a36fdc67",
-    "blockers": [
-      "Fresh candidate-bound stock OMP 18.15.0 five-route and both native public-install acceptance, with independent restoration, remain pending.",
-      "Exact-subject runtime/product review binding, final composition and immutable pins, strict ready verification and founder-owned publication remain pending."
-    ],
+    "blockers": [],
     "composed_source_commit": "3fedf8d53267e32a6d7521ce725fdcc4a36fdc67"
   },
   "profiles": [
@@ -46,12 +43,13 @@
         "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and never share the principal among mutually untrusted clients.",
         "Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.",
         "The F2 runtime components retain serving shapes; no predecessor runtime proof or founder waiver is current evidence.",
-        "Fresh stock OMP 18.15.0 and five-route acceptance must bind one frozen candidate. macOS remains preview and Linux is WSL2-scoped."
+        "Fresh stock OMP 18.15.0 and five-route acceptance bind frozen candidate c6fc8465; RTX 3090 has a failed founder-waived post-route campaign, not anonymous public-install acceptance. macOS remains preview and Linux is WSL2-scoped."
       ],
-      "blockers": [
-        "upstream OMP v18.15.0 client acceptance is pending"
-      ],
-      "acceptance_receipt": null,
+      "blockers": [],
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c6fc8465611a89fd85730f0653f670d2a314a721/releases/v0.16.2/acceptance/darwin-arm64-18.15.0.json",
+        "sha256": "af58a02d0757d5fdc816027f22b7012d089ef78f08f6663531858c6f5c4e3c6c"
+      },
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
@@ -122,7 +120,7 @@
     {
       "id": "windows-docker-local",
       "adapter": "windows-docker-local",
-      "status": "preview",
+      "status": "qualified",
       "transport": "local-loopback",
       "commands": [
         "doctor",
@@ -135,7 +133,7 @@
         "support-bundle"
       ],
       "silent_cloud_fallback": false,
-      "installable": false,
+      "installable": true,
       "support_owner": "alphastorm/omp-ninfer",
       "product_release": "v0.16.2",
       "aliases": [
@@ -149,12 +147,13 @@
         "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and never share the principal among mutually untrusted clients.",
         "Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.",
         "The F2 runtime components retain serving shapes; no predecessor runtime proof or founder waiver is current evidence.",
-        "Fresh stock OMP 18.15.0 and five-route acceptance must bind one frozen candidate. macOS remains preview and Linux is WSL2-scoped."
+        "Fresh stock OMP 18.15.0 and five-route acceptance bind frozen candidate c6fc8465; RTX 3090 has a failed founder-waived post-route campaign, not anonymous public-install acceptance. macOS remains preview and Linux is WSL2-scoped."
       ],
-      "blockers": [
-        "upstream OMP v18.15.0 client acceptance is pending"
-      ],
-      "acceptance_receipt": null,
+      "blockers": [],
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c6fc8465611a89fd85730f0653f670d2a314a721/releases/v0.16.2/acceptance/windows-x64-18.15.0.json",
+        "sha256": "25ab7efab9c653a1d611dd5082e3cb5c8cbd6675bb75eb96c91c0f3d1d23f362"
+      },
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
@@ -225,7 +224,7 @@
     {
       "id": "linux-docker-local",
       "adapter": "linux-docker-local",
-      "status": "preview",
+      "status": "qualified",
       "transport": "local-loopback",
       "commands": [
         "doctor",
@@ -238,7 +237,7 @@
         "support-bundle"
       ],
       "silent_cloud_fallback": false,
-      "installable": false,
+      "installable": true,
       "support_owner": "alphastorm/omp-ninfer",
       "product_release": "v0.16.2",
       "aliases": [
@@ -252,12 +251,13 @@
         "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and never share the principal among mutually untrusted clients.",
         "Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.",
         "The F2 runtime components retain serving shapes; no predecessor runtime proof or founder waiver is current evidence.",
-        "Fresh stock OMP 18.15.0 and five-route acceptance must bind one frozen candidate. macOS remains preview and Linux is WSL2-scoped."
+        "Fresh stock OMP 18.15.0 and five-route acceptance bind frozen candidate c6fc8465; RTX 3090 has a failed founder-waived post-route campaign, not anonymous public-install acceptance. macOS remains preview and Linux is WSL2-scoped."
       ],
-      "blockers": [
-        "upstream OMP v18.15.0 client acceptance is pending"
-      ],
-      "acceptance_receipt": null,
+      "blockers": [],
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c6fc8465611a89fd85730f0653f670d2a314a721/releases/v0.16.2/acceptance/linux-x64-18.15.0.json",
+        "sha256": "977c1ebebc7d8dfb595908f782b32c6ea7b56277208ced7a0b9c0d4ff5d63749"
+      },
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",

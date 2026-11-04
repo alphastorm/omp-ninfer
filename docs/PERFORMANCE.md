@@ -19,6 +19,38 @@ Kernel and runtime changes land in [alphastorm/ninfer](https://github.com/alphas
 (a downstream fork of [Neroued/ninfer](https://github.com/Neroued/ninfer)); this page tracks the
 program so contributors can see the state of play in one place.
 
+## v0.16.2 no-regression and acceptance boundary
+
+The qualified successor uses the explicit
+[founder speed decision](../releases/v0.16.2/qualification/native-speed-decision.json), not the
+historical reducer's 1.08 speedup floor below: against **published beta.1**, role/all-case
+weighted decode **≥0.98**, every case **≥0.95**, normalized outputs byte-identical in every
+required within/cross-build ABBA pair. RTX 3090 measured **1.0002518490206602** weighted /
+**0.9987703200333666** minimum, **84/84** identical; RTX 4090 measured
+**0.9995778248449502** role / **0.9996281434580012** all / **0.9988670027551729** minimum,
+**115/115** identical. Both pass no-regression without a speed waiver or a new speedup claim.
+Parameterizing the older product reducer is deferred in
+[#138](https://github.com/alphastorm/omp-ninfer/issues/138); this release binds the actual native reduction.
+
+The [notes](../releases/v0.16.2/NINFER_RELEASE_NOTES.md#exact-subject-founder-waivers--original-failures-retained)
+retain all three parity exceptions with measured values: RTX 5090 `restore_0` TTFT
+**0.481856409 / 0.231568998 s**, bound **0.481568998 s**; RTX 4090 `restore_1` cache gap
+**−52 / −48**, TTFT **0.642947 / 0.5589493 s** within bound; RTX 3090 position 1 `base`
+TTFT **0.4975294 / 0.2144353 s**, bound **0.4644353 s**. Native parity is **82/83** measured
+passes each; RTX 5090 has **88/88 judged**, not a strict or overall-run pass.
+Both predecessor rehearsal sets passed 3/3; RTX 4090 used only the disclosed founder-approved
+uncapped-power assertion fix, not a runtime change.
+
+Fresh **2026-11-04** [route acceptance](../releases/v0.16.2/acceptance/documented-routes.json)
+on `c6fc8465` passed five routes / 31 blocks, three stock clients and RTX 4090 native acceptance.
+The later RTX 3090 campaign failed, founder-waived, at structured-outage managed Stop:
+`graceful_incomplete_shutdown`, saved 1 / skipped 8 / refused 1, `capacity`, reclaimed 0.
+This #78 residual also exists on published beta.1; v0.16.0 avoided it by timing. Empty-session
+Start/Stop recovery does not establish behavior completion, wrapper restoration or anonymous
+public install. Fork [#89](https://github.com/alphastorm/ninfer/issues/89) /
+[#90](https://github.com/alphastorm/ninfer/issues/90) track the residuals.
+Route completion and the 418.529 s production hold are **not throughput or reclaim-latency benchmarks**.
+
 ## Gate-bound native speed comparisons
 
 [`scripts/speed_gate.py`](../scripts/speed_gate.py) owns the host-free reduction of the

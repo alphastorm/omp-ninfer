@@ -34,8 +34,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   corrections, without changing model or serving shapes. Retarget the prepared guide to
   v0.16.2 while published entry points stay on immutable v0.16.0. Bind the complete
   18.14.0→18.14.2 and 18.14.2→18.15.0 source reviews and independent asset-integrity evidence;
-  fresh candidate-bound client/five-route/public-install acceptance and publication remain
-  separate gates, not carried acceptance.
+  fresh candidate-bound acceptance is recorded separately from founder-owned publication,
+  not carried from predecessor execution.
 - Replace all quarantined native subjects with authenticated published beta.2 packages
   (RTX 3090 `97a8e634`, server `15a4db46`; RTX 4090 `d9b10b47`, server `ffee91bf`).
   Bind both 15-phase lane chains, zero-difference 1,120-prompt quality screens, fit proofs
@@ -56,8 +56,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Full values, original founder-record hashes and the retained overall-run diagnostic are in
   the [v0.16.2 notes](releases/v0.16.2/NINFER_RELEASE_NOTES.md). Track runtime-council
   deferrals in [fork #87](https://github.com/alphastorm/ninfer/issues/87) and native tooling
-  defects in [fork #88](https://github.com/alphastorm/ninfer/issues/88); exact-subject
-  review binding remains pending.
+  defects in [fork #88](https://github.com/alphastorm/ninfer/issues/88). Bind the exact-source
+  runtime full council and focused product reviews, with product deferrals in
+  [#138](https://github.com/alphastorm/omp-ninfer/issues/138), lane-distinct archive provenance
+  beside lane-agnostic GE-R1 summaries, and GE-R4 stock-client source/download review.
+- Compose fresh **2026-11-04** acceptance on `c6fc8465`: five documented routes (**31/31 blocks**),
+  three stock clients and RTX 4090 public-install/probe/restoration checks. Preserve the later
+  RTX 3090 campaign failure under its exact founder waiver: structured-outage managed Stop
+  `graceful_incomplete_shutdown`, saved 1 / skipped 8 / refused 1, final reason `capacity`,
+  reclaimed Host bytes 0. All seven RTX 3090 route blocks passed; behavior completion,
+  wrapper restoration audit and anonymous public install are not claimed. Disclose the
+  residual of #78 also present on published beta.1 (v0.16.0 avoided it by timing), empty-session
+  `Control-Release.ps1 -Action Start` then `-Action Stop` recovery, and fork
+  [#89](https://github.com/alphastorm/ninfer/issues/89) / [#90](https://github.com/alphastorm/ninfer/issues/90).
+  Pin platform, composed acceptance and manifest evidence without granting publication authority.
 - Retain Qwen exact-loop detection with a 1024-character floor for short newline-spanning cycles;
   reject length-truncated main/handoff/branch summaries while preserving a completed main
   summary if only the optional short summary truncates. Retire operator `compat.thinkingLoopGuard`,

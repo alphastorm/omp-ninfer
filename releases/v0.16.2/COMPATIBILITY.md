@@ -3,15 +3,15 @@
 
 Authority: `omp-ninfer-v0.7.3-qualified-1`
 Product release: `v0.16.2`
-Composition: **v0.16.2 runtime lanes bound: published RTX 5090 beta.5 and native beta.2 at common source a87de361; stock OMP 18.15.0 product acceptance remains pending**
+Composition: **qualified**
 
 Client status is independent from each GPU runtime qualification. `preview` is not a support claim.
 
 | Profile | Client | Runtime | Transport | Adapter | Status | Installable | Acceptance |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `darwin-remote-ssh` | macOS 27 arm64 — upstream `v18.15.0` [`omp-darwin-arm64`](https://github.com/can1357/oh-my-pi/releases/download/v18.15.0/omp-darwin-arm64) (sha256 `d36dfabf0ee5`) | `qwen38-5090-v0.13.0` | `ssh-loopback` | `darwin-remote-ssh` | **preview** | no | pending |
-| `windows-docker-local` | Windows 11 x64 — upstream `v18.15.0` [`omp-windows-x64.exe`](https://github.com/can1357/oh-my-pi/releases/download/v18.15.0/omp-windows-x64.exe) (sha256 `978846a816cb`) | `qwen38-5090-v0.13.0` | `local-loopback` | `windows-docker-local` | **preview** | no | pending |
-| `linux-docker-local` | Ubuntu 24.04 x64 — upstream `v18.15.0` [`omp-linux-x64`](https://github.com/can1357/oh-my-pi/releases/download/v18.15.0/omp-linux-x64) (sha256 `6737ee241555`) | `qwen38-5090-v0.13.0` | `local-loopback` | `linux-docker-local` | **preview** | no | pending |
+| `darwin-remote-ssh` | macOS 27 arm64 — upstream `v18.15.0` [`omp-darwin-arm64`](https://github.com/can1357/oh-my-pi/releases/download/v18.15.0/omp-darwin-arm64) (sha256 `d36dfabf0ee5`) | `qwen38-5090-v0.13.0` | `ssh-loopback` | `darwin-remote-ssh` | **preview** | no | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/c6fc8465611a89fd85730f0653f670d2a314a721/releases/v0.16.2/acceptance/darwin-arm64-18.15.0.json) |
+| `windows-docker-local` | Windows 11 x64 — upstream `v18.15.0` [`omp-windows-x64.exe`](https://github.com/can1357/oh-my-pi/releases/download/v18.15.0/omp-windows-x64.exe) (sha256 `978846a816cb`) | `qwen38-5090-v0.13.0` | `local-loopback` | `windows-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/c6fc8465611a89fd85730f0653f670d2a314a721/releases/v0.16.2/acceptance/windows-x64-18.15.0.json) |
+| `linux-docker-local` | Ubuntu 24.04 x64 — upstream `v18.15.0` [`omp-linux-x64`](https://github.com/can1357/oh-my-pi/releases/download/v18.15.0/omp-linux-x64) (sha256 `6737ee241555`) | `qwen38-5090-v0.13.0` | `local-loopback` | `linux-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/c6fc8465611a89fd85730f0653f670d2a314a721/releases/v0.16.2/acceptance/linux-x64-18.15.0.json) |
 
 ## Native runtime variants
 
@@ -51,10 +51,9 @@ Limitations:
 - Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and never share the principal among mutually untrusted clients.
 - Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.
 - The F2 runtime components retain serving shapes; no predecessor runtime proof or founder waiver is current evidence.
-- Fresh stock OMP 18.15.0 and five-route acceptance must bind one frozen candidate. macOS remains preview and Linux is WSL2-scoped.
+- Fresh stock OMP 18.15.0 and five-route acceptance bind frozen candidate c6fc8465; RTX 3090 has a failed founder-waived post-route campaign, not anonymous public-install acceptance. macOS remains preview and Linux is WSL2-scoped.
 
 Blockers:
-- upstream OMP v18.15.0 client acceptance is pending
 
 ### `windows-docker-local`
 
@@ -66,10 +65,9 @@ Limitations:
 - Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and never share the principal among mutually untrusted clients.
 - Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.
 - The F2 runtime components retain serving shapes; no predecessor runtime proof or founder waiver is current evidence.
-- Fresh stock OMP 18.15.0 and five-route acceptance must bind one frozen candidate. macOS remains preview and Linux is WSL2-scoped.
+- Fresh stock OMP 18.15.0 and five-route acceptance bind frozen candidate c6fc8465; RTX 3090 has a failed founder-waived post-route campaign, not anonymous public-install acceptance. macOS remains preview and Linux is WSL2-scoped.
 
 Blockers:
-- upstream OMP v18.15.0 client acceptance is pending
 
 ### `linux-docker-local`
 
@@ -81,12 +79,8 @@ Limitations:
 - Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and never share the principal among mutually untrusted clients.
 - Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.
 - The F2 runtime components retain serving shapes; no predecessor runtime proof or founder waiver is current evidence.
-- Fresh stock OMP 18.15.0 and five-route acceptance must bind one frozen candidate. macOS remains preview and Linux is WSL2-scoped.
+- Fresh stock OMP 18.15.0 and five-route acceptance bind frozen candidate c6fc8465; RTX 3090 has a failed founder-waived post-route campaign, not anonymous public-install acceptance. macOS remains preview and Linux is WSL2-scoped.
 
 Blockers:
-- upstream OMP v18.15.0 client acceptance is pending
 
 ## Composition blockers
-
-- Fresh candidate-bound stock OMP 18.15.0 five-route and both native public-install acceptance, with independent restoration, remain pending.
-- Exact-subject runtime/product review binding, final composition and immutable pins, strict ready verification and founder-owned publication remain pending.

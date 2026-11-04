@@ -16,9 +16,10 @@
     {
       "file": "NINFER_RELEASE_NOTES.md",
       "predecessor_sha256": "04eb5b765044a79d3fd7b9bfbf97aad7c13a3aefc8254d19680208dacc88d7c6",
-      "disposition": "replaced",
-      "reason": "Author current release identity, scope and evidence bindings from v0.16.0 plus actual new inputs; discard predecessor execution claims and preserve only explicit unchanged model/serving constants.",
-      "staged_sha256": "4ccc7fe6dff29fe61ea17706064a3ace5ed60db43430801fda492ab5695ea491"
+      "disposition": "composed-by-acceptance",
+      "reason": "Author current release identity, scope and evidence bindings from v0.16.0 plus actual new inputs; discard predecessor execution claims and preserve only explicit unchanged model/serving constants. Composition reconciliation: actual candidate-bound route/client results, failed RTX 3090 founder waiver and lead recovery, exact-subject reviews and GE-R1/GE-R4 are disclosed; original measurements and predecessor provenance remain.",
+      "staged_sha256": "787db26a5ad913e7e7eb64de201c881436b8dccd8326febad448e3c111284c77",
+      "composition_previous_staged_sha256": "4ccc7fe6dff29fe61ea17706064a3ace5ed60db43430801fda492ab5695ea491"
     },
     {
       "file": "acceptance/composed-external-installation.json",
@@ -119,9 +120,10 @@
     {
       "file": "qualification/client-components.json",
       "predecessor_sha256": "16f6f0a361e66cab4b0b5629d15b48962cb63dadcf1871a44b1ba76593078050",
-      "disposition": "replaced",
-      "reason": "Replace with actual F2-bound lane, package/checksum, powered screen, fit, current-incumbent speed or publication evidence of the same role; no predecessor runtime assertion carries.",
-      "staged_sha256": "917e759c228bc5cff906514aa43cbdfbc9f9f10e7b660afbffc2a963ae324f4c"
+      "disposition": "composed-by-acceptance",
+      "reason": "Replace with actual F2-bound lane, package/checksum, powered screen, fit, current-incumbent speed or publication evidence of the same role; no predecessor runtime assertion carries. Composition reconciliation: compatibility metadata belongs to fresh acceptance; stock OMP 18.15.0 source, assets and executable identities remain unchanged, and the descriptor bytes currently match the staged digest.",
+      "staged_sha256": "917e759c228bc5cff906514aa43cbdfbc9f9f10e7b660afbffc2a963ae324f4c",
+      "composition_previous_staged_sha256": "917e759c228bc5cff906514aa43cbdfbc9f9f10e7b660afbffc2a963ae324f4c"
     },
     {
       "file": "qualification/native-publication.json",
@@ -1389,10 +1391,11 @@
     {
       "file": "manifest.json",
       "pointer": "/components/omp/compatibility_sha256",
-      "disposition": "replaced",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
+      "disposition": "composed-by-acceptance",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
       "predecessor_value_sha256": "fe12753f1eead6b6c018b63d40f83633cfaf22867aca32c82f281772fccab289",
-      "staged_value_sha256": "47ddbbdc0472d6f619d4d415d0df8245771211ef9d944946503bf04561312cea"
+      "staged_value_sha256": "c2e891b4b15579e13b35b84ae2b378a76b03a4b31b4c8fdd12a2d00059ac0a7c",
+      "composition_previous_staged_value_sha256": "47ddbbdc0472d6f619d4d415d0df8245771211ef9d944946503bf04561312cea"
     },
     {
       "file": "manifest.json",
@@ -1643,17 +1646,18 @@
     {
       "file": "manifest.json",
       "pointer": "/publication/blockers/0",
-      "disposition": "added",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
-      "staged_value_sha256": "86cdd61e779b7fdf6dd4e95cd4b61789e6c3eeb543b58250e457c4bbd2c0abd0"
+      "disposition": "dropped",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition removes the preparation blocker after actual accepted or explicitly founder-waived results; this snapshot is not publication authorization.",
+      "composition_previous_staged_value_sha256": "86cdd61e779b7fdf6dd4e95cd4b61789e6c3eeb543b58250e457c4bbd2c0abd0"
     },
     {
       "file": "manifest.json",
       "pointer": "/publication/external_installation_qualified",
-      "disposition": "replaced",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
+      "disposition": "composed-by-acceptance",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
       "predecessor_value_sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
-      "staged_value_sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+      "staged_value_sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+      "composition_previous_staged_value_sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
     },
     {
       "file": "manifest.json",
@@ -1697,10 +1701,11 @@
     {
       "file": "manifest.json",
       "pointer": "/qualification/external_installation_passed",
-      "disposition": "replaced",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
+      "disposition": "composed-by-acceptance",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
       "predecessor_value_sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
-      "staged_value_sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+      "staged_value_sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+      "composition_previous_staged_value_sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
     },
     {
       "file": "manifest.json",
@@ -1729,10 +1734,11 @@
     {
       "file": "manifest.json",
       "pointer": "/qualification/summary_sha256",
-      "disposition": "replaced",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
+      "disposition": "composed-by-acceptance",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
       "predecessor_value_sha256": "6713df92e779a09b9caa5eee34200320482e0341267f4a799f327d4244faa23b",
-      "staged_value_sha256": "cd1f1402ed5beaebc41aacc350e9b1937f827ac843eb262d53bca1f5eb2722f5"
+      "staged_value_sha256": "b76ce4025fee14b1477ae995f8fc52ece3b24e89c2bc0c271f0f3f4ce6315272",
+      "composition_previous_staged_value_sha256": "cd1f1402ed5beaebc41aacc350e9b1937f827ac843eb262d53bca1f5eb2722f5"
     },
     {
       "file": "manifest.json",
@@ -1841,10 +1847,11 @@
     {
       "file": "manifest.json",
       "pointer": "/status",
-      "disposition": "replaced",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
+      "disposition": "composed-by-acceptance",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
       "predecessor_value_sha256": "40ec7f71ea684c8b976e79e8e425f87779e6de57f4821dcfc8066dbcad2defe0",
-      "staged_value_sha256": "6ae048f08fcab44bfbc8463f074bfdb40f94c6bdf56d3aad9a7e1c05e5d5b5c1"
+      "staged_value_sha256": "40ec7f71ea684c8b976e79e8e425f87779e6de57f4821dcfc8066dbcad2defe0",
+      "composition_previous_staged_value_sha256": "6ae048f08fcab44bfbc8463f074bfdb40f94c6bdf56d3aad9a7e1c05e5d5b5c1"
     },
     {
       "file": "qualification.json",
@@ -1996,10 +2003,11 @@
     {
       "file": "qualification.json",
       "pointer": "/composition/external_installation_acceptance/note",
-      "disposition": "replaced",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
+      "disposition": "composed-by-acceptance",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
       "predecessor_value_sha256": "b7f51af9c8aa5f911bdac11c084ce5eb528113aae36654e8bbb55f79ad19e78e",
-      "staged_value_sha256": "cb00595b9ecb8d2abb46136c6d05f5e670d7f806b24aece04ed4cfdc0152a850"
+      "staged_value_sha256": "67e3cb5a9f72d59062ef02ad7f84f987de320dfbdf8526a4c642867f4d3e6515",
+      "composition_previous_staged_value_sha256": "cb00595b9ecb8d2abb46136c6d05f5e670d7f806b24aece04ed4cfdc0152a850"
     },
     {
       "file": "qualification.json",
@@ -2088,10 +2096,11 @@
     {
       "file": "qualification.json",
       "pointer": "/composition/external_installation_acceptance/status",
-      "disposition": "replaced",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
+      "disposition": "composed-by-acceptance",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
       "predecessor_value_sha256": "559532ad927252eed5d9b6687d55203a96b956d822055f4570f196a93a42bece",
-      "staged_value_sha256": "12adac54ac6f7140109391b670b3cbcd51f083d8f5ee62ce26857c794ed67d36"
+      "staged_value_sha256": "bc9d037c04e92d2c4c2dbe98665810c112a9a2567baad040d4057471d1bf72f5",
+      "composition_previous_staged_value_sha256": "12adac54ac6f7140109391b670b3cbcd51f083d8f5ee62ce26857c794ed67d36"
     },
     {
       "file": "qualification.json",
@@ -2640,33 +2649,37 @@
     {
       "file": "qualification.json",
       "pointer": "/documented_route_acceptance/status",
-      "disposition": "replaced",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
+      "disposition": "composed-by-acceptance",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
       "predecessor_value_sha256": "559532ad927252eed5d9b6687d55203a96b956d822055f4570f196a93a42bece",
-      "staged_value_sha256": "12adac54ac6f7140109391b670b3cbcd51f083d8f5ee62ce26857c794ed67d36"
+      "staged_value_sha256": "559532ad927252eed5d9b6687d55203a96b956d822055f4570f196a93a42bece",
+      "composition_previous_staged_value_sha256": "12adac54ac6f7140109391b670b3cbcd51f083d8f5ee62ce26857c794ed67d36"
     },
     {
       "file": "qualification.json",
       "pointer": "/eligibility_scope",
-      "disposition": "dropped",
-      "reason": "Predecessor result/provenance/acceptance/waiver/review binding is not current proof.",
-      "predecessor_value_sha256": "4bf018a8305e1a63f96fb5079d62050ef6ced32271476d261852daadb6a50454"
+      "disposition": "replaced",
+      "reason": "Predecessor result/provenance/acceptance/waiver/review binding is not current proof. Composition binds actual scope and GE-R1 lane-distinct archive provenance beside lane-agnostic summaries, or GE-R4 source/download-only review and unchanged client identity; no raw verdict is changed.",
+      "predecessor_value_sha256": "4bf018a8305e1a63f96fb5079d62050ef6ced32271476d261852daadb6a50454",
+      "staged_value_sha256": "598b8aae77b5514e46f0779a7eb37274e8c64a532fed4884583e22e95537ec49"
     },
     {
       "file": "qualification.json",
       "pointer": "/external_installation_qualified",
-      "disposition": "replaced",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
+      "disposition": "composed-by-acceptance",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
       "predecessor_value_sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
-      "staged_value_sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+      "staged_value_sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+      "composition_previous_staged_value_sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
     },
     {
       "file": "qualification.json",
       "pointer": "/interpretation",
-      "disposition": "replaced",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
+      "disposition": "composed-by-acceptance",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
       "predecessor_value_sha256": "973e8394f63d4f2c6812c0015ecac7dcd117c0d1bee6a0bdf034af53a0fc04ea",
-      "staged_value_sha256": "420b7bd1ffa27159d8df36f00234cabc9c145aafdedecbd3adbf7fd33a68d301"
+      "staged_value_sha256": "138b017dc51bb874c77be670c1036211833c06f08ad10f36187b5bd2179ce567",
+      "composition_previous_staged_value_sha256": "420b7bd1ffa27159d8df36f00234cabc9c145aafdedecbd3adbf7fd33a68d301"
     },
     {
       "file": "qualification.json",
@@ -2738,10 +2751,11 @@
     {
       "file": "qualification.json",
       "pointer": "/observed_gates/g4_review/scope",
-      "disposition": "replaced",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
+      "disposition": "composed-by-acceptance",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
       "predecessor_value_sha256": "a3cb2a65f7c2cdd471e5dec59d671ac5fbe19cd47703bebb625ef20b0f43e448",
-      "staged_value_sha256": "93faf1f4ce75bf3f43be795338f53b2a506aa67350fdf7946823f80b29d8a055"
+      "staged_value_sha256": "1d0720ee94a21120eb1a2bd5955b6b9c565c937b4a16e9d3d92ea9ea7146b54b",
+      "composition_previous_staged_value_sha256": "93faf1f4ce75bf3f43be795338f53b2a506aa67350fdf7946823f80b29d8a055"
     },
     {
       "file": "qualification.json",
@@ -2753,10 +2767,11 @@
     {
       "file": "qualification.json",
       "pointer": "/observed_gates/g4_review/status",
-      "disposition": "replaced",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
+      "disposition": "composed-by-acceptance",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
       "predecessor_value_sha256": "559532ad927252eed5d9b6687d55203a96b956d822055f4570f196a93a42bece",
-      "staged_value_sha256": "12adac54ac6f7140109391b670b3cbcd51f083d8f5ee62ce26857c794ed67d36"
+      "staged_value_sha256": "fc87f02145b87111bc40656a83f781a98c90461b3ba66f7b2c4b86eea81d3b35",
+      "composition_previous_staged_value_sha256": "12adac54ac6f7140109391b670b3cbcd51f083d8f5ee62ce26857c794ed67d36"
     },
     {
       "file": "qualification.json",
@@ -3525,30 +3540,30 @@
     {
       "file": "qualification.json",
       "pointer": "/remaining_release_gates/0",
-      "disposition": "added",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
-      "staged_value_sha256": "2f82b1617dc204e734a5bffe40a54db31ce0f23ce909f8eb76596ef0a29605b9"
+      "disposition": "dropped",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition removes the preparation blocker after actual accepted or explicitly founder-waived results; this snapshot is not publication authorization.",
+      "composition_previous_staged_value_sha256": "2f82b1617dc204e734a5bffe40a54db31ce0f23ce909f8eb76596ef0a29605b9"
     },
     {
       "file": "qualification.json",
       "pointer": "/remaining_release_gates/1",
-      "disposition": "added",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
-      "staged_value_sha256": "782d27f6cc91a8a64fcf19bfd4f4347160e1955b4a2fca65821a74b5e0504b07"
+      "disposition": "dropped",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition removes the preparation blocker after actual accepted or explicitly founder-waived results; this snapshot is not publication authorization.",
+      "composition_previous_staged_value_sha256": "782d27f6cc91a8a64fcf19bfd4f4347160e1955b4a2fca65821a74b5e0504b07"
     },
     {
       "file": "qualification.json",
       "pointer": "/remaining_release_gates/2",
-      "disposition": "added",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
-      "staged_value_sha256": "e1056169cd41e6062fd8b2f06171c0b619a122674a01e56ff148cc87f532bd7a"
+      "disposition": "dropped",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition removes the preparation blocker after actual accepted or explicitly founder-waived results; this snapshot is not publication authorization.",
+      "composition_previous_staged_value_sha256": "e1056169cd41e6062fd8b2f06171c0b619a122674a01e56ff148cc87f532bd7a"
     },
     {
       "file": "qualification.json",
       "pointer": "/remaining_release_gates/3",
-      "disposition": "added",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
-      "staged_value_sha256": "49e58448b0995076d1c9aab8f7536f9c70730f2f0365ae2ccca83d8fb2047b92"
+      "disposition": "dropped",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition removes the preparation blocker after actual accepted or explicitly founder-waived results; this snapshot is not publication authorization.",
+      "composition_previous_staged_value_sha256": "49e58448b0995076d1c9aab8f7536f9c70730f2f0365ae2ccca83d8fb2047b92"
     },
     {
       "file": "qualification.json",
@@ -3706,10 +3721,11 @@
     {
       "file": "qualification.json",
       "pointer": "/scope",
-      "disposition": "replaced",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
+      "disposition": "composed-by-acceptance",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
       "predecessor_value_sha256": "f1b9d8d4febf394d7483ad4179eb008bf3a3382c09ce68991951f65a93910df3",
-      "staged_value_sha256": "72d6b7b90c55d1371dcba6006fab918e6713adb15ec806ed1f315fac4ae421b0"
+      "staged_value_sha256": "5a4ca57e1a67fb84c0cd6b82c27059b7952051578cf2f2b2efae9454aab8269a",
+      "composition_previous_staged_value_sha256": "72d6b7b90c55d1371dcba6006fab918e6713adb15ec806ed1f315fac4ae421b0"
     },
     {
       "file": "qualification.json",
@@ -3730,16 +3746,16 @@
     {
       "file": "compatibility.json",
       "pointer": "/composition/blockers/0",
-      "disposition": "added",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
-      "staged_value_sha256": "1eb479b9f038a3c130a7e9452b3567ff99b90c58181c5f6d339d48fdcad0b5ee"
+      "disposition": "dropped",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition removes the preparation blocker after actual accepted or explicitly founder-waived results; this snapshot is not publication authorization.",
+      "composition_previous_staged_value_sha256": "1eb479b9f038a3c130a7e9452b3567ff99b90c58181c5f6d339d48fdcad0b5ee"
     },
     {
       "file": "compatibility.json",
       "pointer": "/composition/blockers/1",
-      "disposition": "added",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
-      "staged_value_sha256": "a4b4b4f9198e1ac2b1c471ff61fb39f70b94c3b5b10c4f5a414bcda8dd546bec"
+      "disposition": "dropped",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition removes the preparation blocker after actual accepted or explicitly founder-waived results; this snapshot is not publication authorization.",
+      "composition_previous_staged_value_sha256": "a4b4b4f9198e1ac2b1c471ff61fb39f70b94c3b5b10c4f5a414bcda8dd546bec"
     },
     {
       "file": "compatibility.json",
@@ -3792,10 +3808,11 @@
     {
       "file": "compatibility.json",
       "pointer": "/composition/status",
-      "disposition": "replaced",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
+      "disposition": "composed-by-acceptance",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
       "predecessor_value_sha256": "7766b0db77acd35633aec4b6e1fffd02dae7396d5cd5bd02682b1e55ebbfb96b",
-      "staged_value_sha256": "bfff567852cddce37b40153dbcc353ab37b3f7d5194c36f86c6bb80db316751f"
+      "staged_value_sha256": "7766b0db77acd35633aec4b6e1fffd02dae7396d5cd5bd02682b1e55ebbfb96b",
+      "composition_previous_staged_value_sha256": "bfff567852cddce37b40153dbcc353ab37b3f7d5194c36f86c6bb80db316751f"
     },
     {
       "file": "compatibility.json",
@@ -3808,9 +3825,10 @@
     {
       "file": "compatibility.json",
       "pointer": "/profiles/0/acceptance_receipt",
-      "disposition": "added",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
-      "staged_value_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+      "disposition": "composed-by-acceptance",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
+      "staged_value_sha256": "04f9bb5ff86bae0e49941725b80ddb5f2a51d84fd279e64fca2566fbc8e6293b",
+      "composition_previous_staged_value_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
     },
     {
       "file": "compatibility.json",
@@ -3845,9 +3863,9 @@
     {
       "file": "compatibility.json",
       "pointer": "/profiles/0/blockers/0",
-      "disposition": "added",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
-      "staged_value_sha256": "6166484f9ac248f20d28e7031613442394992032ca19d696b06fe22339f4ed1b"
+      "disposition": "dropped",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition removes the preparation blocker after actual accepted or explicitly founder-waived results; this snapshot is not publication authorization.",
+      "composition_previous_staged_value_sha256": "6166484f9ac248f20d28e7031613442394992032ca19d696b06fe22339f4ed1b"
     },
     {
       "file": "compatibility.json",
@@ -4052,10 +4070,11 @@
     {
       "file": "compatibility.json",
       "pointer": "/profiles/0/gpu_qualification/receipt/url",
-      "disposition": "replaced",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
+      "disposition": "composed-by-acceptance",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
       "predecessor_value_sha256": "61d26cb57b2ead299aca381291c11a85c4d89387f6b6852a670f7fd027c8942c",
-      "staged_value_sha256": "0f11089acd8337751f5b96617b71637f16789047906b60de7f45cc7628031ded"
+      "staged_value_sha256": "6594d087f71cfeb429fee54d5e519d959c0d27d1f0f764fd3c3a289ccd68a552",
+      "composition_previous_staged_value_sha256": "0f11089acd8337751f5b96617b71637f16789047906b60de7f45cc7628031ded"
     },
     {
       "file": "compatibility.json",
@@ -4444,9 +4463,10 @@
     {
       "file": "compatibility.json",
       "pointer": "/profiles/1/acceptance_receipt",
-      "disposition": "added",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
-      "staged_value_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+      "disposition": "composed-by-acceptance",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
+      "staged_value_sha256": "7e3efda70f23be7de1c73d3bf630cd3bad52a80fc8d821359c412e41145509e3",
+      "composition_previous_staged_value_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
     },
     {
       "file": "compatibility.json",
@@ -4481,9 +4501,9 @@
     {
       "file": "compatibility.json",
       "pointer": "/profiles/1/blockers/0",
-      "disposition": "added",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
-      "staged_value_sha256": "6166484f9ac248f20d28e7031613442394992032ca19d696b06fe22339f4ed1b"
+      "disposition": "dropped",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition removes the preparation blocker after actual accepted or explicitly founder-waived results; this snapshot is not publication authorization.",
+      "composition_previous_staged_value_sha256": "6166484f9ac248f20d28e7031613442394992032ca19d696b06fe22339f4ed1b"
     },
     {
       "file": "compatibility.json",
@@ -4688,10 +4708,11 @@
     {
       "file": "compatibility.json",
       "pointer": "/profiles/1/gpu_qualification/receipt/url",
-      "disposition": "replaced",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
+      "disposition": "composed-by-acceptance",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
       "predecessor_value_sha256": "61d26cb57b2ead299aca381291c11a85c4d89387f6b6852a670f7fd027c8942c",
-      "staged_value_sha256": "0f11089acd8337751f5b96617b71637f16789047906b60de7f45cc7628031ded"
+      "staged_value_sha256": "6594d087f71cfeb429fee54d5e519d959c0d27d1f0f764fd3c3a289ccd68a552",
+      "composition_previous_staged_value_sha256": "0f11089acd8337751f5b96617b71637f16789047906b60de7f45cc7628031ded"
     },
     {
       "file": "compatibility.json",
@@ -4712,10 +4733,11 @@
     {
       "file": "compatibility.json",
       "pointer": "/profiles/1/installable",
-      "disposition": "replaced",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
+      "disposition": "composed-by-acceptance",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
       "predecessor_value_sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
-      "staged_value_sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+      "staged_value_sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+      "composition_previous_staged_value_sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
     },
     {
       "file": "compatibility.json",
@@ -5056,10 +5078,11 @@
     {
       "file": "compatibility.json",
       "pointer": "/profiles/1/status",
-      "disposition": "replaced",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
+      "disposition": "composed-by-acceptance",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
       "predecessor_value_sha256": "7766b0db77acd35633aec4b6e1fffd02dae7396d5cd5bd02682b1e55ebbfb96b",
-      "staged_value_sha256": "99e505dc299c68bc16363d9d8ee5b76599ce41e2154ddb0dc8e2a00c57dec7a5"
+      "staged_value_sha256": "7766b0db77acd35633aec4b6e1fffd02dae7396d5cd5bd02682b1e55ebbfb96b",
+      "composition_previous_staged_value_sha256": "99e505dc299c68bc16363d9d8ee5b76599ce41e2154ddb0dc8e2a00c57dec7a5"
     },
     {
       "file": "compatibility.json",
@@ -5080,9 +5103,10 @@
     {
       "file": "compatibility.json",
       "pointer": "/profiles/2/acceptance_receipt",
-      "disposition": "added",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
-      "staged_value_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+      "disposition": "composed-by-acceptance",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
+      "staged_value_sha256": "78b0c28f8395112e9705bb033f4989dab72270b4895e7f56e3e2507456b74fc3",
+      "composition_previous_staged_value_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
     },
     {
       "file": "compatibility.json",
@@ -5117,9 +5141,9 @@
     {
       "file": "compatibility.json",
       "pointer": "/profiles/2/blockers/0",
-      "disposition": "added",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
-      "staged_value_sha256": "6166484f9ac248f20d28e7031613442394992032ca19d696b06fe22339f4ed1b"
+      "disposition": "dropped",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition removes the preparation blocker after actual accepted or explicitly founder-waived results; this snapshot is not publication authorization.",
+      "composition_previous_staged_value_sha256": "6166484f9ac248f20d28e7031613442394992032ca19d696b06fe22339f4ed1b"
     },
     {
       "file": "compatibility.json",
@@ -5324,10 +5348,11 @@
     {
       "file": "compatibility.json",
       "pointer": "/profiles/2/gpu_qualification/receipt/url",
-      "disposition": "replaced",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
+      "disposition": "composed-by-acceptance",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
       "predecessor_value_sha256": "61d26cb57b2ead299aca381291c11a85c4d89387f6b6852a670f7fd027c8942c",
-      "staged_value_sha256": "0f11089acd8337751f5b96617b71637f16789047906b60de7f45cc7628031ded"
+      "staged_value_sha256": "6594d087f71cfeb429fee54d5e519d959c0d27d1f0f764fd3c3a289ccd68a552",
+      "composition_previous_staged_value_sha256": "0f11089acd8337751f5b96617b71637f16789047906b60de7f45cc7628031ded"
     },
     {
       "file": "compatibility.json",
@@ -5348,10 +5373,11 @@
     {
       "file": "compatibility.json",
       "pointer": "/profiles/2/installable",
-      "disposition": "replaced",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
+      "disposition": "composed-by-acceptance",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
       "predecessor_value_sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
-      "staged_value_sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+      "staged_value_sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+      "composition_previous_staged_value_sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
     },
     {
       "file": "compatibility.json",
@@ -5692,10 +5718,11 @@
     {
       "file": "compatibility.json",
       "pointer": "/profiles/2/status",
-      "disposition": "replaced",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
+      "disposition": "composed-by-acceptance",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
       "predecessor_value_sha256": "7766b0db77acd35633aec4b6e1fffd02dae7396d5cd5bd02682b1e55ebbfb96b",
-      "staged_value_sha256": "99e505dc299c68bc16363d9d8ee5b76599ce41e2154ddb0dc8e2a00c57dec7a5"
+      "staged_value_sha256": "7766b0db77acd35633aec4b6e1fffd02dae7396d5cd5bd02682b1e55ebbfb96b",
+      "composition_previous_staged_value_sha256": "99e505dc299c68bc16363d9d8ee5b76599ce41e2154ddb0dc8e2a00c57dec7a5"
     },
     {
       "file": "compatibility.json",
@@ -5964,10 +5991,11 @@
     {
       "file": "compatibility.json",
       "pointer": "/runtime_variants/0/qualification_receipt/url",
-      "disposition": "replaced",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
+      "disposition": "composed-by-acceptance",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
       "predecessor_value_sha256": "78be969b0f92ffed68307771aa8a2a6f59d3ae79fbf89a00cd687d1eb030acca",
-      "staged_value_sha256": "ff6487bf53729acae034be93079e150bce635715f7914a5ffa144941f8b813fc"
+      "staged_value_sha256": "6c7a7de1066fea7de245bf7fb2af2a8d4fcc9a9fbead7df53dfaf858825227c6",
+      "composition_previous_staged_value_sha256": "ff6487bf53729acae034be93079e150bce635715f7914a5ffa144941f8b813fc"
     },
     {
       "file": "compatibility.json",
@@ -6204,10 +6232,11 @@
     {
       "file": "compatibility.json",
       "pointer": "/runtime_variants/1/qualification_receipt/url",
-      "disposition": "replaced",
-      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt.",
+      "disposition": "composed-by-acceptance",
+      "reason": "Current identity, scope or evidence binding is derived from the new authenticated component/lane inputs; inspect the corresponding current receipt. Composition snapshot: intentional ready posture, candidate-bound acceptance/waiver, exact-subject review seed or final prose replaces preparation metadata; later immutable pin stages have independent bindings.",
       "predecessor_value_sha256": "42cb41856c84e082700b4d899f15e9c7bd999e7ace142e92e3116e4c4ece6275",
-      "staged_value_sha256": "c31b077ee87ebe8310e26cf4b625bb8bf9c7fa018ac8d58f2e23191725197d88"
+      "staged_value_sha256": "511c5a12bd92df1ad9ae38c6dfa77e840061267d38339fdd8f9f19db9d6a2dab",
+      "composition_previous_staged_value_sha256": "c31b077ee87ebe8310e26cf4b625bb8bf9c7fa018ac8d58f2e23191725197d88"
     },
     {
       "file": "compatibility.json",
@@ -6320,6 +6349,104 @@
       "reason": "Exact schema, product, upstream, serving-policy, status token or support-asset value is retained in its role; changed runtime/client subjects bind new receipts, not predecessor execution.",
       "predecessor_value_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
       "staged_value_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+    },
+    {
+      "file": "qualification.json",
+      "pointer": "/observed_gates/changed_client_acceptance/status",
+      "disposition": "added",
+      "reason": "Composition binds actual scope and GE-R1 lane-distinct archive provenance beside lane-agnostic summaries, or GE-R4 source/download-only review and unchanged client identity; no raw verdict is changed.",
+      "staged_value_sha256": "0f8efc99a73df7f45df535b921edbee841baded99fe22f140187f8ab9dbcb7b2"
+    },
+    {
+      "file": "qualification.json",
+      "pointer": "/observed_gates/changed_client_acceptance/scope",
+      "disposition": "added",
+      "reason": "Composition binds actual scope and GE-R1 lane-distinct archive provenance beside lane-agnostic summaries, or GE-R4 source/download-only review and unchanged client identity; no raw verdict is changed.",
+      "staged_value_sha256": "c90fd408323a05c5a24a50a3d1d09b386c32293c0f15d7f5fb0e33ea0d16e7b3"
+    },
+    {
+      "file": "qualification.json",
+      "pointer": "/observed_gates/rtx3090_upgrade/provenance/evidence_archive_sha256/running",
+      "disposition": "added",
+      "reason": "Composition binds actual scope and GE-R1 lane-distinct archive provenance beside lane-agnostic summaries, or GE-R4 source/download-only review and unchanged client identity; no raw verdict is changed.",
+      "staged_value_sha256": "7eb5771e93db147bc3ece5b5fc1cbc454b56c45aa6139d2bc15314803055eec1"
+    },
+    {
+      "file": "qualification.json",
+      "pointer": "/observed_gates/rtx3090_upgrade/provenance/evidence_archive_sha256/rollback",
+      "disposition": "added",
+      "reason": "Composition binds actual scope and GE-R1 lane-distinct archive provenance beside lane-agnostic summaries, or GE-R4 source/download-only review and unchanged client identity; no raw verdict is changed.",
+      "staged_value_sha256": "94c211bd10d512752f7c9a4977092fc2880dda952bb3faa3481dd76e24fb9a72"
+    },
+    {
+      "file": "qualification.json",
+      "pointer": "/observed_gates/rtx3090_upgrade/provenance/evidence_archive_sha256/repair",
+      "disposition": "added",
+      "reason": "Composition binds actual scope and GE-R1 lane-distinct archive provenance beside lane-agnostic summaries, or GE-R4 source/download-only review and unchanged client identity; no raw verdict is changed.",
+      "staged_value_sha256": "1a96491099dbadc6b755bf91a2f1e6b6dbee42ae842b926a1604bc05f6cd40c3"
+    },
+    {
+      "file": "qualification.json",
+      "pointer": "/observed_gates/rtx3090_upgrade/provenance/scenario_summary_scope",
+      "disposition": "added",
+      "reason": "Composition binds actual scope and GE-R1 lane-distinct archive provenance beside lane-agnostic summaries, or GE-R4 source/download-only review and unchanged client identity; no raw verdict is changed.",
+      "staged_value_sha256": "c08437d9d3ab6cdf9184d475be1881be0bf6e09ee16d171696637e98d2b10f37"
+    },
+    {
+      "file": "qualification.json",
+      "pointer": "/observed_gates/rtx4090_upgrade/provenance/evidence_archive_sha256/running",
+      "disposition": "added",
+      "reason": "Composition binds actual scope and GE-R1 lane-distinct archive provenance beside lane-agnostic summaries, or GE-R4 source/download-only review and unchanged client identity; no raw verdict is changed.",
+      "staged_value_sha256": "6a80863ba6000056f2ffec8eb99ee27e3713faeaa986ab35d132bc0c7716091f"
+    },
+    {
+      "file": "qualification.json",
+      "pointer": "/observed_gates/rtx4090_upgrade/provenance/evidence_archive_sha256/rollback",
+      "disposition": "added",
+      "reason": "Composition binds actual scope and GE-R1 lane-distinct archive provenance beside lane-agnostic summaries, or GE-R4 source/download-only review and unchanged client identity; no raw verdict is changed.",
+      "staged_value_sha256": "86d9faaf6daa2cf1453b2df0a95d4b7e36f45c0a675a99b10d4306eec0c898ec"
+    },
+    {
+      "file": "qualification.json",
+      "pointer": "/observed_gates/rtx4090_upgrade/provenance/evidence_archive_sha256/repair",
+      "disposition": "added",
+      "reason": "Composition binds actual scope and GE-R1 lane-distinct archive provenance beside lane-agnostic summaries, or GE-R4 source/download-only review and unchanged client identity; no raw verdict is changed.",
+      "staged_value_sha256": "bffac7fdbf2180577eaf8f339ed65f9a058b800e202c8e724e40a48394c40a57"
+    },
+    {
+      "file": "qualification.json",
+      "pointer": "/observed_gates/rtx4090_upgrade/provenance/scenario_summary_scope",
+      "disposition": "added",
+      "reason": "Composition binds actual scope and GE-R1 lane-distinct archive provenance beside lane-agnostic summaries, or GE-R4 source/download-only review and unchanged client identity; no raw verdict is changed.",
+      "staged_value_sha256": "c08437d9d3ab6cdf9184d475be1881be0bf6e09ee16d171696637e98d2b10f37"
+    },
+    {
+      "file": "qualification.json",
+      "pointer": "/observed_gates/stock_client_review/descriptor/sha256",
+      "disposition": "added",
+      "reason": "Composition binds actual scope and GE-R1 lane-distinct archive provenance beside lane-agnostic summaries, or GE-R4 source/download-only review and unchanged client identity; no raw verdict is changed.",
+      "staged_value_sha256": "e389eebee434aba6f79545931936a2ebf0940c08ed3f97899b34f1cc82c597a3"
+    },
+    {
+      "file": "qualification.json",
+      "pointer": "/observed_gates/stock_client_review/descriptor/disposition",
+      "disposition": "added",
+      "reason": "Composition binds actual scope and GE-R1 lane-distinct archive provenance beside lane-agnostic summaries, or GE-R4 source/download-only review and unchanged client identity; no raw verdict is changed.",
+      "staged_value_sha256": "c1402bb8bf3666ff38060a45e0770b15f20e6e47a40e73accf17cc1142878670"
+    },
+    {
+      "file": "qualification.json",
+      "pointer": "/observed_gates/stock_client_review/sha256",
+      "disposition": "added",
+      "reason": "Composition binds actual scope and GE-R1 lane-distinct archive provenance beside lane-agnostic summaries, or GE-R4 source/download-only review and unchanged client identity; no raw verdict is changed.",
+      "staged_value_sha256": "66bca2eafc41cf26ea8aa9efabb7dd10120b9c70f287f8de8948c2f24d3a21aa"
+    },
+    {
+      "file": "qualification.json",
+      "pointer": "/observed_gates/stock_client_review/preceding_review/sha256",
+      "disposition": "added",
+      "reason": "Composition binds actual scope and GE-R1 lane-distinct archive provenance beside lane-agnostic summaries, or GE-R4 source/download-only review and unchanged client identity; no raw verdict is changed.",
+      "staged_value_sha256": "b3e01ca451e095e352ecc08c3851ccacac786e9179fa6ce8717159d89e156c2a"
     }
   ]
 }

@@ -75,9 +75,9 @@ Full release authority: [`releases/v0.16.0/NINFER_RELEASE_NOTES.md`](releases/v0
 [`releases/v0.16.0/qualification.json`](releases/v0.16.0/qualification.json) ·
 [`docs/RELEASES.md`](docs/RELEASES.md) · [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md).
 
-## Prepared next — v0.16.2 runtime and client update
+## Qualified successor — v0.16.2 runtime and client update
 
-**Prepared next: v0.16.2 / stock OMP 18.15.0.** Stage from published v0.16.0; the held
+**Qualified successor: v0.16.2 / stock OMP 18.15.0.** Based on published v0.16.0; the held
 v0.16.1 candidate is not a released predecessor. Source
 `a87de3613c17bced777b446fb545f872d8395ec1` supplies published RTX 5090
 `v0.7.0-qwen38-5090-beta.5` and published native `v0.8.0-qwen38-{3090,4090}-beta.2`.
@@ -94,13 +94,25 @@ identical; RTX 4090 **0.9996** / **0.9989** / **115/115**. Original agent failur
 three exact-subject founder waivers, and RTX 4090's private uncapped-power-only rehearsal fix
 is disclosed in the notes; follow-ups are [#87](https://github.com/alphastorm/ninfer/issues/87)
 and [#88](https://github.com/alphastorm/ninfer/issues/88).
-Fresh candidate-bound platform/five-route/native-public-install/restoration acceptance,
-exact-subject runtime/product review binding, final composition/pins and founder-owned
-publication remain pending. No v0.16.0 runtime proof, route result or waiver transfers.
+Fresh **2026-11-04** acceptance on `c6fc8465` passed five routes (**31/31 blocks**), three stock
+clients, and RTX 4090 public-install/probe/restoration checks
+([routes](releases/v0.16.2/acceptance/documented-routes.json) ·
+[composition](releases/v0.16.2/acceptance/composed-external-installation.json)).
+RTX 3090's seven route blocks passed, but its later native campaign failed at structured-outage
+managed Stop (`graceful_incomplete_shutdown`, saved 1 / skipped 8 / refused 1, `capacity`, reclaimed 0).
+The founder waived that residual of #78, also present in published v0.16.0; behavior completion,
+wrapper restoration audit and anonymous public install are not claimed. The notes bind recovery
+using `Control-Release.ps1 -Action Start` then `-Action Stop` without client sessions, and
+fork [#89](https://github.com/alphastorm/ninfer/issues/89) / [#90](https://github.com/alphastorm/ninfer/issues/90).
+The exact-source runtime full council and focused product reviews closed by disposition;
+the [ledger](releases/v0.16.2/review/runtime-ledger.json) separates composition controls from
+review dispositions. Product deferrals use [#138](https://github.com/alphastorm/omp-ninfer/issues/138).
+Immutable evidence pins and review approval do not authorize founder-owned publication.
+No v0.16.0 runtime proof, route result or waiver transfers.
 
 The chosen client is upstream `v18.15.0`, commit `3fedf8d53267e32a6d7521ce725fdcc4a36fdc67`,
 tree `48bc72ba2418c0b78163d9769e91a0d8683e642b`, release `430630500`.
-[Prepared notes](releases/v0.16.2/NINFER_RELEASE_NOTES.md) and the
+[Release notes](releases/v0.16.2/NINFER_RELEASE_NOTES.md) and the
 [source/integrity review](docs/measurements/2026-11-01-omp-18150-client-upgrade-review.json)
 cover guard/summary behavior, replay sanitization, missing-key fallback, async manual compaction
 and optional side-request accounting. This is a native-runtime rebuild, not `rk4v4` adoption,

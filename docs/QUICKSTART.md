@@ -1,10 +1,10 @@
 # Quickstart
 
-> **Prepared guide: v0.16.2 · stock Oh My Pi 18.15.0 · rebuilt RTX 5090 · 4090 · 3090 runtimes**
+> **Qualified successor guide: v0.16.2 · stock Oh My Pi 18.15.0 · five documented routes passed**
 >
 > Published release remains **v0.16.0**. Until publication, use the
 > [immutable v0.16.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.16.0/docs/QUICKSTART.md).
-> This guide supplies frozen-candidate acceptance commands, not permission to install a draft.
+> RTX 3090's later native campaign failed under an exact founder waiver; see the acceptance boundary.
 
 OMP NInfer is the qualified local inference appliance and release layer connecting the
 [Oh My Pi](https://github.com/can1357/oh-my-pi) (OMP) coding-agent client over authenticated
@@ -12,12 +12,12 @@ loopback to the NInfer inference engine serving Qwen3.8 27B on your GPU.
 
 ## Choose your lane
 
-| GPU and host | Client route prepared for v0.16.2 | Start here |
+| GPU and host | Candidate-bound client route for v0.16.2 | Start here |
 | --- | --- | --- |
 | RTX 5090 container on Windows 11 + Docker Desktop / WSL2 | Native Windows x64 client over local loopback `127.0.0.1:18089` | [RTX 5090 Windows route](#ready-route-native-windows-and-docker-desktop-wsl2) |
 | RTX 5090 container on Windows 11 / WSL2 or Linux | macOS arm64 client over a manual SSH tunnel (preview) | [macOS manual SSH route (preview)](#macos-client-over-a-manual-ssh-tunnel-preview) |
-| RTX 4090 native Windows 11 (alone or beside RTX 3090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; published/qualified `v0.8.0-qwen38-4090-beta.2` DFlash2 K=7, one request at a time (`C1`); candidate-bound product acceptance pending | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) |
-| RTX 3090 native Windows 11 (alone or beside RTX 4090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; published/qualified `v0.8.0-qwen38-3090-beta.2` DFlash2 K=7, two requests in flight (`C2`) over one shared 131,072-token pool; candidate-bound product acceptance pending | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
+| RTX 4090 native Windows 11 (alone or beside RTX 3090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; published/qualified `v0.8.0-qwen38-4090-beta.2` DFlash2 K=7, one request at a time (`C1`); route, native campaign and public install passed | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) |
+| RTX 3090 native Windows 11 (alone or beside RTX 4090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; published/qualified `v0.8.0-qwen38-3090-beta.2` DFlash2 K=7, two requests in flight (`C2`) over one shared 131,072-token pool; route passed, later native campaign failed and founder-waived; no anonymous public-install result | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
 | RTX 5090 container with Linux x64 client under WSL2 only | WSL2 shell client over local loopback `127.0.0.1:18089` (no native Linux OS qualification) | [WSL2 Linux client](#wsl2-linux-client-over-local-loopback) |
 | Other GPU, non-WSL Linux client, or concurrent native serving | Unsupported | [Compatibility boundary](COMPATIBILITY.md) |
 
@@ -90,11 +90,11 @@ changing a running host.
 
 ## OMP 18.15.0 client
 
-Prepared release `v0.16.2` selects unmodified upstream
+Qualified successor `v0.16.2` selects unmodified upstream
 [Oh My Pi v18.15.0](https://github.com/can1357/oh-my-pi/releases/tag/v18.15.0), source
 `3fedf8d53267e32a6d7521ce725fdcc4a36fdc67`, tree
 `48bc72ba2418c0b78163d9769e91a0d8683e642b`, release `430630500`.
-The [prepared notes](../releases/v0.16.2/NINFER_RELEASE_NOTES.md#stock-omp-18150) record Windows
+The [release notes](../releases/v0.16.2/NINFER_RELEASE_NOTES.md#stock-omp-18150) record Windows
 `978846a8…`, Linux `6737ee24…` and Darwin `d36dfabf…`; the release-local
 `qualification/client-components.json` descriptor binds those exact identities. The
 [18.14.2 review](measurements/2026-11-01-omp-18142-client-upgrade-review.json) and
@@ -140,13 +140,42 @@ source delta plus independent download integrity; they are not semantic or live 
 
 ## v0.16.2 acceptance boundary
 
-The prepared guide and client descriptor are inputs to fresh acceptance, not an acceptance result.
-All five routes / 31 executable blocks, three stock 18.15.0 clients, both new native public
-installs and candidate-profile probes need new candidate-bound observations and independent
-restoration. macOS remains preview; Linux remains WSL2-only; vision remains macOS/Windows on
-RTX 5090 only. The published results below retain their original v0.16.0 identity and do not
-qualify the new client or rebuilt runtimes. After execution, composition records actual outcomes and the guide hash;
-no executable block may change between that candidate and its composed acceptance.
+Fresh **2026-11-04** acceptance on frozen candidate
+`c6fc8465611a89fd85730f0653f670d2a314a721` passed all five documented routes:
+RTX 5090 host **2/2**, macOS **10/10**, Windows **5/5**, RTX 4090 **7/7** and RTX 3090 **7/7**
+(**31/31 executable blocks**), plus all three stock 18.15.0 clients and RTX 4090
+public-install/probe/restoration acceptance. Receipts:
+[documented routes](../releases/v0.16.2/acceptance/documented-routes.json),
+[composed acceptance](../releases/v0.16.2/acceptance/composed-external-installation.json),
+[restoration](measurements/2026-11-04-v0162-acceptance-restoration.json).
+The RTX 5090 production hold was **418.529 s** accepted and all-attempt total (one window);
+the same healthy production container, image, checkpoint mount and `unless-stopped` policy
+were restored.
+
+RTX 3090's later native campaign **failed** at the separate structured-outage managed Stop:
+`graceful_incomplete_shutdown`, saved **1**, skipped **8**, refused **1**, final durable-save
+reason **capacity**, reclaimed Host bytes **0**. The
+[founder waiver](../releases/v0.16.2/qualification/rtx3090-route-waiver.json) preserves that failure.
+It is a residual of fork #78 also present in published beta.1; v0.16.0 avoided it only by timing.
+Behavior completion, a passing wrapper restoration audit and anonymous public-install acceptance
+are **not claimed**. Fleet/fanout, both parallel-proof scenarios at limit 2 and two committed
+automatic-compaction/control-recall epochs passed before the failure.
+After preserving evidence, the operator recovered with `Control-Release.ps1 -Action Start`
+then `-Action Stop` with no client sessions: graceful, zero refused, runtime record and owner
+lease absent, **370 W**, tasks Ready, no server or port-18082 listener. A refused session
+loses warm restore, not its authoritative OMP transcript; replay it for fresh prefill.
+Follow-ups: [export residual #89](https://github.com/alphastorm/ninfer/issues/89) and
+[owner restoration #90](https://github.com/alphastorm/ninfer/issues/90).
+
+The exact-source runtime full council and focused product reviews closed by disposition;
+their [ledger](../releases/v0.16.2/review/runtime-ledger.json) binds subjects and separate
+composition controls. Product deferrals use [#138](https://github.com/alphastorm/omp-ninfer/issues/138).
+GE-R1 summary receipts are lane-agnostic, with lane-distinct evidence-archive digests;
+GE-R4 source/download review is not live acceptance. Both native routes are first-lineage,
+rollback `not_applicable`, zero directions; the separate predecessor rehearsals are not route rollback.
+macOS remains preview; Linux remains WSL2-only; vision remains macOS/Windows against RTX 5090 only.
+The historical v0.16.0 results below do not qualify the new client or runtime bytes.
+Composition binds only non-executable prose changes; every accepted executable block is unchanged.
 
 ## Published v0.16.0 acceptance evidence (historical, not v0.16.2)
 
@@ -202,7 +231,7 @@ are recorded in the [v0.16.0 notes](../releases/v0.16.0/NINFER_RELEASE_NOTES.md)
 final manifest pin, strict ready verification, and founder-owned publication are separate from
 acceptance. See [Releases](RELEASES.md).
 
-## Prepared v0.16.2 at a glance
+## Qualified successor v0.16.2 at a glance
 
 | Lane | Runtime component and source | Model artifact | Serving profile and limits |
 | --- | --- | --- | --- |
@@ -216,8 +245,8 @@ All three runtime components bind `a87de3613c17bced777b446fb545f872d8395ec1`, in
 [managed-Stop capacity fix #78](https://github.com/alphastorm/ninfer/issues/78).
 The published component reports a bit-identical same-path double build; the v0.16.0
 reproducibility exception is historical, not renewed. See the
-[prepared notes](../releases/v0.16.2/NINFER_RELEASE_NOTES.md) for component evidence and
-the outstanding candidate-bound product-route, review and publication gates.
+[release notes](../releases/v0.16.2/NINFER_RELEASE_NOTES.md) for component evidence,
+candidate-bound acceptance, exact-source reviews and the separate founder-owned publication boundary.
 
 Both native 15-phase chains, fit proofs, zero-difference 1,120-prompt powered quality screens
 and 3/3 predecessor upgrade/rollback/repair scenarios are bound. The founder's no-regression

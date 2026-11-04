@@ -48,9 +48,9 @@ All of these should be materially true:
 
 See the [decision guide](DECISION_GUIDE.md) for the side-by-side comparison.
 
-## Prepared next — v0.16.2 / Host reclaim and OMP 18.15.0
+## Qualified successor — v0.16.2 / Host reclaim and OMP 18.15.0
 
-**Prepared next: v0.16.2 / stock OMP 18.15.0.** This successor to published v0.16.0 rebuilds
+**Qualified successor: v0.16.2 / stock OMP 18.15.0.** This successor to published v0.16.0 rebuilds
 all three runtimes at `a87de3613c17bced777b446fb545f872d8395ec1`: published RTX 5090
 `v0.7.0-qwen38-5090-beta.5` (server `cc99a460`, image `a0cbb8a5`) and published native
 `v0.8.0-qwen38-{3090,4090}-beta.2`. It includes byte-proven durable-generation Host reclaim
@@ -75,14 +75,31 @@ hashes and disclose RTX 4090's uncapped-power-assertion-only rehearsal harness c
 Follow-ups remain [runtime #87](https://github.com/alphastorm/ninfer/issues/87) /
 [native tooling #88](https://github.com/alphastorm/ninfer/issues/88).
 
-Fresh candidate-bound product/client/public-install/restoration acceptance, exact-subject review
-binding, final composition/pins and founder-owned product publication remain pending. No v0.16.0
-runtime proof, acceptance or waiver is relabeled; the held v0.16.1 client-only candidate is not the staging base.
+Fresh **2026-11-04** acceptance on `c6fc8465` passed all five documented routes (**31/31 blocks**),
+three stock clients and RTX 4090 native public-install/probe/restoration checks
+([routes](../releases/v0.16.2/acceptance/documented-routes.json) ·
+[composition](../releases/v0.16.2/acceptance/composed-external-installation.json) ·
+[restoration](measurements/2026-11-04-v0162-acceptance-restoration.json)).
+The RTX 5090 production hold was **418.529 s**, both accepted and all-attempt total (one window).
+RTX 3090's seven route blocks passed; its subsequent native campaign failed at structured-outage
+managed Stop: `graceful_incomplete_shutdown`, saved 1 / skipped 8 / refused 1, `capacity`, reclaimed 0.
+This founder-waived residual of #78 also exists in the published beta.1 runtime; v0.16.0 avoided
+it only by timing. No completed behavior, passing wrapper restoration audit or anonymous
+public-install result is claimed. Empty-session `Control-Release.ps1 -Action Start` then
+`-Action Stop` recovered the owner/power (370 W), with zero refused sessions, no runtime record
+or lease, tasks Ready, no server or listener. Follow-ups:
+[#89](https://github.com/alphastorm/ninfer/issues/89) / [#90](https://github.com/alphastorm/ninfer/issues/90).
+The exact-source runtime full council and focused product reviews closed by disposition; the
+[ledger](../releases/v0.16.2/review/runtime-ledger.json) binds their separate subjects and
+composition controls. GE-R1 summary receipts are lane-agnostic; lane-distinct archive digests
+supply provenance. GE-R4 binds source/download review, not live acceptance. Product deferrals:
+[#138](https://github.com/alphastorm/omp-ninfer/issues/138). Publication is founder-owned.
+No v0.16.0 runtime proof, acceptance or waiver is relabeled; held v0.16.1 is not the staging base.
 
 The selected upstream release is `v18.15.0` (release `430630500`, source
 `3fedf8d53267e32a6d7521ce725fdcc4a36fdc67`, tree
-`48bc72ba2418c0b78163d9769e91a0d8683e642b`). The proposed
-[prepared notes](../releases/v0.16.2/NINFER_RELEASE_NOTES.md#stock-omp-18150) record:
+`48bc72ba2418c0b78163d9769e91a0d8683e642b`). The
+[release notes](../releases/v0.16.2/NINFER_RELEASE_NOTES.md#stock-omp-18150) record:
 
 | Client platform | Raw asset / ID | Bytes | Asset = binary SHA-256 |
 | --- | --- | ---: | --- |

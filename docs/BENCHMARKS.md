@@ -13,6 +13,41 @@ is a universal GPU, model, or end-to-end latency claim.
   [Neroued/ninfer](https://github.com/Neroued/ninfer) and cover different artifacts and settings.
 - **Community results** are tester submissions collected below.
 
+## Qualified successor v0.16.2 — no-regression, not new speedup
+
+Published v0.16.0 remains the installation authority. The v0.16.2 successor binds exact source
+`a87de361`, stock OMP 18.15.0, beta.5 RTX 5090 and beta.2 natives without relabeling the historical
+measurements below. Its [speed decision](../releases/v0.16.2/qualification/native-speed-decision.json)
+uses published beta.1 as comparator: role/all-case weighted ratio **≥0.98**, every case **≥0.95**
+and byte-identical normalized outputs in every required within/cross-build ABBA pairing,
+explicitly superseding the earlier **1.08** floor for this release.
+
+| Lane | Current weighted ratio | Minimum case | Identical normalized outputs |
+| --- | ---: | ---: | ---: |
+| [RTX 3090](../releases/v0.16.2/qualification/rtx3090-speed.json) | 1.0002518490206602 | 0.9987703200333666 | 84/84 |
+| [RTX 4090](../releases/v0.16.2/qualification/rtx4090-speed.json) | Role 0.9995778248449502; all 0.9996281434580012 | 0.9988670027551729 | 115/115 |
+
+No speed waiver or new speedup is claimed. Three exact parity waivers retain measured failures:
+RTX 5090 `restore_0` TTFT **0.481856409 / 0.231568998 s**, bound **0.481568998 s**;
+RTX 4090 `restore_1` cache gap **−52 / −48** (prompt/cache **58539/58487 / 58327/58279**),
+TTFT **0.642947 / 0.5589493 s** within bound; RTX 3090 position 1 `base` TTFT
+**0.4975294 / 0.2144353 s**, bound **0.4644353 s**, prompt/cache **66/0** both arms.
+The [notes](../releases/v0.16.2/NINFER_RELEASE_NOTES.md) preserve full values, reused incumbent
+capture scope, 82/83 native measured passes, 88/88 RTX 5090 judged positions rather than an
+overall-run pass, and the 4090 uncapped-power-only rehearsal-harness fix (3/3 scenarios per lane).
+
+Fresh **2026-11-04** [acceptance](../releases/v0.16.2/acceptance/documented-routes.json) on
+`c6fc8465` passed five routes / **31 blocks**, three stock clients and RTX 4090 public-install/probes.
+RTX 3090's later native campaign failed at structured-outage managed Stop:
+`graceful_incomplete_shutdown`, saved **1** / skipped **8** / refused **1**, reason **capacity**,
+reclaimed Host bytes **0**. The founder-waived residual of #78 also exists on published beta.1;
+v0.16.0 avoided it by timing. Empty-session Start/Stop recovery is not behavior completion,
+wrapper restoration audit or anonymous public-install acceptance; fork
+[#89](https://github.com/alphastorm/ninfer/issues/89) / [#90](https://github.com/alphastorm/ninfer/issues/90)
+remain open follow-ups. The **418.529 s** production hold and route completion are not new
+throughput or reclaim-latency measurements. macOS stays preview, Linux WSL2-only, vision
+macOS/Windows against RTX 5090 only.
+
 ## Current qualified results — v0.16.0
 
 Published release **v0.16.0** (2026-11-01)

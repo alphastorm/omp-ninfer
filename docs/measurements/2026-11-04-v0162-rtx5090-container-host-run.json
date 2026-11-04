@@ -1,0 +1,38 @@
+{
+  "artifact_type": "omp_ninfer_documented_route_run",
+  "schema_version": 1,
+  "lane": "rtx5090-container-host",
+  "document": "docs/QUICKSTART.md",
+  "document_sha256": "5e5bb93dbe839dabe78b5e16058eb521578e5eebf20a7d6a9a7dec87b59b0cf7",
+  "started_utc": "2026-11-04T17:36:19Z",
+  "completed_utc": "2026-11-04T17:37:10Z",
+  "host_os": "Ubuntu 24.04.4 LTS",
+  "clone_commit": "c6fc8465611a89fd85730f0653f670d2a314a721",
+  "steps": [
+    {
+      "position": 1,
+      "slug": "prepare",
+      "heading": "3. Prepare the model and key on the inference host",
+      "index": 0,
+      "block_sha256": "f56ef9c71218e794f3343350978c92e371a081b77fbc0b1b47ff06557f5b6a43",
+      "executed_sha256": "f56ef9c71218e794f3343350978c92e371a081b77fbc0b1b47ff06557f5b6a43",
+      "status": "passed",
+      "elapsed_seconds": 11.957,
+      "error": null,
+      "substitution": null
+    },
+    {
+      "position": 2,
+      "slug": "start",
+      "heading": "4. Start NInfer on the inference host",
+      "index": 0,
+      "block_sha256": "d0b5ed3dc4110d35ca4ff098509b5ece7561e07954e4e16c99463c54d591bc87",
+      "executed_sha256": "d0b5ed3dc4110d35ca4ff098509b5ece7561e07954e4e16c99463c54d591bc87",
+      "status": "passed",
+      "elapsed_seconds": 38.198,
+      "error": null,
+      "substitution": null
+    }
+  ],
+  "status": "passed"
+}

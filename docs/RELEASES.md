@@ -5,7 +5,7 @@ to NInfer (inference engine) serving Qwen3.8 27B (served model). OMP NInfer vers
 product; component repositories keep their own versions and tags, and the product manifest binds
 the exact combination.
 
-**Navigation:** [Prepared v0.16.2](#prepared-v0162--durable-export-host-reclaim-and-stock-omp-18150) · [Current release (v0.16.0)](#v0160--native-dflash2-k7-rtx-3090-concurrency-2-and-unified-engine-fixes) ·
+**Navigation:** [Qualified successor v0.16.2](#qualified-successor-v0162--durable-export-host-reclaim-and-stock-omp-18150) · [Current release (v0.16.0)](#v0160--native-dflash2-k7-rtx-3090-concurrency-2-and-unified-engine-fixes) ·
 [Previous v0.15.0](#v0150--stock-omp-18140-with-unchanged-gpu-lanes) ·
 [Channels](#channels) · [Version identities](#version-identities) ·
 [Release state transition](#release-state-transition) · [Candidate freeze](#candidate-freeze) ·
@@ -13,9 +13,9 @@ the exact combination.
 [External-install acceptance](#external-install-acceptance) · [Cut procedure](#cut-procedure) ·
 [Release notes](#release-notes)
 
-## Prepared v0.16.2 — durable-export Host reclaim and stock OMP 18.15.0
+## Qualified successor v0.16.2 — durable-export Host reclaim and stock OMP 18.15.0
 
-**Prepared next: v0.16.2 / stock OMP 18.15.0.** Stage from published v0.16.0, not the held
+**Qualified successor: v0.16.2 / stock OMP 18.15.0.** Based on published v0.16.0, not the held
 v0.16.1 client-only candidate. All three runtimes bind source
 `a87de3613c17bced777b446fb545f872d8395ec1`: RTX 5090 `v0.7.0-qwen38-5090-beta.5` is
 published (server `cc99a460`, image `a0cbb8a5`, base receipt `runtime-base-a87de361-20261103`);
@@ -61,12 +61,30 @@ unmodified source harness. Runtime-council follow-ups are
 [#87](https://github.com/alphastorm/ninfer/issues/87); native tooling follow-ups are
 [#88](https://github.com/alphastorm/ninfer/issues/88).
 
-Fresh candidate-bound client/five-route/native-public-install/restoration acceptance,
-exact-subject runtime/product review binding, final composition, immutable pins and
-founder-owned publication remain pending. No old measurement, waiver or approval transfers.
+On **2026-11-04**, candidate `c6fc8465611a89fd85730f0653f670d2a314a721` passed all five documented
+routes (**2/10/5/7/7 blocks; 31/31**), three stock clients, and RTX 4090 native public-install,
+probe and independent restoration checks
+([routes](../releases/v0.16.2/acceptance/documented-routes.json) ·
+[composition](../releases/v0.16.2/acceptance/composed-external-installation.json) ·
+[restoration](measurements/2026-11-04-v0162-acceptance-restoration.json)).
+The RTX 5090 accepted and all-attempt hold was **418.529 s** (one window); native campaign
+elapsed times were **512.549 s** RTX 4090 and **1294.095 s** failed RTX 3090.
+RTX 3090's seven route blocks passed before a failed structured-outage managed Stop:
+`graceful_incomplete_shutdown`, saved 1 / skipped 8 / refused 1, `capacity`, reclaimed 0.
+That founder-waived residual of #78 was also present in the published beta.1 runtime; v0.16.0
+avoided it by timing. Behavior completion, wrapper restoration audit and anonymous public
+install are not claimed. The notes bind empty-session Start/Stop owner/power recovery and
+fork [#89](https://github.com/alphastorm/ninfer/issues/89) / [#90](https://github.com/alphastorm/ninfer/issues/90).
+The exact-source runtime full council and focused product reviews closed by disposition;
+the [ledger](../releases/v0.16.2/review/runtime-ledger.json) binds their subjects and separate
+composition controls. GE-R1 adds lane-distinct archive digests to lane-agnostic summaries;
+GE-R4 binds the stock-client source/download review, not live acceptance.
+Deferred product work uses [#138](https://github.com/alphastorm/omp-ninfer/issues/138).
+Review approval and immutable evidence pins do not grant publication. No old measurement,
+waiver or approval transfers.
 
 Published **v0.16.0** remains GitHub `Latest`. The
-[prepared notes](../releases/v0.16.2/NINFER_RELEASE_NOTES.md) select upstream release
+[release notes](../releases/v0.16.2/NINFER_RELEASE_NOTES.md) select upstream release
 `430630500` (`2026-11-01T14:17:08Z`), commit `3fedf8d53267e32a6d7521ce725fdcc4a36fdc67`,
 tree `48bc72ba2418c0b78163d9769e91a0d8683e642b`.
 
@@ -85,8 +103,8 @@ retains the Qwen exact guard and incomplete-summary rejection, and changes share
 missing-key fallback gating, manual-compaction result delivery and optional caption accounting.
 Unlike the held client patch, this release changes every runtime binary; model and serving
 shapes stay fixed, and original v0.16.0 waivers remain historical only. The five routes remain
-2/10/5/7/7 blocks, macOS preview and Linux WSL2-only; both native public installs and exact
-restoration must be evidenced anew before composition and immutable pins.
+2/10/5/7/7 blocks, macOS preview and Linux WSL2-only; RTX 4090 public install/restoration passed,
+while RTX 3090 retains its failed, founder-waived native campaign and separately bound lead recovery.
 
 ## v0.16.0 — native DFlash2 K7, RTX 3090 concurrency 2, and unified engine fixes
 
