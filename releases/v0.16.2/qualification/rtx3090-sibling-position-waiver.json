@@ -1,0 +1,45 @@
+{
+  "artifact_type": "omp_ninfer_founder_gate_waiver",
+  "schema_version": 1,
+  "recorded_utc": "2026-11-04T09:06:51.600805+00:00",
+  "decision": "Founder waived only the named original failed position with disclosure; every other gate and measured result remains unchanged.",
+  "lane": "rtx3090",
+  "subject": {
+    "component": "v0.8.0-qwen38-3090-beta.2",
+    "source": "a87de3613c17bced777b446fb545f872d8395ec1",
+    "package": "ninfer-rtx3090-native-v0.8.0-beta.2-windows-x86_64-cuda13.3-rtx3090.tar.gz",
+    "server_sha256": "15a4db46db09dce695f1c55a9996b30408fa93ed864d881872f9ae7306fbab0f",
+    "package_sha256": "97a8e6340397d6a925cbabc6ffbb6f219a4b00f19b2f5d8e4be6cd14d41f3ed9"
+  },
+  "waived": [
+    {
+      "probe": "sibling",
+      "position": 1,
+      "label": "base",
+      "rule": "p16-agent-parity/2 candidate TTFT <= incumbent + max(0.25 s, 25%)",
+      "incumbent_prompt_tokens": 66,
+      "incumbent_cached_tokens": 0,
+      "candidate_prompt_tokens": 66,
+      "candidate_cached_tokens": 0,
+      "incumbent_ttft_s": 0.2144353,
+      "candidate_ttft_s": 0.4975294,
+      "failures": [
+        "ttft 0.498s > bound 0.464s"
+      ]
+    }
+  ],
+  "raw_verdict": {
+    "passed": false,
+    "evidence_sha256": {
+      "agent-verdict.json": "958e366b18d3e236ad623841e70bdbed9f4dd3dfbcb39ce721f811ba68ca6677",
+      "agent-comparison.json": "1b69fab1ec2c71b93342620e1a4d02e57154bf3612c623fdaec1aee55f613e0f"
+    }
+  },
+  "context": "Sibling probe position 1 is labeled base; the later position labeled sibling_1 passed. Both arms used prompt/cache 66/0. The incumbent is a hash-proved reused published beta.1 capture, not a fresh paired run.",
+  "application_rule": "Apply only to the exact recorded component, server, position, rule and measured values; another failure or changed value fails closed. Publication of the same package does not rewrite its pre-cut measurement.",
+  "provenance": {
+    "source_sha256": "edc7f2265c4b30348054cb5c960c4f43c4013ee6a90ac8ec9db4f67ba67c5f5e",
+    "projection": "Private window identifiers and decision-context strings omitted. Exact original measurements, rules and failed verdict retained. Original candidate-component annotation is pre-cut; the independently authenticated current package hash binds the subsequently published identical package."
+  },
+  "disclosure_required": "release notes must disclose this waived sibling position with its measured values"
+}

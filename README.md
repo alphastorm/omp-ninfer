@@ -90,12 +90,23 @@ credentials. Exact component, source, and model identities: [facts](docs/FACTS.m
 ## Next on main — prepared v0.16.2
 
 **Prepared next: v0.16.2 / stock OMP 18.15.0.** Rebuild all three runtimes at `a87de361`:
-published RTX 5090 `v0.7.0-qwen38-5090-beta.5` and planned native RTX 3090 / RTX 4090
-`v0.8.0-beta.2`, including durable-export Host reclaim and deterministic RDC builds.
-The model and serving shapes stay unchanged. New lane/native qualifications and cuts, fresh
-client/five-route/native-install/restoration observations, exact-subject reviews, immutable pins
-and founder-owned product publication remain separate gates. No v0.16.0 result or waiver is
-relabeled, and the held v0.16.1 client-only candidate is not the staging base.
+published RTX 5090 `v0.7.0-qwen38-5090-beta.5` and now-published native RTX 3090 / RTX 4090
+`v0.8.0-beta.2`, including durable-export Host reclaim, the
+[managed-Stop capacity fix](https://github.com/alphastorm/ninfer/issues/78) and deterministic RDC
+builds. The model and serving shapes stay unchanged. Current lane/native qualification, quality,
+fit and predecessor-upgrade evidence is bound. Native no-regression versus published beta.1
+passes at weighted **1.0003 / 0.9996**, minimum **0.9988 / 0.9989**, with **84/84 / 115/115**
+byte-identical normalized outputs (RTX 3090 / RTX 4090); the explicit rule is weighted ≥0.98,
+every case ≥0.95, not the earlier 1.08 speedup floor.
+
+The notes disclose the exact RTX 5090 `restore_0`, RTX 4090 `restore_1` and RTX 3090 sibling
+position 1 `base` failures under new founder waivers, plus the RTX 4090 uncapped-power-only
+rehearsal-harness fix. Raw failures remain failures. Follow-ups are
+[runtime #87](https://github.com/alphastorm/ninfer/issues/87) and
+[native tooling #88](https://github.com/alphastorm/ninfer/issues/88). Fresh
+candidate-bound client/five-route/native-public-install/restoration acceptance, exact-subject
+reviews, final immutable pins and founder-owned product publication remain pending.
+No v0.16.0 result or waiver is relabeled, and the held v0.16.1 client-only candidate is not the staging base.
 
 The client update retains Qwen's exact loop guard with the 1 KiB whole-line repetition floor and
 rejects incomplete length-stopped summaries. It also changes shared Responses replay sanitization,

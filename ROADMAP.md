@@ -80,15 +80,23 @@ Full release authority: [`releases/v0.16.0/NINFER_RELEASE_NOTES.md`](releases/v0
 **Prepared next: v0.16.2 / stock OMP 18.15.0.** Stage from published v0.16.0; the held
 v0.16.1 candidate is not a released predecessor. Source
 `a87de3613c17bced777b446fb545f872d8395ec1` supplies published RTX 5090
-`v0.7.0-qwen38-5090-beta.5` and planned native `v0.8.0-qwen38-{3090,4090}-beta.2`.
-The runtime delta includes byte-proven durable-generation Host reclaim, export-retirement
+`v0.7.0-qwen38-5090-beta.5` and published native `v0.8.0-qwen38-{3090,4090}-beta.2`.
+The runtime delta includes byte-proven durable-generation Host reclaim and the
+[managed-Stop capacity fix #78](https://github.com/alphastorm/ninfer/issues/78), export-retirement
 reservation, opt-in FP32 identity repair, deterministic RDC builds and native repair/power/
 state-bound gate fixes. Model and serving shapes remain unchanged; new native version/instance
 identities do not grant cross-binary checkpoint compatibility.
 
-Published-image lane and both native qualifications/cuts, fresh platform/five-route/native-install/
-restoration evidence, exact-subject runtime/product review, immutable pins and founder-owned
-publication remain separate gates. No v0.16.0 runtime proof, route result or waiver transfers.
+Published-image lane and both native qualifications/cuts, zero-difference powered quality
+screens, fit proofs, 3/3 upgrade/rollback/repair scenarios per lane and the explicit beta.1
+no-regression speed gates are bound. RTX 3090 weighted **1.0003** / min **0.9988** / **84/84**
+identical; RTX 4090 **0.9996** / **0.9989** / **115/115**. Original agent failures remain under
+three exact-subject founder waivers, and RTX 4090's private uncapped-power-only rehearsal fix
+is disclosed in the notes; follow-ups are [#87](https://github.com/alphastorm/ninfer/issues/87)
+and [#88](https://github.com/alphastorm/ninfer/issues/88).
+Fresh candidate-bound platform/five-route/native-public-install/restoration acceptance,
+exact-subject runtime/product review binding, final composition/pins and founder-owned
+publication remain pending. No v0.16.0 runtime proof, route result or waiver transfers.
 
 The chosen client is upstream `v18.15.0`, commit `3fedf8d53267e32a6d7521ce725fdcc4a36fdc67`,
 tree `48bc72ba2418c0b78163d9769e91a0d8683e642b`, release `430630500`.

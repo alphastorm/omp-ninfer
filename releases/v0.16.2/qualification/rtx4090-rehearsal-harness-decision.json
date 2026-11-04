@@ -1,0 +1,17 @@
+{
+  "artifact_type": "omp_ninfer_founder_gate_decision",
+  "schema_version": 1,
+  "recorded_utc": "2026-11-04T15:01:58.195247+00:00",
+  "decision": "Founder authorized a private RTX 4090 rehearsal harness copy changing only uncapped-power assertions; no product/runtime assertion or other gate was weakened.",
+  "release": "v0.16.2",
+  "source_commit": "a87de3613c17bced777b446fb545f872d8395ec1",
+  "scope": "RTX 4090 running-upgrade, forced-start rollback and interrupted-install repair only. RTX 3090 used the unmodified source harness.",
+  "defect": "F2 Invoke-UpgradeRehearsal.ps1 Observe requires Power() and outer lease qualified_power_limit_w to both equal one configured running limit; an uncapped lane (spec qualified_power_limit_w null -> controller records 0) can never satisfy both",
+  "allowed_change": "a private copy of Invoke-UpgradeRehearsal.ps1 whose ONLY change is the power assertions for uncapped lanes: outer.qualified_power_limit_w == 0 and Power() == owner_power_limit_w; all other assertions byte-identical",
+  "f2_source_sha256": "0e673f07a9458d5b6440b8255d925141ab689cb0cdcd0cdb79f98680b7f4f710",
+  "follow_up": "https://github.com/alphastorm/ninfer/issues/88",
+  "provenance": {
+    "source_sha256": "c169000bc662526c7097e9ddd3fa38afd7d7db6a580aff2b5dd3108b4e09e0c7",
+    "projection": "Private approval-context and prior internal-program reference omitted. Exact defect, allowed assertions, source harness hash and scope preserved."
+  }
+}

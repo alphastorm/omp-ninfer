@@ -12,13 +12,25 @@ watch manifest is [`upstream-watch.json`](../upstream-watch.json); the watch too
 
 **Prepared next: v0.16.2 / stock OMP 18.15.0.** Runtime source
 `a87de3613c17bced777b446fb545f872d8395ec1` on upstream `64d10fbf` supplies published RTX
-5090 `v0.7.0-qwen38-5090-beta.5` and planned native `v0.8.0-qwen38-{3090,4090}-beta.2`.
-The delta includes byte-proven durable-generation Host reclaim, export retirement, opt-in FP32
+5090 `v0.7.0-qwen38-5090-beta.5` and published native `v0.8.0-qwen38-{3090,4090}-beta.2`.
+The delta includes byte-proven durable-generation Host reclaim and the
+[managed-Stop capacity fix #78](https://github.com/alphastorm/ninfer/issues/78), export retirement, opt-in FP32
 identity repair, deterministic RDC builds and native repair/power/qualification-driver fixes.
-Model and serving shapes are retained, not runtime bytes. New lane/native qualification and
-cuts, client/five-route/native-install/restoration evidence, exact-subject reviews, immutable pins
-and founder-owned product publication remain separate gates. The held v0.16.1 manifest and
-v0.16.0 execution results are not carried as current proof.
+Model and serving shapes are retained, not runtime bytes. Current lane/native qualification,
+both 1,120-prompt zero-difference quality screens, fit proofs, published native cuts and
+3/3 upgrade/rollback/repair rehearsals per native lane are bound. The founder's native speed
+decision is no regression versus published beta.1 (weighted ≥0.98, every case ≥0.95,
+byte-identical normalized outputs), superseding the earlier 1.08 speedup floor: RTX 3090
+**1.0003** weighted / **0.9988** min / **84/84** identical; RTX 4090 **0.9996** /
+**0.9989** / **115/115**. New exact-subject waivers preserve the failed RTX 5090 `restore_0`,
+RTX 4090 `restore_1` and RTX 3090 sibling position 1 `base` results.
+The [notes](../releases/v0.16.2/NINFER_RELEASE_NOTES.md) disclose the original founder-record
+hashes and RTX 4090's private uncapped-power-only rehearsal fix. Follow-ups are
+[runtime-council deferrals #87](https://github.com/alphastorm/ninfer/issues/87) and
+[native tooling defects #88](https://github.com/alphastorm/ninfer/issues/88).
+Fresh candidate-bound client/five-route/native-public-install/restoration acceptance,
+exact-subject review binding, final composition/pins and founder-owned product publication
+remain pending. The held v0.16.1 manifest and v0.16.0 execution results are not carried as current proof.
 
 Chosen upstream: [`v18.15.0`](https://github.com/can1357/oh-my-pi/releases/tag/v18.15.0),
 commit `3fedf8d53267e32a6d7521ce725fdcc4a36fdc67`, tree

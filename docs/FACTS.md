@@ -1,6 +1,6 @@
 # OMP NInfer — canonical facts
 
-Updated: 2026-11-01 · Published release: v0.16.0 (2026-11-01) · stock Oh My Pi 18.14.0
+Updated: 2026-11-04 · Published release: v0.16.0 (2026-11-01) · stock Oh My Pi 18.14.0
 
 Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release layer) → NInfer
 (inference engine) → Qwen3.8 27B (served model).
@@ -52,19 +52,32 @@ See the [decision guide](DECISION_GUIDE.md) for the side-by-side comparison.
 
 **Prepared next: v0.16.2 / stock OMP 18.15.0.** This successor to published v0.16.0 rebuilds
 all three runtimes at `a87de3613c17bced777b446fb545f872d8395ec1`: published RTX 5090
-`v0.7.0-qwen38-5090-beta.5` (server `cc99a460`, image `a0cbb8a5`) and planned native
+`v0.7.0-qwen38-5090-beta.5` (server `cc99a460`, image `a0cbb8a5`) and published native
 `v0.8.0-qwen38-{3090,4090}-beta.2`. It includes byte-proven durable-generation Host reclaim
-before export refusal, export-retirement reservation, opt-in FP32 identity repair, deterministic
+before export refusal and its [managed-Stop fix #78](https://github.com/alphastorm/ninfer/issues/78),
+export-retirement reservation, opt-in FP32 identity repair, deterministic
 bounded RDC builds and native repair/power/qualification-driver fixes. The model and serving
 shapes stay unchanged, including RTX 5090 deployment profile `qwen38-5090-v0.13.0`.
 Native version/instance identities advance; checkpoint compatibility is not inferred.
 
 The published 5090 component reports a same-path double-build match (661 artifacts / 3 package
 outputs), not a renewed v0.16.0 reproducibility exception. Its published-image lane receipt,
-both native qualifications/cuts, all fresh product/client/restore observations, exact-subject
-reviews, immutable pins and founder-owned product publication remain separate gates. No v0.16.0
-runtime proof, acceptance or waiver is relabeled. The held v0.16.1 client-only candidate is not
-the staging base.
+both native 15-phase qualifications/cuts, fit proofs and zero-difference 1,120-prompt quality
+screens are bound, along with 3/3 upgrade/rollback/repair scenarios per native lane.
+Native no-regression versus published beta.1 uses the explicit founder rule weighted ≥0.98 /
+every case ≥0.95 / byte-identical normalized outputs, superseding the earlier 1.08 floor:
+RTX 3090 weighted **1.0003**, min **0.9988**, **84/84** identical; RTX 4090 **0.9996**,
+min **0.9989**, **115/115** identical. Original failed agent measurements remain under
+exact-subject waivers (`restore_0`, `restore_1`, sibling position 1 `base`); native parity has
+82/83 measured passes per lane, and RTX 5090 has 88/88 judged rather than a strict pass.
+The [release notes](../releases/v0.16.2/NINFER_RELEASE_NOTES.md) bind the original waiver/decision
+hashes and disclose RTX 4090's uncapped-power-assertion-only rehearsal harness copy.
+Follow-ups remain [runtime #87](https://github.com/alphastorm/ninfer/issues/87) /
+[native tooling #88](https://github.com/alphastorm/ninfer/issues/88).
+
+Fresh candidate-bound product/client/public-install/restoration acceptance, exact-subject review
+binding, final composition/pins and founder-owned product publication remain pending. No v0.16.0
+runtime proof, acceptance or waiver is relabeled; the held v0.16.1 client-only candidate is not the staging base.
 
 The selected upstream release is `v18.15.0` (release `430630500`, source
 `3fedf8d53267e32a6d7521ce725fdcc4a36fdc67`, tree

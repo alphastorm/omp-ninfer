@@ -1,0 +1,44 @@
+{
+  "artifact_type": "omp_ninfer_founder_gate_decision",
+  "schema_version": 1,
+  "recorded_utc": "2026-11-04T01:45:08.685839+00:00",
+  "decision": "Founder selected the native no-regression rule against the published beta.1 incumbent for this release.",
+  "release": "v0.16.2",
+  "source_commit": "a87de3613c17bced777b446fb545f872d8395ec1",
+  "candidate_components": [
+    "v0.8.0-qwen38-3090-beta.2",
+    "v0.8.0-qwen38-4090-beta.2"
+  ],
+  "incumbent_components": [
+    "v0.8.0-qwen38-3090-beta.1",
+    "v0.8.0-qwen38-4090-beta.1"
+  ],
+  "rule": {
+    "weighted_decode_ratio_minimum": 0.98,
+    "every_case_ratio_minimum": 0.95,
+    "byte_identical_normalized_outputs": "required for every case (A0/A3, B1/B2, A0/B1)",
+    "applies_to": [
+      "role weighted",
+      "all-cases weighted",
+      "every case"
+    ]
+  },
+  "superseded": {
+    "rule": "weighted >= 1.08 and every case >= 0.95",
+    "scope": "The earlier 1.08 weighted speedup floor belonged to the prior MTP3-to-DFlash2 release comparison, not this same-backend no-regression gate."
+  },
+  "first_application": {
+    "lane": "rtx4090",
+    "evidence_sha256": "d545d706b0dd4ad493f0d784cc4244e3c12604381d39373427e411758d2b96b9",
+    "role_weighted": 0.9995778248449502,
+    "all_weighted": 0.9996281434580012,
+    "minimum_case": 0.9988670027551729,
+    "cases": 115,
+    "byte_identical_cases": 115,
+    "rerun": false
+  },
+  "provenance": {
+    "source_sha256": "3d9f77cd5a7099b68ec59c8f7ca56765317a9ee7352c3a6705a755fe5902b104",
+    "projection": "Private decision-context and evidence-path strings omitted. Comparator, thresholds, measured values and no-rerun record preserved."
+  }
+}

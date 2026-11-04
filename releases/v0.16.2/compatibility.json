@@ -3,15 +3,15 @@
   "authority_id": "omp-ninfer-v0.7.3-qualified-1",
   "product_release": "v0.16.2",
   "composition": {
-    "status": "v0.16.2 pre-native draft: RTX 5090 beta.5 lane bound; native beta.1 files are quarantined predecessor material, not current qualification",
+    "status": "v0.16.2 runtime lanes bound: published RTX 5090 beta.5 and native beta.2 at common source a87de361; stock OMP 18.15.0 product acceptance remains pending",
     "lifecycle_repository": "https://github.com/can1357/oh-my-pi",
     "lifecycle_source_release": "https://github.com/can1357/oh-my-pi/releases/tag/v18.15.0",
     "lifecycle_source_commit": "3fedf8d53267e32a6d7521ce725fdcc4a36fdc67",
     "ninfer_lifecycle_source_commit": "a87de3613c17bced777b446fb545f872d8395ec1",
     "request_compatibility_source_commit": "3fedf8d53267e32a6d7521ce725fdcc4a36fdc67",
     "blockers": [
-      "Both native beta.2 qualification/public cuts and authenticated bindings remain pending; beta.1 rows and receipts below are quarantined, preview and non-installable.",
-      "Remaining RTX 5090 probes, fresh stock OMP 18.15.0 external-install acceptance and exact-subject runtime/product reviews remain pending."
+      "Fresh candidate-bound stock OMP 18.15.0 five-route and both native public-install acceptance, with independent restoration, remain pending.",
+      "Exact-subject runtime/product review binding, final composition and immutable pins, strict ready verification and founder-owned publication remain pending."
     ],
     "composed_source_commit": "3fedf8d53267e32a6d7521ce725fdcc4a36fdc67"
   },
@@ -45,7 +45,7 @@
         "Strict origin authentication is mandatory. MACs authenticate origin/content, not monotonic freshness.",
         "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and never share the principal among mutually untrusted clients.",
         "Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.",
-        "The published RTX 5090 beta.5 lane is bound separately. Native beta.1 files are quarantined predecessor evidence, not current beta.2 qualification; no predecessor runtime proof, review approval or founder waiver transfers.",
+        "The F2 runtime components retain serving shapes; no predecessor runtime proof or founder waiver is current evidence.",
         "Fresh stock OMP 18.15.0 and five-route acceptance must bind one frozen candidate. macOS remains preview and Linux is WSL2-scoped."
       ],
       "blockers": [
@@ -148,7 +148,7 @@
         "Strict origin authentication is mandatory. MACs authenticate origin/content, not monotonic freshness.",
         "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and never share the principal among mutually untrusted clients.",
         "Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.",
-        "The published RTX 5090 beta.5 lane is bound separately. Native beta.1 files are quarantined predecessor evidence, not current beta.2 qualification; no predecessor runtime proof, review approval or founder waiver transfers.",
+        "The F2 runtime components retain serving shapes; no predecessor runtime proof or founder waiver is current evidence.",
         "Fresh stock OMP 18.15.0 and five-route acceptance must bind one frozen candidate. macOS remains preview and Linux is WSL2-scoped."
       ],
       "blockers": [
@@ -251,7 +251,7 @@
         "Strict origin authentication is mandatory. MACs authenticate origin/content, not monotonic freshness.",
         "Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and never share the principal among mutually untrusted clients.",
         "Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.",
-        "The published RTX 5090 beta.5 lane is bound separately. Native beta.1 files are quarantined predecessor evidence, not current beta.2 qualification; no predecessor runtime proof, review approval or founder waiver transfers.",
+        "The F2 runtime components retain serving shapes; no predecessor runtime proof or founder waiver is current evidence.",
         "Fresh stock OMP 18.15.0 and five-route acceptance must bind one frozen candidate. macOS remains preview and Linux is WSL2-scoped."
       ],
       "blockers": [
@@ -329,25 +329,24 @@
   "runtime_variants": [
     {
       "id": "rtx3090-windows-native",
-      "status": "preview",
+      "status": "qualified",
       "platform": "Windows 11 x64",
       "gpu": "NVIDIA GeForce RTX 3090",
       "cuda_architecture": "sm_86",
       "installation_mode": "native-windows-package",
-      "installable": false,
+      "installable": true,
       "silent_cloud_fallback": false,
-      "release_tag": "v0.8.0-qwen38-3090-beta.1",
-      "source_commit": "26fa28d0e7834515508fc07ac503164a6effc820",
-      "package_name": "ninfer-rtx3090-native-v0.8.0-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz",
-      "package_url": "https://github.com/alphastorm/ninfer/releases/download/v0.8.0-qwen38-3090-beta.1/ninfer-rtx3090-native-v0.8.0-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz",
-      "package_sha256": "040d5923192a969dcb04bb63ff5c931f80bcf9a92f1f769f08e49e2121ad0e20",
-      "package_bytes": 1008976979,
+      "release_tag": "v0.8.0-qwen38-3090-beta.2",
+      "source_commit": "a87de3613c17bced777b446fb545f872d8395ec1",
+      "package_name": "ninfer-rtx3090-native-v0.8.0-beta.2-windows-x86_64-cuda13.3-rtx3090.tar.gz",
+      "package_url": "https://github.com/alphastorm/ninfer/releases/download/v0.8.0-qwen38-3090-beta.2/ninfer-rtx3090-native-v0.8.0-beta.2-windows-x86_64-cuda13.3-rtx3090.tar.gz",
+      "package_sha256": "97a8e6340397d6a925cbabc6ffbb6f219a4b00f19b2f5d8e4be6cd14d41f3ed9",
+      "package_bytes": 1008989809,
       "maximum_context_tokens": 131072,
       "qualification_receipt": {
         "path": "releases/v0.16.2/qualification/rtx3090.json",
         "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/9e2697b09ed40083799e15de0a1a85258793bb9a/releases/v0.16.2/qualification/rtx3090.json",
-        "sha256": "48c7f63572e38b279dcc941c9f1a2acbf858ec95f1ffe3f0eb8bbc20a8111702",
-        "scope": "Quarantined v0.16.0 beta.1 predecessor material, retained only for existing-lane binder structure. It is not current runtime qualification; authenticated beta.2 package, lane, screen, fit, speed and publication binding remain pending."
+        "sha256": "b742870ef0df32d4aa02657ddf3111be39e4b6823a8dd6b2a70237c251f5c39a"
       },
       "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/1cbd84e7221e51186bd7f093a149912d2489625b/qwen3_8_27b.ninfer",
       "model_bytes": 20437521664,
@@ -370,25 +369,24 @@
     },
     {
       "id": "rtx4090-windows-native",
-      "status": "preview",
+      "status": "qualified",
       "platform": "Windows 11 x64",
       "gpu": "NVIDIA GeForce RTX 4090",
       "cuda_architecture": "sm_89",
       "installation_mode": "native-windows-package",
-      "installable": false,
+      "installable": true,
       "silent_cloud_fallback": false,
-      "release_tag": "v0.8.0-qwen38-4090-beta.1",
-      "source_commit": "26fa28d0e7834515508fc07ac503164a6effc820",
-      "package_name": "ninfer-rtx4090-native-v0.8.0-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz",
-      "package_url": "https://github.com/alphastorm/ninfer/releases/download/v0.8.0-qwen38-4090-beta.1/ninfer-rtx4090-native-v0.8.0-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz",
-      "package_sha256": "06526bdb630a87c860ceb0eaafb633df867181b596648897cb5a64a92e268f27",
-      "package_bytes": 991969490,
+      "release_tag": "v0.8.0-qwen38-4090-beta.2",
+      "source_commit": "a87de3613c17bced777b446fb545f872d8395ec1",
+      "package_name": "ninfer-rtx4090-native-v0.8.0-beta.2-windows-x86_64-cuda13.3-rtx4090.tar.gz",
+      "package_url": "https://github.com/alphastorm/ninfer/releases/download/v0.8.0-qwen38-4090-beta.2/ninfer-rtx4090-native-v0.8.0-beta.2-windows-x86_64-cuda13.3-rtx4090.tar.gz",
+      "package_sha256": "d9b10b47f1e7fad8413dc95347dbdd11d91636aec11552c29c1dc94246ca6d5b",
+      "package_bytes": 991981865,
       "maximum_context_tokens": 131072,
       "qualification_receipt": {
         "path": "releases/v0.16.2/qualification/rtx4090.json",
         "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/9e2697b09ed40083799e15de0a1a85258793bb9a/releases/v0.16.2/qualification/rtx4090.json",
-        "sha256": "69ebf60c3b4bee7a32ec92bc282c9a7ec6b735cc75cad822f041c5e89e35fb77",
-        "scope": "Quarantined v0.16.0 beta.1 predecessor material, retained only for existing-lane binder structure. It is not current runtime qualification; authenticated beta.2 package, lane, screen, fit, speed and publication binding remain pending."
+        "sha256": "254167f25f663c7d0774ee51cccf8d63b93b07489fbc1ca114fb6b63a71cdd74"
       },
       "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/1cbd84e7221e51186bd7f093a149912d2489625b/qwen3_8_27b.ninfer",
       "model_bytes": 20437521664,
@@ -419,15 +417,15 @@
       "request_log_schema_version": 30
     },
     {
-      "lane": "RTX 4090 native Windows v0.8.0-beta.2 target",
-      "json_schema": "Pending current authenticated native qualification. The quarantined beta.1 receipt does not qualify the beta.2 target.",
+      "lane": "RTX 4090 native Windows v0.8.0-beta.2",
+      "json_schema": "Bound by the current exact-source lane product-protocol receipt; candidate-bound external-install acceptance is separate.",
       "tool_name_max_characters": 128,
       "status_schema_version": 2,
       "request_log_schema_version": 30
     },
     {
-      "lane": "RTX 3090 native Windows v0.8.0-beta.2 target",
-      "json_schema": "Pending current authenticated native qualification. The quarantined beta.1 receipt does not qualify the beta.2 target.",
+      "lane": "RTX 3090 native Windows v0.8.0-beta.2",
+      "json_schema": "Bound by the current exact-source lane product-protocol receipt; candidate-bound external-install acceptance is separate.",
       "tool_name_max_characters": 128,
       "status_schema_version": 2,
       "request_log_schema_version": 30

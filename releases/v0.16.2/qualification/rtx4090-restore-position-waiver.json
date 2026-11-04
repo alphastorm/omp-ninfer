@@ -1,0 +1,45 @@
+{
+  "artifact_type": "omp_ninfer_founder_gate_waiver",
+  "schema_version": 1,
+  "recorded_utc": "2026-11-03T14:47:31.897842+00:00",
+  "decision": "Founder waived only the named original failed position with disclosure; every other gate and measured result remains unchanged.",
+  "lane": "rtx4090",
+  "subject": {
+    "component": "v0.8.0-qwen38-4090-beta.2",
+    "source": "a87de3613c17bced777b446fb545f872d8395ec1",
+    "package": "ninfer-rtx4090-native-v0.8.0-beta.2-windows-x86_64-cuda13.3-rtx4090.tar.gz",
+    "server_sha256": "ffee91bf17c261ae9b85791fc52528f7f1ef5c985c4d55feb7ee65174c96c73d",
+    "package_sha256": "d9b10b47f1e7fad8413dc95347dbdd11d91636aec11552c29c1dc94246ca6d5b"
+  },
+  "waived": [
+    {
+      "probe": "two-restart restore",
+      "position": 4,
+      "label": "restore_1",
+      "rule": "p16-agent-parity/2 candidate cached-minus-prompt >= incumbent",
+      "incumbent_prompt_tokens": 58327,
+      "incumbent_cached_tokens": 58279,
+      "incumbent_cached_minus_prompt": -48,
+      "candidate_prompt_tokens": 58539,
+      "candidate_cached_tokens": 58487,
+      "candidate_cached_minus_prompt": -52,
+      "incumbent_ttft_s": 0.5589493,
+      "candidate_ttft_s": 0.642947,
+      "ttft_within_bound": true
+    }
+  ],
+  "raw_verdict": {
+    "passed": false,
+    "evidence_sha256": {
+      "agent-verdict.json": "5948ecee8dc28ff0bc8360e57c4723062053d1a8adf2c54f30b42f0aa1d4bfaf",
+      "agent-comparison.json": "3e573c07e56670fdb54d20f8f4efaf3dea6180b8a937c73baed4238c4e20e680"
+    }
+  },
+  "context": "The candidate cached-minus-prompt gap is four tokens below the incumbent; server TTFT stayed within its bound. The incumbent is a hash-proved reused published beta.1 capture, not a fresh paired run.",
+  "application_rule": "Apply only to the exact recorded component, server, position, rule and measured values; another failure or changed value fails closed. Publication of the same package does not rewrite its pre-cut measurement.",
+  "provenance": {
+    "source_sha256": "01168224aa581cc45cd4fc8505c247c8497180f3e1439e6607b497befed9ee44",
+    "projection": "Private window identifiers and decision-context strings omitted. Exact original measurements, rules and failed verdict retained. Original candidate-component annotation is pre-cut; the independently authenticated current package hash binds the subsequently published identical package."
+  },
+  "disclosure_required": "release notes must disclose this waived restore position with its measured values"
+}

@@ -3,9 +3,9 @@
   "schema_version": 1,
   "status": "passed",
   "identity": {
-    "package_sha256": "06526bdb630a87c860ceb0eaafb633df867181b596648897cb5a64a92e268f27",
-    "server_binary_sha256": "c6f59e9e7da2fafb8c2ded9e2cfaa63d8be5c9a91e4dbf615af42ffb4698be71",
-    "configuration_sha256": "f00cfac96000cf6f4e11676242d09e7a3bfdefba1d5e6b768a6c4ab7785ddbc5",
+    "package_sha256": "d9b10b47f1e7fad8413dc95347dbdd11d91636aec11552c29c1dc94246ca6d5b",
+    "server_binary_sha256": "ffee91bf17c261ae9b85791fc52528f7f1ef5c985c4d55feb7ee65174c96c73d",
+    "configuration_sha256": "ae27dc446634048cec913fd42efc5971fb0ad950eed154ecce6aaa981eec4c9b",
     "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
   },
   "runtime_shape": {

@@ -3,7 +3,7 @@
 
 Authority: `omp-ninfer-v0.7.3-qualified-1`
 Product release: `v0.16.2`
-Composition: **v0.16.2 pre-native draft: RTX 5090 beta.5 lane bound; native beta.1 files are quarantined predecessor material, not current qualification**
+Composition: **v0.16.2 runtime lanes bound: published RTX 5090 beta.5 and native beta.2 at common source a87de361; stock OMP 18.15.0 product acceptance remains pending**
 
 Client status is independent from each GPU runtime qualification. `preview` is not a support claim.
 
@@ -19,13 +19,13 @@ These variants use the same OMP clients but own separate native runtime packages
 
 | Variant | Platform | GPU | CUDA | Context | Status | Installable | Installation | Qualification |
 | --- | --- | --- | --- | ---: | --- | --- | --- | --- |
-| rtx3090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 3090 | sm_86 | 131,072 | **preview** | no | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/9e2697b09ed40083799e15de0a1a85258793bb9a/releases/v0.16.2/qualification/rtx3090.json) |
-| rtx4090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 4090 | sm_89 | 131,072 | **preview** | no | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/9e2697b09ed40083799e15de0a1a85258793bb9a/releases/v0.16.2/qualification/rtx4090.json) |
+| rtx3090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 3090 | sm_86 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/9e2697b09ed40083799e15de0a1a85258793bb9a/releases/v0.16.2/qualification/rtx3090.json) |
+| rtx4090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 4090 | sm_89 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/9e2697b09ed40083799e15de0a1a85258793bb9a/releases/v0.16.2/qualification/rtx4090.json) |
 
 Package bindings:
 
-- `rtx3090-windows-native`: component `v0.8.0-qwen38-3090-beta.1`; package [`ninfer-rtx3090-native-v0.8.0-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz`](https://github.com/alphastorm/ninfer/releases/download/v0.8.0-qwen38-3090-beta.1/ninfer-rtx3090-native-v0.8.0-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz); SHA-256 `040d5923192a969dcb04bb63ff5c931f80bcf9a92f1f769f08e49e2121ad0e20`; 1,008,976,979 bytes.
-- `rtx4090-windows-native`: component `v0.8.0-qwen38-4090-beta.1`; package [`ninfer-rtx4090-native-v0.8.0-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz`](https://github.com/alphastorm/ninfer/releases/download/v0.8.0-qwen38-4090-beta.1/ninfer-rtx4090-native-v0.8.0-beta.1-windows-x86_64-cuda13.3-rtx4090.tar.gz); SHA-256 `06526bdb630a87c860ceb0eaafb633df867181b596648897cb5a64a92e268f27`; 991,969,490 bytes.
+- `rtx3090-windows-native`: component `v0.8.0-qwen38-3090-beta.2`; package [`ninfer-rtx3090-native-v0.8.0-beta.2-windows-x86_64-cuda13.3-rtx3090.tar.gz`](https://github.com/alphastorm/ninfer/releases/download/v0.8.0-qwen38-3090-beta.2/ninfer-rtx3090-native-v0.8.0-beta.2-windows-x86_64-cuda13.3-rtx3090.tar.gz); SHA-256 `97a8e6340397d6a925cbabc6ffbb6f219a4b00f19b2f5d8e4be6cd14d41f3ed9`; 1,008,989,809 bytes.
+- `rtx4090-windows-native`: component `v0.8.0-qwen38-4090-beta.2`; package [`ninfer-rtx4090-native-v0.8.0-beta.2-windows-x86_64-cuda13.3-rtx4090.tar.gz`](https://github.com/alphastorm/ninfer/releases/download/v0.8.0-qwen38-4090-beta.2/ninfer-rtx4090-native-v0.8.0-beta.2-windows-x86_64-cuda13.3-rtx4090.tar.gz); SHA-256 `d9b10b47f1e7fad8413dc95347dbdd11d91636aec11552c29c1dc94246ca6d5b`; 991,981,865 bytes.
 - `rtx3090-windows-native` model: [artifact](https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/1cbd84e7221e51186bd7f093a149912d2489625b/qwen3_8_27b.ninfer); SHA-256 `81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da`; 20,437,521,664 bytes.
 - `rtx4090-windows-native` model: [artifact](https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/1cbd84e7221e51186bd7f093a149912d2489625b/qwen3_8_27b.ninfer); SHA-256 `81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da`; 20,437,521,664 bytes.
 
@@ -36,8 +36,8 @@ A candidate implementation is not a qualification claim; JSON-schema support fli
 | Lane | JSON-schema structured output | Tool-name limit | Status schema | Request-log schema |
 | --- | --- | ---: | ---: | ---: |
 | RTX 5090 beta.5 container | Bound by the current exact-source lane product-protocol receipt; candidate-bound external-install acceptance is separate. | 128 | 2 | 30 |
-| RTX 4090 native Windows v0.8.0-beta.2 target | Pending current authenticated native qualification. The quarantined beta.1 receipt does not qualify the beta.2 target. | 128 | 2 | 30 |
-| RTX 3090 native Windows v0.8.0-beta.2 target | Pending current authenticated native qualification. The quarantined beta.1 receipt does not qualify the beta.2 target. | 128 | 2 | 30 |
+| RTX 4090 native Windows v0.8.0-beta.2 | Bound by the current exact-source lane product-protocol receipt; candidate-bound external-install acceptance is separate. | 128 | 2 | 30 |
+| RTX 3090 native Windows v0.8.0-beta.2 | Bound by the current exact-source lane product-protocol receipt; candidate-bound external-install acceptance is separate. | 128 | 2 | 30 |
 
 ## Profile boundaries
 
@@ -50,7 +50,7 @@ Limitations:
 - Strict origin authentication is mandatory. MACs authenticate origin/content, not monotonic freshness.
 - Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and never share the principal among mutually untrusted clients.
 - Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.
-- The published RTX 5090 beta.5 lane is bound separately. Native beta.1 files are quarantined predecessor evidence, not current beta.2 qualification; no predecessor runtime proof, review approval or founder waiver transfers.
+- The F2 runtime components retain serving shapes; no predecessor runtime proof or founder waiver is current evidence.
 - Fresh stock OMP 18.15.0 and five-route acceptance must bind one frozen candidate. macOS remains preview and Linux is WSL2-scoped.
 
 Blockers:
@@ -65,7 +65,7 @@ Limitations:
 - Strict origin authentication is mandatory. MACs authenticate origin/content, not monotonic freshness.
 - Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and never share the principal among mutually untrusted clients.
 - Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.
-- The published RTX 5090 beta.5 lane is bound separately. Native beta.1 files are quarantined predecessor evidence, not current beta.2 qualification; no predecessor runtime proof, review approval or founder waiver transfers.
+- The F2 runtime components retain serving shapes; no predecessor runtime proof or founder waiver is current evidence.
 - Fresh stock OMP 18.15.0 and five-route acceptance must bind one frozen candidate. macOS remains preview and Linux is WSL2-scoped.
 
 Blockers:
@@ -80,7 +80,7 @@ Limitations:
 - Strict origin authentication is mandatory. MACs authenticate origin/content, not monotonic freshness.
 - Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and never share the principal among mutually untrusted clients.
 - Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.
-- The published RTX 5090 beta.5 lane is bound separately. Native beta.1 files are quarantined predecessor evidence, not current beta.2 qualification; no predecessor runtime proof, review approval or founder waiver transfers.
+- The F2 runtime components retain serving shapes; no predecessor runtime proof or founder waiver is current evidence.
 - Fresh stock OMP 18.15.0 and five-route acceptance must bind one frozen candidate. macOS remains preview and Linux is WSL2-scoped.
 
 Blockers:
@@ -88,5 +88,5 @@ Blockers:
 
 ## Composition blockers
 
-- Both native beta.2 qualification/public cuts and authenticated bindings remain pending; beta.1 rows and receipts below are quarantined, preview and non-installable.
-- Remaining RTX 5090 probes, fresh stock OMP 18.15.0 external-install acceptance and exact-subject runtime/product reviews remain pending.
+- Fresh candidate-bound stock OMP 18.15.0 five-route and both native public-install acceptance, with independent restoration, remain pending.
+- Exact-subject runtime/product review binding, final composition and immutable pins, strict ready verification and founder-owned publication remain pending.

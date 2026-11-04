@@ -7,11 +7,13 @@ the held v0.16.1 client-only candidate. Published installation remains **v0.16.0
 [immutable guide](https://github.com/alphastorm/omp-ninfer/blob/v0.16.0/docs/QUICKSTART.md)
 until founder-owned publication of this release.
 
-The target composition is RTX 5090 `v0.7.0-qwen38-5090-beta.5`, native Windows RTX 3090 and
+The bound composition is RTX 5090 `v0.7.0-qwen38-5090-beta.5`, native Windows RTX 3090 and
 RTX 4090 `v0.8.0-qwen38-{3090,4090}-beta.2`, and unmodified upstream **Oh My Pi 18.15.0**.
-All runtime components target source `a87de3613c17bced777b446fb545f872d8395ec1` on upstream
-`64d10fbf9f8e6bfc79ab0570b94674c5b9997929`. The RTX 5090 component is published; the native
-component cuts and exact-source native qualification are not complete. No predecessor runtime,
+All runtime components bind source `a87de3613c17bced777b446fb545f872d8395ec1` on upstream
+`64d10fbf9f8e6bfc79ab0570b94674c5b9997929`. All three components are published; both native
+15-phase qualifications, quality screens, fit proofs, no-regression speed gates and separate
+upgrade/rollback/repair rehearsals are bound to their actual subjects below. The three exact
+founder-waived agent positions retain their failed measurements. No predecessor runtime,
 client execution, product-route acceptance, review approval or waiver transfers to these bytes.
 
 The shared published model v3 and serving shapes stay unchanged. The RTX 5090 keeps deployment
@@ -31,7 +33,8 @@ are the source authorities, not the v0.16.0 measurements.
   storage and protected through publication. This addresses
   [the Host-capacity reclaim issue](https://github.com/alphastorm/ninfer/issues/78) through
   [the implementation and remediations](https://github.com/alphastorm/ninfer/pull/82)
-  (`aa9023f5`). It does not promise that every save succeeds under pressure, or that a crash
+  (`aa9023f5`), including the managed-Stop incomplete-shutdown failure after a capacity-refused
+  final save. It does not promise that every save succeeds under pressure, or that a crash
   preserves work that was never saved.
 - **Reserve export retirement before taking the export lease** (`aaf6c2d0`,
   [#68](https://github.com/alphastorm/ninfer/pull/68)).
@@ -44,7 +47,8 @@ are the source authorities, not the v0.16.0 measurements.
 - **Native repair and power ownership:** refuse unreadable repair-census executable images
   (`58a5b258`, [#63](https://github.com/alphastorm/ninfer/pull/63)) and restore a prior paused
   owner's power before uninstall (`f25ea97b`, [#65](https://github.com/alphastorm/ninfer/pull/65)).
-  Hardware qualification of the new native packages remains a separate obligation.
+  Both new native packages have current hardware qualification; product-route acceptance remains
+  a separate obligation.
 - **Use state-bound qualification and upgrade-rehearsal drivers**, including failure-ordering,
   cleanup-ownership and probe corrections ([#70](https://github.com/alphastorm/ninfer/pull/70),
   [#73](https://github.com/alphastorm/ninfer/pull/73),
@@ -88,9 +92,15 @@ do not assert a new token-rate, restart-latency or reclaim-cost result.
 The separate [published-image lane receipt](qualification/rtx5090.json), SHA-256
 `bfd0ec1a76c323adf3f58a176112b0731694e7ce69b62aebbf05093cf59a2f22`, passed on the
 published beta.5 image on 2026-11-03. It binds the source, server, model and retained
-configuration above; it does not complete the remaining agent probes or product routes.
+configuration above. The separate agent campaign judged **88/88 positions** (72 same-subject
+carried positions and 16 corrected positions), accepted only under the exact `restore_0` waiver
+below; strict parity remains failed. The stock checkpoint-request census completed with **0**
+ordinary checkpoint POSTs, and cleanup/restoration were verified. The overall corrected-run
+record still says failed because it retains an operator `PermissionError`; the bound
+[observed gates](qualification.json) distinguish that record from probe judgment and do not
+assert an overall-run or product-route pass.
 
-### Restore-position founder waivers and pending native binding
+## Exact-subject founder waivers — original failures retained
 
 - **RTX 5090 first-request-after-restart TTFT (founder waiver on two-restart `restore`):**
   Position **3**, `restore_0`, on `v0.7.0-qwen38-5090-beta.5` exceeded the per-position
@@ -100,18 +110,86 @@ configuration above; it does not complete the remaining agent probes or product 
   ([waiver](qualification/rtx5090-restore-position-waiver.json)); it is not rewritten as a measured
   pass. Every oracle passed and `cached - prompt` was equal at **−48 / −48**.
   This waiver applies only to that one failing position with exactly these values.
-  Every other gate remains binding, and the remaining corrected probes are still pending.
-- **RTX 4090 restore cache-gap waiver — pending exact-package evidence binding:**
-  For the `v0.8.0-qwen38-4090-beta.2` candidate package, two-restart `restore` position
+  Every other gate remains binding; all 88 campaign positions have now been judged.
+- **RTX 4090 restore cache-gap waiver:**
+  On the now-authenticated and published `v0.8.0-qwen38-4090-beta.2` package, two-restart `restore` position
   **4**, `restore_1`, recorded `cached - prompt` **−52** candidate versus **−48**
   incumbent, below the rule `candidate >= incumbent`. Candidate prompt/cached tokens
   were **58,539 / 58,487**, versus incumbent **58,327 / 58,279**. Server TTFT was
   **0.642947 s** candidate versus **0.5589493 s** incumbent and stayed within its bound.
-  The founder waived only this cache-gap failure with disclosure; the incumbent
-  capture is hash-proved reused evidence for the published beta.1 package, not a fresh
-  paired run. **Native qualification completion, publication and authenticated beta.2
-  receipt binding remain pending.** No native gate pass or published-package acceptance
-  is inferred from this marker; any other failure or changed value fails closed.
+  The [founder waiver](qualification/rtx4090-restore-position-waiver.json) covers only this
+  cache-gap failure: **82/83** positions measured pass, one failed and was waived. The original
+  pre-cut measurement is bound to the identical subsequently published package, not relabeled
+  as a public-URL install.
+- **RTX 3090 sibling first-request TTFT waiver:**
+  Sibling probe position **1**, labeled **`base`**, measured **0.4975294 s** candidate versus
+  **0.2144353 s** incumbent, above the unchanged **0.4644353 s** bound by **0.0330941 s**.
+  Both arms used **66 prompt / 0 cached tokens**. The
+  [founder waiver](qualification/rtx3090-sibling-position-waiver.json) covers only that failure:
+  **82/83** positions measured pass, one failed and was waived. The waiver record's
+  `sibling1` shorthand denotes position 1, not the later position labeled `sibling_1`, which passed.
+
+Both native comparisons use hash-proved reused captures from the published beta.1 incumbents,
+not fresh paired incumbent runs. All original verdicts, thresholds and measured values remain
+unchanged; a different failing set or value is outside these waivers. The content-safe projections
+omit private execution identifiers and bind the original founder records by SHA-256:
+
+| Founder record / public projection | Original record SHA-256 |
+| --- | --- |
+| [RTX 5090 restore waiver](qualification/rtx5090-restore-position-waiver.json) | `b8dac132b30d874a3112bdd2064f07dba961c234dec854ea430f8f4ca7b5a231` |
+| [RTX 4090 restore waiver](qualification/rtx4090-restore-position-waiver.json) | `01168224aa581cc45cd4fc8505c247c8497180f3e1439e6607b497befed9ee44` |
+| [RTX 3090 sibling waiver](qualification/rtx3090-sibling-position-waiver.json) | `edc7f2265c4b30348054cb5c960c4f43c4013ee6a90ac8ec9db4f67ba67c5f5e` |
+| [Native no-regression speed decision](qualification/native-speed-decision.json) | `3d9f77cd5a7099b68ec59c8f7ca56765317a9ee7352c3a6705a755fe5902b104` |
+| [RTX 4090 rehearsal-harness decision](qualification/rtx4090-rehearsal-harness-decision.json) | `c169000bc662526c7097e9ddd3fa38afd7d7db6a580aff2b5dd3108b4e09e0c7` |
+
+## Published native beta.2 qualification and no-regression evidence
+
+The [native publication receipt](qualification/native-publication.json) binds both published
+beta.2 cuts, each with a closed **10-entry checksum set / 11 distribution files**:
+
+| Lane | Package SHA-256 / bytes | Server SHA-256 | Public configuration SHA-256 |
+| --- | --- | --- | --- |
+| RTX 3090 | `97a8e6340397d6a925cbabc6ffbb6f219a4b00f19b2f5d8e4be6cd14d41f3ed9` / 1,008,989,809 | `15a4db46db09dce695f1c55a9996b30408fa93ed864d881872f9ae7306fbab0f` | `238ccad7ba6dca673d845c183b6c3de3a49bd2ce75090f20f669b2d6f83dda6f` |
+| RTX 4090 | `d9b10b47f1e7fad8413dc95347dbdd11d91636aec11552c29c1dc94246ca6d5b` / 991,981,865 | `ffee91bf17c261ae9b85791fc52528f7f1ef5c985c4d55feb7ee65174c96c73d` | `ae27dc446634048cec913fd42efc5971fb0ad950eed154ecce6aaa981eec4c9b` |
+
+Both [RTX 3090](qualification/rtx3090.json) and [RTX 4090](qualification/rtx4090.json)
+completed their **15-phase native chain**. Those managed chains ran isolated packages differing
+only in `listen.port`, not the public port-18082 packages; the scratch-lineage rollback remains
+`not_applicable`. Separate quality and predecessor-upgrade scenarios used the public packaged
+port. Neither proves the later candidate-bound public-URL product install.
+
+The current **1,120-prompt powered quality screens**
+([RTX 3090](qualification/rtx3090-windows-native.quality-screen.json),
+[RTX 4090](qualification/rtx4090-windows-native.quality-screen.json)) pass all primary bounds
+with **zero paired metric difference** against published beta.1, and both arms have **80/80**
+fresh-cache determinism with no missing or errored samples. Zero difference is not a claim of
+zero secret leakage. The authenticated release-local fit proofs are also bound.
+
+The founder-selected speed rule is **no regression against published beta.1**:
+role-weighted and all-case-weighted decode ratios **≥0.98**, **every case ≥0.95**, and
+byte-identical normalized outputs in all required within-build and cross-build ABBA pairings.
+This explicitly supersedes the earlier **1.08** weighted speedup floor inherited from the
+prior MTP3-to-DFlash2 comparison; it is not a retroactive pass under that superseded rule.
+
+| Current speed gate | Weighted decode ratio | Minimum case | Byte-identical normalized outputs |
+| --- | ---: | ---: | ---: |
+| [RTX 3090, 84 depth-0 role cases](qualification/rtx3090-speed.json) | **1.0003** (1.0002518490) | **0.9988** (0.9987703200) | **84/84** |
+| [RTX 4090, 108 role + 7 supplemental cases](qualification/rtx4090-speed.json) | **0.9996** (role 0.9995778248; all 0.9996281435) | **0.9989** (0.9988670028) | **115/115** |
+
+Both pass that rule without a speed waiver. These are same-backend no-regression results,
+not a new speedup, reclaim-cost or general latency claim.
+
+Separate **running-upgrade / forced-start rollback / interrupted-install repair** rehearsals
+passed and restored on both native lanes (**3/3 scenarios each**), bound in
+[observed gates](qualification.json). RTX 3090 used the unmodified source harness. RTX 4090 used
+a founder-approved private `Invoke-UpgradeRehearsal.ps1` copy changing **only uncapped-power
+assertions** to require `outer.qualified_power_limit_w == 0` and
+`Power() == owner_power_limit_w`; every other assertion was unchanged. The original harness
+SHA-256 is `0e673f07a9458d5b6440b8255d925141ab689cb0cdcd0cdb79f98680b7f4f710`.
+This is a disclosed qualification-harness fix, not a change to the shipped runtime or a weakened
+product gate. Follow-ups remain [runtime-council deferrals #87](https://github.com/alphastorm/ninfer/issues/87)
+and [native tooling defects #88](https://github.com/alphastorm/ninfer/issues/88); neither issue
+substitutes for the release's still-pending exact-subject review binding.
 
 ## Stock OMP 18.15.0
 
@@ -167,7 +245,7 @@ The shared model remains published container v3, **20,437,521,664 bytes**, revis
 
 Native lanes remain UUID-bound and serve sequentially on port **18082**. `Group64` A8 and FP32
 head logits stay off. Running-lane upgrade, forced-start rollback and interrupted-install repair
-must be re-exercised with the new packages; no historical stop-first workaround is reintroduced.
+have current beta.2 evidence as scoped above; no historical stop-first workaround is reintroduced.
 For the container upgrade, stop an incumbent with the matching published v0.16.0 stop script,
 not a successor script whose product identity differs. The v0.16.1 client-only instruction to
 keep the running container is inapplicable because this release changes the server binary.
@@ -175,9 +253,9 @@ keep the running container is inapplicable because this release changes the serv
 The [v0.16.0 notes](../v0.16.0/NINFER_RELEASE_NOTES.md) retain their original measurements and
 waivers: RTX 4090 `log-024@0` speed, two RTX 5090 first-request-after-restart latency misses and
 the RTX 5090 second-build exception. None is renewed for v0.16.2 by copying its receipt.
-The native beta.1 files retained in this draft are explicitly quarantined predecessor
-material in the [receipt audit](qualification/receipt-audit.json), not current beta.2
-qualification. Both native rows remain preview and non-installable until fresh binding.
+The [receipt audit](qualification/receipt-audit.json) replaces the quarantined beta.1 native
+subjects with authenticated current beta.2 bytes. Both native rows are qualified/installable for
+the lane candidate; runtime eligibility does not grant public product acceptance or publication.
 
 ## Outstanding qualification and release gates
 
@@ -186,17 +264,12 @@ not prose substitutions in these notes. Before final composition, the release au
 the actual new evidence and remove the corresponding outstanding-gate disclosure only when
 its bound receipt exists:
 
-- Remaining current-incumbent parity/probes, reclaim-path timing and stock-client
-  checkpoint-request observations on the published beta.5 image; the lane receipt
-  itself has passed and the single restore-position waiver is disclosed above.
-- Both exact-source beta.2 native 15-phase qualifications, powered quality screens, fit/probe/
-  concurrency and speed evidence, running-upgrade/rollback/repair, independent restoration,
-  published component cuts and authenticated package identities.
 - One frozen product candidate running all **five routes / 31 executable blocks**, all three
   exact stock OMP clients and both native public-URL installs. Keep C1 RTX 4090 fleet and C2
   RTX 3090 fanout/parallel/compaction obligations; an uninduced boundary is unexercised.
-- Exact-subject runtime and product-tooling reviews, complete receipt/binding audit, immutable
-  evidence pins, both full interpreter suites and strict ready/pin verification.
+- Exact-subject runtime and product-tooling review binding, final composition and immutable
+  evidence pins, and strict ready/pin verification. Component follow-ups #87/#88 are not a
+  product-review or acceptance receipt.
 - Founder-owned product publication. No prepared text or component publication grants it.
 
 macOS remains manual-SSH preview; Linux remains WSL2-scoped, not native Linux OS qualification.

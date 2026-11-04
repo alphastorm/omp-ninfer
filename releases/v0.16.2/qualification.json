@@ -23,14 +23,19 @@
     "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
     "model_artifact_bytes": 20437521664
   },
+  "native_runtime_identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "source_commit": "a87de3613c17bced777b446fb545f872d8395ec1",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+  },
   "composition": {
     "behavioral_qualification": {
       "status": "passed",
       "repository_path": "releases/v0.16.2/qualification/rtx5090.json",
       "sha256": "bfd0ec1a76c323adf3f58a176112b0731694e7ce69b62aebbf05093cf59a2f22",
       "source_commit": "a87de3613c17bced777b446fb545f872d8395ec1",
-      "server_binary_sha256": "cc99a46097b6da5f9ec3ce671a7818d29754013ba520800f756110b9211bb06e",
-      "evidence_scope": "Current published beta.5 image lane receipt only; no predecessor provenance or product-route acceptance transfers."
+      "server_binary_sha256": "cc99a46097b6da5f9ec3ce671a7818d29754013ba520800f756110b9211bb06e"
     },
     "local_release_packaging": {
       "status": "passed",
@@ -52,24 +57,51 @@
       "publication_receipt": {
         "repository_path": "releases/v0.16.2/qualification/runtime-publication.json",
         "sha256": "5ae2f4a161238595d9737cec470dcc55799acbd8c226dbe8cd359aa249c36e5e"
-      },
-      "scope": "Authenticated current published RTX 5090 component and runtime-base receipts; no native publication, runtime-wide eligibility, product acceptance or publication authority is inferred."
+      }
     },
-    "native_runtime_variants": {},
+    "native_runtime_variants": {
+      "rtx3090-windows-native": {
+        "status": "passed",
+        "beta_qualified": true,
+        "installable": true,
+        "repository_path": "releases/v0.16.2/qualification/rtx3090.json",
+        "sha256": "b742870ef0df32d4aa02657ddf3111be39e4b6823a8dd6b2a70237c251f5c39a",
+        "source_commit": "a87de3613c17bced777b446fb545f872d8395ec1",
+        "release_tag": "v0.8.0-qwen38-3090-beta.2",
+        "package_sha256": "97a8e6340397d6a925cbabc6ffbb6f219a4b00f19b2f5d8e4be6cd14d41f3ed9",
+        "configuration_sha256": "238ccad7ba6dca673d845c183b6c3de3a49bd2ce75090f20f669b2d6f83dda6f",
+        "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+        "scope": "Current 15-phase native lane receipt, using a listen.port-only scratch derivative; public-install and predecessor-upgrade observations retain their own actual scopes."
+      },
+      "rtx4090-windows-native": {
+        "status": "passed",
+        "beta_qualified": true,
+        "installable": true,
+        "repository_path": "releases/v0.16.2/qualification/rtx4090.json",
+        "sha256": "254167f25f663c7d0774ee51cccf8d63b93b07489fbc1ca114fb6b63a71cdd74",
+        "source_commit": "a87de3613c17bced777b446fb545f872d8395ec1",
+        "release_tag": "v0.8.0-qwen38-4090-beta.2",
+        "package_sha256": "d9b10b47f1e7fad8413dc95347dbdd11d91636aec11552c29c1dc94246ca6d5b",
+        "configuration_sha256": "ae27dc446634048cec913fd42efc5971fb0ad950eed154ecce6aaa981eec4c9b",
+        "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+        "scope": "Current 15-phase native lane receipt, using a listen.port-only scratch derivative; public-install and predecessor-upgrade observations retain their own actual scopes."
+      }
+    },
     "native_publication": {
-      "status": "pending",
-      "scope": "Current beta.2 public cuts and authenticated publication summary are pending. The copied predecessor file is quarantined and unbound."
+      "repository_path": "releases/v0.16.2/qualification/native-publication.json",
+      "sha256": "dd5a752a2fa81536544d4db929a68418db651cb8c77748b43da40fee3cd3a6f3"
     },
     "external_installation_acceptance": {
       "status": "pending",
       "note": "Fresh candidate-bound external-install acceptance is a separate release gate."
     }
   },
-  "as_of": "2026-11-03",
-  "status": "draft-pending-native-binding",
+  "as_of": "2026-11-04",
+  "status": "runtime-release-eligible",
   "publication_authorized": false,
   "external_installation_qualified": false,
-  "scope": "Current F2 published RTX 5090 beta.5 lane and component identities are bound. Native beta.1 files and manifest/compatibility rows are quarantined historical material, preview and non-installable; no current native gate pass, runtime-wide eligibility, predecessor execution, review approval or waiver is inferred.",
+  "scope": "Current F2 published RTX 5090 and qualified/published native beta.2 lane subjects; model and serving shapes retained, stock OMP 18.15.0 identities selected. No predecessor execution, review approval or waiver transfers.",
+  "interpretation": "Original agent-parity failures remain failures: RTX 5090 restore position 3 restore_0, RTX 4090 restore position 4 restore_1 and RTX 3090 sibling position 1 base have exact-subject founder waivers. The native speed decision changes this release's comparator rule explicitly; it does not rewrite any prior speed result. Product-route acceptance and publication remain pending.",
   "documented_route_acceptance": {
     "status": "pending"
   },
@@ -78,34 +110,147 @@
       "status": "passed",
       "repository_path": "releases/v0.16.2/qualification/rtx5090.json",
       "sha256": "bfd0ec1a76c323adf3f58a176112b0731694e7ce69b62aebbf05093cf59a2f22",
-      "scope": "Current published beta.5 image lane receipt, not remaining agent probes or product-route acceptance."
+      "scope": "Current published beta.5 image lane receipt, not product-route acceptance."
+    },
+    "rtx5090_agent_parity": {
+      "status": "failed-founder-waived",
+      "raw_passed": false,
+      "accepted_under_exact_waiver": true,
+      "judged_positions": 88,
+      "scope": "All 88 positions judged, 72 carried from the same beta.5 subject and 16 new corrected positions. Strict parity retains the sole restore_0 TTFT failure. Probe acceptance under the exact waiver is not an overall-run or product-route pass.",
+      "provenance": {
+        "evidence_name": "probes-summary.json",
+        "evidence_sha256": "3ceb5f484905a24671b0ec4b4c85ed16bdaf3b44efa7c170ba79676ecdec4d2f",
+        "final_summary_sha256": "12a8f0e73692ad195b3f043604d9f247e68c8c36155a90fa9f57d4a94eee4f79",
+        "overall_run_status": "failed",
+        "overall_run_note": "The final summary retains an operator PermissionError despite complete probe judgment, stock census and verified cleanup/restoration. No overall-run pass is asserted."
+      }
     },
     "rtx5090_restore_waiver": {
       "status": "waived-by-founder",
       "repository_path": "releases/v0.16.2/qualification/rtx5090-restore-position-waiver.json",
       "sha256": "b8f6e26409095b3d8a2a5a5ff9af571f3b0440d5282d8804d88f5e91cba1224d",
-      "scope": "Only position 3 restore_0 at candidate TTFT 0.481856409 s, incumbent 0.231568998 s and bound 0.481568998 s; the raw measured failure is unchanged and all other gates remain binding."
+      "scope": "Only restore position 3 restore_0: TTFT 0.481856409 s versus 0.231568998 s, bound 0.481568998 s, excess 0.000287411 s; cached-minus-prompt -48/-48. Original failed measurement preserved."
+    },
+    "rtx3090_agent_parity": {
+      "status": "failed-founder-waived",
+      "raw_passed": false,
+      "accepted_under_exact_waiver": true,
+      "judged_positions": 83,
+      "measured_passed_positions": 82,
+      "scope": "Only sibling probe position 1, labeled base, failed: TTFT 0.4975294 s versus 0.2144353 s and bound 0.4644353 s; prompt/cache 66/0 in both arms. The later label sibling_1 passed. Published beta.1 incumbent evidence is hash-proved reused capture, not a fresh paired run.",
+      "provenance": {
+        "evidence_name": "agent-verdict.json",
+        "evidence_sha256": "958e366b18d3e236ad623841e70bdbed9f4dd3dfbcb39ce721f811ba68ca6677",
+        "waiver_application_sha256": "5bcfea8fed3c7b0f6579ed2cbe158f635140d7018a2e630addec8b505acd58ac"
+      }
+    },
+    "rtx3090_sibling_waiver": {
+      "status": "waived-by-founder",
+      "repository_path": "releases/v0.16.2/qualification/rtx3090-sibling-position-waiver.json",
+      "sha256": "f0c17efe60e7a1bb81702cb63e1c44b149d333d54177369036ffa19e140376a6",
+      "scope": "Only the original sibling position 1 base TTFT failure on the authenticated, subsequently published beta.2 package; no other position or gate is waived."
+    },
+    "rtx4090_agent_parity": {
+      "status": "failed-founder-waived",
+      "raw_passed": false,
+      "accepted_under_exact_waiver": true,
+      "judged_positions": 83,
+      "measured_passed_positions": 82,
+      "scope": "Only restore position 4 restore_1 failed cached-minus-prompt: candidate -52 versus incumbent -48; prompt/cache 58539/58487 versus 58327/58279. TTFT 0.642947 s versus 0.5589493 s stayed within its bound. Published beta.1 incumbent evidence is hash-proved reused capture, not a fresh paired run.",
+      "provenance": {
+        "evidence_name": "agent-verdict.json",
+        "evidence_sha256": "5948ecee8dc28ff0bc8360e57c4723062053d1a8adf2c54f30b42f0aa1d4bfaf",
+        "waiver_application_sha256": "e51fd5c008b8c2cdd6082284e701115a08d0dbc6db1b1af9bf658bae42237504"
+      }
     },
     "rtx4090_restore_waiver": {
-      "status": "pending-exact-package-binding",
-      "scope": "Founder decision is disclosed in the notes for position 4 restore_1: candidate cached-minus-prompt -52 versus incumbent -48; native completion/publication/authenticated binding are pending. No current native pass or publication is claimed."
+      "status": "waived-by-founder",
+      "repository_path": "releases/v0.16.2/qualification/rtx4090-restore-position-waiver.json",
+      "sha256": "4127964fc0d111cd847dda85655a78d5deb9422fa9103e404a5de143fb523153",
+      "scope": "Only the original restore position 4 restore_1 cache-gap failure on the authenticated, subsequently published beta.2 package; no TTFT failure or other gate is waived."
     },
-    "runtime_product_review": {
+    "native_speed_decision": {
+      "status": "founder-approved-rule",
+      "repository_path": "releases/v0.16.2/qualification/native-speed-decision.json",
+      "sha256": "5c09de6a54bfbc7f52a83eb333436bdf9e025b864a458c0541c882e7560ecc4d",
+      "scope": "Published beta.1 comparator: role/all-case weighted decode ratio >=0.98, every case >=0.95, byte-identical normalized outputs within and across ABBA arms. Supersedes the earlier 1.08 weighted speedup floor for this release only."
+    },
+    "rtx3090_speed": {
+      "status": "passed",
+      "repository_path": "releases/v0.16.2/qualification/rtx3090-speed.json",
+      "sha256": "852e13ca25efe62305ed40d5ffdc39e31efc9a091bf2ecf272a716daaa14e450",
+      "scope": "84 depth-0 ABBA cases versus published beta.1: weighted 1.0002518490206602, minimum 0.9987703200333666; 84/84 normalized outputs byte-identical in every required pairing. No speed waiver or speedup claim."
+    },
+    "rtx4090_speed": {
+      "status": "passed",
+      "repository_path": "releases/v0.16.2/qualification/rtx4090-speed.json",
+      "sha256": "e48aba8161a008231930bd4024eab719d9a50ca08a5ed62a3f7890178aeb4cc8",
+      "scope": "115 ABBA cases versus published beta.1: role108 weighted 0.9995778248449502, all115 weighted 0.9996281434580012, minimum 0.9988670027551729; 115/115 normalized outputs byte-identical in every required pairing. No speed waiver or speedup claim."
+    },
+    "rtx3090_upgrade": {
+      "status": "passed",
+      "scope": "All 3 separate published-predecessor scenarios passed and restored: running-lane upgrade, forced-start rollback, interrupted-install repair. Unmodified source harness; no public-URL product acceptance is inferred.",
+      "provenance": {
+        "source_commit": "a87de3613c17bced777b446fb545f872d8395ec1",
+        "running_sha256": "49659a97d957e8e66c5eef76af2bf7121e97b575f0e3c1a64809e78738aa881a",
+        "rollback_sha256": "1f0dbf3e9f29abeb7e7db9e4faf7812dea8009052414a62c42fac459a9944f1a",
+        "repair_sha256": "0acf3aafa9506e239eab4e2d09c8572b925409e07ed2aa0838c54020dcba7e06"
+      }
+    },
+    "rtx4090_upgrade": {
+      "status": "passed",
+      "scope": "All 3 separate published-predecessor scenarios passed and restored: running-lane upgrade, forced-start rollback, interrupted-install repair. Private uncapped-power-assertion-only harness copy under the separately bound founder decision; no public-URL product acceptance is inferred.",
+      "provenance": {
+        "source_commit": "a87de3613c17bced777b446fb545f872d8395ec1",
+        "running_sha256": "49659a97d957e8e66c5eef76af2bf7121e97b575f0e3c1a64809e78738aa881a",
+        "rollback_sha256": "1f0dbf3e9f29abeb7e7db9e4faf7812dea8009052414a62c42fac459a9944f1a",
+        "repair_sha256": "0acf3aafa9506e239eab4e2d09c8572b925409e07ed2aa0838c54020dcba7e06"
+      }
+    },
+    "rtx4090_rehearsal_harness_decision": {
+      "status": "founder-approved-harness-fix",
+      "repository_path": "releases/v0.16.2/qualification/rtx4090-rehearsal-harness-decision.json",
+      "sha256": "f1fcd1bb162e9107b528c239c6c6ec251d461fe2a7c14664f8d1ea9bd6257a19",
+      "scope": "Only uncapped-lane assertions change: outer.qualified_power_limit_w == 0 and Power() == owner_power_limit_w. Every other assertion is unchanged; native tooling follow-up is alphastorm/ninfer#88."
+    },
+    "g4_review": {
       "status": "pending",
-      "scope": "Exact-subject runtime and product-tooling review binding remains a separate release gate; no predecessor approval transfers."
+      "scope": "Exact-subject runtime and product-tooling review binding is a separate release gate; no predecessor approval transfers."
+    },
+    "rtx3090_quality_screen": {
+      "status": "passed",
+      "repository_path": "releases/v0.16.2/qualification/rtx3090-windows-native.quality-screen.json",
+      "sha256": "20332928c82cc9445b3dab4c58207181ce49dce4706e97f3a6ba365ac942481e",
+      "scope": "Current authenticated beta.2 subject; no predecessor measurement is relabeled."
+    },
+    "rtx3090_fit": {
+      "status": "passed",
+      "repository_path": "releases/v0.16.2/qualification/rtx3090-windows-native.fit.json",
+      "sha256": "c1c3d0aa7027caf45efef2624337af0bc8f8fb4e7c911e6455591ec3d86e0954",
+      "scope": "Current authenticated beta.2 subject; no predecessor measurement is relabeled."
+    },
+    "rtx4090_quality_screen": {
+      "status": "passed",
+      "repository_path": "releases/v0.16.2/qualification/rtx4090-windows-native.quality-screen.json",
+      "sha256": "f6e5a91360ccec19b406c628444f8ce0899d3603b232ca192b9333b7ec871554",
+      "scope": "Current authenticated beta.2 subject; no predecessor measurement is relabeled."
+    },
+    "rtx4090_fit": {
+      "status": "passed",
+      "repository_path": "releases/v0.16.2/qualification/rtx4090-windows-native.fit.json",
+      "sha256": "b22956aa10ec57f3bfe4d6a081eaf05e37166696211ceec03e1a369999f2af83",
+      "scope": "Current authenticated beta.2 subject; no predecessor measurement is relabeled."
     }
   },
   "remaining_release_gates": [
-    "complete remaining RTX 5090 probes and exact-scope waiver application",
-    "current native beta.2 lane/screen/fit/speed/upgrade/probe/restoration qualification, public cuts and authenticated package binding",
-    "replace every quarantined native file and pass the strict complete receipt/binding audit",
     "fresh five-route/three-client/both-native-public-install acceptance and independent restoration",
     "exact-subject runtime/product review binding",
-    "immutable evidence pins, both eligible interpreter suites and final strict verification",
+    "immutable evidence pins and final strict verification",
     "founder-owned publication"
   ],
   "receipt_audit": {
     "repository_path": "releases/v0.16.2/qualification/receipt-audit.json",
-    "sha256": "d8d4d4ef76366227c364925ac4766416ad35247aa24c94e6e3bf887e3d72fb38"
+    "sha256": "4558c4a169e304cd2254057b3b260d563b491524a30b71713e6e7ea4466d8a87"
   }
 }

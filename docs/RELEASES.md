@@ -16,19 +16,54 @@ the exact combination.
 ## Prepared v0.16.2 — durable-export Host reclaim and stock OMP 18.15.0
 
 **Prepared next: v0.16.2 / stock OMP 18.15.0.** Stage from published v0.16.0, not the held
-v0.16.1 client-only candidate. All three runtimes target source
+v0.16.1 client-only candidate. All three runtimes bind source
 `a87de3613c17bced777b446fb545f872d8395ec1`: RTX 5090 `v0.7.0-qwen38-5090-beta.5` is
 published (server `cc99a460`, image `a0cbb8a5`, base receipt `runtime-base-a87de361-20261103`);
-native RTX 3090 / RTX 4090 `v0.8.0-qwen38-{3090,4090}-beta.2` still need qualification and cuts.
+native RTX 3090 / RTX 4090 `v0.8.0-qwen38-{3090,4090}-beta.2` are now published and bound
+(packages `97a8e634` / `d9b10b47`, servers `15a4db46` / `ffee91bf`).
 The shared model and serving policy are unchanged, including `qwen38-5090-v0.13.0`.
 
 The runtime delta reclaims redundant Host state only after proving and protecting its durable
-generation, reserves retirement before an export lease, aligns opt-in FP32 head identity,
+generation, fixing [managed-Stop capacity refusal #78](https://github.com/alphastorm/ninfer/issues/78),
+reserves retirement before an export lease, aligns opt-in FP32 head identity,
 makes bounded RDC builds deterministic and fixes native repair/power and state-bound gate
 drivers. The published 5090 component's 661-artifact / 3-package reproducibility result is not
-a published-image lane or product-acceptance result. Fresh lane/native/client/five-route/
-native-install/restoration evidence, exact-subject reviews, immutable pins and founder-owned
-publication remain separate gates. No old measurement, waiver or approval transfers.
+a product-acceptance result. The current published-image lane receipt and both native 15-phase
+chains are bound; the native chains used listen.port-only scratch derivatives, not public-URL
+product installs. Both 1,120-prompt quality screens pass with zero paired metric difference and
+80/80 determinism per arm; fit proofs and separate running-upgrade/forced-rollback/repair
+rehearsals pass (3/3 scenarios per lane).
+
+The [founder speed decision](../releases/v0.16.2/qualification/native-speed-decision.json) requires
+no regression versus published beta.1: role/all-case weighted decode **≥0.98**, every case
+**≥0.95**, byte-identical normalized outputs in every required ABBA pairing. It explicitly
+supersedes the earlier **1.08** weighted speedup floor for this release, not a raw-result rewrite.
+RTX 3090 measures weighted **1.0003**, minimum **0.9988**, **84/84** identical; RTX 4090 weighted
+**0.9996** (role and all cases), minimum **0.9989**, **115/115** identical. These pass
+no-regression, not a new speedup claim.
+
+Exact-subject founder waivers preserve three failed measurements:
+
+| Lane / failed position | Actual candidate versus incumbent | Unchanged rule / disposition |
+| --- | --- | --- |
+| RTX 5090 restore position 3, `restore_0` | TTFT 0.481856409 s / 0.231568998 s; cached-minus-prompt −48/−48 | TTFT bound 0.481568998 s, exceeded by 0.000287411 s; sole TTFT miss waived; 88/88 positions judged |
+| RTX 4090 restore position 4, `restore_1` | Prompt/cache 58539/58487 / 58327/58279; cached-minus-prompt −52/−48; TTFT 0.642947 / 0.5589493 s | Cache gap must not regress; only the four-token miss waived, TTFT within bound; 82/83 measured passes |
+| RTX 3090 sibling position 1, `base` | TTFT 0.4975294 s / 0.2144353 s; prompt/cache 66/0 in both arms | TTFT bound 0.4644353 s, exceeded by 0.0330941 s; sole TTFT miss waived; 82/83 measured passes |
+
+The native incumbent captures are hash-proved reused beta.1 evidence, not fresh paired runs.
+The RTX 3090 waiver shorthand `sibling1` means position 1 `base`, not the later `sibling_1`
+label. The [notes](../releases/v0.16.2/NINFER_RELEASE_NOTES.md) bind all five original
+founder waiver/decision hashes and retain the corrected RTX 5090 overall-run diagnostic;
+88 judged positions are not an overall-run pass. RTX 4090's rehearsal used a founder-approved
+private harness copy changing only uncapped-power assertions
+(`outer.qualified_power_limit_w == 0`, `Power() == owner_power_limit_w`); RTX 3090 used the
+unmodified source harness. Runtime-council follow-ups are
+[#87](https://github.com/alphastorm/ninfer/issues/87); native tooling follow-ups are
+[#88](https://github.com/alphastorm/ninfer/issues/88).
+
+Fresh candidate-bound client/five-route/native-public-install/restoration acceptance,
+exact-subject runtime/product review binding, final composition, immutable pins and
+founder-owned publication remain pending. No old measurement, waiver or approval transfers.
 
 Published **v0.16.0** remains GitHub `Latest`. The
 [prepared notes](../releases/v0.16.2/NINFER_RELEASE_NOTES.md) select upstream release

@@ -25,15 +25,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Prepare v0.16.2 from published v0.16.0 with common runtime source `a87de361`: published
-  RTX 5090 `v0.7.0-qwen38-5090-beta.5`, planned native RTX 3090 / RTX 4090 `v0.8.0-beta.2`,
+- Bind v0.16.2 from published v0.16.0 with common runtime source `a87de361`: published
+  RTX 5090 `v0.7.0-qwen38-5090-beta.5` and native RTX 3090 / RTX 4090 `v0.8.0-beta.2`,
   and stock Oh My Pi 18.15.0 (`3fedf8d5`, tree `48bc72ba`) for all three client platforms.
-  Include byte-proven durable-generation Host reclaim, export-retirement reservation,
+  Include byte-proven durable-generation Host reclaim and its managed-Stop capacity fix
+  ([fork #78](https://github.com/alphastorm/ninfer/issues/78)), export-retirement reservation,
   opt-in FP32 identity repair, deterministic RDC builds and native repair/power/gate-driver
   corrections, without changing model or serving shapes. Retarget the prepared guide to
   v0.16.2 while published entry points stay on immutable v0.16.0. Bind the complete
   18.14.0→18.14.2 and 18.14.2→18.15.0 source reviews and independent asset-integrity evidence;
-  fresh runtime/native/client execution and publication are separate gates, not carried acceptance.
+  fresh candidate-bound client/five-route/public-install acceptance and publication remain
+  separate gates, not carried acceptance.
+- Replace all quarantined native subjects with authenticated published beta.2 packages
+  (RTX 3090 `97a8e634`, server `15a4db46`; RTX 4090 `d9b10b47`, server `ffee91bf`).
+  Bind both 15-phase lane chains, zero-difference 1,120-prompt quality screens, fit proofs
+  and 3/3 running-upgrade/forced-rollback/repair rehearsals. Disclose the founder-approved
+  RTX 4090 private rehearsal copy changing only uncapped-power assertions; RTX 3090 used
+  the unmodified harness.
+- Bind the explicit native no-regression decision versus published beta.1: role/all-case
+  weighted ratio ≥0.98, every case ≥0.95 and byte-identical normalized outputs, superseding
+  the earlier 1.08 weighted speedup floor for this release. RTX 3090 weighted **1.0003** /
+  min **0.9988**, **84/84** identical; RTX 4090 weighted **0.9996** / min **0.9989**,
+  **115/115** identical. No new speedup claim or inherited speed waiver.
+- Preserve the exact failed agent positions under new source-hash-bound founder waivers:
+  RTX 5090 `restore_0` TTFT **0.481856409 s > 0.481568998 s** (incumbent **0.231568998 s**);
+  RTX 4090 `restore_1` cached-minus-prompt **−52 < −48**, TTFT **0.642947 / 0.5589493 s**
+  within bound; RTX 3090 sibling position 1 **`base`**, TTFT **0.4975294 s > 0.4644353 s**
+  (incumbent **0.2144353 s**, prompt/cache **66/0** in both arms). Native parity is **82/83**
+  measured passes per lane; RTX 5090 has **88/88 judged**, not a rewritten strict pass.
+  Full values, original founder-record hashes and the retained overall-run diagnostic are in
+  the [v0.16.2 notes](releases/v0.16.2/NINFER_RELEASE_NOTES.md). Track runtime-council
+  deferrals in [fork #87](https://github.com/alphastorm/ninfer/issues/87) and native tooling
+  defects in [fork #88](https://github.com/alphastorm/ninfer/issues/88); exact-subject
+  review binding remains pending.
 - Retain Qwen exact-loop detection with a 1024-character floor for short newline-spanning cycles;
   reject length-truncated main/handoff/branch summaries while preserving a completed main
   summary if only the optional short summary truncates. Retire operator `compat.thinkingLoopGuard`,
