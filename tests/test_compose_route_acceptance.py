@@ -27,6 +27,7 @@ sys.modules[STAGE_SPEC.name] = STAGE
 STAGE_SPEC.loader.exec_module(STAGE)
 from verify_release import (  # noqa: E402  # pyright: ignore[reportMissingImports]
     validate_client_profile_predicates, validate_ready_state_consistency,
+    validate_documented_route_acceptance, validate_native_route_policy,
 )
 
 # v0.7.4's accepted posture: the macOS SSH profile stays preview, the Docker-local ones install.
@@ -120,6 +121,20 @@ def route_receipt(lane: str) -> dict:
     ]
     return {"artifact_type": "omp_ninfer_documented_route_run", "lane": lane, "status": "passed",
             "clone_commit": CANDIDATE, "document_sha256": "f" * 64, "steps": steps}
+
+
+def campaign_waiver(release: str, candidate: str, route_sha256: str) -> dict:
+    return {
+        "artifact_type": "omp_ninfer_founder_gate_waiver", "schema_version": 1,
+        "release": release, "candidate": candidate, "lane": "rtx3090-native",
+        "status": "waived-by-founder", "observed_status": "failed",
+        "documented_route_status": "passed", "failed_phase": "structured-outage",
+        "restoration_summary": {"status": "restored-by-lead"},
+        "provenance": {"source_sha256": "7" * 64},
+        "evidence_sha256": {"documented-route.json": route_sha256,
+                            "window-failure.json": "8" * 64, "driver-window.json": "9" * 64,
+                            "lead-restoration.out": "a" * 64},
+    }
 
 
 def refused(function, *arguments) -> str:
@@ -354,6 +369,7 @@ class UpstreamCompositionTests(unittest.TestCase):
         MODULE.save(path, {"artifact_type": "omp_ninfer_review_ledger", "release": self.release,
                            "product_tooling": {"stage_commit": CANDIDATE}})
         qualification = MODULE.load(self.release_root / "qualification.json")
+        qualification["release"] = self.release
         qualification["observed_gates"] = {"g4_review": {
             "repository_path": path.relative_to(self.root).as_posix(),
             "sha256": MODULE.sha256(path.read_bytes())}}
@@ -713,6 +729,139 @@ class UpstreamCompositionTests(unittest.TestCase):
             self.assertEqual(receipt["runtime"]["package_sha256"], digest)
             self.assertEqual(receipt["lane"], f"{lane}-windows-native")
             self.assertEqual(external["evidence"][f"{lane}_public_install"]["sha256"], MODULE.sha256(path.read_bytes()))
+
+    def waive_3090(self) -> Path:
+        self.add_3090(evidence=False)
+        route = self.root / "rtx3090-native.json"
+        path = self.release_root / "qualification/rtx3090-route-waiver.json"
+        MODULE.save(path, campaign_waiver(self.release, CANDIDATE, MODULE.sha256(route.read_bytes())))
+        binding = {"repository_path": path.relative_to(self.root).as_posix(),
+                   "sha256": MODULE.sha256(path.read_bytes())}
+        evidence = MODULE.load(self.root / "evidence.json")
+        evidence["rtx3090"] = {
+            "status": "failed", "failed_phase": "structured-outage", "founder_waiver": binding,
+            "preparation": {"lineage_mode": "first_release", "previous_release_present": False},
+            "observations": {"rollback": deepcopy(FIRST_RELEASE["rollback"])}}
+        evidence["restoration"]["rtx3090"] = {"status": "restored-by-lead", "founder_waiver": binding}
+        MODULE.save(self.root / "evidence.json", evidence)
+        self.bind_native_policies()
+        self.argv += ["--native-route-waiver", f"rtx3090-native={binding['repository_path']}"]
+        return path
+
+    def test_waived_campaign_composes_and_verifies_without_rewriting_the_passed_route(self) -> None:
+        path = self.waive_3090()
+        raw = (self.root / "rtx3090-native.json").read_bytes()
+        self.assertEqual(self.compose(), 0)
+        qualification = MODULE.load(self.release_root / "qualification.json")
+        routes = MODULE.load(self.release_root / "acceptance/documented-routes.json")
+        external = MODULE.load(self.release_root / "acceptance/composed-external-installation.json")
+        binding = {"repository_path": path.relative_to(self.root).as_posix(),
+                   "sha256": MODULE.sha256(path.read_bytes())}
+        self.assertEqual(routes["routes"]["rtx3090-native"]["status"], "passed")
+        campaign = routes["native_campaigns"]["rtx3090-native"]
+        self.assertEqual(campaign["status"], "failed")
+        self.assertEqual(campaign["failed_phase"], "structured-outage")
+        self.assertEqual(campaign["founder_waiver"], binding)
+        self.assertIn("probe_acceptance", campaign)
+        self.assertEqual((self.root / routes["routes"]["rtx3090-native"]["receipt"]).read_bytes(), raw)
+        self.assertEqual(external["status"], "waived-by-founder")
+        self.assertEqual(qualification["composition"]["external_installation_acceptance"]["status"],
+                         "waived-by-founder")
+        self.assertEqual(external["steps"]["rtx3090-native"]["status"], "failed")
+        self.assertEqual(external["steps"]["rtx4090-native"]["status"], "passed")
+        self.assertNotIn("rtx3090_public_install", external["evidence"])
+        self.assertFalse((self.release_root / "acceptance/rtx3090-public-install.json").exists())
+        errors = []
+        validate_documented_route_acceptance(self.root, qualification, errors)
+        validate_native_route_policy(self.root, self.release,
+                                     MODULE.load(self.release_root / "manifest.json"), qualification, errors)
+        self.assertEqual(errors, [])
+
+    def test_unwaived_failed_native_campaign_is_refused(self) -> None:
+        self.waive_3090()
+        del self.argv[-2:]
+        with self.assertRaises(SystemExit):
+            self.compose()
+        self.assertFalse((self.release_root / "acceptance").exists())
+
+    def test_waiver_on_a_passed_native_campaign_is_refused(self) -> None:
+        path = self.waive_3090()
+        evidence = MODULE.load(self.root / "evidence.json")
+        binding = evidence["rtx3090"]["founder_waiver"]
+        evidence["rtx3090"] = {**native_evidence("rtx3090"), "status": "passed",
+                               "failed_phase": "structured-outage", "founder_waiver": binding}
+        evidence["restoration"]["rtx3090"] = deepcopy(RESTORATION["rtx3090"])
+        MODULE.save(self.root / "evidence.json", evidence)
+        with self.assertRaises(SystemExit):
+            self.compose()
+        self.assertTrue(path.exists())
+        self.assertFalse((self.release_root / "acceptance").exists())
+
+    def test_waiver_subject_mismatch_is_refused_before_writing(self) -> None:
+        path = self.waive_3090()
+        original = MODULE.load(path)
+        for field, value in (("release", "v0.1.0"), ("candidate", "2" * 40),
+                             ("lane", "rtx4090-native"), ("failed_phase", "documented-route")):
+            with self.subTest(field=field):
+                MODULE.save(path, {**original, field: value})
+                evidence = MODULE.load(self.root / "evidence.json")
+                binding = {"repository_path": path.relative_to(self.root).as_posix(),
+                           "sha256": MODULE.sha256(path.read_bytes())}
+                evidence["rtx3090"]["founder_waiver"] = binding
+                evidence["restoration"]["rtx3090"]["founder_waiver"] = binding
+                MODULE.save(self.root / "evidence.json", evidence)
+                with self.assertRaises(SystemExit):
+                    self.compose()
+                self.assertFalse((self.release_root / "acceptance").exists())
+                self.assertEqual(list((self.root / "docs/measurements").iterdir()), [])
+
+    def test_missing_waiver_and_changed_projection_binding_are_refused(self) -> None:
+        path = self.waive_3090()
+        original = path.read_bytes()
+        path.unlink()
+        with self.assertRaises(SystemExit):
+            self.compose()
+        path.write_bytes(original + b"\n")
+        with self.assertRaises(SystemExit):
+            self.compose()
+        self.assertFalse((self.release_root / "acceptance").exists())
+
+    def test_waiver_does_not_excuse_an_incomplete_documented_route(self) -> None:
+        path = self.waive_3090()
+        receipt_path = self.root / "rtx3090-native.json"
+        receipt = MODULE.load(receipt_path)
+        receipt["steps"][-1]["status"] = "failed"
+        MODULE.save(receipt_path, receipt)
+        waiver = MODULE.load(path)
+        waiver["evidence_sha256"]["documented-route.json"] = MODULE.sha256(receipt_path.read_bytes())
+        MODULE.save(path, waiver)
+        evidence = MODULE.load(self.root / "evidence.json")
+        binding = {"repository_path": path.relative_to(self.root).as_posix(),
+                   "sha256": MODULE.sha256(path.read_bytes())}
+        evidence["rtx3090"]["founder_waiver"] = binding
+        evidence["restoration"]["rtx3090"]["founder_waiver"] = binding
+        MODULE.save(self.root / "evidence.json", evidence)
+        with self.assertRaises(SystemExit):
+            self.compose()
+        self.assertFalse((self.release_root / "acceptance").exists())
+
+    def test_waiver_does_not_excuse_native_probe_failure(self) -> None:
+        self.waive_3090()
+        evidence = MODULE.load(self.root / "evidence.json")
+        evidence["rtx3090"]["probe_acceptance"]["compaction"]["passed"] = False
+        MODULE.save(self.root / "evidence.json", evidence)
+        with self.assertRaises(SystemExit):
+            self.compose()
+        self.assertFalse((self.release_root / "acceptance").exists())
+
+    def test_waiver_does_not_excuse_another_native_lanes_observations(self) -> None:
+        self.waive_3090()
+        evidence = MODULE.load(self.root / "evidence.json")
+        evidence["rtx4090"]["observations"]["exact_tool_marker"] = False
+        MODULE.save(self.root / "evidence.json", evidence)
+        with self.assertRaises(SystemExit):
+            self.compose()
+        self.assertFalse((self.release_root / "acceptance").exists())
 
     def p15_fixture(self, *, rebuild_4090: bool) -> dict:
         self.add_3090()

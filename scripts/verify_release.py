@@ -91,6 +91,8 @@ PENDING_PRODUCT_TERM_RE = re.compile(
     re.IGNORECASE,
 )
 CLOSED_REVIEW_STATUS_RE = re.compile(r"^closed(?:-[a-z]+)*$")
+NATIVE_ROUTE_LANES = {"rtx4090-native": "rtx4090-windows-native",
+                      "rtx3090-native": "rtx3090-windows-native"}
 MARKDOWN_LINK_RE = re.compile(r'!?\[[^]]*\]\(([^)\s]+)(?:\s+["\'][^)]*["\'])?\)')
 MARKDOWN_REFERENCE_RE = re.compile(r'^\[[^]]+\]:\s+(\S+)', re.MULTILINE)
 ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -826,6 +828,136 @@ def validate_review_ledger(
                 f"{label}.{field} must equal the review ledger's {source}", errors)
 
 
+def validate_native_route_waiver(
+    root: Path, release: str, candidate: str, lane: str, failed_phase: Any,
+    reference: Any, errors: list[str],
+) -> bool:
+    """Only a hash-bound founder decision can admit this post-route campaign failure."""
+    before = len(errors)
+    label = f"{lane} native campaign waiver"
+    require(lane in NATIVE_ROUTE_LANES and failed_phase == "structured-outage",
+            f"{label} must name the structured-outage native campaign phase", errors)
+    if not isinstance(reference, dict):
+        errors.append(f"{label} must bind a repository file and SHA-256")
+        return False
+    name = reference.get("repository_path")
+    path = bound_file(root, name)
+    if (not isinstance(name, str) or Path(name).is_absolute() or path is None
+            or not path.is_relative_to((root / "releases" / release / "qualification").resolve())):
+        errors.append(f"{label} must name a file inside this release's qualification directory")
+        return False
+    require(sha256_file(path) == reference.get("sha256"),
+            f"{label} SHA-256 must match repository file bytes", errors)
+    waiver = load_json(path)
+    require(waiver.get("artifact_type") == "omp_ninfer_founder_gate_waiver"
+            and waiver.get("schema_version") == 1
+            and waiver.get("status") == "waived-by-founder"
+            and waiver.get("observed_status") == "failed"
+            and waiver.get("documented_route_status") == "passed",
+            f"{label} must preserve the failed campaign and passed documented route", errors)
+    for field, expected in (("release", release), ("candidate", candidate), ("lane", lane),
+                            ("failed_phase", failed_phase)):
+        require(waiver.get(field) == expected,
+                f"{label} {field} must match the native campaign", errors)
+    require(isinstance(candidate, str) and GIT_SHA_RE.fullmatch(candidate) is not None,
+            f"{label} candidate must be a full commit", errors)
+    require_sha(waiver.get("provenance", {}).get("source_sha256"),
+                f"{label} founder record SHA-256", errors)
+    require(waiver.get("restoration_summary", {}).get("status") == "restored-by-lead",
+            f"{label} must bind lead recovery without relabelling the wrapper audit", errors)
+    for name in ("documented-route.json", "window-failure.json", "driver-window.json",
+                 "lead-restoration.out"):
+        require_sha(waiver.get("evidence_sha256", {}).get(name),
+                    f"{label} {name} SHA-256", errors)
+    return len(errors) == before
+
+
+def validate_native_campaigns(root: Path, release: str, routes: dict[str, Any],
+                              errors: list[str]) -> dict[str, dict]:
+    """Documented blocks and the subsequent native campaign have separate raw verdicts."""
+    campaigns = routes.get("native_campaigns")
+    if campaigns is None:
+        return {}  # Historical passed receipts predate the separate campaign summary.
+    if not isinstance(campaigns, dict):
+        errors.append("native_campaigns must be an object")
+        return {}
+    route_rows = routes.get("routes", {})
+    expected = set(route_rows).intersection(NATIVE_ROUTE_LANES)
+    require(set(campaigns) == expected,
+            "native_campaigns must name exactly the documented native lanes", errors)
+    waived = {}
+    for lane, campaign in campaigns.items():
+        if not isinstance(campaign, dict):
+            errors.append(f"{lane} native campaign must be an object")
+            continue
+        if campaign.get("status") == "passed":
+            require("founder_waiver" not in campaign,
+                    f"{lane} passed native campaign cannot have a founder waiver", errors)
+            continue
+        before = len(errors)
+        require(campaign.get("status") == "failed",
+                f"{lane} native campaign must preserve its failed status", errors)
+        validate_native_route_waiver(
+            root, release, routes.get("candidate_commit"), lane, campaign.get("failed_phase"),
+            campaign.get("founder_waiver"), errors)
+        row = route_rows.get(lane, {})
+        binding = campaign.get("founder_waiver")
+        waiver_path = bound_file(root, binding.get("repository_path") if isinstance(binding, dict) else None)
+        if waiver_path is not None:
+            require(load_json(waiver_path).get("evidence_sha256", {}).get("documented-route.json")
+                    == row.get("sha256"),
+                    f"{lane} waived campaign must bind the original documented-route digest", errors)
+        path = bound_file(root, row.get("receipt"))
+        require(row.get("status") == "passed" and path is not None
+                and sha256_file(path) == row.get("sha256"),
+                f"{lane} waived campaign must retain its hash-bound passed route receipt", errors)
+        if path is not None:
+            from documented_route import LANES
+            receipt = load_json(path)
+            steps = receipt.get("steps", [])
+            require(receipt.get("artifact_type") == "omp_ninfer_documented_route_run"
+                    and receipt.get("lane") == lane and receipt.get("status") == "passed"
+                    and receipt.get("clone_commit") == routes.get("candidate_commit")
+                    and lane in LANES
+                    and [step.get("slug") for step in steps] == [step.slug for step in LANES[lane]],
+                    f"{lane} waived campaign route must pass all candidate-bound documented steps", errors)
+            require(bool(steps) and all(
+                (step.get("status") == "passed"
+                 or (step.get("status") == "substituted" and bool(step.get("substitution"))))
+                and isinstance(step.get("block_sha256"), str)
+                and SHA256_RE.fullmatch(step["block_sha256"]) is not None
+                and step.get("executed_sha256") == step["block_sha256"] for step in steps),
+                f"{lane} waived campaign route must execute the bundled bytes", errors)
+        if len(errors) == before:
+            waived[lane] = campaign
+    return waived
+
+
+def composed_native_waivers(root: Path, release: str, qualification: dict[str, Any],
+                            composed: dict[str, Any], errors: list[str]) -> dict[str, dict]:
+    """The external installation may be founder-waived, never an all-campaigns pass."""
+    reference = qualification.get("composition", {}).get("documented_route_acceptance", {})
+    path = bound_file(root, reference.get("repository_path"))
+    if path is None or sha256_file(path) != reference.get("sha256"):
+        return {}
+    waived = validate_native_campaigns(root, release, load_json(path), errors)
+    for lane, campaign in waived.items():
+        require(composed.get("evidence", {}).get("documented_routes") == {
+                    "repository_path": reference.get("repository_path"), "sha256": reference.get("sha256")},
+                f"{lane} waived campaign must bind the same documented routes as qualification", errors)
+        step = composed.get("steps", {}).get(lane, {})
+        require(all(step.get(key) == value for key, value in campaign.items()),
+                f"{lane} composed native campaign must preserve the failed founder-waived result", errors)
+        gpu = lane.removesuffix("-native")
+        public_path = root / "releases" / release / "acceptance" / f"{gpu}-public-install.json"
+        require(f"{gpu}_public_install" not in composed.get("evidence", {})
+                and (not public_path.is_file() or load_json(public_path).get("status") != "passed"),
+                f"{lane} waived native campaign cannot also claim public-install acceptance", errors)
+        require(any(lane in text for text in composed.get("limitations", []) if isinstance(text, str)),
+                f"{lane} waived native campaign must be named in composed limitations", errors)
+    return waived
+
+
 def validate_documented_route_acceptance(
     root: Path,
     qualification: dict[str, Any],
@@ -857,6 +989,7 @@ def validate_documented_route_acceptance(
             f"{label} receipt release must match qualification release", errors)
     require(routes.get("status") == "passed",
             f"{label} receipt status must be passed", errors)
+    waived = validate_native_campaigns(root, str(release), routes, errors)
     if summary is None:
         return
     if not isinstance(summary, dict):
@@ -870,6 +1003,9 @@ def validate_documented_route_acceptance(
     ):
         require(summary.get(field) == expected,
                 f"qualification.documented_route_acceptance.{field} must be {meaning}", errors)
+    for lane in waived:
+        require(lane in summary.get("scope", ""),
+                f"{lane} waived native campaign must be named in the acceptance scope", errors)
 
 
 def validate_exact_lane_set(
@@ -1664,8 +1800,20 @@ def validate_native_route_policy(root: Path, release: str, manifest: dict[str, A
         errors.append("native route policy requires hash-bound composed external installation evidence")
         return
     composed = load_json(composed_path)
+    waived = composed_native_waivers(root, release, qualification, composed, errors)
     for variant in manifest.get("components", {}).get("ninfer_variants", []):
         lane = variant["id"].split("-")[0]
+        if lane + "-native" in waived:
+            campaign = waived[lane + "-native"]
+            configuration = native_profile(root, release, variant, errors)
+            require(configuration is not None
+                    and matches_native_configuration(campaign.get("runtime_configuration"), configuration),
+                    f"{lane} waived campaign must retain the exact authenticated candidate configuration", errors)
+            if configuration is not None:
+                errors.extend(f"{lane} waived campaign: {error}" for error in native_probe_acceptance_errors(
+                    configuration, campaign.get("probe_acceptance"), variant,
+                    manifest["components"]["omp"]["binary_sha256"]))
+            continue
         label = f"{lane} public-install acceptance"
         ref = composed.get("evidence", {}).get(f"{lane}_public_install", {})
         path = bound_file(root, ref.get("repository_path"))
@@ -2703,6 +2851,7 @@ def validate(
     require(qualification_pending or qualification.get("publication_authorized") is False,
             "checked-in qualification must not grant publication authority", errors)
     external_acceptance = qualification.get("composition", {}).get("external_installation_acceptance", {})
+    external_status = "passed"
     acceptance_ref = external_acceptance.get("repository_path")
     acceptance_path = (
         (root / acceptance_ref).resolve()
@@ -2723,6 +2872,9 @@ def validate(
         require(acceptance_path.is_file(), "external acceptance receipt must exist", errors)
         if acceptance_inside_repository and acceptance_path.is_file():
             acceptance_subject = load_json(acceptance_path)
+            waived = composed_native_waivers(root, release, qualification, acceptance_subject, errors)
+            if waived:
+                external_status = "waived-by-founder"
             if ga_release(release):
                 require(
                     acceptance_subject.get("release") == release,
@@ -2730,7 +2882,7 @@ def validate(
                     errors,
                 )
                 require(
-                    acceptance_subject.get("status") == "passed",
+                    acceptance_subject.get("status") == external_status,
                     "external acceptance receipt status must be passed",
                     errors,
                 )
@@ -2748,7 +2900,7 @@ def validate(
                 )
 
     if qualification.get("external_installation_qualified") is True:
-        require(external_acceptance.get("status") == "passed",
+        require(external_acceptance.get("status") == external_status,
                 "external installation acceptance must pass", errors)
         require(isinstance(acceptance_ref, str),
                 "external acceptance repository_path must be present", errors)

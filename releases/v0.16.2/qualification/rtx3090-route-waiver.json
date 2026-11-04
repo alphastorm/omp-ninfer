@@ -1,0 +1,64 @@
+{
+  "artifact_type": "omp_ninfer_founder_gate_waiver",
+  "schema_version": 1,
+  "release": "v0.16.2",
+  "lane": "rtx3090-native",
+  "candidate": "c6fc8465611a89fd85730f0653f670d2a314a721",
+  "status": "waived-by-founder",
+  "observed_status": "failed",
+  "documented_route_status": "passed",
+  "failed_phase": "structured-outage",
+  "decision": "Founder waived the failed RTX 3090 post-route native acceptance campaign with disclosure. All seven documented blocks passed; their raw receipt and every other gate remain unchanged. No failed documented step is invented.",
+  "observed_summary": {
+    "action": "Control-Release.ps1 -Action Stop after structured live and native probes",
+    "outcome": "graceful_incomplete_shutdown",
+    "sessions_saved": 1,
+    "sessions_skipped": 8,
+    "sessions_refused": 1,
+    "shutdown_complete": false,
+    "final_durable_save_reason": "capacity",
+    "reclaimed_host_bytes": 0,
+    "blocked_results": [
+      "completed behavior observations and fail-closed structured outage probe",
+      "wrapper restoration receipt and passing final audit",
+      "anonymous public-install acceptance"
+    ],
+    "classification": "Residual of fork issue #78 after #82: export-side reclaim found no eligible Host state under this lane's long-session load. The residual also affected the published beta.1 runtime; v0.16.0 acceptance avoided it only by timing."
+  },
+  "restoration_summary": {
+    "status": "restored-by-lead",
+    "method": "Preserve the failed evidence, then run Control-Release.ps1 -Action Start and -Action Stop with no client sessions.",
+    "outcome": "graceful",
+    "sessions_refused": 0,
+    "runtime_record_absent": true,
+    "gpu_owner_lease_absent": true,
+    "power_limit_w": 370,
+    "all_native_tasks_ready": true,
+    "server_processes": 0,
+    "port_18082_listeners": 0,
+    "scope": "Lead recovery restored the GPU owner and power limit; this is not a passing wrapper restoration audit or a rerun of acceptance."
+  },
+  "evidence_sha256": {
+    "documented-route.json": "e59eeb70b3b0577d2f12d59b0a5071e6bf51a78e5bd701c279d2a1fa3b44e7af",
+    "window-failure.json": "cbf0cee1708f8833378b8915dff0b426eebc8d171b05c76284a75cb771923c51",
+    "driver-window.json": "072c6d15de9e85ad91fee3b83e45244a5fd03f727dfca6e12b92d000a58e6eb7",
+    "evidence-archive.tar.gz": "00d0fbc585b06efe1b1d5ccc4414eee265e1e5b32e4339830df6c397b0285e30",
+    "window-driver.log": "d9af60a008f6a5581f873703545730e368f0806cb8279a80604555de7179787a",
+    "failed-final-audit.json": "990dbe4c049b6efcd64462b1a5ac4e275b89ee71550e4802c40f50401e027969",
+    "canonical-promotion.json": "def3368af2952dc9240e3375a0be39e76e84194a5961fbde7a468cdd876c80be",
+    "pre-window-census.json": "856d9250693ff2b1295a9dbf17b6da419af189af6d70301277241cd0226f05e9",
+    "lead-restoration.out": "f9ada0b8b95e440dde3c4c550490275c6ad4acf41ddc6f4b07620b7966e27192",
+    "preserved-last-stop.json": "ea334c0ffba8dd99879d225bc6c6e7dd26d44aa573c14641b195f67882150bb4",
+    "preserved-shutdown.json": "b8bd86bdb5af9d6373d5f0ab8cca0a8e0efc1a97c661b9f6482095cecfa4093a"
+  },
+  "application_rule": "Only this release, candidate, native lane and structured-outage managed Stop are waived. The passed documented route must remain hash-bound and byte-identical. Other native lanes, RTX 5090 routes, stock clients and all remaining gates must pass. The RTX 3090 native campaign stays failed; no public-install pass is claimed.",
+  "provenance": {
+    "source_sha256": "3f8532e864c664a75cf42f692ea4824769ebbb6c8d0807d720dab0fca39ffca1",
+    "projection": "Content-safe projection of the private founder decision. Machine identities, private paths and decision-context strings omitted; raw verdicts and evidence digests preserved."
+  },
+  "disclosure_required": "Release notes must distinguish the passed seven-block RTX 3090 documented route from the failed, founder-waived post-route native campaign; disclose the residual #78 case and unexercised anonymous public install. Recover the GPU owner and power limit with Control-Release.ps1 -Action Start, then -Action Stop with no client sessions; the refused session loses only warm restore and replays its transcript. Link the runtime residual and controller owner-restore follow-ups.",
+  "follow_up": [
+    "https://github.com/alphastorm/ninfer/issues/89",
+    "https://github.com/alphastorm/ninfer/issues/90"
+  ]
+}

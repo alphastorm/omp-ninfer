@@ -29,7 +29,12 @@ staging leaves every profile pending, so this is where the
 accepted posture is decided. documented_routes.scope states what the accepted routes cover.
 restoration is the restoration receipt's body in v0.14.0's shape (candidate_commit, rtx5090 and
 one section per accepted native lane); every displaced incumbent must be observed back in place,
-or nothing is written. The immutable URL pins that follow are scripts/rebind_release.py's:
+or nothing is written. An explicit --native-route-waiver LANE=REPO_PATH admits only a failed
+post-route structured-outage native campaign. Its documented blocks must still pass unchanged,
+and its candidate policy/probes still pass; only native observations, the public install and the
+wrapper restoration audit are replaced by a hash-bound founder decision and lead recovery.
+Documented-route status stays passed, the native campaign stays failed, and external installation
+is waived-by-founder, not passed. The immutable URL pins that follow are scripts/rebind_release.py's:
 commit these files, then --stage platform, acceptance, manifest.
 Before composition, qualification.observed_gates.g4_review must hash-bind this release's
 review ledger; product_tooling.stage_commit is the frozen candidate every input must name.
@@ -52,7 +57,8 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from verify_release import (  # pyright: ignore[reportMissingImports]
     OMP_PROFILE_PLATFORMS, effective_native_model, validate_upstream_client_bindings,
     validate_upstream_omp_component, ga_release, product_version, OCI_DIGEST_RE,
-    bound_file, native_profile,
+    bound_file, native_profile, validate_native_route_waiver,
+    NATIVE_ROUTE_LANES as NATIVE_LANES,
 )
 from rebind_release import RAW  # pyright: ignore[reportMissingImports]
 from compose_native_qualification import (
@@ -61,8 +67,6 @@ from compose_native_qualification import (
 
 DOCUMENT = ROOT / "docs" / "QUICKSTART.md"
 LANES = ("rtx5090-container-host", "rtx5090-macos-client", "rtx5090-windows-client")
-NATIVE_LANES = {"rtx4090-native": "rtx4090-windows-native",
-                "rtx3090-native": "rtx3090-windows-native"}
 COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 EVIDENCE_KEYS = ("platforms", "restoration", "documented_routes", "composed")
 # What every live client run must have observed before its receipt can say passed.
@@ -271,7 +275,7 @@ def predecessor_image_digest(release: str) -> str:
 
 
 def check_restoration(restoration: Any, lanes: tuple[str, ...], candidate: str,
-                      predecessor_digest: str) -> None:
+                      predecessor_digest: str, waived: dict[str, dict] | None = None) -> None:
     """Restoration counts only when it observed every incumbent the windows displaced back in place."""
     require(isinstance(restoration, dict) and bool(restoration), "restoration evidence is empty")
     overridden = sorted(set(restoration).intersection(RESTORATION_RECEIPT_FIELDS))
@@ -299,6 +303,11 @@ def check_restoration(restoration: Any, lanes: tuple[str, ...], candidate: str,
         if lane not in lanes:
             require(native is None, f"restoration names undeclared native lane {gpu}")
             continue
+        if waived and lane in waived:
+            require(isinstance(native, dict) and native.get("status") == "restored-by-lead"
+                    and native.get("founder_waiver") == waived[lane]["founder_waiver"],
+                    f"{gpu} restoration must retain the founder-bound lead recovery, not a passed audit")
+            continue
         require(isinstance(native, dict) and native.get("status") == "passed",
                 f"{gpu} restoration did not pass")
         for key in NATIVE_RESTORED:
@@ -312,10 +321,11 @@ def check_restoration(restoration: Any, lanes: tuple[str, ...], candidate: str,
                 f"{gpu} restoration must record its window hold seconds")
 
 
-def restoration_summary(restoration: dict, lanes: tuple[str, ...], path: str) -> dict:
+def restoration_summary(restoration: dict, lanes: tuple[str, ...], path: str,
+                        waived: dict[str, dict] | None = None) -> dict:
     """The qualification's restoration line, read from the evidence check_restoration accepted."""
     natives = {lane.removesuffix("-native"): restoration[lane.removesuffix("-native")]
-               for lane in lanes if lane in NATIVE_LANES}
+               for lane in lanes if lane in NATIVE_LANES and lane not in (waived or {})}
     incumbent = restoration["rtx5090"]
     summary: dict[str, Any] = {
         "path": path,
@@ -331,6 +341,9 @@ def restoration_summary(restoration: dict, lanes: tuple[str, ...], path: str) ->
             native["documented_stage_restored"] for native in natives.values())
         summary["native_driver_window_s"] = {gpu: native["window_hold_seconds"]
                                              for gpu, native in natives.items()}
+    if waived:
+        summary["waived_native_campaigns"] = {
+            lane: restoration[lane.removesuffix("-native")] for lane in waived}
     return summary
 
 
@@ -393,6 +406,9 @@ def main() -> int:
     parser.add_argument("--evidence", type=Path, required=True)
     parser.add_argument("--route", action="append", default=[], metavar="LANE=PATH",
                         help="runner receipt for each documented lane")
+    parser.add_argument("--native-route-waiver", action="append", default=[],
+                        metavar="LANE=REPO_PATH",
+                        help="founder waiver for a failed post-route native campaign; route blocks must pass")
     args = parser.parse_args()
     require(COMMIT_RE.fullmatch(args.candidate) is not None, "--candidate must be a 40-hex commit")
     require(re.fullmatch(r"\d{4}-\d{2}-\d{2}", args.as_of) is not None, "--as-of must be an ISO date")
@@ -416,6 +432,13 @@ def main() -> int:
     variant_ids = {v["id"] for v in manifest["components"].get("ninfer_variants", [])}
     lanes = LANES + tuple(lane for lane, variant in NATIVE_LANES.items() if variant in variant_ids)
     require(sorted(routes) == sorted(lanes), f"need one --route for each of {', '.join(lanes)}")
+    waiver_paths = {}
+    for item in args.native_route_waiver:
+        lane, _, path = item.partition("=")
+        require(lane in NATIVE_LANES and lane in lanes and path,
+                f"bad --native-route-waiver {item!r}")
+        require(lane not in waiver_paths, f"duplicate --native-route-waiver {lane!r}")
+        waiver_paths[lane] = path
     require(not set(lanes).intersection(evidence["documented_routes"].get("deferred_routes", {})),
             "accepted routes cannot also be deferred")
     for lane in lanes:
@@ -449,22 +472,63 @@ def main() -> int:
             args.release, args.as_of, profile, evidence["platforms"][profile["id"]], manifest, candidate)
     native_model = effective_native_model(manifest)
     native_configurations = {}
+    native_campaigns = {}
+    waived = {}
+    for lane in lanes:
+        if lane not in NATIVE_LANES:
+            continue
+        native = evidence[lane.removesuffix("-native")]
+        if lane not in waiver_paths:
+            require(native.get("status", "passed") == "passed",
+                    f"{lane}: failed native campaign requires an explicit founder waiver")
+            native_campaigns[lane] = {"status": "passed"}
+            continue
+        path = bound_file(ROOT, waiver_paths[lane])
+        require(path is not None, f"{lane}: native campaign waiver file is missing")
+        reference = {"repository_path": waiver_paths[lane], "sha256": sha256(path.read_bytes())}
+        campaign = {"status": native.get("status"), "failed_phase": native.get("failed_phase"),
+                    "founder_waiver": reference}
+        errors = []
+        validate_native_route_waiver(ROOT, args.release, candidate, lane,
+                                    campaign["failed_phase"], reference, errors)
+        require(not errors, "; ".join(errors))
+        require(campaign["status"] == "failed" and native.get("founder_waiver") == reference,
+                f"{lane}: waiver requires the failed campaign and matching founder binding")
+        observations = native.get("observations", {})
+        restored = evidence["restoration"].get(lane.removesuffix("-native"), {})
+        require(not (observations.get("public_install", {}).get("status") == "passed"
+                     and restored.get("status") == "passed"),
+                f"{lane}: a passed native campaign cannot have a founder waiver")
+        native_campaigns[lane] = waived[lane] = campaign
     for variant in manifest["components"].get("ninfer_variants", []):
         require(variant.get("model_artifact_sha256") == native_model.get("artifact_sha256"),
                 f"{variant['id']}: runtime model must match the effective native model")
         native = evidence[variant["id"].split("-")[0]]
-        check_native_observations(variant["id"], native.get("observations"))
+        lane = variant["id"].split("-")[0] + "-native"
+        if lane not in waived:
+            check_native_observations(variant["id"], native.get("observations"))
         native_configurations[variant["id"]] = check_native_policy(
             args.release, variant, native, manifest["components"]["omp"]["binary_sha256"])
         lane_receipt = variant.get("qualification", {}).get("summary")
         receipt_path = ROOT / lane_receipt if lane_receipt and lane_receipt.startswith("releases/") else release_root / str(lane_receipt)
         check_native_first_release(native, load(receipt_path) if lane_receipt else {})
+        if lane in waived and native_configurations[variant["id"]] is not None:
+            waived[lane]["runtime_configuration"] = native_configurations[variant["id"]]
+            waived[lane]["probe_acceptance"] = native["probe_acceptance"]
     # The restoration receipt and every incumbent-restored claim below rest on this evidence.
     check_restoration(evidence["restoration"], lanes, candidate,
-                      predecessor_image_digest(args.release))
+                      predecessor_image_digest(args.release), waived)
     scope = evidence["documented_routes"].get("scope")
     require(isinstance(scope, str) and bool(scope.strip()),
             "evidence documented_routes needs the scope the accepted routes cover")
+    waiver_limitations = [
+        f"{lane}: documented blocks passed, but the post-route {row['failed_phase']} managed Stop "
+        "failed and was waived by the founder. Native behavior completion, wrapper restoration "
+        "audit and anonymous public-install acceptance are not claimed; lead recovery is bound "
+        "by the waiver." for lane, row in waived.items()]
+    if waived:
+        scope += " " + " ".join(waiver_limitations)
+    acceptance_status = "waived-by-founder" if waived else "passed"
 
     # 1. Route runner receipts, checked and copied byte for byte.
     receipts: dict[str, dict] = {}
@@ -473,6 +537,10 @@ def main() -> int:
         raw = routes[lane].read_bytes()
         receipt = json.loads(raw)
         check_route(lane, receipt, candidate)
+        if lane in waived:
+            waiver = load(ROOT / waived[lane]["founder_waiver"]["repository_path"])
+            require(waiver["evidence_sha256"]["documented-route.json"] == sha256(raw),
+                    f"{lane}: waiver must bind the original documented-route digest")
         receipts[lane] = receipt
         target = measurements / f"{args.measurement_prefix}-{lane}-run.json"
         target.write_bytes(raw)
@@ -533,7 +601,7 @@ def main() -> int:
                    if p["id"] == "windows-docker-local")
     native_refs: dict[str, dict] = {}
     for native_lane, native_variant in NATIVE_LANES.items():
-        if native_lane not in lanes:
+        if native_lane not in lanes or native_lane in waived:
             continue
         gpu_lane = native_lane.removesuffix("-native")
         variant = next(v for v in manifest["components"]["ninfer_variants"] if v["id"] == native_variant)
@@ -596,6 +664,7 @@ def main() -> int:
     routes_doc.update({
         "candidate_commit": candidate,
         "routes": route_rows,
+        "native_campaigns": native_campaigns,
         "steps": [{"lane": lane, "status": "passed"} for lane in lanes],
         "current_block_addresses": addresses,
         "restoration_receipt": restoration_ref,
@@ -636,7 +705,8 @@ def main() -> int:
                       for profile in authority["profiles"]],
     }
     composed_path = acceptance_root / "composed-external-installation.json"
-    steps = {lane: {"status": "passed", "blocks": len(route_rows[lane]["steps"])} for lane in lanes}
+    steps = {lane: {**native_campaigns.get(lane, {"status": "passed"}),
+                    "blocks": len(route_rows[lane]["steps"])} for lane in lanes}
     steps = {"public_client_downloads": public_client_downloads, **steps,
              "linux_live_client": composed["linux_live_client"]}
     save(composed_path, {
@@ -644,7 +714,7 @@ def main() -> int:
         "schema_version": 1,
         "release": args.release,
         "as_of": args.as_of,
-        "status": "passed",
+        "status": acceptance_status,
         "operator_class": "owner-operated tester-equivalent",
         "mode": composed["mode"],
         "client": {
@@ -676,14 +746,14 @@ def main() -> int:
             "published_client_components": {"repository_path": relative(client_components),
                                             "sha256": sha256(client_components.read_bytes())},
         },
-        "limitations": composed["limitations"],
+        "limitations": composed["limitations"] + waiver_limitations,
         "raw_prompts_outputs_or_secrets_included": False,
     })
 
     # 7. Ready posture: the authority, the qualification composition and the manifest.
     composition = qualification["composition"]
     composition["external_installation_acceptance"] = {
-        "status": "passed",
+        "status": acceptance_status,
         "repository_path": relative(composed_path),
         "sha256": sha256(composed_path.read_bytes()),
         "public_url": composition["external_installation_acceptance"].get("public_url"),
@@ -700,7 +770,7 @@ def main() -> int:
         "compatibility_authority": omp["compatibility_authority"],
         "compatibility_sha256": compatibility_sha,
         "platform_receipts": platform_rows,
-        "note": composed["qualification_note"],
+        "note": " ".join([composed["qualification_note"], *waiver_limitations]),
     }
     routes_ref = {"repository_path": relative(routes_path), "sha256": sha256(routes_path.read_bytes())}
     composition["documented_route_acceptance"] = {"status": "passed", **routes_ref}
@@ -725,7 +795,7 @@ def main() -> int:
         "platform_receipts": platform_paths,
         "fresh_product_acceptance": True,
         "restoration": restoration_summary(evidence["restoration"], lanes,
-                                           restoration_ref["repository_path"]),
+                                           restoration_ref["repository_path"], waived),
         "composition_run": True,
     })
     qualification["documented_route_acceptance"] = summary

@@ -1847,6 +1847,129 @@ class ReleaseContractTest(unittest.TestCase):
                     else:
                         self.assertEqual(errors, [])
 
+    def bind_failed_native_campaign(self, root: Path) -> tuple[Path, Path, Path]:
+        """Admit the campaign separately; retain the original passed documented blocks."""
+        from test_compose_route_acceptance import campaign_waiver
+        release_root = root / "releases" / PUBLIC_RELEASE
+        routes_path = release_root / "acceptance/documented-routes.json"
+        routes = self.load(routes_path)
+        path = release_root / "qualification/rtx3090-route-waiver.json"
+        self.save(path, campaign_waiver(PUBLIC_RELEASE, routes["candidate_commit"],
+                                       routes["routes"]["rtx3090-native"]["sha256"]))
+        campaign = {"status": "failed", "failed_phase": "structured-outage",
+                    "founder_waiver": {"repository_path": path.relative_to(root).as_posix(),
+                                       "sha256": VERIFY_RELEASE.sha256_file(path)}}
+        routes["native_campaigns"] = {"rtx4090-native": {"status": "passed"},
+                                     "rtx3090-native": campaign}
+        self.save(routes_path, routes)
+        routes_ref = {"repository_path": routes_path.relative_to(root).as_posix(),
+                      "sha256": VERIFY_RELEASE.sha256_file(routes_path)}
+        external_path = release_root / "acceptance/composed-external-installation.json"
+        external = self.load(external_path)
+        external["status"] = "waived-by-founder"
+        external["steps"]["rtx3090-native"] = {**campaign, "blocks": 7}
+        external["evidence"]["documented_routes"] = routes_ref
+        del external["evidence"]["rtx3090_public_install"]
+        external["limitations"].append("rtx3090-native campaign failed and was waived by the founder.")
+        self.save(external_path, external)
+        # Preserve a non-passing historical install record without claiming it as acceptance.
+        public = release_root / "acceptance/rtx3090-public-install.json"
+        self.save(public, {**self.load(public), "status": "not-run"})
+
+        def update(qualification):
+            qualification["composition"]["documented_route_acceptance"] = {"status": "passed", **routes_ref}
+            qualification["composition"]["external_installation_acceptance"].update(
+                status="waived-by-founder", sha256=VERIFY_RELEASE.sha256_file(external_path))
+            qualification["documented_route_acceptance"] = {
+                "status": "passed", "candidate_commit": routes["candidate_commit"],
+                "evidence_path": routes_ref["repository_path"], "evidence_sha256": routes_ref["sha256"],
+                "scope": "Passed documented blocks; rtx3090-native post-route campaign failed and was founder-waived."}
+
+        self.rebind_qualification(release_root, update)
+        return path, routes_path, external_path
+
+    def rebind_failed_native_campaign(self, root: Path, routes_path: Path, external_path: Path) -> None:
+        """Update only enclosing digests so each refusal targets semantics, not stale parent bytes."""
+        external = self.load(external_path)
+        external["evidence"]["documented_routes"]["sha256"] = VERIFY_RELEASE.sha256_file(routes_path)
+        self.save(external_path, external)
+
+        def update(qualification):
+            qualification["composition"]["documented_route_acceptance"]["sha256"] = VERIFY_RELEASE.sha256_file(routes_path)
+            qualification["documented_route_acceptance"]["evidence_sha256"] = VERIFY_RELEASE.sha256_file(routes_path)
+            qualification["composition"]["external_installation_acceptance"]["sha256"] = VERIFY_RELEASE.sha256_file(external_path)
+
+        self.rebind_qualification(root / "releases" / PUBLIC_RELEASE, update)
+
+    def test_require_ready_accepts_the_failed_founder_waived_campaign_not_a_route_failure(self) -> None:
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        _, routes_path, _ = self.bind_failed_native_campaign(root)
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+        self.assertEqual(errors, [])
+        routes = self.load(routes_path)
+        self.assertEqual(routes["routes"]["rtx3090-native"]["status"], "passed")
+        self.assertEqual(routes["native_campaigns"]["rtx3090-native"]["status"], "failed")
+
+    def test_require_ready_refuses_invalid_native_campaign_waivers(self) -> None:
+        cases = ("passed-campaign", "passed-install", "release", "candidate", "lane", "phase",
+                 "missing-file", "hash-mismatch", "unwaived", "failed-documented-step",
+                 "route-candidate", "route-bytes", "route-digest")
+        for case in cases:
+            with self.subTest(case=case):
+                temporary, root = self.public_draft_copy()
+                try:
+                    path, routes_path, external_path = self.bind_failed_native_campaign(root)
+                    routes, external = self.load(routes_path), self.load(external_path)
+                    campaign = routes["native_campaigns"]["rtx3090-native"]
+                    if case == "passed-campaign":
+                        campaign["status"] = "passed"
+                    elif case == "passed-install":
+                        public = root / "releases" / PUBLIC_RELEASE / "acceptance/rtx3090-public-install.json"
+                        self.save(public, {**self.load(public), "status": "passed"})
+                    elif case in ("release", "candidate", "lane", "phase", "route-digest"):
+                        waiver = self.load(path)
+                        if case == "route-digest":
+                            waiver["evidence_sha256"]["documented-route.json"] = "0" * 64
+                        else:
+                            field, value = {
+                                "release": ("release", "v0.1.0"), "candidate": ("candidate", "2" * 40),
+                                "lane": ("lane", "rtx4090-native"), "phase": ("failed_phase", "native-probes"),
+                            }[case]
+                            waiver[field] = value
+                        self.save(path, waiver)
+                        campaign["founder_waiver"]["sha256"] = VERIFY_RELEASE.sha256_file(path)
+                    elif case == "missing-file":
+                        path.unlink()
+                    elif case == "hash-mismatch":
+                        campaign["founder_waiver"]["sha256"] = "0" * 64
+                    elif case == "unwaived":
+                        del campaign["founder_waiver"]
+                    else:
+                        row = routes["routes"]["rtx3090-native"]
+                        receipt_path = root / row["receipt"]
+                        receipt = self.load(receipt_path)
+                        if case == "failed-documented-step":
+                            receipt["steps"][-1]["status"] = "failed"
+                        elif case == "route-candidate":
+                            receipt["clone_commit"] = "2" * 40
+                        else:
+                            receipt["steps"][0]["executed_sha256"] = "0" * 64
+                        self.save(receipt_path, receipt)
+                        row["sha256"] = VERIFY_RELEASE.sha256_file(receipt_path)
+                        waiver = self.load(path)
+                        waiver["evidence_sha256"]["documented-route.json"] = row["sha256"]
+                        self.save(path, waiver)
+                        campaign["founder_waiver"]["sha256"] = VERIFY_RELEASE.sha256_file(path)
+                    external["steps"]["rtx3090-native"] = {**campaign, "blocks": 7}
+                    self.save(routes_path, routes)
+                    self.save(external_path, external)
+                    self.rebind_failed_native_campaign(root, routes_path, external_path)
+                    _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+                    self.assertTrue(errors, case)
+                finally:
+                    temporary.cleanup()
+
     def test_qualification_repository_bindings_are_enforced_recursively(self) -> None:
         temporary, root = self.public_draft_copy()
         self.addCleanup(temporary.cleanup)
