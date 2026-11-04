@@ -273,8 +273,8 @@ uncapped-power-assertion-only rehearsal fix. Raw failures are not passes; compon
   existing install preserves its actual predecessor as `previous_release` for
   `Control-Release.ps1 -Action Rollback`. Separate beta.2 running-upgrade, forced-start-failure
   rollback and repair rehearsals passed on both lanes; candidate-bound public-URL installation
-  remains pending. An isolated scratch qualification's `not_applicable` rollback is not a
-  predecessor-upgrade proof.
+  passed on RTX 4090 but was not exercised on the failed, founder-waived RTX 3090 campaign.
+  An isolated scratch qualification's `not_applicable` rollback is not a predecessor-upgrade proof.
 - **RTX 3090 power and upgrade:** the serving cap is 350 W, with 370 W owner restoration on the
   qualified hardware. The new installer validates an incumbent's lease under its own policy
   and stops it through its own controller before the successor's policy takes ownership,

@@ -94,7 +94,7 @@
     "external_installation_acceptance": {
       "status": "waived-by-founder",
       "repository_path": "releases/v0.16.2/acceptance/composed-external-installation.json",
-      "sha256": "aa7d8e184b493d3bcbe0eab9f277cab5c88a0d7c2ab88fb2327bb143eafa5019",
+      "sha256": "4d6b48900057dc40f76f54718f5aa44955b462e10db7c9172226bca683ee2b9c",
       "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/9057372474e99d47d974ec6675eab53a2f815de9/releases/v0.16.2/acceptance/composed-external-installation.json",
       "as_of": "2026-11-04",
       "release": "v0.16.2",
@@ -107,7 +107,7 @@
       "windows_asset_sha256": "978846a816cb77f44a55e32b16493375ca837fbf87e0aec35a9c1c934bff0cd0",
       "windows_binary_sha256": "978846a816cb77f44a55e32b16493375ca837fbf87e0aec35a9c1c934bff0cd0",
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
-      "compatibility_sha256": "9c78d3bc30f26d33730f05bbc7ebf35d6a1137c2d4592447d5b32b548e903f78",
+      "compatibility_sha256": "c7782222c349c0418df957a563d9da50154f17bb4351967b22a5030025254fbf",
       "platform_receipts": [
         {
           "profile": "darwin-remote-ssh",
@@ -127,7 +127,7 @@
     "documented_route_acceptance": {
       "status": "passed",
       "repository_path": "releases/v0.16.2/acceptance/documented-routes.json",
-      "sha256": "6a2a12f7caabdddf8c62da67227fd4bfe00c544c0f7d7799dc50351ce006c4f0"
+      "sha256": "fdd5302d2968b270e67b9865712432ee598d052c81db4cd78aefc9c6bd124906"
     }
   },
   "as_of": "2026-11-04",
@@ -143,7 +143,7 @@
     "candidate_commit": "c6fc8465611a89fd85730f0653f670d2a314a721",
     "evidence_commit_changes_candidate": false,
     "evidence_path": "releases/v0.16.2/acceptance/documented-routes.json",
-    "evidence_sha256": "6a2a12f7caabdddf8c62da67227fd4bfe00c544c0f7d7799dc50351ce006c4f0",
+    "evidence_sha256": "fdd5302d2968b270e67b9865712432ee598d052c81db4cd78aefc9c6bd124906",
     "document_change": "Only later non-executable release-state prose may change; composer must independently require every executed block to remain byte-identical.",
     "documented_route_steps": {
       "rtx5090-container-host": "2/2",
@@ -323,7 +323,7 @@
     "g4_review": {
       "status": "passed",
       "repository_path": "releases/v0.16.2/review/runtime-ledger.json",
-      "sha256": "374fce061c037b61e320abb53a852c5dd2467f6e640fa687e399d9aa7cfbfeb1",
+      "sha256": "e484409c8a0e36e1c60cad14ccbd7e908d626401a283f68c31523705c4c67da4",
       "ledger_status": "closed-by-disposition",
       "approval_granted": true,
       "publication_authorized": false,
@@ -364,7 +364,7 @@
       },
       "descriptor": {
         "repository_path": "releases/v0.16.2/qualification/client-components.json",
-        "sha256": "917e759c228bc5cff906514aa43cbdfbc9f9f10e7b660afbffc2a963ae324f4c",
+        "sha256": "8aa18a1deb951c1bc277e645bf9f4e03313f80eac79bf7ab192be89e7464119f",
         "disposition": "composed-by-acceptance"
       },
       "scope": "Complete 18.14.0-to-18.14.2 and incremental 18.15.0 source review with independently verified upstream asset bytes/digests. No executable rehearsal or inference result is imported from either source receipt."
@@ -373,6 +373,6 @@
   "remaining_release_gates": [],
   "receipt_audit": {
     "repository_path": "releases/v0.16.2/qualification/receipt-audit.json",
-    "sha256": "28e2c83c3e52316f4fa4b4cd58bf360ea57533868081f38996495738fdf002f2"
+    "sha256": "8ac4f471302d3d64d9c1474e3523b695317ab4299e81eafc1a24790ba436f434"
   }
 }

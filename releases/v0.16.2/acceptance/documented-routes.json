@@ -7,7 +7,7 @@
   "operator_class": "owner-operated tester-equivalent",
   "mode": "Fresh v0.16.2 acceptance on c6fc8465611a89fd85730f0653f670d2a314a721; failed RTX 3090 native campaign preserved beside its founder waiver.",
   "document_sha256": "5e5bb93dbe839dabe78b5e16058eb521578e5eebf20a7d6a9a7dec87b59b0cf7",
-  "current_document_sha256": "2fc7a947086add8f61c159c7a691bc630c3fec5160ae696161eb95c4da64e45a",
+  "current_document_sha256": "c1f97aa43212107ef3cde43432f47286ffd1f6ac06870d64a8f3b76831913c16",
   "executed_blocks_match_current": true,
   "document_change": "Only later non-executable release-state prose may change; composer must independently require every executed block to remain byte-identical.",
   "candidate_commit": "c6fc8465611a89fd85730f0653f670d2a314a721",
