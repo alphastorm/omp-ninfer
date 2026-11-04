@@ -49,10 +49,10 @@ OMP remains responsible for tool approval and workspace boundaries.
 5. OMP uses explicit local provider routes (`ninfer-beta/q38-ninfer`,
    `ninfer-native-4090/qwen3.8-27b`, or `ninfer-native-3090/q38-ninfer`) with retries, model
    fallback, and automatic client self-updates disabled (`examples/manual-tunnel/fail-closed.yml`).
-6. The upstream OMP 18.14.0 binaries, shared Qwen3.8 27B model container version 3 artifact
+6. The upstream OMP 18.15.0 binaries, shared Qwen3.8 27B model container version 3 artifact
    (`81f924d4`), NInfer container image and native packages, server binaries, SPDX and CycloneDX
    dependency SBOMs, seccomp profile, runtime configurations, and qualification summaries are pinned
-   by immutable SHA-256 digests and commits in `releases/v0.16.0/manifest.json` before release
+   by immutable SHA-256 digests and commits in `releases/v0.16.2/manifest.json` before release
    status becomes `ready`.
 7. The NInfer container image is pulled by OCI manifest digest (`@sha256:`), never a mutable tag.
 8. Support material excludes raw prompts, outputs, request logs, secrets, private paths, hostnames,
@@ -80,7 +80,7 @@ checkpoints across all three qualified lanes:
   256 MiB staging, schema 3, mandatory `--session-checkpoint-require-origin-auth`) and `/logs`, written as the invoking user via `io_uring` and `O_DIRECT`.
 - **Native Windows RTX 4090 and RTX 3090 lanes:** Checkpoints (`cache/<release-instance-id>/session-checkpoints-v3`,
   where `<release-instance-id>` is the installed release ID such as
-  `qwen38-4090-native-v0.8.0-beta.1-26fa28d0e783`; 24,576 MiB quota, 256 MiB staging, schema 3,
+  `qwen38-4090-native-v0.8.0-beta.2-a87de3613c17`; 24,576 MiB quota, 256 MiB staging, schema 3,
   mandatory `--session-checkpoint-require-origin-auth`), release metadata, `last-stop.json`, and
   request JSONL logs live under protected state roots
   (`%ProgramData%\NInfer\qwen38-4090-native` and `%ProgramData%\NInfer\qwen38-3090-native`), while
@@ -95,7 +95,7 @@ key and stored outside the checkpoint root. `scripts/checkpoint_sync.py` verifie
 byte count and SHA-256 before atomic rename publication, and the runtime refuses or quarantines
 modified or unauthenticated generations at load (`--session-checkpoint-require-origin-auth`, which is
 mandatory in the `qwen38-5090-v0.13.0` container profile and both
-`qwen38-4090-native-v0.8.0-beta.1` / `qwen38-3090-native-v0.8.0-beta.1` native profiles,
+`qwen38-4090-native-v0.8.0-beta.2` / `qwen38-3090-native-v0.8.0-beta.2` native profiles,
 requires a valid MAC on at least a 32-byte bearer key; within one API-key principal, `prompt_cache_key` names a session capability, so use
 unique high-entropy keys and never share that principal among mutually untrusted clients). Because checkpoint payloads and request logs
 contain unencrypted session state on disk, treat checkpoint directories, replica storage, and log
@@ -127,7 +127,7 @@ defect.
 
 ## Artifact verification
 
-Run from the exact release tag (`v0.16.0`):
+Run from the exact release tag (`v0.16.2`):
 
 ```sh
 python3 scripts/verify_release.py --require-ready
