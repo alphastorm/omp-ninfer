@@ -98,9 +98,10 @@ def authenticate_decision(value: dict[str, Any], root: Path) -> None:
     if not path.is_relative_to(root.resolve()) or not path.is_file():
         raise SpeedGateError("native_speed_decision must name a file inside the repository")
     expected_sha = require_sha256(binding.get("sha256"), "native_speed_decision sha256")
-    if hashlib.sha256(path.read_bytes()).hexdigest() != expected_sha:
+    decision_bytes = path.read_bytes()
+    if hashlib.sha256(decision_bytes).hexdigest() != expected_sha:
         raise SpeedGateError("native_speed_decision SHA-256 must match the bound file bytes")
-    if value["decision"] != load(path):
+    if value["decision"] != json.loads(decision_bytes):
         raise SpeedGateError("gate decision must equal the release's bound decision")
 
 
