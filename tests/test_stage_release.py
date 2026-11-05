@@ -287,8 +287,31 @@ class StageReleaseTests(unittest.TestCase):
             with self.subTest(arguments=arguments):
                 result = self.stage(root, None, source_release=CURRENT, dependency_args=[
                     "--source-tag", "v0.99.0-qwen38-5090-source.1",
-                    "--source-commit", "c" * 40, *arguments])
+                    "--source-commit", "c" * 40,
+                    "--source-archive-sha", hashlib.sha256(archive.read_bytes()).hexdigest(),
+                    *arguments])
                 self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+                if len(arguments) == 4:
+                    self.assertIn("--checksums source archive entry", result.stderr)
+                self.assertFalse((root / "releases" / TARGET).exists())
+
+    def test_source_checksums_must_list_the_exact_archive_once(self) -> None:
+        root = self.staging_copy(source_release=CURRENT)
+        archive = root / "runtime-source-cccccccc.tar.gz"
+        archive.write_bytes(b"new source archive fixture\n")
+        source_sha = hashlib.sha256(archive.read_bytes()).hexdigest()
+        checksum = root / "SHA256SUMS"
+        entry = f"{source_sha}  {archive.name}\n"
+        for contents in (f"{source_sha}  other-source.tar.gz\n", "not a checksum entry\n",
+                         entry + entry):
+            with self.subTest(checksums=contents):
+                checksum.write_text(contents, encoding="utf-8")
+                result = self.stage(root, None, source_release=CURRENT, dependency_args=[
+                    "--source-tag", "v0.99.0-qwen38-5090-source.1", "--source-commit", "c" * 40,
+                    "--source-archive-sha", source_sha, "--source-archive", str(archive),
+                    "--checksums", str(checksum)])
+                self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+                self.assertIn("--checksums", result.stderr)
                 self.assertFalse((root / "releases" / TARGET).exists())
 
     def test_staging_discards_predecessor_observed_gates_including_waivers(self) -> None:
@@ -623,6 +646,8 @@ class StageReleaseTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertFalse((root / "releases" / TARGET / "qualification/receipt-audit.json").exists())
         self.assertTrue((root / "releases/v0.16.0/qualification/receipt-audit.json").is_file())
+        qualification = self.load(root / "releases" / TARGET / "qualification.json")
+        self.assertNotIn("receipt_audit", qualification)
         staged = self.load(root / "releases" / TARGET / "manifest.json")
         for before, after in zip(source["components"]["ninfer_variants"],
                                  staged["components"]["ninfer_variants"]):

@@ -10,6 +10,7 @@ import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from copy import deepcopy
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import speed_gate as SPEED
@@ -46,6 +47,7 @@ def fixture():
                                        "normalized_output": json.dumps({"content": row["id"], "reasoning": "",
                                                                         "tool_calls": []}, sort_keys=True)}
                                       for row, rate in zip(suite, (100, 100) if label == "A" else (110, 120))]})
+    record_decision(SPEED.ROOT, gate)
     return gate, captures
 
 
@@ -55,12 +57,81 @@ def plan_for(gate, captures):
                                   "configuration_sha256": digest(candidate["config"])})
 
 
+def record_decision(root, gate):
+    directory = root / "releases" / gate["release"]
+    (directory / "qualification").mkdir(parents=True, exist_ok=True)
+    path = directory / "qualification/native-speed-decision.json"
+    path.write_text(json.dumps(gate["decision"]), encoding="utf-8")
+    (directory / "qualification.json").write_text(json.dumps({
+        "observed_gates": {"native_speed_decision": {
+            "repository_path": path.relative_to(root).as_posix(),
+            "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        }},
+    }), encoding="utf-8")
+    return path
+
+
+class SpeedDecisionBindingTests(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        self.patch = mock.patch.object(SPEED, "ROOT", self.root, create=True)
+        self.patch.start()
+        self.addCleanup(self.patch.stop)
+
+    def test_self_written_lax_decision_cannot_authorize_a_speed_regression(self):
+        gate, captures = fixture()
+        record_decision(self.root, gate)
+        gate["decision"]["rule"].update(
+            weighted_decode_ratio_minimum=0.5, every_case_ratio_minimum=0.5)
+        for arm in captures:
+            for row in arm["requests"]:
+                row.update(completion_tokens=100 if arm["arm"] == "A" else 60, decode_seconds=1)
+        with self.assertRaisesRegex(SPEED.SpeedGateError, "bound decision"):
+            SPEED.reduce(gate, captures, plan_for(gate, captures))
+
+    def test_decision_bytes_must_match_the_qualification_hash(self):
+        gate, captures = fixture()
+        path = record_decision(self.root, gate)
+        path.write_bytes(path.read_bytes() + b" ")
+        with self.assertRaisesRegex(SPEED.SpeedGateError, "decision SHA-256"):
+            SPEED.prescreen(gate, {"binary_sha256": "b" * 64, "configuration_sha256": "c" * 64})
+
+    def test_cli_root_override_authenticates_both_prescreen_and_reduction(self):
+        gate, captures = fixture()
+        candidate = {"binary_sha256": "b" * 64,
+                     "configuration_sha256": digest(captures[1]["identity"]["config"])}
+        for name, value in (("gate", gate), ("candidate", candidate),
+                            *[(str(index), capture) for index, capture in enumerate(captures)]):
+            (self.root / f"{name}.json").write_text(json.dumps(value), encoding="utf-8")
+        with mock.patch.object(SPEED, "ROOT", self.root / "not-the-authority"), redirect_stdout(io.StringIO()):
+            self.assertEqual(SPEED.main([
+                "prescreen", "--root", str(self.root), "--gate", str(self.root / "gate.json"),
+                "--candidate", str(self.root / "candidate.json"), "--out", str(self.root / "plan.json"),
+            ]), 0)
+            argv = ["reduce", "--root", str(self.root), "--gate", str(self.root / "gate.json"),
+                    "--plan", str(self.root / "plan.json"), "--out", str(self.root / "result.json")]
+            for index in range(4):
+                argv += ["--capture", str(self.root / f"{index}.json")]
+            self.assertEqual(SPEED.main(argv), 0)
+
+
 class SpeedGateTests(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        patch = mock.patch.object(SPEED, "ROOT", self.root)
+        patch.start()
+        self.addCleanup(patch.stop)
+
     def test_recorded_native_no_regression_rule_replaces_the_speedup_floor(self):
         gate, captures = fixture()
         gate["decision"] = json.loads(
             (ROOT / "releases/v0.16.2/qualification/native-speed-decision.json").read_text())
         gate["release"] = gate["decision"]["release"]
+        record_decision(self.root, gate)
         for arm in captures:
             for row in arm["requests"]:
                 row.update(completion_tokens=100, decode_seconds=1)
@@ -75,6 +146,7 @@ class SpeedGateTests(unittest.TestCase):
             with self.subTest(candidate_tokens=candidate_tokens):
                 gate, captures = fixture()
                 gate["decision"]["rule"]["weighted_decode_ratio_minimum"] = 0.98
+                record_decision(self.root, gate)
                 for arm in captures:
                     for row, tokens in zip(arm["requests"], (100, 100) if arm["arm"] == "A" else candidate_tokens):
                         row.update(completion_tokens=tokens, decode_seconds=1)
@@ -104,6 +176,7 @@ class SpeedGateTests(unittest.TestCase):
         gate, captures = fixture()
         plan = plan_for(gate, captures)
         gate["decision"]["rule"]["weighted_decode_ratio_minimum"] = 0.98
+        record_decision(self.root, gate)
         result = SPEED.reduce(gate, captures, plan)
         self.assertEqual(result["status"], "DIAGNOSTIC")
         self.assertIn("plan.gate_sha256", " ".join(result["diagnostic_reasons"]))

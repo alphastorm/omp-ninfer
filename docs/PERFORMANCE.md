@@ -71,8 +71,12 @@ Before collecting candidate data, freeze one `gate.json` declaration:
 - `artifact_type: "omp_ninfer_speed_gate"` and integer `schema_version: 1`.
 - `release`: the product release being judged.
 - `decision`: the complete recorded `omp_ninfer_founder_gate_decision` schema-1
-  object for that same release, copied from its bound decision JSON, not a new
-  threshold chosen after measurement. Its `rule` contains positive finite
+  object for that same release, copied from the file bound by
+  `releases/<release>/qualification.json` → `observed_gates.native_speed_decision`.
+  Both commands verify that binding's `repository_path` and file SHA-256, then
+  require the embedded decision to equal the bound file's content; a self-written
+  threshold or freshly regenerated plan cannot substitute for that record.
+  Its `rule` contains positive finite
   `weighted_decode_ratio_minimum` and `every_case_ratio_minimum`,
   `byte_identical_normalized_outputs:
   "required for every case (A0/A3, B1/B2, A0/B1)"`, and `applies_to` selecting
@@ -118,6 +122,9 @@ is no comparator argument. `B` comes from `candidate.json`, and the order is ABB
 This command writes an identity plan, not a hardware launcher. A campaign operator
 must resolve those hashes to the actual files, check startup identities, and retain
 the plan with the measured captures. It does not authorize a hardware run.
+Both `prescreen` and `reduce` read qualification from this checkout by default;
+pass `--root PATH` to use another repository root containing the release and its
+hash-bound decision. Neither command contacts a host.
 
 Collect four passed captures with `arm` (`A`, `B`, `B`, `A`), `index` (`0`..`3`),
 `status: "passed"`, measured `identity.binary_sha256`, and either `identity.config`

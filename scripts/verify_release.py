@@ -905,6 +905,9 @@ def validate_waived_position(row: Any, probe: str, label: str, errors: list[str]
     if not isinstance(row, dict):
         errors.append(f"{label} waived position must be an object")
         return
+    job = row.get("job")
+    require(isinstance(job, str) and re.fullmatch(rf"{probe}(-run-\d+)?", job) is not None,
+            f"{label} job must name the {probe} probe or a numbered run", errors)
     position = row.get("position")
     require(type(position) is int and (
         (probe == "restore" and position in (3, 4) and row.get("label") == f"restore_{position - 3}")
@@ -991,9 +994,9 @@ def validate_parity_waiver_evidence(root: Path, release: str, gate: Any, waived:
         errors.append(f"{label} must waive exactly the observed failing position and no other failure")
         return
     name, row, failures = failing[0]
-    require(name == probe and row.get("position") == waived.get("position")
+    require(name == waived.get("job") and row.get("position") == waived.get("position")
             and row.get("label") == waived.get("label"),
-            f"{label} position must match the raw parity failure", errors)
+            f"{label} job and position must match the raw parity failure", errors)
     for arm in ("incumbent", "candidate"):
         for source, target in (("server_ttft_seconds", "ttft_s"), ("prompt_tokens", "prompt_tokens"),
                                ("cached_tokens", "cached_tokens")):
@@ -1011,7 +1014,8 @@ def validate_gate_waivers(root: Path, release: str, manifest: dict[str, Any],
     Published projections lack release/candidate or complete raw-position bindings.
     Their exact original bytes retain only their recorded historical scope; the
     held v0.16.1 explicitly kept v0.16.0's records. No exception admits a successor.
-    New parity waivers require release/candidate identity and a bound raw /2 verdict.
+    New parity waivers require release identity and a bound raw /2 verdict. Product
+    candidate identity is checked only after route acceptance records the commit.
     """
     frozen = {
         ("v0.16.0", "rtx5090_restore_waiver"):
@@ -1095,9 +1099,10 @@ def validate_gate_waivers(root: Path, release: str, manifest: dict[str, Any],
         candidate = qualification.get("documented_route_acceptance", {}).get("candidate_commit")
         require(waiver.get("release") == release,
                 f"{label} release must match the carrying release", errors)
-        require(isinstance(candidate, str) and GIT_SHA_RE.fullmatch(candidate) is not None
-                and waiver.get("candidate") == candidate,
-                f"{label} candidate must match this release's candidate commit", errors)
+        if candidate is not None:
+            require(isinstance(candidate, str) and GIT_SHA_RE.fullmatch(candidate) is not None
+                    and waiver.get("candidate") == candidate,
+                    f"{label} candidate must match this release's recorded candidate commit", errors)
         positions = waiver.get("waived")
         if legacy or probe == "speed" or not isinstance(positions, list) or len(positions) != 1:
             errors.append(f"{label} must waive exactly one observed parity position")

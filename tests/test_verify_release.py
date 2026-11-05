@@ -605,6 +605,7 @@ class GateWaiverContractTests(unittest.TestCase):
         self.waiver = json.loads(
             (current / "qualification/rtx4090-restore-position-waiver.json").read_text())
         self.waiver.update(release=self.release, candidate="a" * 40)
+        self.waiver["waived"][0]["job"] = "restore"
         self.qualification = {
             "documented_route_acceptance": {"candidate_commit": "a" * 40},
             "observed_gates": {
@@ -628,6 +629,9 @@ class GateWaiverContractTests(unittest.TestCase):
         verdict = judge_comparison(comparison, self.directory, "comparison.json")
         if mutate:
             mutate(verdict)
+        self.save_verdict(verdict)
+
+    def save_verdict(self, verdict):
         path = self.directory / "agent-verdict.json"
         path.write_text(json.dumps(verdict))
         sha = VERIFY_RELEASE.sha256_file(path)
@@ -669,6 +673,34 @@ class GateWaiverContractTests(unittest.TestCase):
                 self.waiver = deepcopy(original)
                 mutate(self.waiver)
                 self.assertTrue(self.validate())
+
+    def test_waiver_can_be_authored_before_the_product_candidate_is_recorded(self):
+        self.qualification["documented_route_acceptance"] = {"status": "pending"}
+        self.waiver.pop("candidate")
+        self.assertEqual(self.validate(), [])
+
+    def test_corrected_restore_campaign_binds_the_exact_run_job(self):
+        from agent_parity import judge_comparison
+        fixtures = ROOT / "tests/fixtures/agent_parity"
+        comparison = json.loads((fixtures / "corrected-comparison.json").read_text())
+        verdict = judge_comparison(comparison, fixtures, "corrected-comparison.json")
+        row = verdict["jobs"]["restore-run-0"]["paired_positions"][3]
+        self.assertFalse(row["passed"])
+        self.waiver["waived"] = [{
+            "job": "restore-run-0", "probe": "two-restart restore",
+            "position": row["position"], "label": row["label"],
+            "rule": "p16-agent-parity/2 candidate TTFT <= incumbent + max(0.25 s, 25%)",
+            **{f"{arm}_{target}": row[f"{arm}_{source}"] for arm in ("incumbent", "candidate")
+               for source, target in (("server_ttft_seconds", "ttft_s"),
+                                      ("prompt_tokens", "prompt_tokens"),
+                                      ("cached_tokens", "cached_tokens"))},
+        }]
+        self.save_verdict(verdict)
+        self.assertEqual(self.validate(), [])
+        for job in (None, "restore", "restore-run-1", "sibling-run-0", "restore-run-x"):
+            with self.subTest(job=job):
+                self.waiver["waived"][0]["job"] = job
+                self.assertTrue(any("job" in error for error in self.validate()))
 
     def test_raw_failure_scope_cannot_gain_another_position_or_metric(self):
         def additional_position(verdict):

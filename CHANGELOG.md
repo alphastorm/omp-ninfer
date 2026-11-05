@@ -27,10 +27,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   bytes or refuse, preserve checkpoint origin authentication with profile templates,
   and discard predecessor observed gates/audits while regenerating the client descriptor
   ([#138](https://github.com/alphastorm/omp-ninfer/issues/138), items 1–5 and 8).
-- Take native speed thresholds from the release's recorded decision, bind that decision
+- Take native speed thresholds from the release's hash-bound qualification decision, bind that decision
   into the pre-screen plan, and require retained normalized-output byte identity within
   and across ABBA arms. The recorded `1.08` speedup and `0.98` no-regression rules retain
   the every-case floor; no waiver or claimed matching-output hash supplies a reducer pass.
+  Authenticate the embedded decision against the recorded file, match numbered parity
+  jobs explicitly, permit waiver authoring before the product candidate is recorded,
+  and verify the staged source archive's exact checksum-set entry.
 
 ### Changed
 

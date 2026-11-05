@@ -66,6 +66,7 @@ from render_compatibility import OMP_PROFILE_PLATFORMS
 from verify_release import (
     ContractError,
     NINFER_VARIANT_IDS,
+    SHA256SUMS_ENTRY_RE,
     client_identity_pins,
     client_pin_locations,
     effective_native_model,
@@ -321,6 +322,21 @@ def main() -> int:
                 parser.error(f"missing or empty source metadata artifact: {path}")
         if sha256_file(args.source_archive) != args.source_archive_sha:
             parser.error("--source-archive bytes do not match --source-archive-sha")
+        try:
+            lines = args.checksums.read_text(encoding="utf-8").splitlines()
+        except (OSError, UnicodeError) as error:
+            parser.error(f"--checksums cannot be read: {error}")
+        entries: dict[str, list[str]] = {}
+        for line_number, line in enumerate(lines, 1):
+            if not line:
+                continue
+            match = SHA256SUMS_ENTRY_RE.fullmatch(line)
+            if match is None:
+                parser.error(f"--checksums line {line_number} is not a SHA256SUMS entry")
+            entries.setdefault(match.group(2), []).append(match.group(1))
+        source_name = f"runtime-source-{args.source_commit[:8]}.tar.gz"
+        if entries.get(source_name) != [args.source_archive_sha]:
+            parser.error(f"--checksums source archive entry {source_name} must match --source-archive-sha")
         source_metadata = {"source_archive_bytes": args.source_archive.stat().st_size,
                            "checksums_sha256": sha256_file(args.checksums)}
         if changed_source and any(source_metadata[key] == source_runtime.get(key) for key in source_metadata):
@@ -573,6 +589,7 @@ def main() -> int:
     # Measurements and waivers belong to their original subject, not the copied tree.
     # Explicit successor observations can be supplied by the prepared-draft merge below.
     qualification["observed_gates"] = {}
+    qualification.pop("receipt_audit", None)
     identity = qualification["runtime_identity"]
     identity.update({
         "upstream_commit": ninfer["upstream_commit"],
