@@ -2387,14 +2387,16 @@ class ReleaseContractTest(unittest.TestCase):
             repository = Path(temporary)
             git = ["git", "-C", str(repository)]
             subprocess.run([*git, "init", "-q"], check=True)
+            # Match the product's byte-preserving checkout policy on native Windows too.
+            (repository / ".gitattributes").write_bytes(b"* -text\n")
             receipt = repository / "receipt.json"
-            receipt.write_text('{"status":"passed"}\n')
+            receipt.write_bytes(b'{"status":"passed"}\n')
             subprocess.run([*git, "add", "."], check=True)
             subprocess.run([*git, "-c", "user.name=t", "-c", "user.email=t@example.com",
                             "commit", "-qm", "base"], check=True)
             base = subprocess.check_output([*git, "rev-parse", "HEAD"], text=True).strip()
             subprocess.run([*git, "checkout", "-qb", "local-only-evidence"], check=True)
-            receipt.write_text('{"status":"passed","local_only":true}\n')
+            receipt.write_bytes(b'{"status":"passed","local_only":true}\n')
             subprocess.run([*git, "add", "."], check=True)
             subprocess.run([*git, "-c", "user.name=t", "-c", "user.email=t@example.com",
                             "commit", "-qm", "side evidence"], check=True)
