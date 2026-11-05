@@ -33,7 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the every-case floor; no waiver or claimed matching-output hash supplies a reducer pass.
   Authenticate the embedded decision against the recorded file, match numbered parity
   jobs explicitly, permit waiver authoring before the product candidate is recorded,
-  and verify the staged source archive's exact checksum-set entry.
+  and verify the runtime archive/SPDX checksum entries, checking a source-archive
+  entry only when present so published two-asset RTX 5090 sets remain valid.
 
 ### Changed
 

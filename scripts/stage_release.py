@@ -47,7 +47,8 @@ Optional --sbom-dependency-url/--sbom-dependency-sha256 VARIANT=VALUE pairs atta
 an additional native CycloneDX dependency inventory without replacing the file SBOM.
 When the RTX 5090 source archive URL changes, --source-archive and --checksums must
 supply the new local artifact bytes so their size and checksum-set digest can be
-derived before staging. Predecessor observed gates, including waivers, are cleared;
+derived before staging. The checksum set binds the runtime archive and SPDX SBOM;
+a source entry, when present, must also match. Predecessor observed gates, including waivers, are cleared;
 only explicitly supplied successor --prepared-draft observed gates are retained.
 """
 
@@ -333,9 +334,17 @@ def main() -> int:
             match = SHA256SUMS_ENTRY_RE.fullmatch(line)
             if match is None:
                 parser.error(f"--checksums line {line_number} is not a SHA256SUMS entry")
+            if match.group(2) in entries:
+                parser.error(f"--checksums duplicate entry {match.group(2)}")
             entries.setdefault(match.group(2), []).append(match.group(1))
+        for name, digest, flag in (
+            (archive, args.archive_sha, "--archive-sha"),
+            (archive.removesuffix(".tar.gz") + ".spdx.json", args.sbom_sha, "--sbom-sha"),
+        ):
+            if entries.get(name) != [digest]:
+                parser.error(f"--checksums entry {name} must match {flag}")
         source_name = f"runtime-source-{args.source_commit[:8]}.tar.gz"
-        if entries.get(source_name) != [args.source_archive_sha]:
+        if source_name in entries and entries[source_name] != [args.source_archive_sha]:
             parser.error(f"--checksums source archive entry {source_name} must match --source-archive-sha")
         source_metadata = {"source_archive_bytes": args.source_archive.stat().st_size,
                            "checksums_sha256": sha256_file(args.checksums)}

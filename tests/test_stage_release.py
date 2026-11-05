@@ -31,6 +31,13 @@ class StageReleaseTests(unittest.TestCase):
     def save(path: Path, value: dict) -> None:
         path.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
 
+    @staticmethod
+    def runtime_checksums(runtime: dict) -> bytes:
+        archive = runtime["binary_archive_url"].rsplit("/", 1)[-1]
+        sbom = runtime["sbom_url"].rsplit("/", 1)[-1]
+        return (f"{runtime['binary_archive_sha256']}  {archive}\n"
+                f"{runtime['sbom_sha256']}  {sbom}\n").encode("utf-8")
+
     def staging_copy(self, *, prepare_client_evidence: bool = True, source_release: str = SOURCE) -> Path:
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
@@ -264,7 +271,8 @@ class StageReleaseTests(unittest.TestCase):
         archive.write_bytes(b"new source archive fixture\n")
         checksum = root / "SHA256SUMS"
         source_sha = hashlib.sha256(archive.read_bytes()).hexdigest()
-        checksum.write_text(f"{source_sha}  {archive.name}\n", encoding="utf-8")
+        runtime = self.load(root / "releases" / CURRENT / "manifest.json")["components"]["ninfer"]
+        checksum.write_bytes(self.runtime_checksums(runtime))
         result = self.stage(root, None, source_release=CURRENT, dependency_args=[
             "--source-tag", "v0.99.0-qwen38-5090-source.1", "--source-commit", "c" * 40,
             "--source-archive-sha", source_sha, "--source-archive", str(archive),
@@ -275,12 +283,39 @@ class StageReleaseTests(unittest.TestCase):
         self.assertEqual(runtime["checksums_sha256"], hashlib.sha256(checksum.read_bytes()).hexdigest())
         self.assertEqual(runtime["source_archive_sha256"], source_sha)
 
+    def test_published_v0162_runtime_checksum_set_stages_without_a_source_entry(self) -> None:
+        published = self.load(ROOT / "releases/v0.16.2/manifest.json")["components"]["ninfer"]
+        sums = self.runtime_checksums(published)
+        self.assertEqual(hashlib.sha256(sums).hexdigest(), published["checksums_sha256"])
+        root = self.native_staging_copy()
+        archive = root / f"runtime-source-{published['source_commit'][:8]}.tar.gz"
+        archive.write_bytes(b"source archive bytes for the staging fixture\n")
+        source_sha = hashlib.sha256(archive.read_bytes()).hexdigest()
+        checksum = root / "SHA256SUMS"
+        checksum.write_bytes(sums)
+        result = self.stage(root, None, source_release="v0.16.0", dependency_args=[
+            "--source-tag", published["source_archive_url"].split("/")[-2],
+            "--source-commit", published["source_commit"],
+            "--source-archive-sha", source_sha, "--source-archive", str(archive),
+            "--checksums", str(checksum),
+            "--archive-name", published["binary_archive_url"].rsplit("/", 1)[-1],
+            "--archive-sha", published["binary_archive_sha256"],
+            "--sbom-sha", published["sbom_sha256"],
+        ])
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        staged = self.load(root / "releases" / TARGET / "manifest.json")["components"]["ninfer"]
+        self.assertEqual(staged["checksums_sha256"], published["checksums_sha256"])
+        self.assertEqual(staged["source_archive_bytes"], archive.stat().st_size)
+        self.assertEqual(staged["source_archive_sha256"], source_sha)
+
     def test_source_archive_hash_mismatch_or_partial_inputs_fail_before_staging(self) -> None:
         root = self.staging_copy(source_release=CURRENT)
         archive = root / "runtime-source-cccccccc.tar.gz"
         archive.write_bytes(b"new source archive fixture\n")
         checksum = root / "SHA256SUMS"
-        checksum.write_text(f"{'a' * 64}  {archive.name}\n", encoding="utf-8")
+        runtime = self.load(root / "releases" / CURRENT / "manifest.json")["components"]["ninfer"]
+        checksum.write_bytes(self.runtime_checksums(runtime).replace(
+            runtime["binary_archive_sha256"].encode("utf-8"), b"a" * 64, 1))
         for arguments in (["--source-archive", str(archive)],
                           ["--checksums", str(checksum)],
                           ["--source-archive", str(archive), "--checksums", str(checksum)]):
@@ -292,20 +327,32 @@ class StageReleaseTests(unittest.TestCase):
                     *arguments])
                 self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
                 if len(arguments) == 4:
-                    self.assertIn("--checksums source archive entry", result.stderr)
+                    name = runtime["binary_archive_url"].rsplit("/", 1)[-1]
+                    self.assertIn(f"--checksums entry {name} must match --archive-sha", result.stderr)
                 self.assertFalse((root / "releases" / TARGET).exists())
 
-    def test_source_checksums_must_list_the_exact_archive_once(self) -> None:
+    def test_runtime_checksums_require_binary_and_sbom_once(self) -> None:
         root = self.staging_copy(source_release=CURRENT)
         archive = root / "runtime-source-cccccccc.tar.gz"
         archive.write_bytes(b"new source archive fixture\n")
         source_sha = hashlib.sha256(archive.read_bytes()).hexdigest()
         checksum = root / "SHA256SUMS"
-        entry = f"{source_sha}  {archive.name}\n"
-        for contents in (f"{source_sha}  other-source.tar.gz\n", "not a checksum entry\n",
-                         entry + entry):
-            with self.subTest(checksums=contents):
-                checksum.write_text(contents, encoding="utf-8")
+        runtime = self.load(root / "releases" / CURRENT / "manifest.json")["components"]["ninfer"]
+        sums = self.runtime_checksums(runtime)
+        binary, sbom = sums.splitlines(keepends=True)
+        for label, contents in (
+            ("missing binary", sbom),
+            ("missing SBOM", binary),
+            ("wrong binary hash", sums.replace(runtime["binary_archive_sha256"].encode(), b"a" * 64, 1)),
+            ("wrong SBOM hash", sums.replace(runtime["sbom_sha256"].encode(), b"a" * 64, 1)),
+            ("foreign names", f"{source_sha}  other-source.tar.gz\n".encode()),
+            ("malformed entry", sums + b"not a checksum entry\n"),
+            ("duplicate binary", sums + binary),
+            ("duplicate SBOM", sums + sbom),
+            ("duplicate extra", sums + (f"{source_sha}  extra.tar.gz\n".encode() * 2)),
+        ):
+            with self.subTest(mutation=label):
+                checksum.write_bytes(contents)
                 result = self.stage(root, None, source_release=CURRENT, dependency_args=[
                     "--source-tag", "v0.99.0-qwen38-5090-source.1", "--source-commit", "c" * 40,
                     "--source-archive-sha", source_sha, "--source-archive", str(archive),
@@ -313,6 +360,31 @@ class StageReleaseTests(unittest.TestCase):
                 self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
                 self.assertIn("--checksums", result.stderr)
                 self.assertFalse((root / "releases" / TARGET).exists())
+
+    def test_optional_source_checksum_entry_must_match_when_present(self) -> None:
+        root = self.staging_copy(source_release=CURRENT)
+        archive = root / "runtime-source-cccccccc.tar.gz"
+        archive.write_bytes(b"new source archive fixture\n")
+        source_sha = hashlib.sha256(archive.read_bytes()).hexdigest()
+        checksum = root / "SHA256SUMS"
+        runtime = self.load(root / "releases" / CURRENT / "manifest.json")["components"]["ninfer"]
+        sums = self.runtime_checksums(runtime)
+        entry = f"{source_sha}  {archive.name}\n".encode("utf-8")
+        for label, source_entries, expected in (
+            ("wrong source hash", f"{'a' * 64}  {archive.name}\n".encode(), 2),
+            ("duplicate source", entry + entry, 2),
+            ("matching optional source", entry, 0),
+        ):
+            with self.subTest(mutation=label):
+                checksum.write_bytes(sums + source_entries)
+                result = self.stage(root, None, source_release=CURRENT, dependency_args=[
+                    "--source-tag", "v0.99.0-qwen38-5090-source.1", "--source-commit", "c" * 40,
+                    "--source-archive-sha", source_sha, "--source-archive", str(archive),
+                    "--checksums", str(checksum)])
+                self.assertEqual(result.returncode, expected, result.stdout + result.stderr)
+                if expected:
+                    self.assertIn("--checksums", result.stderr)
+                    self.assertFalse((root / "releases" / TARGET).exists())
 
     def test_staging_discards_predecessor_observed_gates_including_waivers(self) -> None:
         root = self.staging_copy(source_release=CURRENT)

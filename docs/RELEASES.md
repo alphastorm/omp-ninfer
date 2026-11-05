@@ -3283,9 +3283,13 @@ an eligible predecessor.
 When the RTX 5090 source archive URL changes, staging requires both
 `--source-archive PATH` and `--checksums PATH`. It verifies the source archive against
 `--source-archive-sha`, derives `source_archive_bytes` and `checksums_sha256` from
-those local bytes, requires exactly one matching SHA256SUMS entry for
-`runtime-source-<source-commit8>.tar.gz`, and refuses missing, empty, mismatched or stale predecessor
-metadata before copying the release tree. An unchanged source URL keeps its
+those local bytes, and requires exactly one matching SHA256SUMS entry each for
+the binary archive (`--archive-sha`) and its SPDX SBOM (`--sbom-sha`). Current
+published RTX 5090 sets list those two assets, not the separately published source
+archive. If a `runtime-source-<source-commit8>.tar.gz` entry is present, as in the
+v0.14.0 format, it must match `--source-archive-sha`. Missing required entries,
+malformed or duplicate entries, mismatched hashes and stale predecessor metadata
+are refused before copying the release tree. An unchanged source URL keeps its
 metadata when those arguments are omitted. Profile templates retain checkpoint
 contract fields and derive `require_origin_auth` from
 `--session-checkpoint-require-origin-auth`.
