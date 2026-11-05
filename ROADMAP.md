@@ -194,8 +194,9 @@ unmet:
    request streamed and `48` fresh `247`-token requests completed every `~10 s`, running only after
    the other request finished — while upstream
    [`Neroued/ninfer#378`](https://github.com/Neroued/ninfer/issues/378) Host placement was not
-   reproduced on the native RTX 3090 lane (`4/5` Host-fill arms preserved the conversation at
-   `99.995%` peak Host occupancy; the oldest conversation was evicted instead), was **inconclusive**
+   reproduced on the native RTX 3090 lane (both Host-fill arms, fill `4` and fill `5`, preserved the
+   conversation, at up to `99.995%` peak Host occupancy; the oldest conversation was evicted
+   instead), was **inconclusive**
    on the RTX 5090 (`rtx5090-win-a`, production image `a0cbb8a5`: the client's adaptive fill did not
    converge within its `3,600 s` budget across `12` conversations of `~120K` tokens with fill steps
    lengthening to `~10 min`, so no preservation probe ran), and did **not** reproduce on either build
