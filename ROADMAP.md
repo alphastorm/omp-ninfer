@@ -152,7 +152,7 @@ unmet:
    and any fleet completed-work claim requires re-running the fixed multi-machine workload
    ([`scripts/fleet_dispatch.py`](scripts/fleet_dispatch.py), EXP-016 in
    [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md#experiment-ledger)).
-6. **Deferred runtime, installer, and release-tooling residuals ([#138](https://github.com/alphastorm/omp-ninfer/issues/138), [#88](https://github.com/alphastorm/omp-ninfer/issues/88)–[#90](https://github.com/alphastorm/omp-ninfer/issues/90), `alphastorm/ninfer` [#87](https://github.com/alphastorm/ninfer/issues/87)–[#90](https://github.com/alphastorm/ninfer/issues/90)).**
+6. **Deferred runtime, installer, and release-tooling residuals ([#138](https://github.com/alphastorm/omp-ninfer/issues/138), [#88](https://github.com/alphastorm/omp-ninfer/issues/88)–[#90](https://github.com/alphastorm/omp-ninfer/issues/90), `alphastorm/ninfer` [#87](https://github.com/alphastorm/ninfer/issues/87)–[#90](https://github.com/alphastorm/ninfer/issues/90), draft [`alphastorm/ninfer#93`](https://github.com/alphastorm/ninfer/pull/93)).**
    In `v0.16.2`, `alphastorm/ninfer` `#51`–`#55`, `#62`, `#63`, `#65`, `#67`–`#70`, `#73`, `#78`–`#80`,
    and `#82` are resolved across the `a87de361` runtime components (including deterministic RTX 5090
    RDC double builds in [#69](https://github.com/alphastorm/ninfer/pull/69), unreadable repair-census
@@ -165,13 +165,50 @@ unmet:
    reviews on `c6fc8465` and `ff0f3811`/`3ad37ea8` closed by disposition in
    [`releases/v0.16.2/review/runtime-ledger.json`](releases/v0.16.2/review/runtime-ledger.json)
    (`a9af59b57653123b32df1536e438cd3fa6bc26cb6d860c2887f21d7789dbf8fd`), with all four runtime
-   composition controls verified. Remaining open items are product follow-ups in
-   [#138](https://github.com/alphastorm/omp-ninfer/issues/138) (retaining `omp-ninfer`
+   composition controls verified. Subsequent tooling and CI merges on `main` closed the host-free
+   slices of the product trackers: [#143](https://github.com/alphastorm/omp-ninfer/pull/143)
+   (`71b9b84f`) resolved [#138](https://github.com/alphastorm/omp-ninfer/issues/138) items 1–5 and 8
+   (waiver subject/scope/job binding, GA-only predecessors, authenticated speed decision +
+   retained-output identity, byte-checked carried native receipts, staging source metadata/checksum
+   entries/origin auth, and receipt-audit staged hashes and client descriptors, leaving items 6–7 for
+   the next RTX 5090 release); [#141](https://github.com/alphastorm/omp-ninfer/pull/141) (`59452c73`)
+   resolved [#128](https://github.com/alphastorm/omp-ninfer/issues/128) rows `P5`, `P6`, `P8`–`P12`,
+   and `P14` plus `P7` for Python host helpers only (`P4`, `P13`, and the non-Python `P7` residual
+   remain open); [`alphastorm/ninfer#92`](https://github.com/alphastorm/ninfer/pull/92) (`020655f1`)
+   runs Windows release contracts in a dedicated `pwsh` job that fails on any skip or shrinkage
+   (`108/108`), closing [#109](https://github.com/alphastorm/omp-ninfer/issues/109)'s CI rows while
+   four decision rows remain; and Dependabot [#135](https://github.com/alphastorm/omp-ninfer/pull/135)
+   (`8b68303`, `actions/upload-artifact` `v7.0.2`) and
+   [#136](https://github.com/alphastorm/omp-ninfer/pull/136) (`839d45a`, `actions/setup-python`
+   `7.1.0`) landed. On the shipped `a87de361` engine, EXP-109
+   ([`docs/measurements/2026-11-05-p19-flash-next-and-starvation.json`](docs/measurements/2026-11-05-p19-flash-next-and-starvation.json),
+   [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md#experiment-ledger)) reproduced upstream
+   [`Neroued/ninfer#434`](https://github.com/Neroued/ninfer/issues/434) request starvation under
+   context pressure (preregistered red: an admitted request with no token progress `>= 120 s` while
+   others progress) on both `C2` lanes — on the native RTX 3090 `C2` lane (`rtx3090-win-a`,
+   `v0.8.0-qwen38-3090-beta.2`), a `79,989`-token request paused `440.94 s` after `62,464` input
+   tokens with zero output/restores while the prime request generated `16,150` tokens and `45` fresh
+   requests completed, and on the RTX 5090 production image (`rtx5090-win-a`, image `a0cbb8a5`,
+   production serving arguments except a `2 GiB` scratch checkpoint store), an admitted
+   `79,989`-token request produced its first token `~398.8 s` after admission while the other long
+   request streamed and `48` fresh `247`-token requests completed every `~10 s`, running only after
+   the other request finished — while upstream
+   [`Neroued/ninfer#378`](https://github.com/Neroued/ninfer/issues/378) Host placement was not
+   reproduced on the native RTX 3090 lane (`4/5` fill arms preserved the conversation at `99.995%`
+   peak Host occupancy; the oldest conversation was evicted instead) and the RTX 5090 `#378` result
+   is `TODO: [LEAD WILL SUPPLY]`. Draft
+   [`alphastorm/ninfer#93`](https://github.com/alphastorm/ninfer/pull/93) (head `e6ac7b70`, CI green
+   on all `8/8` jobs) ports the targeted fix candidate (the `a754fcf3` failure-diagnostics subset,
+   the `452c3f5f` recovery-loss formula, `#378` Host placement re-expressed from Saylek-ai
+   `fix/378-host-placement`, and the `#434` scheduler pressure owner + bounded service rotation +
+   deferred fresh admission, including a fix and regression test for a refusal-retry liveness defect
+   on a queued fresh-admission notification found in the first scheduler port; GPU red/green on the
+   `rtxpro6000-win-a` RTX PRO 6000 proxy is `TODO: [LEAD WILL SUPPLY]`, with no release in this
+   research cycle).
+   Other remaining open items are `omp-ninfer`
    [#88](https://github.com/alphastorm/omp-ninfer/issues/88)–[#90](https://github.com/alphastorm/omp-ninfer/issues/90),
-   [#109](https://github.com/alphastorm/omp-ninfer/issues/109), and
-   [#128](https://github.com/alphastorm/omp-ninfer/issues/128)), `alphastorm/ninfer`
-   [#87](https://github.com/alphastorm/ninfer/issues/87) (runtime-council deferrals, including
-   [#50](https://github.com/alphastorm/ninfer/issues/50)),
+   `alphastorm/ninfer` [#87](https://github.com/alphastorm/ninfer/issues/87) (runtime-council
+   deferrals, including [#50](https://github.com/alphastorm/ninfer/issues/50)),
    [#88](https://github.com/alphastorm/ninfer/issues/88) (native tooling defects including the
    uncapped-power rehearsal harness assertion),
    [#89](https://github.com/alphastorm/ninfer/issues/89) (the export-side capacity residual of `#78`
@@ -231,21 +268,22 @@ so future work does not repeat closed experiments:
   ([`docs/UPSTREAM.md`](docs/UPSTREAM.md),
   [`docs/measurements/2026-09-27-engine-window-upstream-e31bc99b-vs-shipped.json`](docs/measurements/2026-09-27-engine-window-upstream-e31bc99b-vs-shipped.json),
   [`docs/measurements/2026-10-10-upstream-81c8ce09-rtx5090.json`](docs/measurements/2026-10-10-upstream-81c8ce09-rtx5090.json)).
-- **Full upstream re-port from `64d10fbf` to `1882c6ad` — deferred in favor of targeted fix
-  cherry-picks.** Upstream `Neroued/ninfer` master `1882c6ad`
-  (`1882c6adbc98043fcf89f3589aa5addb3742777a`) is 215 commits ahead of the `v0.13.0`–`v0.16.2`
-  merge base `64d10fbf` (`64d10fbf9f8e6bfc79ab0570b94674c5b9997929`), while `alphastorm/ninfer`
-  is 518 commits ahead of `64d10fbf` at `2c6f423b` (and `main` tip `752dd887`, which merges
-  `2c6f423b` plus `alphastorm/ninfer#48` installer upgrade/rollback and `#49` runtime/media/checkpoint
-  fixes; see [`docs/UPSTREAM.md`](docs/UPSTREAM.md)). Classification of all 215 upstream commit
-  subjects shows 177 on unrelated tracks (Spark/DGX Spark, `GLM5Next`, `TP2`/`EP2`, MoE,
-  `qwen4_exp`, distributed, and bench/docs), 26 serving/context features or config refactors, 2
-  marginal CPU-side latency commits (context admission/reclaim overhead and grammar
-  terminal-automata compilation), and 10 serving/runtime/artifact/build fixes; zero commits touch
-  `NINFER_SM86`/`NINFER_SM89` guards or improve Qwen3.8-27B dense decode, DFlash2, or MTP3 kernels
-  (upstream's `docs/performance/qwen3.8-27b.md` remains the historical 2026-09-28 campaign at
-  revision `7f6aafed`). Meanwhile, upstream restructured the exact seams the fork's 518-commit
-  stack sits on: (1) in `src/models/qwen3_5`, upstream deleted
+- **Full upstream re-port from `64d10fbf` to `a754fcf3` — deferred in favor of targeted fix
+  cherry-picks (draft [`alphastorm/ninfer#93`](https://github.com/alphastorm/ninfer/pull/93)).**
+  As observed on 2026-11-04/05, upstream `Neroued/ninfer` master `a754fcf3` (2026-11-02; `dev` ==
+  `master`) is 228 commits past the `v0.13.0`–`v0.16.2` merge base `64d10fbf`
+  (`64d10fbf9f8e6bfc79ab0570b94674c5b9997929`), adding a native DGX Spark target (`sm_121a`),
+  two-Spark `TP2`/`EP2`/attention-DP distributed execution, MoE routes (`NVFP4`/`FP8`) and CPU expert
+  offload ("expert weight cache"), `Qwen3.8-Flash-Next` (`Qwen4Exp`) and `GLM-5.3-Flash` (`GLM5Next`)
+  models, unified TOML startup configuration, and monitoring snapshots + dashboard (building on the
+  earlier 215-commit delta at `1882c6ad` where 177 commits were on unrelated tracks, 26 were
+  serving/context features or config refactors, 2 were marginal CPU-side latency commits, and 10 were
+  serving/runtime/artifact/build fixes, with zero commits touching `NINFER_SM86`/`NINFER_SM89` guards
+  or improving `Qwen3.8-27B` dense decode, DFlash2, or MTP3 kernels; see
+  [`docs/UPSTREAM.md`](docs/UPSTREAM.md)). In a per-commit merge-tree probe against fork head
+  `a87de361`, only `9/228` upstream commits apply cleanly (`2705a728` alone conflicts in `285` paths)
+  because upstream restructured the exact seams the fork's stack sits on: (1) in
+  `src/models/qwen3_5`, upstream deleted
   `program/transactions/{binding,capture,commit,context_operation,pause,reclaim,replay}.cpp`,
   `program/planning/{graph_profiles,request_plan,source}.cpp`,
   `program/storage/{checkpoints,sequence,draft_context}.cpp`,
@@ -265,17 +303,25 @@ so future work does not repeat closed experiments:
   origin-authentication layer; and (4) both sides edited `src/ops/common/cuda/mma.cuh`,
   `src/ops/softmax_attention/dense/causal_cache/bf16/launch.{cu,h}`,
   `causal_softmax_attention.cpp`, `src/ops/weight_input.cpp`, `src/media/decode/decode.cpp`,
-  `src/text/grammar.{cpp,h}`, and `src/text/json_schema.cpp`. Re-porting the fork's 26 modified
-  `qwen3_5` files, 24 modified `src/runtime` files, durable checkpoint store, and native packaging
-  contracts onto `1882c6ad` is deferred (estimated at 5–8 multi-agent days from the 4-day `v0.14.0`
-  integration on a compatible base, with GPU-only bit-identity and resume risk); the next release
-  cherry-picks self-contained bug fixes onto the `2c6f423b`/`752dd887`/`26fa28d0`/`a87de361` lineage instead.
+  `src/text/grammar.{cpp,h}`, and `src/text/json_schema.cpp`. For the `Qwen3.8-27B` product, `8`
+  upstream fixes are already in the fork (`9822c38d`, `58733a86`, `4ec903a0`, `1e902680` subset,
+  `d602894a`, `a062e016`, `704fa68d`, `45f74287`), and the `3` defects still present — upstream
+  [`#434`](https://github.com/Neroued/ninfer/issues/434) request starvation under context pressure
+  (`a754fcf3`, EXP-109 in
+  [`docs/measurements/2026-11-05-p19-flash-next-and-starvation.json`](docs/measurements/2026-11-05-p19-flash-next-and-starvation.json)),
+  upstream [`#378`](https://github.com/Neroued/ninfer/issues/378) Host placement (re-expressed from
+  Saylek-ai `fix/378-host-placement`), and the `452c3f5f` recovery-loss formula — plus the `a754fcf3`
+  failure-diagnostics subset are ported onto `a87de361` in draft
+  [`alphastorm/ninfer#93`](https://github.com/alphastorm/ninfer/pull/93) (`e6ac7b70`, CI green on all
+  `8/8` jobs). Everything else requires a full re-port estimated at **7–10 multi-agent days** at
+  `a754fcf3` with low value for the dense 27B product today, so the deferral stands.
 - **No better primary model than `Qwen3.8-27B` (`groupwise-int` v3 `81f924d4`, `20,437,521,664`
-  bytes / `19.03 GiB`) as of 2026-10-30; alternative upstream artifacts and `Qwen4-27B` (`qwen4_exp`)
-  deferred or rejected.** A 2026-10-30 census of `neroued/*` and `Qwen/*` Hugging Face repositories
-  confirms `neroued/Qwen3.8-27B-NInfer` remains at artifact blob `81f924d4` (Hugging Face commit
-  `51630a0c`, 2026-09-15; repository commits through `18caef28` on 2026-10-29 are documentation
-  only), and no candidate replaces it as the primary model across the qualified 32 GB and 24 GB
+  bytes / `19.03 GiB`) as of 2026-11-05; alternative upstream artifacts and `Qwen4-27B` (`qwen4_exp`)
+  deferred or rejected.** Census checks through 2026-11-05 confirm `neroued/*` Hugging Face
+  artifacts are unchanged after 2026-10-29 (`neroued/Qwen3.8-27B-NInfer` v3 `81f924d4` at commit
+  `51630a0c`, 2026-09-15, with commits through `18caef28` on 2026-10-29 documentation-only;
+  `neroued/Qwen3.8-Flash-Next-NInfer` at revision `001057dd`, 4 files, `108,445,200,388` bytes), and
+  no candidate replaces `Qwen3.8-27B` as the primary model across the qualified 32 GB and 24 GB
   single-GPU lanes:
   1. **`neroued/Qwen3.8-27B-nvfp4-NInfer` (`74d2c571`, `6a534f28`, 2026-09-15) — rejected:** the v3
      artifact grew to **`23,719,715,844` bytes (`22.09 GiB`)**, `+2,227,020,804` bytes (`+2.07 GiB`)
@@ -292,14 +338,44 @@ so future work does not repeat closed experiments:
      tokens (candidate only for a separate fast/auxiliary tier spike with partial expert offload).
      Older `Qwen3.6-27B` (`16.29 GiB` `groupwise-int` / `17.07 GiB` `nvfp4`) lacks `DFlash2` and
      trails on SWE-bench Pro (`53.5` vs `61.7`).
-  3. **`neroued/Qwen3.8-Flash-Next-NInfer` (`57cf9cd0`, `108,445,200,388` bytes / `101.00 GiB`,
-     `Qwen4Exp` MoE + per-layer-embedding `PLE`) and `neroued/GLM-5.3-Flash-NInfer` (`f1c4e21`,
-     `191,484,328,832` bytes / `178.33 GiB`, `GLM5Next`) — infeasible on this hardware:**
-     `Qwen3.8-Flash-Next` requires `~63.3 GiB` of Host-resident routed-expert (`Main-expert`)
-     backing (exceeding the RTX 5090 container host's `47 GiB` physical / `~31 GiB` WSL2 RAM) plus
-     `~37.7 GiB` of device-resident non-expert weights and KV/state (impossible on 24 GB
-     `sm_89`/`sm_86`, where its `NVFP4`/`FP8`/block-scaled MoE routes are also unsupported), and
-     `GLM-5.3-Flash` (`178.33 GiB`) requires two DGX Spark nodes.
+  3. **`neroued/Qwen3.8-Flash-Next-NInfer` (revision `001057dd` / `57cf9cd0`, 4 files,
+     `108,445,200,388` bytes / `101.00 GiB`, `Qwen4Exp` MoE + per-layer-embedding `PLE`) and
+     `neroued/GLM-5.3-Flash-NInfer` (`f1c4e21`, `191,484,328,832` bytes / `178.33 GiB`, `GLM5Next`)
+     — rejected for product lanes after EXP-108 (`Qwen3.8-Flash-Next` research screen and 32 GB
+     offload probe):** `Qwen3.8-Flash-Next` requires `~63.3 GiB` of pinned Host-resident
+     routed-expert (`Main-expert`) backing (exceeding the RTX 5090 container host's `47 GiB` physical
+     / `~31 GiB` WSL2 RAM on `rtx5090-win-a`) plus `~37.7 GiB` of device-resident non-expert weights
+     and KV/state (impossible on 24 GB `sm_89`/`sm_86`, where its `NVFP4`/`FP8`/block-scaled MoE
+     routes are also unsupported; community fork `ashalliants/ninfer-3090` `d0ff0535` runs Flash-Next
+     on one RTX 3090 with `33 GiB` host-pinned experts at `108–113 tok/s` `MTP`, recorded on watch
+     while native lanes remain frozen), and `GLM-5.3-Flash` (`178.33 GiB`) requires two DGX Spark
+     nodes. In **EXP-108**
+     ([`docs/measurements/2026-11-05-p19-flash-next-and-starvation.json`](docs/measurements/2026-11-05-p19-flash-next-and-starvation.json),
+     [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md#experiment-ledger)) on `rtxpro6000-win-a` (RTX PRO
+     6000 Blackwell 96 GB, `sm_120`, same architecture class as the RTX 5090, WSL2; maintainer-private
+     raw harness logs, public summary in the linked receipt), upstream NInfer `a754fcf3` (binary
+     SHA-256 prefix `bcfba1b0`, artifact rev `001057dd`) was evaluated against stock Strata `v0.2.10`
+     (engine `0.1.56`) + OMP `18.16.0` `IQ3_S` `262K` current RTX PRO 6000 profile under `omp-strata`'s
+     preregistered rule-30 screen (`M1`–`M6`, `G24` guards): the formal NInfer resident (`N`) screen
+     was **not entered** because one `W1` structured tool-call smoke emitted the tool call inside
+     reasoning and ran to the length limit (a later `10×` smoke-frequency probe passed `10/10` on both
+     engines; the formal verdict stands), with `W1` cold long-context TTFT across two runs at `64K`
+     `4.99 / 4.87 s` vs Strata `7.02 / 7.31 s`, `200K` `15.79 / 16.47 s` vs `22.59 / 24.05 s`, and
+     short `C1` (concurrency-1) decode `252–264` vs `311–323 tok/s`. Exploratory scorecard numbers
+     (interleaved Strata `A1` / NInfer / Strata `A2` runs, non-gating because the formal screen was not
+     entered) measured `M1` short `C4` (concurrency-4) aggregate `264.2 / 441.7 / 270.8 tok/s`
+     (`1.63×`), `M2` `64K` `C4` wall `34.36 / 23.82 / 34.39 s` (`1.44×`), `M3` `200K` cold tool-turn
+     TTFT `22.32 / 25.37 / 22.43 s` (`13.7%` slower), `M4` `200K` warm follow-up `2.64 / 2.22 /
+     3.04 s` (unstable reference), `M5` interference stall `3.83 / 0.67 / 3.84 s` (`5.7×` lower), and
+     `M6` `G24` verified passes/hour `115.6 / 95.0 / 118.9` (`20.1%` lower; `G24` NInfer `15/18` in
+     `568.3 s` vs Strata `15/18` in `467.0 s` and `16/18` in `484.4 s`). When testing RTX 5090-class
+     CPU expert offload (`NINFER_VRAM_BUDGET_MIB=31000` on `rtxpro6000-win-a`, forcing `HostExperts`
+     with `~155 GiB` host memory available), every configuration refused at startup with `Device budget
+     cannot hold the calibrated runtime and requested Context capacity` — including zero Host context
+     and a minimal `C1` / `4K` / `BF16` / no-MTP / no-graphs diagnostic — and a `40,960 MiB` budget
+     also refused, so no offload speed was measured. Decision: no Flash-Next lane; Strata stays the
+     Flash-Next engine on the RTX PRO 6000 host (`rtxpro6000-win-a`); revisit only if upstream's
+     offload planner starts on a 32 GB-class budget.
   4. **`Qwen4-27B` (`qwen4_exp` dense 27B) — deferred (no public weights as of 2026-10-30; upstream
      27B ops unmerged on `feat/qwen4-27b-ops`):** no public `Qwen4-27B` weights, model card,
      license, context specification, or agentic-coding/tool-use benchmarks exist (`Qwen` and
@@ -321,6 +397,16 @@ so future work does not repeat closed experiments:
      (`docs/designs/qwen4-27b-op-checklist.md`) and leaves the dense 27B model layer and converter
      recipes (`tools/convert/official_recipes.py`) unimplemented. `feat/qwen4-27b-ops` stays on
      watch until public weights and upstream model/converter support exist.
+- **DGX Spark (`sm_121a`, 128 GB single-node and two-Spark distributed) — do not buy for this
+  workload (decision support, not measured by us).** Third-party NInfer measurements on one 128 GB
+  DGX Spark (`baristahaus/ninfer-gb10`) reach `31.5–32.6 tok/s` without speculation, `59.9 tok/s`
+  `MTP3` `C1`, `121.4 tok/s` aggregate at `C4`, and `~2,500 tok/s` prefill; no published NInfer
+  two-Spark numbers exist (upstream `docs/performance.md` reports none), and third-party vLLM,
+  SGLang, and TensorFold two-Spark single-stream runs reach `47–89 tok/s`. By contrast, Strata on
+  `rtxpro6000-win-a` (RTX PRO 6000 Blackwell 96 GB) delivers `318 tok/s` at a `212K` prompt and
+  `9,366 tok/s` `100K` prefill. With a 128 GB Spark priced at `~$6,950` (October 2026), hourly cloud
+  rental (`$0.79–1.90/h`) is the low-cost path if two-Spark-only `GLM-5.3-Flash` data is ever
+  wanted.
 - **Native `sm_86`/`sm_89` small-T tensor-core decode and `Group64` A8 prefill — rejected for
   `v0.14.0` (EXP-069, EXP-099, EXP-100).** Earlier `sm_89` small-T Q5 tensor-core verify measured
   only +0.38% decode at 26K and +0.40% at 60K on RTX 4090, below the 2.0% and 1.0% promotion
