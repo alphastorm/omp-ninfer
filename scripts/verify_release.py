@@ -14,6 +14,7 @@ without relabelling those proofs as fresh successor admission.
 from __future__ import annotations
 
 import argparse
+import ast
 import hashlib
 import json
 import re
@@ -481,8 +482,19 @@ def validate_pinned_evidence(
     errors: list[str],
 ) -> None:
     cache: dict[tuple[str, str], str | None] = {}
+    ancestors: dict[str, bool] = {}
     for label, url, expected in pinned_evidence(manifest, compatibility, qualification):
         require_pinned_bytes(root, url, expected, label, errors, cache)
+        match = PRODUCT_RAW_URL_RE.fullmatch(url) if isinstance(url, str) else None
+        if match is not None:
+            commit = match.group(1)
+            if commit not in ancestors:
+                ancestors[commit] = subprocess.run(
+                    ["git", "-C", str(root), "merge-base", "--is-ancestor", commit, "HEAD"],
+                    capture_output=True,
+                ).returncode == 0
+            require(ancestors[commit],
+                    f"{label} pins commit {commit[:12]} which is not an ancestor of HEAD", errors)
 
 
 def validate_launch_identity(
@@ -976,7 +988,10 @@ def validate_native_campaigns(root: Path, release: str, routes: dict[str, Any],
                     f"{lane} waived campaign route must pass all candidate-bound documented steps", errors)
             require(bool(steps) and all(
                 (step.get("status") == "passed"
-                 or (step.get("status") == "substituted" and bool(step.get("substitution"))))
+                 or (step.get("slug") == "clone-and-verify"
+                     and step.get("status") == "substituted"
+                     and isinstance(step.get("substitution"), str)
+                     and bool(step["substitution"].strip())))
                 and isinstance(step.get("block_sha256"), str)
                 and SHA256_RE.fullmatch(step["block_sha256"]) is not None
                 and step.get("executed_sha256") == step["block_sha256"] for step in steps),
@@ -1905,6 +1920,28 @@ def native_profile(root: Path, release: str, variant: dict[str, Any], errors: li
     return configuration
 
 
+def validate_native_public_install_identity(install: Any, variant: dict[str, Any],
+                                            errors: list[str]) -> None:
+    """Bind the nested install's observed bytes, not the composer's authored runtime row."""
+    label = f"{variant['id']} nested public-install"
+    if not isinstance(install, dict):
+        errors.append(f"{label} observations are missing")
+        return
+    package = install.get("integrity", {}).get("assets", {}).get("package", {})
+    installed = install.get("installed", {})
+    for field, observed, expected in (
+        ("package.sha256", package.get("sha256"), variant.get("package_sha256")),
+        ("package.bytes", package.get("bytes"), variant.get("package_bytes")),
+        ("server_binary_sha256", installed.get("server_binary_sha256"), variant.get("server_binary_sha256")),
+        ("configuration_sha256", installed.get("configuration_sha256"), variant.get("configuration_sha256")),
+    ):
+        require(expected is not None and observed == expected, f"{label} {field} must match candidate", errors)
+    installer = install.get("install", {})
+    if "package_sha256" in installer:
+        require(installer["package_sha256"] == variant.get("package_sha256"),
+                f"{label} installer package_sha256 must match candidate", errors)
+
+
 def validate_native_route_policy(root: Path, release: str, manifest: dict[str, Any],
                                  qualification: dict[str, Any], errors: list[str]) -> None:
     """Ready P16 routes must bind the actual native policy and separate C2 probe evidence."""
@@ -1941,6 +1978,8 @@ def validate_native_route_policy(root: Path, release: str, manifest: dict[str, A
         require(receipt.get("status") == "passed" and receipt.get("release") == release
                 and receipt.get("lane") == variant["id"],
                 f"{label} must pass for this release and lane", errors)
+        validate_native_public_install_identity(
+            receipt.get("observations", {}).get("public_install"), variant, errors)
         runtime = receipt.get("runtime", {})
         for field, expected in (("package_sha256", variant.get("package_sha256")),
                                 ("binary_sha256", variant.get("server_binary_sha256")),
@@ -2486,6 +2525,7 @@ def validate_release_documentation(root: Path, release: str, errors: list[str]) 
 
 def validate_public_text(root: Path, errors: list[str]) -> None:
     documents = set(repository_files(root, (".md",)))
+    documents.update(repository_files(root, (".py",), "scripts/hosts"))
     documents.update(repository_files(root, (".html", ".svg"), "assets"))
     documents.update(repository_files(root, (".json", ".SHA256SUMS", ".jsonl"), "releases"))
     # Dated receipts are published alongside the docs that cite them, and they are written from
@@ -2495,6 +2535,12 @@ def validate_public_text(root: Path, errors: list[str]) -> None:
     documents.update(repository_files(root, (".cast",), "docs/media"))
     for document in sorted(documents):
         source = document.read_text(encoding="utf-8")
+        if document.suffix == ".py":
+            try:
+                source += "\n" + "\n".join(node.value for node in ast.walk(ast.parse(source))
+                                           if isinstance(node, ast.Constant) and isinstance(node.value, str))
+            except SyntaxError:
+                errors.append(f"{document.relative_to(root).as_posix()} must contain valid Python")
         if document.suffix == ".cast":
             try:
                 source += "\n" + "\n".join(text for line in source.splitlines() if line.strip()
@@ -3223,6 +3269,7 @@ def main() -> int:
     parser.add_argument("--check-pins", action="store_true",
                         help="with --require-ready: every pinned raw evidence URL whose commit is "
                              "in local git history must serve exactly its recorded SHA-256 "
+                             "and be an ancestor of HEAD "
                              "(the final gate of the pin dance; needs full history)")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()

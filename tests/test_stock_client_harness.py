@@ -504,7 +504,8 @@ class HostDirectoryRestorationTests(unittest.TestCase):
     def action(self, action):
         argv = ["accept-rtx5090-host.py", "--action", action, "--workspace", str(self.workspace),
                 "--release", "v0.12.0", "--candidate", "2" * 40, "--windows-workspace", "C:/fixture",
-                "--production-image", "fixture-image", "--restore-after-seconds", "60"]
+                "--production-image", "fixture-image", "--window-dir", "/fixture/window",
+                "--restore-after-seconds", "60"]
         def health(*args, **kwargs):
             response = io.BytesIO(b'{"status":"ok"}')
             response.status = 200
@@ -671,6 +672,53 @@ class HostDirectoryRestorationTests(unittest.TestCase):
 
 
 class WindowsHoldDirectoryTests(unittest.TestCase):
+    @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed for failed hold acquisition")
+    def test_failed_ownership_save_or_acl_removes_only_the_newly_created_hold(self) -> None:
+        proof = r'''
+param($Source,$Scratch)
+$ErrorActionPreference='Stop'
+$text=[IO.File]::ReadAllText($Source)
+function Get-ScheduledTask {@()}
+function Invoke-WebRequest {param([switch]$UseBasicParsing,$Uri,$TimeoutSec) @{StatusCode=200;Content='{"status":"ok"}'}}
+function Get-ExecutionPolicy {param([switch]$List) @()}
+function Get-Acl {param($Path,$LiteralPath) @{Sddl='fixture-acl'}}
+$rows=@(foreach($failure in @('save','acl','preexisting')) {
+    $root=Join-Path $Scratch $failure;$workspace=Join-Path $root 'window'
+    New-Item -ItemType Directory -Force "$root/bin","$root/state",$workspace|Out-Null
+    $env:LOCALAPPDATA=Join-Path $root 'client'
+    $common=@'
+function Set-OmpAdminOnlyFile {param($Path) if($failure -eq 'acl'){throw 'injected ACL failure'}}
+if($failure -eq 'save') {
+    function Save-Json($Name,$Value) {
+        if($Name -eq 'own-hold.json' -and $Value.hold_created){throw 'injected ownership-save failure'}
+        [IO.File]::WriteAllText((Join-Path $Workspace $Name),($Value|ConvertTo-Json -Depth 20))
+    }
+}
+'@
+    Set-Content "$root/bin/windows-host-common.ps1" $common
+    Set-Content "$root/state/other-paused" 'other owner'
+    $hold=Join-Path $root 'state/lane-container-paused'
+    if($failure -eq 'preexisting'){Set-Content $hold 'preexisting owner'}
+    $refused=$false
+    try {$null=& ([scriptblock]::Create($text)) -Action Hold -Workspace $workspace -Release v9.9.9 -Candidate ('1'*40) -ControlRoot $root} catch {$refused=$true}
+    if(-not $refused){throw 'failed acquisition was accepted'}
+    if($failure -eq 'preexisting') {
+        if((Get-Content $hold) -cne 'preexisting owner'){throw 'preexisting hold changed'}
+    } elseif(Test-Path $hold){throw "failed $failure acquisition left its own hold behind"}
+    if((Get-Content "$root/state/other-paused") -cne 'other owner'){throw 'unrelated hold changed'}
+    @{failure=$failure;refused=$refused;passed=$true}
+})
+$rows|ConvertTo-Json -Compress
+'''
+        with tempfile.TemporaryDirectory() as directory:
+            script = Path(directory) / "failed-hold.ps1"
+            script.write_text(proof)
+            result = subprocess.run([shutil.which("pwsh"), "-NoProfile", "-File", str(script),
+                                     str(ROOT / "scripts/hosts/accept-windows-client.ps1"), directory],
+                                    capture_output=True, text=True, timeout=30)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertEqual(len(json.loads(result.stdout)), 3)
+
     def test_hold_ownership_is_claimed_only_after_exclusive_creation(self) -> None:
         source = (ROOT / "scripts/hosts/accept-windows-client.ps1").read_text()
         hold = source.split("if($Action -eq 'Hold') {", 1)[1].split("if($Action -eq 'Release') {", 1)[0]

@@ -117,7 +117,7 @@ class NativeCandidateFitTests(unittest.TestCase):
         self.variant = {
             "id": f"{lane}-windows-native", "maximum_context_tokens": 131072,
             "runtime_shape": deepcopy(self.spec["runtime_shape"]), "qualification": {},
-            "package_sha256": "a" * 64, "server_binary_sha256": "b" * 64,
+            "package_sha256": "a" * 64, "package_bytes": 100, "server_binary_sha256": "b" * 64,
             "configuration_sha256": "c" * 64, "model_artifact_sha256": "d" * 64,
         }
         self.evidence("release_spec", self.spec)
@@ -218,6 +218,11 @@ class NativeCandidateFitTests(unittest.TestCase):
             acceptance.mkdir(exist_ok=True)
             path = acceptance / f"{lane}-public-install.json"
             receipt = {"status": "passed", "release": "v0.16.0", "lane": self.variant["id"],
+                       "observations": {"public_install": {
+                           "integrity": {"assets": {"package": {
+                               "sha256": self.variant["package_sha256"], "bytes": self.variant["package_bytes"]}}},
+                           "installed": {"server_binary_sha256": self.variant["server_binary_sha256"],
+                                         "configuration_sha256": self.variant["configuration_sha256"]}}},
                        "runtime": {"package_sha256": self.variant["package_sha256"],
                                    "binary_sha256": self.variant["server_binary_sha256"],
                                    "configuration_sha256": self.variant["configuration_sha256"],

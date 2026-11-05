@@ -65,7 +65,7 @@ def windows_environment(probe, runtime=Path('/run/WSL')):
     """Environment that starts Windows processes through a live WSL interop relay.
 
     A distro first started by a boot-time S4U task keeps a root relay that cannot start Windows
-    processes (microsoft/WSL#8643; on nyc-pc the supervisors start it that way after every boot),
+    processes (microsoft/WSL#8643; a boot-time supervisor can start it that way after every boot),
     and a process outside every wsl.exe session - an sshd child, the detached watchdog - falls
     back to that relay: each call fails "Invalid argument". v0.9.0's first RTX 5090 window
     restored production and then lost its hold release to it. Use this process's own relay when
@@ -97,7 +97,7 @@ def main():
     for name in ('workspace', 'release', 'candidate', 'windows-workspace', 'production-image'):
         p.add_argument('--' + name, required=True)
     p.add_argument('--production', default='ninfer-5090-v070p')
-    p.add_argument('--window-dir', default='/home/sunil/services/engine-window')
+    p.add_argument('--window-dir', required=True, help='Private directory containing the host window.sh')
     p.add_argument('--restore-after-seconds', type=int, default=3000, help='Independent watchdog delay; reserve restoration time inside the total envelope')
     p.add_argument('--model-id', help="Model the Linux structured client requests, from the candidate's documented provider step; required by the actions that start the client probe")
     p.add_argument('--dry-run', action='store_true')

@@ -198,6 +198,18 @@ class RouteReceiptTests(unittest.TestCase):
         receipt["steps"][0]["substitution"] = None
         self.assertIn("clone-and-verify", refused(MODULE.check_route, "rtx5090-windows-client", receipt, CANDIDATE))
 
+    def test_non_clone_substitution_cannot_qualify_an_unexecuted_block(self) -> None:
+        for lane in MODULE.documented_route.LANES:
+            receipt = route_receipt(lane)
+            for index, step in enumerate(receipt["steps"]):
+                if step["slug"] == "clone-and-verify":
+                    continue
+                with self.subTest(lane=lane, step=receipt["steps"][index]["slug"]):
+                    edited = deepcopy(receipt)
+                    edited["steps"][index].update(status="substituted", substitution="not executed")
+                    self.assertIn(edited["steps"][index]["slug"],
+                                  refused(MODULE.check_route, lane, edited, CANDIDATE))
+
     def test_a_block_executed_with_other_bytes_than_bundled_is_refused(self) -> None:
         receipt = route_receipt("rtx5090-container-host")
         receipt["steps"][0]["executed_sha256"] = "0" * 64
@@ -278,6 +290,17 @@ class PlatformReceiptTests(unittest.TestCase):
         self.assertIn("stock upstream client required", refused(
             MODULE.platform_receipt, "v9.9.9", "2026-01-01", profile, self.evidence("8" * 64),
             MANIFEST, CANDIDATE))
+
+    def test_private_nonmarker_error_text_is_projected_without_mutating_the_capture(self) -> None:
+        evidence = self.evidence("8" * 64)
+        sentinel = "PRIVATE_ERROR_SENTINEL_493817"
+        evidence["live_acceptance"]["fail_closed"]["errors"] = [sentinel]
+        receipt = MODULE.platform_receipt("v9.9.9", "2026-01-01", self.PROFILE,
+                                          evidence, MANIFEST, CANDIDATE)
+        self.assertNotIn(sentinel, json.dumps(receipt))
+        self.assertEqual(receipt["live_acceptance"]["fail_closed"]["errors"],
+                         [{"kind": "client-error", "sha256": MODULE.sha256(sentinel.encode())}])
+        self.assertEqual(evidence["live_acceptance"]["fail_closed"]["errors"], [sentinel])
 
 
 class UpstreamCompositionTests(unittest.TestCase):
@@ -382,6 +405,15 @@ class UpstreamCompositionTests(unittest.TestCase):
                         probes[name]["omp"]["sha256"] = manifest["components"]["omp"]["binary_sha256"]
                 evidence[lane].update(runtime_configuration=configuration,
                                       probe_acceptance=native_probe_summary(probes))
+                install = evidence[lane].get("observations", {}).get("public_install")
+                if install is not None:
+                    install["integrity"]["assets"]["package"].update(
+                        sha256=variant["package_sha256"], bytes=variant["package_bytes"])
+                    install["installed"].update(
+                        server_binary_sha256=variant["server_binary_sha256"],
+                        configuration_sha256=variant["configuration_sha256"])
+                    if "package_sha256" in install["install"]:
+                        install["install"]["package_sha256"] = variant["package_sha256"]
         MODULE.save(self.release_root / "manifest.json", manifest)
         MODULE.save(self.root / "evidence.json", evidence)
 
@@ -668,6 +700,47 @@ class UpstreamCompositionTests(unittest.TestCase):
             ("install failed", lambda observations: observations["public_install"].update(status="failed"),
              "public install did not pass"),
         ))
+
+    def test_predecessor_public_install_is_refused_before_composition(self) -> None:
+        self.refused_before_writing(
+            lambda evidence: evidence["rtx4090"]["observations"]["public_install"], (
+                ("package", lambda install: install["integrity"]["assets"]["package"].update(
+                    sha256="0" * 64), "package.sha256 must match candidate"),
+                ("server", lambda install: install["installed"].update(
+                    server_binary_sha256="0" * 64), "server_binary_sha256 must match candidate"),
+                ("configuration", lambda install: install["installed"].update(
+                    configuration_sha256="0" * 64), "configuration_sha256 must match candidate"),
+            ))
+
+    def test_ready_verifier_refuses_rehashed_predecessor_nested_public_install(self) -> None:
+        self.assertEqual(self.compose(), 0)
+        path = self.release_root / "acceptance/rtx4090-public-install.json"
+        qualification_path = self.release_root / "qualification.json"
+        qualification = MODULE.load(qualification_path)
+        external_path = self.release_root / "acceptance/composed-external-installation.json"
+        external = MODULE.load(external_path)
+        receipt = MODULE.load(path)
+        receipt["observations"]["public_install"]["installed"]["configuration_sha256"] = "0" * 64
+        MODULE.save(path, receipt)
+        external["evidence"]["rtx4090_public_install"]["sha256"] = MODULE.sha256(path.read_bytes())
+        MODULE.save(external_path, external)
+        qualification["composition"]["external_installation_acceptance"]["sha256"] = MODULE.sha256(
+            external_path.read_bytes())
+        errors = []
+        validate_native_route_policy(self.root, self.release,
+                                     MODULE.load(self.release_root / "manifest.json"), qualification, errors)
+        self.assertTrue(any("configuration_sha256 must match candidate" in error for error in errors), errors)
+
+    def test_native_error_projection_keeps_private_capture_separate(self) -> None:
+        path = self.root / "evidence.json"
+        evidence = MODULE.load(path)
+        sentinel = "PRIVATE_NATIVE_ERROR_SENTINEL_205361"
+        evidence["rtx4090"]["observations"]["structured_client"]["fail_closed"]["errors"] = [sentinel]
+        MODULE.save(path, evidence)
+        self.assertEqual(self.compose(), 0)
+        receipt = MODULE.load(self.release_root / "acceptance/rtx4090-public-install.json")
+        self.assertNotIn(sentinel, json.dumps(receipt))
+        self.assertEqual(MODULE.load(path), evidence)
 
     def test_composition_replaces_the_staged_route_acceptance_summary(self) -> None:
         """Staging leaves the summary the ready gate reads pending; composition, not a hand edit,

@@ -3249,6 +3249,27 @@ before the product tag. The gate proves:
 The external smoke qualifies the installation composition; it does not repeat CUDA numerical or
 performance qualification without a concrete runtime change.
 
+The composer and ready gate bind the nested native public-install observation's downloaded package
+hash/size and installed server/configuration hashes to the candidate variant, not just the outer
+receipt's authored runtime row. Only `clone-and-verify` may be recorded as an explained substitution;
+every other documented block must pass. Arbitrary client error strings become `client-error` SHA-256
+records in public platform/native observations; retain the original capture privately. Host-helper
+Python source, including decoded string literals, is included in the public privacy scan.
+
+The RTX 5090 acceptance driver requires explicit `--wsl-host`, `--windows-host`,
+`--route-ssh-destination` and private WSL `--window-dir` inputs; its WSL helper also requires
+`--window-dir`. It has no operator-specific host/account/home defaults. Native public-install smoke
+fails on controller errors or a mismatched observed baseline and restores a start it owns, including
+after smoke failure. An owned Stop failure fails the receipt explicitly; an already-running
+incumbent is never stopped by that cleanup. A failed Windows hold acquisition removes only the hold
+whose exclusive creation it completed, including ownership-save/ACL failures.
+
+These are host-free guard regressions, not fresh hardware acceptance. Two
+[#128](https://github.com/alphastorm/omp-ninfer/issues/128) rows remain deferred: P4 retains the
+long-action/restoration design choice in [#109](https://github.com/alphastorm/omp-ninfer/issues/109);
+P13's native QUICKSTART operate blocks remain unchanged under the founder's native-documentation
+freeze.
+
 ## Cut procedure
 
 The release tree is staged as a draft and cut with the pin dance; every step is a script and
@@ -3275,9 +3296,29 @@ the verifier decides what remains:
    `--pin <that commit> --stage manifest`;
    commit. The manifest stage runs `verify_release.py --require-ready --check-pins`, which
    reads every pinned evidence URL out of local git history and requires it to serve exactly
-   the recorded SHA-256. It also rejects stale unpublished/ready-candidate wording in tracked
+   the recorded SHA-256 and every pinned commit to be an ancestor of the checked-out head.
+   A locally resolvable side-branch pin is not publication evidence. It also rejects stale unpublished/ready-candidate wording in tracked
    Markdown outside `releases/`; use release-neutral wording before freezing the tag. CI repeats the gate on
    the release tag with full history.
+
+### Guarded completion of a partial product publication
+
+`scripts/hosts/publish-product-release.sh` defaults to a no-effect preflight. Normal publication
+still refuses an existing tag or GitHub release. If a founder-owned publication failed **after the
+tag push**, repeat its exact `--release`, `--commit` and `--pr` arguments with
+`--complete-existing --dry-run`. Completion requires remote `main` and the peeled remote tag to
+resolve to that exact commit, the original PR head/base and green checks to match (the PR may now be
+merged), and the clean exact-commit ready/pin verifier to pass again. Completion waits for the
+push-to-main and tag CI runs on the same SHA to finish green; in-progress or failed runs refuse
+completion.
+
+Only after that preflight may the founder replace `--dry-run` with `--publish`. Completion never
+pushes `main` or a tag and never creates a local tag. It creates the missing release with the
+commit's own notes, or marks an already matching non-draft, non-prerelease release Latest. An
+existing release must name the same tag and target that commit (or `main`, already proved identical).
+Latest is checked after the effect. A different/missing remote tag, advanced main or mismatched
+release is refused for operator diagnosis, never repaired implicitly. Agents must not execute live
+publication or completion; fake Git/GitHub fixtures cover these failure and recovery transitions.
 
 ## Release notes
 
