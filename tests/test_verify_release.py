@@ -572,6 +572,20 @@ class ReleaseContractTest(unittest.TestCase):
                 self.assertTrue(any("docs/media/fixture.cast contains private marker" in error
                                     for error in errors), "public cast text must be scanned")
 
+    def test_public_text_scan_includes_python_host_helper_literals(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "scripts/hosts/probe.py"
+            source.parent.mkdir(parents=True)
+            for value in ("/home/synthetic-operator", "C:\\Users\\synthetic-operator",
+                          "ssh://sf-pc/synthetic"):
+                with self.subTest(value=value):
+                    source.write_text("DEFAULT = " + repr(value) + "\n")
+                    errors = []
+                    VERIFY_RELEASE.validate_public_text(root, errors)
+                    self.assertTrue(any("scripts/hosts/probe.py contains private marker" in error
+                                        for error in errors), errors)
+
     def test_receipt_command_text_is_not_a_json_evidence_reference(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -2367,6 +2381,36 @@ class ReleaseContractTest(unittest.TestCase):
                 errors: list[str] = []
                 VERIFY_RELEASE.require_pinned_bytes(repository, url, expected, "receipt", errors, {})
                 self.assertEqual(errors, expected_errors)
+
+    def test_side_branch_evidence_pin_must_be_an_ancestor_of_the_published_head(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            repository = Path(temporary)
+            git = ["git", "-C", str(repository)]
+            subprocess.run([*git, "init", "-q"], check=True)
+            receipt = repository / "receipt.json"
+            receipt.write_text('{"status":"passed"}\n')
+            subprocess.run([*git, "add", "."], check=True)
+            subprocess.run([*git, "-c", "user.name=t", "-c", "user.email=t@example.com",
+                            "commit", "-qm", "base"], check=True)
+            base = subprocess.check_output([*git, "rev-parse", "HEAD"], text=True).strip()
+            subprocess.run([*git, "checkout", "-qb", "local-only-evidence"], check=True)
+            receipt.write_text('{"status":"passed","local_only":true}\n')
+            subprocess.run([*git, "add", "."], check=True)
+            subprocess.run([*git, "-c", "user.name=t", "-c", "user.email=t@example.com",
+                            "commit", "-qm", "side evidence"], check=True)
+            side = subprocess.check_output([*git, "rev-parse", "HEAD"], text=True).strip()
+            digest = VERIFY_RELEASE.sha256_file(receipt)
+            subprocess.run([*git, "checkout", "-q", "--detach", base], check=True)
+            manifest = {"qualification": {
+                "public_url": f"https://raw.githubusercontent.com/alphastorm/omp-ninfer/{side}/receipt.json",
+                "summary_sha256": digest}}
+            errors = []
+            VERIFY_RELEASE.validate_pinned_evidence(repository, manifest, {}, {}, errors)
+            self.assertTrue(any("not an ancestor of HEAD" in error for error in errors), errors)
+            subprocess.run([*git, "checkout", "-q", "--detach", side], check=True)
+            errors = []
+            VERIFY_RELEASE.validate_pinned_evidence(repository, manifest, {}, {}, errors)
+            self.assertEqual(errors, [])
 
     def test_cross_component_model_hash_drift_is_rejected(self) -> None:
         temporary, root = self.candidate_copy()

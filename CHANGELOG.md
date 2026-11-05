@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Guard release receipts against nested predecessor public-install identities and non-clone
+  route substitutions. Project arbitrary probe error strings to public digests, scan host-helper
+  Python literals for private markers, and require explicit operator host/window inputs.
+  Fail native public-install smoke on controller/restoration errors and undo owned starts after
+  failures; clean up partially acquired Windows holds without removing another owner's marker.
+- Require immutable evidence pins to be ancestors of the publication head. Add no-effect
+  fake Git/GitHub admission and partial-publication regressions, with identity-checked
+  `--complete-existing` recovery that never replays successful ref effects. Live publication
+  remains founder-only. [#128](https://github.com/alphastorm/omp-ninfer/issues/128) P4 retains
+  its #109 lifecycle design decision and P13 retains the frozen native operate blocks.
+
 ### Changed
 
 - Mark v0.16.2 as the published release across the README, quickstart banner, facts, roadmap,

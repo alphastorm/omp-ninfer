@@ -22,8 +22,8 @@ tailnet-reachable, exits when the transfer completes or the deadline passes) and
 the receiving host (N parallel Range requests, SHA-256 verified against the server) - which
 needs only the standard library on both ends.
 
-  pscp.py pull --host sf-old --platform windows --remote C:/Users/me/replica.tar --local replica.tar
-  pscp.py push --host sf-old --platform windows --local replica.tar --remote C:/Users/me/replica.tar
+  pscp.py pull --host transfer-host --platform windows --remote C:/Transfer/replica.tar --local replica.tar
+  pscp.py push --host transfer-host --platform windows --local replica.tar --remote C:/Transfer/replica.tar
 """
 from __future__ import annotations
 

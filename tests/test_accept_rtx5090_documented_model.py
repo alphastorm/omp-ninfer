@@ -86,7 +86,9 @@ def drive(root: Path, wsl: Path, action: str, command) -> None:
     """Run one driver action; ``command`` fakes every subprocess the driver starts."""
     argv = ["accept-rtx5090-routes.py", "--action", action, "--release", RELEASE, "--candidate", CANDIDATE,
             "--workspace", str(root), "--wsl-workspace", str(wsl), "--windows-workspace", WINDOWS,
-            "--production-image", "fixture-image"]
+            "--production-image", "fixture-image", "--window-dir", "/fixture/window",
+            "--wsl-host", "fixture-wsl", "--windows-host", "fixture-windows",
+            "--route-ssh-destination", "fixture-user@fixture-windows"]
     tunnel = types.SimpleNamespace(poll=lambda: None, terminate=lambda: None, wait=lambda timeout=None: 0)
     health = mock.MagicMock()
     health.__enter__.return_value.status = 200
@@ -248,7 +250,7 @@ if($ModelId){$parameters.ModelId=$ModelId}
             with self.subTest(action=action):
                 argv = ["accept-rtx5090-host.py", "--action", action, "--workspace", str(self.wsl),
                         "--release", RELEASE, "--candidate", CANDIDATE, "--windows-workspace", WINDOWS,
-                        "--production-image", "fixture-image"]
+                        "--production-image", "fixture-image", "--window-dir", "/fixture/window"]
                 refusal = io.StringIO()
                 with self.assertRaises(SystemExit) as refused, contextlib.redirect_stderr(refusal):
                     self.wsl_host(argv)

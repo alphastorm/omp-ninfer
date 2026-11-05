@@ -112,16 +112,17 @@ def main():
     p.add_argument('--action', choices=('preflight', 'window', 'windows-live-only', 'restore', 'collect', 'summarize'), required=True)
     for name in ('release', 'candidate', 'workspace', 'wsl-workspace', 'windows-workspace', 'production-image'):
         p.add_argument('--' + name, required=True)
-    p.add_argument('--wsl-host', default='nyc-pc-wsl')
-    p.add_argument('--windows-host', default='nyc-pc')
-    p.add_argument('--route-ssh-destination', default='Sunil@nyc-pc')
+    p.add_argument('--wsl-host', required=True)
+    p.add_argument('--windows-host', required=True)
+    p.add_argument('--route-ssh-destination', required=True)
+    p.add_argument('--window-dir', required=True, help='Private WSL directory containing window.sh')
     p.add_argument('--attempt', choices=('initial', 'corrected'), default='initial')
     p.add_argument('--prior-workspace', help='Restored initial evidence root; required for a corrected attempt')
     p.add_argument('--windows-evidence', help='Explicitly authorized Windows-only completion evidence root for final aggregation')
     p.add_argument('--dry-run', action='store_true')
     a = p.parse_args()
     if not PureWindowsPath(a.windows_workspace).is_absolute():
-        p.error('--windows-workspace must be absolute (prefer C:/Users/... to avoid shell escaping)')
+        p.error('--windows-workspace must be absolute (use forward slashes to avoid shell escaping)')
     if a.dry_run:
         phases = ['hold', 'stop production', 'published launcher setup (not a route run)', 'Windows structured live and outage', 'independent restoration', 'collect'] if a.action == 'windows-live-only' else ['preflight', 'hold', 'stop production', 'host route', 'Linux live/outage', 'Mac route/live/outage', 'Windows live/route/outage', 'independent restoration', 'collect']
         print(json.dumps({'status': 'dry-run', 'release': a.release, 'candidate': a.candidate, 'action': a.action, 'effects': 'none',
@@ -160,7 +161,8 @@ def main():
         return run(['ssh', '-o', 'BatchMode=yes', a.wsl_host, shlex.join([str(x) for x in argv])], label, timeout)
     def host(action, timeout=120, dry=False, model_id=None):
         args = ['python3', wsl + '/accept-rtx5090-host.py', '--action', action, '--release', a.release, '--candidate', a.candidate,
-                '--workspace', wsl, '--windows-workspace', windows, '--production-image', a.production_image, '--restore-after-seconds', str(watchdog_seconds)]
+                '--workspace', wsl, '--windows-workspace', windows, '--production-image', a.production_image,
+                '--window-dir', a.window_dir, '--restore-after-seconds', str(watchdog_seconds)]
         if model_id:
             args += ['--model-id', model_id]
         if dry:

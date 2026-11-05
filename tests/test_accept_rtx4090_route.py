@@ -722,5 +722,94 @@ ConvertTo-Json -Compress $messages
         self.assertIn("still runs", messages[2])
 
 
+@unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed for native install restoration")
+class NativePublicInstallRestorationTests(unittest.TestCase):
+    """Run the production smoke/finalization statements against an isolated controller."""
+
+    def test_failed_stop_or_smoke_never_claims_restoration_or_leaks_an_owned_start(self) -> None:
+        source = (ROOT / "scripts/hosts/accept-native-public-install.ps1").read_text()
+        proof = r'''
+param($Source,$Scratch,$Case)
+$ErrorActionPreference='Stop'
+$controller=Join-Path $Scratch 'controller.ps1'
+$state=Join-Path $Scratch 'state.json'
+$running=$Case -eq 'running-smoke-failure'
+[IO.File]::WriteAllText($state,(@{running=$running;case=$Case;calls=@()}|ConvertTo-Json))
+[IO.File]::WriteAllText($controller,@'
+param($Action,$StateRoot)
+$path=Join-Path $StateRoot 'state.json'
+$state=Get-Content $path -Raw|ConvertFrom-Json
+$state.calls=@($state.calls)+$Action
+$code=0
+if($Action -eq 'Start'){$state.running=$true}
+if($Action -eq 'Stop'){
+    if($state.case -eq 'failed-stop'){$code=7}else{$state.running=$false}
+}
+[IO.File]::WriteAllText($path,($state|ConvertTo-Json))
+if($Action -eq 'Status') {
+    @{process_state=$(if($state.running){'running'}else{'stopped'});endpoint_state=$(if($state.running){'ready'}else{'unavailable'});release_id='candidate'}|ConvertTo-Json -Compress
+}
+exit $code
+'@)
+$StateRoot=$Scratch
+$ReceiptPath=Join-Path $Scratch 'receipt.json'
+$key=Join-Path $Scratch 'key'
+$config=Join-Path $Scratch 'config.json'
+[IO.File]::WriteAllText($key,'synthetic-key')
+[IO.File]::WriteAllText($config,'{"model_id":"fixture-model"}')
+$rel=@{api_key_file=$key;config_file=$config;host='127.0.0.1';port=18082}
+$nativeModel=@{artifact_sha256='c'*64}
+$installedBinary='a'*64;$installedConfig='b'*64;$gpuUuid='fixture-gpu'
+function Get-NativeGpuPowerLimit {param($Uuid) 450}
+function Invoke-RestMethod {
+    param($Method,$Uri,$Headers,$TimeoutSec,[switch]$UseBasicParsing,$ContentType,$Body)
+    if($Case -in @('throw-after-start','running-smoke-failure')){throw 'injected smoke failure'}
+    if($Method -eq 'Get'){return @{identity=@{binary_sha256='a'*64;config_sha256='b'*64;model_artifact_sha256='c'*64};runtime=@{speculative_backend='dflash2'}}}
+    return @{choices=@(@{message=@{content='ACCEPTED'}});usage=@{completion_tokens=1}}
+}
+function Invoke-WebRequest {
+    param($Method,$Uri,$TimeoutSec,[switch]$UseBasicParsing)
+    $error=[Exception]::new('anonymous refusal')
+    $error|Add-Member NoteProperty Response ([pscustomobject]@{StatusCode=401})
+    throw $error
+}
+$text=[IO.File]::ReadAllText($Source)
+$start=$text.IndexOf('function Sha(')
+$end=$text.IndexOf("try {`n",$start)
+$definitions=$text.Substring($start,$end-$start)
+$smoke=$text.Substring($text.IndexOf('    # 5. Smoke'))
+& ([scriptblock]::Create($definitions+"try {`n"+$smoke))
+'''
+        self.assertIn("# 5. Smoke", source)
+        for case in ("failed-stop", "throw-after-start", "running-smoke-failure", "passed"):
+            with self.subTest(case=case), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                script = root / "proof.ps1"
+                script.write_text(proof)
+                result = subprocess.run([shutil.which("pwsh"), "-NoProfile", "-File", str(script),
+                                         str(ROOT / "scripts/hosts/accept-native-public-install.ps1"),
+                                         directory, case], capture_output=True, text=True, timeout=30)
+                receipt = json.loads((root / "receipt.json").read_text())
+                state = json.loads((root / "state.json").read_text())
+                if case == "passed":
+                    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                    self.assertEqual(receipt["status"], "passed")
+                    self.assertFalse(state["running"])
+                    self.assertTrue(receipt["restoration"]["prior_state_restored"])
+                elif case == "failed-stop":
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertEqual(receipt["status"], "failed")
+                    self.assertFalse(receipt["restoration"]["prior_state_restored"])
+                    self.assertIn("restoration_error", receipt)
+                else:
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertEqual(receipt["status"], "failed")
+                    self.assertEqual(state["running"], case == "running-smoke-failure")
+                    if case == "running-smoke-failure":
+                        self.assertNotIn("Stop", state["calls"], "an incumbent start is never ours to stop")
+                    else:
+                        self.assertIn("Stop", state["calls"])
+
+
 if __name__ == "__main__":
     unittest.main()

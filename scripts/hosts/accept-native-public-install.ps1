@@ -27,6 +27,24 @@ function Finish([string]$Status) {
     $json = $receipt | ConvertTo-Json -Depth 8
     [IO.File]::WriteAllText($ReceiptPath, $json, [Text.UTF8Encoding]::new($false))
 }
+$baselineObserved = $false
+$startOwned = $false
+function Restore-PublicInstallState {
+    if (-not $baselineObserved) { return }
+    $receipt.restoration = [ordered]@{ prior_state_restored=$false }
+    if ($startOwned) {
+        & $controller -Action Stop -StateRoot $StateRoot | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw "owned public-install Stop failed (exit $LASTEXITCODE)" }
+    }
+    $after = ((@(& $controller -Action Status -StateRoot $StateRoot) -join "`n") | ConvertFrom-Json)
+    if ($LASTEXITCODE -ne 0) { throw "public-install restoration Status failed (exit $LASTEXITCODE)" }
+    $restored = ([string]$after.process_state -ceq [string]$before.process_state) -and
+                ([string]$after.endpoint_state -ceq [string]$before.endpoint_state) -and
+                ([string]$after.release_id -ceq [string]$before.release_id)
+    $limit = [int](Get-NativeGpuPowerLimit $gpuUuid)
+    $receipt.restoration = [ordered]@{ process_state=[string]$after.process_state; endpoint_state=[string]$after.endpoint_state; prior_state_restored=$restored; power_limit_w=$limit; active_release=[string]$after.release_id }
+    if (-not $restored) { throw 'public-install controller baseline was not restored' }
+}
 try {
     $manifest = Get-Content -LiteralPath $ManifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
     $nativeModel = if ($manifest.components.PSObject.Properties.Name -contains 'native_model') { $manifest.components.native_model } else { $manifest.components.model }
@@ -123,9 +141,18 @@ try {
     }
     # 5. Smoke through the installed controller.
     $before = ((@(& $controller -Action Status -StateRoot $StateRoot) -join "`n") | ConvertFrom-Json)
+    if ($LASTEXITCODE -ne 0) { throw "public-install baseline Status failed (exit $LASTEXITCODE)" }
+    if ([string]$before.process_state -cnotin @('running','stopped')) { throw 'public-install baseline process state is not running or stopped' }
+    $baselineObserved = $true
     $wasRunning = ([string]$before.process_state -ceq 'running')
-    if (-not $wasRunning) { & $controller -Action Start -StateRoot $StateRoot | Out-Null }
+    if (-not $wasRunning) {
+        # Claim the attempted start before invoking it: even a throwing Start can have effects.
+        $startOwned = $true
+        & $controller -Action Start -StateRoot $StateRoot | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw "public-install Start failed (exit $LASTEXITCODE)" }
+    }
     $status = ((@(& $controller -Action Status -StateRoot $StateRoot) -join "`n") | ConvertFrom-Json)
+    if ($LASTEXITCODE -ne 0) { throw "public-install smoke Status failed (exit $LASTEXITCODE)" }
     if ([string]$status.process_state -cne 'running' -or [string]$status.endpoint_state -cne 'ready') { throw 'controller did not report a ready release' }
     $keyBytes = [IO.File]::ReadAllBytes([string]$rel.api_key_file); $len=$keyBytes.Length
     while ($len -gt 0 -and ($keyBytes[$len-1] -eq 10 -or $keyBytes[$len-1] -eq 13)) { $len-- }
@@ -147,16 +174,16 @@ try {
     $text = [string]$comp.choices[0].message.content
     $receipt.smoke = [ordered]@{ authenticated_status_http=200; status_ms=[math]::Round($statusMs,1); served_identity_matches_installed=$true; anonymous_status_http=$anon; completion_http=200; completion_ms=[math]::Round($compMs,1); completion_tokens=[int]$comp.usage.completion_tokens; output_sha256=(ShaText $text); output_contains_marker=($text -match 'ACCEPTED'); speculative_backend=[string]$st.runtime.speculative_backend; public_model_id=$publicModel }
     if ($anon -ne 401) { throw 'anonymous status request was not refused' }
-    # 6. Restoration: return the release to its prior state.
-    if (-not $wasRunning) { & $controller -Action Stop -StateRoot $StateRoot | Out-Null }
-    $after = ((@(& $controller -Action Status -StateRoot $StateRoot) -join "`n") | ConvertFrom-Json)
-    $limit = [int](Get-NativeGpuPowerLimit $gpuUuid)
-    $receipt.restoration = [ordered]@{ process_state=[string]$after.process_state; endpoint_state=[string]$after.endpoint_state; prior_state_restored=(([string]$after.process_state -ceq 'running') -eq $wasRunning); power_limit_w=$limit; active_release=[string]$after.release_id }
     $receipt.content_safety = [ordered]@{ hostnames_recorded=0; usernames_recorded=0; private_paths_recorded=0; secret_values_recorded=0; raw_prompts_recorded=0; model_outputs_recorded=0; identities_bound_by_sha256=$true }
-    Finish 'passed'
 } catch {
     $receipt.error = [string]$_.Exception.Message
+} finally {
+    # Failure is not an exemption from returning a start we own to the observed baseline.
+    try { Restore-PublicInstallState } catch { $receipt.restoration_error = [string]$_.Exception.Message }
+}
+if ($receipt.Contains('error') -or $receipt.Contains('restoration_error')) {
     Finish 'failed'
     exit 1
 }
+Finish 'passed'
 exit 0

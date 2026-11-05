@@ -12,11 +12,13 @@
 #
 # Usage:
 #   publish-product-release.sh --release v0.7.4 --commit <sha40> --pr 47 [--publish]
+# Add --complete-existing only to complete a partial publication whose remote main and tag
+# already resolve to that exact commit. This mode never pushes refs or creates a local tag.
 set -euo pipefail
 
 REPO=alphastorm/omp-ninfer
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
-release=""; commit=""; pr=""; publish=0; dry_run=0
+release=""; commit=""; pr=""; publish=0; dry_run=0; complete_existing=0
 while (($#)); do
   case "$1" in
     --release|--commit|--pr) (($# >= 2)) || { echo "$1 requires a value" >&2; exit 2; } ;;
@@ -27,6 +29,7 @@ while (($#)); do
     --pr) pr="$2"; shift 2 ;;
     --publish) publish=1; shift ;;
     --dry-run) dry_run=1; shift ;;
+    --complete-existing) complete_existing=1; shift ;;
     *) echo "unknown argument: $1" >&2; exit 2 ;;
   esac
 done
@@ -40,14 +43,15 @@ git -C "$ROOT" cat-file -e "$commit^{commit}" || { echo "commit $commit is not f
 
 pr_json=$(gh pr view "$pr" --repo "$REPO" \
   --json state,headRefOid,baseRefName,mergeable,statusCheckRollup)
-python3 - "$pr_json" "$commit" <<'PY'
+python3 - "$pr_json" "$commit" "$complete_existing" <<'PY'
 import json, sys
 view, commit = json.loads(sys.argv[1]), sys.argv[2]
-if view["state"] != "OPEN" or view["baseRefName"] != "main":
+completion = sys.argv[3] == "1"
+if view["state"] not in (("OPEN", "MERGED") if completion else ("OPEN",)) or view["baseRefName"] != "main":
     raise SystemExit(f"pull request is {view['state']} into {view['baseRefName']}, not open into main")
 if view["headRefOid"] != commit:
     raise SystemExit(f"pull request head is {view['headRefOid']}, not {commit}")
-if view["mergeable"] != "MERGEABLE":
+if not completion and view["mergeable"] != "MERGEABLE":
     raise SystemExit(f"pull request is {view['mergeable']}")
 checks = view["statusCheckRollup"]
 failing = [c.get("name") or c.get("context") for c in checks
@@ -56,20 +60,47 @@ if not checks or failing:
     raise SystemExit(f"pull request checks are not all green: {failing or 'none reported'}")
 PY
 
-if git -C "$ROOT" rev-parse -q --verify "refs/tags/$release" >/dev/null \
+existing_release=0
+if ((complete_existing)); then
+  remote_main=$(git -C "$ROOT" ls-remote origin refs/heads/main)
+  remote_tag=$(git -C "$ROOT" ls-remote --tags origin "refs/tags/$release" "refs/tags/$release^{}")
+  python3 - "$remote_main" "$remote_tag" "$commit" "$release" <<'PY'
+import sys
+main, tags, commit, release = sys.argv[1:]
+main_refs = dict(line.split()[::-1] for line in main.splitlines())
+tag_refs = dict(line.split()[::-1] for line in tags.splitlines())
+tag = f"refs/tags/{release}"
+if main_refs.get("refs/heads/main") != commit:
+    raise SystemExit("completion requires remote main at the exact publication commit")
+if tag_refs.get(tag + "^{}", tag_refs.get(tag)) != commit:
+    raise SystemExit("completion requires the remote tag at the exact publication commit")
+PY
+  if release_json=$(gh release view "$release" --repo "$REPO" \
+      --json tagName,targetCommitish,isDraft,isPrerelease); then
+    existing_release=1
+    python3 - "$release_json" "$commit" "$release" <<'PY'
+import json, sys
+view, commit, release = json.loads(sys.argv[1]), sys.argv[2], sys.argv[3]
+if (view.get("tagName") != release or view.get("targetCommitish") not in (commit, "main")
+        or view.get("isDraft") is not False or view.get("isPrerelease") is not False):
+    raise SystemExit("completion requires the matching non-draft, non-prerelease GitHub release")
+PY
+  fi
+else
+  if git -C "$ROOT" rev-parse -q --verify "refs/tags/$release" >/dev/null \
     || [[ -n $(git -C "$ROOT" ls-remote --tags origin "refs/tags/$release") ]]; then
-  echo "tag $release already exists" >&2; exit 1
+    echo "tag $release already exists" >&2; exit 1
+  fi
+  if gh release view "$release" --repo "$REPO" >/dev/null 2>&1; then
+    echo "GitHub release $release already exists" >&2; exit 1
+  fi
+  git -C "$ROOT" merge-base --is-ancestor origin/main "$commit" \
+    || { echo "origin/main does not fast-forward to $commit" >&2; exit 1; }
+  git -C "$ROOT" push --dry-run -q origin "$commit:refs/heads/main" \
+    || { echo "a fast-forward push of main to $commit would be refused" >&2; exit 1; }
+  git -C "$ROOT" push --dry-run -q origin "$commit:refs/tags/$release" \
+    || { echo "pushing tag $release would be refused" >&2; exit 1; }
 fi
-if gh release view "$release" --repo "$REPO" >/dev/null 2>&1; then
-  echo "GitHub release $release already exists" >&2; exit 1
-fi
-# Every live effect below is checked here first, so --publish can fail only on the effect itself.
-git -C "$ROOT" merge-base --is-ancestor origin/main "$commit" \
-  || { echo "origin/main does not fast-forward to $commit" >&2; exit 1; }
-git -C "$ROOT" push --dry-run -q origin "$commit:refs/heads/main" \
-  || { echo "a fast-forward push of main to $commit would be refused" >&2; exit 1; }
-git -C "$ROOT" push --dry-run -q origin "$commit:refs/tags/$release" \
-  || { echo "pushing tag $release would be refused" >&2; exit 1; }
 
 work=$(mktemp -d)
 trap 'git -C "$ROOT" worktree remove --force "$work/tree" >/dev/null 2>&1 || true; rm -rf "$work"' EXIT
@@ -84,17 +115,23 @@ title=$(sed -n '1s/^# //p' "$notes")
 [[ -n $title ]] || { echo "release notes have no title heading" >&2; exit 1; }
 cp "$notes" "$work/notes.md"
 
-echo "preflight passed: $release at $commit, pull request #$pr green, main fast-forwards, title: $title"
+echo "preflight passed: $release at $commit, pull request #$pr green, completion=$complete_existing, title: $title"
 if ((publish == 0)); then
-  echo "no effect taken; rerun with --publish to fast-forward main, tag and publish (founder-only)"
+  echo "no effect taken; add --publish to perform this checked publication mode (founder-only)"
   exit 0
 fi
 
-git -C "$ROOT" push origin "$commit:refs/heads/main"
-git -C "$ROOT" tag -a "$release" "$commit" -m "$title"
-git -C "$ROOT" push origin "refs/tags/$release"
-gh release create "$release" --repo "$REPO" --verify-tag --latest \
-  --title "$title" --notes-file "$work/notes.md"
+if ((complete_existing == 0)); then
+  git -C "$ROOT" push origin "$commit:refs/heads/main"
+  git -C "$ROOT" tag -a "$release" "$commit" -m "$title"
+  git -C "$ROOT" push origin "refs/tags/$release"
+fi
+if ((existing_release)); then
+  gh release edit "$release" --repo "$REPO" --latest
+else
+  gh release create "$release" --repo "$REPO" --verify-tag --latest --target "$commit" \
+    --title "$title" --notes-file "$work/notes.md"
+fi
 latest=$(gh api "repos/$REPO/releases/latest" --jq .tag_name)
 [[ $latest == "$release" ]] || { echo "Latest is $latest, not $release" >&2; exit 1; }
 echo "published $release as Latest: https://github.com/$REPO/releases/tag/$release"

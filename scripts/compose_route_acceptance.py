@@ -61,6 +61,7 @@ from verify_release import (  # pyright: ignore[reportMissingImports]
     OMP_PROFILE_PLATFORMS, effective_native_model, validate_upstream_client_bindings,
     validate_upstream_omp_component, ga_release, product_version, OCI_DIGEST_RE,
     bound_file, native_profile, validate_native_route_waiver, validate_native_lead_recovery,
+    validate_native_public_install_identity,
     NATIVE_ROUTE_LANES as NATIVE_LANES,
 )
 from rebind_release import RAW  # pyright: ignore[reportMissingImports]
@@ -185,7 +186,10 @@ def check_route(lane: str, receipt: dict, candidate: str) -> None:
     for step in steps:
         # The pre-cut clone substitution is the only non-verbatim block a runner may record,
         # and it must say what it substituted.
-        substituted = step.get("status") == "substituted" and bool(step.get("substitution"))
+        substituted = (step.get("slug") == "clone-and-verify"
+                       and step.get("status") == "substituted"
+                       and isinstance(step.get("substitution"), str)
+                       and bool(step["substitution"].strip()))
         require(step.get("status") == "passed" or substituted,
                 f"{lane}/{step.get('slug')}: {step.get('status')}")
         require(step.get("executed_sha256") == step.get("block_sha256"),
@@ -238,6 +242,24 @@ def check_native_observations(lane: str, observations: Any) -> None:
     install = observations.get("public_install")
     require(isinstance(install, dict) and install.get("status") == "passed",
             f"{lane}: the native public install did not pass")
+
+
+def public_observations(value: Any) -> Any:
+    """Project arbitrary client error strings to digests; keep originals in the private capture."""
+    if isinstance(value, list):
+        return [public_observations(child) for child in value]
+    if not isinstance(value, dict):
+        return value
+    result = {}
+    for key, child in value.items():
+        if key == "errors":
+            require(isinstance(child, list) and all(isinstance(error, str) for error in child),
+                    "client errors must be a list of strings in the private capture")
+            result[key] = [{"kind": "client-error", "sha256": sha256(error.encode("utf-8"))}
+                           for error in child]
+        else:
+            result[key] = public_observations(child)
+    return result
 
 
 def check_native_policy(release: str, variant: dict, native: dict, client_sha256: str) -> dict | None:
@@ -386,7 +408,7 @@ def platform_receipt(release: str, as_of: str, profile: dict, evidence: dict,
         "source": {"repository": omp["upstream_repository"], "tag": omp["upstream_tag"],
                    "commit": omp["upstream_commit"], "tree": omp["upstream_tree"]},
         "client": dict(distribution),
-        "live_acceptance": evidence["live_acceptance"],
+        "live_acceptance": public_observations(evidence["live_acceptance"]),
         "checks": {
             "new_client_asset_and_binary_identity": "passed",
             "new_client_clean_install": "passed",
@@ -518,6 +540,10 @@ def main() -> int:
         lane = variant["id"].split("-")[0] + "-native"
         if lane not in waived:
             check_native_observations(variant["id"], native.get("observations"))
+            errors = []
+            validate_native_public_install_identity(
+                native["observations"]["public_install"], variant, errors)
+            require(not errors, "; ".join(errors))
         native_configurations[variant["id"]] = check_native_policy(
             args.release, variant, native, manifest["components"]["omp"]["binary_sha256"])
         lane_receipt = variant.get("qualification", {}).get("summary")
@@ -645,7 +671,7 @@ def main() -> int:
             **({"probe_acceptance": native["probe_acceptance"]}
                if native_configurations[native_variant] is not None else {}),
             "preparation": native["preparation"],
-            "observations": native["observations"],
+            "observations": public_observations(native["observations"]),
             "documented_route": {"repository_path": route_rows[native_lane]["receipt"],
                                  "sha256": route_rows[native_lane]["sha256"]},
             "restoration": restoration_ref,

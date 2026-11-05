@@ -72,10 +72,21 @@ if($Action -eq 'Hold') {
     $ownership=@{created_utc=[DateTime]::UtcNow.ToString('o');path=$Hold;hold_created=$false}
     Save-Json 'own-hold.json' $ownership
     New-Item -ItemType Directory -Path $HoldDirectory -Force | Out-Null
-    New-Item -ItemType File -Path $Hold | Out-Null
-    $ownership.hold_created=$true
-    Save-Json 'own-hold.json' $ownership
-    Set-OmpAdminOnlyFile -Path $Hold
+    try {
+        New-Item -ItemType File -Path $Hold | Out-Null
+        $ownership.hold_created=$true
+        Save-Json 'own-hold.json' $ownership
+        Set-OmpAdminOnlyFile -Path $Hold
+    } catch {
+        # The caller never receives a successful acquisition on this path. Undo only a file
+        # whose exclusive creation completed here, never a pre-existing/racing owner's hold.
+        if($ownership.hold_created) {
+            Remove-Item -LiteralPath $Hold -Force
+            $ownership.hold_created=$false
+            Save-Json 'own-hold.json' $ownership
+        }
+        throw
+    }
     Write-Output 'own lane hold acquired'; return
 }
 if($Action -eq 'Release') {
