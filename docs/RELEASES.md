@@ -3275,6 +3275,69 @@ freeze.
 The release tree is staged as a draft and cut with the pin dance; every step is a script and
 the verifier decides what remains:
 
+The verifier resolves predecessors from **ready GA manifests**, not the newest
+GA-named directory. Published product releases use `status: ready`; neither
+`publication.authorized` nor a published component makes a held product candidate
+an eligible predecessor.
+
+When the RTX 5090 source archive URL changes, staging requires both
+`--source-archive PATH` and `--checksums PATH`. It verifies the source archive against
+`--source-archive-sha`, derives `source_archive_bytes` and `checksums_sha256` from
+those local bytes, and requires exactly one matching SHA256SUMS entry each for
+the binary archive (`--archive-sha`) and its SPDX SBOM (`--sbom-sha`). Current
+published RTX 5090 sets list those two assets, not the separately published source
+archive. If a `runtime-source-<source-commit8>.tar.gz` entry is present, as in the
+v0.14.0 format, it must match `--source-archive-sha`. Missing required entries,
+malformed or duplicate entries, mismatched hashes and stale predecessor metadata
+are refused before copying the release tree. An unchanged source URL keeps its
+metadata when those arguments are omitted. Profile templates retain checkpoint
+contract fields and derive `require_origin_auth` from
+`--session-checkpoint-require-origin-auth`.
+
+Staging clears predecessor `observed_gates` (including waivers) and removes the
+predecessor receipt-audit file and `receipt_audit` binding: neither describes this
+successor's evidence. Explicit
+successor gate observations may be supplied through `--prepared-draft`; fresh
+composition authors its audit. Staging regenerates the stock-client descriptor
+from the successor manifest and platform rows, without claiming client acceptance.
+
+`verify_release.py` byte-checks carried native quality/fit bindings even when no
+observed gate names them. It also checks retained receipt-audit `staged_sha256`
+entries and all three stock-client descriptor identities against the manifest and
+compatibility authority. Dropped audit entries and superseded composition hashes
+are historical observations, not retained-byte claims; early v0.13.x audits used
+pre-replacement snapshots. Stock descriptors do not compare mutable compatibility
+URL metadata.
+
+Waivers must bind their lane's current component and their release-local file.
+Original v0.16.x projections without complete release/candidate or raw-position
+bindings retain only their exact historical bytes and scope, including the held
+v0.16.1 records; they confer no successor acceptance. New parity waivers must name
+the release, retain exactly one failed restore/sibling position and rule, and match the complete failed set
+and measurements in a same-release, hash-bound contract-2
+`p16-agent-parity/2` raw verdict. A TTFT waiver cannot also waive a cache-gap failure,
+or vice versa. Its `raw_verdict.evidence_sha256["agent-verdict.json"]` must equal
+the observed parity gate's bound verdict hash.
+
+The product `candidate` field is not required while route acceptance is pending:
+gates and waivers are authored before the candidate commit exists. Once
+`documented_route_acceptance.candidate_commit` is recorded, the waiver must bind
+that exact commit. This permits the documented pre-cut authoring sequence without
+transferring a predecessor's waiver or changing its lane subject.
+
+Supported new waiver shapes are deliberately narrow:
+
+- Each `waived` list contains exactly one position and names its exact verdict `job`:
+  `restore` / `sibling`, or that probe followed by `-run-<digits>`. The job, position,
+  label, measured values and sole failed rule must all match the retained verdict.
+- Restore supports position 3 `restore_0` or position 4 `restore_1`; sibling supports
+  position 1 `base`. The waived rule is the `/2` TTFT bound or cached-minus-prompt rule.
+- The bound verdict must have exactly one failing position and one failed metric.
+  Verdicts with multiple failing positions or both TTFT and cache-gap failure are
+  unsupported, even when separate waiver files are supplied.
+- New `*_speed_waiver` records are unsupported. Only the exact historical speed
+  waivers listed above retain their original scope. Unsupported shapes fail closed.
+
 1. `scripts/stage_release.py --from <previous> --release <new> ...` copies the tree, rewrites
    the component and identity pins (including `--config-sha`, the lifecycle configuration
    identity of the new deployment profile), and recomputes the chain with

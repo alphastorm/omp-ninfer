@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""Plan gate-bound pre-screens and reduce native ABBA speed captures, without contacting hosts."""
+"""Reduce native ABBA captures under their release's recorded speed decision.
+
+The declaration embeds the release's hash-bound qualification decision, binding
+its authenticated rule into the pre-screen plan. Both weighted suites, every case,
+and retained normalized UTF-8 output bytes must pass; neither a digest-only capture
+nor a waiver supplies a pass.
+No host is contacted and normalized output text is never copied into the result.
+"""
 from __future__ import annotations
 
 import argparse
@@ -13,8 +20,8 @@ from pathlib import Path
 from typing import Any, Sequence
 
 ORDER = ("A", "B", "B", "A")
-WEIGHTED_MINIMUM = 1.08
-EVERY_CASE_MINIMUM = 0.95
+OUTPUT_RULE = "required for every case (A0/A3, B1/B2, A0/B1)"
+ROOT = Path(__file__).resolve().parents[1]
 
 
 class SpeedGateError(ValueError):
@@ -56,7 +63,49 @@ def arm_identity(value: Any) -> dict[str, str]:
             for key in ("binary_sha256", "configuration_sha256")}
 
 
-def declaration(value: Any) -> dict[str, Any]:
+def recorded_thresholds(decision: Any, release: Any) -> dict[str, float]:
+    if (not isinstance(release, str) or not release
+            or not isinstance(decision, dict)
+            or decision.get("artifact_type") != "omp_ninfer_founder_gate_decision"
+            or type(decision.get("schema_version")) is not int or decision["schema_version"] != 1
+            or decision.get("release") != release):
+        raise SpeedGateError("decision must be this release's schema-1 omp_ninfer_founder_gate_decision")
+    rule = decision.get("rule")
+    if not isinstance(rule, dict) or rule.get("byte_identical_normalized_outputs") != OUTPUT_RULE:
+        raise SpeedGateError("decision rule must require normalized output bytes for every ABBA case")
+    applies_to = rule.get("applies_to")
+    if (not isinstance(applies_to, list) or len(applies_to) != 3
+            or any(not isinstance(item, str) for item in applies_to)
+            or set(applies_to) != {"role weighted", "all-cases weighted", "every case"}):
+        raise SpeedGateError("decision rule must cover role weighted, all-cases weighted and every case")
+    return {"weighted_minimum": positive_number(rule.get("weighted_decode_ratio_minimum"), "weighted minimum"),
+            "every_case_minimum": positive_number(rule.get("every_case_ratio_minimum"), "every-case minimum")}
+
+
+def authenticate_decision(value: dict[str, Any], root: Path) -> None:
+    release = value["release"]
+    if re.fullmatch(r"v[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?", release) is None:
+        raise SpeedGateError("release must name a versioned release directory")
+    qualification = load(root / "releases" / release / "qualification.json")
+    gates = qualification.get("observed_gates")
+    binding = gates.get("native_speed_decision") if isinstance(gates, dict) else None
+    if not isinstance(binding, dict):
+        raise SpeedGateError("release qualification must bind native_speed_decision")
+    reference = binding.get("repository_path")
+    if not isinstance(reference, str) or Path(reference).is_absolute():
+        raise SpeedGateError("native_speed_decision must name a repository-relative file")
+    path = (root / reference).resolve()
+    if not path.is_relative_to(root.resolve()) or not path.is_file():
+        raise SpeedGateError("native_speed_decision must name a file inside the repository")
+    expected_sha = require_sha256(binding.get("sha256"), "native_speed_decision sha256")
+    decision_bytes = path.read_bytes()
+    if hashlib.sha256(decision_bytes).hexdigest() != expected_sha:
+        raise SpeedGateError("native_speed_decision SHA-256 must match the bound file bytes")
+    if value["decision"] != json.loads(decision_bytes):
+        raise SpeedGateError("gate decision must equal the release's bound decision")
+
+
+def declaration(value: Any, *, root: Path | None = None) -> dict[str, Any]:
     if (not isinstance(value, dict) or value.get("artifact_type") != "omp_ninfer_speed_gate"
             or type(value.get("schema_version")) is not int or value["schema_version"] != 1):
         raise SpeedGateError("expected a schema-1 omp_ninfer_speed_gate declaration")
@@ -67,14 +116,18 @@ def declaration(value: Any) -> dict[str, Any]:
     if (not isinstance(roles, list) or not roles or any(not isinstance(case, str) for case in roles)
             or len(set(roles)) != len(roles) or not set(roles) <= {row["id"] for row in suite}):
         raise SpeedGateError("role_case_ids must select unique declared role requests")
+    recorded_thresholds(value.get("decision"), value.get("release"))
+    authenticate_decision(value, root if root is not None else ROOT)
     return {"artifact_type": "omp_ninfer_speed_gate", "schema_version": 1,
+            "release": value["release"], "decision": value["decision"],
             "comparator": arm_identity(value.get("comparator")), "request_suite": suite,
             "request_suite_sha256": digest(suite), "role_case_ids": sorted(roles)}
 
 
-def prescreen(gate: dict[str, Any], candidate: dict[str, Any]) -> dict[str, Any]:
+def prescreen(gate: dict[str, Any], candidate: dict[str, Any], *,
+              root: Path | None = None) -> dict[str, Any]:
     """There is no comparator argument: A always comes from the gate declaration."""
-    gate = declaration(gate)
+    gate = declaration(gate, root=root)
     return {"artifact_type": "omp_ninfer_speed_prescreen_plan", "schema_version": 1,
             "gate_sha256": digest(gate), "order": list(ORDER),
             "arms": {"A": gate["comparator"], "B": arm_identity(candidate)},
@@ -113,8 +166,12 @@ def receipts(captures: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
                 raise SpeedGateError("completion_tokens must be a positive integer")
             seconds = positive_number(row.get("decode_seconds"), "decode_seconds")
             positive_number(tokens / seconds, "decode rate")
+            output = row.get("normalized_output")
+            if not isinstance(output, str):
+                raise SpeedGateError("normalized_output must contain the retained normalized UTF-8 output")
             arm["requests"].append({"id": row["id"], "request_sha256": row["request_sha256"],
-                                    "completion_tokens": tokens, "decode_seconds": seconds})
+                                    "completion_tokens": tokens, "decode_seconds": seconds,
+                                    "normalized_output_sha256": hashlib.sha256(output.encode("utf-8")).hexdigest()})
         arm["capture_sha256s"].append(digest(capture))
     if set(arms) != set(range(4)):
         raise SpeedGateError("all four ABBA positions are required")
@@ -126,7 +183,8 @@ def receipts(captures: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
     return result
 
 
-def summarize(arms: Sequence[dict[str, Any]], case_ids: set[str]) -> dict[str, Any] | None:
+def summarize(arms: Sequence[dict[str, Any]], case_ids: set[str],
+              every_case_minimum: float) -> dict[str, Any] | None:
     if not case_ids:
         return None
     samples = {label: [row for arm in arms if arm["arm"] == label
@@ -142,11 +200,21 @@ def summarize(arms: Sequence[dict[str, Any]], case_ids: set[str]) -> dict[str, A
                       "ratio": rate["B"] / rate["A"]})
     return {"case_count": len(cases), "weighted_decode_tok_s": rates, "weighted_decode_ratio": rates["B"] / rates["A"],
             "minimum_case_ratio": min(row["ratio"] for row in cases),
-            "below_case_floor": [row["id"] for row in cases if row["ratio"] < EVERY_CASE_MINIMUM], "cases": cases}
+            "below_case_floor": [row["id"] for row in cases if row["ratio"] < every_case_minimum], "cases": cases}
+
+
+def output_mismatches(captures: Sequence[dict[str, Any]]) -> list[str]:
+    """Compare retained bytes, not claimed matching hashes or booleans."""
+    outputs: dict[int, dict[str, bytes]] = {index: {} for index in range(4)}
+    for capture in captures:
+        for row in capture["requests"]:
+            outputs[capture["index"]][row["id"]] = row["normalized_output"].encode("utf-8")
+    return sorted(case_id for case_id, baseline in outputs[0].items()
+                  if any(outputs[index][case_id] != baseline for index in (3, 1, 2)))
 
 
 def identity_differences(gate: dict[str, Any], arms: Sequence[dict[str, Any]],
-                         plan: dict[str, Any]) -> list[str]:
+                         plan: dict[str, Any], *, root: Path | None = None) -> list[str]:
     if (not isinstance(plan, dict) or plan.get("artifact_type") != "omp_ninfer_speed_prescreen_plan"
             or type(plan.get("schema_version")) is not int or plan["schema_version"] != 1):
         raise SpeedGateError("expected a schema-1 omp_ninfer_speed_prescreen_plan")
@@ -155,7 +223,7 @@ def identity_differences(gate: dict[str, Any], arms: Sequence[dict[str, Any]],
     if not isinstance(planned_arms, dict) or set(planned_arms) != {"A", "B"}:
         raise SpeedGateError("plan arms must declare A and B identities")
     planned_arms = {label: arm_identity(value) for label, value in planned_arms.items()}
-    expected_plan = prescreen(gate, planned_arms["B"])
+    expected_plan = prescreen(gate, planned_arms["B"], root=root)
     reasons = []
     for field in ("gate_sha256", "role_case_ids", "request_suite", "request_suite_sha256", "order"):
         if plan.get(field) != expected_plan[field]:
@@ -180,27 +248,33 @@ def identity_differences(gate: dict[str, Any], arms: Sequence[dict[str, Any]],
 
 
 def reduce(gate: dict[str, Any], captures: Sequence[dict[str, Any]],
-           plan: dict[str, Any]) -> dict[str, Any]:
-    gate = declaration(gate)
+           plan: dict[str, Any], *, root: Path | None = None) -> dict[str, Any]:
+    gate = declaration(gate, root=root)
+    thresholds = recorded_thresholds(gate["decision"], gate["release"])
     arms = receipts(captures)
     case_ids = {row["id"] for row in arms[0]["requests"]}
     role_ids = case_ids & set(gate["role_case_ids"])
-    roles = summarize(arms, role_ids)
-    all_cases = summarize(arms, case_ids)
-    reasons = identity_differences(gate, arms, plan)
-    passed = (roles is not None and roles["weighted_decode_ratio"] >= WEIGHTED_MINIMUM
-              and all_cases["weighted_decode_ratio"] >= WEIGHTED_MINIMUM
-              and all_cases["minimum_case_ratio"] >= EVERY_CASE_MINIMUM)
+    roles = summarize(arms, role_ids, thresholds["every_case_minimum"])
+    all_cases = summarize(arms, case_ids, thresholds["every_case_minimum"])
+    reasons = identity_differences(gate, arms, plan, root=root)
+    mismatches = output_mismatches(captures)
+    passed = (roles is not None and roles["weighted_decode_ratio"] >= thresholds["weighted_minimum"]
+              and all_cases["weighted_decode_ratio"] >= thresholds["weighted_minimum"]
+              and all_cases["minimum_case_ratio"] >= thresholds["every_case_minimum"])
+    gate_passed = not reasons and passed and not mismatches
     return {"artifact_type": "omp_ninfer_speed_gate_result", "schema_version": 1,
-            "status": "DIAGNOSTIC" if reasons else ("PASS" if passed else "FAIL"),
+            "status": "DIAGNOSTIC" if reasons else ("PASS" if gate_passed else "FAIL"),
             "gate_predictive": not reasons, "diagnostic_reasons": reasons,
-            "thresholds_passed": passed, "gate_passed": not reasons and passed,
+            "thresholds_passed": passed, "gate_passed": gate_passed,
+            "normalized_outputs_identical": not mismatches, "output_mismatch_case_ids": mismatches,
+            "release": gate["release"], "decision_sha256": digest(gate["decision"]),
             "gate_sha256": digest(gate), "comparator": gate["comparator"],
             "plan_sha256": digest(plan), "plan_gate_sha256": plan["gate_sha256"],
             "role_case_ids": gate["role_case_ids"],
             "request_suite_sha256": gate["request_suite_sha256"],
-            "thresholds": {"weighted_minimum": WEIGHTED_MINIMUM, "every_case_minimum": EVERY_CASE_MINIMUM},
-            "role_suite": roles, "supplemental": summarize(arms, case_ids - role_ids), "all_cases": all_cases,
+            "thresholds": thresholds, "role_suite": roles,
+            "supplemental": summarize(arms, case_ids - role_ids, thresholds["every_case_minimum"]),
+            "all_cases": all_cases,
             "arms": arms}
 
 
@@ -220,12 +294,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     reduction.add_argument("--capture", type=Path, action="append", required=True)
     reduction.add_argument("--plan", type=Path, required=True, help="recorded pre-screen identity plan")
     for command in (plan, reduction):
+        command.add_argument("--root", type=Path,
+                             help="repository root containing release qualification (default: this checkout)")
         command.add_argument("--gate", type=Path, required=True)
         command.add_argument("--out", type=Path, required=True)
     args = parser.parse_args(argv)
     try:
-        result = (prescreen(load(args.gate), load(args.candidate)) if args.command == "prescreen"
-                  else reduce(load(args.gate), [load(path) for path in args.capture], load(args.plan)))
+        result = (prescreen(load(args.gate), load(args.candidate), root=args.root) if args.command == "prescreen"
+                  else reduce(load(args.gate), [load(path) for path in args.capture],
+                              load(args.plan), root=args.root))
         args.out.write_text(json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
     except (OSError, ValueError) as exc:
         print(f"speed_gate: {exc}", file=sys.stderr)

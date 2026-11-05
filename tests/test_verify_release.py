@@ -31,6 +31,30 @@ REBIND_SPEC.loader.exec_module(REBIND_RELEASE)
 
 
 class ReleaseIdentitySnapshotTests(unittest.TestCase):
+    def test_predecessor_skips_unpublished_candidates_and_missing_manifests(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            for release, status in (("v0.15.0", "ready"), ("v0.16.0", "ready"),
+                                    ("v0.16.1", "candidate")):
+                path = root / "releases" / release / "manifest.json"
+                path.parent.mkdir(parents=True)
+                path.write_text(json.dumps({"release": release, "status": status}), encoding="utf-8")
+            self.assertEqual(VERIFY_RELEASE.predecessor_manifest(root, "v0.16.4")["release"],
+                             "v0.16.0")
+            (root / "releases/v0.16.2").mkdir()
+            (root / "releases/v0.16.3-beta.1").mkdir()
+            path = root / "releases/v0.16.1/manifest.json"
+            for status in ("draft", None, "held"):
+                with self.subTest(status=status):
+                    path.write_text(json.dumps({"release": "v0.16.1", "status": status}),
+                                    encoding="utf-8")
+                    self.assertEqual(VERIFY_RELEASE.predecessor_manifest(root, "v0.16.4")["release"],
+                                     "v0.16.0")
+            path.write_text(json.dumps({"release": "v0.16.1", "status": "ready"}), encoding="utf-8")
+            self.assertEqual(VERIFY_RELEASE.predecessor_manifest(root, "v0.16.4")["release"],
+                             "v0.16.1")
+            self.assertIsNone(VERIFY_RELEASE.predecessor_manifest(root, "v0.15.0"))
+
     def test_current_release_identity_snapshots_match(self) -> None:
         release = json.loads((ROOT / "compatibility.json").read_text(encoding="utf-8"))[
             "product_release"]
@@ -82,7 +106,8 @@ class ReleaseIdentitySnapshotTests(unittest.TestCase):
             previous.parent.mkdir(parents=True)
             old = {"source_archive_url": "https://example.invalid/previous.tar.gz",
                    "source_archive_bytes": 100, "checksums_sha256": "a" * 64}
-            previous.write_text(json.dumps({"components": {"ninfer": old}}), encoding="utf-8")
+            previous.write_text(json.dumps({"status": "ready", "components": {"ninfer": old}}),
+                                encoding="utf-8")
             current = {**old, "source_archive_url": "https://example.invalid/current.tar.gz",
                        "source_archive_bytes": 200, "checksums_sha256": "b" * 64}
             for carried in ((), ("source_archive_bytes",), ("checksums_sha256",),
@@ -371,7 +396,8 @@ class NativeQualityContractTests(unittest.TestCase):
     def save_predecessor(self):
         path = self.root / "releases/v0.14.0/manifest.json"
         path.parent.mkdir(exist_ok=True)
-        path.write_text(json.dumps({"components": {"ninfer_variants": [self.predecessor]}}))
+        path.write_text(json.dumps({"status": "ready",
+                                    "components": {"ninfer_variants": [self.predecessor]}}))
 
     def evidence(self, field, value):
         path = self.directory / f"{field}.json"
@@ -525,6 +551,32 @@ class NativeQualityContractTests(unittest.TestCase):
                         f"{self.variant['id']}.qualification.{field} must match the carried predecessor binding",
                         self.validate())
 
+    def test_carried_quality_and_fit_verify_bytes_without_an_observed_gate(self):
+        for field, value in (("quality_screen", self.screen), ("fit", self.fit())):
+            self.evidence(field, value)
+            self.predecessor["qualification"][field] = deepcopy(
+                self.variant["qualification"][field])
+        self.predecessor.update({key: deepcopy(self.variant[key]) for key in (
+            "release_tag", "package_sha256", *VERIFY_RELEASE.NATIVE_IDENTITY_FIELDS,
+            "runtime_shape")})
+        self.save_predecessor()
+        self.assertEqual(self.validate(), [])
+        for field in ("quality_screen", "fit"):
+            path = self.root / self.variant["qualification"][field]["path"]
+            original = path.read_bytes()
+            with self.subTest(field=field, mutation="bytes"):
+                path.write_bytes(original + b" ")
+                errors = self.validate()
+                self.assertTrue(any(
+                    f"qualification.{field} SHA-256 must match bytes" in error
+                    for error in errors), errors)
+            with self.subTest(field=field, mutation="missing"):
+                path.unlink()
+                self.assertTrue(any(
+                    f"qualification.{field} file must exist" in error
+                    for error in self.validate()))
+            path.write_bytes(original)
+
     def test_legacy_predecessor_shape_uses_only_hash_bound_mtp_configuration(self):
         path = self.root / "releases/v0.14.0/qualification/rtx3090.json"
         path.parent.mkdir()
@@ -538,6 +590,153 @@ class NativeQualityContractTests(unittest.TestCase):
                          VERIFY_RELEASE.native_shape(self.root, self.predecessor))
         path.write_text("{}")
         self.assertIsNone(VERIFY_RELEASE.native_shape(self.root, predecessor))
+
+
+class GateWaiverContractTests(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        self.release = "v0.99.0"
+        self.directory = self.root / "releases" / self.release / "qualification"
+        self.directory.mkdir(parents=True)
+        current = ROOT / "releases/v0.16.2"
+        self.manifest = json.loads((current / "manifest.json").read_text())
+        self.waiver = json.loads(
+            (current / "qualification/rtx4090-restore-position-waiver.json").read_text())
+        self.waiver.update(release=self.release, candidate="a" * 40)
+        self.waiver["waived"][0]["job"] = "restore"
+        self.qualification = {
+            "documented_route_acceptance": {"candidate_commit": "a" * 40},
+            "observed_gates": {
+                "rtx4090_agent_parity": {"status": "failed-founder-waived", "raw_passed": False,
+                                          "accepted_under_exact_waiver": True},
+                "rtx4090_restore_waiver": {"status": "waived-by-founder"},
+            },
+        }
+        self.bind_verdict()
+
+    def bind_verdict(self, mutate=None):
+        from agent_parity import judge_comparison
+        waived = self.waiver["waived"][0]
+        row = {"position": waived["position"], "label": waived["label"]}
+        for arm in ("incumbent", "candidate"):
+            row.update({f"{arm}_server_ttft_seconds": waived[f"{arm}_ttft_s"],
+                        f"{arm}_prompt_tokens": waived[f"{arm}_prompt_tokens"],
+                        f"{arm}_cached_tokens": waived[f"{arm}_cached_tokens"]})
+        comparison = {"contract_version": 2, "rule": "p16-agent-parity/2",
+                      "jobs": {"restore": {"positions": [row]}}}
+        verdict = judge_comparison(comparison, self.directory, "comparison.json")
+        if mutate:
+            mutate(verdict)
+        self.save_verdict(verdict)
+
+    def save_verdict(self, verdict):
+        path = self.directory / "agent-verdict.json"
+        path.write_text(json.dumps(verdict))
+        sha = VERIFY_RELEASE.sha256_file(path)
+        self.qualification["observed_gates"]["rtx4090_agent_parity"].update(
+            repository_path=path.relative_to(self.root).as_posix(), sha256=sha)
+        self.waiver["raw_verdict"]["evidence_sha256"]["agent-verdict.json"] = sha
+
+    def validate(self):
+        path = self.directory / "waiver.json"
+        path.write_text(json.dumps(self.waiver))
+        self.qualification["observed_gates"]["rtx4090_restore_waiver"].update(
+            repository_path=path.relative_to(self.root).as_posix(),
+            sha256=VERIFY_RELEASE.sha256_file(path))
+        errors = []
+        VERIFY_RELEASE.validate_gate_waivers(
+            self.root, self.release, self.manifest, self.qualification, errors)
+        return errors
+
+    def test_new_waiver_matches_same_release_candidate_and_exact_raw_failure(self):
+        self.assertEqual(self.validate(), [])
+        original = deepcopy(self.waiver)
+        cases = (
+            ("copied release", lambda waiver: waiver.pop("release")),
+            ("foreign release", lambda waiver: waiver.update(release="v0.16.2")),
+            ("copied candidate", lambda waiver: waiver.pop("candidate")),
+            ("foreign candidate", lambda waiver: waiver.update(candidate="b" * 40)),
+            ("subject", lambda waiver: waiver["subject"].update(source="b" * 40)),
+            ("other valid restore position", lambda waiver: waiver["waived"][0].update(
+                position=3, label="restore_0")),
+            ("changed measurement", lambda waiver: waiver["waived"][0].update(candidate_ttft_s=0.65)),
+            ("broader rule", lambda waiver: waiver["waived"][0].update(rule="all failures")),
+            ("wrong cache arithmetic", lambda waiver: waiver["waived"][0].update(
+                candidate_cached_minus_prompt=-53)),
+            ("wrong verdict hash", lambda waiver: waiver["raw_verdict"]["evidence_sha256"].update(
+                {"agent-verdict.json": "0" * 64})),
+        )
+        for label, mutate in cases:
+            with self.subTest(mutation=label):
+                self.waiver = deepcopy(original)
+                mutate(self.waiver)
+                self.assertTrue(self.validate())
+
+    def test_waiver_can_be_authored_before_the_product_candidate_is_recorded(self):
+        self.qualification["documented_route_acceptance"] = {"status": "pending"}
+        self.waiver.pop("candidate")
+        self.assertEqual(self.validate(), [])
+
+    def test_corrected_restore_campaign_binds_the_exact_run_job(self):
+        from agent_parity import judge_comparison
+        fixtures = ROOT / "tests/fixtures/agent_parity"
+        comparison = json.loads((fixtures / "corrected-comparison.json").read_text())
+        verdict = judge_comparison(comparison, fixtures, "corrected-comparison.json")
+        row = verdict["jobs"]["restore-run-0"]["paired_positions"][3]
+        self.assertFalse(row["passed"])
+        self.waiver["waived"] = [{
+            "job": "restore-run-0", "probe": "two-restart restore",
+            "position": row["position"], "label": row["label"],
+            "rule": "p16-agent-parity/2 candidate TTFT <= incumbent + max(0.25 s, 25%)",
+            **{f"{arm}_{target}": row[f"{arm}_{source}"] for arm in ("incumbent", "candidate")
+               for source, target in (("server_ttft_seconds", "ttft_s"),
+                                      ("prompt_tokens", "prompt_tokens"),
+                                      ("cached_tokens", "cached_tokens"))},
+        }]
+        self.save_verdict(verdict)
+        self.assertEqual(self.validate(), [])
+        for job in (None, "restore", "restore-run-1", "sibling-run-0", "restore-run-x"):
+            with self.subTest(job=job):
+                self.waiver["waived"][0]["job"] = job
+                self.assertTrue(any("job" in error for error in self.validate()))
+
+    def test_raw_failure_scope_cannot_gain_another_position_or_metric(self):
+        def additional_position(verdict):
+            job = verdict["jobs"]["restore"]
+            row = deepcopy(job["paired_positions"][0])
+            row.update(position=3, label="restore_0")
+            job["paired_positions"].append(row)
+
+        original = deepcopy(self.waiver)
+        for label, mutate in (
+            ("another position", additional_position),
+            ("no retained measurements", lambda verdict: verdict["jobs"]["restore"].pop("paired_positions")),
+            ("extra TTFT failure", lambda verdict: verdict["jobs"]["restore"]["paired_positions"][0].update(
+                candidate_server_ttft_seconds=1.0)),
+        ):
+            with self.subTest(mutation=label):
+                self.waiver = deepcopy(original)
+                self.bind_verdict(mutate)
+                self.assertTrue(self.validate())
+
+    def test_current_native_waiver_scope_is_frozen_not_reinterpreted(self):
+        release = ROOT / "releases/v0.16.2"
+        qualification = json.loads((release / "qualification.json").read_text())
+        for name in ("rtx3090_sibling_waiver", "rtx4090_restore_waiver"):
+            with self.subTest(waiver=name):
+                original = qualification["observed_gates"][name]
+                waiver = json.loads((ROOT / original["repository_path"]).read_text())
+                waiver["waived"][0].update(position=3, label="restore_0", candidate_ttft_s=0.7)
+                path = self.root / original["repository_path"]
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(json.dumps(waiver))
+                binding = {**original, "sha256": VERIFY_RELEASE.sha256_file(path)}
+                errors = []
+                VERIFY_RELEASE.validate_gate_waivers(
+                    self.root, "v0.16.2", self.manifest, {"observed_gates": {name: binding}}, errors)
+                self.assertTrue(any("exact historical waiver scope" in error for error in errors), errors)
 
 
 class ReleaseContractTest(unittest.TestCase):
@@ -874,6 +1073,11 @@ class ReleaseContractTest(unittest.TestCase):
             VERIFY_RELEASE.sha256_file(root / "compatibility.json")
         )
         self.save(release_root / "manifest.json", manifest)
+        self.save(release_root / "qualification/client-components.json", {
+            "artifact_type": "omp_ninfer_upstream_client_components", "schema_version": 1,
+            "release": PUBLIC_RELEASE, "omp": manifest["components"]["omp"],
+            "platforms": descriptor["platforms"],
+        })
         return temporary, root
 
     def test_upstream_release_manifest_and_profiles_are_installable(self) -> None:
@@ -1090,6 +1294,161 @@ class ReleaseContractTest(unittest.TestCase):
         for document in ("CHANGELOG.md", "ROADMAP.md"):
             (root / document).write_text("# Test fixture\n", encoding="utf-8")
         return temporary, root
+
+    def current_release_copy(self) -> tuple[tempfile.TemporaryDirectory[str], Path]:
+        temporary, root = self.public_draft_copy()
+        release = root / "releases/v0.16.2"
+        for profile in (release / "profiles").glob("*.json"):
+            shutil.copy2(profile, root / "profiles" / profile.name)
+        shutil.copy2(release / "compatibility.json", root / "compatibility.json")
+        shutil.copy2(release / "COMPATIBILITY.md", root / "docs/COMPATIBILITY.md")
+        return temporary, root
+
+    def test_current_release_rejects_rehashed_waiver_subject_position_and_scope(self) -> None:
+        temporary, root = self.current_release_copy()
+        self.addCleanup(temporary.cleanup)
+        release = root / "releases/v0.16.2"
+        original = self.load(release / "qualification.json")
+        cases = (
+            ("subject", lambda waiver: waiver["subject"].update(source="0" * 40)),
+            ("lane", lambda waiver: waiver.update(lane="rtx3090")),
+            ("release", lambda waiver: waiver.update(release="v0.16.0")),
+            ("candidate", lambda waiver: waiver.update(candidate="0" * 40)),
+            ("position", lambda waiver: waiver["waived"][0].update(position=4)),
+            ("label", lambda waiver: waiver["waived"][0].update(label="restore_1")),
+            ("probe", lambda waiver: waiver["waived"][0].update(probe="sibling")),
+            ("rule", lambda waiver: waiver["waived"][0].update(rule="all parity failures")),
+            ("measurement", lambda waiver: waiver["waived"][0].update(candidate_ttft_s=0.6)),
+            ("additional position", lambda waiver: waiver["waived"].append(
+                {**waiver["waived"][0], "position": 4, "label": "restore_1"})),
+        )
+        path = root / original["observed_gates"]["rtx5090_restore_waiver"]["repository_path"]
+        original_waiver = self.load(path)
+        for label, mutate in cases:
+            with self.subTest(mutation=label):
+                qualification = deepcopy(original)
+                waiver = deepcopy(original_waiver)
+                mutate(waiver)
+                self.save(path, waiver)
+                qualification["observed_gates"]["rtx5090_restore_waiver"]["sha256"] = (
+                    VERIFY_RELEASE.sha256_file(path))
+                self.save(release / "qualification.json", qualification)
+                manifest = self.load(release / "manifest.json")
+                manifest["qualification"]["summary_sha256"] = VERIFY_RELEASE.sha256_file(
+                    release / "qualification.json")
+                self.save(release / "manifest.json", manifest)
+                _, errors = VERIFY_RELEASE.validate(root, False, product_release="v0.16.2")
+                self.assertTrue(any("rtx5090_restore_waiver" in error for error in errors), errors)
+
+    def test_current_release_rejects_a_predecessor_waiver_with_valid_file_hash(self) -> None:
+        temporary, root = self.current_release_copy()
+        self.addCleanup(temporary.cleanup)
+        release = root / "releases/v0.16.2"
+        qualification = self.load(release / "qualification.json")
+        old = self.load(root / "releases/v0.16.0/qualification.json")
+        qualification["observed_gates"]["rtx4090_speed_waiver"] = (
+            old["observed_gates"]["rtx4090_speed_waiver"])
+        self.save(release / "qualification.json", qualification)
+        manifest = self.load(release / "manifest.json")
+        manifest["qualification"]["summary_sha256"] = VERIFY_RELEASE.sha256_file(
+            release / "qualification.json")
+        self.save(release / "manifest.json", manifest)
+        _, errors = VERIFY_RELEASE.validate(root, False, product_release="v0.16.2")
+        self.assertTrue(any("rtx4090_speed_waiver" in error for error in errors), errors)
+
+    def test_receipt_audit_staged_hashes_cover_otherwise_unbound_files(self) -> None:
+        temporary, root = self.current_release_copy()
+        self.addCleanup(temporary.cleanup)
+        path = root / "releases/v0.16.2/NINFER_RELEASE_NOTES.md"
+        path.write_bytes(path.read_bytes() + b"\nAdditional release note.\n")
+        _, errors = VERIFY_RELEASE.validate(root, False, product_release="v0.16.2")
+        self.assertTrue(any("receipt-audit" in error and "staged_sha256" in error
+                            for error in errors), errors)
+
+    def test_receipt_audit_checks_retained_entries_without_reinterpreting_historical_rows(self) -> None:
+        for release in ("v0.13.0", "v0.13.1", "v0.14.0", "v0.15.0",
+                        "v0.16.0", "v0.16.1", "v0.16.2"):
+            with self.subTest(release=release):
+                errors = []
+                VERIFY_RELEASE.validate_receipt_audit(ROOT, release, errors)
+                self.assertEqual(errors, [])
+        temporary, root = self.current_release_copy()
+        self.addCleanup(temporary.cleanup)
+        path = root / "releases/v0.16.2/qualification/receipt-audit.json"
+        original = self.load(path)
+        row = next(row for row in original["files"] if row.get("file") == "NINFER_RELEASE_NOTES.md")
+        cases = (
+            ("bad hash", [{**row, "staged_sha256": "not-a-hash"}]),
+            ("missing file", [{**row, "file": "missing.json"}]),
+            ("outside directory", [{**row, "file": "../manifest.json"}]),
+            ("absolute path", [{**row, "file": str(root / "compatibility.json")}]),
+            ("duplicate row", [row, row]),
+            ("invalid row", [None]),
+        )
+        for label, rows in cases:
+            with self.subTest(mutation=label):
+                self.save(path, {**original, "files": rows})
+                errors = []
+                VERIFY_RELEASE.validate_receipt_audit(root, "v0.16.2", errors)
+                self.assertTrue(errors)
+        self.save(path, {**original, "files": [
+            {"file": "dropped.json", "disposition": "dropped", "staged_sha256": "a" * 64},
+            {"file": "not-hash-bound.json", "disposition": "replaced"},
+        ]})
+        errors = []
+        VERIFY_RELEASE.validate_receipt_audit(root, "v0.16.2", errors)
+        self.assertEqual(errors, [])
+
+    def test_client_descriptor_binary_identity_cannot_disagree_with_compatibility(self) -> None:
+        temporary, root = self.current_release_copy()
+        self.addCleanup(temporary.cleanup)
+        release = root / "releases/v0.16.2"
+        path = release / "qualification/client-components.json"
+        descriptor = self.load(path)
+        descriptor["platforms"]["darwin-arm64"]["asset_sha256"] = "0" * 64
+        descriptor["platforms"]["darwin-arm64"]["binary_sha256"] = "0" * 64
+        self.save(path, descriptor)
+        qualification = self.load(release / "qualification.json")
+        qualification["observed_gates"]["stock_client_review"]["descriptor"]["sha256"] = (
+            VERIFY_RELEASE.sha256_file(path))
+        self.save(release / "qualification.json", qualification)
+        manifest = self.load(release / "manifest.json")
+        manifest["qualification"]["summary_sha256"] = VERIFY_RELEASE.sha256_file(
+            release / "qualification.json")
+        self.save(release / "manifest.json", manifest)
+        _, errors = VERIFY_RELEASE.validate(root, False, product_release="v0.16.2")
+        self.assertTrue(any("client-components" in error and "asset_sha256" in error
+                            for error in errors), errors)
+
+    def test_client_descriptor_schema_release_and_primary_identity_are_verified(self) -> None:
+        temporary, root = self.current_release_copy()
+        self.addCleanup(temporary.cleanup)
+        path = root / "releases/v0.16.2/qualification/client-components.json"
+        original = self.load(path)
+        manifest = self.load(path.parent.parent / "manifest.json")
+        compatibility = self.load(path.parent.parent / "compatibility.json")
+        cases = (
+            ("schema", lambda value: value.update(schema_version=2)),
+            ("release", lambda value: value.update(release="v0.16.0")),
+            ("primary identity", lambda value: value["omp"].update(artifact_asset_id=1)),
+            ("missing platform", lambda value: value["platforms"].pop("linux-x64")),
+            ("foreign platform source", lambda value: value["platforms"]["linux-x64"].update(
+                upstream_commit="a" * 40)),
+        )
+        for label, mutate in cases:
+            with self.subTest(mutation=label):
+                value = deepcopy(original)
+                mutate(value)
+                self.save(path, value)
+                errors = []
+                VERIFY_RELEASE.validate_client_components(
+                    root, "v0.16.2", manifest["components"]["omp"], compatibility, errors)
+                self.assertTrue(errors)
+        path.unlink()
+        errors = []
+        VERIFY_RELEASE.validate_client_components(
+            root, "v0.16.2", manifest["components"]["omp"], compatibility, errors)
+        self.assertTrue(any("must exist" in error for error in errors), errors)
 
     def add_unbound_client_candidate(self, root: Path) -> None:
         """Change only client/provider state, preserving the fixture's runtime identity."""
