@@ -42,6 +42,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   release history, upstream watch, reference docs, site, and brand assets; front-door install links
   return to the guide on `main`.
 
+### Documentation
+
+- Record the 2026-11-05 upstream `Neroued/ninfer` `a754fcf3` watch delta (`228` commits past merge
+  base `64d10fbf`, `9/228` clean per-commit merge-tree applies against fork head `a87de361`, 7–10
+  multi-agent-day full re-port deferral), the `Qwen3.8-Flash-Next` research screen against Strata
+  `v0.2.10` on `rtxpro6000-win-a` (`EXP-108`, formal resident screen not entered after one `W1`
+  structured tool-call smoke failure, `31,000` and `40,960 MiB` `HostExperts` CPU-expert-offload
+  budgets refused at startup), the DGX Spark (`sm_121a`) no-buy decision, the upstream
+  [`Neroued/ninfer#434`](https://github.com/Neroued/ninfer/issues/434) context-pressure request
+  starvation reproduction on shipped `a87de361` across both `C2` lanes and the `rtxpro6000-win-a`
+  proxy (`EXP-109`, where draft
+  [`alphastorm/ninfer#93`](https://github.com/alphastorm/ninfer/pull/93) at `e6ac7b70` eliminates
+  admitted-request starvation at `1.28 s` max pause vs `362.3 s` baseline while trading silent stalls
+  for bounded HTTP `503` queue timeouts on deferred fresh requests), and the stock OMP
+  `18.16.0` served-ID `q38-ninfer` tokenizer verification ([#142](https://github.com/alphastorm/omp-ninfer/pull/142),
+  held as a candidate for a future client bump while `v0.16.2` remains on `18.15.0`) in
+  [`ROADMAP.md`](ROADMAP.md), [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md),
+  [`docs/UPSTREAM.md`](docs/UPSTREAM.md),
+  [`docs/measurements/2026-11-05-omp-18160-tokenizer-VERIFY.md`](docs/measurements/2026-11-05-omp-18160-tokenizer-VERIFY.md),
+  and
+  [`docs/measurements/2026-11-05-p19-flash-next-and-starvation.json`](docs/measurements/2026-11-05-p19-flash-next-and-starvation.json).
+
 ## [0.16.2] - 2026-11-04
 
 ### Fixed

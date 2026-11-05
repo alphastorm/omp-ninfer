@@ -1,0 +1,315 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-108 / EXP-109",
+  "experiments": [
+    "EXP-108",
+    "EXP-109"
+  ],
+  "title": "2026-11-05 research and engine defect probes: Qwen3.8-Flash-Next on upstream NInfer a754fcf3 vs Strata v0.2.10 on RTX PRO 6000 (EXP-108, formal screen not entered, 31,000 and 40,960 MiB HostExperts CPU-expert-offload budgets refused at startup) and upstream #434 request starvation under context pressure reproduced on shipped source a87de361 across the native RTX 3090 C2 lane (440.94 s pause), RTX 5090 production image (~398.8 s TTFT), and RTX PRO 6000 proxy (362.3 s pause), with draft alphastorm/ninfer#93 eliminating admitted-request starvation (max pause 1.28 s) while trading silent stalls for two HTTP 503 queue timeouts on deferred fresh requests (EXP-109)",
+  "generated_utc": "2026-11-05T05:30:00Z",
+  "status": "completed_with_limits",
+  "evidence_boundary": "Maintainer-private raw harness logs and transcripts; public summary metrics are recorded here, while raw prompts, model outputs, credentials, and private host filesystem paths are excluded.",
+  "question": "Does Qwen3.8-Flash-Next on upstream NInfer a754fcf3 clear omp-strata's preregistered rule-30 screen against Strata v0.2.10 on the RTX PRO 6000 Blackwell host (rtxpro6000-win-a) or start under an RTX 5090-class 31,000 MiB VRAM budget with CPU expert offload (HostExperts, EXP-108), and do upstream Neroued/ninfer#434 request starvation under context pressure and Neroued/ninfer#378 Host placement reproduce on the shipped v0.16.2 engine (a87de361) on the native RTX 3090 C2 (concurrency-2) lane (rtx3090-win-a), the RTX 5090 C2 container image (rtx5090-win-a), and the RTX PRO 6000 proxy (rtxpro6000-win-a), and does draft alphastorm/ninfer#93 (e6ac7b70) resolve starvation under the strict no-failure criterion (EXP-109)?",
+  "answer": "EXP-108 (research only, not a product lane): on rtxpro6000-win-a (RTX PRO 6000 Blackwell 96 GB, sm_120, WSL2), upstream NInfer a754fcf3 (binary sha256 prefix bcfba1b0, Flash-Next artifact rev 001057dd, 108,445,200,388 B) did not enter the formal rule-30 resident screen against stock Strata v0.2.10 (engine 0.1.56) + OMP 18.16.0 IQ3_S 262K because one W1 structured tool-call smoke emitted the tool call inside reasoning and ran to the length limit (a later 10x smoke-frequency probe passed 10/10 on both engines; the formal verdict stands). Exploratory M1-M6 numbers across the interleaved Strata A1 / NInfer / Strata A2 runs show faster C4 (concurrency-4) throughput and lower interference stall on NInfer (M1 short C4 aggregate 441.7 vs 264.2/270.8 tok/s, 1.63x; M2 64K C4 wall 23.82 vs 34.36/34.39 s, 1.44x; M5 stall 0.67 vs 3.83/3.84 s, 5.7x lower) but slower 200K cold tool-turn TTFT (M3 25.37 vs 22.32/22.43 s, 13.7% slower) and lower G24 verified passes/hour (M6 95.0 vs 115.6/118.9, 20.1% lower). Under NINFER_VRAM_BUDGET_MIB=31000 (and 40,960 MiB) on rtxpro6000-win-a forcing HostExperts (CPU expert offload) with ~155 GiB host RAM free, every configuration refused at startup. EXP-109: under the preregistered red condition (an admitted request with no token progress >= 120 s while others progress), upstream #434 starvation reproduced on both C2 (concurrency-2) lanes on shipped source a87de361: on rtx3090-win-a (v0.8.0-qwen38-3090-beta.2), a 79,989-token request paused 440.94 s after 62,464 input tokens with zero output/restores while the prime (first admitted long) request generated 16,150 tokens and 45 fresh requests completed; on rtx5090-win-a (image a0cbb8a5, 2 GiB scratch checkpoint store), an admitted 79,989-token request waited ~398.8 s for its first token while the other long request streamed and 48 fresh 247-token requests completed every ~10 s. Upstream #378 Host placement did not reproduce on the native RTX 3090 lane (both Host-fill arms, fill 4 and fill 5, preserved the conversation, at up to 99.995% peak Host occupancy while the oldest conversation was evicted instead), was inconclusive on the RTX 5090 (rtx5090-win-a, image a0cbb8a5: adaptive fill did not converge within its 3,600 s budget across 12 conversations of ~120K tokens with fill steps lengthening to ~10 min, so no preservation probe ran), and did not reproduce on either build on the RTX PRO 6000 proxy (rtxpro6000-win-a, sm_120, NINFER_VRAM_BUDGET_MIB=31000, C2/BF16/131,072-token KV, 20.4 GiB Host, preregistered fixed fill 5: peak Host occupancy 99.842% baseline / 99.861% candidate, with the preserved conversation keeping 119,985 of 119,992 / 119,981 of 119,988 cached tokens). On that same RTX PRO 6000 proxy (Linux sm_120a builds of a87de361 and e6ac7b70, clean build provenance), baseline a87de361 was RED (an admitted request paused 362.3 s without progress while 38 fresh requests completed); candidate draft alphastorm/ninfer#93 (e6ac7b70, 8/8 CI jobs green) eliminated admitted-request starvation (maximum pause 1.28 s, both long requests completed) and passed no-pressure parity (three greedy prompts, output fields and finish reasons byte-identical), but two fresh requests were refused with HTTP 503 queue timeouts (180 s pending timeout) while admission was deferred under sustained pressure, so the strict no-failure criterion is not met and the 503 trade-off requires a design decision before qualification.",
+  "decision": {
+    "action": "Do not add a Qwen3.8-Flash-Next lane to omp-ninfer; keep Strata as the Flash-Next engine on the RTX PRO 6000 host (rtxpro6000-win-a) and keep draft alphastorm/ninfer#93 (head e6ac7b70) as a draft-only fix candidate pending a design decision on the HTTP 503 fresh-request queue-timeout trade-off under sustained pressure (no release in this research cycle)",
+    "rule": "EXP-108 uses omp-strata's preregistered rule-30 screen (W1 structured tool-call smoke and G24 guard rails gating entry of the NInfer resident N arm into the M1-M6 comparison against bracketing Strata A1 and Strata A2 reference runs, plus RTX 5090-class 31,000 MiB VRAM budget startup feasibility for HostExperts CPU expert offload). EXP-109 preregisters starvation red as an admitted request making no token progress for >= 120 s while concurrent requests progress, and requires strict no-failure completion plus byte-identical no-pressure greedy parity for green promotion.",
+    "verdict": "EXP-108 formal verdict: NInfer resident (N) not entered (W1 tool-call smoke failure; exploratory M1-M6 recorded as non-gating diagnostics) and 31,000/40,960 MiB HostExperts startup refused. EXP-109 verdict: upstream #434 starvation REPRODUCED on shipped a87de361 across native RTX 3090, RTX 5090 container, and the RTX PRO 6000 proxy (baseline RED, 362.3 s pause); upstream #378 not reproduced on native RTX 3090 or on the RTX PRO 6000 proxy (both builds) and INCONCLUSIVE on RTX 5090 (adaptive fill exceeded 3,600 s budget); draft alphastorm/ninfer#93 (e6ac7b70, 8/8 CI green) eliminates admitted-request starvation (max pause 1.28 s) and passes 3/3 no-pressure greedy parity, but does NOT meet the strict no-failure criterion (2 fresh requests refused with HTTP 503 queue timeouts at the 180 s pending timeout under deferred admission).",
+    "reason": "Upstream NInfer's Flash-Next offload planner refuses 31,000 MiB and 40,960 MiB device budgets at startup and requires ~63.3 GiB pinned host RAM for routed experts (above the 47 GiB physical RAM on rtx5090-win-a), while on the 96 GB RTX PRO 6000 host (rtxpro6000-win-a) NInfer failed the W1 entry smoke and trailed Strata by 20.1% on M6 G24 verified passes/hour. Separately, while draft alphastorm/ninfer#93 removes indefinite silent stalls on admitted requests (362.3 s -> 1.28 s max pause), deferring fresh admission under sustained context pressure trades silent stalls for bounded, visible HTTP 503 queue timeouts on new arrivals, which requires a design decision before qualification.",
+    "not_decided_here": "Design decision on the HTTP 503 queue-timeout trade-off under sustained pressure and full hardware qualification of draft alphastorm/ninfer#93 into a new omp-ninfer release (draft only; no release in this research cycle)."
+  },
+  "method": {
+    "evidence_class": "maintainer-private",
+    "exp_108_flash_next_screen": {
+      "host_label": "rtxpro6000-win-a",
+      "gpu": "NVIDIA RTX PRO 6000 Blackwell (96 GB, sm_120, same architecture class as RTX 5090)",
+      "environment": "WSL2",
+      "protocol": "omp-strata preregistered rule-30 screen (W1 smoke, M1-M6 metrics, G24 guards), maintainer-private evidence",
+      "ninfer_candidate": {
+        "upstream_repository": "Neroued/ninfer",
+        "upstream_commit": "a754fcf3",
+        "binary_sha256_prefix": "bcfba1b0",
+        "model_repository": "neroued/Qwen3.8-Flash-Next-NInfer",
+        "model_revision": "001057dd",
+        "model_file_count": 4,
+        "model_total_bytes": 108445200388,
+        "routed_experts_pinned_host_ram_gib_approx": 63.3
+      },
+      "strata_incumbent": {
+        "strata_release": "v0.2.10",
+        "engine_version": "0.1.56",
+        "omp_version": "18.16.0",
+        "quantization": "IQ3_S",
+        "context_tokens": 262144,
+        "profile": "current RTX PRO 6000 profile"
+      },
+      "rtx5090_class_offload_probe": {
+        "probed_on_host_label": "rtxpro6000-win-a",
+        "env_override": "NINFER_VRAM_BUDGET_MIB=31000",
+        "additional_budget_tested_mib": 40960,
+        "mode_forced": "HostExperts (CPU expert offload / expert weight cache)",
+        "host_memory_available_gib_approx": 155,
+        "rtx5090_host_physical_ram_gib": 47
+      }
+    },
+    "exp_109_starvation_and_host_placement": {
+      "preregistered_red_rule": "An admitted request with no token progress >= 120 s while other requests progress",
+      "native_rtx3090_lane": {
+        "host_label": "rtx3090-win-a",
+        "installed_component": "v0.8.0-qwen38-3090-beta.2",
+        "engine_source": "a87de361"
+      },
+      "rtx5090_container_lane": {
+        "host_label": "rtx5090-win-a",
+        "image_digest_prefix": "a0cbb8a5",
+        "engine_source": "a87de361",
+        "serving_args_note": "Production serving arguments except a 2 GiB scratch checkpoint store"
+      },
+      "rtxpro6000_proxy": {
+        "host_label": "rtxpro6000-win-a",
+        "gpu_architecture": "sm_120 (Linux sm_120a builds)",
+        "vram_budget_mib": 31000,
+        "concurrency": "C2",
+        "kv_dtype": "BF16",
+        "kv_capacity_tokens": 131072,
+        "host_context_gib": 20.4,
+        "baseline_source": "a87de361",
+        "candidate_source": "e6ac7b70",
+        "build_provenance": "clean"
+      },
+      "fix_candidate": {
+        "pull_request": "alphastorm/ninfer#93",
+        "status": "draft",
+        "head_commit": "e6ac7b70",
+        "ci_jobs_passed": "8/8",
+        "ported_items": [
+          "upstream a754fcf3 failure-diagnostics subset",
+          "upstream 452c3f5f recovery-loss formula",
+          "upstream #378 Host placement (re-expressed from Saylek-ai fix/378-host-placement)",
+          "upstream #434 scheduler pressure owner + bounded service rotation + deferred fresh admission (a754fcf3), plus a fix and regression test for a refusal-retry liveness defect on a queued fresh-admission notification found in the first scheduler port"
+        ]
+      }
+    }
+  },
+  "observations": {
+    "exp_108_flash_next_vs_strata": {
+      "formal_verdict": "not_entered",
+      "formal_verdict_detail": "NInfer resident (N) not entered: one W1 structured tool-call smoke emitted the call inside reasoning and ran to the length limit. A later 10x smoke-frequency probe passed 10/10 on both engines; the formal verdict stands.",
+      "w1_cold_long_context_ttft_seconds": {
+        "64k": {
+          "ninfer_s": [
+            4.99,
+            4.87
+          ],
+          "strata_s": [
+            7.02,
+            7.31
+          ]
+        },
+        "200k": {
+          "ninfer_s": [
+            15.79,
+            16.47
+          ],
+          "strata_s": [
+            22.59,
+            24.05
+          ]
+        }
+      },
+      "w1_short_c1_decode_tok_s": {
+        "ninfer_range": [
+          252,
+          264
+        ],
+        "strata_range": [
+          311,
+          323
+        ]
+      },
+      "exploratory_scorecard": {
+        "note": "Exploratory only; formal resident screen was not entered.",
+        "order": [
+          "Strata A1",
+          "NInfer",
+          "Strata A2"
+        ],
+        "M1_short_c4_aggregate_tok_s": {
+          "strata_a1": 264.2,
+          "ninfer": 441.7,
+          "strata_a2": 270.8,
+          "ninfer_vs_strata_ratio": 1.63
+        },
+        "M2_64k_c4_wall_seconds": {
+          "strata_a1": 34.36,
+          "ninfer": 23.82,
+          "strata_a2": 34.39,
+          "speedup_ratio": 1.44
+        },
+        "M3_200k_cold_tool_turn_ttft_seconds": {
+          "strata_a1": 22.32,
+          "ninfer": 25.37,
+          "strata_a2": 22.43,
+          "relative_delta": "+13.7% slower"
+        },
+        "M4_200k_warm_followup_seconds": {
+          "strata_a1": 2.64,
+          "ninfer": 2.22,
+          "strata_a2": 3.04,
+          "note": "unstable reference"
+        },
+        "M5_interference_stall_seconds": {
+          "strata_a1": 3.83,
+          "ninfer": 0.67,
+          "strata_a2": 3.84,
+          "reduction_factor": 5.7
+        },
+        "M6_g24_verified_passes_per_hour": {
+          "strata_a1": 115.6,
+          "ninfer": 95.0,
+          "strata_a2": 118.9,
+          "relative_delta": "-20.1% lower",
+          "g24_runs": {
+            "ninfer": {
+              "passed": 15,
+              "total": 18,
+              "wall_seconds": 568.3
+            },
+            "strata_a1": {
+              "passed": 15,
+              "total": 18,
+              "wall_seconds": 467.0
+            },
+            "strata_a2": {
+              "passed": 16,
+              "total": 18,
+              "wall_seconds": 484.4
+            }
+          }
+        }
+      },
+      "rtx5090_class_cpu_expert_offload": {
+        "budgets_tested_mib": [
+          31000,
+          40960
+        ],
+        "host_memory_available_gib_approx": 155,
+        "startup_result": "refused",
+        "error": "Device budget cannot hold the calibrated runtime and requested Context capacity",
+        "configs_refused": [
+          "standard HostExperts with zero Host context",
+          "minimal C1 / 4K / BF16 / no-MTP / no-graphs diagnostic",
+          "40,960 MiB device budget"
+        ],
+        "offload_speed_measured": false
+      }
+    },
+    "exp_109_upstream_434_starvation_and_378": {
+      "upstream_434_starvation": {
+        "rtx3090_native_c2": {
+          "host_label": "rtx3090-win-a",
+          "reproduced": true,
+          "starved_request_prompt_tokens": 79989,
+          "input_tokens_processed_before_pause": 62464,
+          "pause_duration_seconds": 440.94,
+          "output_tokens_during_pause": 0,
+          "restores_during_pause": 0,
+          "concurrent_prime_tokens_generated": 16150,
+          "concurrent_fresh_requests_completed": 45
+        },
+        "rtx5090_container_c2": {
+          "host_label": "rtx5090-win-a",
+          "reproduced": true,
+          "starved_request_prompt_tokens": 79989,
+          "time_to_first_token_seconds_approx": 398.8,
+          "concurrent_fresh_requests_completed": 48,
+          "concurrent_fresh_request_prompt_tokens": 247,
+          "concurrent_fresh_request_cadence_seconds_approx": 10,
+          "detail": "Produced its first token ~398.8 s after admission while the other long request streamed and 48 fresh 247-token requests completed every ~10 s; it ran only after the other request finished."
+        }
+      },
+      "upstream_378_host_placement": {
+        "rtx3090_native": {
+          "host_label": "rtx3090-win-a",
+          "reproduced": false,
+          "fill_arms": [4, 5], "conversation_preserved_in_every_arm": true,
+          "peak_host_occupancy_percent": 99.995,
+          "eviction_observed": "oldest conversation evicted instead"
+        },
+        "rtx5090_container": {
+          "host_label": "rtx5090-win-a",
+          "image_digest_prefix": "a0cbb8a5",
+          "status": "inconclusive",
+          "budget_seconds": 3600,
+          "conversations_seeded": 12,
+          "conversation_tokens_approx": 120000,
+          "fill_step_duration_minutes_approx": 10,
+          "preservation_probe_ran": false,
+          "detail": "INCONCLUSIVE: the client's adaptive fill did not converge within its 3,600 s budget (12 conversations of ~120K tokens, fill steps lengthening to ~10 min), so no preservation probe ran."
+        },
+        "rtxpro6000_proxy": {
+          "host_label": "rtxpro6000-win-a",
+          "gpu_architecture": "sm_120",
+          "vram_budget_mib": 31000,
+          "geometry": "C2 / BF16 / 131,072-token KV, 20.4 GiB Host",
+          "preregistered_fixed_fill": 5,
+          "reproduced_baseline_a87de361": false,
+          "reproduced_candidate_e6ac7b70": false,
+          "peak_host_occupancy_percent": {
+            "baseline_a87de361": 99.842,
+            "candidate_e6ac7b70": 99.861
+          },
+          "preserved_conversation_cached_tokens": {
+            "baseline_a87de361": {
+              "cached": 119985,
+              "prompt": 119992
+            },
+            "candidate_e6ac7b70": {
+              "cached": 119981,
+              "prompt": 119988
+            }
+          }
+        }
+      },
+      "draft_ninfer_93_verification": {
+        "pull_request": "alphastorm/ninfer#93",
+        "head_commit": "e6ac7b70",
+        "ci_status": "8/8 jobs green",
+        "pro_proxy_gpu_red_green": {
+          "host_label": "rtxpro6000-win-a",
+          "geometry": "NINFER_VRAM_BUDGET_MIB=31000, C2 / BF16 / 131,072-token KV, 20.4 GiB Host",
+          "builds": "Linux sm_120a builds of a87de361 and e6ac7b70, clean build provenance",
+          "baseline_a87de361": {
+            "verdict": "RED",
+            "admitted_request_pause_seconds": 362.3,
+            "concurrent_fresh_requests_completed": 38
+          },
+          "candidate_e6ac7b70": {
+            "admitted_request_starvation_absent": true,
+            "max_admitted_request_pause_seconds": 1.28,
+            "long_requests_completed": "2/2",
+            "deferred_fresh_requests_http_503_queue_timeouts": 2,
+            "pending_timeout_seconds": 180,
+            "strict_no_failure_criterion_met": false,
+            "tradeoff": "Trades indefinite silent stalls on admitted requests for bounded, visible HTTP 503 queue timeouts on new requests during sustained pressure; requires a design decision before qualification.",
+            "no_pressure_parity": {
+              "verdict": "PASS",
+              "greedy_prompts_compared": 3,
+              "output_fields_and_finish_reasons_byte_identical": true
+            }
+          },
+          "status": "draft_only_no_release"
+        }
+      }
+    }
+  },
+  "limits": [
+    "EXP-108 M1-M6 numbers are exploratory only because NInfer did not enter the formal rule-30 resident screen after failing one W1 structured tool-call smoke.",
+    "No RTX 5090 CPU-expert offload throughput could be measured in EXP-108 because upstream NInfer a754fcf3 refused startup at both 31,000 MiB and 40,960 MiB device budgets.",
+    "On rtx5090-win-a, the #378 adaptive Host-fill harness did not converge within its 3,600 s budget (12 ~120K-token conversations, fill steps lengthening to ~10 min), so #378 preservation was evaluated on rtx3090-win-a and on the rtxpro6000-win-a fixed-fill-5 proxy instead.",
+    "Draft alphastorm/ninfer#93 (e6ac7b70) remains draft-only and is not promoted or packaged into a qualified omp-ninfer release: while it eliminates admitted-request starvation on the rtxpro6000-win-a proxy (max pause 1.28 s vs 362.3 s baseline), two deferred fresh arrivals hit the 180 s pending timeout (HTTP 503), so the 503 trade-off requires a design decision before qualification."
+  ],
+  "private_paths_included": false,
+  "raw_prompts_outputs_or_secrets_included": false
+}

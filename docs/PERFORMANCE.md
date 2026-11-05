@@ -259,15 +259,18 @@ retaining **DFlash2 draft window 7 (`K=7`)** across all three lanes (`BF16` KV a
   founder-approved no-regression ABBA speed gates against published `beta.1` (RTX 3090 weighted
   `1.0003` / min `0.9988`, `84/84` identical; RTX 4090 weighted `0.9996` / min `0.9989`, `115/115`
   identical).
-- **Open work:** `rk4v4` 4-bit KV true-cold continuation divergence (at token 32 on `262,144`-token
-  `C1` and tokens 16–32 on `245,760`/`229,376`-token `C2`) blocking 262,144-token native context
-  (EXP-107), RTX 4090 `C2` (where `INT8` `C2` at 131,072 tokens exceeds the 24 GB device budget and
-  requires a smaller KV format such as `rk4v4`, EXP-106), root-cause numerics localization for the
-  rejected `sm_86`/`sm_89` small-T (narrow token-batch) tensor-core decode (EXP-099) and `Group64`
-  A8 prefill (EXP-100) candidates, selective upstream kernel/feature backports, verify-round
-  boundary pipelining (EXP-058, EXP-092), Q4/Q5 epilogue fusion (EXP-056), warm-turn fragment
-  consolidation (EXP-059), template-fork warm starts, and paged host-to-device KV prefetch beyond
-  262K tokens.
+- **Open work:** targeted upstream [`Neroued/ninfer#434`](https://github.com/Neroued/ninfer/issues/434)
+  context-pressure request-starvation and [`#378`](https://github.com/Neroued/ninfer/issues/378) Host
+  placement fixes staged in draft [`alphastorm/ninfer#93`](https://github.com/alphastorm/ninfer/pull/93)
+  (`e6ac7b70`, EXP-109), `rk4v4` 4-bit KV true-cold continuation divergence (at token 32 on
+  `262,144`-token `C1` and tokens 16–32 on `245,760`/`229,376`-token `C2`) blocking 262,144-token
+  native context (EXP-107), RTX 4090 `C2` (where `INT8` `C2` at 131,072 tokens exceeds the 24 GB
+  device budget and requires a smaller KV format such as `rk4v4`, EXP-106), root-cause numerics
+  localization for the rejected `sm_86`/`sm_89` small-T (narrow token-batch) tensor-core decode
+  (EXP-099) and `Group64` A8 prefill (EXP-100) candidates, selective upstream kernel/feature
+  backports, verify-round boundary pipelining (EXP-058, EXP-092), Q4/Q5 epilogue fusion (EXP-056),
+  warm-turn fragment consolidation (EXP-059), template-fork warm starts, and paged host-to-device KV
+  prefetch beyond 262K tokens.
 
 ## Measured baseline
 
@@ -460,6 +463,8 @@ refer to the runtime repositories. As of 2026-10-31.
 | EXP-105 | Export-State residency fix (`StateImageStore::prepare_host_export`) | Materializing immutable `StateImage` replicas into the counted Host arena and dropping their Device replicas before acquiring off-worker durable checkpoint export `ReadLease`s (`ReadLease::host_view()`, `8c639fe0` / `80c0af77`) eliminates the multi-second first-fork admission wait on export-pinned Device states where adding two extra device-state slots alone failed | Before the fix, an off-worker durable export pinned all Device `StateImage` replicas through disk serialization: on RTX 3090 `DFlash2 K=7` (`131,072` `INT8` `C1`), adding **two extra device-state slots (`3` total at `31583e3f`, `21,881,405,440` B Host) alone did not help**, with all `3` Device states pinned (`source_wait` `14.86–17.22 s`) and first-fork/continuation server TTFT **15.4–17.8 s** (`15.388–17.771 s` with `2` extra slots, `14.345–17.731 s` with `0` extra slots on `c3911a14`); on RTX 5090 (`DFlash2 K=7`, `BF16`, `C2`, `2` extra / `4` total states), `resume-first` `fork_after_resume` measured **5.03 s TTFT / 4.85 s source wait** (`5.026 s` / `4.850 s` on `c3911a14`, `4.903 s` / `4.738 s` on `31583e3f`). After the fix (`08257eec`, frozen in `26fa28d0`), RTX 3090 `131,072` `INT8` `C1` (`12/12` `warm_arrival` restart-and-fork requests) waits **<= 0.033 s** (`max 0.0327743 s`) with fork server TTFT **0.33–0.76 s** (`0.333701–0.759395 s`; `endpoint_resume_after_fork` `0.550 s`) and passes all `83/83` `C1` and `63/63` `C2` agent-probe requests (`0` cached-token delta across all `51/51` `agent_mix` turns; RTX 4090 `26fa28d0` shipping package `06526bdb` passes `83/83` with max `source_wait` `<= 0.0178 s`); RTX 5090 `fork_after_resume` drops to **0.106 s TTFT** (`0.105796 s`, `source_wait` `0.00461 s`, client wall `5.450 → 0.637 s`) with `11/11` `26fa28d0` release-candidate phases, `84/84` role-corpus output hashes (`347.20 → 346.95 tok/s`, ratio `0.999282`), published-image [`rtx5090.json`](../releases/v0.16.0/qualification/rtx5090.json) (`2200fa44`, `181.78 tok/s` server / `180.25 tok/s` wall decode at `2.71 tokens/round`, `56.62 s` wall / `56.51 s` server `130,048`-token prefill at `2,297.0 tok/s`, `agent_protocol` passed), and N16 agent probes (`warm_arrival` 12/12 with `fork_after_resume` `5.159 → 0.278 s`, `agent_mix` 51/51, `sibling_continue` 5/5, `fanout` 11/11 with `post_restart_branch_0` `5.437 → 0.300 s`, 4-way concurrent fanout 5/5 under rule `p16-agent-parity/2` — a judge correction pairing simultaneously submitted concurrent branches by server admission order — and two-restart `restore` waived at `0.526 vs 0.491 s` and `0.520 vs 0.492 s` with disclosure) | kept — shipped in `v0.16.0` (`26fa28d0`) across all three lanes |
 | EXP-106 | Native `C2` (`--max-concurrency 2`) on the RTX 3090 (`INT8` shared `131,072`-token pool) and RTX 4090 `INT8` `C2` fit | Enforcing physical and configured-budget headroom at final readiness (`startup_memory.cpp`) and waiting for in-flight off-worker checkpoint exports in `EngineCore::reserve_resident_units()` (`ea2edc20`) lets native `C2` (`2` extra / `4` total device states, `180,000 ms` pending timeout) serve two concurrent `~60K`-token requests on a shared `131,072`-token `INT8` pool | Before the export-pin liveness fix (`31583e3f`), two concurrent `75,063`-token requests on the RTX 3090 `INT8` `C2` `131,072`-token shared pool hit **HTTP 500 `oldest resident cannot obtain its legal unit`** when a completed sibling's off-worker export pinned `1,008` Device KV pages while the resumed resident (`1,040` pages at `66,560` tokens) needed `16` pages (`34,603,008` B) despite `19,114,072,064` B free Host capacity. After the fix (`08257eec`, frozen in `26fa28d0` RTX 3090 `DFlash2 K=7`, `INT8`, `C2`, shared `131,072` KV, `2` extra slots, `21,881,405,440` B Host, `768 MiB` / `805,306,368` B RTX 3090 headroom, `350 W`), startup (`1,110,441,984` B available, `22,584 MiB` peak) and two-session `59,866`-token true-cold durability pass (`32/32` tokens identical); calibrated two-concurrent `~60K` (`59,879 + 59,879` tokens) runs pass **6/6** requests per trial (**18/18** across `3` trials, `0` HTTP 500s); and `2,048`-token two-request decode vs `C1` (`pending_timeout_ms = 180000`) reaches **1.385×** summed aggregate decode (`57.68 → 79.90 tok/s`, `1.38515×`) and **0.722×** two-request completion wall (`71.01 → 51.26 s`, `0.72195×`; per-request concurrent `40.18 / 42.81` vs `57.58 / 58.26 tok/s`). On the **RTX 4090**, `INT8` `C2` at `131,072` tokens (`chunk 2,048`, `640 MiB` headroom) **does not fit 24 GB**: startup refused before readiness (`Device budget cannot hold the calibrated runtime and requested KV capacity`) | kept for RTX 3090 `INT8` `C2` (`v0.8.0-qwen38-3090-beta.1` shipped in `v0.16.0`); rejected for RTX 4090 `INT8` `C2` at `131,072` tokens (startup refused; needs a smaller KV format) |
 | EXP-107 | Native `rk4v4` 4-bit KV cache (`sm_86`, `sm_89`) | Porting head-dim-256 (`D256`) `rk4v4` (`rk4v4_h256_lloyd_g64_s4_g32_v1` from `ashalliants/ninfer-3090` `f5cec0a6`; `17,920` B/token vs `INT8` `33,792` B/token, `47.0%` smaller per-token KV) clears `FP64` op oracles, held-out perplexity (`ΔNLL <= 0.02`), `262,144`-token `C1` / `245,760`–`229,376`-token `C2` fit, and exact true-cold checkpoint durability on 24 GB native lanes | On `08257eec`, all `7/7` numerical/graph/store test executables (`44` `rk4v4` cases, `16` graph cases, `180` `FP64` reductions, max rel L2 `0.007773`) and held-out perplexity (`16,984` tokens, `32` windows at `1,024/512`: mean NLL `1.643463 → 1.646910`, **$\Delta\text{NLL} = 0.00345 \le 0.02$**, PPL `5.173052 → 5.190916`, max domain `+0.006273 <= 0.05`) pass on both `sm_86` and `sm_89`. On RTX 3090, `rk4v4` **fits at `262,144`-token `C1`** (`1,097,859,072` B available above the `805,306,368` B / `768 MiB` RTX 3090 floor; exact `130,048`- and `250,062`-token diagnostic retrieval in `197.86` and `503.57 s`), `245,760`-token `C2` (`1,135,607,808` B available), and `229,376`-token `C2` (`1,429,209,088` B available), while RTX 4090 (`chunk 2,048`, `640 MiB` floor) refuses `262,144`-token `C1` and `245,760`-token `C2` at startup and fits `229,376`-token `C2` (`952,107,008` B available). **The exact true-cold restore oracle fails on RTX 3090**: at `262,144`-token `C1` (`3,093` prompt, `3,066` cached) continuation diverges at **token 32** (cold token ID `48117` vs restored `3635` despite byte-exact `55,050,240`-byte CPU page-layout inversion, SHA-256 `53e8f8bc`), and at `245,760`- and `229,376`-token `C2` (`59,866` prompt, `59,840` cached) the first concurrent session diverges at **tokens 16–32** (second session `32/32` equal); cause unproven between GPU restore transport and width-dependent `rk4v4` prefill vs decode+restore numerics | open — deferred to a follow-up release; `--kv-dtype rk4v4` stays off in shipped profiles |
+| EXP-108 | `Qwen3.8-Flash-Next` (`Qwen4Exp` MoE + per-layer-embedding `PLE`) on upstream NInfer `a754fcf3` vs Strata `v0.2.10` (`sm_120`, research only, not a product lane) | Under `omp-strata`'s preregistered rule-30 screen (`M1`–`M6`, `G24` guards) on `rtxpro6000-win-a` (RTX PRO 6000 Blackwell 96 GB, `sm_120`, WSL2; maintainer-private raw harness logs), upstream NInfer `a754fcf3` (binary SHA-256 `bcfba1b0...`, `neroued/Qwen3.8-Flash-Next-NInfer` rev `001057dd`, 4 files, `108,445,200,388` B) clears the `W1` entry smoke and `M1`–`M6` resident screen against stock Strata `v0.2.10` (engine `0.1.56`) + OMP `18.16.0` `IQ3_S` `262K` current RTX PRO 6000 profile, and starts under an RTX 5090-class `NINFER_VRAM_BUDGET_MIB=31000` device budget with CPU expert offload (`HostExperts`) | **Formal verdict: NInfer resident (`N`) not entered** ([receipt](measurements/2026-11-05-p19-flash-next-and-starvation.json)): one `W1` structured tool-call smoke emitted the tool call inside reasoning and ran to the length limit (a later `10×` smoke-frequency probe passed `10/10` on both engines; the formal verdict stands). `W1` cold long-context TTFT across two runs: `64K` **4.99 / 4.87 s** vs Strata **7.02 / 7.31 s**; `200K` **15.79 / 16.47 s** vs **22.59 / 24.05 s**; short `C1` decode **252–264** vs **311–323 tok/s**. **Exploratory scorecard (interleaved Strata `A1` / NInfer / Strata `A2`, non-gating):** `M1` short `C4` (concurrency-4) aggregate **264.2 / 441.7 / 270.8 tok/s (1.63×)**; `M2` `64K` `C4` wall **34.36 / 23.82 / 34.39 s (1.44×)**; `M3` `200K` cold tool-turn TTFT **22.32 / 25.37 / 22.43 s (13.7% slower)**; `M4` `200K` warm follow-up **2.64 / 2.22 / 3.04 s** (unstable reference); `M5` interference stall **3.83 / 0.67 / 3.84 s (5.7× lower)**; `M6` `G24` verified passes/hour **115.6 / 95.0 / 118.9 (20.1% lower**; `G24` NInfer `15/18` in `568.3 s` vs Strata `15/18` in `467.0 s` and `16/18` in `484.4 s`). **RTX 5090-class CPU expert offload (`NINFER_VRAM_BUDGET_MIB=31000` on `rtxpro6000-win-a`, forcing `HostExperts`):** every configuration refused at startup with `Device budget cannot hold the calibrated runtime and requested Context capacity` (including zero Host context and a minimal `C1` / `4K` / `BF16` / no-MTP / no-graphs diagnostic, with `~155 GiB` host memory available; a `40,960 MiB` budget also refused); no offload speed was measured, and upstream needs `~63.3 GiB` pinned host RAM for routed experts vs `47 GiB` on `rtx5090-win-a` | rejected for product lanes (formal verdict `not entered`; 31,000 and 40,960 MiB `HostExperts` budgets refused at startup) — Strata stays the Flash-Next engine on the RTX PRO 6000 host (`rtxpro6000-win-a`); revisit if upstream's offload planner starts on a 32 GB-class budget |
+| EXP-109 | Upstream [`#434`](https://github.com/Neroued/ninfer/issues/434) request starvation under context pressure and [`#378`](https://github.com/Neroued/ninfer/issues/378) Host placement on shipped engine source `a87de361` | Under the preregistered red condition (an admitted request making no token progress `>= 120 s` while concurrent requests progress), the shipped `v0.16.2` engine (fork source `a87de361` on upstream base `64d10fbf`) exhibits upstream `#434` request starvation on the `C2` lanes or `#378` active-conversation Host eviction, and targeted cherry-picks in draft [`alphastorm/ninfer#93`](https://github.com/alphastorm/ninfer/pull/93) (`e6ac7b70`) eliminate admitted-request starvation under the strict no-failure criterion without a full re-port to `a754fcf3` | **Upstream `#434` starvation REPRODUCED on both shipped `C2` lanes and on the RTX PRO 6000 proxy** ([receipt](measurements/2026-11-05-p19-flash-next-and-starvation.json)): on the **native RTX 3090 `C2` lane** (`rtx3090-win-a`, installed `v0.8.0-qwen38-3090-beta.2`, source `a87de361`), a `79,989`-token request paused **440.94 s** after `62,464` input tokens with zero output or restores while the prime (first admitted long) request generated `16,150` tokens and `45` fresh requests completed; on the **RTX 5090 production image** (`rtx5090-win-a`, image `a0cbb8a5`, source `a87de361`, production serving args except a `2 GiB` scratch checkpoint store), an admitted `79,989`-token request produced its first token **~398.8 s** after admission while the other long request streamed and `48` fresh `247`-token requests completed every `~10 s`, running only after the other request finished. **Upstream `#378` Host placement:** not reproduced on the native RTX 3090 lane (both Host-fill arms, fill `4` and fill `5`, preserved the conversation, at up to `99.995%` peak Host occupancy; the oldest conversation was evicted instead); **INCONCLUSIVE** on the RTX 5090 (`rtx5090-win-a`, production image `a0cbb8a5`: the client's adaptive fill did not converge within its `3,600 s` budget across `12` conversations of `~120K` tokens with fill steps lengthening to `~10 min`, so no preservation probe ran); and **not reproduced on either build** on the RTX PRO 6000 proxy (`rtxpro6000-win-a`, `sm_120`, `NINFER_VRAM_BUDGET_MIB=31000`, `C2` / `BF16` / `131,072`-token KV, `20.4 GiB` Host, preregistered fixed fill `5`: peak Host occupancy **99.842%** baseline / **99.861%** candidate, and the preserved conversation kept **119,985 / 119,992** and **119,981 / 119,988** cached tokens). **Fix candidate (`alphastorm/ninfer#93`, head `e6ac7b70`, `8/8` CI jobs green):** ports the `a754fcf3` failure-diagnostics subset, the `452c3f5f` recovery-loss formula, `#378` Host placement (re-expressed from Saylek-ai `fix/378-host-placement`), and the `#434` scheduler pressure owner + bounded service rotation + deferred fresh admission (plus a fix and regression test for a refusal-retry liveness defect on a queued fresh-admission notification found in the first scheduler port). On the `rtxpro6000-win-a` RTX PRO 6000 proxy (same geometry, Linux `sm_120a` builds of `a87de361` and `e6ac7b70`, clean build provenance), baseline `a87de361` was **RED** (an admitted request paused **362.3 s** without progress while `38` fresh requests completed); candidate `e6ac7b70` eliminated admitted-request starvation (maximum pause **1.28 s**, both long requests completed) and passed **no-pressure parity** (`3/3` greedy prompts, output fields and finish reasons byte-identical), **but** two fresh requests were refused with HTTP `503` queue timeouts (`180 s` pending timeout) while admission was deferred under sustained pressure, so the strict no-failure criterion is **not** met (the fix trades indefinite silent stalls for bounded, visible `503`s on new requests during long pressure) | reproduced on shipped `a87de361`; draft [`alphastorm/ninfer#93`](https://github.com/alphastorm/ninfer/pull/93) (`e6ac7b70`) eliminates admitted-request starvation (`362.3 s → 1.28 s` max pause) but stays draft-only (no release; the HTTP `503` queue-timeout trade-off under sustained pressure needs a design decision before qualification) |
 
 Entry detail:
 
@@ -2019,6 +2024,83 @@ Entry detail:
   3090 `262,144`/`245,760`/`229,376` durability failure receipts, and RTX 4090 `rk4v4` deferral
   receipt (2026-10-31).
 
+- **EXP-108 — `Qwen3.8-Flash-Next` on upstream NInfer `a754fcf3` vs Strata `v0.2.10` on `rtxpro6000-win-a`
+  (research only; formal verdict `not entered`; 31,000 and 40,960 MiB `HostExperts` budgets refused at
+  startup, 2026-11-05).** Evaluated on `rtxpro6000-win-a` (RTX PRO 6000 Blackwell 96 GB, `sm_120`, same
+  architecture class as the RTX 5090, WSL2) under `omp-strata`'s preregistered rule-30 screen
+  (`M1`–`M6`, `G24` guards, maintainer-private evidence), comparing upstream `Neroued/ninfer` master
+  `a754fcf3` (binary SHA-256 `bcfba1b0...`, `neroued/Qwen3.8-Flash-Next-NInfer` revision `001057dd`,
+  4 files, `108,445,200,388` bytes) against stock Strata `v0.2.10` (engine `0.1.56`) + OMP `18.16.0`
+  `IQ3_S` `262K` current PRO profile:
+  - **Formal verdict (`not entered`):** NInfer resident (`N`) was **not entered** into the formal
+    resident comparison because one `W1` structured tool-call smoke emitted the tool call inside
+    reasoning and ran to the length limit (a later `10×` smoke-frequency probe passed `10/10` on both
+    engines; the formal verdict stands). In `W1`, cold long-context TTFT measured **4.99 / 4.87 s** on
+    NInfer vs **7.02 / 7.31 s** on Strata at `64K` and **15.79 / 16.47 s** vs **22.59 / 24.05 s** at
+    `200K`, while short `C1` decode measured **252–264 tok/s** on NInfer vs **311–323 tok/s** on
+    Strata.
+  - **Exploratory scorecard (Strata `A1` / NInfer / Strata `A2`, non-gating diagnostics):** `M1`
+    short `C4` aggregate decode **264.2 / 441.7 / 270.8 tok/s (`1.63×`)**; `M2` `64K` `C4` wall
+    **34.36 / 23.82 / 34.39 s (`1.44×`)**; `M3` `200K` cold tool-turn TTFT **22.32 / 25.37 / 22.43 s
+    (`13.7%` slower)**; `M4` `200K` warm follow-up **2.64 / 2.22 / 3.04 s** (unstable reference); `M5`
+    interference stall **3.83 / 0.67 / 3.84 s (`5.7×` lower)**; and `M6` `G24` verified passes/hour
+    **115.6 / 95.0 / 118.9 (`20.1%` lower**; `G24` NInfer `15/18` in `568.3 s` vs Strata `15/18` in
+    `467.0 s` and `16/18` in `484.4 s`).
+  - **RTX 5090-class CPU expert offload (`NINFER_VRAM_BUDGET_MIB=31000` on `rtxpro6000-win-a`, forcing
+    `HostExperts`):** every configuration refused at startup with `Device budget cannot hold the
+    calibrated runtime and requested Context capacity`, including zero Host context and a minimal
+    `C1` / `4K` / `BF16` / no-MTP / no-graphs diagnostic, with `~155 GiB` host memory available; a
+    `40,960 MiB` budget also refused, so no offload speed was measured. Upstream needs `~63.3 GiB`
+    pinned host RAM for the routed experts, whereas the RTX 5090 host (`rtx5090-win-a`) has `47 GiB`.
+    Decision: no Flash-Next lane in `omp-ninfer`; Strata remains the Flash-Next engine on the RTX PRO
+    6000 host (`rtxpro6000-win-a`); revisit if upstream's offload planner starts on a 32 GB-class
+    budget. Receipt:
+    [`2026-11-05-p19-flash-next-and-starvation.json`](measurements/2026-11-05-p19-flash-next-and-starvation.json).
+
+- **EXP-109 — upstream [`#434`](https://github.com/Neroued/ninfer/issues/434) request starvation under
+  context pressure reproduced on shipped source `a87de361` across the native RTX 3090 `C2` lane and
+  RTX 5090 production image; targeted fix candidate staged in draft
+  [`alphastorm/ninfer#93`](https://github.com/alphastorm/ninfer/pull/93) (2026-11-05).** Under the
+  preregistered red condition — an admitted request making no token progress for `>= 120 s` while
+  concurrent requests progress — the shipped `v0.16.2` engine (`a87de361` on `64d10fbf`) reproduced
+  upstream `#434` on both `C2` lanes:
+  - **Native RTX 3090 `C2` lane (`rtx3090-win-a`, installed `v0.8.0-qwen38-3090-beta.2`, source
+    `a87de361`):** **REPRODUCED** — a `79,989`-token request paused **440.94 s** after `62,464` input
+    tokens with zero output or restores while the prime request generated `16,150` tokens and `45`
+    fresh requests completed.
+  - **RTX 5090 production image (`rtx5090-win-a`, image `a0cbb8a5`, source `a87de361`, production
+    serving arguments except a `2 GiB` scratch checkpoint store):** **REPRODUCED** — an admitted
+    `79,989`-token request produced its first token **~398.8 s** after admission while the other long
+    request streamed and `48` fresh `247`-token requests completed every `~10 s`; it ran only after
+    the other request finished.
+  - **Upstream [`#378`](https://github.com/Neroued/ninfer/issues/378) Host placement:** not reproduced
+    on the native RTX 3090 lane (both Host-fill arms, fill `4` and fill `5`, preserved the conversation,
+    at up to `99.995%` peak Host occupancy; the oldest conversation was evicted instead); **INCONCLUSIVE** on the RTX 5090
+    (`rtx5090-win-a`, production image `a0cbb8a5`: the client's adaptive fill did not converge within
+    its `3,600 s` budget across `12` conversations of `~120K` tokens with fill steps lengthening to
+    `~10 min`, so no preservation probe ran); and **not reproduced on either build** on the RTX PRO
+    6000 proxy (`rtxpro6000-win-a`, `sm_120`, `NINFER_VRAM_BUDGET_MIB=31000`, `C2` / `BF16` /
+    `131,072`-token KV, `20.4 GiB` Host, preregistered fixed fill `5`: peak Host occupancy **99.842%**
+    baseline / **99.861%** candidate, and the preserved conversation kept **119,985 of 119,992** /
+    **119,981 of 119,988** cached tokens).
+  - **Fix candidate and RTX PRO 6000 proxy red/green:** draft
+    [`alphastorm/ninfer#93`](https://github.com/alphastorm/ninfer/pull/93) (head `e6ac7b70`, CI green
+    on all `8/8` jobs) ports the `a754fcf3` failure-diagnostics subset, the `452c3f5f` recovery-loss
+    formula, `#378` Host placement (re-expressed from Saylek-ai `fix/378-host-placement`), and the
+    `#434` scheduler pressure owner + bounded service rotation + deferred fresh admission; a real
+    liveness defect found in the first scheduler port (refusal retry on a queued fresh-admission
+    notification) was fixed with a regression test. On the `rtxpro6000-win-a` RTX PRO 6000 proxy (same
+    geometry, Linux `sm_120a` builds of `a87de361` and `e6ac7b70`, clean build provenance), baseline
+    `a87de361` was **RED** (an admitted request paused **362.3 s** without progress while `38` fresh
+    requests completed); candidate `e6ac7b70` eliminated admitted-request starvation (maximum pause
+    **1.28 s**, both long requests completed) and passed **no-pressure parity** (`3/3` greedy prompts,
+    output fields and finish reasons byte-identical), **but** two fresh requests were refused with
+    HTTP `503` queue timeouts (`180 s` pending timeout) while admission was deferred under sustained
+    pressure, so the strict no-failure criterion is **not** met: the fix trades indefinite silent
+    stalls for bounded, visible `503`s on new requests during long pressure. Status: draft only; no
+    release; the `503` trade-off needs a design decision before qualification. Receipt:
+    [`2026-11-05-p19-flash-next-and-starvation.json`](measurements/2026-11-05-p19-flash-next-and-starvation.json).
+
 ## Current order
 
 The backlog below is a pool; product sequencing lives in [`ROADMAP.md`](../ROADMAP.md). On the
@@ -2067,12 +2149,22 @@ decision); both routes stay compiled off. EXP-095 compared the superseded fork c
 against upstream `81c8ce09` in a local fixed-KV rehearsal — not the selected `1302d639` runtime —
 before the [v0.13.0–v0.14.0 rebases](UPSTREAM.md#v0130-sync-program) re-ported the durable store
 and kernel routes onto `64d10fbf` (EXP-097: 101.09% median role-corpus decode vs `1302d639` on RTX
-5090; all three lanes unified at `2c6f423b` in `v0.14.0`, `26fa28d0` in `v0.16.0`, and `a87de361` in `v0.16.2`). Open
-kernel work targets `rk4v4` 4-bit KV true-cold continuation root cause for 262,144-token native
-context and RTX 4090 `C2` (EXP-106, EXP-107), root-cause numerics localization for the rejected
-native small-T decode and `Group64` A8 routes (EXP-099, EXP-100), verify-round host-commit idle
-time (EXP-058, EXP-092), Q4/Q5 epilogue fusion (EXP-056), warm-turn fragment consolidation
-(EXP-059), and host-to-device KV prefetch.
+5090; all three lanes unified at `2c6f423b` in `v0.14.0`, `26fa28d0` in `v0.16.0`, and `a87de361` in
+`v0.16.2`). In post-`v0.16.2` research (EXP-108, EXP-109 in
+[`2026-11-05-p19-flash-next-and-starvation.json`](measurements/2026-11-05-p19-flash-next-and-starvation.json)),
+`Qwen3.8-Flash-Next` on upstream `a754fcf3` did not enter the formal rule-30 screen on
+`rtxpro6000-win-a` and refused `31,000` / `40,960 MiB` `HostExperts` budgets at startup, while
+upstream `#434` context-pressure starvation reproduced on both shipped `C2` lanes (`440.94 s` pause
+on native RTX 3090 and `~398.8 s` TTFT on RTX 5090) and on the `rtxpro6000-win-a` proxy (`362.3 s`
+pause), where draft [`alphastorm/ninfer#93`](https://github.com/alphastorm/ninfer/pull/93)
+(`e6ac7b70`) eliminated admitted-request starvation (`1.28 s` max pause) while trading indefinite
+silent stalls for bounded HTTP `503` queue timeouts (`180 s` pending timeout) on deferred fresh
+arrivals. Open kernel and runtime work targets resolving the `#93` HTTP `503` pressure-admission
+design decision before qualification (EXP-109), `rk4v4` 4-bit KV
+true-cold continuation root cause for 262,144-token native context and RTX 4090 `C2` (EXP-106,
+EXP-107), root-cause numerics localization for the rejected native small-T decode and `Group64` A8
+routes (EXP-099, EXP-100), verify-round host-commit idle time (EXP-058, EXP-092), Q4/Q5 epilogue
+fusion (EXP-056), warm-turn fragment consolidation (EXP-059), and host-to-device KV prefetch.
 
 ## Ideas backlog
 
