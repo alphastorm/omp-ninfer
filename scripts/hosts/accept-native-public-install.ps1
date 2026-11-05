@@ -34,10 +34,8 @@ function Restore-PublicInstallState {
     $receipt.restoration = [ordered]@{ prior_state_restored=$false }
     if ($startOwned) {
         & $controller -Action Stop -StateRoot $StateRoot | Out-Null
-        if ($LASTEXITCODE -ne 0) { throw "owned public-install Stop failed (exit $LASTEXITCODE)" }
     }
     $after = ((@(& $controller -Action Status -StateRoot $StateRoot) -join "`n") | ConvertFrom-Json)
-    if ($LASTEXITCODE -ne 0) { throw "public-install restoration Status failed (exit $LASTEXITCODE)" }
     $restored = ([string]$after.process_state -ceq [string]$before.process_state) -and
                 ([string]$after.endpoint_state -ceq [string]$before.endpoint_state) -and
                 ([string]$after.release_id -ceq [string]$before.release_id)
@@ -141,7 +139,6 @@ try {
     }
     # 5. Smoke through the installed controller.
     $before = ((@(& $controller -Action Status -StateRoot $StateRoot) -join "`n") | ConvertFrom-Json)
-    if ($LASTEXITCODE -ne 0) { throw "public-install baseline Status failed (exit $LASTEXITCODE)" }
     if ([string]$before.process_state -cnotin @('running','stopped')) { throw 'public-install baseline process state is not running or stopped' }
     $baselineObserved = $true
     $wasRunning = ([string]$before.process_state -ceq 'running')
@@ -149,10 +146,8 @@ try {
         # Claim the attempted start before invoking it: even a throwing Start can have effects.
         $startOwned = $true
         & $controller -Action Start -StateRoot $StateRoot | Out-Null
-        if ($LASTEXITCODE -ne 0) { throw "public-install Start failed (exit $LASTEXITCODE)" }
     }
     $status = ((@(& $controller -Action Status -StateRoot $StateRoot) -join "`n") | ConvertFrom-Json)
-    if ($LASTEXITCODE -ne 0) { throw "public-install smoke Status failed (exit $LASTEXITCODE)" }
     if ([string]$status.process_state -cne 'running' -or [string]$status.endpoint_state -cne 'ready') { throw 'controller did not report a ready release' }
     $keyBytes = [IO.File]::ReadAllBytes([string]$rel.api_key_file); $len=$keyBytes.Length
     while ($len -gt 0 -and ($keyBytes[$len-1] -eq 10 -or $keyBytes[$len-1] -eq 13)) { $len-- }

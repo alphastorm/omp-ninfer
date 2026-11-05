@@ -3259,8 +3259,8 @@ Python source, including decoded string literals, is included in the public priv
 The RTX 5090 acceptance driver requires explicit `--wsl-host`, `--windows-host`,
 `--route-ssh-destination` and private WSL `--window-dir` inputs; its WSL helper also requires
 `--window-dir`. It has no operator-specific host/account/home defaults. Native public-install smoke
-always checks controller exits and restores a start it owns, including after smoke failure. An owned
-Stop failure or a mismatched observed baseline fails the receipt explicitly; an already-running
+fails on controller errors or a mismatched observed baseline and restores a start it owns, including
+after smoke failure. An owned Stop failure fails the receipt explicitly; an already-running
 incumbent is never stopped by that cleanup. A failed Windows hold acquisition removes only the hold
 whose exclusive creation it completed, including ownership-save/ACL failures.
 
@@ -3308,7 +3308,9 @@ still refuses an existing tag or GitHub release. If a founder-owned publication 
 tag push**, repeat its exact `--release`, `--commit` and `--pr` arguments with
 `--complete-existing --dry-run`. Completion requires remote `main` and the peeled remote tag to
 resolve to that exact commit, the original PR head/base and green checks to match (the PR may now be
-merged), and the clean exact-commit ready/pin verifier to pass again.
+merged), and the clean exact-commit ready/pin verifier to pass again. Completion waits for the
+push-to-main and tag CI runs on the same SHA to finish green; in-progress or failed runs refuse
+completion.
 
 Only after that preflight may the founder replace `--dry-run` with `--publish`. Completion never
 pushes `main` or a tag and never creates a local tag. It creates the missing release with the

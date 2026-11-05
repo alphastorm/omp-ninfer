@@ -733,23 +733,22 @@ param($Source,$Scratch,$Case)
 $ErrorActionPreference='Stop'
 $controller=Join-Path $Scratch 'controller.ps1'
 $state=Join-Path $Scratch 'state.json'
-$running=$Case -eq 'running-smoke-failure'
+$running=$Case -in @('running-smoke-failure','stale-native-exit')
 [IO.File]::WriteAllText($state,(@{running=$running;case=$Case;calls=@()}|ConvertTo-Json))
 [IO.File]::WriteAllText($controller,@'
 param($Action,$StateRoot)
 $path=Join-Path $StateRoot 'state.json'
 $state=Get-Content $path -Raw|ConvertFrom-Json
 $state.calls=@($state.calls)+$Action
-$code=0
 if($Action -eq 'Start'){$state.running=$true}
 if($Action -eq 'Stop'){
-    if($state.case -eq 'failed-stop'){$code=7}else{$state.running=$false}
+    if($state.case -eq 'failed-stop'){throw 'injected Stop failure'}
+    if($state.case -ne 'stop-returns-running'){$state.running=$false}
 }
 [IO.File]::WriteAllText($path,($state|ConvertTo-Json))
 if($Action -eq 'Status') {
     @{process_state=$(if($state.running){'running'}else{'stopped'});endpoint_state=$(if($state.running){'ready'}else{'unavailable'});release_id='candidate'}|ConvertTo-Json -Compress
 }
-exit $code
 '@)
 $StateRoot=$Scratch
 $ReceiptPath=Join-Path $Scratch 'receipt.json'
@@ -778,10 +777,13 @@ $start=$text.IndexOf('function Sha(')
 $end=$text.IndexOf("try {`n",$start)
 $definitions=$text.Substring($start,$end-$start)
 $smoke=$text.Substring($text.IndexOf('    # 5. Smoke'))
+Remove-Variable LASTEXITCODE -Scope Global -ErrorAction SilentlyContinue
+if($Case -eq 'stale-native-exit'){$global:LASTEXITCODE=7}
 & ([scriptblock]::Create($definitions+"try {`n"+$smoke))
 '''
         self.assertIn("# 5. Smoke", source)
-        for case in ("failed-stop", "throw-after-start", "running-smoke-failure", "passed"):
+        for case in ("failed-stop", "stop-returns-running", "throw-after-start",
+                     "running-smoke-failure", "passed", "stale-native-exit"):
             with self.subTest(case=case), tempfile.TemporaryDirectory() as directory:
                 root = Path(directory)
                 script = root / "proof.ps1"
@@ -791,16 +793,19 @@ $smoke=$text.Substring($text.IndexOf('    # 5. Smoke'))
                                          directory, case], capture_output=True, text=True, timeout=30)
                 receipt = json.loads((root / "receipt.json").read_text())
                 state = json.loads((root / "state.json").read_text())
-                if case == "passed":
+                if case in ("passed", "stale-native-exit"):
                     self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
                     self.assertEqual(receipt["status"], "passed")
-                    self.assertFalse(state["running"])
+                    self.assertEqual(state["running"], case == "stale-native-exit")
                     self.assertTrue(receipt["restoration"]["prior_state_restored"])
-                elif case == "failed-stop":
+                    if case == "stale-native-exit":
+                        self.assertNotIn("Stop", state["calls"])
+                elif case in ("failed-stop", "stop-returns-running"):
                     self.assertNotEqual(result.returncode, 0)
                     self.assertEqual(receipt["status"], "failed")
                     self.assertFalse(receipt["restoration"]["prior_state_restored"])
-                    self.assertIn("restoration_error", receipt)
+                    self.assertIn("injected Stop failure" if case == "failed-stop" else
+                                  "baseline was not restored", receipt["restoration_error"])
                 else:
                     self.assertNotEqual(result.returncode, 0)
                     self.assertEqual(receipt["status"], "failed")

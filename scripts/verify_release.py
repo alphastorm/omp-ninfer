@@ -988,7 +988,10 @@ def validate_native_campaigns(root: Path, release: str, routes: dict[str, Any],
                     f"{lane} waived campaign route must pass all candidate-bound documented steps", errors)
             require(bool(steps) and all(
                 (step.get("status") == "passed"
-                 or (step.get("status") == "substituted" and bool(step.get("substitution"))))
+                 or (step.get("slug") == "clone-and-verify"
+                     and step.get("status") == "substituted"
+                     and isinstance(step.get("substitution"), str)
+                     and bool(step["substitution"].strip())))
                 and isinstance(step.get("block_sha256"), str)
                 and SHA256_RE.fullmatch(step["block_sha256"]) is not None
                 and step.get("executed_sha256") == step["block_sha256"] for step in steps),

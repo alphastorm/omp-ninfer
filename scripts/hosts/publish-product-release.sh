@@ -47,8 +47,10 @@ python3 - "$pr_json" "$commit" "$complete_existing" <<'PY'
 import json, sys
 view, commit = json.loads(sys.argv[1]), sys.argv[2]
 completion = sys.argv[3] == "1"
-if view["state"] not in (("OPEN", "MERGED") if completion else ("OPEN",)) or view["baseRefName"] != "main":
-    raise SystemExit(f"pull request is {view['state']} into {view['baseRefName']}, not open into main")
+states = ("OPEN", "MERGED") if completion else ("OPEN",)
+if view["state"] not in states or view["baseRefName"] != "main":
+    raise SystemExit(f"pull request is {view['state']} into {view['baseRefName']}; "
+                     f"requires {' or '.join(states)} into main")
 if view["headRefOid"] != commit:
     raise SystemExit(f"pull request head is {view['headRefOid']}, not {commit}")
 if not completion and view["mergeable"] != "MERGEABLE":

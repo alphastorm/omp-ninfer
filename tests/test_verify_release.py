@@ -1947,6 +1947,43 @@ class ReleaseContractTest(unittest.TestCase):
         self.assertEqual(routes["routes"]["rtx3090-native"]["status"], "passed")
         self.assertEqual(routes["native_campaigns"]["rtx3090-native"]["status"], "failed")
 
+    def test_waived_campaign_substitution_is_limited_to_an_explained_clone(self) -> None:
+        for slug, explanation, refused in (
+            ("clone-and-verify", "cloned the frozen candidate", False),
+            (None, "unexecuted non-clone block", True),
+            ("clone-and-verify", ["not a string"], True),
+            ("clone-and-verify", " ", True),
+        ):
+            with self.subTest(slug=slug, explanation=explanation):
+                temporary, root = self.public_draft_copy()
+                try:
+                    waiver_path, routes_path, external_path = self.bind_failed_native_campaign(root)
+                    routes, external = self.load(routes_path), self.load(external_path)
+                    campaign = routes["native_campaigns"]["rtx3090-native"]
+                    row = routes["routes"]["rtx3090-native"]
+                    receipt_path = root / row["receipt"]
+                    receipt = self.load(receipt_path)
+                    step = next(step for step in receipt["steps"]
+                                if (step["slug"] == slug if slug else step["slug"] != "clone-and-verify"))
+                    step.update(status="substituted", substitution=explanation)
+                    self.save(receipt_path, receipt)
+                    row["sha256"] = VERIFY_RELEASE.sha256_file(receipt_path)
+                    waiver = self.load(waiver_path)
+                    waiver["evidence_sha256"]["documented-route.json"] = row["sha256"]
+                    self.save(waiver_path, waiver)
+                    campaign["founder_waiver"]["sha256"] = VERIFY_RELEASE.sha256_file(waiver_path)
+                    external["steps"]["rtx3090-native"] = {**campaign, "blocks": 7}
+                    self.save(routes_path, routes)
+                    self.save(external_path, external)
+                    self.rebind_failed_native_campaign(root, routes_path, external_path)
+                    _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+                    if refused:
+                        self.assertIn("rtx3090-native waived campaign route must execute the bundled bytes", errors)
+                    else:
+                        self.assertEqual(errors, [])
+                finally:
+                    temporary.cleanup()
+
     def test_require_ready_refuses_waivers_for_other_managed_stop_failures(self) -> None:
         temporary, root = self.public_draft_copy()
         self.addCleanup(temporary.cleanup)
