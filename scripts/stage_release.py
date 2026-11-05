@@ -45,6 +45,10 @@ Their quality-screen and fit bindings also carry unchanged, including predecesso
 they are not fresh admission proofs against the successor's predecessor.
 Optional --sbom-dependency-url/--sbom-dependency-sha256 VARIANT=VALUE pairs attach
 an additional native CycloneDX dependency inventory without replacing the file SBOM.
+When the RTX 5090 source archive URL changes, --source-archive and --checksums must
+supply the new local artifact bytes so their size and checksum-set digest can be
+derived before staging. Predecessor observed gates, including waivers, are cleared;
+only explicitly supplied successor --prepared-draft observed gates are retained.
 """
 
 from __future__ import annotations
@@ -182,6 +186,10 @@ def main() -> int:
                         help="server binary sha256 inside the archive")
     parser.add_argument("--archive-sha", required=True, metavar="SHA256")
     parser.add_argument("--source-archive-sha", required=True, metavar="SHA256")
+    parser.add_argument("--source-archive", type=Path, metavar="PATH",
+                        help="local RTX 5090 source archive; required with --checksums when its URL changes")
+    parser.add_argument("--checksums", type=Path, metavar="PATH",
+                        help="local RTX 5090 checksum set; its SHA-256 is derived from these bytes")
     parser.add_argument("--sbom-sha", required=True, metavar="SHA256")
     parser.add_argument("--sbom-dependency-url", action="append", default=[], metavar="VARIANT=URL",
                         help="optional native dependency SBOM; repeat per native variant")
@@ -297,6 +305,27 @@ def main() -> int:
     )
     download = f"https://github.com/alphastorm/ninfer/releases/download/{args.release_tag}"
     source_manifest = load(src_dir / "manifest.json")
+    source_archive_url = (
+        f"https://github.com/alphastorm/ninfer/releases/download/"
+        f"{args.source_tag}/runtime-source-{args.source_commit[:8]}.tar.gz"
+    )
+    source_runtime = source_manifest["components"]["ninfer"]
+    source_metadata = {}
+    changed_source = source_archive_url != source_runtime["source_archive_url"]
+    if changed_source or args.source_archive is not None or args.checksums is not None:
+        if args.source_archive is None or args.checksums is None:
+            parser.error("--source-archive and --checksums are required together to derive "
+                         "source_archive_bytes and checksums_sha256 when the source URL changes")
+        for path in (args.source_archive, args.checksums):
+            if not path.is_file() or path.stat().st_size == 0:
+                parser.error(f"missing or empty source metadata artifact: {path}")
+        if sha256_file(args.source_archive) != args.source_archive_sha:
+            parser.error("--source-archive bytes do not match --source-archive-sha")
+        source_metadata = {"source_archive_bytes": args.source_archive.stat().st_size,
+                           "checksums_sha256": sha256_file(args.checksums)}
+        if changed_source and any(source_metadata[key] == source_runtime.get(key) for key in source_metadata):
+            parser.error("derived source_archive_bytes and checksums_sha256 must differ from "
+                         "the predecessor when the source URL changes")
     dependency_pins: dict[str, dict[str, str]] = {}
     for field in ("sbom_dependency_url", "sbom_dependency_sha256"):
         for value in getattr(args, field):
@@ -380,6 +409,9 @@ def main() -> int:
     shutil.copytree(src_dir, dst_dir, dirs_exist_ok=bool(prepared))
     if "NINFER_RELEASE_NOTES.md" in prepared:
         (dst_dir / "NINFER_RELEASE_NOTES.md").write_bytes(prepared["NINFER_RELEASE_NOTES.md"])
+    # A predecessor audit describes its staged bytes, not this successor's mutations.
+    # Fresh composition owns the successor audit; staging cannot author its decisions.
+    (dst_dir / "qualification/receipt-audit.json").unlink(missing_ok=True)
 
     # 2. Manifest component + identity pins.
     manifest_path = dst_dir / "manifest.json"
@@ -421,10 +453,8 @@ def main() -> int:
         "runtime_receipt_release": args.runtime_receipt_release,
         "sbom_url": f"{download}/{archive.removesuffix('.tar.gz')}.spdx.json",
         "sbom_sha256": args.sbom_sha,
-        "source_archive_url": (
-            f"https://github.com/alphastorm/ninfer/releases/download/"
-            f"{args.source_tag}/runtime-source-{args.source_commit[:8]}.tar.gz"
-        ),
+        "source_archive_url": source_archive_url,
+        **source_metadata,
     })
     manifest["runtime_identity"]["deployment_profile"] = profile_to
     manifest["runtime_identity"]["configuration_sha256"] = config_sha
@@ -528,16 +558,21 @@ def main() -> int:
                     status_schema_version=server.get("status_schema_version", 1),
                     request_log_schema_version=30,
                     session_checkpoints={
+                        **profile["runtime"].get("session_checkpoints", {}),
                         "store_mount": server["checkpoint_mount_target"],
                         "schema_version": 3,
                         "seccomp_profile": server["checkpoint_seccomp_profile"],
                         "seccomp_sha256": server["checkpoint_seccomp_sha256"],
+                        "require_origin_auth": "--session-checkpoint-require-origin-auth" in server["arguments"],
                     })
         dump(compat_path, compatibility)
 
     qual_path = dst_dir / "qualification.json"
     qualification = load(qual_path)
     qualification["release"] = args.release
+    # Measurements and waivers belong to their original subject, not the copied tree.
+    # Explicit successor observations can be supplied by the prepared-draft merge below.
+    qualification["observed_gates"] = {}
     identity = qualification["runtime_identity"]
     identity.update({
         "upstream_commit": ninfer["upstream_commit"],
@@ -596,6 +631,16 @@ def main() -> int:
                       "build_route_note", "anonymous_pull_evidence_source", "publication_receipt"):
             packaging.pop(field, None)
     dump(qual_path, qualification)
+    if manifest["components"]["omp"].get("distribution_kind") == "upstream-release":
+        compatibility = load(compat_path)
+        dump(dst_dir / "qualification/client-components.json", {
+            "artifact_type": "omp_ninfer_upstream_client_components", "schema_version": 1,
+            "release": args.release,
+            "omp": {key: value for key, value in manifest["components"]["omp"].items()
+                    if key not in {"compatibility_authority", "compatibility_sha256"}},
+            "platforms": {OMP_PROFILE_PLATFORMS[row["id"]]: row["client_distribution"]
+                          for row in compatibility["profiles"]},
+        })
     shutil.rmtree(dst_dir / "acceptance", ignore_errors=True)
 
     # 6. Hash chain in dependency order, release tree only: the root authority and profiles

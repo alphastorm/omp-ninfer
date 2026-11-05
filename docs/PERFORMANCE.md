@@ -54,16 +54,31 @@ Route completion and the 418.529 s production hold are **not throughput or recla
 ## Gate-bound native speed comparisons
 
 [`scripts/speed_gate.py`](../scripts/speed_gate.py) owns the host-free reduction of the
-native ABBA speed gate. It uses the v0.16.0 rule unchanged: **weighted decode ratio
-`>= 1.08` and every case ratio `>= 0.95`**, versus the shipped incumbent on the same
-card. Both the role-only and combined role-plus-supplemental weighted ratios must
-clear `1.08`; the every-case floor covers the combined suite. There is no threshold
-override or built-in waiver. A separately recorded release waiver does not turn a
-failed numerical gate into a passing reduction.
+native ABBA speed gate. Its thresholds come from the release's recorded decision,
+not a fixed speedup floor. The
+[v0.16.2 decision](../releases/v0.16.2/qualification/native-speed-decision.json)
+requires **weighted decode ratio `>= 0.98`, every case `>= 0.95`, and byte-identical
+normalized outputs** against the published beta.1 incumbent. The earlier v0.16.0
+speedup-claim rule remains expressible by recording `1.08` / `0.95` instead.
+Both role-only and combined role-plus-supplemental weighted ratios must clear the
+recorded weighted floor; the every-case floor covers the combined suite. Neither
+rule permits different normalized output bytes. There is no separate threshold
+override or built-in waiver: a release waiver does not turn a failed reduction
+into a pass.
 
 Before collecting candidate data, freeze one `gate.json` declaration:
 
 - `artifact_type: "omp_ninfer_speed_gate"` and integer `schema_version: 1`.
+- `release`: the product release being judged.
+- `decision`: the complete recorded `omp_ninfer_founder_gate_decision` schema-1
+  object for that same release, copied from its bound decision JSON, not a new
+  threshold chosen after measurement. Its `rule` contains positive finite
+  `weighted_decode_ratio_minimum` and `every_case_ratio_minimum`,
+  `byte_identical_normalized_outputs:
+  "required for every case (A0/A3, B1/B2, A0/B1)"`, and `applies_to` selecting
+  `"role weighted"`, `"all-cases weighted"`, and `"every case"`. The complete
+  decision is included in the declaration digest; changing it invalidates the
+  recorded pre-screen plan.
 - `comparator`: `binary_sha256` of the shipped incumbent executable and
   `configuration_sha256` of its measured configuration. A candidate executable
   configured for MTP3 is **not** the shipped-incumbent comparator.
@@ -108,7 +123,13 @@ Collect four passed captures with `arm` (`A`, `B`, `B`, `A`), `index` (`0`..`3`)
 `status: "passed"`, measured `identity.binary_sha256`, and either `identity.config`
 or a measured canonical `identity.configuration_sha256`. Each `requests` entry
 contains `id`, `request_sha256`, positive integer `completion_tokens`, and positive
-finite `decode_seconds`. Native role/depth captures already use this shape.
+finite `decode_seconds`, plus a `normalized_output` string containing the retained
+normalized UTF-8 output. For native captures, attach the canonical JSON serialization
+of each retained output's `projection`: sorted keys, `ensure_ascii=False`,
+`separators=(",", ":")`, and no trailing newline. This preserves content, reasoning,
+ordered tool calls and their raw argument strings; only transport tool IDs are
+excluded by the capture's projection. A claimed `output_sha256` or matching-output
+boolean is not a substitute for retained normalized bytes.
 Reduce the pre-screen or final gate against the **same** declaration and recorded plan:
 
 ```sh
@@ -125,6 +146,10 @@ each arm's binary, configuration and recomputed request-suite identities and the
 capture digests. It does not copy configurations, prompts, outputs, paths, or GPU
 identifiers. The recorded plan is required: the result binds its canonical `plan_sha256`
 and `plan_gate_sha256` alongside the declaration's `gate_sha256` and `role_case_ids`.
+It also records the release and canonical `decision_sha256` (not the formatted
+decision file's byte hash), numerical `thresholds_passed`, `normalized_outputs_identical`,
+and `output_mismatch_case_ids`. Output comparisons use the actual UTF-8 bytes at
+all four ABBA positions; safe arm receipts retain only normalized-output hashes.
 
 Weighted throughput is pooled completion tokens divided by pooled decode seconds
 for each arm, then candidate divided by comparator. Each case's ratio uses the
@@ -143,7 +168,9 @@ mechanism, even when captures match the comparator and complete request list.
 The declaration remains the campaign authority; the reducer does not hardcode a corpus.
 Thus the v0.16.0 same-binary MTP3 pre-screen cannot claim
 to predict the shipped-incumbent gate; an isolated subset cannot claim the full
-role-suite gate either. Properly bound final RTX 4090 measurements still fail
+role-suite gate either. Missing normalized output bytes are invalid input; differing
+bytes are a gate failure even when every numerical threshold passes. Properly bound
+historical v0.16.0 final RTX 4090 measurements still fail
 the `log-024@0` floor at `0.933832`, rather than inheriting the historical waiver.
 Exit status is `0` for a gate pass, `1` for a failure or diagnostic, and `2` for
 invalid/incomplete inputs.

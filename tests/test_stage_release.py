@@ -221,6 +221,7 @@ class StageReleaseTests(unittest.TestCase):
         self.assertEqual(authority["runtime_contracts"], prepared_authority["runtime_contracts"])
         for row in authority["profiles"]:
             self.assertEqual(row["runtime"]["session_checkpoints"]["store_mount"], "/checkpoints-v013")
+            self.assertTrue(row["runtime"]["session_checkpoints"]["require_origin_auth"])
             self.assertEqual(row["runtime"]["speculative_backend"], "dflash2")
             self.assertEqual(row["runtime"]["draft_tokens"], 7)
         manifest_path = target / "manifest.json"
@@ -248,6 +249,66 @@ class StageReleaseTests(unittest.TestCase):
         result = self.stage(root, None, source_release=CURRENT, dependency_args=["--prepared-draft"])
         self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
         self.assertEqual(self.load(target / "manifest.json"), {"release": "already-staged"})
+
+    def test_changed_source_archive_refuses_missing_derived_metadata_before_staging(self) -> None:
+        root = self.staging_copy(source_release=CURRENT)
+        result = self.stage(root, None, source_release=CURRENT, dependency_args=[
+            "--source-tag", "v0.99.0-qwen38-5090-source.1", "--source-commit", "c" * 40])
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+        self.assertIn("--source-archive and --checksums", result.stderr)
+        self.assertFalse((root / "releases" / TARGET).exists())
+
+    def test_changed_source_archive_derives_size_and_checksums_from_supplied_bytes(self) -> None:
+        root = self.staging_copy(source_release=CURRENT)
+        archive = root / "runtime-source-cccccccc.tar.gz"
+        archive.write_bytes(b"new source archive fixture\n")
+        checksum = root / "SHA256SUMS"
+        source_sha = hashlib.sha256(archive.read_bytes()).hexdigest()
+        checksum.write_text(f"{source_sha}  {archive.name}\n", encoding="utf-8")
+        result = self.stage(root, None, source_release=CURRENT, dependency_args=[
+            "--source-tag", "v0.99.0-qwen38-5090-source.1", "--source-commit", "c" * 40,
+            "--source-archive-sha", source_sha, "--source-archive", str(archive),
+            "--checksums", str(checksum)])
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        runtime = self.load(root / "releases" / TARGET / "manifest.json")["components"]["ninfer"]
+        self.assertEqual(runtime["source_archive_bytes"], archive.stat().st_size)
+        self.assertEqual(runtime["checksums_sha256"], hashlib.sha256(checksum.read_bytes()).hexdigest())
+        self.assertEqual(runtime["source_archive_sha256"], source_sha)
+
+    def test_source_archive_hash_mismatch_or_partial_inputs_fail_before_staging(self) -> None:
+        root = self.staging_copy(source_release=CURRENT)
+        archive = root / "runtime-source-cccccccc.tar.gz"
+        archive.write_bytes(b"new source archive fixture\n")
+        checksum = root / "SHA256SUMS"
+        checksum.write_text(f"{'a' * 64}  {archive.name}\n", encoding="utf-8")
+        for arguments in (["--source-archive", str(archive)],
+                          ["--checksums", str(checksum)],
+                          ["--source-archive", str(archive), "--checksums", str(checksum)]):
+            with self.subTest(arguments=arguments):
+                result = self.stage(root, None, source_release=CURRENT, dependency_args=[
+                    "--source-tag", "v0.99.0-qwen38-5090-source.1",
+                    "--source-commit", "c" * 40, *arguments])
+                self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+                self.assertFalse((root / "releases" / TARGET).exists())
+
+    def test_staging_discards_predecessor_observed_gates_including_waivers(self) -> None:
+        root = self.staging_copy(source_release=CURRENT)
+        source = root / "releases" / CURRENT / "qualification.json"
+        qualification = self.load(source)
+        waiver = root / "releases" / CURRENT / "qualification/old-waiver.json"
+        self.save(waiver, {"release": CURRENT, "decision": "predecessor only"})
+        qualification["observed_gates"] = {
+            "native_speed": {"status": "passed"},
+            "restore_waiver": {"status": "waived-by-founder", "scope": "predecessor only",
+                               "repository_path": f"releases/{CURRENT}/qualification/old-waiver.json",
+                               "sha256": hashlib.sha256(waiver.read_bytes()).hexdigest()},
+        }
+        self.save(source, qualification)
+        result = self.stage(root, None, source_release=CURRENT)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        staged = self.load(root / "releases" / TARGET / "qualification.json")
+        self.assertEqual(staged["observed_gates"], {})
+        self.assertEqual(self.load(source), qualification)
 
     def test_partial_invalid_or_duplicate_dependency_pins_fail_before_staging(self) -> None:
         root = self.staging_copy(source_release=CURRENT)
@@ -413,6 +474,11 @@ class StageReleaseTests(unittest.TestCase):
             self.assertFalse(profile["installable"])
             self.assertEqual(profile["status"], "preview")
         self.assertFalse((staged / "acceptance").exists())
+        staged_descriptor = self.load(staged / "qualification/client-components.json")
+        self.assertEqual(staged_descriptor["release"], TARGET)
+        self.assertEqual(staged_descriptor["platforms"], descriptor["platforms"])
+        self.assertEqual(staged_descriptor["omp"]["binary_sha256"],
+                         manifest["components"]["omp"]["binary_sha256"])
         qualification = self.load(staged / "qualification.json")
         self.assertNotIn("documented_route_acceptance", qualification["composition"])
         self.assertFalse(qualification["external_installation_qualified"])
@@ -555,6 +621,8 @@ class StageReleaseTests(unittest.TestCase):
         source = self.load(source_path)
         result = self.stage(root, None, source_release="v0.16.0")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertFalse((root / "releases" / TARGET / "qualification/receipt-audit.json").exists())
+        self.assertTrue((root / "releases/v0.16.0/qualification/receipt-audit.json").is_file())
         staged = self.load(root / "releases" / TARGET / "manifest.json")
         for before, after in zip(source["components"]["ninfer_variants"],
                                  staged["components"]["ninfer_variants"]):

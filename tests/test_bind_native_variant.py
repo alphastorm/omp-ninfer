@@ -446,7 +446,8 @@ class BindNativeVariantTest(unittest.TestCase):
                     "model_artifact_sha256": self.receipt["model_sha256"]}
         predecessor = self.workspace / "releases/v0.14.0/manifest.json"
         predecessor.parent.mkdir()
-        predecessor.write_text(json.dumps({"components": {"ninfer_variants": [previous]}}))
+        predecessor.write_text(json.dumps({"status": "ready",
+                                            "components": {"ninfer_variants": [previous]}}))
         package = self.workspace / PACKAGE.replace("v0.6.1", "v0.8.0")
         config = json.dumps({
             "artifact_type": "ninfer_windows_server_config", "schema_version": 4,

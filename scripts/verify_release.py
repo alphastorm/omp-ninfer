@@ -8,7 +8,10 @@ their shared model binding. Native variants must match the effective model hash,
 and split-model compatibility rows must publish its URL, byte length and SHA-256.
 Native quality-screen and fit bindings must match the receipts declared by the
 qualification summary. Carried runtimes retain their predecessor's exact bindings,
-without relabelling those proofs as fresh successor admission.
+including their cited bytes, without relabelling proofs as fresh admission.
+Waivers bind only their recorded release/lane subjects and failures. Receipt
+audits check staged hashes; stock-client descriptors must match all platform
+binary identities, not mutable compatibility URL metadata.
 """
 
 from __future__ import annotations
@@ -17,6 +20,7 @@ import argparse
 import ast
 import hashlib
 import json
+import math
 import re
 import subprocess
 import sys
@@ -306,6 +310,113 @@ def validate_upstream_client_bindings(
             require(client.get(key) == omp.get(component_key),
                     f"{label}.{key} must match components.omp.{component_key}", errors)
     require(matched, "components.omp.platform must have a matching compatibility client row", errors)
+
+
+def validate_client_components(root: Path, release: str, omp: dict[str, Any],
+                               compatibility: dict[str, Any], errors: list[str]) -> None:
+    """Validate stock descriptors without comparing mutable pin-dance URLs.
+
+    Pre-stock fork descriptors describe archives rather than raw binaries and
+    retain their historical format.
+    """
+    if omp.get("distribution_kind") != "upstream-release":
+        return
+    label = "qualification/client-components.json"
+    path = root / "releases" / release / label
+    if not path.is_file():
+        errors.append(f"{label} must exist for an upstream-release client")
+        return
+    descriptor = load_json(path)
+    require(descriptor.get("artifact_type") == "omp_ninfer_upstream_client_components"
+            and descriptor.get("schema_version") == 1,
+            f"{label} must be a schema-1 upstream client descriptor", errors)
+    require(descriptor.get("release") == release,
+            f"{label}.release must match the manifest", errors)
+    primary, platforms = descriptor.get("omp"), descriptor.get("platforms")
+    require(isinstance(primary, dict), f"{label}.omp must be an object", errors)
+    require(isinstance(platforms, dict) and set(platforms) == set(OMP_PROFILE_PLATFORMS.values()),
+            f"{label}.platforms must contain darwin-arm64, windows-x64 and linux-x64", errors)
+    if not isinstance(primary, dict) or not isinstance(platforms, dict):
+        return
+    descriptor_errors: list[str] = []
+    validate_upstream_omp_component(primary, descriptor_errors)
+    for field in (
+        "distribution_kind", "upstream_repository", "upstream_tag", "upstream_commit",
+        "upstream_tree", "release_id", "distribution_version", "platform", "artifact_name",
+        "artifact_url", "artifact_release_id", "artifact_asset_id", "artifact_published",
+        "artifact_bytes", "artifact_sha256", "binary_sha256",
+    ):
+        require(primary.get(field) == omp.get(field),
+                f"{label}.omp.{field} must match components.omp.{field}", errors)
+    rows = []
+    authority_rows = {row["id"]: row.get("client_distribution", {})
+                      for row in compatibility.get("profiles", []) if isinstance(row, dict) and "id" in row}
+    for profile_id, platform in OMP_PROFILE_PLATFORMS.items():
+        client = platforms.get(platform)
+        require(isinstance(client, dict), f"{label}.platforms.{platform} must be an object", errors)
+        if not isinstance(client, dict):
+            continue
+        rows.append({"id": profile_id, "client_distribution": client})
+        authority = authority_rows.get(profile_id, {})
+        for field in (
+            "distribution_kind", "upstream_repository", "upstream_tag", "upstream_commit",
+            "architecture", "published", "release_id", "asset_id", "asset_name", "asset_url",
+            "asset_bytes", "asset_sha256", "binary_sha256",
+        ):
+            require(client.get(field) == authority.get(field),
+                    f"{label}.platforms.{platform}.{field} must match compatibility {profile_id}", errors)
+    validate_upstream_client_bindings(primary, rows, descriptor_errors)
+    errors.extend(f"{label}: {error}" for error in descriptor_errors)
+
+
+def validate_receipt_audit(root: Path, release: str, errors: list[str]) -> None:
+    """Check retained staged bytes, not superseded stage/composition digests.
+
+    v0.13.x audits recorded pre-replacement snapshots even for replaced files.
+    From v0.14.0 staged_sha256 means retained bytes; dropped rows and rows without
+    a staged hash make no retained-byte claim. v0.16.2 expanded qualification-
+    relative names to release-relative names.
+    """
+    version = product_version(release) or (0, 0, 0)
+    if version < (0, 14, 0):
+        return
+    release_dir = root / "releases" / release
+    path = release_dir / "qualification/receipt-audit.json"
+    if not path.is_file():
+        return
+    label = "qualification/receipt-audit.json"
+    audit = load_json(path)
+    require(audit.get("artifact_type") == "omp_ninfer_release_receipt_audit"
+            and audit.get("schema_version") == 1,
+            f"{label} must be a schema-1 receipt audit", errors)
+    require(audit.get("release") == release, f"{label}.release must match the manifest", errors)
+    rows = audit.get("files")
+    if not isinstance(rows, list):
+        errors.append(f"{label}.files must be an array")
+        return
+    directory = release_dir if version >= (0, 16, 2) else path.parent
+    seen = set()
+    for index, row in enumerate(rows):
+        row_label = f"{label}.files[{index}]"
+        if not isinstance(row, dict):
+            errors.append(f"{row_label} must be an object")
+            continue
+        name = row.get("file")
+        target = (directory / name).resolve() if isinstance(name, str) else directory.resolve()
+        valid = (isinstance(name, str) and bool(name) and not Path(name).is_absolute()
+                 and target.is_relative_to(directory.resolve()) and target != directory.resolve())
+        require(valid, f"{row_label}.file must stay inside its audited directory", errors)
+        if not valid:
+            continue
+        require(target not in seen, f"{row_label}.file must not be duplicated", errors)
+        seen.add(target)
+        if row.get("disposition") == "dropped" or "staged_sha256" not in row:
+            continue
+        require_sha(row["staged_sha256"], f"{row_label}.staged_sha256", errors)
+        require(target.is_file(), f"{row_label}.staged_sha256 requires an existing staged file", errors)
+        if target.is_file():
+            require(sha256_file(target) == row["staged_sha256"],
+                    f"{row_label}.staged_sha256 must match staged file bytes ({name})", errors)
 
 
 def client_identity_pins(omp: dict[str, Any], compatibility: dict[str, Any]) -> set[str]:
@@ -787,6 +898,219 @@ def validate_repository_bindings(root: Path, value: Any, errors: list[str],
         for key, child in value.items():
             validate_repository_bindings(root, child, errors, f"{label}.{key}",
                                          require_hashes=require_hashes)
+
+
+def validate_waived_position(row: Any, probe: str, label: str, errors: list[str]) -> None:
+    """Check the named parity rule, position numbering and measured arithmetic."""
+    if not isinstance(row, dict):
+        errors.append(f"{label} waived position must be an object")
+        return
+    position = row.get("position")
+    require(type(position) is int and (
+        (probe == "restore" and position in (3, 4) and row.get("label") == f"restore_{position - 3}")
+        or (probe == "sibling" and position == 1 and row.get("label") == "base")),
+        f"{label} position and label must match the {probe} probe", errors)
+    require(row.get("probe") == ("two-restart restore" if probe == "restore" else "sibling"),
+            f"{label} probe must match the observed gate", errors)
+    incumbent, candidate = row.get("incumbent_ttft_s"), row.get("candidate_ttft_s")
+    numeric = all(type(value) in (int, float) and math.isfinite(value) and value > 0
+                  for value in (incumbent, candidate))
+    require(numeric, f"{label} TTFT measurements must be finite positive numbers", errors)
+    if not numeric:
+        return
+    bound = incumbent + max(0.25, 0.25 * incumbent)
+    for field, expected in (("bound_s", bound), ("excess_s", candidate - bound)):
+        if field in row:
+            require(type(row[field]) in (int, float)
+                    and math.isclose(row[field], expected, rel_tol=0, abs_tol=1e-9),
+                    f"{label} {field} must match measured TTFT arithmetic", errors)
+    rule = row.get("rule")
+    if rule == "p16-agent-parity/2 candidate TTFT <= incumbent + max(0.25 s, 25%)":
+        require(candidate > bound, f"{label} must retain the failed TTFT measurement", errors)
+    elif rule == "p16-agent-parity/2 candidate cached-minus-prompt >= incumbent":
+        gaps = {}
+        for arm in ("incumbent", "candidate"):
+            prompt, cached = row.get(f"{arm}_prompt_tokens"), row.get(f"{arm}_cached_tokens")
+            valid = type(prompt) is int and type(cached) is int and prompt >= cached >= 0
+            require(valid, f"{label} {arm} prompt/cache counts must be nonnegative integers", errors)
+            if valid:
+                gaps[arm] = cached - prompt
+                require(row.get(f"{arm}_cached_minus_prompt") == gaps[arm],
+                        f"{label} {arm} cache gap must equal cached minus prompt tokens", errors)
+        require(len(gaps) == 2 and gaps["candidate"] < gaps["incumbent"],
+                f"{label} must retain the failed cache-gap measurement", errors)
+        require(candidate <= bound and row.get("ttft_within_bound") is True,
+                f"{label} cache-gap waiver cannot waive a TTFT failure", errors)
+    else:
+        errors.append(f"{label} rule must name only the observed TTFT or cache-gap failure")
+
+
+def validate_parity_waiver_evidence(root: Path, release: str, gate: Any, waived: dict[str, Any],
+                                    probe: str, label: str, errors: list[str]) -> None:
+    """Match a new waiver to the actual /2 verdict's entire failing set."""
+    from agent_parity import ContractVersionError, input_contract, judge_position
+
+    if not isinstance(gate, dict):
+        errors.append(f"{label} must cite an observed failed parity gate")
+        return
+    require(gate.get("status") == "failed-founder-waived" and gate.get("raw_passed") is False
+            and gate.get("accepted_under_exact_waiver") is True,
+            f"{label} must retain the observed failed parity status", errors)
+    reference = gate.get("repository_path")
+    path = bound_file(root, reference)
+    if (not isinstance(reference, str) or Path(reference).is_absolute() or path is None
+            or not path.is_relative_to((root / "releases" / release / "qualification").resolve())):
+        errors.append(f"{label} must bind a same-release raw parity verdict")
+        return
+    require(sha256_file(path) == gate.get("sha256"),
+            f"{label} raw parity SHA-256 must match verdict bytes", errors)
+    verdict = load_json(path)
+    require(verdict.get("passed") is False and verdict.get("contract_version") == 2
+            and verdict.get("rule") == "p16-agent-parity/2",
+            f"{label} must retain a failed contract-2 parity verdict", errors)
+    jobs = verdict.get("jobs")
+    if not isinstance(jobs, dict) or not jobs:
+        errors.append(f"{label} raw parity verdict must contain jobs")
+        return
+    comparisons = {}
+    for name, job in jobs.items():
+        if not isinstance(job, dict):
+            errors.append(f"{label} raw parity job must be an object")
+            return
+        if job.get("judged") is False and job.get("passed") is not False:
+            continue
+        comparisons[name] = {"positions": job.get("paired_positions")}
+    try:
+        input_contract({"contract_version": 2, "rule": "p16-agent-parity/2", "jobs": comparisons})
+    except ContractVersionError:
+        errors.append(f"{label} raw parity verdict must retain complete paired measurements")
+        return
+    failing = [(name, row, judge_position(row)) for name, job in comparisons.items()
+               for row in job["positions"] if judge_position(row)]
+    if len(failing) != 1:
+        errors.append(f"{label} must waive exactly the observed failing position and no other failure")
+        return
+    name, row, failures = failing[0]
+    require(name == probe and row.get("position") == waived.get("position")
+            and row.get("label") == waived.get("label"),
+            f"{label} position must match the raw parity failure", errors)
+    for arm in ("incumbent", "candidate"):
+        for source, target in (("server_ttft_seconds", "ttft_s"), ("prompt_tokens", "prompt_tokens"),
+                               ("cached_tokens", "cached_tokens")):
+            require(row.get(f"{arm}_{source}") == waived.get(f"{arm}_{target}"),
+                    f"{label} {arm}_{target} must match the raw parity measurement", errors)
+    expected = "ttft " if "candidate TTFT" in str(waived.get("rule")) else "cached-prompt "
+    require(len(failures) == 1 and failures[0].startswith(expected),
+            f"{label} rule must match the sole observed failure, not broaden its scope", errors)
+
+
+def validate_gate_waivers(root: Path, release: str, manifest: dict[str, Any],
+                          qualification: dict[str, Any], errors: list[str]) -> None:
+    """Never transfer a predecessor waiver or broaden the failure it disposes.
+
+    Published projections lack release/candidate or complete raw-position bindings.
+    Their exact original bytes retain only their recorded historical scope; the
+    held v0.16.1 explicitly kept v0.16.0's records. No exception admits a successor.
+    New parity waivers require release/candidate identity and a bound raw /2 verdict.
+    """
+    frozen = {
+        ("v0.16.0", "rtx5090_restore_waiver"):
+            "66ba8104c435f12f2c4740b5a0c0fe57047b4b4c5eb818072a4e28a1f083491f",
+        ("v0.16.0", "rtx4090_speed_waiver"):
+            "92b94c4a1beeb37917b5a086d740af66d6109b59724f0afb012aac73d20b21f3",
+        ("v0.16.1", "rtx5090_restore_waiver"):
+            "66ba8104c435f12f2c4740b5a0c0fe57047b4b4c5eb818072a4e28a1f083491f",
+        ("v0.16.1", "rtx4090_speed_waiver"):
+            "92b94c4a1beeb37917b5a086d740af66d6109b59724f0afb012aac73d20b21f3",
+        ("v0.16.2", "rtx5090_restore_waiver"):
+            "b8f6e26409095b3d8a2a5a5ff9af571f3b0440d5282d8804d88f5e91cba1224d",
+        ("v0.16.2", "rtx4090_restore_waiver"):
+            "4127964fc0d111cd847dda85655a78d5deb9422fa9103e404a5de143fb523153",
+        ("v0.16.2", "rtx3090_sibling_waiver"):
+            "f0c17efe60e7a1bb81702cb63e1c44b149d333d54177369036ffa19e140376a6",
+    }
+    gates = qualification.get("observed_gates", {})
+    if not isinstance(gates, dict):
+        return
+    for name, binding in gates.items():
+        if not (name.endswith("_waiver")
+                or isinstance(binding, dict) and binding.get("status") == "waived-by-founder"):
+            continue
+        label = f"qualification.observed_gates.{name}"
+        match = re.fullmatch(r"(rtx5090|rtx4090|rtx3090)_(speed|restore|sibling)_waiver", name)
+        if match is None or not isinstance(binding, dict):
+            errors.append(f"{label} must identify its lane and observed speed/restore/sibling gate")
+            continue
+        lane, probe = match.groups()
+        require(binding.get("status") == "waived-by-founder",
+                f"{label}.status must be waived-by-founder", errors)
+        original_hash = frozen.get((release, name))
+        directory_release = "v0.16.0" if release == "v0.16.1" and original_hash else release
+        reference = binding.get("repository_path")
+        path = bound_file(root, reference)
+        if (not isinstance(reference, str) or Path(reference).is_absolute() or path is None
+                or not path.is_relative_to(
+                    (root / "releases" / directory_release / "qualification").resolve())):
+            errors.append(f"{label} waiver must belong to this release's qualification")
+            continue
+        digest = sha256_file(path)
+        require(digest == binding.get("sha256"), f"{label} SHA-256 must match waiver bytes", errors)
+        waiver = load_json(path)
+        legacy = waiver.get("artifact_type") == "p16_founder_gate_waiver"
+        require(waiver.get("schema_version") == 1 and waiver.get("artifact_type") in (
+            "p16_founder_gate_waiver", "omp_ninfer_founder_gate_waiver"),
+            f"{label} must be a schema-1 founder gate waiver", errors)
+        require(waiver.get("lane") == lane, f"{label} lane must match the observed gate", errors)
+        component = manifest.get("components", {}).get("ninfer", {}) if lane == "rtx5090" else next(
+            (row for row in manifest.get("components", {}).get("ninfer_variants", [])
+             if row.get("id") == f"{lane}-windows-native"), {})
+        subject = waiver.get("subject")
+        if not isinstance(subject, dict):
+            errors.append(f"{label}.subject must bind the current component")
+            continue
+        expected_subject = {"source": component.get("source_commit")}
+        if legacy and probe == "speed":
+            expected_subject["package_sha256"] = component.get("package_sha256")
+            for key, target in (("server_sha256_prefix", "server_binary_sha256"),
+                                ("config_sha256_prefix", "configuration_sha256")):
+                prefix = subject.get(key)
+                require(isinstance(prefix, str) and re.fullmatch(r"[0-9a-f]{8}", prefix) is not None
+                        and str(component.get(target, "")).startswith(prefix),
+                        f"{label}.subject.{key} must match the current native component", errors)
+        else:
+            expected_subject.update(component=component.get("release_tag"),
+                                    server_sha256=component.get("server_binary_sha256"))
+            if lane == "rtx5090":
+                expected_subject["image"] = component.get("oci_reference")
+            else:
+                expected_subject.update(package=component.get("package_name"),
+                                        package_sha256=component.get("package_sha256"))
+        for field, expected in expected_subject.items():
+            require(expected is not None and subject.get(field) == expected,
+                    f"{label}.subject.{field} must match the current lane component", errors)
+        if original_hash:
+            require(digest == original_hash,
+                    f"{label} must retain the exact historical waiver scope and measurements", errors)
+            continue
+        candidate = qualification.get("documented_route_acceptance", {}).get("candidate_commit")
+        require(waiver.get("release") == release,
+                f"{label} release must match the carrying release", errors)
+        require(isinstance(candidate, str) and GIT_SHA_RE.fullmatch(candidate) is not None
+                and waiver.get("candidate") == candidate,
+                f"{label} candidate must match this release's candidate commit", errors)
+        positions = waiver.get("waived")
+        if legacy or probe == "speed" or not isinstance(positions, list) or len(positions) != 1:
+            errors.append(f"{label} must waive exactly one observed parity position")
+            continue
+        gate = gates.get(f"{lane}_agent_parity")
+        raw = waiver.get("raw_verdict")
+        require(isinstance(raw, dict) and raw.get("passed") is False
+                and isinstance(raw.get("evidence_sha256"), dict) and isinstance(gate, dict)
+                and raw["evidence_sha256"].get("agent-verdict.json") == gate.get("sha256"),
+                f"{label} must bind the observed raw parity verdict hash", errors)
+        validate_waived_position(positions[0], probe, label, errors)
+        if isinstance(positions[0], dict):
+            validate_parity_waiver_evidence(root, release, gate, positions[0], probe, label, errors)
 
 
 def validate_review_ledger(
@@ -2002,17 +2326,21 @@ def product_version(release: str) -> tuple[int, int, int] | None:
 
 
 def predecessor_manifest(root: Path, release: str) -> dict[str, Any] | None:
-    """The immediately preceding GA directory owns the predecessor, not a CLI-supplied row."""
+    """The latest ready GA manifest owns the predecessor, never a held candidate.
+
+    Published releases retain status=ready and publication.authorized=false;
+    authorization and component publication do not publish a product candidate.
+    """
     current = product_version(release)
-    candidates = [(product_version(path.name), path) for path in (root / "releases").iterdir()
-                  if path.is_dir() and ga_release(path.name) and product_version(path.name) is not None]
-    older = [(version, path) for version, path in candidates if current and version < current]
-    if not older:
-        return None
-    path = max(older, key=lambda value: value[0])[1] / "manifest.json"
-    if not path.is_file():
-        return None
-    return load_json(path)
+    candidates = []
+    for path in (root / "releases").glob("*/manifest.json"):
+        version = product_version(path.parent.name)
+        if not ga_release(path.parent.name) or version is None or current is None or version >= current:
+            continue
+        manifest = load_json(path)
+        if manifest.get("status") == "ready":
+            candidates.append((version, manifest))
+    return max(candidates, key=lambda row: row[0])[1] if candidates else None
 
 
 def predecessor_native_variant(root: Path, release: str, variant_id: str) -> dict[str, Any] | None:
@@ -2078,24 +2406,37 @@ def native_shape(root: Path, variant: dict[str, Any]) -> dict[str, Any] | None:
     }}
 
 
-def native_evidence(root: Path, release: str, variant: dict[str, Any], field: str,
-                    errors: list[str], incoming: Path | None = None) -> dict[str, Any] | None:
-    label = f"{variant.get('id')}.qualification.{field}"
-    reference = variant.get("qualification", {}).get(field)
+def native_evidence_path(root: Path, release: str, reference: Any, label: str,
+                         errors: list[str], incoming: Path | None = None, *,
+                         carried: bool = False) -> Path | None:
+    """Check a native evidence edge even when no observed gate names the file."""
     if not isinstance(reference, dict) or set(reference) != {"path", "sha256"}:
         errors.append(f"{label} must bind path and sha256")
         return None
     relative = reference.get("path")
     destination = (root / relative).resolve() if isinstance(relative, str) else root.resolve()
-    require(isinstance(relative, str) and destination.is_relative_to(
-        (root / "releases" / release / "qualification").resolve()),
-        f"{label}.path must stay inside release qualification", errors)
+    directory = root / "releases" if carried else root / "releases" / release / "qualification"
+    valid_path = (isinstance(relative, str) and not Path(relative).is_absolute()
+                  and destination.is_relative_to(directory.resolve()))
+    require(valid_path, f"{label}.path must stay inside release qualification", errors)
     require_sha(reference.get("sha256"), f"{label}.sha256", errors)
+    if not valid_path:
+        return None
     path = incoming if incoming is not None else destination
     if not path.is_file():
         errors.append(f"{label} file must exist")
         return None
     require(sha256_file(path) == reference.get("sha256"), f"{label} SHA-256 must match bytes", errors)
+    return path
+
+
+def native_evidence(root: Path, release: str, variant: dict[str, Any], field: str,
+                    errors: list[str], incoming: Path | None = None) -> dict[str, Any] | None:
+    label = f"{variant.get('id')}.qualification.{field}"
+    path = native_evidence_path(root, release, variant.get("qualification", {}).get(field),
+                                label, errors, incoming)
+    if path is None:
+        return None
     value = load_json(path)
     for text in walk_strings(value):
         for marker in PRIVATE_MARKERS:
@@ -2235,6 +2576,11 @@ def validate_native_quality(root: Path, release: str, variant: dict[str, Any], e
                 require(qualification.get(field) == previous_bindings[field],
                         f"{variant['id']}.qualification.{field} must match the carried predecessor binding",
                         errors)
+            if field in qualification:
+                native_evidence_path(root, release, qualification[field],
+                                     f"{variant['id']}.qualification.{field}", errors,
+                                     incoming_screen if field == "quality_screen" else incoming_fit,
+                                     carried=True)
         # Inherited screens describe their original production/candidate pair,
         # not a fresh comparison with this release's immediate predecessor.
         if "quality_screen" in qualification and "quality_screen" not in previous_bindings:
@@ -2632,6 +2978,7 @@ def validate(
     # Published path-only gate annotations predate mandatory paired bindings.
     validate_repository_bindings(root, qualification, errors,
                                  require_hashes=(product_version(release) or (0, 0, 0)) >= (0, 15, 1))
+    validate_gate_waivers(root, selected_release, manifest, qualification, errors)
     qualification_pending = pending_allowed and not qualification
     components = manifest.get("components", {})
     omp = components.get("omp", {})
@@ -2695,6 +3042,9 @@ def validate(
         compatibility = load_authority(compatibility_path)
     except (OSError, ValueError, json.JSONDecodeError) as error:
         errors.append(f"compatibility.json: {error}")
+
+    validate_client_components(root, selected_release, omp, compatibility, errors)
+    validate_receipt_audit(root, selected_release, errors)
 
     # Root archives bind their platform distribution, not the manifest's primary Windows asset.
     # Historical fork archives still bind the primary component; package-only cask clients pin no archive.

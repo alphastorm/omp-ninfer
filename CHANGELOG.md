@@ -20,6 +20,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `--complete-existing` recovery that never replays successful ref effects. Live publication
   remains founder-only. [#128](https://github.com/alphastorm/omp-ninfer/issues/128) P4 retains
   its #109 lifecycle design decision and P13 retains the frozen native operate blocks.
+- Close release-verification false passes: bind waivers to their release, lane and
+  exact failed position/scope; resolve only ready GA predecessors; byte-check carried
+  native quality/fit receipts; validate receipt-audit staged hashes and all stock-client
+  descriptor identities. Stage source-archive size/checksum metadata from supplied
+  bytes or refuse, preserve checkpoint origin authentication with profile templates,
+  and discard predecessor observed gates/audits while regenerating the client descriptor
+  ([#138](https://github.com/alphastorm/omp-ninfer/issues/138), items 1–5 and 8).
+- Take native speed thresholds from the release's recorded decision, bind that decision
+  into the pre-screen plan, and require retained normalized-output byte identity within
+  and across ABBA arms. The recorded `1.08` speedup and `0.98` no-regression rules retain
+  the every-case floor; no waiver or claimed matching-output hash supplies a reducer pass.
 
 ### Changed
 

@@ -14,6 +14,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import speed_gate as SPEED
 
+ROOT = Path(__file__).resolve().parents[1]
+
 
 def digest(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":"),
@@ -25,7 +27,13 @@ def fixture():
                "B": {"speculative": {"backend": "dflash2", "draft_tokens": 7}}}
     suite = [{"id": "log-024@0", "request_sha256": "1" * 64},
              {"id": "role-002@0", "request_sha256": "2" * 64}]
-    gate = {"artifact_type": "omp_ninfer_speed_gate", "schema_version": 1,
+    gate = {"artifact_type": "omp_ninfer_speed_gate", "schema_version": 1, "release": "v0.99.0",
+            "decision": {
+                "artifact_type": "omp_ninfer_founder_gate_decision", "schema_version": 1,
+                "release": "v0.99.0",
+                "rule": {"weighted_decode_ratio_minimum": 1.08, "every_case_ratio_minimum": 0.95,
+                         "byte_identical_normalized_outputs": "required for every case (A0/A3, B1/B2, A0/B1)",
+                         "applies_to": ["role weighted", "all-cases weighted", "every case"]}},
             "comparator": {"binary_sha256": "a" * 64, "configuration_sha256": digest(configs["A"])},
             "request_suite": suite, "request_suite_sha256": digest(suite),
             "role_case_ids": [row["id"] for row in suite]}
@@ -34,7 +42,9 @@ def fixture():
         captures.append({"arm": label, "index": index, "status": "passed",
                          "identity": {"binary_sha256": ("a" if label == "A" else "b") * 64,
                                       "config": deepcopy(configs[label])},
-                         "requests": [{**row, "completion_tokens": 1024, "decode_seconds": 1024 / rate}
+                         "requests": [{**row, "completion_tokens": 1024, "decode_seconds": 1024 / rate,
+                                       "normalized_output": json.dumps({"content": row["id"], "reasoning": "",
+                                                                        "tool_calls": []}, sort_keys=True)}
                                       for row, rate in zip(suite, (100, 100) if label == "A" else (110, 120))]})
     return gate, captures
 
@@ -46,6 +56,71 @@ def plan_for(gate, captures):
 
 
 class SpeedGateTests(unittest.TestCase):
+    def test_recorded_native_no_regression_rule_replaces_the_speedup_floor(self):
+        gate, captures = fixture()
+        gate["decision"] = json.loads(
+            (ROOT / "releases/v0.16.2/qualification/native-speed-decision.json").read_text())
+        gate["release"] = gate["decision"]["release"]
+        for arm in captures:
+            for row in arm["requests"]:
+                row.update(completion_tokens=100, decode_seconds=1)
+        result = SPEED.reduce(gate, captures, plan_for(gate, captures))
+        self.assertEqual(result["status"], "PASS")
+        self.assertEqual(result["thresholds"], {"weighted_minimum": 0.98, "every_case_minimum": 0.95})
+        self.assertEqual(result["decision_sha256"], digest(gate["decision"]))
+
+    def test_recorded_no_regression_weighted_and_case_floors_are_inclusive(self):
+        for candidate_tokens, expected in (((98, 98), "PASS"), ((97, 97), "FAIL"),
+                                           ((95, 101), "PASS"), ((94, 110), "FAIL")):
+            with self.subTest(candidate_tokens=candidate_tokens):
+                gate, captures = fixture()
+                gate["decision"]["rule"]["weighted_decode_ratio_minimum"] = 0.98
+                for arm in captures:
+                    for row, tokens in zip(arm["requests"], (100, 100) if arm["arm"] == "A" else candidate_tokens):
+                        row.update(completion_tokens=tokens, decode_seconds=1)
+                self.assertEqual(SPEED.reduce(gate, captures, plan_for(gate, captures))["status"], expected)
+
+    def test_normalized_outputs_must_match_within_and_across_abba_arms(self):
+        for indices in ((0,), (1,), (2,), (3,), (0, 3), (1, 2)):
+            with self.subTest(indices=indices):
+                gate, captures = fixture()
+                for index in indices:
+                    captures[index]["requests"][0]["normalized_output"] += " "
+                result = SPEED.reduce(gate, captures, plan_for(gate, captures))
+                self.assertTrue(result["thresholds_passed"])
+                self.assertEqual(result["status"], "FAIL")
+                self.assertFalse(result["normalized_outputs_identical"])
+                self.assertFalse(result["gate_passed"])
+                self.assertEqual(result["output_mismatch_case_ids"], ["log-024@0"])
+
+    def test_missing_normalized_bytes_cannot_be_replaced_by_a_hash_or_pass_flag(self):
+        gate, captures = fixture()
+        captures[0]["requests"][0].pop("normalized_output")
+        captures[0]["requests"][0].update(output_sha256="f" * 64, normalized_output_hashes_match=True)
+        with self.assertRaisesRegex(SPEED.SpeedGateError, "normalized_output"):
+            SPEED.reduce(gate, captures, plan_for(gate, captures))
+
+    def test_rule_and_release_are_bound_to_the_recorded_plan(self):
+        gate, captures = fixture()
+        plan = plan_for(gate, captures)
+        gate["decision"]["rule"]["weighted_decode_ratio_minimum"] = 0.98
+        result = SPEED.reduce(gate, captures, plan)
+        self.assertEqual(result["status"], "DIAGNOSTIC")
+        self.assertIn("plan.gate_sha256", " ".join(result["diagnostic_reasons"]))
+        self.assertFalse(result["gate_passed"])
+
+    def test_missing_foreign_or_invalid_recorded_decisions_are_rejected(self):
+        gate, _ = fixture()
+        for decision in (None, {}, {**gate["decision"], "release": "v0.98.0"},
+                         {**gate["decision"], "rule": {}},
+                         {**gate["decision"], "rule": {**gate["decision"]["rule"],
+                                                       "weighted_decode_ratio_minimum": True}},
+                         {**gate["decision"], "rule": {**gate["decision"]["rule"],
+                                                       "byte_identical_normalized_outputs": False}}):
+            with self.subTest(decision=decision):
+                with self.assertRaises(SPEED.SpeedGateError):
+                    SPEED.declaration({**gate, "decision": decision})
+
     def test_changed_role_partition_from_prescreen_is_diagnostic(self):
         gate, captures = fixture()
         gate["role_case_ids"] = ["log-024@0"]
@@ -178,7 +253,7 @@ class SpeedGateTests(unittest.TestCase):
                 self.assertIn("configuration_sha256" if field == "config" else field,
                               " ".join(result["diagnostic_reasons"]))
 
-    def test_thresholds_are_fixed_and_inclusive(self):
+    def test_recorded_speedup_thresholds_are_inclusive(self):
         for candidate_tokens, expected in ((108, "PASS"), (107, "FAIL")):
             with self.subTest(weighted=candidate_tokens):
                 gate, captures = fixture()
@@ -239,6 +314,7 @@ class SpeedGateTests(unittest.TestCase):
             arm["identity"]["private_metadata"] = "must-not-export"
             for row in arm["requests"]:
                 row["output_text"] = "must-not-export"
+                row["normalized_output"] = "must-not-export"
         result = SPEED.reduce(gate, captures, plan_for(gate, captures))
         self.assertNotIn("must-not-export", json.dumps(result))
         self.assertNotIn("config", result["arms"][0]["identity"])
