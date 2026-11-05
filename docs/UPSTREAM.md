@@ -50,10 +50,13 @@ Observed on 2026-11-04/05 after `v0.16.2` publication (companion experiment rece
   `45f74287`); `3` upstream source defects remain unported on `a87de361` and are ported in draft
   [`alphastorm/ninfer#93`](https://github.com/alphastorm/ninfer/pull/93) (head `e6ac7b70`, CI green
   on all `8/8` jobs) — upstream [`#434`](https://github.com/Neroued/ninfer/issues/434) request
-  starvation under context pressure (`a754fcf3`, reproduced at runtime on both shipped `C2` lanes in
-  [EXP-109](PERFORMANCE.md#experiment-ledger)), upstream
+  starvation under context pressure (`a754fcf3`, reproduced at runtime on both shipped `C2` lanes and
+  the `rtxpro6000-win-a` proxy in [EXP-109](PERFORMANCE.md#experiment-ledger), where `e6ac7b70` cuts
+  the maximum admitted-request pause from `362.3 s` to `1.28 s` while trading indefinite silent stalls
+  for bounded HTTP `503` queue timeouts on deferred fresh arrivals), upstream
   [`#378`](https://github.com/Neroued/ninfer/issues/378) Host placement (re-expressed from Saylek-ai
-  `fix/378-host-placement`; not reproduced in the native RTX 3090 fill test in EXP-109), and the
+  `fix/378-host-placement`; not reproduced on native RTX 3090 or on the `rtxpro6000-win-a` fixed-fill-5
+  proxy and inconclusive on RTX 5090 within its `3,600 s` adaptive-fill budget in EXP-109), and the
   `452c3f5f` recovery-loss formula — plus the `a754fcf3` failure-diagnostics subset. Everything else
   requires a full re-port estimated at **7–10 multi-agent days** at `a754fcf3`, with low value for
   the dense 27B product today (deferral stands).

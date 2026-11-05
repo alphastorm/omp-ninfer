@@ -194,17 +194,31 @@ unmet:
    request streamed and `48` fresh `247`-token requests completed every `~10 s`, running only after
    the other request finished — while upstream
    [`Neroued/ninfer#378`](https://github.com/Neroued/ninfer/issues/378) Host placement was not
-   reproduced on the native RTX 3090 lane (`4/5` fill arms preserved the conversation at `99.995%`
-   peak Host occupancy; the oldest conversation was evicted instead) and the RTX 5090 `#378` result
-   is `TODO: [LEAD WILL SUPPLY]`. Draft
+   reproduced on the native RTX 3090 lane (`4/5` Host-fill arms preserved the conversation at
+   `99.995%` peak Host occupancy; the oldest conversation was evicted instead), was **inconclusive**
+   on the RTX 5090 (`rtx5090-win-a`, production image `a0cbb8a5`: the client's adaptive fill did not
+   converge within its `3,600 s` budget across `12` conversations of `~120K` tokens with fill steps
+   lengthening to `~10 min`, so no preservation probe ran), and did **not** reproduce on either build
+   on the RTX PRO 6000 proxy (`rtxpro6000-win-a`, `sm_120`, `NINFER_VRAM_BUDGET_MIB=31000`, `C2` /
+   `BF16` / `131,072`-token KV, `20.4 GiB` Host, preregistered fixed fill `5`: peak Host occupancy
+   `99.842%` baseline / `99.861%` candidate, with the preserved conversation keeping `119,985` of
+   `119,992` / `119,981` of `119,988` cached tokens). Draft
    [`alphastorm/ninfer#93`](https://github.com/alphastorm/ninfer/pull/93) (head `e6ac7b70`, CI green
    on all `8/8` jobs) ports the targeted fix candidate (the `a754fcf3` failure-diagnostics subset,
    the `452c3f5f` recovery-loss formula, `#378` Host placement re-expressed from Saylek-ai
    `fix/378-host-placement`, and the `#434` scheduler pressure owner + bounded service rotation +
    deferred fresh admission, including a fix and regression test for a refusal-retry liveness defect
-   on a queued fresh-admission notification found in the first scheduler port; GPU red/green on the
-   `rtxpro6000-win-a` RTX PRO 6000 proxy is `TODO: [LEAD WILL SUPPLY]`, with no release in this
-   research cycle).
+   on a queued fresh-admission notification found in the first scheduler port). On that same
+   `rtxpro6000-win-a` RTX PRO 6000 proxy (Linux `sm_120a` builds of `a87de361` and `e6ac7b70`, clean
+   build provenance), baseline `a87de361` was **RED** (an admitted request paused `362.3 s` without
+   progress while `38` fresh requests completed), whereas candidate `e6ac7b70` eliminated
+   admitted-request starvation (maximum pause `1.28 s`, both long requests completed) and passed
+   no-pressure parity (`3/3` greedy prompts with output fields and finish reasons byte-identical),
+   **but** two fresh requests were refused with HTTP `503` queue timeouts (`180 s` pending timeout)
+   while admission was deferred under sustained pressure; the strict no-failure criterion is therefore
+   **not** met (the fix trades indefinite silent stalls for bounded, visible `503`s on new requests
+   during long pressure, so `alphastorm/ninfer#93` stays draft-only with no release until a design
+   decision resolves the `503` trade-off before qualification).
    Other remaining open items are `omp-ninfer`
    [#88](https://github.com/alphastorm/omp-ninfer/issues/88)–[#90](https://github.com/alphastorm/omp-ninfer/issues/90),
    `alphastorm/ninfer` [#87](https://github.com/alphastorm/ninfer/issues/87) (runtime-council
