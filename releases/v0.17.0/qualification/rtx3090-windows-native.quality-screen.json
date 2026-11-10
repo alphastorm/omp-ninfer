@@ -1,0 +1,764 @@
+{
+  "artifact_type": "omp-ninfer.quality-screen-verdict",
+  "schema_version": 1,
+  "tool_sha256": "2eb4c590255895156668415df2e3ccfdee9f924d7839c6db11ac7aae807e7571",
+  "preregistration": {
+    "experiment": "EXP-085",
+    "fixed_utc": "2026-10-01",
+    "question": "Is the candidate's role-corpus quality not worse than production's by more than the margins on any primary metric of the automatic-use gate?",
+    "gate_variants_per_case": 8,
+    "redaction_variants_per_control": 72,
+    "variant_family": "EXP-063's: v0-v7 are EXP-057's prefixes; the rest are whitespace strings over space, newline and tab in order of length, then alphabet order, skipping any already used; each is prepended to the task",
+    "vacuous_cases": {
+      "struct-001": "json_schema structured-output case: answered HTTP 400 at transport in every corpus run (v0.8.7, v0.9.0, EXP-080, EXP-081, EXP-084); not sent",
+      "struct-003": "json_schema structured-output case: answered HTTP 400 at transport in every corpus run (v0.8.7, v0.9.0, EXP-080, EXP-081, EXP-084); not sent",
+      "struct-004": "json_schema structured-output case: answered HTTP 400 at transport in every corpus run (v0.8.7, v0.9.0, EXP-080, EXP-081, EXP-084); not sent",
+      "struct-006": "json_schema structured-output case: answered HTTP 400 at transport in every corpus run (v0.8.7, v0.9.0, EXP-080, EXP-081, EXP-084); not sent",
+      "struct-007": "json_schema structured-output case: answered HTTP 400 at transport in every corpus run (v0.8.7, v0.9.0, EXP-080, EXP-081, EXP-084); not sent"
+    },
+    "screen_order": "cases sorted by id; each case's variants in index order",
+    "determinism_prompts": 80,
+    "arms": "production, then each candidate, each on a fresh server with its own image and arguments, the same prompt order, concurrency 1, low reasoning",
+    "production": "shipped v0.9.0: published image 4c816b0c, server f62a570e, artifact eec39564, production's arguments (two requests, MTP3, BF16 KV, four device state slots, durable store on)",
+    "candidates": "first the DFlash2 K=7 two-request profile with NVFP4 KV and four device state slots (EXP-084's spk5-df2k7-c2ds4-nvfp4-ckpt, server c260dde9, artifact 0634abb0); if its verdict is not pass, the same profile with BF16 KV and two slots (spk5-df2k7-c2ds2) runs next under the same rule, to separate NVFP4's effect from DFlash2's",
+    "follow_on_candidates": {
+      "EXP-088": "registered 2026-10-01 after EXP-085's verdicts and EXP-087's pre-check, before its data: the same DFlash2 K=7 two-request profile with the fork's FP8 E4M3 row-256 KV and four device state slots (spk5-df2k7-c2ds4-fp8-ckpt, server c260dde9), against EXP-085's production screen and determinism runs, under this rule unchanged",
+      "EXP-094": "registered 2026-10-03 after EXP-092 and EXP-093, before its data: the shipped v0.10.0 DFlash2 K=7 BF16 two-request profile on fork a59c13d0, which adds EXP-092's verify rounds and the 8- and 16-column Q4 query/key projections on the small-T tensor cores (exp094-a59c13d0, server 884e5a43), against EXP-085's production screen and determinism runs, under this rule unchanged; its verdict against EXP-085's BF16 DFlash2 runs (spk5-df2k7-c2ds2) is reported, not a gate",
+      "EXP-101": "registered 2026-10-30 before any data: native Windows RTX 3090 powered screen for DFlash2 K=7 (one request, low reasoning, 350 W, INT8 KV, 131,072 tokens). Production arm: the published v0.14.0 incumbent v0.7.0-beta.3 (server fedce425, configuration d08d262b, model 81f924d4) as a packaged scratch install on the same card at release-spec port 18082; production screen, then fresh-cache determinism. Candidate arm: the RTX 3090 package of the frozen N15 source (component v0.8.0-beta.1), whose server prefix is appended here before any candidate data; candidate screen, then fresh-cache determinism. 1,120 screen prompts and the first 80 determinism prompts in fixed matched contiguous <=100-prompt shards with resumed identity and seal verification; under this rule unchanged. Appended 2026-10-30 before any candidate data: the candidate is the frozen source 2af6b3de RTX 3090 package (server 05cb97e4, configuration 55788a64, model 81f924d4); every role, production included, uses 50-prompt shards. Amended 2026-10-31 before any candidate data (none was collected for 2af6b3de): the candidate is the frozen P16 source 26fa28d0 RTX 3090 package (component v0.8.0-qwen38-3090-beta.1; package 040d5923, server 72cd776b, configuration cbe67aae, model 81f924d4; DFlash2 K=7, INT8 KV, concurrency 2 over one shared 131,072-token pool); the screen still sends one request at a time",
+      "EXP-102": "registered 2026-10-30 before any data: native Windows RTX 4090 powered screen for the P16 candidate (one request, low reasoning, 450 W). Production arm: the published v0.14.0 incumbent v0.7.0-qwen38-4090-beta.3 (server 5caa7780, configuration b5cfbf50, model 81f924d4; MTP3, INT8 KV, 131,072 tokens) as a packaged scratch install on the same card at explicit port 18084; production screen, then fresh-cache determinism. Candidate arm: the RTX 4090 package of the frozen P16 source, whose server prefix and profile are appended here before any candidate data; candidate screen, then fresh-cache determinism. 1,120 screen prompts and the first 80 determinism prompts in fixed matched contiguous 50-prompt shards with resumed identity and seal verification; under this rule unchanged. Amended 2026-10-30 before any data: the scratch install listens on the release-spec port 18082, as EXP-101's does, because the incumbent's installer has no port override and any other port would change configuration b5cfbf50. Appended 2026-10-31 before any candidate data: the candidate is the frozen P16 source 26fa28d0 RTX 4090 package (component v0.8.0-qwen38-4090-beta.1; package 06526bdb, server c6f59e9e, configuration f00cfac9, model 81f924d4; DFlash2 K=7, INT8 KV, concurrency 1, 131,072 tokens)"
+    },
+    "pairing": "by prompt id; a pair where either arm errored is left out of the primary statistics",
+    "primary": {
+      "required_fact_recall": {
+        "direction": "higher",
+        "margin": -0.02,
+        "definition": "required facts found / required facts, over gate pairs"
+      },
+      "evidence_precision": {
+        "direction": "higher",
+        "margin": -0.02,
+        "definition": "supported citations / citations, over gate pairs (0 without citations)"
+      },
+      "unsupported_claim_rate": {
+        "direction": "lower",
+        "margin": 0.03,
+        "definition": "samples with an unsupported claim / gate pairs"
+      },
+      "schema_valid_rate": {
+        "direction": "higher",
+        "margin": -0.02,
+        "definition": "schema-valid samples / gate pairs"
+      },
+      "tool_selection_accuracy": {
+        "direction": "higher",
+        "margin": -0.02,
+        "definition": "correct tool selections / tool-evaluable samples"
+      },
+      "tool_argument_accuracy": {
+        "direction": "higher",
+        "margin": -0.02,
+        "definition": "correct tool arguments / argument-evaluable samples"
+      },
+      "duplicate_rate": {
+        "direction": "lower",
+        "margin": 0.02,
+        "definition": "duplicate work items / work items, over gate pairs (0 without items)"
+      },
+      "redaction_control_pass_rate": {
+        "direction": "higher",
+        "margin": -0.05,
+        "definition": "redaction pairs with no secret leak / redaction pairs"
+      },
+      "secret_leak_ratio": {
+        "direction": "ratio",
+        "margin": 1.1,
+        "definition": "candidate secret leaks / production secret leaks, over redaction pairs"
+      }
+    },
+    "gate_pairs": "variants v0-v7 of every counted case, including the redaction controls",
+    "redaction_pairs": "variants v0-v71 of every counted redaction control",
+    "bounds": "one-sided 95% percentile bounds of a paired bootstrap that resamples variants within each case; a difference is candidate minus production",
+    "decision": "pass only when every primary bound is inside its margin",
+    "margin_basis": "2.0 points is the automatic-use gate's criterion-6 margin. The unsupported-claim rate takes 3.0 points: its per-pair difference is a 0/1 flip, and at 672 gate pairs a 2.0-point bound would have about three-in-four power for an equivalent candidate. The redaction margins are EXP-063's.",
+    "power_basis": "Approximate, from single-run paired differences between builds (EXP-078 against EXP-080: 8 of 84 cases changed their unsupported-claim flag, recall differences had a standard deviation of 0.13 per case): about 0.9 power or more for an equivalent candidate on recall, precision and unsupported claims at 672 pairs, and EXP-063's basis for redaction at 504 pairs. Variance across variants within a case was not measured before this screen.",
+    "one_sided_alpha": 0.05,
+    "bootstrap_resamples": 20000,
+    "seed": 20261001,
+    "validity": {
+      "complete": "every counted prompt has a scored sample in both arms",
+      "max_error_fraction": 0.01,
+      "min_perturbed_case_fraction": 0.5,
+      "perturbed_case": "a counted case with at least two distinct outputs among its gate variants in the arm",
+      "determinism_subset": "the screen's first 80 prompts, re-run by each arm in the same order on a fresh server after its screen; every output must equal the screen's byte for byte",
+      "evaluable": "every primary metric has a non-empty denominator in both arms",
+      "decision": "any failed check makes the screen invalid, and an invalid screen gives no verdict"
+    },
+    "secondary_reported_only": [
+      "critical misses and forbidden claims: totals over gate pairs and the candidate/production ratio's one-sided 95% upper bound",
+      "mean output tokens over gate pairs",
+      "per-class required fact recall, evidence precision and unsupported-claim rate",
+      "per-case distinct outputs"
+    ]
+  },
+  "runs": {
+    "production": {
+      "label": "screen-cand",
+      "corpus_sha256": "91f981536ba5ef79ad16a4f45eeae967da467fd87006face9f54ed4341f9a78c",
+      "scores_sha256": "500eafb6d4d51aaf18ccd7ff8b73fbed293536c819b51df7df57ee6d340d15e4",
+      "responses_sha256": "28ba7eeb689d4466e1476fdc94eb934c137c61610b5a027194c960349f394ebc",
+      "arm": {
+        "artifact_type": "omp_ninfer_screen_arm",
+        "schema_version": 1,
+        "kind": "native-windows",
+        "lane": "rtx3090",
+        "release_id": "qwen38-3090-native-v0.8.0-beta.1-26fa28d0e783",
+        "package_sha256": "040d5923192a969dcb04bb63ff5c931f80bcf9a92f1f769f08e49e2121ad0e20",
+        "server_binary_sha256": "72cd776be6caa99148757a88db8dca046f2c1fba67166975c8b4f2f84d94c624",
+        "configuration_sha256": "cbe67aae59707d188966b851e21539c84784138a69fc8769825a09eac8ba8866",
+        "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+        "gpu_name": "NVIDIA GeForce RTX 3090",
+        "power_limit_w": 350.0,
+        "endpoint_port": 18082,
+        "concurrency": 1,
+        "reasoning": "low",
+        "fresh_start": {
+          "cache_root_empty": true,
+          "process_started_utc": "2026-11-01T01:02:59.393729+00:00"
+        },
+        "prompts_sha256": "91f981536ba5ef79ad16a4f45eeae967da467fd87006face9f54ed4341f9a78c"
+      },
+      "prompt_count": 1120,
+      "prompt_ids_sha256": "c0bcbfab833dd48de039ae4e2b1332c88418b3d6ebc80ed97d3ffcf3e8d343ad"
+    },
+    "candidate": {
+      "label": "screen-cand",
+      "corpus_sha256": "91f981536ba5ef79ad16a4f45eeae967da467fd87006face9f54ed4341f9a78c",
+      "scores_sha256": "a0f6e4719cf8488d9b52cf934b50a2f91193e46465a35a68a945af7c374794eb",
+      "responses_sha256": "21155ad251e4e525b13f70aab02a87ff25fa4696bb5c78aad5c69f457ccb537f",
+      "arm": {
+        "artifact_type": "omp_ninfer_screen_arm",
+        "schema_version": 1,
+        "kind": "native-windows",
+        "lane": "rtx3090",
+        "release_id": "qwen38-3090-native-v0.8.0-beta.2-a87de3613c17",
+        "package_sha256": "97a8e6340397d6a925cbabc6ffbb6f219a4b00f19b2f5d8e4be6cd14d41f3ed9",
+        "server_binary_sha256": "15a4db46db09dce695f1c55a9996b30408fa93ed864d881872f9ae7306fbab0f",
+        "configuration_sha256": "238ccad7ba6dca673d845c183b6c3de3a49bd2ce75090f20f669b2d6f83dda6f",
+        "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+        "gpu_name": "NVIDIA GeForce RTX 3090",
+        "power_limit_w": 350.0,
+        "endpoint_port": 18082,
+        "concurrency": 1,
+        "reasoning": "low",
+        "fresh_start": {
+          "cache_root_empty": true,
+          "process_started_utc": "2026-11-04T00:33:20.455187+00:00"
+        },
+        "prompts_sha256": "91f981536ba5ef79ad16a4f45eeae967da467fd87006face9f54ed4341f9a78c"
+      },
+      "prompt_count": 1120,
+      "prompt_ids_sha256": "c0bcbfab833dd48de039ae4e2b1332c88418b3d6ebc80ed97d3ffcf3e8d343ad"
+    },
+    "production_determinism": {
+      "label": "screen-cand",
+      "corpus_sha256": "77a809520071612c3a79a03091f15a285b0bc8254ff210cb79cc1739148ac313",
+      "scores_sha256": "2d66e8aa1b801f9bd673d7567472a0a74667c5521347c48226ca1b3d473e4e53",
+      "responses_sha256": "f8512da5fd5f5c0a11079c264611323bbe8e0514d8903df452fc964b76b765fb",
+      "arm": {
+        "artifact_type": "omp_ninfer_screen_arm",
+        "schema_version": 1,
+        "kind": "native-windows",
+        "lane": "rtx3090",
+        "release_id": "qwen38-3090-native-v0.8.0-beta.1-26fa28d0e783",
+        "package_sha256": "040d5923192a969dcb04bb63ff5c931f80bcf9a92f1f769f08e49e2121ad0e20",
+        "server_binary_sha256": "72cd776be6caa99148757a88db8dca046f2c1fba67166975c8b4f2f84d94c624",
+        "configuration_sha256": "cbe67aae59707d188966b851e21539c84784138a69fc8769825a09eac8ba8866",
+        "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+        "gpu_name": "NVIDIA GeForce RTX 3090",
+        "power_limit_w": 350.0,
+        "endpoint_port": 18082,
+        "concurrency": 1,
+        "reasoning": "low",
+        "fresh_start": {
+          "cache_root_empty": true,
+          "process_started_utc": "2026-11-01T02:32:59.272789+00:00"
+        },
+        "prompts_sha256": "77a809520071612c3a79a03091f15a285b0bc8254ff210cb79cc1739148ac313"
+      },
+      "prompt_count": 80,
+      "prompt_ids_sha256": "280cd274c428829d2162bb0707786f0f3098fb83c6877b921050872a17d04d53"
+    },
+    "candidate_determinism": {
+      "label": "screen-cand",
+      "corpus_sha256": "77a809520071612c3a79a03091f15a285b0bc8254ff210cb79cc1739148ac313",
+      "scores_sha256": "1beb7cca44335de5d2f7e29ff42910b041ddff2eb9000c61d9f54c18882f102d",
+      "responses_sha256": "a5a7bab7aaa721d8c75aeef63c4d349d8592fb5ce7b79c4596d03a7c0c3323fe",
+      "arm": {
+        "artifact_type": "omp_ninfer_screen_arm",
+        "schema_version": 1,
+        "kind": "native-windows",
+        "lane": "rtx3090",
+        "release_id": "qwen38-3090-native-v0.8.0-beta.2-a87de3613c17",
+        "package_sha256": "97a8e6340397d6a925cbabc6ffbb6f219a4b00f19b2f5d8e4be6cd14d41f3ed9",
+        "server_binary_sha256": "15a4db46db09dce695f1c55a9996b30408fa93ed864d881872f9ae7306fbab0f",
+        "configuration_sha256": "238ccad7ba6dca673d845c183b6c3de3a49bd2ce75090f20f669b2d6f83dda6f",
+        "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+        "gpu_name": "NVIDIA GeForce RTX 3090",
+        "power_limit_w": 350.0,
+        "endpoint_port": 18082,
+        "concurrency": 1,
+        "reasoning": "low",
+        "fresh_start": {
+          "cache_root_empty": true,
+          "process_started_utc": "2026-11-04T01:09:19.092270+00:00"
+        },
+        "prompts_sha256": "77a809520071612c3a79a03091f15a285b0bc8254ff210cb79cc1739148ac313"
+      },
+      "prompt_count": 80,
+      "prompt_ids_sha256": "280cd274c428829d2162bb0707786f0f3098fb83c6877b921050872a17d04d53"
+    }
+  },
+  "counted_cases": 84,
+  "controls": [
+    "log-023",
+    "log-024",
+    "repo-029",
+    "repo-030",
+    "worklog-007",
+    "worklog-008",
+    "worklog-014"
+  ],
+  "counted_prompts": 1120,
+  "validity": {
+    "checks": {
+      "complete": true,
+      "errors_within_bound": true,
+      "variants_perturb_outputs": true,
+      "deterministic": true,
+      "evaluable": true
+    },
+    "missing_samples": {
+      "production": 0,
+      "candidate": 0
+    },
+    "errored_samples": {
+      "production": 0,
+      "candidate": 0
+    },
+    "max_errored_samples": 11,
+    "perturbed_cases": {
+      "production": 80,
+      "candidate": 80
+    },
+    "min_perturbed_cases": 42,
+    "determinism_subset": 80,
+    "determinism_mismatches": {
+      "production": 0,
+      "candidate": 0
+    },
+    "valid": true
+  },
+  "pairs": {
+    "gate": 672,
+    "redaction": 504
+  },
+  "primary": {
+    "required_fact_recall": {
+      "production": 0.9327,
+      "candidate": 0.9327,
+      "difference": 0.0,
+      "difference_lower_95": 0.0,
+      "margin": -0.02,
+      "inside_margin": true
+    },
+    "evidence_precision": {
+      "production": 0.977,
+      "candidate": 0.977,
+      "difference": 0.0,
+      "difference_lower_95": 0.0,
+      "margin": -0.02,
+      "inside_margin": true
+    },
+    "unsupported_claim_rate": {
+      "production": 0.2485,
+      "candidate": 0.2485,
+      "difference": 0.0,
+      "difference_upper_95": 0.0,
+      "margin": 0.03,
+      "inside_margin": true
+    },
+    "schema_valid_rate": {
+      "production": 1.0,
+      "candidate": 1.0,
+      "difference": 0.0,
+      "difference_lower_95": 0.0,
+      "margin": -0.02,
+      "inside_margin": true
+    },
+    "tool_selection_accuracy": {
+      "production": 1.0,
+      "candidate": 1.0,
+      "difference": 0.0,
+      "difference_lower_95": 0.0,
+      "margin": -0.02,
+      "inside_margin": true
+    },
+    "tool_argument_accuracy": {
+      "production": 1.0,
+      "candidate": 1.0,
+      "difference": 0.0,
+      "difference_lower_95": 0.0,
+      "margin": -0.02,
+      "inside_margin": true
+    },
+    "duplicate_rate": {
+      "production": 0.0025,
+      "candidate": 0.0025,
+      "difference": 0.0,
+      "difference_upper_95": 0.0,
+      "margin": 0.02,
+      "inside_margin": true
+    },
+    "redaction_control_pass_rate": {
+      "production": 0.5694,
+      "candidate": 0.5694,
+      "difference": 0.0,
+      "difference_lower_95": 0.0,
+      "margin": -0.05,
+      "inside_margin": true
+    },
+    "secret_leak_ratio": {
+      "production_total": 561,
+      "candidate_total": 561,
+      "ratio": 1.0,
+      "ratio_upper_95": 1.0,
+      "margin": 1.1,
+      "inside_margin": true
+    }
+  },
+  "secondary": {
+    "critical_misses": {
+      "production": 86,
+      "candidate": 86,
+      "ratio": 1.0,
+      "ratio_upper_95": 1.0
+    },
+    "forbidden_claims": {
+      "production": 66,
+      "candidate": 66,
+      "ratio": 1.0,
+      "ratio_upper_95": 1.0
+    },
+    "mean_output_tokens": {
+      "production": 967.8,
+      "candidate": 967.8
+    },
+    "per_class": {
+      "log-triage": {
+        "pairs": 192,
+        "production": {
+          "required_fact_recall": 0.9818,
+          "evidence_precision": 0.9294,
+          "unsupported_claim_rate": 0.3906
+        },
+        "candidate": {
+          "required_fact_recall": 0.9818,
+          "evidence_precision": 0.9294,
+          "unsupported_claim_rate": 0.3906
+        }
+      },
+      "regression-contract": {
+        "pairs": 64,
+        "production": {
+          "required_fact_recall": 0.75,
+          "evidence_precision": 0.0,
+          "unsupported_claim_rate": 1.0
+        },
+        "candidate": {
+          "required_fact_recall": 0.75,
+          "evidence_precision": 0.0,
+          "unsupported_claim_rate": 1.0
+        }
+      },
+      "repository-evidence": {
+        "pairs": 240,
+        "production": {
+          "required_fact_recall": 0.9041,
+          "evidence_precision": 1.0,
+          "unsupported_claim_rate": 0.1167
+        },
+        "candidate": {
+          "required_fact_recall": 0.9041,
+          "evidence_precision": 1.0,
+          "unsupported_claim_rate": 0.1167
+        }
+      },
+      "structured-output": {
+        "pairs": 16,
+        "production": {
+          "required_fact_recall": 1.0,
+          "evidence_precision": 0.0,
+          "unsupported_claim_rate": 0.0
+        },
+        "candidate": {
+          "required_fact_recall": 1.0,
+          "evidence_precision": 0.0,
+          "unsupported_claim_rate": 0.0
+        }
+      },
+      "work-log-extraction": {
+        "pairs": 160,
+        "production": {
+          "required_fact_recall": 0.9646,
+          "evidence_precision": 0.9887,
+          "unsupported_claim_rate": 0.0
+        },
+        "candidate": {
+          "required_fact_recall": 0.9646,
+          "evidence_precision": 0.9887,
+          "unsupported_claim_rate": 0.0
+        }
+      }
+    }
+  },
+  "per_case_distinct_outputs": {
+    "log-001": {
+      "production": 8,
+      "candidate": 8
+    },
+    "log-002": {
+      "production": 8,
+      "candidate": 8
+    },
+    "log-003": {
+      "production": 8,
+      "candidate": 8
+    },
+    "log-004": {
+      "production": 8,
+      "candidate": 8
+    },
+    "log-005": {
+      "production": 8,
+      "candidate": 8
+    },
+    "log-006": {
+      "production": 8,
+      "candidate": 8
+    },
+    "log-007": {
+      "production": 8,
+      "candidate": 8
+    },
+    "log-008": {
+      "production": 8,
+      "candidate": 8
+    },
+    "log-009": {
+      "production": 8,
+      "candidate": 8
+    },
+    "log-010": {
+      "production": 8,
+      "candidate": 8
+    },
+    "log-011": {
+      "production": 8,
+      "candidate": 8
+    },
+    "log-012": {
+      "production": 8,
+      "candidate": 8
+    },
+    "log-013": {
+      "production": 8,
+      "candidate": 8
+    },
+    "log-014": {
+      "production": 8,
+      "candidate": 8
+    },
+    "log-015": {
+      "production": 8,
+      "candidate": 8
+    },
+    "log-016": {
+      "production": 8,
+      "candidate": 8
+    },
+    "log-017": {
+      "production": 8,
+      "candidate": 8
+    },
+    "log-018": {
+      "production": 8,
+      "candidate": 8
+    },
+    "log-019": {
+      "production": 8,
+      "candidate": 8
+    },
+    "log-020": {
+      "production": 8,
+      "candidate": 8
+    },
+    "log-021": {
+      "production": 8,
+      "candidate": 8
+    },
+    "log-022": {
+      "production": 8,
+      "candidate": 8
+    },
+    "log-023": {
+      "production": 8,
+      "candidate": 8
+    },
+    "log-024": {
+      "production": 8,
+      "candidate": 8
+    },
+    "reg-commit-468dcf69": {
+      "production": 3,
+      "candidate": 3
+    },
+    "reg-commit-5933e395": {
+      "production": 4,
+      "candidate": 4
+    },
+    "reg-commit-708d6c94": {
+      "production": 3,
+      "candidate": 3
+    },
+    "reg-commit-85d47e27": {
+      "production": 4,
+      "candidate": 4
+    },
+    "reg-commit-ddee681f": {
+      "production": 5,
+      "candidate": 5
+    },
+    "reg-commit-e881586f": {
+      "production": 1,
+      "candidate": 1
+    },
+    "reg-title-commit-measure": {
+      "production": 6,
+      "candidate": 6
+    },
+    "reg-title-rollback": {
+      "production": 4,
+      "candidate": 4
+    },
+    "repo-001": {
+      "production": 1,
+      "candidate": 1
+    },
+    "repo-002": {
+      "production": 4,
+      "candidate": 4
+    },
+    "repo-003": {
+      "production": 4,
+      "candidate": 4
+    },
+    "repo-004": {
+      "production": 4,
+      "candidate": 4
+    },
+    "repo-005": {
+      "production": 2,
+      "candidate": 2
+    },
+    "repo-006": {
+      "production": 2,
+      "candidate": 2
+    },
+    "repo-007": {
+      "production": 5,
+      "candidate": 5
+    },
+    "repo-008": {
+      "production": 6,
+      "candidate": 6
+    },
+    "repo-009": {
+      "production": 4,
+      "candidate": 4
+    },
+    "repo-010": {
+      "production": 4,
+      "candidate": 4
+    },
+    "repo-011": {
+      "production": 5,
+      "candidate": 5
+    },
+    "repo-012": {
+      "production": 3,
+      "candidate": 3
+    },
+    "repo-013": {
+      "production": 2,
+      "candidate": 2
+    },
+    "repo-014": {
+      "production": 2,
+      "candidate": 2
+    },
+    "repo-015": {
+      "production": 2,
+      "candidate": 2
+    },
+    "repo-016": {
+      "production": 3,
+      "candidate": 3
+    },
+    "repo-017": {
+      "production": 5,
+      "candidate": 5
+    },
+    "repo-018": {
+      "production": 5,
+      "candidate": 5
+    },
+    "repo-019": {
+      "production": 7,
+      "candidate": 7
+    },
+    "repo-020": {
+      "production": 6,
+      "candidate": 6
+    },
+    "repo-021": {
+      "production": 4,
+      "candidate": 4
+    },
+    "repo-022": {
+      "production": 6,
+      "candidate": 6
+    },
+    "repo-023": {
+      "production": 2,
+      "candidate": 2
+    },
+    "repo-024": {
+      "production": 1,
+      "candidate": 1
+    },
+    "repo-025": {
+      "production": 8,
+      "candidate": 8
+    },
+    "repo-026": {
+      "production": 6,
+      "candidate": 6
+    },
+    "repo-027": {
+      "production": 2,
+      "candidate": 2
+    },
+    "repo-028": {
+      "production": 3,
+      "candidate": 3
+    },
+    "repo-029": {
+      "production": 5,
+      "candidate": 5
+    },
+    "repo-030": {
+      "production": 4,
+      "candidate": 4
+    },
+    "struct-002": {
+      "production": 2,
+      "candidate": 2
+    },
+    "struct-005": {
+      "production": 1,
+      "candidate": 1
+    },
+    "worklog-001": {
+      "production": 7,
+      "candidate": 7
+    },
+    "worklog-002": {
+      "production": 8,
+      "candidate": 8
+    },
+    "worklog-003": {
+      "production": 7,
+      "candidate": 7
+    },
+    "worklog-004": {
+      "production": 7,
+      "candidate": 7
+    },
+    "worklog-005": {
+      "production": 8,
+      "candidate": 8
+    },
+    "worklog-006": {
+      "production": 8,
+      "candidate": 8
+    },
+    "worklog-007": {
+      "production": 7,
+      "candidate": 7
+    },
+    "worklog-008": {
+      "production": 8,
+      "candidate": 8
+    },
+    "worklog-009": {
+      "production": 7,
+      "candidate": 7
+    },
+    "worklog-010": {
+      "production": 4,
+      "candidate": 4
+    },
+    "worklog-011": {
+      "production": 8,
+      "candidate": 8
+    },
+    "worklog-012": {
+      "production": 5,
+      "candidate": 5
+    },
+    "worklog-013": {
+      "production": 6,
+      "candidate": 6
+    },
+    "worklog-014": {
+      "production": 8,
+      "candidate": 8
+    },
+    "worklog-015": {
+      "production": 4,
+      "candidate": 4
+    },
+    "worklog-016": {
+      "production": 8,
+      "candidate": 8
+    },
+    "worklog-017": {
+      "production": 8,
+      "candidate": 8
+    },
+    "worklog-018": {
+      "production": 6,
+      "candidate": 6
+    },
+    "worklog-019": {
+      "production": 8,
+      "candidate": 8
+    },
+    "worklog-020": {
+      "production": 8,
+      "candidate": 8
+    }
+  },
+  "verdict": "pass",
+  "raw_prompts_outputs_or_secrets_included": false
+}

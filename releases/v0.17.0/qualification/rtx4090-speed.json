@@ -1,0 +1,2636 @@
+{
+  "label": "Native no-regression; founder decision SHA-256 3d9f77cd5a7099b68ec59c8f7ca56765317a9ee7352c3a6705a755fe5902b104",
+  "status": "PASS",
+  "gate": {
+    "weighted_minimum": 0.98,
+    "every_case_minimum": 0.95
+  },
+  "role108": {
+    "case_count": 108,
+    "weighted_decode_tok_s": {
+      "A": 178.29662510606403,
+      "B": 178.22135270071502
+    },
+    "weighted_decode_ratio": 0.9995778248449502,
+    "minimum_case_ratio": 0.9988670027551729,
+    "below_case_floor": [],
+    "acceptance": {
+      "A": {
+        "accepted": 94704,
+        "drafted": 171170,
+        "rounds": 24516
+      },
+      "B": {
+        "accepted": 94704,
+        "drafted": 171170,
+        "rounds": 24516
+      }
+    },
+    "cases": [
+      {
+        "id": "log-001@0",
+        "baseline_decode_tok_s": 152.18087331274805,
+        "candidate_decode_tok_s": 152.01755036461486,
+        "ratio": 0.9989267840000002,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-001@32000",
+        "baseline_decode_tok_s": 191.28788252840053,
+        "candidate_decode_tok_s": 191.23030701372682,
+        "ratio": 0.9996990111767003,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-001@64000",
+        "baseline_decode_tok_s": 183.39198733415503,
+        "candidate_decode_tok_s": 183.37599790109368,
+        "ratio": 0.9999128128044535,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-002@0",
+        "baseline_decode_tok_s": 162.56080638934895,
+        "candidate_decode_tok_s": 162.37662544359296,
+        "ratio": 0.9988670027551729,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-003@0",
+        "baseline_decode_tok_s": 145.56952669750208,
+        "candidate_decode_tok_s": 145.43587970776423,
+        "ratio": 0.9990819026978388,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-004@0",
+        "baseline_decode_tok_s": 143.90285972389927,
+        "candidate_decode_tok_s": 143.80783554267455,
+        "ratio": 0.9993396643999498,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-005@0",
+        "baseline_decode_tok_s": 143.36644077452678,
+        "candidate_decode_tok_s": 143.3109977694948,
+        "ratio": 0.9996132776629423,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-006@0",
+        "baseline_decode_tok_s": 149.4193472424501,
+        "candidate_decode_tok_s": 149.32113729002154,
+        "ratio": 0.9993427226511089,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-007@0",
+        "baseline_decode_tok_s": 146.1985109672421,
+        "candidate_decode_tok_s": 146.0972865832,
+        "ratio": 0.9993076237003209,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-008@0",
+        "baseline_decode_tok_s": 146.2131174193778,
+        "candidate_decode_tok_s": 146.13994780698806,
+        "ratio": 0.9994995687549711,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-009@0",
+        "baseline_decode_tok_s": 171.16759298661697,
+        "candidate_decode_tok_s": 171.13446937399112,
+        "ratio": 0.9998064843230667,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-010@0",
+        "baseline_decode_tok_s": 129.55383708071435,
+        "candidate_decode_tok_s": 129.46016812949162,
+        "ratio": 0.999276988213291,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-011@0",
+        "baseline_decode_tok_s": 146.50116789722617,
+        "candidate_decode_tok_s": 146.41457726242237,
+        "ratio": 0.9994089423582988,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-012@0",
+        "baseline_decode_tok_s": 221.81416996133228,
+        "candidate_decode_tok_s": 221.69610159296158,
+        "ratio": 0.9994677149417853,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-012@32000",
+        "baseline_decode_tok_s": 211.1713545990096,
+        "candidate_decode_tok_s": 211.19119601054845,
+        "ratio": 1.0000939588211504,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-012@64000",
+        "baseline_decode_tok_s": 201.45216950793895,
+        "candidate_decode_tok_s": 201.50345989679474,
+        "ratio": 1.000254603308473,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-013@0",
+        "baseline_decode_tok_s": 232.82390323218738,
+        "candidate_decode_tok_s": 232.7376191170158,
+        "ratio": 0.999629401818397,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-014@0",
+        "baseline_decode_tok_s": 215.47184927121464,
+        "candidate_decode_tok_s": 215.3486019701723,
+        "ratio": 0.9994280120514155,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-015@0",
+        "baseline_decode_tok_s": 138.15914496034708,
+        "candidate_decode_tok_s": 138.06948541151462,
+        "ratio": 0.999351041519125,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-016@0",
+        "baseline_decode_tok_s": 153.88232252893522,
+        "candidate_decode_tok_s": 153.80280930100486,
+        "ratio": 0.999483285496192,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-017@0",
+        "baseline_decode_tok_s": 122.58642158967442,
+        "candidate_decode_tok_s": 122.52665819684572,
+        "ratio": 0.9995124795058563,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-018@0",
+        "baseline_decode_tok_s": 136.29161060578662,
+        "candidate_decode_tok_s": 136.21256005068693,
+        "ratio": 0.9994199895742055,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-019@0",
+        "baseline_decode_tok_s": 182.53670136030365,
+        "candidate_decode_tok_s": 182.44914450728643,
+        "ratio": 0.9995203328844845,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-020@0",
+        "baseline_decode_tok_s": 148.96341373061148,
+        "candidate_decode_tok_s": 148.90344374039285,
+        "ratio": 0.9995974179919971,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-021@0",
+        "baseline_decode_tok_s": 147.4235077813421,
+        "candidate_decode_tok_s": 147.35031083728853,
+        "ratio": 0.9995034920471291,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-022@0",
+        "baseline_decode_tok_s": 200.6403109848561,
+        "candidate_decode_tok_s": 200.54712164886456,
+        "ratio": 0.9995355403132397,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-023@0",
+        "baseline_decode_tok_s": 133.52965920706603,
+        "candidate_decode_tok_s": 133.48051677995727,
+        "ratio": 0.9996319736948287,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-024@0",
+        "baseline_decode_tok_s": 130.31168630560194,
+        "candidate_decode_tok_s": 130.27561417170398,
+        "ratio": 0.9997231857332168,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reg-commit-468dcf69@0",
+        "baseline_decode_tok_s": 171.88491302435796,
+        "candidate_decode_tok_s": 171.8151332824139,
+        "ratio": 0.9995940321886532,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reg-commit-468dcf69@32000",
+        "baseline_decode_tok_s": 137.11696182530108,
+        "candidate_decode_tok_s": 137.1690857635922,
+        "ratio": 1.0003801421618248,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reg-commit-468dcf69@64000",
+        "baseline_decode_tok_s": 144.2351121587038,
+        "candidate_decode_tok_s": 144.18492353491484,
+        "ratio": 0.9996520360192619,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reg-commit-5933e395@0",
+        "baseline_decode_tok_s": 150.9660754582521,
+        "candidate_decode_tok_s": 150.88904755743823,
+        "ratio": 0.999489766819598,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reg-commit-708d6c94@0",
+        "baseline_decode_tok_s": 139.8546240427449,
+        "candidate_decode_tok_s": 139.84034735467242,
+        "ratio": 0.9998979176543487,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reg-commit-85d47e27@0",
+        "baseline_decode_tok_s": 170.22780506155777,
+        "candidate_decode_tok_s": 170.1363892796483,
+        "ratio": 0.9994629797295664,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reg-commit-ddee681f@0",
+        "baseline_decode_tok_s": 167.65791385842888,
+        "candidate_decode_tok_s": 167.56726248459478,
+        "ratio": 0.9994593075164311,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reg-commit-e881586f@0",
+        "baseline_decode_tok_s": 157.3150612747079,
+        "candidate_decode_tok_s": 157.2381680442089,
+        "ratio": 0.9995112150745393,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reg-title-commit-measure@0",
+        "baseline_decode_tok_s": 177.42259598468698,
+        "candidate_decode_tok_s": 177.35641282482942,
+        "ratio": 0.9996269744589732,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reg-title-commit-measure@32000",
+        "baseline_decode_tok_s": 194.05170117860158,
+        "candidate_decode_tok_s": 194.11168930822944,
+        "ratio": 1.0003091347783273,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reg-title-commit-measure@64000",
+        "baseline_decode_tok_s": 184.8289735619087,
+        "candidate_decode_tok_s": 184.84982380057383,
+        "ratio": 1.0001128082803432,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reg-title-rollback@0",
+        "baseline_decode_tok_s": 225.34561141736393,
+        "candidate_decode_tok_s": 225.2077530168075,
+        "ratio": 0.9993882356985373,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-001@0",
+        "baseline_decode_tok_s": 182.64963269430473,
+        "candidate_decode_tok_s": 182.54928664475955,
+        "ratio": 0.9994506090810863,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-001@32000",
+        "baseline_decode_tok_s": 187.45643842976455,
+        "candidate_decode_tok_s": 187.51792974604695,
+        "ratio": 1.0003280298974924,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-001@64000",
+        "baseline_decode_tok_s": 173.96798536170036,
+        "candidate_decode_tok_s": 173.99823356678363,
+        "ratio": 1.0001738722502327,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-002@0",
+        "baseline_decode_tok_s": 234.07861856940502,
+        "candidate_decode_tok_s": 234.05979173280355,
+        "ratio": 0.9999195704557873,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-003@0",
+        "baseline_decode_tok_s": 234.95168958743213,
+        "candidate_decode_tok_s": 234.87087477081278,
+        "ratio": 0.9996560364525947,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-004@0",
+        "baseline_decode_tok_s": 177.03210516725335,
+        "candidate_decode_tok_s": 177.0345889905468,
+        "ratio": 1.0000140303550653,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-005@0",
+        "baseline_decode_tok_s": 161.36470487000912,
+        "candidate_decode_tok_s": 161.3044793463338,
+        "ratio": 0.999626773873978,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-006@0",
+        "baseline_decode_tok_s": 209.39900081226907,
+        "candidate_decode_tok_s": 209.33541825699308,
+        "ratio": 0.9996963569308863,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-007@0",
+        "baseline_decode_tok_s": 232.84480006379235,
+        "candidate_decode_tok_s": 232.7047644518048,
+        "ratio": 0.9993985881928685,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-008@0",
+        "baseline_decode_tok_s": 232.19148243131002,
+        "candidate_decode_tok_s": 232.10118138816435,
+        "ratio": 0.9996110923527421,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-009@0",
+        "baseline_decode_tok_s": 212.6843883449509,
+        "candidate_decode_tok_s": 212.54095769549815,
+        "ratio": 0.9993256174062944,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-010@0",
+        "baseline_decode_tok_s": 233.4676438734388,
+        "candidate_decode_tok_s": 233.34549342378324,
+        "ratio": 0.9994767992359499,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-010@32000",
+        "baseline_decode_tok_s": 216.8265834794332,
+        "candidate_decode_tok_s": 216.85044099950917,
+        "ratio": 1.0001100304201318,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-010@64000",
+        "baseline_decode_tok_s": 207.84791831787044,
+        "candidate_decode_tok_s": 207.8841280623525,
+        "ratio": 1.0001742126876954,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-011@0",
+        "baseline_decode_tok_s": 210.53471206404578,
+        "candidate_decode_tok_s": 210.4808452601228,
+        "ratio": 0.9997441428855371,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-012@0",
+        "baseline_decode_tok_s": 197.80129084625213,
+        "candidate_decode_tok_s": 197.69618075471362,
+        "ratio": 0.9994686076562553,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-013@0",
+        "baseline_decode_tok_s": 226.59508179717514,
+        "candidate_decode_tok_s": 226.4988074227063,
+        "ratio": 0.9995751259307781,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-014@0",
+        "baseline_decode_tok_s": 172.4712288640706,
+        "candidate_decode_tok_s": 172.4339560293027,
+        "ratio": 0.9997838895506607,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-015@0",
+        "baseline_decode_tok_s": 221.6834096277498,
+        "candidate_decode_tok_s": 221.5369261707636,
+        "ratio": 0.9993392222844634,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-016@0",
+        "baseline_decode_tok_s": 211.77282177886747,
+        "candidate_decode_tok_s": 211.67590104959078,
+        "ratio": 0.9995423363184068,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-017@0",
+        "baseline_decode_tok_s": 207.50604006163206,
+        "candidate_decode_tok_s": 207.45438795611153,
+        "ratio": 0.9997510814359659,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-018@0",
+        "baseline_decode_tok_s": 243.1204319006947,
+        "candidate_decode_tok_s": 242.99531450773912,
+        "ratio": 0.999485368662858,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-019@0",
+        "baseline_decode_tok_s": 244.5498904512136,
+        "candidate_decode_tok_s": 244.4257773820269,
+        "ratio": 0.9994924836443079,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-020@0",
+        "baseline_decode_tok_s": 199.83511813353434,
+        "candidate_decode_tok_s": 199.79613756099164,
+        "ratio": 0.9998049363249725,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-020@32000",
+        "baseline_decode_tok_s": 196.04853259709353,
+        "candidate_decode_tok_s": 196.0092901403125,
+        "ratio": 0.9997998329481931,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-020@64000",
+        "baseline_decode_tok_s": 186.25445843201334,
+        "candidate_decode_tok_s": 186.2364319064772,
+        "ratio": 0.9999032156025264,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-021@0",
+        "baseline_decode_tok_s": 224.33104013717573,
+        "candidate_decode_tok_s": 224.25915018760162,
+        "ratio": 0.9996795363248432,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-022@0",
+        "baseline_decode_tok_s": 209.71165004009788,
+        "candidate_decode_tok_s": 209.66743472190828,
+        "ratio": 0.9997891613642773,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-023@0",
+        "baseline_decode_tok_s": 235.23571381540853,
+        "candidate_decode_tok_s": 235.12495985050094,
+        "ratio": 0.9995291787836498,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-024@0",
+        "baseline_decode_tok_s": 253.48001129223178,
+        "candidate_decode_tok_s": 253.3698284726948,
+        "ratio": 0.9995653194941279,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-025@0",
+        "baseline_decode_tok_s": 211.18807888572803,
+        "candidate_decode_tok_s": 211.03353173890343,
+        "ratio": 0.9992682013698878,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-026@0",
+        "baseline_decode_tok_s": 210.73938283180308,
+        "candidate_decode_tok_s": 210.70690091403378,
+        "ratio": 0.9998458668838599,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-027@0",
+        "baseline_decode_tok_s": 174.5472108939274,
+        "candidate_decode_tok_s": 174.48524784642194,
+        "ratio": 0.9996450069457534,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-028@0",
+        "baseline_decode_tok_s": 224.7938634707039,
+        "candidate_decode_tok_s": 224.654718157871,
+        "ratio": 0.9993810092914256,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-029@0",
+        "baseline_decode_tok_s": 190.94715016937565,
+        "candidate_decode_tok_s": 190.88649800490646,
+        "ratio": 0.9996823615098974,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-030@0",
+        "baseline_decode_tok_s": 224.59609467624347,
+        "candidate_decode_tok_s": 224.51255460975037,
+        "ratio": 0.9996280431028264,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "struct-002@0",
+        "baseline_decode_tok_s": 203.66712130287627,
+        "candidate_decode_tok_s": 203.74780147509267,
+        "ratio": 1.0003961374408412,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "struct-002@32000",
+        "baseline_decode_tok_s": 218.2633389653697,
+        "candidate_decode_tok_s": 218.23228247197846,
+        "ratio": 0.9998577109030841,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "struct-002@64000",
+        "baseline_decode_tok_s": 228.13253347952107,
+        "candidate_decode_tok_s": 228.29120631348854,
+        "ratio": 1.0006955291801103,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "struct-005@0",
+        "baseline_decode_tok_s": 210.08875514839679,
+        "candidate_decode_tok_s": 210.25345166241817,
+        "ratio": 1.000783937788127,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "struct-005@32000",
+        "baseline_decode_tok_s": 188.76128027634564,
+        "candidate_decode_tok_s": 188.83859165825982,
+        "ratio": 1.000409572248085,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "struct-005@64000",
+        "baseline_decode_tok_s": 165.18494175194922,
+        "candidate_decode_tok_s": 165.2448384907015,
+        "ratio": 1.0003626041097755,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-001@0",
+        "baseline_decode_tok_s": 252.52216602712917,
+        "candidate_decode_tok_s": 252.36791469903443,
+        "ratio": 0.9993891572746997,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-001@32000",
+        "baseline_decode_tok_s": 251.05220711597576,
+        "candidate_decode_tok_s": 251.0145297663638,
+        "ratio": 0.9998499222530454,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-001@64000",
+        "baseline_decode_tok_s": 238.277232330982,
+        "candidate_decode_tok_s": 238.28472721928966,
+        "ratio": 1.0000314544878433,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-002@0",
+        "baseline_decode_tok_s": 208.34767860645988,
+        "candidate_decode_tok_s": 208.30930799395873,
+        "ratio": 0.9998158337411878,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-003@0",
+        "baseline_decode_tok_s": 194.8147775514043,
+        "candidate_decode_tok_s": 194.69307707239983,
+        "ratio": 0.9993753016042515,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-004@0",
+        "baseline_decode_tok_s": 147.8443374082533,
+        "candidate_decode_tok_s": 147.77893812328483,
+        "ratio": 0.9995576476846193,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-005@0",
+        "baseline_decode_tok_s": 166.47534105614125,
+        "candidate_decode_tok_s": 166.4020685234077,
+        "ratio": 0.9995598595427485,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-006@0",
+        "baseline_decode_tok_s": 194.15751030361173,
+        "candidate_decode_tok_s": 194.05760903941825,
+        "ratio": 0.999485462787212,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-007@0",
+        "baseline_decode_tok_s": 189.0448787362847,
+        "candidate_decode_tok_s": 188.96131606730268,
+        "ratio": 0.9995579744368607,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-008@0",
+        "baseline_decode_tok_s": 204.9385061435869,
+        "candidate_decode_tok_s": 204.89562189217327,
+        "ratio": 0.9997907457596886,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-009@0",
+        "baseline_decode_tok_s": 218.50117136061624,
+        "candidate_decode_tok_s": 218.39951199064447,
+        "ratio": 0.9995347422197385,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-010@0",
+        "baseline_decode_tok_s": 230.146372344831,
+        "candidate_decode_tok_s": 230.06117491177622,
+        "ratio": 0.9996298119662423,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-010@32000",
+        "baseline_decode_tok_s": 211.74339970894994,
+        "candidate_decode_tok_s": 211.78304154619855,
+        "ratio": 1.0001872164010925,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-010@64000",
+        "baseline_decode_tok_s": 201.19208859612394,
+        "candidate_decode_tok_s": 201.20152690032157,
+        "ratio": 1.0000469119052517,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-011@0",
+        "baseline_decode_tok_s": 202.43055214390716,
+        "candidate_decode_tok_s": 202.35109427119397,
+        "ratio": 0.9996074808280091,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-012@0",
+        "baseline_decode_tok_s": 230.18819968679702,
+        "candidate_decode_tok_s": 230.11598510351573,
+        "ratio": 0.999686280255115,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-013@0",
+        "baseline_decode_tok_s": 222.01980428696376,
+        "candidate_decode_tok_s": 221.9572435281079,
+        "ratio": 0.9997182199171071,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-014@0",
+        "baseline_decode_tok_s": 179.4440032084499,
+        "candidate_decode_tok_s": 179.36229076455686,
+        "ratio": 0.9995446354158845,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-015@0",
+        "baseline_decode_tok_s": 223.02773711476857,
+        "candidate_decode_tok_s": 222.88077425631144,
+        "ratio": 0.9993410556894925,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-016@0",
+        "baseline_decode_tok_s": 210.58010851172338,
+        "candidate_decode_tok_s": 210.48104572230605,
+        "ratio": 0.999529571951893,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-017@0",
+        "baseline_decode_tok_s": 221.06704766873028,
+        "candidate_decode_tok_s": 220.97662780172007,
+        "ratio": 0.9995909844186922,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-018@0",
+        "baseline_decode_tok_s": 193.02743042415693,
+        "candidate_decode_tok_s": 192.9149497229394,
+        "ratio": 0.9994172812590918,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-019@0",
+        "baseline_decode_tok_s": 230.18368068234133,
+        "candidate_decode_tok_s": 230.0666786952933,
+        "ratio": 0.9994917016414838,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-020@0",
+        "baseline_decode_tok_s": 167.10035574872666,
+        "candidate_decode_tok_s": 167.03157002893704,
+        "ratio": 0.9995883568321479,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-020@32000",
+        "baseline_decode_tok_s": 180.1730917556747,
+        "candidate_decode_tok_s": 180.1885424367382,
+        "ratio": 1.0000857546535553,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-020@64000",
+        "baseline_decode_tok_s": 162.38117639819137,
+        "candidate_decode_tok_s": 162.27723500055657,
+        "ratio": 0.9993598925691983,
+        "normalized_output_hashes_match": true
+      }
+    ]
+  },
+  "all115": {
+    "case_count": 115,
+    "weighted_decode_tok_s": {
+      "A": 177.17404848359223,
+      "B": 177.1081651545912
+    },
+    "weighted_decode_ratio": 0.9996281434580012,
+    "minimum_case_ratio": 0.9988670027551729,
+    "below_case_floor": [],
+    "acceptance": {
+      "A": {
+        "accepted": 105908,
+        "drafted": 192906,
+        "rounds": 27632
+      },
+      "B": {
+        "accepted": 105908,
+        "drafted": 192906,
+        "rounds": 27632
+      }
+    },
+    "cases": [
+      {
+        "id": "code-depth-0",
+        "baseline_decode_tok_s": 183.90353324414383,
+        "candidate_decode_tok_s": 183.86723657334232,
+        "ratio": 0.999802632009504,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "code-depth-32000",
+        "baseline_decode_tok_s": 171.38700199576198,
+        "candidate_decode_tok_s": 171.36860099079922,
+        "ratio": 0.9998926347695655,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "code-depth-64000",
+        "baseline_decode_tok_s": 174.95165850161808,
+        "candidate_decode_tok_s": 174.9690523239845,
+        "ratio": 1.0000994207343639,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-001@0",
+        "baseline_decode_tok_s": 152.18087331274805,
+        "candidate_decode_tok_s": 152.01755036461486,
+        "ratio": 0.9989267840000002,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-001@32000",
+        "baseline_decode_tok_s": 191.28788252840053,
+        "candidate_decode_tok_s": 191.23030701372682,
+        "ratio": 0.9996990111767003,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-001@64000",
+        "baseline_decode_tok_s": 183.39198733415503,
+        "candidate_decode_tok_s": 183.37599790109368,
+        "ratio": 0.9999128128044535,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-002@0",
+        "baseline_decode_tok_s": 162.56080638934895,
+        "candidate_decode_tok_s": 162.37662544359296,
+        "ratio": 0.9988670027551729,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-003@0",
+        "baseline_decode_tok_s": 145.56952669750208,
+        "candidate_decode_tok_s": 145.43587970776423,
+        "ratio": 0.9990819026978388,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-004@0",
+        "baseline_decode_tok_s": 143.90285972389927,
+        "candidate_decode_tok_s": 143.80783554267455,
+        "ratio": 0.9993396643999498,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-005@0",
+        "baseline_decode_tok_s": 143.36644077452678,
+        "candidate_decode_tok_s": 143.3109977694948,
+        "ratio": 0.9996132776629423,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-006@0",
+        "baseline_decode_tok_s": 149.4193472424501,
+        "candidate_decode_tok_s": 149.32113729002154,
+        "ratio": 0.9993427226511089,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-007@0",
+        "baseline_decode_tok_s": 146.1985109672421,
+        "candidate_decode_tok_s": 146.0972865832,
+        "ratio": 0.9993076237003209,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-008@0",
+        "baseline_decode_tok_s": 146.2131174193778,
+        "candidate_decode_tok_s": 146.13994780698806,
+        "ratio": 0.9994995687549711,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-009@0",
+        "baseline_decode_tok_s": 171.16759298661697,
+        "candidate_decode_tok_s": 171.13446937399112,
+        "ratio": 0.9998064843230667,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-010@0",
+        "baseline_decode_tok_s": 129.55383708071435,
+        "candidate_decode_tok_s": 129.46016812949162,
+        "ratio": 0.999276988213291,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-011@0",
+        "baseline_decode_tok_s": 146.50116789722617,
+        "candidate_decode_tok_s": 146.41457726242237,
+        "ratio": 0.9994089423582988,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-012@0",
+        "baseline_decode_tok_s": 221.81416996133228,
+        "candidate_decode_tok_s": 221.69610159296158,
+        "ratio": 0.9994677149417853,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-012@32000",
+        "baseline_decode_tok_s": 211.1713545990096,
+        "candidate_decode_tok_s": 211.19119601054845,
+        "ratio": 1.0000939588211504,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-012@64000",
+        "baseline_decode_tok_s": 201.45216950793895,
+        "candidate_decode_tok_s": 201.50345989679474,
+        "ratio": 1.000254603308473,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-013@0",
+        "baseline_decode_tok_s": 232.82390323218738,
+        "candidate_decode_tok_s": 232.7376191170158,
+        "ratio": 0.999629401818397,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-014@0",
+        "baseline_decode_tok_s": 215.47184927121464,
+        "candidate_decode_tok_s": 215.3486019701723,
+        "ratio": 0.9994280120514155,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-015@0",
+        "baseline_decode_tok_s": 138.15914496034708,
+        "candidate_decode_tok_s": 138.06948541151462,
+        "ratio": 0.999351041519125,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-016@0",
+        "baseline_decode_tok_s": 153.88232252893522,
+        "candidate_decode_tok_s": 153.80280930100486,
+        "ratio": 0.999483285496192,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-017@0",
+        "baseline_decode_tok_s": 122.58642158967442,
+        "candidate_decode_tok_s": 122.52665819684572,
+        "ratio": 0.9995124795058563,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-018@0",
+        "baseline_decode_tok_s": 136.29161060578662,
+        "candidate_decode_tok_s": 136.21256005068693,
+        "ratio": 0.9994199895742055,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-019@0",
+        "baseline_decode_tok_s": 182.53670136030365,
+        "candidate_decode_tok_s": 182.44914450728643,
+        "ratio": 0.9995203328844845,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-020@0",
+        "baseline_decode_tok_s": 148.96341373061148,
+        "candidate_decode_tok_s": 148.90344374039285,
+        "ratio": 0.9995974179919971,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-021@0",
+        "baseline_decode_tok_s": 147.4235077813421,
+        "candidate_decode_tok_s": 147.35031083728853,
+        "ratio": 0.9995034920471291,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-022@0",
+        "baseline_decode_tok_s": 200.6403109848561,
+        "candidate_decode_tok_s": 200.54712164886456,
+        "ratio": 0.9995355403132397,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-023@0",
+        "baseline_decode_tok_s": 133.52965920706603,
+        "candidate_decode_tok_s": 133.48051677995727,
+        "ratio": 0.9996319736948287,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "log-024@0",
+        "baseline_decode_tok_s": 130.31168630560194,
+        "candidate_decode_tok_s": 130.27561417170398,
+        "ratio": 0.9997231857332168,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reasoning-algorithm",
+        "baseline_decode_tok_s": 166.9423878886678,
+        "candidate_decode_tok_s": 166.98967250126225,
+        "ratio": 1.000283239105373,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reasoning-capacity",
+        "baseline_decode_tok_s": 203.1505033080287,
+        "candidate_decode_tok_s": 203.1368622140211,
+        "ratio": 0.9999328522756012,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reasoning-invariant",
+        "baseline_decode_tok_s": 127.44664909711196,
+        "candidate_decode_tok_s": 127.4501624973847,
+        "ratio": 1.0000275676159212,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reasoning-probability",
+        "baseline_decode_tok_s": 171.43460342747065,
+        "candidate_decode_tok_s": 171.45065294376832,
+        "ratio": 1.0000936188842673,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reg-commit-468dcf69@0",
+        "baseline_decode_tok_s": 171.88491302435796,
+        "candidate_decode_tok_s": 171.8151332824139,
+        "ratio": 0.9995940321886532,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reg-commit-468dcf69@32000",
+        "baseline_decode_tok_s": 137.11696182530108,
+        "candidate_decode_tok_s": 137.1690857635922,
+        "ratio": 1.0003801421618248,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reg-commit-468dcf69@64000",
+        "baseline_decode_tok_s": 144.2351121587038,
+        "candidate_decode_tok_s": 144.18492353491484,
+        "ratio": 0.9996520360192619,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reg-commit-5933e395@0",
+        "baseline_decode_tok_s": 150.9660754582521,
+        "candidate_decode_tok_s": 150.88904755743823,
+        "ratio": 0.999489766819598,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reg-commit-708d6c94@0",
+        "baseline_decode_tok_s": 139.8546240427449,
+        "candidate_decode_tok_s": 139.84034735467242,
+        "ratio": 0.9998979176543487,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reg-commit-85d47e27@0",
+        "baseline_decode_tok_s": 170.22780506155777,
+        "candidate_decode_tok_s": 170.1363892796483,
+        "ratio": 0.9994629797295664,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reg-commit-ddee681f@0",
+        "baseline_decode_tok_s": 167.65791385842888,
+        "candidate_decode_tok_s": 167.56726248459478,
+        "ratio": 0.9994593075164311,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reg-commit-e881586f@0",
+        "baseline_decode_tok_s": 157.3150612747079,
+        "candidate_decode_tok_s": 157.2381680442089,
+        "ratio": 0.9995112150745393,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reg-title-commit-measure@0",
+        "baseline_decode_tok_s": 177.42259598468698,
+        "candidate_decode_tok_s": 177.35641282482942,
+        "ratio": 0.9996269744589732,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reg-title-commit-measure@32000",
+        "baseline_decode_tok_s": 194.05170117860158,
+        "candidate_decode_tok_s": 194.11168930822944,
+        "ratio": 1.0003091347783273,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reg-title-commit-measure@64000",
+        "baseline_decode_tok_s": 184.8289735619087,
+        "candidate_decode_tok_s": 184.84982380057383,
+        "ratio": 1.0001128082803432,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reg-title-rollback@0",
+        "baseline_decode_tok_s": 225.34561141736393,
+        "candidate_decode_tok_s": 225.2077530168075,
+        "ratio": 0.9993882356985373,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-001@0",
+        "baseline_decode_tok_s": 182.64963269430473,
+        "candidate_decode_tok_s": 182.54928664475955,
+        "ratio": 0.9994506090810863,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-001@32000",
+        "baseline_decode_tok_s": 187.45643842976455,
+        "candidate_decode_tok_s": 187.51792974604695,
+        "ratio": 1.0003280298974924,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-001@64000",
+        "baseline_decode_tok_s": 173.96798536170036,
+        "candidate_decode_tok_s": 173.99823356678363,
+        "ratio": 1.0001738722502327,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-002@0",
+        "baseline_decode_tok_s": 234.07861856940502,
+        "candidate_decode_tok_s": 234.05979173280355,
+        "ratio": 0.9999195704557873,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-003@0",
+        "baseline_decode_tok_s": 234.95168958743213,
+        "candidate_decode_tok_s": 234.87087477081278,
+        "ratio": 0.9996560364525947,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-004@0",
+        "baseline_decode_tok_s": 177.03210516725335,
+        "candidate_decode_tok_s": 177.0345889905468,
+        "ratio": 1.0000140303550653,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-005@0",
+        "baseline_decode_tok_s": 161.36470487000912,
+        "candidate_decode_tok_s": 161.3044793463338,
+        "ratio": 0.999626773873978,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-006@0",
+        "baseline_decode_tok_s": 209.39900081226907,
+        "candidate_decode_tok_s": 209.33541825699308,
+        "ratio": 0.9996963569308863,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-007@0",
+        "baseline_decode_tok_s": 232.84480006379235,
+        "candidate_decode_tok_s": 232.7047644518048,
+        "ratio": 0.9993985881928685,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-008@0",
+        "baseline_decode_tok_s": 232.19148243131002,
+        "candidate_decode_tok_s": 232.10118138816435,
+        "ratio": 0.9996110923527421,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-009@0",
+        "baseline_decode_tok_s": 212.6843883449509,
+        "candidate_decode_tok_s": 212.54095769549815,
+        "ratio": 0.9993256174062944,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-010@0",
+        "baseline_decode_tok_s": 233.4676438734388,
+        "candidate_decode_tok_s": 233.34549342378324,
+        "ratio": 0.9994767992359499,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-010@32000",
+        "baseline_decode_tok_s": 216.8265834794332,
+        "candidate_decode_tok_s": 216.85044099950917,
+        "ratio": 1.0001100304201318,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-010@64000",
+        "baseline_decode_tok_s": 207.84791831787044,
+        "candidate_decode_tok_s": 207.8841280623525,
+        "ratio": 1.0001742126876954,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-011@0",
+        "baseline_decode_tok_s": 210.53471206404578,
+        "candidate_decode_tok_s": 210.4808452601228,
+        "ratio": 0.9997441428855371,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-012@0",
+        "baseline_decode_tok_s": 197.80129084625213,
+        "candidate_decode_tok_s": 197.69618075471362,
+        "ratio": 0.9994686076562553,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-013@0",
+        "baseline_decode_tok_s": 226.59508179717514,
+        "candidate_decode_tok_s": 226.4988074227063,
+        "ratio": 0.9995751259307781,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-014@0",
+        "baseline_decode_tok_s": 172.4712288640706,
+        "candidate_decode_tok_s": 172.4339560293027,
+        "ratio": 0.9997838895506607,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-015@0",
+        "baseline_decode_tok_s": 221.6834096277498,
+        "candidate_decode_tok_s": 221.5369261707636,
+        "ratio": 0.9993392222844634,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-016@0",
+        "baseline_decode_tok_s": 211.77282177886747,
+        "candidate_decode_tok_s": 211.67590104959078,
+        "ratio": 0.9995423363184068,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-017@0",
+        "baseline_decode_tok_s": 207.50604006163206,
+        "candidate_decode_tok_s": 207.45438795611153,
+        "ratio": 0.9997510814359659,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-018@0",
+        "baseline_decode_tok_s": 243.1204319006947,
+        "candidate_decode_tok_s": 242.99531450773912,
+        "ratio": 0.999485368662858,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-019@0",
+        "baseline_decode_tok_s": 244.5498904512136,
+        "candidate_decode_tok_s": 244.4257773820269,
+        "ratio": 0.9994924836443079,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-020@0",
+        "baseline_decode_tok_s": 199.83511813353434,
+        "candidate_decode_tok_s": 199.79613756099164,
+        "ratio": 0.9998049363249725,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-020@32000",
+        "baseline_decode_tok_s": 196.04853259709353,
+        "candidate_decode_tok_s": 196.0092901403125,
+        "ratio": 0.9997998329481931,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-020@64000",
+        "baseline_decode_tok_s": 186.25445843201334,
+        "candidate_decode_tok_s": 186.2364319064772,
+        "ratio": 0.9999032156025264,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-021@0",
+        "baseline_decode_tok_s": 224.33104013717573,
+        "candidate_decode_tok_s": 224.25915018760162,
+        "ratio": 0.9996795363248432,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-022@0",
+        "baseline_decode_tok_s": 209.71165004009788,
+        "candidate_decode_tok_s": 209.66743472190828,
+        "ratio": 0.9997891613642773,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-023@0",
+        "baseline_decode_tok_s": 235.23571381540853,
+        "candidate_decode_tok_s": 235.12495985050094,
+        "ratio": 0.9995291787836498,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-024@0",
+        "baseline_decode_tok_s": 253.48001129223178,
+        "candidate_decode_tok_s": 253.3698284726948,
+        "ratio": 0.9995653194941279,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-025@0",
+        "baseline_decode_tok_s": 211.18807888572803,
+        "candidate_decode_tok_s": 211.03353173890343,
+        "ratio": 0.9992682013698878,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-026@0",
+        "baseline_decode_tok_s": 210.73938283180308,
+        "candidate_decode_tok_s": 210.70690091403378,
+        "ratio": 0.9998458668838599,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-027@0",
+        "baseline_decode_tok_s": 174.5472108939274,
+        "candidate_decode_tok_s": 174.48524784642194,
+        "ratio": 0.9996450069457534,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-028@0",
+        "baseline_decode_tok_s": 224.7938634707039,
+        "candidate_decode_tok_s": 224.654718157871,
+        "ratio": 0.9993810092914256,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-029@0",
+        "baseline_decode_tok_s": 190.94715016937565,
+        "candidate_decode_tok_s": 190.88649800490646,
+        "ratio": 0.9996823615098974,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "repo-030@0",
+        "baseline_decode_tok_s": 224.59609467624347,
+        "candidate_decode_tok_s": 224.51255460975037,
+        "ratio": 0.9996280431028264,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "struct-002@0",
+        "baseline_decode_tok_s": 203.66712130287627,
+        "candidate_decode_tok_s": 203.74780147509267,
+        "ratio": 1.0003961374408412,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "struct-002@32000",
+        "baseline_decode_tok_s": 218.2633389653697,
+        "candidate_decode_tok_s": 218.23228247197846,
+        "ratio": 0.9998577109030841,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "struct-002@64000",
+        "baseline_decode_tok_s": 228.13253347952107,
+        "candidate_decode_tok_s": 228.29120631348854,
+        "ratio": 1.0006955291801103,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "struct-005@0",
+        "baseline_decode_tok_s": 210.08875514839679,
+        "candidate_decode_tok_s": 210.25345166241817,
+        "ratio": 1.000783937788127,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "struct-005@32000",
+        "baseline_decode_tok_s": 188.76128027634564,
+        "candidate_decode_tok_s": 188.83859165825982,
+        "ratio": 1.000409572248085,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "struct-005@64000",
+        "baseline_decode_tok_s": 165.18494175194922,
+        "candidate_decode_tok_s": 165.2448384907015,
+        "ratio": 1.0003626041097755,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-001@0",
+        "baseline_decode_tok_s": 252.52216602712917,
+        "candidate_decode_tok_s": 252.36791469903443,
+        "ratio": 0.9993891572746997,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-001@32000",
+        "baseline_decode_tok_s": 251.05220711597576,
+        "candidate_decode_tok_s": 251.0145297663638,
+        "ratio": 0.9998499222530454,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-001@64000",
+        "baseline_decode_tok_s": 238.277232330982,
+        "candidate_decode_tok_s": 238.28472721928966,
+        "ratio": 1.0000314544878433,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-002@0",
+        "baseline_decode_tok_s": 208.34767860645988,
+        "candidate_decode_tok_s": 208.30930799395873,
+        "ratio": 0.9998158337411878,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-003@0",
+        "baseline_decode_tok_s": 194.8147775514043,
+        "candidate_decode_tok_s": 194.69307707239983,
+        "ratio": 0.9993753016042515,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-004@0",
+        "baseline_decode_tok_s": 147.8443374082533,
+        "candidate_decode_tok_s": 147.77893812328483,
+        "ratio": 0.9995576476846193,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-005@0",
+        "baseline_decode_tok_s": 166.47534105614125,
+        "candidate_decode_tok_s": 166.4020685234077,
+        "ratio": 0.9995598595427485,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-006@0",
+        "baseline_decode_tok_s": 194.15751030361173,
+        "candidate_decode_tok_s": 194.05760903941825,
+        "ratio": 0.999485462787212,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-007@0",
+        "baseline_decode_tok_s": 189.0448787362847,
+        "candidate_decode_tok_s": 188.96131606730268,
+        "ratio": 0.9995579744368607,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-008@0",
+        "baseline_decode_tok_s": 204.9385061435869,
+        "candidate_decode_tok_s": 204.89562189217327,
+        "ratio": 0.9997907457596886,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-009@0",
+        "baseline_decode_tok_s": 218.50117136061624,
+        "candidate_decode_tok_s": 218.39951199064447,
+        "ratio": 0.9995347422197385,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-010@0",
+        "baseline_decode_tok_s": 230.146372344831,
+        "candidate_decode_tok_s": 230.06117491177622,
+        "ratio": 0.9996298119662423,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-010@32000",
+        "baseline_decode_tok_s": 211.74339970894994,
+        "candidate_decode_tok_s": 211.78304154619855,
+        "ratio": 1.0001872164010925,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-010@64000",
+        "baseline_decode_tok_s": 201.19208859612394,
+        "candidate_decode_tok_s": 201.20152690032157,
+        "ratio": 1.0000469119052517,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-011@0",
+        "baseline_decode_tok_s": 202.43055214390716,
+        "candidate_decode_tok_s": 202.35109427119397,
+        "ratio": 0.9996074808280091,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-012@0",
+        "baseline_decode_tok_s": 230.18819968679702,
+        "candidate_decode_tok_s": 230.11598510351573,
+        "ratio": 0.999686280255115,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-013@0",
+        "baseline_decode_tok_s": 222.01980428696376,
+        "candidate_decode_tok_s": 221.9572435281079,
+        "ratio": 0.9997182199171071,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-014@0",
+        "baseline_decode_tok_s": 179.4440032084499,
+        "candidate_decode_tok_s": 179.36229076455686,
+        "ratio": 0.9995446354158845,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-015@0",
+        "baseline_decode_tok_s": 223.02773711476857,
+        "candidate_decode_tok_s": 222.88077425631144,
+        "ratio": 0.9993410556894925,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-016@0",
+        "baseline_decode_tok_s": 210.58010851172338,
+        "candidate_decode_tok_s": 210.48104572230605,
+        "ratio": 0.999529571951893,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-017@0",
+        "baseline_decode_tok_s": 221.06704766873028,
+        "candidate_decode_tok_s": 220.97662780172007,
+        "ratio": 0.9995909844186922,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-018@0",
+        "baseline_decode_tok_s": 193.02743042415693,
+        "candidate_decode_tok_s": 192.9149497229394,
+        "ratio": 0.9994172812590918,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-019@0",
+        "baseline_decode_tok_s": 230.18368068234133,
+        "candidate_decode_tok_s": 230.0666786952933,
+        "ratio": 0.9994917016414838,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-020@0",
+        "baseline_decode_tok_s": 167.10035574872666,
+        "candidate_decode_tok_s": 167.03157002893704,
+        "ratio": 0.9995883568321479,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-020@32000",
+        "baseline_decode_tok_s": 180.1730917556747,
+        "candidate_decode_tok_s": 180.1885424367382,
+        "ratio": 1.0000857546535553,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "worklog-020@64000",
+        "baseline_decode_tok_s": 162.38117639819137,
+        "candidate_decode_tok_s": 162.27723500055657,
+        "ratio": 0.9993598925691983,
+        "normalized_output_hashes_match": true
+      }
+    ]
+  },
+  "supplemental7": {
+    "case_count": 7,
+    "weighted_decode_tok_s": {
+      "A": 168.34877440324897,
+      "B": 168.35279894173172
+    },
+    "weighted_decode_ratio": 1.00002390595653,
+    "minimum_case_ratio": 0.999802632009504,
+    "below_case_floor": [],
+    "acceptance": {
+      "A": {
+        "accepted": 11204,
+        "drafted": 21736,
+        "rounds": 3116
+      },
+      "B": {
+        "accepted": 11204,
+        "drafted": 21736,
+        "rounds": 3116
+      }
+    },
+    "cases": [
+      {
+        "id": "code-depth-0",
+        "baseline_decode_tok_s": 183.90353324414383,
+        "candidate_decode_tok_s": 183.86723657334232,
+        "ratio": 0.999802632009504,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "code-depth-32000",
+        "baseline_decode_tok_s": 171.38700199576198,
+        "candidate_decode_tok_s": 171.36860099079922,
+        "ratio": 0.9998926347695655,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "code-depth-64000",
+        "baseline_decode_tok_s": 174.95165850161808,
+        "candidate_decode_tok_s": 174.9690523239845,
+        "ratio": 1.0000994207343639,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reasoning-algorithm",
+        "baseline_decode_tok_s": 166.9423878886678,
+        "candidate_decode_tok_s": 166.98967250126225,
+        "ratio": 1.000283239105373,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reasoning-capacity",
+        "baseline_decode_tok_s": 203.1505033080287,
+        "candidate_decode_tok_s": 203.1368622140211,
+        "ratio": 0.9999328522756012,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reasoning-invariant",
+        "baseline_decode_tok_s": 127.44664909711196,
+        "candidate_decode_tok_s": 127.4501624973847,
+        "ratio": 1.0000275676159212,
+        "normalized_output_hashes_match": true
+      },
+      {
+        "id": "reasoning-probability",
+        "baseline_decode_tok_s": 171.43460342747065,
+        "candidate_decode_tok_s": 171.45065294376832,
+        "ratio": 1.0000936188842673,
+        "normalized_output_hashes_match": true
+      }
+    ]
+  },
+  "campaigns": {
+    "native-d0": {
+      "case_count": 84,
+      "weighted_decode_tok_s": {
+        "A": 174.72537257986548,
+        "B": 174.63698515179124
+      },
+      "weighted_decode_ratio": 0.9994941351289216,
+      "minimum_case_ratio": 0.9988670027551729,
+      "below_case_floor": [],
+      "acceptance": {
+        "A": {
+          "accepted": 76774,
+          "drafted": 144224,
+          "rounds": 20658
+        },
+        "B": {
+          "accepted": 76774,
+          "drafted": 144224,
+          "rounds": 20658
+        }
+      },
+      "cases": [
+        {
+          "id": "log-001@0",
+          "baseline_decode_tok_s": 152.18087331274805,
+          "candidate_decode_tok_s": 152.01755036461486,
+          "ratio": 0.9989267840000002,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "log-002@0",
+          "baseline_decode_tok_s": 162.56080638934895,
+          "candidate_decode_tok_s": 162.37662544359296,
+          "ratio": 0.9988670027551729,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "log-003@0",
+          "baseline_decode_tok_s": 145.56952669750208,
+          "candidate_decode_tok_s": 145.43587970776423,
+          "ratio": 0.9990819026978388,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "log-004@0",
+          "baseline_decode_tok_s": 143.90285972389927,
+          "candidate_decode_tok_s": 143.80783554267455,
+          "ratio": 0.9993396643999498,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "log-005@0",
+          "baseline_decode_tok_s": 143.36644077452678,
+          "candidate_decode_tok_s": 143.3109977694948,
+          "ratio": 0.9996132776629423,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "log-006@0",
+          "baseline_decode_tok_s": 149.4193472424501,
+          "candidate_decode_tok_s": 149.32113729002154,
+          "ratio": 0.9993427226511089,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "log-007@0",
+          "baseline_decode_tok_s": 146.1985109672421,
+          "candidate_decode_tok_s": 146.0972865832,
+          "ratio": 0.9993076237003209,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "log-008@0",
+          "baseline_decode_tok_s": 146.2131174193778,
+          "candidate_decode_tok_s": 146.13994780698806,
+          "ratio": 0.9994995687549711,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "log-009@0",
+          "baseline_decode_tok_s": 171.16759298661697,
+          "candidate_decode_tok_s": 171.13446937399112,
+          "ratio": 0.9998064843230667,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "log-010@0",
+          "baseline_decode_tok_s": 129.55383708071435,
+          "candidate_decode_tok_s": 129.46016812949162,
+          "ratio": 0.999276988213291,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "log-011@0",
+          "baseline_decode_tok_s": 146.50116789722617,
+          "candidate_decode_tok_s": 146.41457726242237,
+          "ratio": 0.9994089423582988,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "log-012@0",
+          "baseline_decode_tok_s": 221.81416996133228,
+          "candidate_decode_tok_s": 221.69610159296158,
+          "ratio": 0.9994677149417853,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "log-013@0",
+          "baseline_decode_tok_s": 232.82390323218738,
+          "candidate_decode_tok_s": 232.7376191170158,
+          "ratio": 0.999629401818397,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "log-014@0",
+          "baseline_decode_tok_s": 215.47184927121464,
+          "candidate_decode_tok_s": 215.3486019701723,
+          "ratio": 0.9994280120514155,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "log-015@0",
+          "baseline_decode_tok_s": 138.15914496034708,
+          "candidate_decode_tok_s": 138.06948541151462,
+          "ratio": 0.999351041519125,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "log-016@0",
+          "baseline_decode_tok_s": 153.88232252893522,
+          "candidate_decode_tok_s": 153.80280930100486,
+          "ratio": 0.999483285496192,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "log-017@0",
+          "baseline_decode_tok_s": 122.58642158967442,
+          "candidate_decode_tok_s": 122.52665819684572,
+          "ratio": 0.9995124795058563,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "log-018@0",
+          "baseline_decode_tok_s": 136.29161060578662,
+          "candidate_decode_tok_s": 136.21256005068693,
+          "ratio": 0.9994199895742055,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "log-019@0",
+          "baseline_decode_tok_s": 182.53670136030365,
+          "candidate_decode_tok_s": 182.44914450728643,
+          "ratio": 0.9995203328844845,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "log-020@0",
+          "baseline_decode_tok_s": 148.96341373061148,
+          "candidate_decode_tok_s": 148.90344374039285,
+          "ratio": 0.9995974179919971,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "log-021@0",
+          "baseline_decode_tok_s": 147.4235077813421,
+          "candidate_decode_tok_s": 147.35031083728853,
+          "ratio": 0.9995034920471291,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "log-022@0",
+          "baseline_decode_tok_s": 200.6403109848561,
+          "candidate_decode_tok_s": 200.54712164886456,
+          "ratio": 0.9995355403132397,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "log-023@0",
+          "baseline_decode_tok_s": 133.52965920706603,
+          "candidate_decode_tok_s": 133.48051677995727,
+          "ratio": 0.9996319736948287,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "log-024@0",
+          "baseline_decode_tok_s": 130.31168630560194,
+          "candidate_decode_tok_s": 130.27561417170398,
+          "ratio": 0.9997231857332168,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "reg-commit-468dcf69@0",
+          "baseline_decode_tok_s": 171.88491302435796,
+          "candidate_decode_tok_s": 171.8151332824139,
+          "ratio": 0.9995940321886532,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "reg-commit-5933e395@0",
+          "baseline_decode_tok_s": 150.9660754582521,
+          "candidate_decode_tok_s": 150.88904755743823,
+          "ratio": 0.999489766819598,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "reg-commit-708d6c94@0",
+          "baseline_decode_tok_s": 139.8546240427449,
+          "candidate_decode_tok_s": 139.84034735467242,
+          "ratio": 0.9998979176543487,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "reg-commit-85d47e27@0",
+          "baseline_decode_tok_s": 170.22780506155777,
+          "candidate_decode_tok_s": 170.1363892796483,
+          "ratio": 0.9994629797295664,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "reg-commit-ddee681f@0",
+          "baseline_decode_tok_s": 167.65791385842888,
+          "candidate_decode_tok_s": 167.56726248459478,
+          "ratio": 0.9994593075164311,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "reg-commit-e881586f@0",
+          "baseline_decode_tok_s": 157.3150612747079,
+          "candidate_decode_tok_s": 157.2381680442089,
+          "ratio": 0.9995112150745393,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "reg-title-commit-measure@0",
+          "baseline_decode_tok_s": 177.42259598468698,
+          "candidate_decode_tok_s": 177.35641282482942,
+          "ratio": 0.9996269744589732,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "reg-title-rollback@0",
+          "baseline_decode_tok_s": 225.34561141736393,
+          "candidate_decode_tok_s": 225.2077530168075,
+          "ratio": 0.9993882356985373,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-001@0",
+          "baseline_decode_tok_s": 182.64963269430473,
+          "candidate_decode_tok_s": 182.54928664475955,
+          "ratio": 0.9994506090810863,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-002@0",
+          "baseline_decode_tok_s": 234.07861856940502,
+          "candidate_decode_tok_s": 234.05979173280355,
+          "ratio": 0.9999195704557873,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-003@0",
+          "baseline_decode_tok_s": 234.95168958743213,
+          "candidate_decode_tok_s": 234.87087477081278,
+          "ratio": 0.9996560364525947,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-004@0",
+          "baseline_decode_tok_s": 177.03210516725335,
+          "candidate_decode_tok_s": 177.0345889905468,
+          "ratio": 1.0000140303550653,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-005@0",
+          "baseline_decode_tok_s": 161.36470487000912,
+          "candidate_decode_tok_s": 161.3044793463338,
+          "ratio": 0.999626773873978,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-006@0",
+          "baseline_decode_tok_s": 209.39900081226907,
+          "candidate_decode_tok_s": 209.33541825699308,
+          "ratio": 0.9996963569308863,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-007@0",
+          "baseline_decode_tok_s": 232.84480006379235,
+          "candidate_decode_tok_s": 232.7047644518048,
+          "ratio": 0.9993985881928685,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-008@0",
+          "baseline_decode_tok_s": 232.19148243131002,
+          "candidate_decode_tok_s": 232.10118138816435,
+          "ratio": 0.9996110923527421,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-009@0",
+          "baseline_decode_tok_s": 212.6843883449509,
+          "candidate_decode_tok_s": 212.54095769549815,
+          "ratio": 0.9993256174062944,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-010@0",
+          "baseline_decode_tok_s": 233.4676438734388,
+          "candidate_decode_tok_s": 233.34549342378324,
+          "ratio": 0.9994767992359499,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-011@0",
+          "baseline_decode_tok_s": 210.53471206404578,
+          "candidate_decode_tok_s": 210.4808452601228,
+          "ratio": 0.9997441428855371,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-012@0",
+          "baseline_decode_tok_s": 197.80129084625213,
+          "candidate_decode_tok_s": 197.69618075471362,
+          "ratio": 0.9994686076562553,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-013@0",
+          "baseline_decode_tok_s": 226.59508179717514,
+          "candidate_decode_tok_s": 226.4988074227063,
+          "ratio": 0.9995751259307781,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-014@0",
+          "baseline_decode_tok_s": 172.4712288640706,
+          "candidate_decode_tok_s": 172.4339560293027,
+          "ratio": 0.9997838895506607,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-015@0",
+          "baseline_decode_tok_s": 221.6834096277498,
+          "candidate_decode_tok_s": 221.5369261707636,
+          "ratio": 0.9993392222844634,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-016@0",
+          "baseline_decode_tok_s": 211.77282177886747,
+          "candidate_decode_tok_s": 211.67590104959078,
+          "ratio": 0.9995423363184068,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-017@0",
+          "baseline_decode_tok_s": 207.50604006163206,
+          "candidate_decode_tok_s": 207.45438795611153,
+          "ratio": 0.9997510814359659,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-018@0",
+          "baseline_decode_tok_s": 243.1204319006947,
+          "candidate_decode_tok_s": 242.99531450773912,
+          "ratio": 0.999485368662858,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-019@0",
+          "baseline_decode_tok_s": 244.5498904512136,
+          "candidate_decode_tok_s": 244.4257773820269,
+          "ratio": 0.9994924836443079,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-020@0",
+          "baseline_decode_tok_s": 199.83511813353434,
+          "candidate_decode_tok_s": 199.79613756099164,
+          "ratio": 0.9998049363249725,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-021@0",
+          "baseline_decode_tok_s": 224.33104013717573,
+          "candidate_decode_tok_s": 224.25915018760162,
+          "ratio": 0.9996795363248432,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-022@0",
+          "baseline_decode_tok_s": 209.71165004009788,
+          "candidate_decode_tok_s": 209.66743472190828,
+          "ratio": 0.9997891613642773,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-023@0",
+          "baseline_decode_tok_s": 235.23571381540853,
+          "candidate_decode_tok_s": 235.12495985050094,
+          "ratio": 0.9995291787836498,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-024@0",
+          "baseline_decode_tok_s": 253.48001129223178,
+          "candidate_decode_tok_s": 253.3698284726948,
+          "ratio": 0.9995653194941279,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-025@0",
+          "baseline_decode_tok_s": 211.18807888572803,
+          "candidate_decode_tok_s": 211.03353173890343,
+          "ratio": 0.9992682013698878,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-026@0",
+          "baseline_decode_tok_s": 210.73938283180308,
+          "candidate_decode_tok_s": 210.70690091403378,
+          "ratio": 0.9998458668838599,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-027@0",
+          "baseline_decode_tok_s": 174.5472108939274,
+          "candidate_decode_tok_s": 174.48524784642194,
+          "ratio": 0.9996450069457534,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-028@0",
+          "baseline_decode_tok_s": 224.7938634707039,
+          "candidate_decode_tok_s": 224.654718157871,
+          "ratio": 0.9993810092914256,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-029@0",
+          "baseline_decode_tok_s": 190.94715016937565,
+          "candidate_decode_tok_s": 190.88649800490646,
+          "ratio": 0.9996823615098974,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-030@0",
+          "baseline_decode_tok_s": 224.59609467624347,
+          "candidate_decode_tok_s": 224.51255460975037,
+          "ratio": 0.9996280431028264,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "struct-002@0",
+          "baseline_decode_tok_s": 203.66712130287627,
+          "candidate_decode_tok_s": 203.74780147509267,
+          "ratio": 1.0003961374408412,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "struct-005@0",
+          "baseline_decode_tok_s": 210.08875514839679,
+          "candidate_decode_tok_s": 210.25345166241817,
+          "ratio": 1.000783937788127,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "worklog-001@0",
+          "baseline_decode_tok_s": 252.52216602712917,
+          "candidate_decode_tok_s": 252.36791469903443,
+          "ratio": 0.9993891572746997,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "worklog-002@0",
+          "baseline_decode_tok_s": 208.34767860645988,
+          "candidate_decode_tok_s": 208.30930799395873,
+          "ratio": 0.9998158337411878,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "worklog-003@0",
+          "baseline_decode_tok_s": 194.8147775514043,
+          "candidate_decode_tok_s": 194.69307707239983,
+          "ratio": 0.9993753016042515,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "worklog-004@0",
+          "baseline_decode_tok_s": 147.8443374082533,
+          "candidate_decode_tok_s": 147.77893812328483,
+          "ratio": 0.9995576476846193,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "worklog-005@0",
+          "baseline_decode_tok_s": 166.47534105614125,
+          "candidate_decode_tok_s": 166.4020685234077,
+          "ratio": 0.9995598595427485,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "worklog-006@0",
+          "baseline_decode_tok_s": 194.15751030361173,
+          "candidate_decode_tok_s": 194.05760903941825,
+          "ratio": 0.999485462787212,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "worklog-007@0",
+          "baseline_decode_tok_s": 189.0448787362847,
+          "candidate_decode_tok_s": 188.96131606730268,
+          "ratio": 0.9995579744368607,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "worklog-008@0",
+          "baseline_decode_tok_s": 204.9385061435869,
+          "candidate_decode_tok_s": 204.89562189217327,
+          "ratio": 0.9997907457596886,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "worklog-009@0",
+          "baseline_decode_tok_s": 218.50117136061624,
+          "candidate_decode_tok_s": 218.39951199064447,
+          "ratio": 0.9995347422197385,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "worklog-010@0",
+          "baseline_decode_tok_s": 230.146372344831,
+          "candidate_decode_tok_s": 230.06117491177622,
+          "ratio": 0.9996298119662423,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "worklog-011@0",
+          "baseline_decode_tok_s": 202.43055214390716,
+          "candidate_decode_tok_s": 202.35109427119397,
+          "ratio": 0.9996074808280091,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "worklog-012@0",
+          "baseline_decode_tok_s": 230.18819968679702,
+          "candidate_decode_tok_s": 230.11598510351573,
+          "ratio": 0.999686280255115,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "worklog-013@0",
+          "baseline_decode_tok_s": 222.01980428696376,
+          "candidate_decode_tok_s": 221.9572435281079,
+          "ratio": 0.9997182199171071,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "worklog-014@0",
+          "baseline_decode_tok_s": 179.4440032084499,
+          "candidate_decode_tok_s": 179.36229076455686,
+          "ratio": 0.9995446354158845,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "worklog-015@0",
+          "baseline_decode_tok_s": 223.02773711476857,
+          "candidate_decode_tok_s": 222.88077425631144,
+          "ratio": 0.9993410556894925,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "worklog-016@0",
+          "baseline_decode_tok_s": 210.58010851172338,
+          "candidate_decode_tok_s": 210.48104572230605,
+          "ratio": 0.999529571951893,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "worklog-017@0",
+          "baseline_decode_tok_s": 221.06704766873028,
+          "candidate_decode_tok_s": 220.97662780172007,
+          "ratio": 0.9995909844186922,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "worklog-018@0",
+          "baseline_decode_tok_s": 193.02743042415693,
+          "candidate_decode_tok_s": 192.9149497229394,
+          "ratio": 0.9994172812590918,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "worklog-019@0",
+          "baseline_decode_tok_s": 230.18368068234133,
+          "candidate_decode_tok_s": 230.0666786952933,
+          "ratio": 0.9994917016414838,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "worklog-020@0",
+          "baseline_decode_tok_s": 167.10035574872666,
+          "candidate_decode_tok_s": 167.03157002893704,
+          "ratio": 0.9995883568321479,
+          "normalized_output_hashes_match": true
+        }
+      ]
+    },
+    "native-d32000": {
+      "case_count": 12,
+      "weighted_decode_tok_s": {
+        "A": 201.5394876708082,
+        "B": 201.54315776620754
+      },
+      "weighted_decode_ratio": 1.000018210304302,
+      "minimum_case_ratio": 0.9996990111767003,
+      "below_case_floor": [],
+      "acceptance": {
+        "A": {
+          "accepted": 9100,
+          "drafted": 13590,
+          "rounds": 1946
+        },
+        "B": {
+          "accepted": 9100,
+          "drafted": 13590,
+          "rounds": 1946
+        }
+      },
+      "cases": [
+        {
+          "id": "log-001@32000",
+          "baseline_decode_tok_s": 191.28788252840053,
+          "candidate_decode_tok_s": 191.23030701372682,
+          "ratio": 0.9996990111767003,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "log-012@32000",
+          "baseline_decode_tok_s": 211.1713545990096,
+          "candidate_decode_tok_s": 211.19119601054845,
+          "ratio": 1.0000939588211504,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "reg-commit-468dcf69@32000",
+          "baseline_decode_tok_s": 137.11696182530108,
+          "candidate_decode_tok_s": 137.1690857635922,
+          "ratio": 1.0003801421618248,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "reg-title-commit-measure@32000",
+          "baseline_decode_tok_s": 194.05170117860158,
+          "candidate_decode_tok_s": 194.11168930822944,
+          "ratio": 1.0003091347783273,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-001@32000",
+          "baseline_decode_tok_s": 187.45643842976455,
+          "candidate_decode_tok_s": 187.51792974604695,
+          "ratio": 1.0003280298974924,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-010@32000",
+          "baseline_decode_tok_s": 216.8265834794332,
+          "candidate_decode_tok_s": 216.85044099950917,
+          "ratio": 1.0001100304201318,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-020@32000",
+          "baseline_decode_tok_s": 196.04853259709353,
+          "candidate_decode_tok_s": 196.0092901403125,
+          "ratio": 0.9997998329481931,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "struct-002@32000",
+          "baseline_decode_tok_s": 218.2633389653697,
+          "candidate_decode_tok_s": 218.23228247197846,
+          "ratio": 0.9998577109030841,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "struct-005@32000",
+          "baseline_decode_tok_s": 188.76128027634564,
+          "candidate_decode_tok_s": 188.83859165825982,
+          "ratio": 1.000409572248085,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "worklog-001@32000",
+          "baseline_decode_tok_s": 251.05220711597576,
+          "candidate_decode_tok_s": 251.0145297663638,
+          "ratio": 0.9998499222530454,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "worklog-010@32000",
+          "baseline_decode_tok_s": 211.74339970894994,
+          "candidate_decode_tok_s": 211.78304154619855,
+          "ratio": 1.0001872164010925,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "worklog-020@32000",
+          "baseline_decode_tok_s": 180.1730917556747,
+          "candidate_decode_tok_s": 180.1885424367382,
+          "ratio": 1.0000857546535553,
+          "normalized_output_hashes_match": true
+        }
+      ]
+    },
+    "native-d64000": {
+      "case_count": 12,
+      "weighted_decode_tok_s": {
+        "A": 191.05029069591265,
+        "B": 191.04623965174935
+      },
+      "weighted_decode_ratio": 0.999978795927771,
+      "minimum_case_ratio": 0.9993598925691983,
+      "below_case_floor": [],
+      "acceptance": {
+        "A": {
+          "accepted": 8830,
+          "drafted": 13356,
+          "rounds": 1912
+        },
+        "B": {
+          "accepted": 8830,
+          "drafted": 13356,
+          "rounds": 1912
+        }
+      },
+      "cases": [
+        {
+          "id": "log-001@64000",
+          "baseline_decode_tok_s": 183.39198733415503,
+          "candidate_decode_tok_s": 183.37599790109368,
+          "ratio": 0.9999128128044535,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "log-012@64000",
+          "baseline_decode_tok_s": 201.45216950793895,
+          "candidate_decode_tok_s": 201.50345989679474,
+          "ratio": 1.000254603308473,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "reg-commit-468dcf69@64000",
+          "baseline_decode_tok_s": 144.2351121587038,
+          "candidate_decode_tok_s": 144.18492353491484,
+          "ratio": 0.9996520360192619,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "reg-title-commit-measure@64000",
+          "baseline_decode_tok_s": 184.8289735619087,
+          "candidate_decode_tok_s": 184.84982380057383,
+          "ratio": 1.0001128082803432,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-001@64000",
+          "baseline_decode_tok_s": 173.96798536170036,
+          "candidate_decode_tok_s": 173.99823356678363,
+          "ratio": 1.0001738722502327,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-010@64000",
+          "baseline_decode_tok_s": 207.84791831787044,
+          "candidate_decode_tok_s": 207.8841280623525,
+          "ratio": 1.0001742126876954,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "repo-020@64000",
+          "baseline_decode_tok_s": 186.25445843201334,
+          "candidate_decode_tok_s": 186.2364319064772,
+          "ratio": 0.9999032156025264,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "struct-002@64000",
+          "baseline_decode_tok_s": 228.13253347952107,
+          "candidate_decode_tok_s": 228.29120631348854,
+          "ratio": 1.0006955291801103,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "struct-005@64000",
+          "baseline_decode_tok_s": 165.18494175194922,
+          "candidate_decode_tok_s": 165.2448384907015,
+          "ratio": 1.0003626041097755,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "worklog-001@64000",
+          "baseline_decode_tok_s": 238.277232330982,
+          "candidate_decode_tok_s": 238.28472721928966,
+          "ratio": 1.0000314544878433,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "worklog-010@64000",
+          "baseline_decode_tok_s": 201.19208859612394,
+          "candidate_decode_tok_s": 201.20152690032157,
+          "ratio": 1.0000469119052517,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "worklog-020@64000",
+          "baseline_decode_tok_s": 162.38117639819137,
+          "candidate_decode_tok_s": 162.27723500055657,
+          "ratio": 0.9993598925691983,
+          "normalized_output_hashes_match": true
+        }
+      ]
+    },
+    "native-supplemental": {
+      "case_count": 7,
+      "weighted_decode_tok_s": {
+        "A": 168.34877440324897,
+        "B": 168.35279894173172
+      },
+      "weighted_decode_ratio": 1.00002390595653,
+      "minimum_case_ratio": 0.999802632009504,
+      "below_case_floor": [],
+      "acceptance": {
+        "A": {
+          "accepted": 11204,
+          "drafted": 21736,
+          "rounds": 3116
+        },
+        "B": {
+          "accepted": 11204,
+          "drafted": 21736,
+          "rounds": 3116
+        }
+      },
+      "cases": [
+        {
+          "id": "code-depth-0",
+          "baseline_decode_tok_s": 183.90353324414383,
+          "candidate_decode_tok_s": 183.86723657334232,
+          "ratio": 0.999802632009504,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "code-depth-32000",
+          "baseline_decode_tok_s": 171.38700199576198,
+          "candidate_decode_tok_s": 171.36860099079922,
+          "ratio": 0.9998926347695655,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "code-depth-64000",
+          "baseline_decode_tok_s": 174.95165850161808,
+          "candidate_decode_tok_s": 174.9690523239845,
+          "ratio": 1.0000994207343639,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "reasoning-algorithm",
+          "baseline_decode_tok_s": 166.9423878886678,
+          "candidate_decode_tok_s": 166.98967250126225,
+          "ratio": 1.000283239105373,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "reasoning-capacity",
+          "baseline_decode_tok_s": 203.1505033080287,
+          "candidate_decode_tok_s": 203.1368622140211,
+          "ratio": 0.9999328522756012,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "reasoning-invariant",
+          "baseline_decode_tok_s": 127.44664909711196,
+          "candidate_decode_tok_s": 127.4501624973847,
+          "ratio": 1.0000275676159212,
+          "normalized_output_hashes_match": true
+        },
+        {
+          "id": "reasoning-probability",
+          "baseline_decode_tok_s": 171.43460342747065,
+          "candidate_decode_tok_s": 171.45065294376832,
+          "ratio": 1.0000936188842673,
+          "normalized_output_hashes_match": true
+        }
+      ]
+    }
+  },
+  "byte_identity_counts": {
+    "native-d0": {
+      "cases": 84,
+      "A0_A3": 84,
+      "B1_B2": 84,
+      "all_four": 84,
+      "A0_B1": 84,
+      "A0_B2": 84,
+      "A3_B1": 84,
+      "A3_B2": 84
+    },
+    "native-d32000": {
+      "cases": 12,
+      "A0_A3": 12,
+      "B1_B2": 12,
+      "all_four": 12,
+      "A0_B1": 12,
+      "A0_B2": 12,
+      "A3_B1": 12,
+      "A3_B2": 12
+    },
+    "native-d64000": {
+      "cases": 12,
+      "A0_A3": 12,
+      "B1_B2": 12,
+      "all_four": 12,
+      "A0_B1": 12,
+      "A0_B2": 12,
+      "A3_B1": 12,
+      "A3_B2": 12
+    },
+    "native-supplemental": {
+      "cases": 7,
+      "A0_A3": 7,
+      "B1_B2": 7,
+      "all_four": 7,
+      "A0_B1": 7,
+      "A0_B2": 7,
+      "A3_B1": 7,
+      "A3_B2": 7
+    }
+  },
+  "byte_identity_method": "Reopened retained content/reasoning/ordered-tool-call projection UTF8 bytes; transport tool IDs excluded; raw argument strings unchanged; no digest-only equality"
+}

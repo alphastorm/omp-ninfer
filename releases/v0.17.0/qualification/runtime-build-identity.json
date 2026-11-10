@@ -1,0 +1,19 @@
+{
+  "artifact_type": "ninfer_release_build_identity",
+  "binaries": {
+    "ninfer": "c84b314a37d77dec15b8466caeb22575605325b3dfe7fd34b222e6595026d9b2",
+    "ninfer-serve": "dc86e101c2c6a0fb03875e746448c4008d5dfce0633a0c8e3e830b61ac820c29"
+  },
+  "build_profile": "rtx5090",
+  "build_type": "Release",
+  "cuda_architecture": "120a",
+  "cuda_compiler": "NVIDIA-13.1.115",
+  "cuda_toolkit": "13.1.115",
+  "cxx_compiler": "GNU-13.3.0",
+  "patch_stack_sha": "e0971faf221204047d5a4ed834e4e298740cee17",
+  "platform": "linux-x86_64-cuda13.1",
+  "release_version": "v0.7.0",
+  "schema_version": 1,
+  "source_dirty": false,
+  "upstream_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929"
+}

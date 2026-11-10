@@ -1,0 +1,96 @@
+{
+  "schema": "p16-5090-preview-gate/1",
+  "source_commit": "e0971faf221204047d5a4ed834e4e298740cee17",
+  "phase": "rc",
+  "exit": 0,
+  "wall_seconds": 688.813,
+  "diagnostic_preview": false,
+  "release_qualification": true,
+  "passed": true,
+  "phases": [
+    {
+      "phase": "host",
+      "exit": 0,
+      "seconds": 14
+    },
+    {
+      "phase": "host_current",
+      "exit": 0,
+      "seconds": 34
+    },
+    {
+      "phase": "dense_real",
+      "exit": 0,
+      "seconds": 272
+    },
+    {
+      "phase": "loader",
+      "exit": 0,
+      "seconds": 5
+    },
+    {
+      "phase": "shared_mtp_fp8",
+      "exit": 0,
+      "seconds": 17
+    },
+    {
+      "phase": "overlap",
+      "exit": 0,
+      "seconds": 32
+    },
+    {
+      "phase": "four_boot_restart",
+      "exit": 0,
+      "seconds": 112
+    },
+    {
+      "phase": "product_shape",
+      "exit": 0,
+      "seconds": 146
+    },
+    {
+      "phase": "exact_release_profile",
+      "exit": 0,
+      "seconds": 32
+    },
+    {
+      "phase": "product_smokes",
+      "exit": 0,
+      "seconds": 23
+    },
+    {
+      "phase": "help_candidate",
+      "exit": 0,
+      "seconds": 0
+    },
+    {
+      "phase": "help_control",
+      "exit": 0,
+      "seconds": 1
+    }
+  ],
+  "junit": {
+    "host": {
+      "tests": 66,
+      "failures": 0,
+      "skips": 0
+    },
+    "real": {
+      "tests": 11,
+      "failures": 0,
+      "skips": 0
+    },
+    "overlap": {
+      "tests": 1,
+      "failures": 0,
+      "skips": 0
+    }
+  },
+  "expected_tests": {
+    "host": 66,
+    "real": 11,
+    "overlap": 1
+  },
+  "current_host_tests": 54,
+  "package_exit": 0
+}

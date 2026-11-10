@@ -43,6 +43,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Stage v0.17.0 with published RTX 5090 runtime beta.6 from `e0971faf`, stock OMP 18.18.6
+  and unchanged native beta.2 components. Bind fresh published-image/artifact receipts, preserve
+  predecessor checkpoint stores, and prepare the full successor guide. New-client five-route
+  acceptance, final review/composition pins and founder-owned product publication remain separate.
 - Prepare the reviewed stock-client fragments for the next release: pin `tokenizer: qwen3`
   on opaque aliases and disable automatic updates and the setup wizard explicitly, while
   retaining effort clamps, async compaction and concurrency. Explicit `omp update` remains an

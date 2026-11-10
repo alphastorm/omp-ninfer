@@ -1,0 +1,74 @@
+{
+  "artifact_type": "omp_ninfer_component_asset_authentication",
+  "schema_version": 1,
+  "as_of": "2026-11-10T11:19:20.880705+00:00",
+  "source_commit": "e0971faf221204047d5a4ed834e4e298740cee17",
+  "status": "passed",
+  "method": "Independent public release downloads; byte count and SHA-256 against release API and local RC mirror; streaming package files against SPDX; published image/base receipt identity equality. No executable or container was run.",
+  "assets": [
+    {
+      "release": "v0.7.0-qwen38-5090-beta.6",
+      "asset": "ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.SHA256SUMS",
+      "bytes": 251,
+      "sha256": "beb70158323695ac2bc562e0c2f0ae6c55ee5fb6e8270c1df5cfb09a0d9f994b",
+      "public_api_size_digest_match": true,
+      "local_mirror_match": true,
+      "url": "https://github.com/alphastorm/ninfer/releases/download/v0.7.0-qwen38-5090-beta.6/ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.SHA256SUMS"
+    },
+    {
+      "release": "v0.7.0-qwen38-5090-beta.6",
+      "asset": "ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.spdx.json",
+      "bytes": 3596,
+      "sha256": "d9ea727c7d415c8189f0c76708fa665ebd4df4c025764906f8e7c48cb6356a4e",
+      "public_api_size_digest_match": true,
+      "local_mirror_match": true,
+      "url": "https://github.com/alphastorm/ninfer/releases/download/v0.7.0-qwen38-5090-beta.6/ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.spdx.json"
+    },
+    {
+      "release": "v0.7.0-qwen38-5090-beta.6",
+      "asset": "ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.tar.gz",
+      "bytes": 580026014,
+      "sha256": "d7f1ca4fdca2555a2e36ce84121737e9910e559f4519e24a848f0451214ea180",
+      "public_api_size_digest_match": true,
+      "local_mirror_match": true,
+      "url": "https://github.com/alphastorm/ninfer/releases/download/v0.7.0-qwen38-5090-beta.6/ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.tar.gz"
+    },
+    {
+      "release": "v0.7.0-qwen38-5090-source.6",
+      "asset": "runtime-source-e0971faf.tar.gz",
+      "bytes": 12820073,
+      "sha256": "73749f93241ff6990873b8d18a9c7d5687dee101af94683076d9c077795ce478",
+      "public_api_size_digest_match": true,
+      "local_mirror_match": true,
+      "url": "https://github.com/alphastorm/ninfer/releases/download/v0.7.0-qwen38-5090-source.6/runtime-source-e0971faf.tar.gz"
+    },
+    {
+      "release": "v0.7.0-qwen38-5090-runtime-beta.6",
+      "asset": "ninfer-runtime-image-v0.7.0-qwen38-5090-beta.6.json",
+      "bytes": 1215,
+      "sha256": "c43645c8ef1906b36ec7f63f7de1e8c6eaef5b1d8e25c49e875b11140bc727e9",
+      "public_api_size_digest_match": true,
+      "local_mirror_match": null,
+      "url": "https://github.com/alphastorm/ninfer/releases/download/v0.7.0-qwen38-5090-runtime-beta.6/ninfer-runtime-image-v0.7.0-qwen38-5090-beta.6.json"
+    },
+    {
+      "release": "runtime-base-a87de361-20261103",
+      "asset": "ninfer-runtime-base.json",
+      "bytes": 29993,
+      "sha256": "cf0fe8e668920eb54f8c724d9607ef8b7b2861c778330be6a8d13887cc9268ca",
+      "public_api_size_digest_match": true,
+      "local_mirror_match": null,
+      "url": "https://github.com/alphastorm/ninfer/releases/download/runtime-base-a87de361-20261103/ninfer-runtime-base.json"
+    }
+  ],
+  "packaged_server_sha256": "dc86e101c2c6a0fb03875e746448c4008d5dfce0633a0c8e3e830b61ac820c29",
+  "package_files_sha256": {
+    "ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1/LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+    "ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1/bin/ninfer": "c84b314a37d77dec15b8466caeb22575605325b3dfe7fd34b222e6595026d9b2",
+    "ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1/bin/ninfer-serve": "dc86e101c2c6a0fb03875e746448c4008d5dfce0633a0c8e3e830b61ac820c29",
+    "ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1/build-identity.json": "f6bc0ed4e540434b0aaadf3658df87f70911a0a55a8c3394ad806e7c500f61d7"
+  },
+  "image_digest": "sha256:7a19576b334b54f8bfca0e022626969bd47ca376ac600a93eb6117dcafd89233",
+  "runtime_base_receipt_sha256": "cf0fe8e668920eb54f8c724d9607ef8b7b2861c778330be6a8d13887cc9268ca",
+  "raw_prompts_outputs_or_secrets_included": false
+}

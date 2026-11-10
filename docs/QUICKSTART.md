@@ -1,11 +1,11 @@
 # Quickstart
 
-> **Route preparation for v0.17.0 · release pins remain v0.16.2 · stock Oh My Pi 18.15.0**
+> **Prepared guide: v0.17.0 · stock Oh My Pi 18.18.6 · fresh route acceptance required**
 
-This branch prepares successor-only route changes; it is not an installable v0.17.0 release.
-Use the [immutable published v0.16.2 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.16.2/docs/QUICKSTART.md)
-for installation. The component/client pins below remain unchanged until staging; the changed host
-checkpoint and macOS key blocks need fresh candidate-bound acceptance, not v0.16.2's receipts.
+This guide prepares the v0.17.0 runtime-and-client candidate; it does not claim completed product
+acceptance or publication. Use the [immutable published v0.16.2 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.16.2/docs/QUICKSTART.md)
+for installation until this release is published. The new host checkpoint and atomic macOS key
+blocks must execute in fresh candidate-bound acceptance; predecessor receipts are not transferred.
 
 OMP NInfer is the qualified local inference appliance and release layer connecting the
 [Oh My Pi](https://github.com/can1357/oh-my-pi) (OMP) coding-agent client over authenticated
@@ -13,18 +13,18 @@ loopback to the NInfer inference engine serving Qwen3.8 27B on your GPU.
 
 ## Choose your lane
 
-| GPU and host | Client route in v0.16.2 | Start here |
+| GPU and host | Client route in v0.17.0 | Start here |
 | --- | --- | --- |
 | RTX 5090 container on Windows 11 + Docker Desktop / WSL2 | Native Windows x64 client over local loopback `127.0.0.1:18089` | [RTX 5090 Windows route](#ready-route-native-windows-and-docker-desktop-wsl2) |
 | RTX 5090 container on Windows 11 / WSL2 or Linux | macOS arm64 client over a manual SSH tunnel (preview) | [macOS manual SSH route (preview)](#macos-client-over-a-manual-ssh-tunnel-preview) |
-| RTX 4090 native Windows 11 (alone or beside RTX 3090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; `v0.8.0-qwen38-4090-beta.2` DFlash2 K=7, one request at a time (`C1`); route, native campaign and public install passed | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) |
-| RTX 3090 native Windows 11 (alone or beside RTX 4090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; `v0.8.0-qwen38-3090-beta.2` DFlash2 K=7, two requests in flight (`C2`) over one shared 131,072-token pool; route passed, later native campaign failed and founder-waived; no anonymous public-install result | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
+| RTX 4090 native Windows 11 (alone or beside RTX 3090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; `v0.8.0-qwen38-4090-beta.2` DFlash2 K=7, one request at a time (`C1`); carried beta.2 component, fresh new-client route acceptance required | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) |
+| RTX 3090 native Windows 11 (alone or beside RTX 4090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; `v0.8.0-qwen38-3090-beta.2` DFlash2 K=7, two requests in flight (`C2`) over one shared 131,072-token pool; carried beta.2 component, fresh new-client route acceptance required; no new waiver or public-install pass claimed | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
 | RTX 5090 container with Linux x64 client under WSL2 only | WSL2 shell client over local loopback `127.0.0.1:18089` (no native Linux OS qualification) | [WSL2 Linux client](#wsl2-linux-client-over-local-loopback) |
 | Other GPU, non-WSL Linux client, or concurrent native serving | Unsupported | [Compatibility boundary](COMPATIBILITY.md) |
 
 ## Before you start
 
-- **Clone the tag and run the ready gate:** start from a clean clone of `v0.16.2` and verify
+- **Clone the tag and run the ready gate:** start from a clean clone of `v0.17.0` and verify
   `python3 scripts/verify_release.py --require-ready` (`py -3 scripts\verify_release.py --require-ready`
   on Windows). Never install from a moving branch, an untagged archive, or a draft/candidate manifest.
 - **Keep one release authority end to end:** stock OMP has no `omp appliance` commands, and
@@ -50,7 +50,7 @@ loopback to the NInfer inference engine serving Qwen3.8 27B on your GPU.
 ## Contributor acceptance and preflight
 
 You can exercise the stock client without a GPU: run
-`python3 scripts/client_acceptance.py --omp ./omp-darwin-arm64 --omp-sha256 SHA256 --omp-version omp/18.15.0 --local-rehearsal --receipt rehearsal.json`,
+`python3 scripts/client_acceptance.py --omp ./omp-darwin-arm64 --omp-sha256 SHA256 --omp-version omp/18.18.6 --local-rehearsal --receipt rehearsal.json`,
 substituting the binary and SHA-256 from the selected release's client descriptor (use
 `omp-windows-x64.exe` or `omp-linux-x64` on those platforms). The runner creates a disposable
 HOME and its own loopback Responses stub, checks a typed read-tool turn, continuation, a real
@@ -89,18 +89,16 @@ also checks the actual container's publication. For a hardware-independent local
 Read the [doctor boundaries and remedies](TROUBLESHOOTING.md#named-cause-preflight) before
 changing a running host.
 
-## OMP 18.15.0 client
+## OMP 18.18.6 client
 
-Release `v0.16.2` selects unmodified upstream
-[Oh My Pi v18.15.0](https://github.com/can1357/oh-my-pi/releases/tag/v18.15.0), source
-`3fedf8d53267e32a6d7521ce725fdcc4a36fdc67`, tree
-`48bc72ba2418c0b78163d9769e91a0d8683e642b`, release `430630500`.
-The [release notes](../releases/v0.16.2/NINFER_RELEASE_NOTES.md#stock-omp-18150) record Windows
-`978846a8…`, Linux `6737ee24…` and Darwin `d36dfabf…`; the release-local
-`qualification/client-components.json` descriptor binds those exact identities. The
-[18.14.2 review](measurements/2026-11-01-omp-18142-client-upgrade-review.json) and
-[18.15.0 review](measurements/2026-11-01-omp-18150-client-upgrade-review.json) cover the whole
-source delta plus independent download integrity; they are not semantic or live acceptance.
+Release `v0.17.0` selects unmodified upstream
+[Oh My Pi v18.18.6](https://github.com/can1357/oh-my-pi/releases/tag/v18.18.6), source
+`9058ab9d229663e229e2867824ba6df6f21e9e59`, tree
+`fd379b65368a20c7648d97f2c2b99cc03e019254`, release `439766193`.
+The [release notes](../releases/v0.17.0/NINFER_RELEASE_NOTES.md#stock-omp-18186) and release-local
+`qualification/client-components.json` bind the exact platform assets. The
+[18.15.0→18.18.6 review](measurements/2026-11-10-omp-18186-client-upgrade-review.json)
+covers source behavior and independent public-download integrity, not client execution or live acceptance.
 
 - **Keep the three working compat keys:** per model, `compat.statefulResponses: true`,
   `compat.includeEncryptedReasoning: false`, `compat.supportsReasoningSummary: false`.
@@ -144,112 +142,51 @@ source delta plus independent download integrity; they are not semantic or live 
 
 ## Acceptance evidence
 
-Fresh **2026-11-04** acceptance on frozen candidate
-`c6fc8465611a89fd85730f0653f670d2a314a721` passed all five documented routes:
-RTX 5090 host **2/2**, macOS **10/10**, Windows **5/5**, RTX 4090 **7/7** and RTX 3090 **7/7**
-(**31/31 executable blocks**), plus all three stock 18.15.0 clients and RTX 4090
-public-install/probe/restoration acceptance. Receipts:
-[documented routes](../releases/v0.16.2/acceptance/documented-routes.json),
-[composed acceptance](../releases/v0.16.2/acceptance/composed-external-installation.json),
-[restoration](measurements/2026-11-04-v0162-acceptance-restoration.json).
-The RTX 5090 production hold was **418.529 s** accepted and all-attempt total (one window);
-the same healthy production container, image, checkpoint mount and `unless-stopped` policy
-were restored.
+Fresh v0.17.0 acceptance is not yet composed. The frozen candidate must execute all five documented
+routes: RTX 5090 host 2 blocks, macOS 10, Windows 5, RTX 4090 7 and RTX 3090 7 (31 executable
+blocks), plus structured acceptance on all three exact stock OMP 18.18.6 clients, native probes,
+public installs and independent restoration. macOS remains preview; Linux is WSL2-only; image
+input remains macOS/Windows against RTX 5090 only.
 
-RTX 3090's later native campaign **failed** at the separate structured-outage managed Stop:
-`graceful_incomplete_shutdown`, saved **1**, skipped **8**, refused **1**, final durable-save
-reason **capacity**, reclaimed Host bytes **0**. The
-[founder waiver](../releases/v0.16.2/qualification/rtx3090-route-waiver.json) preserves that failure.
-It is a residual of fork #78 also present in published beta.1; v0.16.0 avoided it only by timing.
-Behavior completion, a passing wrapper restoration audit and anonymous public-install acceptance
-are **not claimed**. Fleet/fanout, both parallel-proof scenarios at limit 2 and two committed
-automatic-compaction/control-recall epochs passed before the failure.
-After preserving evidence, the operator recovered with `Control-Release.ps1 -Action Start`
-then `-Action Stop` with no client sessions: graceful, zero refused, runtime record and owner
-lease absent, **370 W**, tasks Ready, no server or port-18082 listener. A refused session
-loses warm restore, not its authoritative OMP transcript; replay it for fresh prefill.
-Follow-ups: [export residual #89](https://github.com/alphastorm/ninfer/issues/89) and
-[owner restoration #90](https://github.com/alphastorm/ninfer/issues/90).
-
-The exact-source runtime full council and focused product reviews closed by disposition;
-their [ledger](../releases/v0.16.2/review/runtime-ledger.json) binds subjects and separate
-composition controls. Product deferrals use [#138](https://github.com/alphastorm/omp-ninfer/issues/138).
-Review control GE-R1 binds lane-distinct evidence-archive digests beside lane-agnostic scenario
-summary receipts; GE-R4 binds the stock-client source and download-integrity review, not live acceptance.
-Both native routes are first-lineage, rollback `not_applicable`, zero directions; the separate predecessor rehearsals are not route rollback.
-macOS remains preview; Linux remains WSL2-only; vision remains macOS/Windows against RTX 5090 only.
-No predecessor client, runtime, or product-route receipt is relabeled.
-Composition binds only non-executable prose changes; every accepted executable block is unchanged.
-See [Releases](RELEASES.md).
+The published runtime component and carried native qualifications are separate from those new-client
+and product-route obligations. Historical acceptance, failed native campaign disclosures and founder
+waivers remain with the [immutable v0.16.2 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.16.2/docs/QUICKSTART.md).
+No old waiver, product acceptance or review approval is relabeled as a v0.17.0 result. No host window,
+production promotion or product publication is authorized by this prepared guide.
 
 ## Current release at a glance
 
 | Lane | Runtime component and source | Model artifact | Serving profile and limits |
 | --- | --- | --- | --- |
-| RTX 5090 container (`127.0.0.1:18089`) | `v0.7.0-qwen38-5090-beta.5`, source `a87de361` on upstream `64d10fbf`, server `cc99a460`, image `a0cbb8a5`; current published-image lane receipt bound | `81f924d4` (20,437,521,664 bytes) | Kept `qwen38-5090-v0.13.0` (config `751d22dc`): strict origin auth, DFlash2 K7, BF16 KV, 146,368 automatic tokens, 131,072 context, C2 plus two extra device-state slots, shared Host budget, 180 s pending timeout |
-| RTX 4090 native Windows (`127.0.0.1:18082`) | `v0.8.0-qwen38-4090-beta.2`, source `a87de361` on upstream `64d10fbf`; package `d9b10b47`, server `ffee91bf`, config `ae27dc44` | Same model v3 | `qwen38-4090-native-v0.8.0-beta.2`: INT8 DFlash2 K7, `Group64` A8 and FP32 head logits off, 131,072 context, C1, 30 s pending timeout, two extra slots, 1,024-token prefill, 16,512,696,320 B shared Host budget, 640 MiB headroom |
-| RTX 3090 native Windows (`127.0.0.1:18082`) | `v0.8.0-qwen38-3090-beta.2`, source `a87de361` on upstream `64d10fbf`; package `97a8e634`, server `15a4db46`, config `238ccad7` | Same model v3 | `qwen38-3090-native-v0.8.0-beta.2`: INT8 DFlash2 K7, `Group64` A8 and FP32 head logits off, C2 over one 131,072-token pool, 180 s pending timeout, two extra slots, 1,024-token prefill, 21,881,405,440 B shared Host budget, 768 MiB headroom, 350 W serving cap |
+| RTX 5090 container (`127.0.0.1:18089`) | `v0.7.0-qwen38-5090-beta.6`, source `e0971faf`, server `dc86e101`, image `7a19576b`; current published-image lane receipt is required before the candidate pin | Published v3 `81f924d4` (20,437,521,664 bytes) | Retained `qwen38-5090-v0.13.0` / config `751d22dc`: strict origin auth, DFlash2 K7, BF16 KV, 131,072 context, C2, two extra device-state slots, 180 s pending timeout; successor host store `checkpoints-v017` |
+| RTX 4090 native Windows (`127.0.0.1:18082`) | Carried `v0.8.0-qwen38-4090-beta.2`, source `a87de361`; package `d9b10b47`, server `ffee91bf`, config `ae27dc44` | Same model v3 | Unchanged INT8 DFlash2 K7, 131,072 context, C1, 30 s pending timeout, two extra slots, 1,024-token prefill, 640 MiB admission headroom |
+| RTX 3090 native Windows (`127.0.0.1:18082`) | Carried `v0.8.0-qwen38-3090-beta.2`, source `a87de361`; package `97a8e634`, server `15a4db46`, config `238ccad7` | Same model v3 | Unchanged INT8 DFlash2 K7, C2 over one 131,072-token pool, 180 s pending timeout, two extra slots, 1,024-token prefill, 768 MiB headroom, 350 W serving cap |
 
-The exact RTX 5090 image is
-`ghcr.io/alphastorm/ninfer-runtime@sha256:a0cbb8a5f933ec8aeec9a7defa07d78a835c1093d1d98f5f842267287efa3f71`.
-All three runtime components bind `a87de3613c17bced777b446fb545f872d8395ec1`, including the
-[managed-Stop capacity fix #78](https://github.com/alphastorm/ninfer/issues/78).
-The published component reports a bit-identical same-path double build; the v0.16.0
-reproducibility exception is historical, not renewed. See the
-[release notes](../releases/v0.16.2/NINFER_RELEASE_NOTES.md) and
-[manifest](../releases/v0.16.2/manifest.json) for component evidence,
-candidate-bound acceptance, exact-source reviews and exact identities.
+The RTX 5090 image is
+`ghcr.io/alphastorm/ninfer-runtime@sha256:7a19576b334b54f8bfca0e022626969bd47ca376ac600a93eb6117dcafd89233`.
+The [manifest](../releases/v0.17.0/manifest.json) binds the exact source/artifact/configuration
+identities. Pacing is optional and default off; copy drafting and the separate prefix-source-wait
+follow-up are not selected. No new model, context, native configuration or performance guarantee
+is implied. Native beta.2 bytes are carried, not rebuilt from the RTX 5090 source; their original
+qualification does not cover the new client. No canonical native promotion is needed for this release.
 
-Both native 15-phase chains, fit proofs, zero-difference 1,120-prompt powered quality screens
-and 3/3 predecessor upgrade/rollback/repair scenarios are bound. The founder's no-regression
-rule versus published beta.1 is weighted ≥0.98, every case ≥0.95 and byte-identical normalized
-outputs, superseding the earlier 1.08 speedup floor: RTX 3090 weighted **1.0003** /
-min **0.9988**, **84/84** identical; RTX 4090 **0.9996** / **0.9989**, **115/115**.
-The notes disclose the original failed RTX 5090 `restore_0`, RTX 4090 `restore_1` and RTX 3090
-sibling position 1 `base` measurements and exact-subject waivers, and RTX 4090's private
-uncapped-power-assertion-only rehearsal fix. Raw failures are not passes; component follow-ups
-[#87](https://github.com/alphastorm/ninfer/issues/87) /
-[#88](https://github.com/alphastorm/ninfer/issues/88) do not replace product acceptance.
-
-- **Serving limits and compaction:** RTX 5090 admits two requests at once and holds a pending
-  request for up to 180 s (`--pending-timeout-ms 180000`) when both prompts plus output reservations
-  do not fit its 146,368-token automatic KV pool (upgrade an older one-at-a-time RTX 5090 server before
-  raising its OMP limit). RTX 3090 likewise admits two requests, sharing one 131,072-token INT8
-  pool with a 180 s pending timeout and OMP limit `2`; this is not a fairness or per-request
-  throughput guarantee. RTX 4090
-  stays C1 with a 30 s pending timeout and OMP limit `1`; excess turns wait in OMP during
-  background compaction rather than expiring at the server
-  ([troubleshooting](TROUBLESHOOTING.md#a-turn-fails-with-request_queue_timeout-late-in-a-long-session)).
-- **Native two-GPU UUID topology and rollback:** Both native packages bind their GPU UUID and PCI
-  address on a two-GPU Windows 11 host and serve sequentially on port `18082`. Upgrading an
-  existing install preserves its actual predecessor as `previous_release` for
-  `Control-Release.ps1 -Action Rollback`. Separate beta.2 running-upgrade, forced-start-failure
-  rollback and repair rehearsals passed on both lanes; candidate-bound public-URL installation
-  passed on RTX 4090 but was not exercised on the failed, founder-waived RTX 3090 campaign.
-  An isolated scratch qualification's `not_applicable` rollback is not a predecessor-upgrade proof.
-- **RTX 3090 power and upgrade:** the serving cap is 350 W, with 370 W owner restoration on the
-  qualified hardware. The new installer validates an incumbent's lease under its own policy
-  and stops it through its own controller before the successor's policy takes ownership,
-  fixing the historical stop-first restriction in
-  [#94](https://github.com/alphastorm/omp-ninfer/issues/94). Inspect every refusal; do not bypass it.
-- **Checkpoints and legacy routes:** Stock OMP names each session with `prompt_cache_key`, which the
-  authenticated runtime hashes into the session identity. Checkpoints restore across graceful
-  restarts on all three lanes, but saves are best effort under traffic (a crash or expired wait can
-  lose unsaved work; universal warm reuse is not promised) and restore requires the same runtime
-  binary, model, profile, and bearer key. Single-GPU native owners staying on `v0.10.0` use the
-  [immutable v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md);
-  the older RTX 3090 `v0.2` lineage on the OMP 18.0.9 fork client remains in the
-  [historical v0.7.2 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md).
-- **Session capability boundary:** Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and do not share that principal among mutually untrusted clients.
-- **Native protocol and checkpoint contract:** Both native lanes require Chat and Responses
-  JSON-schema structured output, 128-character tool names, status endpoint schema 2, and request-log
-  schema 30. The package server-config (schema 4) uses
-  `cache/<release-instance-id>/session-checkpoints-v3` (where `<release-instance-id>` is the
-  installed release ID such as `qwen38-4090-native-v0.8.0-beta.2-a87de3613c17`), not the old native
-  root. Keep old native roots untouched; never migrate their generations. Replay OMP transcripts for
-  a fresh prefill. Both native profiles require `--session-checkpoint-require-origin-auth` and a key
-  of at least 32 bytes; the generated key below is 64 characters. Do not drop strict origin to
-  accept old state.
+- **Sequential native ownership:** both native lanes are UUID/PCI-bound on a two-GPU Windows host
+  and share port 18082. Stop the other lane first; C2 means two requests within the one active
+  RTX 3090 lane, not concurrent native-lane serving. Keep prior roots/staging/checkpoints for rollback.
+- **Checkpoint boundary:** restore requires the same binary, model, profile and bearer key. Saves
+  are best effort under traffic; authoritative OMP transcripts remain replayable. The new container
+  host store `checkpoints-v017` is separate from predecessor `checkpoints-v013`, while the retained
+  container mount stays `/checkpoints-v013`. Never import prior generations or write the successor
+  into the predecessor store.
+- **Session capability:** `prompt_cache_key` names a session within one authenticated API-key
+  principal. Use high-entropy unique keys; do not share that principal among mutually untrusted clients.
+- **Native durability:** the unchanged native schema-3 store is
+  `cache/<release-instance-id>/session-checkpoints-v3`, such as
+  `qwen38-4090-native-v0.8.0-beta.2-a87de3613c17`. Both native profiles require strict origin auth
+  and a bearer key of at least 32 bytes. Preserve legacy generations without migration.
+- **Legacy owners:** use the immutable [v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md)
+  or [v0.7.2 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md) for those lineages;
+  do not mix their clients/fragments with this prepared route.
 
 ## Ready route: native Windows and Docker Desktop WSL2
 
@@ -265,7 +202,7 @@ Clone the tag in Windows and in the WSL2 distro that owns Docker (`Set-Execution
 the current window only):
 
 ```powershell
-git clone --branch v0.16.2 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.17.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 if ($LASTEXITCODE -ne 0) { throw 'release clone failed' }
 Set-Location omp-ninfer
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
@@ -277,8 +214,8 @@ if ($LASTEXITCODE -ne 0) { throw 'ready gate failed' }
 
 ```powershell
 $ErrorActionPreference = 'Stop'
-$Url = 'https://github.com/can1357/oh-my-pi/releases/download/v18.15.0/omp-windows-x64.exe'
-$Expected = '978846a816cb77f44a55e32b16493375ca837fbf87e0aec35a9c1c934bff0cd0'
+$Url = 'https://github.com/can1357/oh-my-pi/releases/download/v18.18.6/omp-windows-x64.exe'
+$Expected = 'dfb15c27cb2ea192a94761c26aa5cd4eed54b1e0a5a85c02938ab07d769bc8f7'
 Invoke-WebRequest -UseBasicParsing -Uri $Url -OutFile omp-windows-x64.exe
 if ((Get-FileHash omp-windows-x64.exe -Algorithm SHA256).Hash.ToLowerInvariant() -cne $Expected) { throw 'OMP binary checksum mismatch' }
 $Launcher = "$env:LOCALAPPDATA\OMP\omp.exe"
@@ -289,7 +226,7 @@ Remove-Item Env:PI_OPENAI_STATEFUL -ErrorAction SilentlyContinue
 if ($LASTEXITCODE -ne 0) { throw 'OMP version check failed' }
 ```
 
-The client version must be `omp/18.15.0` (to roll back, verify the previous pinned binary's
+The client version must be `omp/18.18.6` (to roll back, verify the previous pinned binary's
 checksum before replacing `omp.exe`). Inside WSL2, run **3. Prepare the model and key** and
 **4. Start NInfer** below, skip sections 5–6 (Docker Desktop exposes `127.0.0.1:18089` to native
 Windows), then run **Native Windows OMP** in section 7 and **Native Windows command forms** in
@@ -306,7 +243,7 @@ and staging untouched for historical recovery; never import MTP3 checkpoints int
 runtime.
 
 ```powershell
-git clone --branch v0.16.2 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.17.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 if ($LASTEXITCODE -ne 0) { throw 'release clone failed' }
 Set-Location omp-ninfer
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
@@ -321,7 +258,7 @@ $VariantId = 'rtx4090-windows-native'
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 $ErrorActionPreference = 'Stop'
-$Manifest = Get-Content .\releases\v0.16.2\manifest.json -Raw | ConvertFrom-Json
+$Manifest = Get-Content .\releases\v0.17.0\manifest.json -Raw | ConvertFrom-Json
 $Variant = @($Manifest.components.ninfer_variants | Where-Object { $_.id -ceq $VariantId })
 if ($Variant.Count -ne 1 -or $Variant[0].status -cne 'qualified') {
   throw 'requested native runtime variant is not uniquely qualified'
@@ -511,7 +448,7 @@ is no longer required. Keep all predecessor roots, staging, and checkpoints for 
 checkpoints do not transfer into DFlash2.
 
 ```powershell
-git clone --branch v0.16.2 --depth 1 https://github.com/alphastorm/omp-ninfer.git
+git clone --branch v0.17.0 --depth 1 https://github.com/alphastorm/omp-ninfer.git
 if ($LASTEXITCODE -ne 0) { throw 'release clone failed' }
 Set-Location omp-ninfer
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
@@ -526,7 +463,7 @@ $VariantId = 'rtx3090-windows-native'
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 $ErrorActionPreference = 'Stop'
-$Manifest = Get-Content .\releases\v0.16.2\manifest.json -Raw | ConvertFrom-Json
+$Manifest = Get-Content .\releases\v0.17.0\manifest.json -Raw | ConvertFrom-Json
 $Variant = @($Manifest.components.ninfer_variants | Where-Object { $_.id -ceq $VariantId })
 if ($Variant.Count -ne 1 -or $Variant[0].status -cne 'qualified') {
   throw 'requested native runtime variant is not uniquely qualified'
@@ -713,7 +650,7 @@ From the tagged clone, install the release's checksummed `omp-linux-x64` and cop
 ```sh
 (
 set -euo pipefail
-CLIENT='releases/v0.16.2/qualification/client-components.json'
+CLIENT='releases/v0.17.0/qualification/client-components.json'
 URL=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["platforms"]["linux-x64"]["asset_url"])' "$CLIENT")
 EXPECTED=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["platforms"]["linux-x64"]["asset_sha256"])' "$CLIENT")
 VERSION=$(python3 -c 'import json,sys; print("omp/" + json.load(open(sys.argv[1]))["omp"]["distribution_version"])' "$CLIENT")
@@ -751,8 +688,8 @@ release failure. Restart NInfer with section 4 only after observing the failure.
 ## macOS client over a manual SSH tunnel (preview)
 
 The macOS arm64 client is a preview platform (stock upstream binary over a manual OpenSSH loopback
-tunnel, without a managed macOS installer or appliance service); fresh v0.16.2 acceptance ran
-all 10 executable blocks against the `v0.7.0-qwen38-5090-beta.5` RTX 5090 container lane. Sections 3 and 4 also serve as
+tunnel, without a managed macOS installer or appliance service). Fresh v0.17.0 acceptance must run
+all 10 executable blocks against the `v0.7.0-qwen38-5090-beta.6` RTX 5090 container lane. Sections 3 and 4 also serve as
 the inference-host setup for the Windows and WSL2 Linux client routes.
 
 ### Prerequisites
@@ -780,21 +717,21 @@ Run the chain as one block. A failed clone stops before entering any existing `o
 directory; the ready gate explicitly names the release being installed.
 
 ```sh
-git clone --branch v0.16.2 --depth 1 \
+git clone --branch v0.17.0 --depth 1 \
   https://github.com/alphastorm/omp-ninfer.git &&
 cd omp-ninfer &&
-python3 scripts/verify_release.py --release v0.16.2 --require-ready
+python3 scripts/verify_release.py --release v0.17.0 --require-ready
 ```
 
 ## 2. Install the OMP beta on the Mac
 
-Despite the retained heading, this installs the stock Oh My Pi 18.15.0 binary (`omp-darwin-arm64`):
+Despite the retained heading, this installs the stock Oh My Pi 18.18.6 binary (`omp-darwin-arm64`):
 
 ```sh
 (
 set -euo pipefail
-URL='https://github.com/can1357/oh-my-pi/releases/download/v18.15.0/omp-darwin-arm64'
-EXPECTED='d36dfabf0ee52d6f08efadb59c46f0349545c6f6975522417adae29646e73e34'
+URL='https://github.com/can1357/oh-my-pi/releases/download/v18.18.6/omp-darwin-arm64'
+EXPECTED='ed2e63eb43888eb76cb1409b245b1db4557c94dfad52dc545c9aaca01ebce82d'
 curl --fail --location --output omp-darwin-arm64 "$URL"
 test "$(shasum -a 256 omp-darwin-arm64 | cut -d ' ' -f 1)" = "$EXPECTED"
 mkdir -p "$HOME/.local/bin"
@@ -805,7 +742,7 @@ unset PI_OPENAI_STATEFUL
 )
 ```
 
-The version must be `omp/18.15.0`; add `$HOME/.local/bin` to `PATH` before continuing.
+The version must be `omp/18.18.6`; add `$HOME/.local/bin` to `PATH` before continuing.
 
 ## 3. Prepare the model and key on the inference host
 
@@ -817,11 +754,11 @@ CHECKPOINTS="$ROOT/checkpoints-v017"
 install -d -m 700 "$ROOT" "$STATE" "$LOGS" "$CHECKPOINTS"
 
 MODEL_URL=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.16.2/manifest.json"))["components"]["model"]["artifact_url"])')
+  'import json; print(json.load(open("releases/v0.17.0/manifest.json"))["components"]["model"]["artifact_url"])')
 MODEL_BYTES=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.16.2/manifest.json"))["components"]["model"]["artifact_bytes"])')
+  'import json; print(json.load(open("releases/v0.17.0/manifest.json"))["components"]["model"]["artifact_bytes"])')
 MODEL_SHA256=$(python3 -c \
-  'import json; print(json.load(open("releases/v0.16.2/manifest.json"))["components"]["model"]["artifact_sha256"])')
+  'import json; print(json.load(open("releases/v0.17.0/manifest.json"))["components"]["model"]["artifact_sha256"])')
 MODEL="$ROOT/qwen3_8_27b-v3.ninfer"
 
 # a rerun with a complete file gets HTTP 416 from the CDN; the byte-count and checksum below decide
@@ -850,17 +787,17 @@ stores untouched for rollback; never mount either read-write into the successor 
 generations. Retained profile/mount names do not establish cross-binary checkpoint compatibility.
 Resume earlier sessions by replaying the authoritative client transcript for a fresh prefill.
 New exact-runtime checkpoints accelerate later continuations. The retained serving contract includes
-JSON-schema structured output and 128-character Chat/Responses tool names. The historical v0.16.2
+JSON-schema structured output and 128-character Chat/Responses tool names. Historical v0.16.2
 receipts do not qualify these successor route changes. See the
-[v0.16.2 compatibility matrix](../releases/v0.16.2/COMPATIBILITY.md).
+[v0.17.0 compatibility matrix](../releases/v0.17.0/COMPATIBILITY.md).
 
 ## 4. Start NInfer on the inference host
 
 For the successor upgrade from v0.16.2, stop the incumbent with its matching published v0.16.2
 stop script before using the staged successor's launcher. Keeping the predecessor container running
 does not activate a rebuilt runtime. Follow the immutable guide for the incumbent, preserve its
-stores, and replay prior transcripts rather than importing them. The successor identities are not
-staged on this preparation branch.
+stores, and replay prior transcripts rather than importing them. The published component identities are staged here; product-route acceptance and publication
+remain separate gates.
 
 ```sh
 ./examples/manual-tunnel/start-ninfer.sh \
@@ -1175,7 +1112,7 @@ the failure.
 
 The RTX 5090/RTX 4090 single-GPU fleet recipe belongs to the
 [immutable v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md#fleet-the-two-qualified-lanes-in-one-omp-configuration)
-and does not qualify a cross-release fleet or concurrent native serving in v0.16.2.
+and does not qualify a cross-release fleet or concurrent native serving in v0.17.0.
 
 ## Replicating sessions off the machine
 
