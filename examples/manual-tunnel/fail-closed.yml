@@ -1,14 +1,16 @@
-# Install or merge into ~/.omp/agent/config.yml, alongside the OMP 18.15.0 model fragment.
+# Install or merge into ~/.omp/agent/config.yml, alongside the selected release model fragment.
 # The fragment sets compat.statefulResponses per model; launch: omp --model ninfer-beta/q38-ninfer
 retry:
   enabled: false
   modelFallback: false
   fallbackRevertPolicy: never
-# The client profile pins stock upstream 18.15.0; eligibility follows the versioned manifest.
-# The generic startup check
-# would advertise `omp update`, which replaces it outside the release procedure (issue #18).
+# The versioned manifest pins the client. Keep setup and automatic replacement off;
+# these keys do not prevent an operator from explicitly running `omp update` (issue #18).
+update:
+  auto: false
 startup:
   checkUpdate: false
+  setupWizard: false
 # Each provider's limit is its lane's concurrency: the RTX 5090 (ninfer-beta, ninfer-main) serves
 # two requests at once, as does the qualified C2 RTX 3090 (ninfer-native-3090). The RTX 4090
 # (ninfer-native-4090, ninfer-heavy) stays at one. A request beyond a lane's concurrency waits

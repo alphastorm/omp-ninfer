@@ -43,6 +43,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Prepare the reviewed stock-client fragments for the next release: pin `tokenizer: qwen3`
+  on opaque aliases and disable automatic updates and the setup wizard explicitly, while
+  retaining effort clamps, async compaction and concurrency. Explicit `omp update` remains an
+  operator action. Correct the unset-reserve summary cap to 13,107; release-state client pins
+  still select 18.15.0 until staging ([#145](https://github.com/alphastorm/omp-ninfer/pull/145)).
 - Mark v0.16.2 as the published release across the README, quickstart banner, facts, roadmap,
   release history, upstream watch, reference docs, site, and brand assets; front-door install links
   return to the guide on `main`.

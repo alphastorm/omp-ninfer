@@ -9,6 +9,7 @@ providers:
     models:
       - id: q38-ninfer
         name: Qwen3.8 27B NInfer RTX 3090 native
+        tokenizer: qwen3
         api: openai-responses
         reasoning: true
         thinking:

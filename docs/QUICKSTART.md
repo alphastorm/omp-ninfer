@@ -28,8 +28,9 @@ loopback to the NInfer inference engine serving Qwen3.8 27B on your GPU.
   `python3 scripts/verify_release.py --require-ready` (`py -3 scripts\verify_release.py --require-ready`
   on Windows). Never install from a moving branch, an untagged archive, or a draft/candidate manifest.
 - **Keep one release authority end to end:** stock OMP has no `omp appliance` commands, and
-  `examples/manual-tunnel/fail-closed.yml` disables OMP's startup update check so `omp update`
-  cannot replace the checksummed binary. Never mix current fragments with a legacy `v0.10.0` or
+  `examples/manual-tunnel/fail-closed.yml` pins `update.auto=false`, `startup.checkUpdate=false`
+  and `startup.setupWizard=false`. Do not run `omp update`: an explicit operator command can
+  still replace the checksummed binary. Never mix current fragments with a legacy `v0.10.0` or
   `v0.7.2` route.
 - **One GPU lane at a time per host:** both native Windows packages install on the same two-GPU
   host, but they share loopback port `127.0.0.1:18082` and serve sequentially — stop one lane and
@@ -112,12 +113,15 @@ source delta plus independent download integrity; they are not semantic or live 
   `ninfer-heavy/qwen3.8-27b:medium`. Keep high→medium/off→low clamps, the stock
   `qwen3.8-27b` replace / opaque `q38-ninfer` hashline edit defaults, declared 131072/32768 limits,
   static fragments and existing concurrency limits. No discovery, service tiers, /fast, effortMap
-  or per-call-model opt-in is introduced.
+  or per-call-model opt-in is introduced. The stock default `high` is clamped to `medium` by
+  these explicit effort lists; do not remove them or send raw `high` to the shipped Qwen
+  template. Pin `tokenizer: qwen3` on the four opaque `q38-ninfer` model entries; the
+  canonical `qwen3.8-27b` entries already infer qwen3 and need no tokenizer override.
 - **Keep exact-loop detection on:** short whole-line/newline-spanning cycles retain four repeats
   but now need 1024 repeated characters; short non-newline cycles remain four/180 and long cycles
   three/1024. A truly induced loop must still fail closed. Uninduced boundaries are not passes.
 - **Keep default compaction:** reserve 19660 and strict >111412 trigger remain. The ordinary
-  summary output cap is 15728, not the route's 32768. Length-stopped main, turn-prefix, handoff
+  summary output cap with an unset reserve is 13107, not the route's 32768. Length-stopped main, turn-prefix, handoff
   and branch summaries fail visibly without committing partial context; a completed main summary
   survives a truncated display-only short summary. Manual compaction now waits for persistence
   replacement before delivering queued background results. Failure/cancellation and restart

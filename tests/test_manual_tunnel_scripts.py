@@ -64,6 +64,20 @@ class ManualTunnelScriptsTest(unittest.TestCase):
                 self.assertNotIn("PI_OPENAI_STATEFUL", fragment)
                 self.assertNotIn("supportsImageDetailOriginal", fragment)
 
+    def test_opaque_model_aliases_pin_qwen3_tokenization(self) -> None:
+        aliases = []
+        for path in (ROOT / "examples").glob("*/models*.fragment.yml"):
+            text = path.read_text(encoding="utf-8")
+            models = re.split(r"(?=^      - id: )", text, flags=re.M)[1:]
+            for model in models:
+                with self.subTest(fragment=path.relative_to(ROOT), model=model.splitlines()[0]):
+                    if model.startswith("      - id: q38-ninfer\n"):
+                        self.assertIn("        tokenizer: qwen3\n", model)
+                        aliases.append(path)
+                    else:
+                        self.assertNotIn("        tokenizer:", model)
+        self.assertEqual(len(aliases), 4)
+
     def test_every_documented_provider_admits_as_many_requests_as_its_lane(self) -> None:
         # A request past its lane's --max-concurrency waits at the server, which expires it after
         # --pending-timeout-ms. OMP's async compaction sends its summary in the background as a
