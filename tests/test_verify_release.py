@@ -2348,6 +2348,7 @@ class ReleaseContractTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             path = root / "releases/v0.17.0/qualification/rtx3090-route-waiver.json"
+            path.parent.mkdir(parents=True)
             original = campaign_waiver("v0.17.0", "1" * 40, "2" * 64, failed_phase="native-probes")
             cases = [
                 ("valid", lambda waiver, evidence: None, None),
