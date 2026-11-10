@@ -76,7 +76,7 @@ desktop GUI ([LM Studio](https://lmstudio.ai)), the widest hardware reach or App
 All three lanes share a 131,072-token context, DFlash2 speculative decoding with draft window 7,
 JSON-schema output, and the same 20.4 GB Qwen3.8 27B artifact (`81f924d4`).
 
-| Lane | Runs as | Serves | Decode | Exact&nbsp;130,048-token retrieval |
+| Lane | Runs as | Serves | Decode | Exact&nbsp;retrieval, 130,048&nbsp;tokens |
 | --- | --- | --- | --- | --- |
 | **RTX&nbsp;5090** | Docker Desktop/WSL2 container on Windows 11; clients: Windows (local), macOS over a manual SSH tunnel (preview), Linux under WSL2 | Two requests in flight; vision, tools, and preserved thinking | [181.92&nbsp;tok/s](releases/v0.17.0/qualification/rtx5090.json) | [56.63&nbsp;s](releases/v0.17.0/qualification/rtx5090.json) |
 | **RTX&nbsp;4090** | Native Windows 11 package; Windows client (local) | One request at a time; text and tools | [254.59&nbsp;tok/s](releases/v0.17.0/qualification/rtx4090.json) | [83.54&nbsp;s](releases/v0.17.0/qualification/rtx4090.json) |
