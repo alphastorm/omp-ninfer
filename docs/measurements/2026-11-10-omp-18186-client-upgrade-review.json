@@ -1,0 +1,360 @@
+{
+  "artifact_type": "omp_ninfer_client_upgrade_review",
+  "schema_version": 1,
+  "as_of": "2026-11-10",
+  "product_release": "unselected-successor-to-v0.16.2",
+  "provenance": {
+    "review": "Host-free stock v18.15.0..v18.18.6 source review, shipped-engine a87de361 parser/template inspection, sibling cross-reference and independent three-platform asset/checksum download hashing. Complete local inventories contain 2051 commits and 3461 changed paths, classified by subsystem with detailed route-sensitive inspection, not an audit of every unrelated line. No client binary, semantic rehearsal, NInfer server, GPU, host window, release staging, merge or publication was executed. Product measurement/release receipt checks are reported separately in the draft PR and lane STATUS; no product CI or inference qualification is inferred. The successor product version is unselected.",
+    "implementation_commits": [],
+    "ci": null,
+    "ci_conclusion": "not-claimed",
+    "ci_head": null
+  },
+  "client_upgrade": {
+    "from": "18.15.0",
+    "to": "18.18.6",
+    "reason": "Prepare identity/source evidence for an unselected next release, without staging. No new blocking source mismatch was found for the documented custom Responses routes with their explicit three-tier effort lists. Raw high/minimal/max remain an engine-template compatibility blocker outside that bounded configuration. Propose explicit qwen3 for opaque aliases and explicit update/setup opt-outs. Do not import Strata async-compaction performance policy or GPU/Chat-Completions acceptance. Fresh platform, five-route/31-block, compaction, fleet/fanout and restoration gates remain required. Published v0.16.2 still pins OMP 18.15.0.",
+    "upstream_commit": "9058ab9d229663e229e2867824ba6df6f21e9e59",
+    "upstream_tree": "fd379b65368a20c7648d97f2c2b99cc03e019254",
+    "release_id": 439766193,
+    "published_at": "2026-11-09T23:30:49Z",
+    "stable_releases_reviewed": [
+      "18.15.0",
+      "18.16.0",
+      "18.17.0",
+      "18.18.0",
+      "18.18.1",
+      "18.18.2",
+      "18.18.3",
+      "18.18.4",
+      "18.18.5",
+      "18.18.6"
+    ]
+  },
+  "descriptor_inputs": "releases/v0.16.2/qualification/client-components.json",
+  "host_free_checks": {
+    "asset_identity": {
+      "method": "Downloaded all three raw executables and SHA256SUMS.txt into the private lane with gh release download after recording gh release view. Independently counted complete files and computed SHA-256; all four sizes/hashes match the GitHub API and all three executable hashes match the downloaded checksum rows. This proves download integrity only; no executable was run. descriptor_inputs is the predecessor shape, not a staged successor descriptor.",
+      "release_checksum_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.18.6/SHA256SUMS.txt",
+      "release_checksum_sha256": "3d11ad7277e7ad65ea76963b60c0db21d57ad7c0621a94a9379f2e851939f280",
+      "release_checksum_asset_id": 729375445,
+      "release_checksum_bytes": 844,
+      "release_checksum_api_digest": "sha256:3d11ad7277e7ad65ea76963b60c0db21d57ad7c0621a94a9379f2e851939f280",
+      "release_checksum_api_bytes_match": true,
+      "release_checksum_api_digest_match": true,
+      "assets": [
+        {
+          "name": "omp-darwin-arm64",
+          "asset_id": 729375455,
+          "bytes": 221867152,
+          "sha256": "ed2e63eb43888eb76cb1409b245b1db4557c94dfad52dc545c9aaca01ebce82d",
+          "api_digest": "sha256:ed2e63eb43888eb76cb1409b245b1db4557c94dfad52dc545c9aaca01ebce82d",
+          "api_bytes_match": true,
+          "api_digest_match": true,
+          "download_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.18.6/omp-darwin-arm64",
+          "sha256sums_match": true
+        },
+        {
+          "name": "omp-windows-x64.exe",
+          "asset_id": 729375449,
+          "bytes": 249985024,
+          "sha256": "dfb15c27cb2ea192a94761c26aa5cd4eed54b1e0a5a85c02938ab07d769bc8f7",
+          "api_digest": "sha256:dfb15c27cb2ea192a94761c26aa5cd4eed54b1e0a5a85c02938ab07d769bc8f7",
+          "api_bytes_match": true,
+          "api_digest_match": true,
+          "download_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.18.6/omp-windows-x64.exe",
+          "sha256sums_match": true
+        },
+        {
+          "name": "omp-linux-x64",
+          "asset_id": 729375448,
+          "bytes": 286021808,
+          "sha256": "a8059b95de5eaba0b3fb6f7182842d661feae29cb2931cdbeba2986db4751ecb",
+          "api_digest": "sha256:a8059b95de5eaba0b3fb6f7182842d661feae29cb2931cdbeba2986db4751ecb",
+          "api_bytes_match": true,
+          "api_digest_match": true,
+          "download_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.18.6/omp-linux-x64",
+          "sha256sums_match": true
+        }
+      ]
+    },
+    "semantic_rehearsals": {
+      "execution_kind": "not executed; source review and independent asset download hashing only",
+      "guide_sha256": null,
+      "binary_version": null,
+      "binary_sha256": null,
+      "checks": [],
+      "runs": [],
+      "scope_limit": "No client executable, inference server, GPU or route driver was run. Historical 18.16.0 tokenizer/rehearsal and Strata qualifications remain historical, not 18.18.6 runtime results. Product unit checks are not stock-binary rehearsals. Fresh platform execution, NInfer request/compaction/fleet probes, five documented routes (31 blocks), native public installs and independent restoration remain unperformed."
+    }
+  },
+  "behavior_review": [
+    {
+      "id": "complete-source-and-release-census",
+      "predicate": "The complete local Git range v18.15.0..v18.18.6 enumerates 2051 commits and the uncapped tagged-tree diff enumerates 3461 changed paths. The lane retains both raw inventories, full scoped diff packets and a per-path subsystem/disposition census (SHA-256 b0ba829bd071a2ceb206f7aa28c5b66410f75c9b4112624b5e78eeefed6e098d). Census buckets cover direct/shared provider code, other AI/auth/backends, catalog policy, tokenizer/compaction, session/config, subagent/worker delivery, tools/native shell, support/UI and remaining build/docs/optional packages. This is complete path classification with detailed route-sensitive inspection, not an audit of every unrelated line. The initial 30-release census identifies v18.18.6 as Latest and non-prerelease; GitHub API release 439766193 was published at 2026-11-09T23:30:49Z. Tag resolves to commit 9058ab9d229663e229e2867824ba6df6f21e9e59, tree fd379b65368a20c7648d97f2c2b99cc03e019254.",
+      "lane_effect": "Strata is prior evidence for 18.16.0, 18.17.0/18.18.0 and 18.18.3, but its Chat Completions transport and other engine do not qualify our Responses routes. The later 18.18.4/5/6 compaction, retry, task and persistence changes are included. No successor product release number was selected.",
+      "action": "Retain v0.16.2 on 18.15.0. Re-census before staging; review any newer stable increment separately. Do not stage, repin descriptors or import sibling GPU acceptance.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/compare/v18.15.0...v18.18.6",
+        "https://api.github.com/repos/can1357/oh-my-pi/releases/tags/v18.18.6",
+        "https://api.github.com/repos/can1357/oh-my-pi/releases?per_page=30",
+        "https://github.com/alphastorm/omp-strata/blob/0501cf4c437b333a731765325aeac24eb700c483/docs/UPSTREAM.md#L402-L458",
+        "https://github.com/alphastorm/omp-strata/blob/0501cf4c437b333a731765325aeac24eb700c483/docs/UPSTREAM.md#L1569-L1706"
+      ]
+    },
+    {
+      "id": "our-route-is-custom-responses-not-completions",
+      "predicate": "All five model-fragment files select openai-responses. They retain authHeader=true, compat.statefulResponses=true, includeEncryptedReasoning=false, supportsReasoningSummary=false; q38-ninfer and qwen3.8-27b both declare reasoning=true, thinking.mode=effort, efforts=[low,medium,xhigh], contextWindow=131072 and maxTokens=32768. custom-models.ts and buildModel are byte-carried; the only models schema-bundle delta adds cl100k to the tokenizer enum. openai-completions.ts changes only reasoning-source signature helper extraction and opt-in omitStainlessTimeoutHeader; its request-body construction is otherwise carried. Responses/shared helpers have substantive deltas.",
+      "lane_effect": "[INFERENCE; source-derived] Our requests use POST /v1/responses and reasoning.effort, not Chat reasoning_effort. The stock textVerbosity default medium->low does not send text.verbosity here: emission requires compat.officialEndpoint, which requires provider=openai and the official host. Our custom loopback providers are not official. No obfuscation stream option is newly emitted either. This matters because the shipped Responses parser accepts only medium verbosity; forcing officialEndpoint would not be equivalent.",
+      "action": "Keep exact IDs, endpoints, limits, input capabilities and compatibility values. No API migration, discovery, service-tier, verbosity or header override is proposed. Later capture actual candidate wire bodies rather than treating Strata transport equality as Responses equality.",
+      "sources": [
+        "https://github.com/alphastorm/omp-ninfer/blob/449b69baa6964baffbfe2404e178a8f52dd48832/examples/manual-tunnel/models.fragment.yml",
+        "https://github.com/alphastorm/omp-ninfer/blob/449b69baa6964baffbfe2404e178a8f52dd48832/examples/windows-native/models.fragment.yml",
+        "https://github.com/alphastorm/omp-ninfer/blob/449b69baa6964baffbfe2404e178a8f52dd48832/examples/windows-native/models-rtx3090.fragment.yml",
+        "https://github.com/alphastorm/omp-ninfer/blob/449b69baa6964baffbfe2404e178a8f52dd48832/examples/windows-docker-local/models.fragment.yml",
+        "https://github.com/alphastorm/omp-ninfer/blob/449b69baa6964baffbfe2404e178a8f52dd48832/examples/fleet/models.fragment.yml",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/config/custom-models.ts#L81-L160",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/config/models-config-schema-bundle.ts#L180-L225",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/ai/src/providers/openai-completions.ts#L689-L700",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/ai/src/providers/openai-responses.ts#L1863-L1887",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/catalog/src/compat/resolve.ts#L319-L330",
+        "https://github.com/alphastorm/ninfer/blob/a87de3613c17bced777b446fb545f872d8395ec1/src/serve/openai_responses_request.cpp#L1044-L1069"
+      ]
+    },
+    {
+      "id": "raw-high-is-an-engine-template-blocker-not-our-default-wire",
+      "predicate": "At shipped fork a87de361, Chat parse_reasoning_effort and Responses parse_reasoning accept none|minimal|low|medium|high|xhigh|max. translate.cpp passes non-none efforts through without tier normalization. Qwen3.8 Jinja checks only xhigh|medium|low while thinking is enabled and raises for minimal/high/max; chat_template.cpp passes high through. GenerationService maps invalid prompt arguments to HTTP 400. Raw high therefore is not accepted by this template despite passing the HTTP schema. Unlike the older upstream #440 report, this fork makes none disable thinking before rendering, bypassing the enabled-thinking check. Omitted effort defaults to xhigh. This is source evidence, not an executed HTTP probe.",
+      "lane_effect": "[INFERENCE; source-derived] Our fragments do not send raw high by default. defaultThinkingLevel=high already exists in 18.15.0 (settings.ts:241-245); it is not new in 18.16.0. The unchanged clamp maps off/minimal/low->low, medium/high->medium, xhigh/max->xhigh against [low,medium,xhigh]. Main/full-compaction requests stay within supported enabled-thinking tiers, and fleet-heavy stays medium. New display-summary disableReasoning maps to low under the custom provider lowest-effort dialect, not a guarantee of physically disabled thinking. Explicit forceReasoningOff can send none, handled by this fork. #441 is distinct: contradictory explicit thinking and effort still conflict, but ordinary Responses bodies do not send Anthropic thinking={type:disabled} with competing output_config effort.",
+      "action": "Conditional blocker: unconstrained raw high/minimal/max needs a fix before use. Minimal client remedy is preserving the existing explicit thinking.efforts list; no new effortMap or global defaultThinkingLevel pin is needed. General seven-tier acceptance requires a separate engine/template change (normalize unsupported enabled tiers at the template boundary or widen the embedded/overridden template), separately versioned and qualified. Do not import the issue report's none rejection onto this fork or depend on negotiation retries to make the first raw-high request valid.",
+      "sources": [
+        "https://github.com/alphastorm/ninfer/blob/a87de3613c17bced777b446fb545f872d8395ec1/src/serve/openai_chat_request.cpp#L772-L785",
+        "https://github.com/alphastorm/ninfer/blob/a87de3613c17bced777b446fb545f872d8395ec1/src/serve/openai_responses_request.cpp#L1016-L1042",
+        "https://github.com/alphastorm/ninfer/blob/a87de3613c17bced777b446fb545f872d8395ec1/src/serve/translate.cpp#L129-L181",
+        "https://github.com/alphastorm/ninfer/blob/a87de3613c17bced777b446fb545f872d8395ec1/src/models/common/qwen/frontend/chat_template.cpp#L69-L95",
+        "https://github.com/alphastorm/ninfer/blob/a87de3613c17bced777b446fb545f872d8395ec1/tools/chat_templates/qwen3_8.jinja#L51-L62",
+        "https://github.com/alphastorm/ninfer/blob/a87de3613c17bced777b446fb545f872d8395ec1/src/serve/generation_service.cpp#L179-L185",
+        "https://github.com/alphastorm/ninfer/blob/a87de3613c17bced777b446fb545f872d8395ec1/src/serve/generation_service.cpp#L494-L499",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/catalog/src/model-thinking.ts#L51-L88",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/session/settings.ts#L238-L242",
+        "https://github.com/can1357/oh-my-pi/blob/3fedf8d53267e32a6d7521ce725fdcc4a36fdc67/packages/coding-agent/src/session/settings.ts#L241-L245",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/agent/src/compaction/compaction.ts#L646-L662",
+        "https://github.com/Neroued/ninfer/issues/440",
+        "https://github.com/Neroued/ninfer/issues/441"
+      ]
+    },
+    {
+      "id": "opaque-alias-still-needs-explicit-qwen3-tokenizer",
+      "predicate": "q38-ninfer does not match the unchanged Qwen bounded taxonomy and has no NInfer-provider alias override. resolveModelTokenizer returns no explicit family; all normal count modes now use native counting, with o200k_base when encoding is unset, replacing the old default approximate bytes/4 path. qwen3.8-27b matches Qwen >=3.5 and resolves qwen3. New cl100k mapping is for old OpenAI generations, not this alias. buildModel still selects spec.tokenizer before inference, and the unchanged custom loader forwards it. The 18.16.0 verification measured the actual alias/override effect; its corpus counts are historical, not remeasured for 18.18.6.",
+      "lane_effect": "[INFERENCE; source-derived] 18.18.6 does not recognize Qwen behind q38-ninfer. Wrong fallback affects unanchored/imported history, pending input, newly added tool outputs and post-compaction estimates. The trigger still takes max(provider usage, independent local stored-history estimate): a settled provider count can dominate, so this override does not add a second charge or prove universally earlier compaction.",
+      "action": "Add tokenizer: qwen3 beneath the q38-ninfer model name in fleet, manual-tunnel, windows-docker-local and windows-native/models-rtx3090 fragments. proposed-fragments.patch includes all four and QUICKSTART guidance. Leave both canonical qwen3.8-27b entries inferred; do not rename served IDs, alter taxonomy/edit mode or reimplement the tokenizer.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/catalog/src/compat/rules/taxonomy/qwen.kdl#L1-L13",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/catalog/src/compat/taxonomy.ts#L56-L76",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/catalog/src/model-tokenizer.ts#L27-L29",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/catalog/src/model-tokenizer.ts#L64-L82",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/catalog/src/build.ts#L518-L533",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/config/custom-models.ts#L81-L145",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/agent/src/tokenizer.ts#L86-L94",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/agent/src/tokenizer.ts#L281-L285",
+        "https://github.com/alphastorm/omp-ninfer/blob/449b69baa6964baffbfe2404e178a8f52dd48832/docs/measurements/2026-11-05-omp-18160-tokenizer-VERIFY.md"
+      ]
+    },
+    {
+      "id": "responses-websockets-are-new-opt-in-not-a-route-default",
+      "predicate": "Standard Responses gains WebSocket transport/session pooling and a shared Codex-derived connection implementation: socket-local delta chaining, idle reuse, sticky per-session SSE fallback, a three-stale-anchor breaker, pre-send fallback and no sent-generation replay. HTTP/SSE stateful precedence remains per-call option, PI_OPENAI_STATEFUL, compat.statefulResponses, then official-endpoint default. providers.openaiResponsesWebsockets defaults false and catalog supportsWebsockets=true is separately required; either explicit model/request false vetoes preference. providers.openaiWebsockets stays Codex-only.",
+      "lane_effect": "[INFERENCE; source-derived] With no new opt-in/capability our custom providers remain HTTP/SSE and store=true for stored previous_response_id chaining. This does not make the provider unchanged: request construction, error sharing and tool replay were refactored around the new transport. No NInfer WebSocket implementation or qualification is inferred.",
+      "action": "Do not add a WebSocket preference. Preserve statefulResponses=true, clear PI_OPENAI_STATEFUL and retain unique high-entropy session keys. Later re-prove same-process chaining, cold replay, linked tools, checkpoint restart and outages; keep WS-only behavior out of the qualification claim.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/catalog/src/compat/responses-websocket.ts#L1-L12",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/session/settings.ts#L1171-L1184",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/session/settings-stream-fn.ts#L42-L62",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/ai/src/providers/openai-responses.ts#L550-L575",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/ai/src/providers/openai-responses.ts#L801-L842",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/ai/src/providers/openai-responses-session.ts#L1-L181",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/ai/src/providers/openai-responses-state.ts#L14-L32"
+      ]
+    },
+    {
+      "id": "tool-schema-replay-and-validation-deltas",
+      "predicate": "Responses reconstruction restores executable calls cut by an output limit and missing from the final native pairing window; an older reused call_id no longer hides them. Malformed tool names are excluded. Optional namespace metadata is recorded/replayed. Rule-owned host-specific name prefixing (Muse Code) uses a wire-name map built only from tools surviving schema quarantine; forced choices use that same surviving list. NInfer has no prefix rule. Agent intent schema memoization/fingerprinting is per description. Shared argument repair preserves literal string null in valid content/payload fields instead of deleting it as an optional placeholder.",
+      "lane_effect": "[INFERENCE; source-derived] Normal NInfer tool names/schema dialect stay, but truncated native history and repaired argument content can change legitimate wire input. No namespace is invented for unnamespaced engine responses. Stable-prefix decisions now fingerprint actual wire schemas/intent descriptions, not just tool names. No typed-tool execution is proved by source repair.",
+      "action": "Retain typed read/tool-link gates; later cover cut calls and reused call_ids with no orphan outputs/duplicate tool execution. Preserve literal null payloads. Do not add prefixes or expand input capabilities for unrelated provider coverage.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/ai/src/providers/openai-shared.ts#L1573-L1614",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/ai/src/providers/openai-shared.ts#L2390-L2456",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/ai/src/providers/openai-responses.ts#L1891-L1935",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/ai/src/providers/openai-responses.ts#L2039-L2054",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/ai/src/providers/openai-shared.ts#L3681-L3692",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/ai/src/utils/validation.ts#L824-L844",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/agent/src/agent-loop.ts#L961-L1090",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/agent/src/append-only-context.ts"
+      ]
+    },
+    {
+      "id": "retries-and-fallback-opt-outs-remain-layered",
+      "predicate": "HTTP/shared provider error classification now honors x-should-retry:false; the low-level default six-attempt budget is carried. Reasoning/strict validation negotiation is shared with explicit pre-generation WS invalid-request envelopes, not progressed generations. Session recovery bounds consecutive generic abort retries at two, does not misclassify 429/402 token wording as overflow, fails billing caps without waiting for nonexistent resets, and attributes late quota errors to the issuing provider rather than cooling the newly selected provider. Auth rotation preserves actionable quota errors when a sibling fails 401. Model-role ownership/fallback chains survive resume. Missing-key pre-prompt fallback still exits when retry.modelFallback=false; ordinary session retry still exits when retry.enabled=false.",
+      "lane_effect": "[INFERENCE; source-derived] The explicit retry.enabled=false, retry.modelFallback=false, fallbackRevertPolicy=never remains correct. It does not globally disable HTTP attempts, strict/effort negotiation, auxiliary role resolution or arbitrary extensions. New quota/rotation paths mostly do not apply to a single static local bearer key with session fallback off, but error strings and request counts cannot be assumed identical.",
+      "action": "Keep all three settings and isolate acceptance credentials. Later retain existing request-count, missing-key refusal and selected-provider outage oracles; do not weaken them or match old error text. Do not use reasoning negotiation as the raw-high compatibility fix.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/ai/src/utils/openai-http.ts#L100-L122",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/ai/src/error/retryable.ts#L42-L61",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/ai/src/providers/openai-request-error.ts#L31-L73",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/ai/src/providers/openai-reasoning-fallback.ts#L269-L284",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/session/turn-recovery.ts#L2094-L2100",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/session/turn-recovery.ts#L2674-L2713",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/session/turn-recovery.ts#L2881-L2900",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/session/turn-recovery.ts#L3077-L3109",
+        "https://github.com/alphastorm/omp-ninfer/blob/449b69baa6964baffbfe2404e178a8f52dd48832/examples/manual-tunnel/fail-closed.yml#L1-L10"
+      ]
+    },
+    {
+      "id": "numeric-compaction-budget-and-display-summary-effort",
+      "predicate": "context-settings.ts and transcript-tokens.ts are byte-carried. With window 131072 and unset reserve, effective/budget reserve=max(floor(0.15*131072),16384)=19660 and the automatic trigger stays strictly >111412. Trigger count remains max(nonnegative provider context, local stored-history estimate). The ordinary summarizer receives configured reserve or DEFAULT_RESERVE_TOKENS=16384: its cap is floor(0.8*16384)=13107, not 15728; the earlier receipt/QUICKSTART number was corrected in the tokenizer verification. 18.18.4+ sets disableReasoning=true for the display-only <=512-token summary; full summaries still use clamped session effort. Incomplete full summaries fail; truncated optional display summaries are omitted.",
+      "lane_effect": "[INFERENCE; source-derived] Alias correction affects local counts, not numerical policy. Our generic custom Responses disable dialect is lowest-effort, so display-summary disableReasoning becomes supported low, not guaranteed zero reasoning. It does not become raw high. No live compaction quality, context count or longer-window qualification is inferred.",
+      "action": "Keep reserve/trigger/output settings and refusal assertions. The held patch corrects only the summary-cap prose. Later re-prove near-limit counting, two real compaction/control-recall epochs, incomplete-summary refusal, manual/background delivery and restart continuation; uninduced boundaries are not passes.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/agent/src/compaction/compaction.ts#L325-L424",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/agent/src/compaction/compaction.ts#L923-L925",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/agent/src/compaction/compaction.ts#L1245-L1310",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/agent/src/compaction/compaction.ts#L1772-L1792",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/catalog/src/compat/resolve.ts#L301-L317",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/ai/src/providers/openai-shared.ts#L1049-L1082",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/ai/src/providers/openai-shared.ts#L4285-L4339",
+        "https://github.com/alphastorm/omp-ninfer/blob/449b69baa6964baffbfe2404e178a8f52dd48832/docs/measurements/2026-11-05-omp-18160-tokenizer-VERIFY.md"
+      ]
+    },
+    {
+      "id": "async-compaction-is-not-a-transferred-strata-fix",
+      "predicate": "compaction.asyncEnabled defaults true in both tags. false gates speculative/idle work and claiming an armed speculative result, not ordinary threshold/manual compaction. Speculative LLM requests have distinct sessionId :spec:<unique-id>, isolated from the live provider-session chain. Published config deliberately caps 5090/3090 at two in-flight requests and 4090 at one to avoid earlier server pending-timeout failures during summary work. Strata's measured async-off benefit concerns its single-sequence prefix cache, not NInfer.",
+      "lane_effect": "[INFERENCE] Summary work can compete for NInfer cache/device/Host capacity, so synchronous-only is a reasonable comparison arm, but sibling eviction/latency results do not prove NInfer evicts the lead prefix or runs faster with async off. Distinct speculative identity also defeats a blanket claim that summary requests overwrite the live Responses chain. No NInfer performance regression is established host-free.",
+      "action": "Conservative choice: do not silently import asyncEnabled=false into the client-only default. Keep current behavior/caps in proposed-fragments.patch. The separate optional-sync-compaction.patch gives the exact standalone diff against the unchanged base: add compaction: {asyncEnabled: false} and replace obsolete async-overlap comments; no reserve/method/retry/provider-limit change. Selecting this arm needs fresh acceptance and a deliberate policy decision, not a compatibility workaround. Neither patch is applied.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/session/context-settings.ts#L259-L274",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/session/session-maintenance.ts#L2288-L2322",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/session/session-maintenance.ts#L2475-L2506",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/session/session-maintenance.ts#L2632-L2641",
+        "https://github.com/alphastorm/omp-ninfer/blob/449b69baa6964baffbfe2404e178a8f52dd48832/examples/manual-tunnel/fail-closed.yml#L11-L35",
+        "https://github.com/alphastorm/omp-strata/blob/0501cf4c437b333a731765325aeac24eb700c483/docs/UPSTREAM.md"
+      ]
+    },
+    {
+      "id": "compaction-reader-history-and-fixed-context-recovery",
+      "predicate": "Session context selects the newest provider-native boundary the reader can replay and re-expands unreadable history; fallback/promotion fit checks count that reader's rebuilt context. Manual remote methods exclude incompatible readers. /shake thinking retains native-replayed reasoning instead of crediting tokens still on the wire. Snapcompact projections inspect archived reasoning, preserve custom summary wording and do not credit unreconstructable standing archives as replaced. File-operation accounting moves into snapcompact. Memory extra context loads lazily only when consumed by an LLM summary; generic remote-compaction calls resolve headers per request and expose onPayload. The 18.18.4+ fixed-system/tool-context recovery-band gate covers every threshold caller to stop unrecoverable repeated compaction.",
+      "lane_effect": "[INFERENCE; source-derived] Static same-provider local summaries stay readable, but rewritten/imported history and alternate-reader paths have real behavior changes. Fixed system/tool schemas above the 0.8 recovery band now pause maintenance with a warning, not a changed threshold. Remote/native compaction and memory backends are not newly opted into by these fragments.",
+      "action": "Preserve methods, models and thresholds. Later check post-rewrite tool/nonce retention and persisted prefixes, including a background result during manual compaction. An alternate-reader claim requires proving re-expanded history fits; same-reader probes do not cover it.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/session/session-context.ts#L184-L198",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/session/session-context.ts#L250-L274",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/session/session-maintenance.ts#L987-L1047",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/session/session-maintenance.ts#L4335-L4369",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/session/session-maintenance.ts#L4429-L4498",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/session/session-maintenance.ts#L5214-L5232",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/agent/src/compaction/compaction.ts#L1404-L1420",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/agent/src/compaction/openai.ts#L1068-L1128"
+      ]
+    },
+    {
+      "id": "durable-client-resume-and-session-journal",
+      "predicate": "Date/cwd reminders journal their original placement across resume/revive/branch, including legacy moved controls. Eval snapshots appended on context rebuild after shake/prune persist before adoption so the next process rebuilds the same prefix. Nested session transitions serialize; process-exit aborts are marked interrupted for --restore. Continue can interrupt a running turn and consume queued input instead of only rejecting busy state. Completely unindexed sessions re-index even at the current version; generated ids enter the collision set. Persistence retries a throwing accessor once through plain JSON but retains blob I/O failures. Legacy hookMessage/custom identity is normalized. 18.18.6 gc --strip preserves all responses of the latest replay/tool turn, reference-only images and file permissions.",
+      "lane_effect": "[INFERENCE; source-derived] Transcript bytes, restore scheduling and prefix reuse can differ. Server checkpoint preservation does not prove client continuation. gc --strip is an explicit CLI operation, not newly automatic on normal launch. No engine checkpoint-format change or durable-save success follows.",
+      "action": "Later re-prove same client session, linked tools, file nonce, cross-process resume and graceful engine restart with candidate hashes. Avoid destructive gc experiments on real sessions. Published native Stop/capacity caveats remain; this review neither repairs nor waives them.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/session/date-cwd-reminder.ts#L4-L14",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/session/date-cwd-reminder.ts#L433-L478",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/session/agent-session.ts#L6798-L6809",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/session/agent-session.ts#L7842-L7902",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/session/agent-session.ts#L8624-L8691",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/session/session-migrations.ts#L14-L38",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/session/session-migrations.ts#L64-L80",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/session/session-persistence.ts#L568-L596",
+        "https://github.com/can1357/oh-my-pi/releases/tag/v18.18.6"
+      ]
+    },
+    {
+      "id": "subagents-worker-threads-and-delivery",
+      "predicate": "Subagents gain thread home identities, RPC links, model/auth/settings mirrors, session publishers/remote handles and async-job, registry, memory/MCP/LSP/integration bridges. task.workerThreads defaults 4. Fewer than nine concurrent runs remain on main; one worker is allowed at 9, two at 18, then one per doubling up to the cap. Follow-up turns route home; cold revive may be worker-placed. Worker death yields a failed SingleResult, parking the ref only with a transcript. session_init adds mountedTools; revive restores placement, exact per-call identity/current grants, role/fallback ownership and live owner account policy. Follow-up/revive turns now honor soft budgets; cost-cap refusals end runs instead of futile reminders. Isolated cleanup survives signal exit and retains recoverable patches on capture/merge failures.",
+      "lane_effect": "[INFERENCE; source-derived] Small-fanout probes do not cover >=9-run workers. Server maxInFlightRequests caps requests, not agent-session existence; it does not prove workers unreachable. Mirrors/dispatch guards intend to retain NInfer model/config/provider caps, but no thread or native binary was executed. This is a material agent-surface change without a new engine API.",
+      "action": "Preserve fleet-heavy provider/model:medium and local auth policy. Later re-prove fleet/fanout, exactly-once output, queue cancellation, warm/cold revival and shutdown. Any worker qualification must deliberately cross nine concurrent runs and test worker death; a two-request parallel proof is not that coverage. Add no worker-thread pin or fleet role here.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/task/settings.ts#L437-L460",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/thread/subagent-worker.ts#L41-L73",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/thread/executor-routing.ts#L1-L219",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/thread/services/model-registry-mirror.ts#L1-L18",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/task/executor.ts#L4416-L4458",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/task/persisted-revive.ts#L82-L130",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/task/persisted-revive.ts#L430-L510",
+        "https://github.com/alphastorm/omp-ninfer/blob/449b69baa6964baffbfe2404e178a8f52dd48832/examples/fleet/agents/fleet-heavy.md"
+      ]
+    },
+    {
+      "id": "delegation-tools-shell-and-score-comparability",
+      "predicate": "Default delegation changes eager->balanced for canonical Qwen and the opaque alias. System guidance adds turn batching and whole small-file reads. Task schemas advertise per-call models only when eligible; blank placeholders mean omitted; user-selected effort conflicts with explicit per-call model. Wait changes from a 30-minute cap to 5/10/30/60/300-second idle windows, direct-message/reply-aware wakes, completion coalescing and accurate delivered-vs-late labels. Bash moves to Bash 5.3 semantics with executable/output fixes, C.UTF-8 locale, forked overlapping calls and Windows-owned consoles. Read paging/cut-byte accounting, write refusals/diagnostics, shell traces and literal-null/payload repair alter tool output. ovnfs on PATH changes checkout guidance and optional isolation.",
+      "lane_effect": "[INFERENCE; source-derived] New agent/task behavior and prompt bytes are not comparable with 18.15.0 scores. Shell/native assets need fresh platform execution even where request bodies are carried. Shipping optional ovnfs/browser/ask/LSP/MCP does not mean short file-read routes exercised them. No model capability, performance or zero-regression inference is imported from Strata.",
+      "action": "Keep typed-tool, continuation, outage and platform scope assertions; use candidate-bound execution. Record ovnfs presence/absence during later preflight. Do not add delegation/edit/ask/shell-UI/per-call overrides just to recreate scores. Qwen/opaque edit defaults and exact loop-guard blobs are carried; leave the guard enabled.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/catalog/src/compat/delegation.ts#L60-L74",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/prompts/system/system-prompt.md#L97-L144",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/task/types.ts",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/task/settings.ts#L164-L191",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/tools/wait.ts#L24-L43",
+        "https://github.com/can1357/oh-my-pi/releases/tag/v18.17.0",
+        "https://github.com/can1357/oh-my-pi/releases/tag/v18.18.2",
+        "https://github.com/can1357/oh-my-pi/releases/tag/v18.18.3",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/ai/src/utils/thinking-loop.ts"
+      ]
+    },
+    {
+      "id": "pin-background-update-and-setup-explicitly",
+      "predicate": "18.17.0 adds opt-in update.auto (default false) and a setup-wizard auto-update scene. Startup version checks now run when checkUpdate OR update.auto is true, while installation is independently guarded by update.auto. startup.setupWizard defaults true. The published example sets only startup.checkUpdate=false. Existing retry and providers.maxInFlightRequests keys stay valid; limit normalization merely replaces a duplicate object predicate.",
+      "lane_effect": "[INFERENCE; source-derived] checkUpdate=false alone is not a complete pin if inherited update.auto=true exists or setup enables it. Explicit auto=false/setupWizard=false plus checkUpdate=false match the sibling install policy without changing provider/auth/limits. These keys do not stop an operator explicitly running omp update.",
+      "action": "proposed-fragments.patch adds update: {auto: false} and startup.setupWizard: false to the shared fail-closed.yml, retaining checkUpdate:false and every retry/provider limit. All documented routes already install/merge this file. Held QUICKSTART prose explains the pins/manual-update boundary; no executable block or published client/release pin is changed.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/modes/settings.ts#L1271-L1292",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/modes/settings.ts#L1311-L1330",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/main.ts#L275-L279",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/main.ts#L697-L708",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/main.ts#L758-L774",
+        "https://github.com/alphastorm/omp-ninfer/blob/449b69baa6964baffbfe2404e178a8f52dd48832/examples/manual-tunnel/fail-closed.yml",
+        "https://github.com/alphastorm/omp-ninfer/blob/449b69baa6964baffbfe2404e178a8f52dd48832/docs/QUICKSTART.md#L967-L976"
+      ]
+    },
+    {
+      "id": "usage-side-requests-and-unselected-backends",
+      "predicate": "Discarded assistant turns re-journal billed usage as model_usage purpose=discarded-turn, not a newly issued auxiliary call. Session titles journal/cost-gate tiny-model usage. Cache observations start at dispatch after provider-slot acquisition and fingerprint wire schemas/history/retention. Skill-description compression is deferred until the first interactive frame. Other AI changes cover Anthropic threads, Factory Gemini/native replay, Cursor ordering, hosted catalog/auth/discovery and paused providers (including Google Antigravity); none selects a new NInfer provider. Optional browser/ask/MCP auth refresh is distinct from the static-key inference request.",
+      "lane_effect": "[INFERENCE; source-derived] Static provider selection and modelFallback=false are not a universal no-cloud/no-side-request guarantee in an operator home with auxiliary credentials/features. The short route does not qualify optional title/widget/memory/skill/cache-refresh paths. No new engine checkpoint format, GPU support or publication authority is introduced.",
+      "action": "Use isolated acceptance homes with selected local credentials only; separately attribute intentionally exercised auxiliary features and distinguish discarded usage from actual requests. Preserve route request-count/provider/model oracles. Enable no new credentials, memory, discovery, role default or extension as part of this evidence change.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/session/session-manager.ts#L4068-L4114",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/session/agent-session.ts#L6074-L6143",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/session/agent-session.ts#L11438-L11441",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/coding-agent/src/main.ts#L2727-L2753",
+        "https://github.com/can1357/oh-my-pi/releases/tag/v18.18.6",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/ai/src/stream.ts#L855-L862",
+        "https://github.com/can1357/oh-my-pi/blob/9058ab9d229663e229e2867824ba6df6f21e9e59/packages/ai/src/auth/pool.ts#L329-L345"
+      ]
+    }
+  ],
+  "verdict": {
+    "host_free_blocker_found": false,
+    "qualification_claimed": false,
+    "new_client_inference_qualification_claimed": false,
+    "predecessor_acceptance_transferred": false,
+    "scope_limit": "No newly blocking source mismatch found in the documented three-tier custom Responses configuration; unconstrained seven-tier effort is not approved. Raw high/minimal/max reach a rejecting Qwen template and need a client restriction or separately qualified engine/template change. The explicit existing lists already restrict those values, so raw-high rejection is not a new default-route blocker. Correct opaque tokenizers and pin update/setup policy at an authorized successor stage. AsyncEnabled=false is only a separate unselected comparison patch: Strata cache results establish no NInfer benefit. No descriptor, compatibility authority, profile or executable QUICKSTART/example block changed. No successor release, live acceptance, window, merge or publication is authorized."
+  },
+  "sources": [
+    "https://api.github.com/repos/can1357/oh-my-pi/releases/tags/v18.18.6",
+    "https://api.github.com/repos/can1357/oh-my-pi/releases?per_page=30",
+    "https://github.com/can1357/oh-my-pi/releases/tag/v18.18.6",
+    "https://github.com/can1357/oh-my-pi/compare/v18.15.0...v18.18.6",
+    "https://github.com/can1357/oh-my-pi/releases/download/v18.18.6/omp-darwin-arm64",
+    "https://github.com/can1357/oh-my-pi/releases/download/v18.18.6/omp-linux-x64",
+    "https://github.com/can1357/oh-my-pi/releases/download/v18.18.6/omp-windows-x64.exe",
+    "https://github.com/can1357/oh-my-pi/releases/download/v18.18.6/SHA256SUMS.txt",
+    "https://github.com/alphastorm/omp-ninfer/blob/449b69baa6964baffbfe2404e178a8f52dd48832/docs/measurements/2026-11-01-omp-18150-client-upgrade-review.json",
+    "https://github.com/alphastorm/omp-ninfer/blob/449b69baa6964baffbfe2404e178a8f52dd48832/docs/measurements/2026-11-01-omp-18142-client-upgrade-review.json",
+    "https://github.com/alphastorm/omp-ninfer/blob/449b69baa6964baffbfe2404e178a8f52dd48832/docs/measurements/2026-11-05-omp-18160-tokenizer-VERIFY.md",
+    "https://github.com/alphastorm/omp-strata/blob/0501cf4c437b333a731765325aeac24eb700c483/docs/UPSTREAM.md",
+    "https://github.com/Neroued/ninfer/issues/440",
+    "https://github.com/Neroued/ninfer/issues/441"
+  ]
+}
