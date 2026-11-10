@@ -1,0 +1,1348 @@
+{
+  "artifact_type": "omp_ninfer_measurement",
+  "schema_version": 1,
+  "experiment": "EXP-110 / EXP-111 / EXP-112 / EXP-113 / EXP-114 / EXP-115 / EXP-116 / EXP-117 / EXP-118 / EXP-119 / EXP-120 / EXP-121",
+  "experiments": [
+    "EXP-110",
+    "EXP-111",
+    "EXP-112",
+    "EXP-113",
+    "EXP-114",
+    "EXP-115",
+    "EXP-116",
+    "EXP-117",
+    "EXP-118",
+    "EXP-119",
+    "EXP-120",
+    "EXP-121"
+  ],
+  "title": "2026-11-10 P20 overnight measurement and candidate campaign: RTX 5090 production request-log traffic profile, warm-TTFT tail attribution, and #58 low-acceptance fallback rejection (EXP-110); offline 3,000-turn coding-agent replay declining own-prefix n-gram copy-drafting revival (EXP-111); upstream #434 starvation production controls vs E1 candidate on RTX PRO 6000 proxy and RTX 5090 (EXP-112); cold prefill/decode interference (EXP-077) on RTX PRO 6000 proxy and RTX 5090 (EXP-113); C2 pair K=6144 T=16 Q5 mixer-output attribution on small-T tensor-core sliced-K closing EXP-092's open half (EXP-114); native RTX 3090 keep-warm and RTX 4090 prefill-chunk-2048 configuration probes rejected (EXP-115); native rk4v4 (#60) true-cold restore token-32 divergence reclassified as oracle prefill geometry on RTX 3090 (EXP-116); host-side NFC boundary normalization 11.06x speedup in candidate alphastorm/ninfer#96 with Jinja strip and small-T preload skipped (EXP-117); RTX 5090 shipped-quota (24,576 MiB) EXP-077 arrival-wait control and retained-preferred-source-wait root cause with candidate alphastorm/ninfer#100 (EXP-118); E4 opt-in prefill-pacing curve on RTX PRO 6000 proxy in candidate alphastorm/ninfer#95 (EXP-119); E2 serve robustness (#446/#440/#441/numerical_failure/shutdown) in candidate alphastorm/ninfer#98 (EXP-120); and RTX 5090 DFlash2 C1 greedy byte-identity parity on integrated candidate F (a3fa0550) and council-remediated candidate F2 (bdc665a3 / F3 e0971faf, alphastorm/ninfer#99 and #101) vs production (EXP-121)",
+  "generated_utc": "2026-11-10T10:25:00Z",
+  "status": "completed_with_limits",
+  "evidence_boundary": "Maintainer-private raw harness logs, request logs, and transcripts; public summary metrics and cryptographic identities are recorded here, while raw prompts, model outputs, credentials, and private host filesystem paths are excluded. Pre-cut slice, proxy, and integration measurements in E1-E4, integration F, source-wait #100, and council remediation F2/F3 are recorded on their exact measured subjects across fork PRs alphastorm/ninfer#95-#101; runtime v0.7.0-qwen38-5090-beta.6 subsequently shipped in omp-ninfer v0.17.0 (published 2026-11-10) from fork source F3 e0971faf = integration F a3fa0550 (#99: E1 bounded fresh admission #97, E2 serve robustness #98, E3 NFC #96, and E4 prefill pacing #95 shipped default-off) + council remediation #101 (pending-pressure-save wait and fresh-window budget), while E5 copy drafting (#94, declined, closed) and the arrival source-wait fix (#100, closed unmerged; tracked in alphastorm/ninfer#102) were not shipped, RTX 3090's native post-route compaction campaign failed and was founder-waived with disclosure in v0.17.0 (tracked in alphastorm/ninfer#89), and product tooling follow-ups are tracked in alphastorm/omp-ninfer#149.",
+  "ledger_reference": "docs/PERFORMANCE.md#experiment-ledger",
+  "question": "Across the 2026-11-10 P20 campaign: (1) What do the retained RTX 5090 production request logs (9,430 completions) show for decode/prefill/queue wall shares, overlap slowdown, warm-TTFT tail causes, and the #58 DFlash2 low-acceptance fallback trigger (EXP-110)? (2) Does own-prefix n-gram copy drafting (S1 / E5 alphastorm/ninfer#94) reach the >= 15% pooled session decode bar on a 3,000-turn real coding-agent transcript replay (EXP-111)? (3) Does E1 (alphastorm/ninfer#97, adopting upstream 77c2e5e2 / #443 resume-without-replay semantics plus a bounded fresh-admission rotation window) eliminate both admitted-request starvation (< 5 s pause) and fresh-request HTTP 503 queue timeouts on the RTX PRO 6000 proxy (df7aeb52) and on the RTX 5090 (375bb848) against production controls (EXP-112)? (4) How severe is cold 130K prefill/decode interference (EXP-077) on the e6ac7b70 proxy and on the RTX 5090 (a87de361 production and 375bb848 E1 at the 2,048 MiB scratch checkpoint quota, EXP-113)? (5) Does the e6ac7b70 base still need EXP-092's unmerged 3a2fadbd T=16 K=6144 Q5 pair-mixer port (EXP-114)? (6) Do config-only --gpu-keep-warm-ms 60000 on native RTX 3090 or --prefill-chunk 2048 on native RTX 4090 pass their promotion gates on shipped v0.16.2-v0.17.0 binaries (EXP-115)? (7) Is EXP-107's RTX 3090 rk4v4 (#60) true-cold restore mismatch at token 32 caused by checkpoint transport / kernel numerics or by oracle prefill chunk geometry (EXP-116)? (8) Which host-side TTFT optimizations (NFC boundary normalization, Jinja .strip() edge decode, small-T CUDA module preload) earn inclusion in E3 alphastorm/ninfer#96 (EXP-117)? (9) Does the 21-23 s RTX 5090 EXP-077 arrival wait persist at the shipped 24,576 MiB checkpoint quota, what is its root cause, and does the first source-wait candidate fix (alphastorm/ninfer#100) eliminate the 45 s proxy reproduction (EXP-118)? (10) What co-resident decode and long-wall trade-offs does the E4 opt-in prefill-pacing curve (alphastorm/ninfer#95) achieve on the RTX PRO 6000 proxy (EXP-119)? (11) Does E2 serve robustness (alphastorm/ninfer#98) resolve #446, #440, #441, non-finite numerical failures, and managed final-save shutdown timeouts (EXP-120)? (12) Do integrated F (a3fa0550) and post-council remediated F2 (bdc665a3 / F3 e0971faf, alphastorm/ninfer#101) preserve 3/3 byte-identical DFlash2 C1 greedy parity against production a87de361 on the RTX 5090 (EXP-121)?",
+  "answer": "EXP-110 (rtx5090-win-a production logs, 9,430 completions 2026-08-25 to 2026-11-04): DFlash2 v0100p+ filtered traffic (production logs from v0.10.0 onward with DFlash2 speculative decoding, excluding diagnostic filenames, deterministic <= 256-token or explicit-request-digest probes, the historical greedy 8,192-10,240-token no-tool corpus signature, and acceptance-window overlaps; 7,318 requests, 55,988.14 s wall) is 69.42% decode / 28.58% prefill / 1.43% queue with 1.31% request overlap; the recent v0.13-v0.16.2 filtered slice (176 of 180 requests, 299.64 s wall) shifts to 31.89% decode / 50.21% prefill / 8.16% queue with 25.57% request overlap and 1.560x median matched elapsed decode slowdown on 8 requests overlapping a peer's pre-first-token window (1.340x on 14 decode-overlap requests), zero >= 60 s global-decode stalls, and zero logged preemptions/replays across all 180 recent completions. Recent cached (= strict-warm <= 1,024 computed tokens, n=112) TTFT p50/p90/p99 is 0.265 / 0.357 / 1.466 s (cold n=64 is 3.451 / 4.821 / 5.939 s); 94.42% of the broad DFlash2 cached top-decile TTFT (n=718) is prefill (673/718 compute > 4,096 tokens), 79.33% of the historical strict-warm top 1% (n=35) is queue wait, and 4 first-after-server-start Host-KV restores account for 84.0% of recent top-decile TTFT above the cohort median (excluding them lowers recent p99 from 1.466 s to 0.376 s). Low-acceptance DFlash2 (< 3 tokens/round) is 3.45% (DFlash2 v0100p+) to 6.26% (recent) of decode time, giving 0.469%-0.851% modelled round-cost recovery (< 3% trigger), so alphastorm/ninfer#58 is dropped. EXP-111 (offline replay of 3,000 nonempty cloud-model coding-agent turns / 1,764,539 Qwen-tokenized output tokens across 649 sessions; 0 local-Qwen turns in the 30-day census): accepted own-prefix copy share is 20.5413% fixed (min match 12; 19.38% payload-only) and 13.2531% with adaptive 12->24->36 backoff, concentrated in edit/hashline arguments (39.76% fixed / 31.52% backoff), formatting (29.20% / 17.49%), other tool arguments (23.87% / 11.24%), bash/eval (23.37% / 15.51%), and write arguments (17.00% / 10.24%) vs visible reasoning (3.61% / 1.70%) and plain text (2.87% / 2.06%). Pooled session decode speedup is 1.06664-1.09314x fixed and 1.05484-1.06928x with backoff (combined x1.055-1.093, or 1.02958-1.05425x / 1.01476-1.02812x with S1's -4.205% short-Read lookup-toll sensitivity), below the >= 15% bar; E5 copy-drafting revival (alphastorm/ninfer#94, d117bc17) was declined, closed, and not shipped in v0.17.0. EXP-112 (E1 in alphastorm/ninfer#97, shipped in RTX 5090 v0.7.0-qwen38-5090-beta.6 / F3 e0971faf in v0.17.0): on rtxpro6000-win-a, same-session control e6ac7b70 had 1.618474534 s max admitted pause, 6 HTTP 503 timeouts, and 1/2 long requests completing, whereas candidate df7aeb52 (binary c46c67d1) achieved 2.266069104 s max pause (< 5 s), 0 HTTP 503, 2/2 long completions, and 3/3 byte-identical greedy parity on both DFlash2 and MTP3. On rtx5090-win-a (same production serving vector, 146,368 auto BF16 KV, 2,048 MiB scratch quota), production a87de361 (binary cc99a460) paused 367.9977688699946 s (368.62261531799595 s max scheduler pause) and starved the second long request (1/2 completed, 0/54 HTTP 503, fresh TTFT p50/p95 0.292190 / 0.535915 s), whereas E1 candidate 375bb848 (binary 7f988154) passed with 2.9986773779965006 s max fully-paused interval (3.2083587239976623 s pause->recovery), 2/2 40,000-token long completions inside 600 s, 0/51 HTTP 503, and fresh TTFT p50/p95 0.400092 / 3.392509 s. EXP-113 (cold 130K EXP-077 interference): on rtxpro6000-win-a (e6ac7b70, 130,084 cold tokens, 3 repeats), median co-resident decode is 6.375002 tok/s (< 100 tok/s trigger; full-A 20.387571 tok/s, gap p50/p99 350.569854 / 469.988615 ms, long-request wall 46.491205 s, server prefill 44.226679 s) and arrival-during-prefill TTFT is 0.803794 s (< 5 s trigger); on rtx5090-win-a at the 2,048 MiB scratch quota, production a87de361 (6/6 valid cold, arrival submitted at admission + ~5.15 s offsets) measured 5.109089 tok/s co-resident decode (full-A 16.116528 tok/s), gap p50/p99 430.325104 / 618.715558 ms, arrival TTFT 23.071937 s, and long wall 59.960177 / 59.473603 s, and E1 candidate 375bb848 (5/6 valid cold, 2/3 valid arrival) measured 5.127272 tok/s co-resident decode, gap p50/p99 405.190917 / 618.392636 ms, arrival TTFT 20.999604 s (invalid 3rd sample 52.519997 s retained), and long wall 59.891799 / 59.165644 s. EXP-114 (rtxpro6000-win-a Nsight Systems trace on e6ac7b70): in a C2 decode round (743 kernels, 17.838570 ms summed), all 64 K=6144 T=16 LinearAdd mixer calls already run on q5_a16_sliced_k_mma_kernel (320 CTAs, mean 19.767594 us, total 1.265126 ms/round vs EXP-092's 1.41 ms target), so porting 3a2fadbd is unnecessary. EXP-115 (native config probes on shipped v0.16.2-v0.17.0 a87de361): on rtx3090-win-a (binary 15a4db46), --gpu-keep-warm-ms 60000 with the compiled sm_86 3.5/10 ms spin drops to NVIDIA P-states P5 at 12 s and P8 at 30/58 s (+15.4 to +37.9 W held draw) with post-idle TTFT 0.5456 / 0.5667 / 0.6501 s vs 0.4173-0.4212 s back-to-back (median per-observation paired ratios 1.362-1.521x > 1.10x gate, 27/27 identical) and is rejected; on rtx4090-win-a (binary ffee91bf), --prefill-chunk 2048 fits (848.00 MiB available >= 640 MiB) but gains only x1.0236 C1 prefill and x1.0149 130K retrieval (< 1.04 gate), regresses benchmark_c1 decode x0.8818 (254.40 -> 224.33 tok/s), and diverges on 40/84 role84 cases (44/84 cross-arm identity), so it is rejected. EXP-116 (rtx3090-win-a rk4v4 alphastorm/ninfer#60 geometry control on f6ed4381): a cold rk4v4 run replaying the restored arm's capture boundary and suffix prefill geometry (split 3,066, suffix chunks 18, 2, 3, 4 at bases 3066, 3084, 3086, 3089) matches the restored continuation 32/32 tokens (both emit token 32 = 3635, whereas ordinary chunk-1024 cold emits 48117 at token 32; INT8 control is 32/32 three-way identical at 48117, and canonical KV/StateImage transport is byte-exact), reclassifying #60 as oracle prefill geometry rather than a restore or kernel defect. EXP-117 (E3 in alphastorm/ninfer#96, 6f1ae8d2 on e6ac7b70, shipped in RTX 5090 v0.7.0-qwen38-5090-beta.6 / F3 e0971faf in v0.17.0): boundary-segmented NFC normalization speeds up a 507,749-byte technical document (39,469 non-ASCII bytes) from 5.147875 ms to 0.465583 ms (-90.96%, 11.06x) and a 507,749-byte ASCII control from 0.065500 ms to 0.056375 ms (-13.93%) while matching 100,000 random utf8proc oracle texts, 65/65 serialized results (56 prompts + 9 expected errors), and 564,922/564,922 token IDs; Jinja .strip() edge-only decode (21d8b947) is skipped because base validates interior UTF-8 by contract, and small-T module preload (79d657e0) is skipped as N/A after Nsight tracing on rtxpro6000-win-a measured <= 0.668558 ms cumulative module/lookup API time per request (< 20 ms gate). EXP-118 (rtx5090-win-a shipped-quota EXP-077 control and source-wait root cause): re-running production a87de361 at the shipped 24,576 MiB checkpoint quota (production-exp077-q24-01, 6/6 valid cold) proved the arrival wait persists (arrival TTFT 23.073498 s vs 23.071937 s at 2,048 MiB, delta +0.001561 s; co-resident decode 5.254542 tok/s, gap p50/p99 430.661417 / 618.893977 ms, PDD/DDP long wall 59.710807 / 58.846915 s) and localized the root cause to retained-preferred-source wait (preferred_reused_tokens=111, fallback_reason=none, source_wait_seconds 19.492952 / 23.722483 / 22.305462 s across repeats 1-3); a first candidate fix in stacked PR alphastorm/ninfer#100 (head 7f2c71fd; GPU sm_120a binary at 1c5, sha256 20782176) passed CPU tests (EngineCore 31/31 + ResourceManager, 0.060028 s wait at 60 ms allowance) and CI, but did NOT remove a 3-pair warm-history GPU reproduction on rtxpro6000-win-a (base source_wait 44.750 / 44.859 / 44.877 s vs candidate 44.740 / 44.776 / 44.945 s, candidate TTFT 44.942 / 44.973 / 45.144 s) because engine_core.h:2703 reserves resident units before the fresh scan and try_admit_one:1893 refuses while reclaim occupies the Native context slot (#100 closed unmerged and not shipped; tracked in alphastorm/ninfer#102). EXP-119 (E4 opt-in prefill pacing on rtxpro6000-win-a, alphastorm/ninfer#95): across 7 cold arms against e6ac7b70 (6.375 tok/s, gap p99 469.989 ms, B-submit+1s arrival TTFT 0.619 s, PDD/DDP long wall 46.491 / 45.484 s), co-resident decode scales from 6.600 tok/s (e4-b95f-off) and 6.400 / 12.025 / 24.160 / 47.901 / 73.400 tok/s (k1 / k2 / k4 / k8 / b250-k16) to 103.205 tok/s (b500-k32-v2, gap p99 265.079 ms, arrival 0.628 / 0.654 s, long wall 49.658 / 45.701 s, wall ratios 1.068 / 1.005), but corresponding-repeat C2 outputs differ on every arm (base itself varies across C2 repetitions), so both flags shipped default-off (0) in RTX 5090 v0.7.0-qwen38-5090-beta.6 (F3 e0971faf, v0.17.0). EXP-120 (E2 serve robustness in alphastorm/ninfer#98, head d191fb57, binary 88bd2265; live GPU proof at 5e73453f, binary 5fd3bdec; shipped in RTX 5090 v0.7.0-qwen38-5090-beta.6 / F3 e0971faf in v0.17.0): fixes #446 malformed tool-call history (HTTP 200), #440 all 7 reasoning-effort tiers mapped to low/medium/xhigh on unchanged artifact template 81f924d4 (high HTTP 200), #441 disabled thinking with effort (HTTP 200), request-local HTTP 500 numerical_failure recovery on NaN/Inf/OOV (GPU ninfer_sampling_test --nonfinite-only exit 0), and stop/join split + exportable catalog during shutdown (2.570988 s Stop, saved 1 / refused 0 / skipped 0, restored 18 cached tokens vs baseline e6ac7b70 failing with managed final-save deadline exceeded), with 5/5 byte-identical MTP3 parity (6fe9fe7e) and all CI green. EXP-121 (RTX 5090 DFlash2 C1 greedy parity on rtx5090-win-a): integrated candidate F (a3fa0550, binary 1afbb82d, alphastorm/ninfer#99) passed 3/3 byte-identical C1 gating (f-parity-01-pc1 vs fc1) and 3/3 informational C2 (pc2 vs fc2) against production a87de361 (cc99a460); after council CR-20261110T083627Z-a3fa0550 identified a P1 (resident pause hitting a Pending durable pressure save causes pause_reclaim_victim / reserve_resident_units to fail the Engine with 'progress owner cannot obtain its legal unit') and a P2 (failed fresh window not consuming its rotation in take_fresh_window()), both fixed in alphastorm/ninfer#101 (F2 runtime commit bdc665a3, binary 92f0f636; F3 test-only fix e0971faf, EngineCore 35/35, 1,311/1,311 Ninja steps, CI all green), remediated F2 passed 3/3 byte-identical DFlash2 C1 greedy parity against production (f2-parity-01-pc1 vs fc1) and F3 e0971faf shipped as RTX 5090 v0.7.0-qwen38-5090-beta.6 in omp-ninfer v0.17.0 (published 2026-11-10).",
+  "decision": {
+    "action": "Record EXP-110 through EXP-121 and the CR-20261110T083627Z-a3fa0550 council remediation in the public performance ledger and roadmap; drop #58 low-acceptance DFlash2->MTP3 fallback; decline reviving own-prefix copy drafting (E5 PR alphastorm/ninfer#94 closed unmerged and not shipped); close EXP-092's pair-mixer backlog item as already covered on e6ac7b70; reject native RTX 3090 keep-warm (with the compiled sm_86 pattern) and native RTX 4090 chunk 2048; reclassify native rk4v4 (#60) token-32 divergence as oracle prefill geometry pending a founder decision on a geometry-matched durability oracle; ship E1 (#97), E2 (#98), E3 (#96), default-off E4 prefill pacing (#95), integration F (#99), and council remediation F2/F3 (#101, e0971faf) in RTX 5090 v0.7.0-qwen38-5090-beta.6 in omp-ninfer v0.17.0 (published 2026-11-10); and close stacked arrival source-wait PR #100 unmerged for structural follow-up in alphastorm/ninfer#102.",
+    "rule": "Each P20 experiment was governed by preregistered promotion or design-trigger bars: EXP-110 #58 fallback trigger >= 3% all-decode-seconds recovery; EXP-111 copy-drafting revival bar >= 15% pooled session decode speedup; EXP-112 #434 starvation green bar < 5 s max fully-paused interval, 0 HTTP 503 queue timeouts, 2/2 long requests completing within 600 s, and 3/3 byte-identical no-pressure greedy parity; EXP-113 EXP-077 pacing design trigger co-resident decode < 100 tok/s or arrival-during-prefill TTFT > 5 s; EXP-114 pair-mixer kernel attribution on C2 decode rounds; EXP-115 native config gates (RTX 3090 post-idle TTFT <= 1.10x back-to-back at 12/30/58 s inside 350 W; RTX 4090 available >= 640 MiB, C1 and 130K prefill >= 1.04x, decode >= 0.98x, and 84/84 byte identity); EXP-116 32-token three-way cold/restored/matched-geometry control with byte-exact transport verification; EXP-117 byte-identical 65/65 serialized results (56 prompts + 9 expected errors) / 564,922-token-ID frontend parity and >= 20 ms first-use CUDA module-load threshold; EXP-118 shipped-quota (24,576 MiB) arrival-wait control and 3-pair warm-history GPU source-wait reproduction; EXP-119 C2 cold pacing curve (co-resident >= 100 tok/s, arrivals < 2 s, long wall <= 1.15x, byte-identical outputs required for default-on promotion); EXP-120 HTTP 200 on #446/#440/#441, request-local 500 numerical_failure isolation, managed Stop completion + restore, and 5/5 MTP3 byte parity; EXP-121 3/3 byte-identical DFlash2 C1 greedy parity on RTX 5090.",
+    "verdict": "EXP-110: #58 fallback DROPPED (0.469%-0.851% decode recovery < 3%); interference confirmed as top recent real-traffic runtime lever (25.57% overlap, 1.560x slowdown). EXP-111: copy-drafting revival DECLINED and NOT SHIPPED in v0.17.0 (x1.055-1.093 pooled decode < 1.15 bar; E5 PR #94 closed). EXP-112: E1 (PR #97) GREEN on both rtxpro6000-win-a (df7aeb52: 2.27 s max pause, 0 HTTP 503 vs 6 on e6ac7b70 control, 2/2 long complete, 3/3 DFlash2 and MTP3 greedy parity) and rtx5090-win-a (375bb848: 3.0 s max fully-paused interval vs 368.0 s production control, 2/2 long complete, 0/51 HTTP 503) and SHIPPED in RTX 5090 beta.6 (F3 e0971faf, v0.17.0). EXP-113: interference trigger TRUE on proxy (6.375 tok/s co-resident decode, 0.804 s arrival TTFT, 46.49 s long wall / 44.23 s server prefill) and on rtx5090-win-a (5.11 tok/s production / 5.13 tok/s E1 co-resident decode; 23.07 s / 21.00 s arrival TTFT at 2,048 MiB scratch quota). EXP-114: pair-mixer port NOT NEEDED (already on small-T sliced-K at 19.77 us/call, 1.27 ms/round). EXP-115: native RTX 3090 keep-warm REJECTED (drops to P5/P8, 1.362-1.521x TTFT ratio) and native RTX 4090 chunk 2048 REJECTED (x1.0236 / x1.0149 prefill, x0.8818 benchmark decode, 44/84 cross-arm identity). EXP-116: rk4v4 #60 RECLASSIFIED as oracle prefill geometry (32/32 matched-geometry cold == restored). EXP-117: NFC boundary fix PORTED in PR #96 (5.15 -> 0.47 ms, 11.06x, 65/65 serialized results and 564,922 token IDs identical) and SHIPPED in RTX 5090 beta.6 (F3 e0971faf, v0.17.0); Jinja strip and small-T preload (<= 0.67 ms < 20 ms) SKIPPED. EXP-118: RTX 5090 arrival wait PERSISTS at shipped 24,576 MiB quota (23.073498 s, delta +0.001561 s; root cause = 19.49-23.72 s retained-preferred-source wait); PR #100 (7f2c71fd / 1c5) did NOT remove the 45 s proxy reproduction (44.740-44.945 s vs 44.750-44.877 s base), was CLOSED UNMERGED (not shipped), and is tracked in alphastorm/ninfer#102. EXP-119: E4 pacing (PR #95) reaches 103.205 tok/s co-resident decode at b500-k32-v2 (+6.8% PDD long wall), but C2 outputs differ across repeats; SHIPPED DEFAULT-OFF (0) in RTX 5090 beta.6 (F3 e0971faf, v0.17.0). EXP-120: E2 serve robustness (PR #98, d191fb57 / 5e73453f) PASSES CPU/GPU/HTTP resilience (2.571 s Stop vs base timeout, 18 cached tokens restored, 5/5 MTP3 parity, CI green) and SHIPPED in RTX 5090 beta.6 (F3 e0971faf, v0.17.0). EXP-121: RTX 5090 DFlash2 C1 greedy parity PASSES 3/3 byte-identical on both integrated F (a3fa0550, binary 1afbb82d, plus 3/3 informational C2) and council-remediated F2 (bdc665a3, binary 92f0f636, runtime-identical to F3 e0971faf in PR #101, SHIPPED as RTX 5090 v0.7.0-qwen38-5090-beta.6 in omp-ninfer v0.17.0 on 2026-11-10).",
+    "reason": "Decisions follow directly from measured P20 hardware and log/corpus receipts without unverified extrapolations.",
+    "not_decided_here": "Native Windows re-cut incorporating the F3 (e0971faf) runtime fixes and resolving the RTX 3090 native compaction-campaign residual (founder-waived with disclosure in v0.17.0, tracked in alphastorm/ninfer#89; product tooling follow-ups in alphastorm/omp-ninfer#149), structural fix for the retained-preferred-source arrival wait (alphastorm/ninfer#102 after #100 closed unmerged), and founder disposition of a geometry-matched true-cold durability oracle for native rk4v4."
+  },
+  "method": {
+    "evidence_class": "maintainer-private",
+    "exp_110_real_traffic_profile": {
+      "host_label": "rtx5090-win-a",
+      "snapshot_id": "20261110T063534Z",
+      "archive_files": 253,
+      "archive_bytes": 77842633,
+      "archive_sha256": "bbd8bb7bca3310e695f79f11b6be5095cfb87cf9d0f17fc46cdf8f0a56ec7c27",
+      "event_range_utc": [
+        "2026-08-25T20:26:22.873Z",
+        "2026-11-09T19:18:39.820Z"
+      ],
+      "completion_range_utc": [
+        "2026-08-25T20:47:51.795Z",
+        "2026-11-04T22:11:53.905Z"
+      ],
+      "parsed_events": 34152,
+      "completed_requests": 9430,
+      "server_instances": 543,
+      "malformed_lines_omitted": 1,
+      "acceptance_windows_checked": 105,
+      "acceptance_window_overlaps": 0
+    },
+    "exp_111_copy_drafting_replay": {
+      "s1_engine_worktree_head": "a05d6e7790aabb8c7831541ac6aa66422c423575",
+      "s1_measured_binary_commit": "60a95b0e",
+      "rebased_draft_pr": "alphastorm/ninfer#94",
+      "rebased_draft_commit": "d117bc17",
+      "serve_flag": "--ngram-draft-tokens 0|15 (default 0, requires DFlash2)",
+      "tokenizer_repo": "Qwen/Qwen3.8-27B",
+      "tokenizer_revision": "37561816e66b5b9153b1b64c10968c18c1e6f4a0",
+      "tokenizer_json_sha256": "0997f410c57a1f4e53b09e4be8f4a172d90edd9564368fb0847030937229b9f3",
+      "tokenizers_version": "0.23.3",
+      "census_window_end_utc": "2026-11-10T06:07:32.162009Z",
+      "census_window_days": 30,
+      "census_assistant_records_total": 68351,
+      "census_assistant_records_nonempty": 68221,
+      "census_sessions": 876,
+      "replayed_turns": 3000,
+      "replayed_sessions": 649,
+      "replayed_output_tokens": 1764539,
+      "neural_tokens_per_round_assumed": 4.631,
+      "copy_round_cost_envelope_units": [
+        1.22,
+        1.41
+      ],
+      "promotion_bar_pooled_decode_ratio": 1.15
+    },
+    "exp_112_starvation_434_control_vs_e1": {
+      "candidate_pr": "alphastorm/ninfer#97",
+      "candidate_family_note": "Pre-cut slice/proxy/integration measurements across fork PRs alphastorm/ninfer#95-#101 (#95 E4 pacing shipped default-off, #96 E3 NFC, #97 E1 starvation, #98 E2 serve robustness, #99 integration F, #100 E1 source-wait closed unmerged and tracked in alphastorm/ninfer#102, #101 council remediation F2/F3; shipped as RTX 5090 v0.7.0-qwen38-5090-beta.6 from fork source F3 e0971faf in omp-ninfer v0.17.0 on 2026-11-10); E1 adopts upstream 77c2e5e2 / #443 resume-without-replay semantics plus a bounded fresh-admission rotation window.",
+      "client_harness_sha256": "46dc58d4d7eee545e3df46785c9f3a7261c38a6e6062a068f36d7b699e8d2d74",
+      "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+      "rtxpro6000_proxy": {
+        "host_label": "rtxpro6000-win-a",
+        "toolchain": "Release / sm_120a / GNU 13.3 / NVCC 13.4.92",
+        "control_commit": "e6ac7b709a1a3f94fbbcd6529ce87e813d20cd09",
+        "control_serve_sha256": "8235ada432dda4f2a6b8a65c308ed7b23d28260b06a5f10689b2d5805a5de79c",
+        "candidate_commit": "df7aeb526ad344ea9bc9fbba0e7bd719aa5dab3b",
+        "candidate_serve_sha256": "c46c67d1381e1a6a322297f533a7b413adb0c2d7e94f5e4e1532dfde00ed616e",
+        "real_preemption_test_elf_sha256": "dd9dbbe623794a1e7d3886f1b1b8a85fd3ba478b7e6a25012b98e52828e44ff4",
+        "geometry": "C2, BF16, max-context/shared-KV 131,072, Host 21,881,405,440 B, chunk 1,024, extra states 2, headroom 768 MiB, VRAM budget 31,000 MiB, pending timeout 180,000 ms, keep-warm 60,000 ms, DFlash2 K=7, checkpoint quota 24,576 MiB / staging 256 MiB"
+      },
+      "rtx5090_real_card": {
+        "host_label": "rtx5090-win-a",
+        "runtime_image_sha256": "a0cbb8a5f933ec8aeec9a7defa07d78a835c1093d1d98f5f842267287efa3f71",
+        "pinned_release_builder_sha256": "e7f34ca2f41ecea14da5cce0b2a30cae6b0877e3b3eb371bd92d103bca1121f1",
+        "builder_toolchain": "CUDA 13.1.2 / libcudart 13.1.80-1 / cuBLAS 13.2.2.2-1 / glibc 2.39-0ubuntu8.7 / GCC 14.2.0, Release sm_120a",
+        "seccomp_sha256": "3b7bf1e9fa71bfd8ed536c8aaaa2d40e4f133a0c853d226efd9b9e4966dd1506",
+        "profile_template_sha256": "62dba03b05af4438292f4491d9eceb87bef6be3f3d6a324494713e14d0157725",
+        "production_control_commit": "a87de3613c17bced777b446fb545f872d8395ec1",
+        "production_control_binary_sha256": "cc99a46097b6da5f9ec3ce671a7818d29754013ba520800f756110b9211bb06e",
+        "candidate_commit": "375bb8483790ce6271e957318967f9a16b8c9833",
+        "candidate_tree": "2bb7b6022eefaf71286c672aba4718220f068fd8",
+        "candidate_binary_sha256": "7f9881546d541f7a39e72351ee60d78db47b7a358ff658f2984296d869c96ae0",
+        "geometry": "C2, BF16, 131,072 context, 146,368 automatic KV tokens, chunk 1,024, DFlash2 K=7, Host 20,867.734375 MiB, keep-warm 60,000 ms, isolated scratch checkpoint quota 2,048 MiB"
+      }
+    },
+    "exp_113_prefill_decode_interference": {
+      "design_trigger_rule": "co-resident decode < 100 tok/s OR arrival-during-prefill TTFT > 5 s",
+      "long_fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a",
+      "rtxpro6000_proxy": {
+        "host_label": "rtxpro6000-win-a",
+        "engine_commit": "e6ac7b709a1a3f94fbbcd6529ce87e813d20cd09",
+        "upstream_base": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+        "serve_sha256": "8235ada432dda4f2a6b8a65c308ed7b23d28260b06a5f10689b2d5805a5de79c",
+        "effective_config_sha256": "f8d99fb91ce69e0988f689e8e1f2edbd8d227a7a9685a995bdd9c7052168e93b",
+        "product_probe_sha256": "14dbee83c35eb95193d5153a31ce35ef75976b17233e0d991c8fad2d9461323c",
+        "cold_prompt_tokens": 130084,
+        "cached_tokens": 0,
+        "repeats_per_scenario": 3,
+        "scratch_checkpoint_quota_mib": 4096
+      },
+      "rtx5090_real_card": {
+        "host_label": "rtx5090-win-a",
+        "production_commit": "a87de3613c17bced777b446fb545f872d8395ec1",
+        "production_binary_sha256": "cc99a46097b6da5f9ec3ce671a7818d29754013ba520800f756110b9211bb06e",
+        "e1_candidate_commit": "375bb8483790ce6271e957318967f9a16b8c9833",
+        "e1_candidate_binary_sha256": "7f9881546d541f7a39e72351ee60d78db47b7a358ff658f2984296d869c96ae0",
+        "frozen_reducer_sha256": "5da116043798c202a692bcf58f78b663e1b470aa7672c7f719dc563ec9163a31",
+        "scratch_checkpoint_quota_mib": 2048,
+        "shipped_profile_checkpoint_quota_mib": 24576
+      }
+    },
+    "exp_114_pair_mixer_attribution": {
+      "host_label": "rtxpro6000-win-a",
+      "engine_commit": "e6ac7b709a1a3f94fbbcd6529ce87e813d20cd09",
+      "serve_sha256": "8235ada432dda4f2a6b8a65c308ed7b23d28260b06a5f10689b2d5805a5de79c",
+      "effective_config_sha256": "f8d99fb91ce69e0988f689e8e1f2edbd8d227a7a9685a995bdd9c7052168e93b",
+      "profiler": "Nsight Systems 2026.3.2.476-263238834031v0",
+      "nvtx_range": "first complete C2 decode range with membership payload 2 (64 residual-add K=6144/T=16 calls)",
+      "cuda_graph_id": 71
+    },
+    "exp_115_native_config_probes": {
+      "engine_source": "a87de3613c17bced777b446fb545f872d8395ec1",
+      "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+      "rtx3090_keep_warm": {
+        "host_label": "rtx3090-win-a",
+        "installed_component": "v0.8.0-qwen38-3090-beta.2",
+        "binary_sha256": "15a4db46db09dce695f1c55a9996b30408fa93ed864d881872f9ae7306fbab0f",
+        "serving_power_cap_w": 350,
+        "restored_power_cap_w": 370,
+        "design": "ABBA fresh servers, 6 post-idle observations per arm/delay across 163-226-token prefix-cold prompts with adjacent immediate controls at 12 s, 30 s, and 58 s idle",
+        "compiled_spin_pattern": "sm_86 3.5 ms / 10 ms"
+      },
+      "rtx4090_chunk_2048": {
+        "host_label": "rtx4090-win-a",
+        "installed_component": "v0.8.0-qwen38-4090-beta.2",
+        "binary_sha256": "ffee91bf17c261ae9b85791fc52528f7f1ef5c985c4d55feb7ee65174c96c73d",
+        "power_cap_w": 450,
+        "design": "ABBA fresh servers comparing shipped --prefill-chunk 1024 (Arm A) vs --prefill-chunk 2048 (Arm B) at 131,072 INT8 C1 (+2 extra slots) on benchmark_c1 (4,541 prompt / 1,024 completion), retrieval130048 (130,048 tokens), and role84 (84 prompts)"
+      }
+    },
+    "exp_116_rk4v4_geometry_control": {
+      "host_label": "rtx3090-win-a",
+      "diagnostic_source_commit": "f6ed4381a991aee0b9c3db6aa3a7a4012e2393fb",
+      "prompt_tokens": 3093,
+      "restored_cached_tokens": 3066,
+      "restored_computed_tokens": 27,
+      "matched_cold_capture_split": 3066,
+      "matched_cold_suffix_chunks": [
+        18,
+        2,
+        3,
+        4
+      ],
+      "matched_cold_suffix_bases": [
+        3066,
+        3084,
+        3086,
+        3089
+      ],
+      "generated_tokens_compared": 32,
+      "arms": [
+        "rk4v4 restored (3,066 cached + 27 computed)",
+        "rk4v4 ordinary chunk-1024 cold (3,093 computed, 0 cached)",
+        "rk4v4 matched-geometry cold (3,093 computed, 0 cached, split 3,066 + suffix 18/2/3/4)",
+        "int8-group64 restored / ordinary cold / matched-geometry cold controls"
+      ]
+    },
+    "exp_117_host_ttft_probes": {
+      "base_commit": "e6ac7b709a1a3f94fbbcd6529ce87e813d20cd09",
+      "candidate_commit": "6f1ae8d26bbd5c6120cf2a2a7be087481b3d5d82",
+      "candidate_pr": "alphastorm/ninfer#96",
+      "host_bench_platform": "Apple M5 Max, 36 GiB, arm64, AppleClang 21 Release (-O3 -DNDEBUG), 5 warmups + 31 timed samples per ABBA leg",
+      "community_commits_evaluated": {
+        "jinja_strip": {
+          "tree": "9811c30e",
+          "commit": "21d8b94757d2ecf0c964f32dab891023a1a0f174"
+        },
+        "nfc_boundaries": {
+          "tree": "2523523c",
+          "commit": "4f8d324ab78219fb7174a740170ea18a80d1b23a"
+        },
+        "small_t_preload": {
+          "tree": "f3e8420e",
+          "commit": "79d657e0e0f3e0abd27e3d47929349c35110560c"
+        }
+      },
+      "small_t_preload_proxy_trace": {
+        "host_label": "rtxpro6000-win-a",
+        "serve_sha256": "8235ada432dda4f2a6b8a65c308ed7b23d28260b06a5f10689b2d5805a5de79c",
+        "config_sha256": "f8d99fb91ce69e0988f689e8e1f2edbd8d227a7a9685a995bdd9c7052168e93b",
+        "model_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+        "env": "CUDA_MODULE_LOADING=LAZY",
+        "adoption_threshold_ms": 20.0
+      }
+    }
+    ,
+    "exp_118_arrival_source_wait_and_pr100": {
+      "rtx5090_q24_control": {
+        "host_label": "rtx5090-win-a",
+        "label": "production-exp077-q24-01",
+        "utc": "2026-11-10T09:02:43Z",
+        "production_commit": "a87de3613c17bced777b446fb545f872d8395ec1",
+        "production_binary_sha256": "cc99a46097b6da5f9ec3ce671a7818d29754013ba520800f756110b9211bb06e",
+        "quota_mib": 24576,
+        "baseline_scratch_quota_mib": 2048,
+        "checkpoint_filesystem": "ext4",
+        "cold_prompt_tokens": 130110,
+        "cached_tokens": 0
+      },
+      "e1_source_wait_candidate": {
+        "candidate_pr": "alphastorm/ninfer#100",
+        "branch": "p20/e1-source-wait",
+        "base_commit": "df7aeb526ad344ea9bc9fbba0e7bd719aa5dab3b",
+        "cpu_red_test_commit": "4d62c6996",
+        "final_head_commit": "7f2c71fddb264e2f615c4b5e1425bbe20eaa6d96",
+        "gpu_tested_commit_prefix": "1c5",
+        "gpu_serve_sha256": "20782176939d51dfd853cf94ce9f01b69b12c8950079928641a5004de37edaa6",
+        "proxy_host_label": "rtxpro6000-win-a",
+        "proxy_geometry": "C2 / BF16 / DFlash2 K=7 / chunk 1,024 / KV 131,072 / Host 20,867.734375 MiB / quota 4,096 MiB",
+        "ci_runs": [
+          42795274259,
+          42795274400,
+          42795274269
+        ]
+      }
+    },
+    "exp_119_e4_prefill_pacing_curve": {
+      "host_label": "rtxpro6000-win-a",
+      "candidate_pr": "alphastorm/ninfer#95",
+      "branch": "p20/e4-pacing",
+      "baseline_commit": "e6ac7b709a1a3f94fbbcd6529ce87e813d20cd09",
+      "cold_repeats_per_scenario": 3,
+      "arrival_protocol_note": "Original B-submit + 1 s with cold-B / early-A-output proof (baseline arrival TTFT 0.6185583470000893 s), distinct from G1's admission-observed gate (0.803794 s).",
+      "promotion_gates": {
+        "co_resident_decode_tok_s_at_least": 100.0,
+        "all_arrivals_ttft_s_below": 2.0,
+        "long_wall_ratio_at_most": 1.15,
+        "byte_identical_outputs": true
+      }
+    },
+    "exp_120_e2_serve_robustness": {
+      "candidate_pr": "alphastorm/ninfer#98",
+      "branch": "p20/e2-serve",
+      "base_commit": "e6ac7b709a1a3f94fbbcd6529ce87e813d20cd09",
+      "upstream_base": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+      "cpu_and_live_gpu_commit": "5e73453f218917983fb893541e18a081a6f43392",
+      "cpu_and_live_serve_sha256": "5fd3bdec57eb584d96d9e187076f451a050a53ba67df95a35936a1e7cf4afe13",
+      "final_head_commit": "d191fb5738c4df358e7613cd39c8b5b6d13473e2",
+      "final_serve_sha256": "88bd22655b461c2f173d5698246309d49c89e5c9360375c807f8dc1b4f7814bc",
+      "sampling_test_sha256": "6d5358c8c02070a2714a64953dac221a4e741a5586073e4d170e86792581a1e0",
+      "speculative_round_test_sha256": "cf7ea74f06026730d6a12a866ee8159bc092faa48f1d415fab473d6ed17d5c3e",
+      "native_transactions_test_sha256": "1c77a2287776954bb6b716f7031552655b079b2ea7508fad99443831108ca14f",
+      "mtp3_parity_commit_prefix": "6fe9fe7e",
+      "mtp3_parity_config_sha256": "082234018437e0044523c132488bc16cfe94ea594f8d8d299fd476b3d8d17d38",
+      "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+      "proxy_host_label": "rtxpro6000-win-a",
+      "ci_runs": [
+        42777721394,
+        42777721650,
+        42777721269
+      ],
+      "windows_ci_job": 129700052085
+    },
+    "exp_121_rtx5090_dflash2_c1_parity": {
+      "host_label": "rtx5090-win-a",
+      "runtime_image_sha256": "a0cbb8a5f933ec8aeec9a7defa07d78a835c1093d1d98f5f842267287efa3f71",
+      "pinned_release_builder_sha256": "e7f34ca2f41ecea14da5cce0b2a30cae6b0877e3b3eb371bd92d103bca1121f1",
+      "production_control_commit": "a87de3613c17bced777b446fb545f872d8395ec1",
+      "production_control_binary_sha256": "cc99a46097b6da5f9ec3ce671a7818d29754013ba520800f756110b9211bb06e",
+      "f_integration": {
+        "candidate_pr": "alphastorm/ninfer#99",
+        "source_commit": "a3fa0550cfb67b5dc706359ebca0ed02eb722b7c",
+        "source_tree": "73d0f8a94861be55ed82a41f5256b3c60ed25341",
+        "binary_sha256": "1afbb82d0131a507da77ebc372d95596fc2ce6835a1ee35da0e5d7987610131c",
+        "built_utc": "2026-11-10T08:14:35.399968+00:00"
+      },
+      "f2_remediated": {
+        "candidate_pr": "alphastorm/ninfer#101",
+        "branch": "p20/remediation-r1",
+        "red_test_commit": "538f6d922",
+        "source_commit": "bdc665a338dc0ea08478c566db3d1e5514eb0d7c",
+        "source_tree": "cc473d295188cfbceac4587623bfd655bb21d334",
+        "binary_sha256": "92f0f636009ab824627084cd724c2eff57e814d40c857772206375083ff4a284",
+        "built_utc": "2026-11-10T09:31:16.978135+00:00",
+        "f3_test_only_head": "e0971faf221204047d5a4ed834e4e298740cee17",
+        "ci_runs_on_e0971faf": [
+          42792113220,
+          42792113216,
+          42792113378
+        ]
+      },
+      "council_review": {
+        "council_id": "CR-20261110T083627Z-a3fa0550",
+        "sequence": "omp-ninfer-v0.17.0-fork-a3fa0550",
+        "subject_diff": "a3fa0550cfb67b5dc706359ebca0ed02eb722b7c vs a87de3613c17bced777b446fb545f872d8395ec1 (94 paths, +4530/-1032)",
+        "packet_sha256": "b264c256724bde6c36adb492215c19373e79e095bc30a7a198a9a1008b2f901f",
+        "review_record_sha256": "9e1ce834a7fcc7ff0d7437654e7fc42185229676125b78e5ee75188e81529af3",
+        "subject_digest": "4a9f56e7ddde9a121065d9f1db017b30dbf8c93034b0c4de4b509dbf83dcbb35",
+        "ledger_sha256": "48bfa68cb61f92b90f597ce45a378abce6acf340613b3ac18e281d03100b513a",
+        "seats_completed": "4/4"
+      }
+    }
+  },
+  "observations": {
+    "exp_110_real_traffic_profile": {
+      "cohorts": {
+        "earlier_nonproduction_all": {
+          "completed_requests": 2107,
+          "distinct_sessions": 401,
+          "sessionless_requests": 991,
+          "request_days_utc": 25,
+          "wall_seconds": 10455.57,
+          "wall_share_percent": {
+            "decode": 44.84,
+            "prefill": 46.51,
+            "queue": 8.37,
+            "prepare": 0.14,
+            "residual": 0.15
+          }
+        },
+        "earlier_nonproduction_filtered": {
+          "completed_requests": 1170,
+          "distinct_sessions": 244,
+          "sessionless_requests": 543,
+          "request_days_utc": 23,
+          "wall_seconds": 4683.56,
+          "wall_share_percent": {
+            "decode": 56.16,
+            "prefill": 34.88,
+            "queue": 8.56,
+            "prepare": 0.18,
+            "residual": 0.22
+          }
+        },
+        "dflash2_v0100p_plus_filtered": {
+          "completed_requests": 7318,
+          "unfiltered_requests": 7323,
+          "distinct_sessions": 203,
+          "sessionless_requests": 436,
+          "request_days_utc": 15,
+          "wall_seconds": 55988.14,
+          "wall_share_percent": {
+            "decode": 69.42,
+            "prefill": 28.58,
+            "queue": 1.43,
+            "prepare": 0.18,
+            "residual": 0.4
+          },
+          "prompt_tokens_p50_p90_p99": [
+            48905.0,
+            94703.0,
+            109306.66
+          ],
+          "computed_tokens_p50_p90_p99": [
+            1129.0,
+            6027.3,
+            94973.96
+          ],
+          "cached_token_share_percent": 91.32,
+          "ttft_s_p50_p90_p99": {
+            "cached_any_n7177": [
+              0.75,
+              2.583,
+              50.392
+            ],
+            "cold_zero_cached_n141": [
+              3.457,
+              10.414,
+              50.606
+            ],
+            "warm_computed_at_most_1024_n3440": [
+              0.508,
+              0.706,
+              1.923
+            ]
+          },
+          "overlap": {
+            "any_peer_overlaps": 96,
+            "any_peer_overlap_percent": 1.31,
+            "active_wall_at_least_2_percent": 0.23,
+            "decode_window_overlap_percent": 0.42,
+            "peer_prefirst_token_exposed_requests": 58,
+            "matched_decode_overlap_slowdown_p50": 1.612,
+            "matched_prefirst_peer_overlap_slowdown_p50": 1.995
+          }
+        },
+        "recent_v013_to_v0162_filtered": {
+          "completed_requests": 176,
+          "unfiltered_requests": 180,
+          "distinct_sessions": 5,
+          "sessionless_requests": 147,
+          "request_days_utc": 4,
+          "wall_seconds": 299.64,
+          "wall_share_percent": {
+            "decode": 31.89,
+            "prefill": 50.21,
+            "queue": 8.16,
+            "prepare": 3.65,
+            "residual": 6.09
+          },
+          "prompt_tokens_p50_p90_p99": [
+            11801.0,
+            12932.5,
+            19766.5
+          ],
+          "computed_tokens_p50_p90_p99": [
+            477.0,
+            11622.5,
+            17102.5
+          ],
+          "cached_token_share_percent": 74.58,
+          "ttft_s_p50_p90_p99": {
+            "cached_any_equals_strict_warm_n112": [
+              0.265,
+              0.357,
+              1.466
+            ],
+            "cold_zero_cached_n64": [
+              3.451,
+              4.821,
+              5.939
+            ]
+          },
+          "overlap": {
+            "any_peer_overlaps": 45,
+            "any_peer_overlap_percent": 25.57,
+            "active_wall_at_least_2_percent": 9.8,
+            "decode_window_overlap_percent": 24.44,
+            "peer_prefirst_token_exposed_requests": 35,
+            "solo_raw_decode_tok_s": 307.37,
+            "decode_overlap_raw_tok_s": 204.62,
+            "prefirst_overlap_raw_tok_s": 171.75,
+            "matched_decode_overlap_slowdown_p50": 1.34,
+            "matched_prefirst_peer_overlap_slowdown_p50": 1.56
+          },
+          "preemption_and_replay": {
+            "coverage_requests": 180,
+            "preemptions": 0,
+            "snapshot_restores": 0,
+            "replay_restores": 0,
+            "replayed_tokens": 0,
+            "paused_ns": 0
+          },
+          "zero_global_decode_intersections_at_least_60s": 0
+        }
+      },
+      "warm_ttft_tail": {
+        "dflash2_any_cached_top_decile": {
+          "n": 718,
+          "ttft_sum_s": 10450.752,
+          "prefill_share_percent": 94.42,
+          "queue_share_percent": 5.43,
+          "computed_over_4096_count": 673
+        },
+        "dflash2_strict_warm_top_1_percent": {
+          "n": 35,
+          "ttft_sum_s": 99.69,
+          "queue_share_percent": 79.33,
+          "prefill_share_percent": 19.9
+        },
+        "recent_cached_strict_warm_top_decile": {
+          "n": 12,
+          "ttft_sum_s": 8.284,
+          "added_prepare_share_percent": 48.45,
+          "prefill_share_percent": 38.16,
+          "first_after_server_start_host_kv_restores": 4,
+          "first_after_server_start_share_of_top_decile_excess_percent": 84.0,
+          "added_prepare_seconds_range": [
+            0.874,
+            1.13
+          ],
+          "host_h2d_transfer_ms_range": [
+            117.3,
+            119.9
+          ],
+          "p99_excluding_first_after_server_start_s": 0.376
+        }
+      },
+      "low_acceptance_58_trigger": {
+        "dflash2_v0100p_plus_filtered": {
+          "low_requests": 324,
+          "requests_with_rounds": 7317,
+          "low_decode_seconds": 1340.01,
+          "all_decode_seconds": 38864.83,
+          "low_decode_share_percent": 3.45,
+          "pooled_tokens_per_round": 3.875,
+          "same_tokens_per_round_recovery_percent": 0.469,
+          "first_three_proxy_recovery_percent": 0.017,
+          "perfect_mtp3_recovery_percent": 1.307
+        },
+        "recent_v013_to_v0162_filtered": {
+          "low_requests": 11,
+          "requests_with_rounds": 176,
+          "low_decode_seconds": 5.98,
+          "all_decode_seconds": 95.57,
+          "low_decode_share_percent": 6.26,
+          "pooled_tokens_per_round": 4.124,
+          "same_tokens_per_round_recovery_percent": 0.851,
+          "first_three_proxy_recovery_percent": 0.169,
+          "perfect_mtp3_recovery_percent": 2.525
+        },
+        "design_trigger_percent": 3.0,
+        "verdict": "dropped"
+      }
+    },
+    "exp_111_copy_drafting_replay": {
+      "s1_hardware_reference": {
+        "synthetic_edit_gain_percent": 53.434,
+        "short_read_regression_percent": -4.205,
+        "output_identity": "15/23"
+      },
+      "local_qwen_turns_observed": 0,
+      "fixed_min_12": {
+        "accepted_copied_tokens": 362459,
+        "accepted_copy_fraction_percent": 20.5413,
+        "payload_only_copy_fraction_percent": 19.38,
+        "copy_proposal_rounds": 45495,
+        "positive_copy_rounds": 39475,
+        "zero_acceptance_rounds": 6020,
+        "zero_acceptance_percent": 13.23,
+        "mean_positive_accepted_run_tokens": 9.182,
+        "mean_accepted_per_proposed_round_tokens": 7.967,
+        "coverage_runs_at_least_8_percent": 17.3827,
+        "coverage_runs_at_least_12_percent": 14.6983,
+        "pooled_decode_ratio_cost_141_to_122": [
+          1.06664,
+          1.09314
+        ],
+        "pooled_decode_ratio_with_lookup_toll": [
+          1.02958,
+          1.05425
+        ],
+        "median_session_ratio_cost_141": 1.03952,
+        "sessions_above_15pct_cost_141": "87/649",
+        "bootstrap_95ci_coverage_percent": [
+          18.36,
+          23.11
+        ]
+      },
+      "adaptive_backoff_12_24_36": {
+        "accepted_copied_tokens": 233857,
+        "accepted_copy_fraction_percent": 13.2531,
+        "payload_only_copy_fraction_percent": 12.68,
+        "copy_proposal_rounds": 25626,
+        "positive_copy_rounds": 23027,
+        "zero_acceptance_rounds": 2599,
+        "zero_acceptance_percent": 10.14,
+        "mean_positive_accepted_run_tokens": 10.156,
+        "mean_accepted_per_proposed_round_tokens": 9.126,
+        "coverage_runs_at_least_8_percent": 11.6859,
+        "coverage_runs_at_least_12_percent": 10.3887,
+        "pooled_decode_ratio_cost_141_to_122": [
+          1.05484,
+          1.06928
+        ],
+        "pooled_decode_ratio_with_lookup_toll": [
+          1.01476,
+          1.02812
+        ],
+        "median_session_ratio_cost_141": 1.02016,
+        "sessions_above_15pct_cost_141": "59/649"
+      },
+      "coverage_by_output_kind_percent": {
+        "edit_hashline_patch_arguments": {
+          "output_tokens": 290045,
+          "fixed_copied_tokens": 115315,
+          "fixed_percent": 39.76,
+          "backoff_copied_tokens": 91429,
+          "backoff_percent": 31.52
+        },
+        "write_file_content_arguments": {
+          "output_tokens": 267203,
+          "fixed_copied_tokens": 45431,
+          "fixed_percent": 17.0,
+          "backoff_copied_tokens": 27369,
+          "backoff_percent": 10.24
+        },
+        "bash_eval_command_arguments": {
+          "output_tokens": 270486,
+          "fixed_copied_tokens": 63218,
+          "fixed_percent": 23.37,
+          "backoff_copied_tokens": 41951,
+          "backoff_percent": 15.51
+        },
+        "plain_text": {
+          "output_tokens": 9092,
+          "fixed_copied_tokens": 261,
+          "fixed_percent": 2.87,
+          "backoff_copied_tokens": 187,
+          "backoff_percent": 2.06
+        },
+        "visible_reasoning": {
+          "output_tokens": 465861,
+          "fixed_copied_tokens": 16823,
+          "fixed_percent": 3.61,
+          "backoff_copied_tokens": 7932,
+          "backoff_percent": 1.7
+        },
+        "other_tool_arguments": {
+          "output_tokens": 252429,
+          "fixed_copied_tokens": 60264,
+          "fixed_percent": 23.87,
+          "backoff_copied_tokens": 28366,
+          "backoff_percent": 11.24
+        },
+        "qwen_tool_formatting": {
+          "output_tokens": 209423,
+          "fixed_copied_tokens": 61147,
+          "fixed_percent": 29.2,
+          "backoff_copied_tokens": 36623,
+          "backoff_percent": 17.49
+        }
+      },
+      "verdict": "declined_and_closed_unmerged_in_pr_94_not_shipped_in_v0_17_0"
+    },
+    "exp_112_starvation_434_control_vs_e1": {
+      "rtxpro6000_proxy": {
+        "host_label": "rtxpro6000-win-a",
+        "control_e6ac7b70": {
+          "max_fully_paused_interval_s": 1.327120366,
+          "max_subsequent_actual_output_gap_s": 1.618474534,
+          "max_admitted_pause_s": 1.618474534,
+          "http_503_count_same_session": 6,
+          "long_holders_completed_normally": "1/2",
+          "holder_0": {
+            "prompt_tokens": 79992,
+            "completion_tokens": 40000,
+            "finish_reason": "output_limit"
+          },
+          "holder_1": {
+            "prompt_tokens": 79997,
+            "completion_tokens": 27288,
+            "finish_reason": "cancelled_at_horizon"
+          }
+        },
+        "candidate_df7aeb52": {
+          "verdict": "GREEN",
+          "max_fully_paused_interval_s": 2.0860554,
+          "max_subsequent_actual_output_gap_s": 2.266069104,
+          "max_admitted_pause_s": 2.266069104,
+          "http_503_count": 0,
+          "long_holders_completed_normally": "2/2",
+          "holder_0": {
+            "prompt_tokens": 79993,
+            "completion_tokens": 40000,
+            "finish_reason": "output_limit"
+          },
+          "holder_1": {
+            "prompt_tokens": 79998,
+            "completion_tokens": 36190,
+            "finish_reason": "stop_token"
+          },
+          "dflash2_greedy_parity": "3/3 byte-identical",
+          "mtp3_greedy_parity": "3/3 byte-identical",
+          "real_preemption_suite_seconds": {
+            "none": 56.326,
+            "mtp": 33.091,
+            "dflash2": 35.466
+          }
+        }
+      },
+      "rtx5090_real_card": {
+        "host_label": "rtx5090-win-a",
+        "production_control_a87de361": {
+          "label": "production-exp109-01",
+          "kv_capacity_tokens": 146368,
+          "paused_wait_s": 367.9977688699946,
+          "max_admitted_scheduler_pause_s": 368.62261531799595,
+          "both_long_requests_complete": false,
+          "long_holders_completed_normally": "1/2",
+          "long_results": [
+            {
+              "prompt_tokens": 80000,
+              "completion_tokens": 40000,
+              "finish_reason": "output_limit"
+            },
+            {
+              "prompt_tokens": 79991,
+              "completion_tokens": 19392,
+              "finish_reason": "cancelled"
+            }
+          ],
+          "fresh_http_503_count": 0,
+          "fresh_total": 54,
+          "fresh_completed": 54,
+          "fresh_ttft_s": {
+            "p50": 0.2921903124988603,
+            "p95": 0.5359154294997986,
+            "p99": 38.33627007124886,
+            "max": 43.863092249994224
+          }
+        },
+        "e1_candidate_375bb848": {
+          "label": "e1-exp109-01",
+          "verdict": "PASS",
+          "pool_tokens": 146368,
+          "max_fully_paused_interval_s": 2.9986773779965006,
+          "max_pause_to_recovery_s": 3.2083587239976623,
+          "scheduler_pause_count": 234,
+          "both_long_complete_normally": true,
+          "long_holders_completed_normally": "2/2",
+          "long_results": [
+            {
+              "prompt_tokens": 79987,
+              "completion_tokens": 40000,
+              "finish_reason": "output_limit",
+              "server_decode_tok_s": 337.5049065759843,
+              "max_post_first_progress_gap_s": 3.6162539159995504
+            },
+            {
+              "prompt_tokens": 79992,
+              "completion_tokens": 40000,
+              "finish_reason": "output_limit",
+              "server_decode_tok_s": 112.69065795258916,
+              "max_post_first_progress_gap_s": 1.5433445839953492
+            }
+          ],
+          "fresh_http_503_count": 0,
+          "fresh_total": 51,
+          "fresh_completed": 50,
+          "fresh_note": "50 of 51 fresh requests completed before the 600 s observation horizon ended; 0 HTTP 503 refusals.",
+          "fresh_ttft_s": {
+            "p50": 0.40009193749938277,
+            "p95": 3.3925088376519748,
+            "p99": 42.07315435541174,
+            "max": 45.2264105830036
+          }
+        }
+      }
+    },
+    "exp_113_prefill_decode_interference": {
+      "rtxpro6000_proxy_e6ac7b70": {
+        "host_label": "rtxpro6000-win-a",
+        "cold_valid_repeats_per_scenario": 3,
+        "prefill_arriving_during_decode_medians": {
+          "co_resident_decode_tok_s": 6.375002,
+          "full_a_decode_tok_s": 20.387571,
+          "gap_p50_ms": 350.569854,
+          "gap_p99_ms": 469.988615,
+          "long_ttft_s": 46.349826,
+          "long_total_wall_s": 46.491205,
+          "server_prefill_s": 44.226679
+        },
+        "decode_arriving_during_prefill_medians": {
+          "arrival_ttft_s": 0.803794,
+          "long_ttft_s": 45.514373,
+          "long_total_wall_s": 45.637334,
+          "http_admission_before_b_first_output_proven": "3/3"
+        },
+        "design_trigger": {
+          "triggered": true,
+          "rate_trigger_below_100_tok_s": true,
+          "arrival_trigger_above_5_s": false
+        }
+      },
+      "rtx5090_production_a87de361": {
+        "host_label": "rtx5090-win-a",
+        "label": "production-exp077-cold-01",
+        "cold_valid_rows": "6/6",
+        "medians": {
+          "co_resident_decode_tok_s": 5.1090889787842,
+          "a_full_decode_tok_s": 16.11652799540881,
+          "overlapping_inter_output_gap_p50_ms": 430.32510400007595,
+          "overlapping_inter_output_gap_p99_ms": 618.7155582298874,
+          "arrival_during_prefill_ttft_s": 23.071937208995223,
+          "prefill_during_decode_long_ttft_s": 59.67532029100403,
+          "prefill_during_decode_long_wall_s": 59.96017691599991,
+          "decode_during_prefill_long_ttft_s": 59.13663633300166,
+          "decode_during_prefill_long_wall_s": 59.473603333004576
+        },
+        "design_trigger": {
+          "triggered": true,
+          "median_rate_trigger": true,
+          "median_arrival_trigger": true
+        }
+      },
+      "rtx5090_e1_candidate_375bb848": {
+        "host_label": "rtx5090-win-a",
+        "label": "e1-exp077-cold-01",
+        "verdict": "PARTIAL: one arrival sample invalid; no rerun",
+        "cold_valid_rows": "5/6",
+        "cold_valid_rows_note": "3/3 valid prefill-during-decode cold repeats plus 2/3 valid decode-during-prefill arrival repeats; repeat 2 arrived 0.000698 s after long first output and was marked invalid without retry.",
+        "medians": {
+          "co_resident_decode_tok_s": 5.12727214416205,
+          "a_full_decode_tok_s": 16.18602562375548,
+          "overlapping_inter_output_gap_p50_ms": 405.19091700116405,
+          "overlapping_inter_output_gap_p99_ms": 618.3926359693578,
+          "arrival_during_prefill_ttft_s": 20.999604124499456,
+          "prefill_during_decode_long_wall_s": 59.89179870799853,
+          "decode_during_prefill_long_wall_s": 59.165644458000315
+        },
+        "arrival_samples_s": [
+          {
+            "repeat": 1,
+            "valid": true,
+            "ttft_s": 20.341782666000654
+          },
+          {
+            "repeat": 2,
+            "valid": false,
+            "raw_ttft_s": 52.51999666700431
+          },
+          {
+            "repeat": 3,
+            "valid": true,
+            "ttft_s": 21.657425582998258
+          }
+        ]
+      }
+    },
+    "exp_114_pair_mixer_attribution": {
+      "host_label": "rtxpro6000-win-a",
+      "kernel_symbol": "q5_a16_sliced_k_mma_kernel<Q5A16SlicedKMmaSchedule<16,16,8,2,...,6144,16,...>,...,LinearResidualAddEpilogue,...>",
+      "ctas": "320x1x1",
+      "threads": "256x1x1",
+      "calls_per_round": 64,
+      "mean_us": 19.767594,
+      "median_us": 19.776,
+      "min_max_us": [
+        19.264,
+        20.223
+      ],
+      "total_ms_per_round": 1.265126,
+      "exp092_proposed_target_ms_per_round": 1.41,
+      "exp092_historical_prompt_gemm_ms_per_round": 3.43,
+      "full_round_kernels": 743,
+      "full_round_summed_kernel_ms": 17.83857,
+      "full_round_gpu_span_ms": 17.835578,
+      "full_round_host_range_ms": 18.353995,
+      "verdict": "already_on_small_t_sliced_k_no_port_needed"
+    },
+    "exp_115_native_config_probes": {
+      "rtx3090_keep_warm": {
+        "host_label": "rtx3090-win-a",
+        "verdict": "DO_NOT_PROMOTE",
+        "output_mismatches": "0/27",
+        "peak_board_draw_w": 328.02,
+        "delays": {
+          "12s": {
+            "a_ttft_s": 0.6716,
+            "a_back_to_back_s": 0.4181,
+            "b_ttft_s": 0.5456,
+            "b_back_to_back_s": 0.4173,
+            "b_median_paired_ratio": 1.364,
+            "a_prefill_s": 0.5067,
+            "b_prefill_s": 0.4425,
+            "a_held_watts": 34.7,
+            "b_held_watts": 72.6,
+            "added_watts": 37.9,
+            "b_p2_occupancy_percent": 7.4,
+            "b_pstate_before_request": "P5"
+          },
+          "30s": {
+            "a_ttft_s": 0.6617,
+            "a_back_to_back_s": 0.4219,
+            "b_ttft_s": 0.5667,
+            "b_back_to_back_s": 0.4199,
+            "b_median_paired_ratio": 1.362,
+            "a_prefill_s": 0.4914,
+            "b_prefill_s": 0.4044,
+            "a_held_watts": 10.0,
+            "b_held_watts": 29.8,
+            "added_watts": 19.8,
+            "b_p2_occupancy_percent": 1.8,
+            "b_pstate_before_request": "P8"
+          },
+          "58s": {
+            "a_ttft_s": 0.6435,
+            "a_back_to_back_s": 0.4208,
+            "b_ttft_s": 0.6501,
+            "b_back_to_back_s": 0.4212,
+            "b_median_paired_ratio": 1.521,
+            "a_prefill_s": 0.4697,
+            "b_prefill_s": 0.4817,
+            "a_held_watts": 9.8,
+            "b_held_watts": 25.2,
+            "added_watts": 15.4,
+            "b_p2_occupancy_percent": 1.1,
+            "b_pstate_before_request": "P8"
+          }
+        }
+      },
+      "rtx4090_chunk_2048": {
+        "host_label": "rtx4090-win-a",
+        "verdict": "DO_NOT_PROMOTE",
+        "startup_available_mib_chunk_1024": 1008.0,
+        "startup_available_mib_chunk_2048": 848.0,
+        "benchmark_c1_prefill_tok_s": {
+          "chunk_1024": 2122.99,
+          "chunk_2048": 2173.11,
+          "ratio": 1.0236,
+          "gate": 1.04
+        },
+        "retrieval130048_prefill_tok_s": {
+          "chunk_1024": 1562.57,
+          "chunk_2048": 1585.82,
+          "ratio": 1.0149,
+          "gate": 1.04
+        },
+        "benchmark_c1_decode_tok_s": {
+          "chunk_1024": 254.4,
+          "chunk_2048": 224.33,
+          "ratio": 0.8818,
+          "gate": 0.98
+        },
+        "role84_decode_tok_s": {
+          "chunk_1024": 174.67,
+          "chunk_2048": 174.85,
+          "ratio": 1.0011,
+          "gate": 0.98
+        },
+        "within_arm_role84_byte_identical": "84/84",
+        "cross_arm_role84_byte_identical": "44/84"
+      }
+    },
+    "exp_116_rk4v4_geometry_control": {
+      "host_label": "rtx3090-win-a",
+      "verdict": "oracle_geometry_explains_token_mismatch",
+      "rk4v4_restored_vs_ordinary_cold1024_matching_tokens": "31/32",
+      "rk4v4_restored_vs_matched_geometry_cold_matching_tokens": "32/32",
+      "int8_three_way_matching_tokens": "32/32",
+      "token_32_ids": {
+        "rk4v4_restored": 3635,
+        "rk4v4_ordinary_cold1024": 48117,
+        "rk4v4_matched_geometry_cold": 3635,
+        "int8_restored": 48117,
+        "int8_ordinary_cold1024": 48117,
+        "int8_matched_geometry_cold": 48117
+      },
+      "validity": {
+        "identical_prompt_ledgers": true,
+        "int8_three_way32": true,
+        "matched_has_capture3066": true,
+        "matched_suffix_geometry": true,
+        "ordinary_rk4v4_reproduced": true,
+        "restoration_mirror_retirement_and_locks": true,
+        "transport_byte_exact": true
+      }
+    },
+    "exp_117_host_ttft_probes": {
+      "nfc_boundary_normalization": {
+        "disposition": "ported_in_pr_96_and_shipped_in_rtx5090_beta6_v0_17_0",
+        "technical_doc_507749b_39469_non_ascii_ms": {
+          "base_median": 5.147875,
+          "base_p10_p90": [
+            4.86575,
+            5.370875
+          ],
+          "candidate_median": 0.465583,
+          "candidate_p10_p90": [
+            0.456584,
+            0.470833
+          ],
+          "relative_change_percent": -90.96,
+          "speedup_factor": 11.06
+        },
+        "ascii_control_507749b_ms": {
+          "base_median": 0.0655,
+          "base_p10_p90": [
+            0.065333,
+            0.066417
+          ],
+          "candidate_median": 0.056375,
+          "candidate_p10_p90": [
+            0.056291,
+            0.056417
+          ],
+          "relative_change_percent": -13.93
+        },
+        "conversation_render_500k_chars_unchanged_ms": {
+          "base_median": 1.162375,
+          "candidate_median": 1.182208,
+          "relative_change_percent": 1.71
+        },
+        "utf8proc_oracle_random_texts_matched": 100000,
+        "local_combining_sequence_mapped_bytes": {
+          "base": 500003,
+          "candidate": 3
+        },
+        "differential_corpus_serialized_results_matched": "65/65 (56 successful prompts + 9 expected errors)",
+        "differential_corpus_token_ids_matched": "564922/564922",
+        "render_result_sha256": "a9e3f2d28cbeede6a22eaba784713c1e675747e383ea7f35bca8fa75039c2f24",
+        "token_id_file_sha256": "e6ff96c6a9c7663a00e46b8bdfc9f82b5a9192a46bd061dc3a829f82207efd3a"
+      },
+      "jinja_strip": {
+        "disposition": "skipped_incompatible_with_interior_utf8_validation_contract",
+        "base_decodes_for_500002_chars": 500004
+      },
+      "small_t_module_preload": {
+        "disposition": "skipped_not_applicable",
+        "host_label": "rtxpro6000-win-a",
+        "requests_traced": 33,
+        "proven_prefix_hits": 31,
+        "computed_widths_covered": "11..25",
+        "cuda_api_events_retained": 164093,
+        "max_single_module_lookup_api_ms": 0.054462,
+        "max_cumulative_request_module_lookup_api_ms": 0.668558,
+        "max_attention_launch_api_ms": 0.226192,
+        "max_first_seen_attention_launch_api_ms": 0.032022,
+        "adoption_threshold_ms": 20.0
+      }
+    }
+    ,
+    "exp_118_arrival_source_wait_and_pr100": {
+      "rtx5090_production_q24": {
+        "host_label": "rtx5090-win-a",
+        "label": "production-exp077-q24-01",
+        "verdict": "PASS: valid diagnostic; long arrival wait persists at shipped quota",
+        "quota_mib": 24576,
+        "cold_valid_rows": 6,
+        "valid_arrivals": 3,
+        "minimum_sampled_c_free_gib": 313.5384101867676,
+        "medians": {
+          "co_resident_decode_tok_s": 5.2545419751788325,
+          "a_full_decode_tok_s": 16.166105119810688,
+          "overlapping_inter_output_gap_p50_ms": 430.66141700546723,
+          "overlapping_inter_output_gap_p99_ms": 618.8939774995379,
+          "arrival_during_prefill_ttft_s": 23.073498041994753,
+          "prefill_during_decode_long_ttft_s": 59.61118237499613,
+          "prefill_during_decode_long_wall_s": 59.71080666699709,
+          "decode_during_prefill_long_ttft_s": 58.62070575000689,
+          "decode_during_prefill_long_wall_s": 58.84691487500095
+        },
+        "arrival_median_delta_vs_2048_mib_s": 0.0015608329995302483,
+        "admission_aggregates": [
+          {
+            "repeat": 1,
+            "queue_wait_s": 19.613795417000002,
+            "source_wait_seconds": 19.492951790000003,
+            "preferred_reused_tokens": 111,
+            "fallback_reason": "none",
+            "revoked_checkpoints": 0
+          },
+          {
+            "repeat": 2,
+            "queue_wait_s": 23.92797951,
+            "source_wait_seconds": 23.722483155000003,
+            "preferred_reused_tokens": 111,
+            "fallback_reason": "none",
+            "revoked_checkpoints": 0
+          },
+          {
+            "repeat": 3,
+            "queue_wait_s": 22.39627786,
+            "source_wait_seconds": 22.305462323,
+            "preferred_reused_tokens": 111,
+            "fallback_reason": "none",
+            "revoked_checkpoints": 0
+          }
+        ]
+      },
+      "e1_source_wait_pr100_proxy": {
+        "host_label": "rtxpro6000-win-a",
+        "candidate_pr": "alphastorm/ninfer#100",
+        "cpu_proof": {
+          "engine_core_tests": "31/31 PASS",
+          "resource_manager_tests": "PASS",
+          "source_wait_s_at_60ms_allowance": 0.0600276,
+          "preferred_reused_tokens": 3,
+          "root_computed_tokens": 4
+        },
+        "warm_history_3_pairs_gpu": {
+          "base_source_wait_s": [
+            44.75,
+            44.859,
+            44.877
+          ],
+          "candidate_source_wait_s": [
+            44.74,
+            44.776,
+            44.945
+          ],
+          "candidate_ttft_s": [
+            44.942,
+            44.973,
+            45.144
+          ],
+          "preferred_and_actual_reused_tokens": 111,
+          "computed_tokens": 7,
+          "fallback_reason": "none",
+          "state_h2d_bytes": 0,
+          "cold_b_computed_tokens": 130084,
+          "serial_solo_digest_parity": "3/3",
+          "verdict": "RED_LATENCY_NO_MEASURED_GAIN"
+        },
+        "structural_gate_diagnosis": "engine_core.h:2703 reserves resident units before fresh scan; reclaim may occupy the Native context slot so try_admit_one:1893 refuses even a re-armed scan; poll (2720-2722) then refresh (2723-2725) does not retry fresh before running resident work."
+      }
+    },
+    "exp_119_e4_prefill_pacing_curve": {
+      "host_label": "rtxpro6000-win-a",
+      "candidate_pr": "alphastorm/ninfer#95",
+      "baseline_e6ac7b70_cold": {
+        "co_resident_decode_tok_s": 6.375002409910286,
+        "a_full_decode_tok_s": 20.387570703138,
+        "overlap_gap_p50_ms": 350.56985400001395,
+        "overlap_gap_p99_ms": 469.9886151900023,
+        "arrival_during_prefill_ttft_s": 0.6185583470000893,
+        "prefill_during_decode_long_ttft_s": 46.34982557399985,
+        "prefill_during_decode_long_wall_s": 46.491205369,
+        "decode_during_prefill_long_ttft_s": 45.363701494,
+        "decode_during_prefill_long_wall_s": 45.48361648499997
+      },
+      "arms": [
+        {
+          "arm": "e4-b95f-off",
+          "co_resident_decode_tok_s": 6.5999768563561565,
+          "a_full_decode_tok_s": 20.38284874576493,
+          "overlap_gap_p50_ms": 353.9644300000191,
+          "overlap_gap_p99_ms": 469.8805120999964,
+          "arrival_ttft_median_s": 0.6182486540001264,
+          "arrival_ttft_worst_s": 0.6263901659999647,
+          "long_wall_pdd_s": 46.400128399000096,
+          "long_wall_ddp_s": 45.358050319000085,
+          "wall_ratio_pdd": 0.9980409849717377,
+          "wall_ratio_ddp": 0.9972393099822813,
+          "byte_identical_outputs": false,
+          "promotable": false
+        },
+        {
+          "arm": "e4-b95f-k1-v2",
+          "co_resident_decode_tok_s": 6.399997372321079,
+          "a_full_decode_tok_s": 20.43098399605729,
+          "overlap_gap_p50_ms": 352.91025250012353,
+          "overlap_gap_p99_ms": 469.52366230009375,
+          "arrival_ttft_median_s": 0.6310502729998007,
+          "arrival_ttft_worst_s": 0.6333493229999476,
+          "long_wall_pdd_s": 46.24725784300017,
+          "long_wall_ddp_s": 45.80942459000016,
+          "wall_ratio_pdd": 0.9947528242371084,
+          "wall_ratio_ddp": 1.0071631969966073,
+          "byte_identical_outputs": false,
+          "promotable": false
+        },
+        {
+          "arm": "e4-b95f-k2-v2",
+          "co_resident_decode_tok_s": 12.02497518616308,
+          "a_full_decode_tok_s": 20.19886196442209,
+          "overlap_gap_p50_ms": 16.122766000080446,
+          "overlap_gap_p99_ms": 471.30772439977585,
+          "arrival_ttft_median_s": 0.6340788699999393,
+          "arrival_ttft_worst_s": 0.6373841149998043,
+          "long_wall_pdd_s": 48.56072094800038,
+          "long_wall_ddp_s": 45.92950701500013,
+          "wall_ratio_pdd": 1.0445141304161651,
+          "wall_ratio_ddp": 1.0098033218213245,
+          "byte_identical_outputs": false,
+          "promotable": false
+        },
+        {
+          "arm": "e4-b95f-k4-v2",
+          "co_resident_decode_tok_s": 24.159986941043858,
+          "a_full_decode_tok_s": 31.724513423426767,
+          "overlap_gap_p50_ms": 14.53044600020803,
+          "overlap_gap_p99_ms": 395.724528800365,
+          "arrival_ttft_median_s": 0.6392737289997967,
+          "arrival_ttft_worst_s": 0.6579903700003342,
+          "long_wall_pdd_s": 49.824528387999635,
+          "long_wall_ddp_s": 45.9744708799999,
+          "wall_ratio_pdd": 1.0716979263614075,
+          "wall_ratio_ddp": 1.0107918945970755,
+          "byte_identical_outputs": false,
+          "promotable": false
+        },
+        {
+          "arm": "e4-b95f-k8-v2",
+          "co_resident_decode_tok_s": 47.90062427446598,
+          "a_full_decode_tok_s": 58.4889931485251,
+          "overlap_gap_p50_ms": 14.530487000229186,
+          "overlap_gap_p99_ms": 320.9307005201299,
+          "arrival_ttft_median_s": 0.6385532379999859,
+          "arrival_ttft_worst_s": 0.6696068520004701,
+          "long_wall_pdd_s": 49.70285399800014,
+          "long_wall_ddp_s": 45.89246238799933,
+          "wall_ratio_pdd": 1.0690807778268885,
+          "wall_ratio_ddp": 1.0089888609260917,
+          "byte_identical_outputs": false,
+          "promotable": false
+        },
+        {
+          "arm": "e4-b95f-b250-k16-v2",
+          "co_resident_decode_tok_s": 73.3999952877203,
+          "a_full_decode_tok_s": 90.25223480763339,
+          "overlap_gap_p50_ms": 14.518802000566211,
+          "overlap_gap_p99_ms": 249.3068058402241,
+          "arrival_ttft_median_s": 0.6406906310003251,
+          "arrival_ttft_worst_s": 0.6509991180000725,
+          "long_wall_pdd_s": 49.94518817399967,
+          "long_wall_ddp_s": 45.821065797999836,
+          "wall_ratio_pdd": 1.0742932513275458,
+          "wall_ratio_ddp": 1.0074191398810857,
+          "byte_identical_outputs": false,
+          "promotable": false
+        },
+        {
+          "arm": "e4-b95f-b500-k32-v2",
+          "co_resident_decode_tok_s": 103.20480067279445,
+          "a_full_decode_tok_s": 122.22168886963671,
+          "overlap_gap_p50_ms": 14.467424000031315,
+          "overlap_gap_p99_ms": 265.0793972398242,
+          "arrival_ttft_median_s": 0.6279374799996731,
+          "arrival_ttft_worst_s": 0.6538938170015172,
+          "long_wall_pdd_s": 49.65779777899934,
+          "long_wall_ddp_s": 45.70052808499986,
+          "wall_ratio_pdd": 1.0681116435864835,
+          "wall_ratio_ddp": 1.0047690051223483,
+          "byte_identical_outputs": false,
+          "promotable": false
+        }
+      ],
+      "disposition": "keep_both_flags_at_0_default_off_not_promoted"
+    },
+    "exp_120_e2_serve_robustness": {
+      "candidate_pr": "alphastorm/ninfer#98",
+      "fixes_verified": {
+        "issue_446_malformed_history_http_status": 200,
+        "issue_440_effort_high_http_status": 200,
+        "issue_440_tiers": [
+          "low",
+          "medium",
+          "xhigh"
+        ],
+        "issue_440_mapping": {
+          "minimal": "low",
+          "high": "xhigh",
+          "max": "xhigh"
+        },
+        "issue_440_template_bytes_unchanged": true,
+        "issue_441_disabled_effort_http_status": 200,
+        "numerical_failure_gpu_nonfinite_exit_code": 0,
+        "baseline_shutdown_e6ac7b70": {
+          "resident_at_stop": true,
+          "exit_code": 1,
+          "failure": "managed final-save deadline exceeded"
+        },
+        "candidate_shutdown_5e73453f": {
+          "resident_at_stop": true,
+          "exit_code": 0,
+          "stop_seconds": 2.5709882819999734,
+          "complete": true,
+          "saved": 1,
+          "refused": 0,
+          "skipped": 0,
+          "restored_cached_tokens": 18,
+          "passed": true
+        }
+      },
+      "cpu_ctest": {
+        "tests_passed": "3/3 (ninfer_engine_core_test, ninfer_serve_resilience_test, ninfer_stop_event_test)",
+        "total_time_s": 15.14
+      },
+      "mtp3_parity": {
+        "commit_prefix": "6fe9fe7e",
+        "cases_compared": "5/5 (parity-0, parity-1, parity-2, pair-0, pair-1)",
+        "all_equal": true
+      },
+      "ci_d191fb57": {
+        "overall": "success",
+        "linux_bounded": "success",
+        "windows_host_contracts": "success",
+        "native_sm86_sm89": "success",
+        "rdc": "success"
+      }
+    },
+    "exp_121_rtx5090_dflash2_c1_parity": {
+      "host_label": "rtx5090-win-a",
+      "f_parity_01": {
+        "utc": "2026-11-10T08:40:53Z",
+        "verdict": "PASS",
+        "source_commit": "a3fa0550cfb67b5dc706359ebca0ed02eb722b7c",
+        "binary_sha256": "1afbb82d0131a507da77ebc372d95596fc2ce6835a1ee35da0e5d7987610131c",
+        "c1_gating": {
+          "control_label": "f-parity-01-pc1",
+          "candidate_label": "f-parity-01-fc1",
+          "prompts_matched": "3/3 (parity-0, parity-1, parity-2)",
+          "all_fields_identical": true
+        },
+        "c2_informational": {
+          "control_label": "f-parity-01-pc2",
+          "candidate_label": "f-parity-01-fc2",
+          "prompts_matched": "3/3 (parity-0, parity-1, parity-2)",
+          "all_fields_identical": true,
+          "c2_failure_can_fail_gate": false
+        }
+      },
+      "council_cr_20261110t083627z_a3fa0550": {
+        "confirmed_p1": "gemini-argon-R1: resident pause can trigger a Pending durable pressure save through the release guard; pause_reclaim_victim then pauses older residents and reserve_resident_units throws 'progress owner cannot obtain its legal unit', failing the Engine (shape also present in shipped v0.16.2 a87de361, where the 180 recent production completions that carry scheduling counters show zero preemptions; older requests lack those counters).",
+        "confirmed_p2": "daybreak-blue-R1 = gpt-astra-R1: failed fresh-admission window did not consume its per-rotation window in take_fresh_window().",
+        "remediation_pr": "alphastorm/ninfer#101",
+        "red_on_f_538f6d92": "EngineCore 33 PASS + 2 new FAIL (including 'progress owner cannot obtain its legal unit'); Scheduler unsuccessful-window regression FAIL.",
+        "green_on_f2_bdc665a3_and_f3_e0971faf": "EngineCore 35/35 PASS, Scheduler PASS, full RC-shaped build 1,311/1,311 Ninja steps (740.3 s) with apps/tests/benchmarks ON, all PR #101 CI runs (42792113220, 42792113216, 42792113378) SUCCESS.",
+        "closed_utc": "2026-11-10T10:20:00Z",
+        "disposition": "closed_as_verified_localized_remediation"
+      },
+      "f2_parity_01": {
+        "utc": "2026-11-10T09:42:16Z",
+        "verdict": "PASS",
+        "source_commit": "bdc665a338dc0ea08478c566db3d1e5514eb0d7c",
+        "binary_sha256": "92f0f636009ab824627084cd724c2eff57e814d40c857772206375083ff4a284",
+        "f3_runtime_equivalent_source": "e0971faf221204047d5a4ed834e4e298740cee17",
+        "c1_gating": {
+          "control_label": "f2-parity-01-pc1",
+          "candidate_label": "f2-parity-01-fc1",
+          "prompts_matched": "3/3 (parity-0, parity-1, parity-2)",
+          "all_fields_identical": true
+        },
+        "c2_informational": {
+          "status": "not_run",
+          "c2_failure_can_fail_gate": false
+        }
+      }
+    }
+  },
+  "limits": [
+    "Pre-cut slice, proxy, and integration measurements in E1-E4, integration F, source-wait #100, and council-remediated F2/F3 (e0971faf) record the exact measured builds across fork PRs alphastorm/ninfer#95-#101; RTX 5090 v0.7.0-qwen38-5090-beta.6 subsequently shipped in omp-ninfer v0.17.0 (published 2026-11-10) from fork source F3 e0971faf = integration F a3fa0550 (#99: E1 #97, E2 #98, E3 #96, and E4 #95 shipped default-off) + council remediation #101, while native v0.8.0-beta.2 packages remained at a87de361 (with RTX 3090's native post-route compaction campaign failure founder-waived with disclosure in v0.17.0, tracked in alphastorm/ninfer#89, and product tooling follow-ups in alphastorm/omp-ninfer#149).",
+    "EXP-110 production request logs end on 2026-11-04 and omit prompt/completion text, per-token emission timestamps, and HTTP status codes on generic request_error events.",
+    "EXP-111 replays 3,000 cloud-model coding-agent turns as structural proxies because zero local-Qwen/ninfer/Strata turns occurred in the 30-day session census on the analysis workstation; E5 copy drafting (alphastorm/ninfer#94) was declined, closed, and not shipped.",
+    "EXP-118 confirmed that the 20-25 s RTX 5090 arrival wait persists at the shipped 24,576 MiB checkpoint quota (23.073498 s, 19.49-23.72 s retained-preferred-source wait), and the first candidate fix in stacked PR alphastorm/ninfer#100 (7f2c71fd / 1c5) did not remove the ~45 s warm-history GPU proxy reproduction and was closed unmerged (problem tracked in alphastorm/ninfer#102).",
+    "EXP-119 E4 prefill pacing (alphastorm/ninfer#95) is measured on the RTX PRO 6000 proxy only, changes C2 outputs across repeats, and shipped default-off (0) in RTX 5090 v0.7.0-qwen38-5090-beta.6 (v0.17.0) without default-on promotion.",
+    "EXP-116 is a single-case instrumented RTX 3090 geometry control on diagnostic commit f6ed4381; it reclassifies the token-32 mismatch as oracle prefill geometry but does not by itself qualify rk4v4 or enable RTX 4090 C2 / 262K native context."
+  ],
+  "private_paths_included": false,
+  "raw_prompts_outputs_or_secrets_included": false
+}
