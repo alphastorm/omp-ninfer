@@ -15,6 +15,78 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Documentation
 
+- Record the 2026-11-10 overnight measurement campaign (`EXP-110`–`EXP-121` and council
+  [`CR-20261110T083627Z-a3fa0550`](releases/v0.17.0/review/runtime-ledger.json) localized remediation) in
+  [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md), [`ROADMAP.md`](ROADMAP.md), and
+  [`docs/measurements/2026-11-10-p20-overnight.json`](docs/measurements/2026-11-10-p20-overnight.json):
+  maintainer-private `rtx5090-win-a` production request-log traffic profile (`9,430` completions;
+  recent `v0.13–v0.16.2` probe-filtered `176` of `180` requests at `31.89%` decode / `50.21%` prefill
+  / `8.16%` queue, `25.57%` request overlap with `1.560×` median matched decode slowdown on `8`
+  requests overlapping a peer's pre-first-token window, cached = strict-warm `<= 1,024`-computed-token
+  TTFT p50/p90/p99 `0.265 / 0.357 / 1.466 s` or `0.376 s` p99 excluding `4` first-after-`server_start`
+  host-KV restores, and [`#58`](https://github.com/alphastorm/ninfer/issues/58) low-acceptance `< 3`
+  tokens/round `DFlash2 → MTP3` fallback dropped at `0.469%–0.851% < 3%` modelled decode recovery,
+  `EXP-110`); 3,000-turn coding-agent transcript replay declining own-prefix n-gram copy-drafting
+  revival (`20.5413%` fixed min-12 / `13.2531%` adaptive `12 → 24 → 36` backoff copyable share,
+  `×1.055–1.093` pooled session decode `< 1.15` bar; `E5` copy-drafting PR
+  [`alphastorm/ninfer#94`](https://github.com/alphastorm/ninfer/pull/94) `d117bc17` declined,
+  closed, and not shipped, `EXP-111`); runtime changes shipped in RTX 5090
+  `v0.7.0-qwen38-5090-beta.6` (`omp-ninfer` `v0.17.0`, published 2026-11-10) from fork source `F3`
+  `e0971faf` = integration `F` `a3fa0550`
+  ([`alphastorm/ninfer#99`](https://github.com/alphastorm/ninfer/pull/99): `#97` `E1` `#434`
+  bounded fresh admission, `#98` `E2` serve robustness, `#96` `E3` NFC, and `#95` `E4` prefill
+  pacing shipped **default-off**) + council remediation
+  [`#101`](https://github.com/alphastorm/ninfer/pull/101) (`F2` `bdc665a3` / `F3` `e0971faf`:
+  pressure-save wait and fresh-window budget; carried native `v0.8.0-beta.2` packages stay at
+  `a87de361`, with RTX 3090's native post-route compaction campaign failure founder-waived with
+  disclosure in `v0.17.0` and tracked in
+  [`alphastorm/ninfer#89`](https://github.com/alphastorm/ninfer/issues/89), and product tooling
+  follow-ups in [`alphastorm/omp-ninfer#149`](https://github.com/alphastorm/omp-ninfer/issues/149))
+  for upstream [`#434`](https://github.com/Neroued/ninfer/issues/434) context-pressure starvation in
+  [`alphastorm/ninfer#97`](https://github.com/alphastorm/ninfer/pull/97) (`rtxpro6000-win-a`
+  slice `df7aeb52`: `2.27 s` max admitted pause, `0` HTTP `503`, `2/2` long complete, `3/3`
+  byte-identical `DFlash2` and `MTP3` greedy parity vs `e6ac7b70` control `6` same-session `503`s and
+  `1/2` long complete; `rtx5090-win-a` `E1` slice `375bb848`: `3.0 s` max fully-paused interval,
+  `3.2 s` pause→recovery, `2/2` `40,000`-token long completions, `0/51` fresh-arrival `503`, and
+  fresh TTFT p50/p95 `0.40 / 3.39 s` vs production `a87de361` `368.0 s` `paused_wait_s` and `1/2`
+  long complete, `EXP-112`), `E2` serve robustness in
+  [`alphastorm/ninfer#98`](https://github.com/alphastorm/ninfer/pull/98) (`d191fb57` / `5e73453f`:
+  `Neroued/ninfer` `#446`/`#440`/`#441` HTTP `200`, request-local HTTP `500` `numerical_failure`
+  isolation, `2.571 s` managed `Stop` saving `1` / restoring `18` cached tokens vs `e6ac7b70`
+  final-save deadline timeout, `5/5` `MTP3` parity, CI green, `EXP-120`), `E3` host-side NFC boundary
+  normalization in [`alphastorm/ninfer#96`](https://github.com/alphastorm/ninfer/pull/96)
+  (`6f1ae8d2`: `5.15 → 0.47 ms`, `11.06×` on a `507,749`-byte non-ASCII document, `65/65` serialized
+  results — `56` prompts + `9` expected errors — and `564,922` token IDs identical; Jinja `.strip()`
+  edge decode and small-T module preload `<= 0.67 ms` skipped, `EXP-117`), `E4` opt-in prefill-pacing
+  curve on `rtxpro6000-win-a` in
+  [`alphastorm/ninfer#95`](https://github.com/alphastorm/ninfer/pull/95) (`6.375` baseline and `6.600`
+  `off` through `6.400 / 12.025 / 24.160 / 47.901 / 73.400` to `103.205 tok/s` at
+  `--prefill-stall-budget-ms 500 --decode-rounds-per-prefill 32` (`b500-k32-v2`) with
+  `1.068×` prefill-during-decode (`PDD`) long wall; `C2` outputs differ across repeats, shipped **default-off** at `0`,
+  `EXP-119`), and RTX 5090 `DFlash2` `C1` greedy parity on `rtx5090-win-a` (`3/3`
+  byte-identical on integrated `F` `a3fa0550` / binary `1afbb82d` in `#99` plus `3/3` informational
+  `C2`, and `3/3` byte-identical on remediated `F2` `bdc665a3` / binary `92f0f636` after fixing council
+  `CR-20261110T083627Z-a3fa0550`'s severity-`P1` pending-pressure-save `Engine` failure and severity-`P2` failed
+  fresh-window rotation in [`alphastorm/ninfer#101`](https://github.com/alphastorm/ninfer/pull/101)
+  → shipped source `F3` `e0971faf`, `EXP-121`); cold `130K` `EXP-077` interference (`6.375 tok/s`
+  co-resident decode, `46.49 s` long-request wall / `44.23 s` server prefill, and `0.804 s` arrival
+  TTFT on `rtxpro6000-win-a`; `5.11 tok/s` production `a87de361` / `5.13 tok/s` `E1` `375bb848`
+  co-resident decode and `23.07 s` / `21.00 s` arrival TTFT on `rtx5090-win-a` at `2,048 MiB`
+  scratch quota, `EXP-113`), plus the shipped `24,576 MiB` quota control on `rtx5090-win-a`
+  (`5.25 tok/s` co-resident decode, `23.073498 s` arrival TTFT, localizing the wait to
+  `19.49–23.72 s` retained-preferred-source wait while stacked
+  [`alphastorm/ninfer#100`](https://github.com/alphastorm/ninfer/pull/100) (`7f2c71fd`, GPU binary
+  commit prefix `1c5`) did not remove a `44.740–44.945 s` vs `44.750–44.877 s` proxy reproduction,
+  was closed unmerged and not shipped, and is tracked in
+  [`alphastorm/ninfer#102`](https://github.com/alphastorm/ninfer/issues/102), `EXP-118`); `C2` pair
+  `K=6144` `T=16` Q5 mixer outputs confirmed already on small-T sliced-K (`19.77 µs/call`,
+  `1.27 ms/round`, closing `EXP-092`'s open half, `EXP-114`); native RTX 3090 keep-warm
+  (`1.362–1.521×` paired post-idle TTFT ratio, drops to NVIDIA performance states `P5`/`P8`) and native RTX 4090
+  `chunk 2048` (`×1.0236` / `×1.0149` prefill, `×0.8818` `benchmark_c1` decode, `44/84` cross-arm
+  identity) rejected (`EXP-115`); and native `rk4v4`
+  [`#60`](https://github.com/alphastorm/ninfer/issues/60) token-`32` true-cold restore mismatch on
+  `rtx3090-win-a` (`f6ed4381`) reclassified as oracle prefill chunk geometry (`32/32` matched when
+  cold replays split `3,066` + suffix `18/2/3/4`, `EXP-116`).
 - Record the 2026-11-10 upstream `Neroued/ninfer` `77c2e5e2` watch (`63` commits after `a754fcf3`,
   [`#434`](https://github.com/Neroued/ninfer/issues/434) closed by `77c2e5e2` + PR
   [`#443`](https://github.com/Neroued/ninfer/pull/443) and shipped-fork
