@@ -124,8 +124,9 @@
       "file": "qualification/client-components.json",
       "predecessor_sha256": "eb08fbb92ebc222fc84399495f053a955afb53719dbcb5aed58299abb13b7116",
       "disposition": "replaced",
-      "reason": "Current authenticated component/client identities or successor preparation; no predecessor acceptance/waiver is transferred.",
-      "staged_sha256": "dff02bf5e95e0b603cba78b0779536b0cb02e55cae195ea99418f97f964b4ad2"
+      "reason": "Current authenticated component/client identities or successor preparation; no predecessor acceptance/waiver is transferred. Composition rewrote the descriptor with the composer's JSON formatting only; stock OMP source, asset and binary identities and every field value are unchanged. The original stage digest is retained above.",
+      "composition_previous_staged_sha256": "dff02bf5e95e0b603cba78b0779536b0cb02e55cae195ea99418f97f964b4ad2",
+      "staged_sha256": "d840d5e5abd2d7cc29f1754458343aef092ad6f077d5a75143a1a178af4fbe4d"
     },
     {
       "file": "qualification/native-publication.json",
