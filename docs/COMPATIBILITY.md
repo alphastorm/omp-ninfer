@@ -2,16 +2,16 @@
 # Compatibility matrix
 
 Authority: `omp-ninfer-v0.7.3-qualified-1`
-Product release: `v0.16.2`
-Composition: **qualified**
+Product release: `v0.17.0`
+Composition: **v0.17.0 upstream OMP v18.18.6 client acceptance pending**
 
 Client status is independent from each GPU runtime qualification. `preview` is not a support claim.
 
 | Profile | Client | Runtime | Transport | Adapter | Status | Installable | Acceptance |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `darwin-remote-ssh` | macOS 27 arm64 — upstream `v18.15.0` [`omp-darwin-arm64`](https://github.com/can1357/oh-my-pi/releases/download/v18.15.0/omp-darwin-arm64) (sha256 `d36dfabf0ee5`) | `qwen38-5090-v0.13.0` | `ssh-loopback` | `darwin-remote-ssh` | **preview** | no | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/a50a7aacd5962065af998dd2609946905480e039/releases/v0.16.2/acceptance/darwin-arm64-18.15.0.json) |
-| `windows-docker-local` | Windows 11 x64 — upstream `v18.15.0` [`omp-windows-x64.exe`](https://github.com/can1357/oh-my-pi/releases/download/v18.15.0/omp-windows-x64.exe) (sha256 `978846a816cb`) | `qwen38-5090-v0.13.0` | `local-loopback` | `windows-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/a50a7aacd5962065af998dd2609946905480e039/releases/v0.16.2/acceptance/windows-x64-18.15.0.json) |
-| `linux-docker-local` | Ubuntu 24.04 x64 — upstream `v18.15.0` [`omp-linux-x64`](https://github.com/can1357/oh-my-pi/releases/download/v18.15.0/omp-linux-x64) (sha256 `6737ee241555`) | `qwen38-5090-v0.13.0` | `local-loopback` | `linux-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/a50a7aacd5962065af998dd2609946905480e039/releases/v0.16.2/acceptance/linux-x64-18.15.0.json) |
+| `darwin-remote-ssh` | macOS 27 arm64 — upstream `v18.18.6` [`omp-darwin-arm64`](https://github.com/can1357/oh-my-pi/releases/download/v18.18.6/omp-darwin-arm64) (sha256 `ed2e63eb4388`) | `qwen38-5090-v0.13.0` | `ssh-loopback` | `darwin-remote-ssh` | **preview** | no | pending |
+| `windows-docker-local` | Windows 11 x64 — upstream `v18.18.6` [`omp-windows-x64.exe`](https://github.com/can1357/oh-my-pi/releases/download/v18.18.6/omp-windows-x64.exe) (sha256 `dfb15c27cb2e`) | `qwen38-5090-v0.13.0` | `local-loopback` | `windows-docker-local` | **preview** | no | pending |
+| `linux-docker-local` | Linux under WSL2 x64 — upstream `v18.18.6` [`omp-linux-x64`](https://github.com/can1357/oh-my-pi/releases/download/v18.18.6/omp-linux-x64) (sha256 `a8059b95de5e`) | `qwen38-5090-v0.13.0` | `local-loopback` | `linux-docker-local` | **preview** | no | pending |
 
 ## Native runtime variants
 
@@ -19,8 +19,8 @@ These variants use the same OMP clients but own separate native runtime packages
 
 | Variant | Platform | GPU | CUDA | Context | Status | Installable | Installation | Qualification |
 | --- | --- | --- | --- | ---: | --- | --- | --- | --- |
-| rtx3090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 3090 | sm_86 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/2f37bdefab07af6aafdb665fba758e5913cb04b3/releases/v0.16.2/qualification/rtx3090.json) |
-| rtx4090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 4090 | sm_89 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/2f37bdefab07af6aafdb665fba758e5913cb04b3/releases/v0.16.2/qualification/rtx4090.json) |
+| rtx3090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 3090 | sm_86 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/9a365dc5da1ed3cb9f1e11f62bd520ff29fa79a7/releases/v0.17.0/qualification/rtx3090.json) |
+| rtx4090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 4090 | sm_89 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/9a365dc5da1ed3cb9f1e11f62bd520ff29fa79a7/releases/v0.17.0/qualification/rtx4090.json) |
 
 Package bindings:
 
@@ -46,42 +46,32 @@ A candidate implementation is not a qualification claim; JSON-schema support fli
 Commands: `doctor`, `plan`, `install`, `status`, `benchmark`, `checkpoint`, `rollback`, `support-bundle`
 
 Limitations:
-- The upstream OMP client has no managed installation or appliance lifecycle, so this profile stays preview; the documented macOS client route reaches the RTX 5090 host over a manual SSH tunnel.
-- Strict origin authentication is mandatory. MACs authenticate origin/content, not monotonic freshness.
-- Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and never share the principal among mutually untrusted clients.
-- Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.
-- The F2 runtime components retain serving shapes; no predecessor runtime proof or founder waiver is current evidence.
-- Fresh stock OMP 18.15.0 and five-route acceptance bind frozen candidate c6fc8465; RTX 3090 has a failed founder-waived post-route campaign, not anonymous public-install acceptance. macOS remains preview and Linux is WSL2-scoped.
+- Fresh stock OMP 18.18.6 platform and candidate-bound documented-route acceptance is required; no predecessor client execution is carried.
+- macOS manual SSH preview.
 
 Blockers:
+- upstream OMP v18.18.6 client acceptance is pending
 
 ### `windows-docker-local`
 
 Commands: `doctor`, `plan`, `install`, `status`, `benchmark`, `checkpoint`, `rollback`, `support-bundle`
 
 Limitations:
-- The primary profile runs one Docker Desktop Linux runtime; native 3090/4090 packages are separate variants with separate receipts.
-- Strict origin authentication is mandatory. MACs authenticate origin/content, not monotonic freshness.
-- Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and never share the principal among mutually untrusted clients.
-- Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.
-- The F2 runtime components retain serving shapes; no predecessor runtime proof or founder waiver is current evidence.
-- Fresh stock OMP 18.15.0 and five-route acceptance bind frozen candidate c6fc8465; RTX 3090 has a failed founder-waived post-route campaign, not anonymous public-install acceptance. macOS remains preview and Linux is WSL2-scoped.
+- Fresh stock OMP 18.18.6 platform and candidate-bound documented-route acceptance is required; no predecessor client execution is carried.
 
 Blockers:
+- upstream OMP v18.18.6 client acceptance is pending
 
 ### `linux-docker-local`
 
 Commands: `doctor`, `plan`, `install`, `status`, `benchmark`, `checkpoint`, `rollback`, `support-bundle`
 
 Limitations:
-- Linux x64 client acceptance covers Ubuntu 24.04 under WSL2 on the Windows 11 container host only; no separately qualified native Linux OS or Linux vision claim.
-- Strict origin authentication is mandatory. MACs authenticate origin/content, not monotonic freshness.
-- Within one API-key principal, prompt_cache_key names a session capability; use unique high-entropy keys and never share the principal among mutually untrusted clients.
-- Schema 3 uses isolated /checkpoints-v013. Keep older roots untouched; no cross-binary checkpoint generation migration or compatibility is inferred.
-- The F2 runtime components retain serving shapes; no predecessor runtime proof or founder waiver is current evidence.
-- Fresh stock OMP 18.15.0 and five-route acceptance bind frozen candidate c6fc8465; RTX 3090 has a failed founder-waived post-route campaign, not anonymous public-install acceptance. macOS remains preview and Linux is WSL2-scoped.
+- Fresh stock OMP 18.18.6 platform and candidate-bound documented-route acceptance is required; no predecessor client execution is carried.
+- Linux x64 under WSL2 only; no separate native Linux OS or Linux vision claim.
 
 Blockers:
+- upstream OMP v18.18.6 client acceptance is pending
 
 ## Composition blockers
 
