@@ -1,6 +1,11 @@
 # Quickstart
 
-> **Versioned guide: v0.16.2 · stock Oh My Pi 18.15.0 · Qualified on RTX 5090 · 4090 · 3090**
+> **Route preparation for v0.17.0 · release pins remain v0.16.2 · stock Oh My Pi 18.15.0**
+
+This branch prepares successor-only route changes; it is not an installable v0.17.0 release.
+Use the [immutable published v0.16.2 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.16.2/docs/QUICKSTART.md)
+for installation. The component/client pins below remain unchanged until staging; the changed host
+checkpoint and macOS key blocks need fresh candidate-bound acceptance, not v0.16.2's receipts.
 
 OMP NInfer is the qualified local inference appliance and release layer connecting the
 [Oh My Pi](https://github.com/can1357/oh-my-pi) (OMP) coding-agent client over authenticated
@@ -804,7 +809,7 @@ The version must be `omp/18.15.0`; add `$HOME/.local/bin` to `PATH` before conti
 ROOT="$HOME/.local/share/omp-ninfer"
 STATE="$HOME/.config/omp-ninfer"
 LOGS="$HOME/.local/state/omp-ninfer"
-CHECKPOINTS="$ROOT/checkpoints-v013"
+CHECKPOINTS="$ROOT/checkpoints-v017"
 install -d -m 700 "$ROOT" "$STATE" "$LOGS" "$CHECKPOINTS"
 
 MODEL_URL=$(python3 -c \
@@ -835,21 +840,23 @@ A rerun keeps an existing nonempty key, because checkpoint MACs and the copy eac
 bound to it. To rotate the key, stop NInfer, move the old key aside, rerun this block, and install
 the new key on every client; checkpoints saved under the old key no longer load.
 
-Keep the host directory `checkpoints-v013`, mounted at `/checkpoints-v013`; keep the v0.12.x
-`checkpoints` store untouched for historical recovery. The retained profile/store names do not
-establish cross-binary checkpoint compatibility. Never import prior generations; resume earlier
-sessions by replaying the authoritative client transcript for a fresh prefill. New exact-runtime
-checkpoints accelerate later continuations. The retained serving contract includes JSON-schema
-structured output and 128-character Chat/Responses tool names. Current v0.16.2 lane receipts
-bind the runtime protocol, and fresh five-route acceptance passed on the frozen candidate. See the
+The successor uses the separate host directory `checkpoints-v017`, still mounted at the profile's
+`/checkpoints-v013` container path. Keep the predecessor's `checkpoints-v013` and older `checkpoints`
+stores untouched for rollback; never mount either read-write into the successor or import their
+generations. Retained profile/mount names do not establish cross-binary checkpoint compatibility.
+Resume earlier sessions by replaying the authoritative client transcript for a fresh prefill.
+New exact-runtime checkpoints accelerate later continuations. The retained serving contract includes
+JSON-schema structured output and 128-character Chat/Responses tool names. The historical v0.16.2
+receipts do not qualify these successor route changes. See the
 [v0.16.2 compatibility matrix](../releases/v0.16.2/COMPATIBILITY.md).
 
 ## 4. Start NInfer on the inference host
 
-For an upgrade from v0.16.0, stop the incumbent with its matching published v0.16.0 stop script before
-using this release's launcher. This is a runtime rebuild, not the held client-only patch:
-keeping a v0.16.0 container running does not activate `v0.7.0-qwen38-5090-beta.5`. Follow the immutable guide for
-the incumbent, preserve its stores, and replay prior transcripts rather than importing them.
+For the successor upgrade from v0.16.2, stop the incumbent with its matching published v0.16.2
+stop script before using the staged successor's launcher. Keeping the predecessor container running
+does not activate a rebuilt runtime. Follow the immutable guide for the incumbent, preserve its
+stores, and replay prior transcripts rather than importing them. The successor identities are not
+staged on this preparation branch.
 
 ```sh
 ./examples/manual-tunnel/start-ninfer.sh \
@@ -929,14 +936,22 @@ shell or the `Ubuntu-24.04` WSL2 distro (on Windows, the first branch prints one
 `cannot find the path` line):
 
 ```sh
+(
+set -euo pipefail
 install -d -m 700 "$HOME/.omp/agent"
 umask 077
+KEY_TMP=$(mktemp "$HOME/.omp/agent/.ninfer-beta.key.XXXXXX")
+trap 'rm -f "$KEY_TMP"' EXIT
 ssh USER@RUNTIME_HOST 'sh -lc "cat ~/.config/omp-ninfer/api-key" 2>/dev/null || wsl.exe -d Ubuntu-24.04 -- sh -lc "cat ~/.config/omp-ninfer/api-key"' \
-  | tr -d '\r' > "$HOME/.omp/agent/ninfer-beta.key"
-chmod 600 "$HOME/.omp/agent/ninfer-beta.key"
-test "$(wc -c < "$HOME/.omp/agent/ninfer-beta.key")" -gt 32
+  | tr -d '\r' > "$KEY_TMP"
+test "$(wc -c < "$KEY_TMP")" -gt 32
+chmod 600 "$KEY_TMP"
+mv -f "$KEY_TMP" "$HOME/.omp/agent/ninfer-beta.key"
+)
 ```
 
+The SSH transfer and key-length check must succeed before the same-directory atomic rename replaces
+an existing key. A failed transfer leaves the previous key intact and removes the temporary file.
 Do not paste the key into YAML, shell history, issues, or support bundles.
 
 ## 7. Add the OMP provider

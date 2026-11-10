@@ -37,9 +37,13 @@ def digest(path):
 def documented_host_names(release):
     """Checkpoint directory and model file that docs/QUICKSTART.md section 3 creates for a release.
 
-    The v0.13 line uses a fresh store and a separate v3 model path; earlier releases keep the
-    original names. tests/test_stock_client_harness.py binds this to the current guide."""
-    major, minor = (int(part) for part in release.removeprefix('v').split('.')[:2])
+    v0.17 and later isolate the host store by product release; v0.13-v0.16 retain their
+    historical shared name. The container mount target is a separate profile binding.
+    tests/test_stock_client_harness.py binds this to the current guide."""
+    major, minor, patch = (int(part) for part in release.removeprefix('v').split('.'))
+    if (major, minor) >= (0, 17):
+        suffix = f'v{major}{minor:02d}' + (f'-{patch}' if patch else '')
+        return 'checkpoints-' + suffix, 'qwen3_8_27b-v3.ninfer'
     if (major, minor) >= (0, 13):
         return 'checkpoints-v013', 'qwen3_8_27b-v3.ninfer'
     return 'checkpoints', 'qwen3_8_27b.ninfer'

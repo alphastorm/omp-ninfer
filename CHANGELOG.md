@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Prepare the next RTX 5090 route with a separate `checkpoints-v017` host store, leaving
+  predecessor stores intact for rollback. Install the macOS bearer key through a same-directory
+  temporary file and replace it only after SSH success and validation
+  ([#138](https://github.com/alphastorm/omp-ninfer/issues/138), items 6–7). Published release
+  receipts and pins are unchanged; these executable changes require fresh successor acceptance.
 - Guard release receipts against nested predecessor public-install identities and non-clone
   route substitutions. Project arbitrary probe error strings to public digests, scan host-helper
   Python literals for private markers, and require explicit operator host/window inputs.

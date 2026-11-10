@@ -57,6 +57,8 @@ class Step:
 
 # The documented routes, as a reader meets them. Every step is a fenced block in the quickstart;
 # prose between blocks (clone the tag, open an elevated shell) is the runner's precondition.
+# Changing a block changes its content address: successor preparation never rebinds a published
+# release's accepted hashes. New acceptance must execute and compose the staged candidate's bytes.
 LANES: dict[str, tuple[Step, ...]] = {
     # RTX 4090 native Windows: the OMP client, then the lane section top to bottom. The lane's
     # first block clones the tag and changes into it; the runner starts in the parent directory.

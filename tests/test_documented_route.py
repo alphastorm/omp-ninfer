@@ -142,8 +142,7 @@ class ExtractionTests(unittest.TestCase):
         self.assertIn(f"stock upstream {version};", fragment)
 
     def test_prepared_routes_keep_all_composer_addresses_and_new_pins(self) -> None:
-        guide = documented_route.DEFAULT_DOC.read_text(encoding="utf-8")
-        release = re.search(r"(?:Prepared|Versioned) guide: (v[0-9.]+)", guide).group(1)
+        release = json.loads((ROOT / "compatibility.json").read_text())["product_release"]
         clients = json.loads((ROOT / "releases" / release / "qualification" /
                               "client-components.json").read_text())["platforms"]
         routes = {lane: documented_route.lane_blocks(documented_route.DEFAULT_DOC, lane)
@@ -171,7 +170,7 @@ class ExtractionTests(unittest.TestCase):
                          [release] * 5)
         preparation = documented_route.extract(
             documented_route.DEFAULT_DOC, "3. Prepare the model and key on the inference host").text
-        self.assertIn('CHECKPOINTS="$ROOT/checkpoints-v013"', preparation)
+        self.assertIn('CHECKPOINTS="$ROOT/checkpoints-v017"', preparation)
         self.assertIn(f"releases/{release}/manifest.json", preparation)
         self.assertIn('MODEL="$ROOT/qwen3_8_27b-v3.ninfer"', preparation)
         for lane in ("rtx4090-native", "rtx3090-native"):
@@ -182,6 +181,21 @@ class ExtractionTests(unittest.TestCase):
             self.assertIn("$NativeModel = $Manifest.components.model", native)
             self.assertNotIn("components.native_model", native)
             self.assertIn("$NativeModel.artifact_sha256 -cne $Variant[0].model_artifact_sha256", native)
+
+    def test_successor_preparation_does_not_relabel_published_guide_hashes(self) -> None:
+        published = json.loads((ROOT / "releases/v0.16.2/acceptance/documented-routes.json").read_text())
+        changed = set()
+        for lane, addresses in published["current_block_addresses"].items():
+            current = documented_route.lane_blocks(documented_route.DEFAULT_DOC, lane)
+            self.assertEqual([(step.slug, step.heading, step.index) for step, _ in current],
+                             [(step["slug"], step["heading"], step["index"]) for step in addresses])
+            for (step, block), accepted in zip(current, addresses):
+                if block.sha256 != accepted["sha256"]:
+                    changed.add((lane, step.slug))
+        self.assertEqual(changed, {("rtx5090-container-host", "prepare"),
+                                   ("rtx5090-macos-client", "key")})
+        self.assertNotEqual(hashlib.sha256(documented_route.DEFAULT_DOC.read_bytes()).hexdigest(),
+                            published["current_document_sha256"])
 
     def test_every_lane_resolves_to_fenced_blocks_of_its_language(self) -> None:
         for lane in documented_route.LANES:
@@ -683,6 +697,20 @@ class HostPreparationTests(unittest.TestCase):
             key.write_bytes(b"")  # what an interrupted first run leaves behind
             self.assertRegex(self.prepare(home).decode(), r"\A[0-9a-f]{64}\n\Z")
 
+    def test_successor_preparation_leaves_predecessor_checkpoint_stores_intact(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            home = Path(temporary)
+            root = home / ".local/share/omp-ninfer"
+            for name in ("checkpoints", "checkpoints-v013"):
+                store = root / name
+                store.mkdir(parents=True)
+                (store / "generation").write_bytes(b"predecessor checkpoint")
+            self.prepare(home)
+            self.assertTrue((root / "checkpoints-v017").is_dir())
+            self.assertEqual(list((root / "checkpoints-v017").iterdir()), [])
+            for name in ("checkpoints", "checkpoints-v013"):
+                self.assertEqual((root / name / "generation").read_bytes(), b"predecessor checkpoint")
+
 
 @unittest.skipIf(os.name == "nt", "executes the documented POSIX clone block")
 class ShellCloneTests(unittest.TestCase):
@@ -737,6 +765,44 @@ class ClientConfigurationTests(unittest.TestCase):
     def install(home: Path, block: str) -> subprocess.CompletedProcess:
         return subprocess.run(["bash", "-eo", "pipefail", "-c", block], cwd=ROOT, capture_output=True,
                               text=True, timeout=30, env={"HOME": str(home), "PATH": os.environ["PATH"]})
+
+    def test_macos_key_transfer_replaces_only_after_successful_validation(self) -> None:
+        block = self.blocks()["key"]
+        for existing in (False, True):
+            for code, payload, success in (
+                (0, "a" * 64 + "\r\n", True),
+                (255, "", False),
+                (255, "b" * 64 + "\n", False),
+                (0, "short\n", False),
+            ):
+                with self.subTest(existing=existing, code=code, success=success), \
+                        tempfile.TemporaryDirectory() as temporary:
+                    home = Path(temporary)
+                    agent, stubs = home / ".omp/agent", home / "bin"
+                    agent.mkdir(parents=True)
+                    stubs.mkdir()
+                    target = agent / "ninfer-beta.key"
+                    old = b"existing-key-must-survive"
+                    if existing:
+                        target.write_bytes(old)
+                        target.chmod(0o600)
+                    ssh = stubs / "ssh"
+                    ssh.write_text('#!/bin/sh\nprintf "%s" "$PAYLOAD"\nexit "$SSH_EXIT"\n')
+                    ssh.chmod(0o755)
+                    result = subprocess.run(
+                        ["bash", "-c", block], capture_output=True, text=True, timeout=20,
+                        env=dict(os.environ, HOME=str(home), PAYLOAD=payload, SSH_EXIT=str(code),
+                                 PATH=f"{stubs}{os.pathsep}{os.environ['PATH']}"))
+                    self.assertEqual(result.returncode == 0, success, result.stderr)
+                    if success:
+                        self.assertEqual(target.read_bytes(), b"a" * 64 + b"\n")
+                        self.assertEqual(target.stat().st_mode & 0o777, 0o600)
+                    elif existing:
+                        self.assertEqual(target.read_bytes(), old)
+                        self.assertEqual(target.stat().st_mode & 0o777, 0o600)
+                    else:
+                        self.assertFalse(target.exists())
+                    self.assertEqual(list(agent.glob(".ninfer-beta.key.*")), [])
 
     def test_a_rerun_keeps_an_identical_file_and_a_different_one_is_refused(self) -> None:
         blocks = self.blocks()

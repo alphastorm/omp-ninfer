@@ -905,13 +905,18 @@ class DocumentedHostNamesTests(unittest.TestCase):
         text = "\n".join(block.text for _, block in route.lane_blocks(
             ROOT / "docs/QUICKSTART.md", "rtx5090-container-host"))
         assignment = lambda name: re.search(rf'^{name}="\$(?:HOME|ROOT)/([^"]+)"$', text, re.M).group(1)
-        release = json.loads((ROOT / "compatibility.json").read_text())["product_release"]
         self.assertEqual(assignment("ROOT"), ".local/share/omp-ninfer")
         names = (assignment("CHECKPOINTS"), assignment("MODEL"))
-        self.assertEqual(names, ("checkpoints-v013", "qwen3_8_27b-v3.ninfer"))
-        for version in ("v0.13.0", "v0.13.1", release):
+        self.assertEqual(names, ("checkpoints-v017", "qwen3_8_27b-v3.ninfer"))
+        self.assertEqual(host.documented_host_names("v0.17.0"), names)
+        self.assertEqual(host.documented_host_names("v0.17.1"),
+                         ("checkpoints-v017-1", names[1]))
+        self.assertEqual(host.documented_host_names("v0.18.0"),
+                         ("checkpoints-v018", names[1]))
+        for version in ("v0.13.0", "v0.13.1", "v0.16.2"):
             with self.subTest(release=version):
-                self.assertEqual(host.documented_host_names(version), names)
+                self.assertEqual(host.documented_host_names(version),
+                                 ("checkpoints-v013", names[1]))
 
 
 
