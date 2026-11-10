@@ -15,7 +15,7 @@
     "note": "Every stock OMP 18.18.6 client was freshly downloaded and accepted against the candidate-bound selected runtime identities; only the RTX 5090 runtime was rebuilt."
   },
   "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
-  "compatibility_sha256": "2cbd593ae6de3af616cd5ccb0279064ffc57131be12e5f3e8bd34ed224c62180",
+  "compatibility_sha256": "4d516348f42d55e00dc4aeacab4da670e835b571b7b1a1b9c6d32f3519a2459e",
   "windows_asset_sha256": "dfb15c27cb2ea192a94761c26aa5cd4eed54b1e0a5a85c02938ab07d769bc8f7",
   "windows_binary_sha256": "dfb15c27cb2ea192a94761c26aa5cd4eed54b1e0a5a85c02938ab07d769bc8f7",
   "platform_receipts": [
