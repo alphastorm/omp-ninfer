@@ -13,24 +13,232 @@ watch manifest is [`upstream-watch.json`](../upstream-watch.json); the watch too
 | Component / upstream | Current position (v0.17.0) | Upstream base / watch head | Evidence and notes |
 | --- | --- | --- | --- |
 | `can1357/oh-my-pi` (client) | Unmodified upstream **OMP 18.18.6**, source `9058ab9d229663e229e2867824ba6df6f21e9e59`, tree `fd379b65368a20c7648d97f2c2b99cc03e019254`, release `439766193` | Upstream release [`v18.18.6`](https://github.com/can1357/oh-my-pi/releases/tag/v18.18.6) (2026-11-09) | Pins `tokenizer: qwen3` on opaque `q38-ninfer` model entries while canonical `qwen3.8-27b` entries retain inferred `qwen3`, preserves explicit `[low, medium, xhigh]` effort lists with `high`→`medium` and `off`→`low` clamps, disables automatic updates and the setup wizard explicitly in `fail-closed.yml`, retains Qwen's exact-loop guard with a 1,024-character floor on short newline-spanning cycles, and keeps default async compaction (`19,660` reserve, strict `>111,412` trigger, `13,107` unset-reserve summary cap); accepted across all five `v0.17.0` routes (`PASS 31/31 blocks on 076bbe4f, 2026-11-10`); see [client setup](QUICKSTART.md#omp-18186-client), [release notes](../releases/v0.17.0/NINFER_RELEASE_NOTES.md), and [18.18.6 review](measurements/2026-11-10-omp-18186-client-upgrade-review.json). |
-| `alphastorm/ninfer` (RTX 5090 container runtime) | `v0.7.0-qwen38-5090-beta.6`, frozen engine source `e0971faf221204047d5a4ed834e4e298740cee17` ([fork PR #101](https://github.com/alphastorm/ninfer/pull/101)) | `Neroued/ninfer` master `64d10fbf9f8e6bfc79ab0570b94674c5b9997929` | Image `7a19576b` (reused base `28857182`), server `dc86e101`, archive `d7f1ca4f` (`580,026,014` B), model `81f924d4`, kept profile `qwen38-5090-v0.13.0` (`751d22dc`), DFlash2 draft window 7 (`--lm-head-draft`), BF16 KV (146,368 automatic tokens), two requests in flight, isolated host schema 3 checkpoint directory `checkpoints-v017` mounted at `/checkpoints-v013` (strict origin auth, bounded resume/fresh admission with per-rotation fresh-window accounting for upstream [#434](https://github.com/Neroued/ninfer/issues/434), durable pressure-work waits, byte-proven durable-generation Host reclaim [#78](https://github.com/alphastorm/ninfer/issues/78), export-retirement reservation [#68](https://github.com/alphastorm/ninfer/pull/68), non-blocking export with Host `StateImage` materialization `EXP-105`), serving robustness ([#440](https://github.com/Neroued/ninfer/issues/440)/[#441](https://github.com/alphastorm/ninfer/issues/441)/[#446](https://github.com/alphastorm/ninfer/issues/446)), host-side NFC/frontend rendering, deterministic bounded RDC builds (`664` build artifacts and all `3` package outputs bit-identical across a same-path double build; `12/12` RC phases in [`runtime-rc.json`](../releases/v0.17.0/qualification/runtime-rc.json) `bed3a245`), `io_uring` owned completion buffers and CQE drain barrier ([#116](https://github.com/alphastorm/omp-ninfer/issues/116)), per-position speculative metrics (schema `30`), JSON-schema output, 128-character tool names ([receipt](../releases/v0.17.0/qualification/rtx5090.json) `11fde294`). |
+| `alphastorm/ninfer` (RTX 5090 container runtime) | `v0.7.0-qwen38-5090-beta.6`, frozen engine source `e0971faf221204047d5a4ed834e4e298740cee17` ([fork PR #101](https://github.com/alphastorm/ninfer/pull/101)) | `Neroued/ninfer` master `64d10fbf9f8e6bfc79ab0570b94674c5b9997929` | Image `7a19576b` (reused base `28857182`), server `dc86e101`, archive `d7f1ca4f` (`580,026,014` B), model `81f924d4`, kept profile `qwen38-5090-v0.13.0` (`751d22dc`), DFlash2 draft window 7 (`--lm-head-draft`), BF16 KV (146,368 automatic tokens), two requests in flight, isolated host schema 3 checkpoint directory `checkpoints-v017` mounted at `/checkpoints-v013` (strict origin auth, bounded resume/fresh admission with per-rotation fresh-window accounting for upstream [#434](https://github.com/Neroued/ninfer/issues/434), durable pressure-work waits, byte-proven durable-generation Host reclaim [#78](https://github.com/alphastorm/ninfer/issues/78), export-retirement reservation [#68](https://github.com/alphastorm/ninfer/pull/68), non-blocking export with Host `StateImage` materialization `EXP-105`), serving robustness ([#440](https://github.com/Neroued/ninfer/issues/440)/[#441](https://github.com/alphastorm/ninfer/issues/441)/[#446](https://github.com/Neroued/ninfer/issues/446)), host-side NFC/frontend rendering, deterministic bounded RDC builds (`664` build artifacts and all `3` package outputs bit-identical across a same-path double build; `12/12` RC phases in [`runtime-rc.json`](../releases/v0.17.0/qualification/runtime-rc.json) `bed3a245`), `io_uring` owned completion buffers and CQE drain barrier ([#116](https://github.com/alphastorm/omp-ninfer/issues/116)), per-position speculative metrics (schema `30`), JSON-schema output, 128-character tool names ([receipt](../releases/v0.17.0/qualification/rtx5090.json) `11fde294`). |
 | `alphastorm/ninfer` (RTX 4090 and RTX 3090 native Windows runtimes) | Carried RTX 4090 `v0.8.0-qwen38-4090-beta.2` (`d9b10b47`, server `ffee91bf`, config `ae27dc44`, `C1`); carried RTX 3090 `v0.8.0-qwen38-3090-beta.2` (`97a8e634`, server `15a4db46`, config `238ccad7`, `C2` over one shared 131,072-token pool, 350 W cap); shared source `a87de3613c17bced777b446fb545f872d8395ec1` | `Neroued/ninfer` master `64d10fbf9f8e6bfc79ab0570b94674c5b9997929` | Shared published model v3 `81f924d4`, **DFlash2 draft window 7** (`Q4_G64_FP16` draft MLP, host-mapped `token_embedding`, `proposal: "artifact-default"`), INT8 KV, `Group64` A8 and FP32 head logits off, 1,024-token prefill chunk, two extra device-state slots, shared Host budgets (`15,747.734375 MiB` / `16,512,696,320` B on RTX 4090; `20,867.734375 MiB` / `21,881,405,440` B on RTX 3090), `640` / `768 MiB` admission headroom, `30 s` / `180 s` pending timeouts, strict-origin schema 3 checkpoints (`session-checkpoints-v3`), JSON-schema output, 128-character tool names, CycloneDX 1.5 dependency SBOMs, unreadable repair-census refusal ([#63](https://github.com/alphastorm/ninfer/pull/63)), paused-owner power restoration before uninstall ([#65](https://github.com/alphastorm/ninfer/pull/65)), carried zero-difference 1,120-prompt quality screens, no-regression speed gates vs published `beta.1` (`1.0003` / `0.9988` on RTX 3090; `0.9996` / `0.9989` on RTX 4090), and `3/3` `v0.8.0-beta.1` running-upgrade, forced-rollback, and repair rehearsals per lane ([RTX 4090](../releases/v0.17.0/qualification/rtx4090.json) `254167f2`, [RTX 3090](../releases/v0.17.0/qualification/rtx3090.json) `b742870e`, [`receipt-audit.json`](../releases/v0.17.0/qualification/receipt-audit.json) `c137388a`; in `v0.17.0` acceptance on `076bbe4f`, RTX 4090 campaign and public install passed while RTX 3090's post-route `native-probes` compaction campaign failed under retained-context pressure and is waived in [`rtx3090-route-waiver.json`](../releases/v0.17.0/qualification/rtx3090-route-waiver.json) `19f2c0ef` with lead recovery `fabb50de`). |
-| `Neroued/ninfer` (engine watch) | Shipped container and native runtime base `64d10fbf` in `v0.13.0`–`v0.17.0` | Master `a754fcf3` (2026-11-02, 228 commits after `64d10fbf`; `dev` == `master`; earlier `1882c6ad` / `b57eaddc` in the [2026-10-29 watch](measurements/2026-10-29-upstream-watch.json)) | **Full re-port to `a754fcf3` remains deferred** (`9/228` commits apply cleanly in a per-commit merge-tree probe against `a87de361`, estimated 7–10 multi-agent days, low value for dense 27B today); `8` upstream fixes are already in `alphastorm/ninfer` and the `3` remaining source defects (`#434` starvation, `#378` Host placement, `452c3f5f` recovery-loss formula) plus the `a754fcf3` failure-diagnostics subset are ported in draft [`alphastorm/ninfer#93`](https://github.com/alphastorm/ninfer/pull/93) (`e6ac7b70`, the integration base for `v0.17.0`'s RTX 5090 `e0971faf` release in [fork PR #101](https://github.com/alphastorm/ninfer/pull/101)). Downstream qualification remains bound in [`releases/v0.17.0/qualification.json`](../releases/v0.17.0/qualification.json). |
-| `Neroued/ninfer` (Qwen 4 feature watch) | Research only; no source adoption | `feat/qwen4-27b-ops` at `e1874e94` (2026-10-29), 204 commits after shipped base `64d10fbf` | [Dated watch](measurements/2026-10-29-upstream-watch.json) lists all 204 commits (`unknown-truncated` at 300 files). `Qwen4-27B` has no public weights as of 2026-10-30; this branch watch does not change the shipped Qwen3.8 model or engine pins. |
-| `sergiuszm/ninfer-4090` (engine watch) | `upgrade-available`; active `sm_89` reference | `rtx4090-port` at `7f47a622` (2026-10-24), 172 commits after 2026-10-07 upstream baseline `81c8ce09`; side branch `catchup4b` at `4a22fae7` (2026-10-31) | Replaces the inactive `UDPSendToFailed` watch (`5c60b7c9`, 2026-09-09); its old `11aae2d6` fork point remains in the manifest as provenance. Side branch `catchup4b` (`4a22fae7`) ports upstream `Qwen4Exp`/`GLM5Next`/expert cache to Ada. Watch only; no community runtime is adopted. |
-| `ashalliants/ninfer-3090` (active `sm_86` fork watch; supersedes `Don-Chad/ninfer-3090`) | `upgrade-available`; tracked `sm_86` community line (native lanes frozen 2026-11-04) | Master `d0ff0535` (2026-11-02, releases through `v0.17.1-rtx3090` 2026-10-29 on upstream base `f76e19c0`; earlier `f5cec0a6` / `477b2ddc`) | **Supersedes `Don-Chad/ninfer-3090`** (master `115dee6b` on 2026-10-31 adds only an optional web dashboard since `d8c29253` after [PR #30](https://github.com/Don-Chad/ninfer-3090/pull/30) / `1418aca3`). Provenance source for the native head-dim-256 (`D256`) `rk4v4` 4-bit KV codec (`0b4f9588`, `2ba10da2`) evaluated in [EXP-107](PERFORMANCE.md#experiment-ledger); shipped `v0.16.2`–`v0.17.0` native source `a87de361` on upstream master `64d10fbf` keeps `--kv-dtype rk4v4` off and unqualified in all shipped profiles and adopts no community binary. |
-| `iamwavecut/ninfer-all` (consolidation hub watch) | Watch; idea and kernel reference only | Master `c87b836d` (2026-10-30) | Multi-architecture consolidation hub (`sm_70`/`sm_75`/`sm_80`/`sm_86`/`sm_89`/`sm_120a`, `sm_86` default build) integrating work from `ashalliants/ninfer-3090`, `UDPSendToFailed/ninfer-4090`, `TertiumOrganum1/ninfer-3090`, `Wallawalla47/infernix`, `13thblade/ninfer-all-nvfp4`, and `IMGillusion/ninfer-disk-kv`. Source of the opt-in `FP32` vocabulary-head logits idea (`2013d01f`) ported into `alphastorm/ninfer` and rejected on RTX 4090 depth-0 case `log-024@0` (`0.9016–0.9025` decode ratio vs `MTP3`, below the `0.95` floor; [EXP-104](PERFORMANCE.md#experiment-ledger)). |
-| `13thblade/ninfer-all-nvfp4` (non-Blackwell `NVFP4` watch) | Watch; not adopted | Master `245f3ad2` (2026-10-30) | Implements `NVFP4` 4-bit weights with `FP16` activations (`W4A16`, `--nvfp4-w4a16`) on `sm_75`/`sm_86`/`sm_89`/`sm_120` and 8-bit integer activations (`W4A8-int`, `--nvfp4-w4a8-int`) on `sm_70`/`sm_75`/`sm_80`/`sm_86`/`sm_89`/`sm_120` for GPUs without Blackwell `FP4` tensor cores; any adoption requires independent artifact fit and 1,120-prompt powered quality screening. |
-| `IMGillusion/ninfer-disk-kv` / `IMGillusion/ninfer-engine` (disk KV tier watch) | Watch; design reference only | `IMGillusion/ninfer-engine` `main` `82e5e826` (2026-10-30; also `--disk-kv-path` in `troyliu0105/ninfer-all` `76940895` / `43c2e163`) | Host/disk L3 KV tier with phased read/write worker pools (`767e67e2`, `92bac11c`), two materialization slots (`8d9b28cb`), and device-to-host (`D2H`) spill settlement before staging reuse (`a0e2d900`). Tracked as a design reference alongside our authenticated schema 3 checkpoint store. |
+| `Neroued/ninfer` (engine watch) | Shipped container and native runtime base `64d10fbf` in `v0.13.0`–`v0.17.0` (RTX 5090 `v0.7.0-qwen38-5090-beta.6` release source `F3` `e0971faf` and carried native `v0.8.0-beta.2` source `a87de361` in `v0.17.0`; unified at `a87de361` in `v0.16.2`) | Master `77c2e5e2` (2026-11-07, 291 commits after `64d10fbf`, 63 after `a754fcf3` / 62 commit objects in the compare payload; `dev` == `master`; [2026-11-10 watch](measurements/2026-11-10-upstream-watch.json), earlier `a754fcf3` on 2026-11-02 and `1882c6ad` / `b57eaddc` in the [2026-10-29 watch](measurements/2026-10-29-upstream-watch.json)) | **Full re-port to `a754fcf3` / `77c2e5e2` remains deferred** (`9/228` commits apply cleanly in a per-commit merge-tree probe against `a87de361` at `a754fcf3`, estimated 7–10 multi-agent days, low value for dense 27B today); across `a754fcf3..77c2e5e2`, only `77c2e5e2` (+ PR [`#443`](https://github.com/Neroued/ninfer/pull/443), closing [`#434`](https://github.com/Neroued/ninfer/issues/434) on 2026-11-07) is adopt-now for the dense 27B product (shipped with bounded fresh-admission rotation [`#97`](https://github.com/alphastorm/ninfer/pull/97), serve robustness and stop/join split [`#98`](https://github.com/alphastorm/ninfer/pull/98), host NFC boundary normalization [`#96`](https://github.com/alphastorm/ninfer/pull/96), default-off prefill pacing [`#95`](https://github.com/alphastorm/ninfer/pull/95), and council remediation [`#101`](https://github.com/alphastorm/ninfer/pull/101) in RTX 5090 `v0.7.0-qwen38-5090-beta.6` from release source `F3` `e0971faf` = integration `F` `a3fa0550` [`#99`](https://github.com/alphastorm/ninfer/pull/99) + `#101` in `omp-ninfer` `v0.17.0`, published 2026-11-10; [2026-11-05 receipt](measurements/2026-11-05-p19-flash-next-and-starvation.json)), while the `5` `BF16` linear retunes (`a1ac2ae3`, `a18bb379`, `b3902de4`, `6321a8f3`, `9f274245`) and the Spark `Q4` draft-head staging commit (`5ea2ce50`) stay on watch and the remaining `MXFP8` / `Block-FP8` / `NVFP4` / MoE / Spark / `FP4-Local` (`d49b9af7`, `7fdc0eca`) commits do not apply; remedies for all four shipped-fork defects — [`#446`](https://github.com/Neroued/ninfer/issues/446), [`#440`](https://github.com/Neroued/ninfer/issues/440), and [`#441`](https://github.com/Neroued/ninfer/issues/441) in `#98`, plus [`#402`](https://github.com/Neroued/ninfer/issues/402)/[`#403`](https://github.com/Neroued/ninfer/pull/403) expected-$O(1)$ `unordered_set` removed-handle `recovery_loss.h` membership (`246,768 → 224` comparisons at `32` removed / `256` survivors) in `#97` — shipped on the RTX 5090 lane in `F3` `e0971faf` (`v0.17.0`), while only the carried native `v0.8.0-beta.2` runtimes remain on `a87de361`. Downstream qualification is bound in [`releases/v0.17.0/qualification.json`](../releases/v0.17.0/qualification.json) (and [`releases/v0.16.2/qualification.json`](../releases/v0.16.2/qualification.json)). |
+| `Neroued/ninfer` (Qwen 4 feature watch) | Research only; no source adoption | `feat/qwen4-27b-ops` at `e1874e94` (2026-10-29; unchanged on 2026-11-10), 204 commits after shipped base `64d10fbf` | [2026-11-10 watch](measurements/2026-11-10-upstream-watch.json) and [2026-10-29 watch](measurements/2026-10-29-upstream-watch.json) list all 204 commits (`unknown-truncated` at 300 files). `Qwen4-27B` has no public weights as of 2026-11-10; this branch watch does not change the shipped Qwen3.8 model or engine pins. |
+| `sergiuszm/ninfer-4090` (engine watch) | `upgrade-available`; active `sm_89` reference | `rtx4090-port` at `7f47a622` (2026-10-24, 172 commits after 2026-10-07 upstream baseline `81c8ce09`); `master` at `07811ec5` (2026-08-08); side branch `catchup4b` at `4a22fae7` (2026-10-31) | Replaces the inactive `UDPSendToFailed` watch (`5c60b7c9`, 2026-09-09); its old `11aae2d6` fork point remains in the manifest as provenance. Side branch `catchup4b` (`4a22fae7`) ports upstream `Qwen4Exp`/`GLM5Next`/expert cache to Ada (`sm_89`), plus PR `#15` `INT8` group-64 activation prefill (`--prefill-activations a16|int8`, already declined in [EXP-100](PERFORMANCE.md#experiment-ledger)) and `--tolerant-tool-calls` / `tool_constraints=auto`. Watch only; no community runtime is adopted. |
+| `ashalliants/ninfer-3090` (active `sm_86` fork watch; supersedes `Don-Chad/ninfer-3090`) | `upgrade-available`; tracked `sm_86` community line | Master `aa6566fc` (2026-11-09, 2,141 commits past `81c8ce09` in the [2026-11-10 watch](measurements/2026-11-10-upstream-watch.json); releases through `v0.17.2-rtx3090` 2026-11-07 on upstream base `f76e19c0`; earlier `d0ff0535` on 2026-11-02 and `f5cec0a6` / `477b2ddc`) | **Supersedes `Don-Chad/ninfer-3090`** (master `115dee6b` on 2026-10-31, 1,912 commits past `ef6ecc3c`, adds only an optional web dashboard since `d8c29253` after [PR #30](https://github.com/Don-Chad/ninfer-3090/pull/30) / `1418aca3`). Provenance source for the native head-dim-256 (`D256`) `rk4v4` 4-bit KV codec (`0b4f9588`, `2ba10da2`) evaluated in [EXP-107](PERFORMANCE.md#experiment-ledger); `aa6566fc` adds `v0.17.2-rtx3090` request-scoped out-of-vocabulary token fault handling (PR `#412` `2ac892d1` / `437a40cb`), GPU-free byte/bandwidth performance modeling (`tools/perf_model.py`, PR `#438` `d248479f` and PR `#439` `853377de`), and a rented-GPU power-cap guard (`cae63825`). Shipped `v0.16.2`–`v0.17.0` native source `a87de361` (and `v0.17.0` RTX 5090 source `F3` `e0971faf`) on upstream master `64d10fbf` keeps `--kv-dtype rk4v4` off and unqualified in all shipped profiles and adopts no community binary. |
+| `iamwavecut/ninfer-all` (consolidation hub watch) | Watch; idea and kernel reference only | Master `8412e774` (2026-11-10; earlier `c87b836d` on 2026-10-30) | Multi-architecture consolidation hub (`sm_70`/`sm_75`/`sm_80`/`sm_86`/`sm_89`/`sm_120a`, `sm_86` default build) integrating work from `ashalliants/ninfer-3090`, `UDPSendToFailed/ninfer-4090`, `TertiumOrganum1/ninfer-3090`, `Wallawalla47/infernix`, `13thblade/ninfer-all-nvfp4`, and `IMGillusion/ninfer-disk-kv`. Source of the opt-in `FP32` vocabulary-head logits idea (`2013d01f`) ported into `alphastorm/ninfer` and rejected on RTX 4090 depth-0 case `log-024@0` (`0.9016–0.9025` decode ratio vs `MTP3`, below the `0.95` floor; [EXP-104](PERFORMANCE.md#experiment-ledger)), plus concurrent prefill pacing (`--prefill-stall-budget-ms` / `--decode-rounds-per-prefill`, PR `#195` `c87b836d` / `6152a3fb`, shipped **default-off** on RTX 5090 `beta.6` in `v0.17.0` via [`#95`](https://github.com/alphastorm/ninfer/pull/95)), host-side TTFT micro-fixes (NFC boundary normalization `4f8d324a` shipped on RTX 5090 `beta.6` in `v0.17.0` via [`#96`](https://github.com/alphastorm/ninfer/pull/96); `21d8b947`, `79774084`, `51917102`, `f76b614c`, `79d657e0` not adopted), in-situ RTX 3090 route calibration (PR `#191` `3fda3165` / `cdf5456c`), request-scoped non-finite logit faults (PR `#299` `d82ccb4a` / `c8849f1c`, shipped on RTX 5090 `beta.6` in `v0.17.0` via [`#98`](https://github.com/alphastorm/ninfer/pull/98)), online-softmax history rescaling (PR `#302` `fc884ec5` / `48783e2a`), and `gguf_blocks_v1` conversion. |
+| `13thblade/ninfer-all-nvfp4` (non-Blackwell `NVFP4` watch) | Watch; not adopted | Master `9b4b8a00` (2026-11-02; README-only after `245f3ad2` on 2026-10-30) | Implements `NVFP4` 4-bit weights with `FP16` activations (`W4A16`, `--nvfp4-w4a16`) on `sm_75`/`sm_86`/`sm_89`/`sm_120` and 8-bit integer activations (`W4A8-int`, `--nvfp4-w4a8-int`) on `sm_70`/`sm_75`/`sm_80`/`sm_86`/`sm_89`/`sm_120` for GPUs without Blackwell `FP4` tensor cores; any adoption requires independent artifact fit and 1,120-prompt powered quality screening. |
+| `IMGillusion/ninfer-disk-kv` / `IMGillusion/ninfer-engine` (disk KV tier watch) | Watch; design reference only | `IMGillusion/ninfer-engine` `main` `ae1ba85a` (2026-11-02; earlier `82e5e826` on 2026-10-30; also `--disk-kv-path` in `troyliu0105/ninfer-all` `81bf00d0` on 2026-11-02, earlier `76940895` / `43c2e163`) | Host/disk L3 KV tier with phased read/write worker pools (`767e67e2`, `92bac11c`), two materialization slots (`8d9b28cb`), device-to-host (`D2H`) spill settlement before staging reuse (`a0e2d900`), and persisting only matchable states. Tracked as a design reference alongside our authenticated schema 3 checkpoint store. |
 | `eagle-hq/EAGLE-4` / `EAGLE-Corp/Qwen3.8-27B-EAGLE4` (drafter watch) | Watch; not implemented in NInfer | `eagle-hq/EAGLE-4` `0.1.1` (2026-10-21); `EAGLE-Corp/Qwen3.8-27B-EAGLE4` `f58a5985` (2026-10-19; [Neroued/ninfer#413](https://github.com/Neroued/ninfer/issues/413)) | Autoregressive tree drafter for `Qwen3.8-27B` (`3,089,075,200` BF16 params / `6.18 GB` vs `z-lab/Qwen3.8-27B-DFlash2` `50307d4c` at `1,924,404,480` params / `3.85 GB`, unchanged since 2026-08-19; Hugging Face license field `other` / `eagle-4`, non-Apache-2.0). Watch only until license terms, an engine tree-verify path, and 24 GB fit are established. |
 
-The [2026-10-29 read-only receipt](measurements/2026-10-29-upstream-watch.json) also records
-the `sergiuszm/ninfer-4090` (`7f47a622`) and `Don-Chad/ninfer-3090` (`d8c29253`, superseded by
-`ashalliants/ninfer-3090`) heads and client `main` at `338d2ce6`, 1,826 commits after the `v0.14.0`
-stock OMP 18.12.6 baseline `45c35e40` (before `v0.15.0` advanced the client pin to `v18.14.0` at
-`31147f9d`, `v0.16.2` advanced it to `v18.15.0` at `3fedf8d5`, and `v0.17.0` advanced it to `v18.18.6` at `9058ab9d`). Client commit/file lists are cut at the GitHub API caps (250 commits / 300 files); no
-watched client, engine, or fork-network head is an adopted release pin. Recommendations are
-commit-subject/path heuristics, not a security assessment or a qualification result.
+The [2026-11-10 read-only receipt](measurements/2026-11-10-upstream-watch.json) (and earlier
+[2026-10-29 receipt](measurements/2026-10-29-upstream-watch.json)) records `Neroued/ninfer`
+`master` at `77c2e5e2` (`291` commits past `64d10fbf`, `250` listed), `feat/qwen4-27b-ops`
+unchanged at `e1874e94` (`204` commits), `sergiuszm/ninfer-4090` `rtx4090-port` unchanged at
+`7f47a622` (`172` commits), `Don-Chad/ninfer-3090` at `115dee6b` (`1,912` commits, superseded by
+`ashalliants/ninfer-3090` at `aa6566fc`, `2,141` commits past `81c8ce09`), and client `main` at
+`f0200abf28e8`, `4,472` commits after the `v0.14.0` stock OMP 18.12.6 baseline `45c35e40` (before
+`v0.15.0` advanced the client pin to `v18.14.0` at `31147f9d`, `v0.16.2` advanced it to
+`v18.15.0` at `3fedf8d5`, and `v0.17.0` advanced it to `v18.18.6` at `9058ab9d` on 2026-11-10). Commit and file lists are cut at the GitHub API caps (250 commits /
+300 files); no watched client, engine, or fork-network head is an adopted release pin.
+Recommendations are commit-subject/path heuristics, not a security assessment or a qualification
+result.
+
+## 2026-11-10 upstream and fork watch
+
+Observed on 2026-11-10 (companion watch receipt:
+[`2026-11-10-upstream-watch.json`](measurements/2026-11-10-upstream-watch.json)):
+
+- **`Neroued/ninfer` master `77c2e5e2` (2026-11-07):** `291` commits past our merge base `64d10fbf`
+  (`250` listed before the GitHub API cap) and `63` commits after `a754fcf3` (`compare/a754fcf3...77c2e5e2`
+  reports `ahead_by: 63` and returns `62` commit objects; `dev` equals `master`). Upstream
+  [`#434`](https://github.com/Neroued/ninfer/issues/434) (request starvation under context pressure)
+  was closed on 2026-11-07 by `77c2e5e2` (`fix(runtime): recover preempted requests without stalling`,
+  `+818`/`-154` across `34` files, validated upstream on RTX 5090 / `Qwen3.8-27B` `NVFP4` for `none`,
+  `MTP`, and `DFlash2`) and PR [`#443`](https://github.com/Neroued/ninfer/pull/443)
+  (`src/models/qwen3_5/session/binding.cpp`, `+4`/`-1`): `plan_binding` drops the `source &&`
+  conjunct (`resume_without_replay = resume && actual->reused_tokens == resume->frontier()`) and
+  `install_binding` enforces `tx.reuse_frontier < saved.frontier`, so a request paused at frontier `0`
+  with no reused prefix resumes directly into its saved `Prefill`/`Decode`/`Control` lifecycle
+  (`RecoveryProgress` routes `None`/`Direct`/`Snapshot`/`Replay`) instead of entering an
+  unsatisfiable `[0, 0)` `Lifecycle::Replaying` loop that pins `recovery_pending` forever and blocks
+  fresh admission. `77c2e5e2` also splits `Engine::request_stop()` and `HttpServer::stop()` worker
+  joining (moving `SIGINT`/`SIGTERM` to a `10 ms` `std::jthread` polling an `atomic<bool>`) and adds
+  recovery observability (`direct_restores`, `replayed_tokens`, `last_progress_ns`, `progress_owner`,
+  `| replay <tok/s>`, request-log schema `31` → `32`).
+- **Classification of `a754fcf3..77c2e5e2` for the dense `Qwen3.8-27B` product:** only `77c2e5e2`
+  (+ PR [`#443`](https://github.com/Neroued/ninfer/pull/443)) is **adopt-now** (zero-frontier
+  direct resume and bounded fresh-admission rotation in
+  [`alphastorm/ninfer#97`](https://github.com/alphastorm/ninfer/pull/97) plus graceful shutdown
+  stop/join split in [`alphastorm/ninfer#98`](https://github.com/alphastorm/ninfer/pull/98),
+  integrated in `F` `a3fa0550` [`#99`](https://github.com/alphastorm/ninfer/pull/99) and
+  council-remediated in `F3` `e0971faf` [`#101`](https://github.com/alphastorm/ninfer/pull/101),
+  shipped in RTX 5090 `v0.7.0-qwen38-5090-beta.6` in `omp-ninfer` `v0.17.0`, published 2026-11-10;
+  the separate arrival source-wait probe [`#100`](https://github.com/alphastorm/ninfer/pull/100) was
+  closed unmerged and is tracked in [`alphastorm/ninfer#102`](https://github.com/alphastorm/ninfer/issues/102));
+  `5` architecture-neutral `BF16` linear kernel retunes (`a1ac2ae3`, `a18bb379`, `b3902de4`,
+  `6321a8f3`, `9f274245` in `src/ops/linear/kernels/bf16/*` and `projection/bf16`, gated on a
+  one-off artifact `BF16` tensor-shape audit) and `1` `Q4_G64_FP16` draft-head staging commit
+  (`5ea2ce50` under `projection/q4/dgx_spark/shapes/n77440_k4096.cu`, absent from the fork's `q4`
+  shape family) stay on **watch**; the remaining `55` commits in the `62`-object compare payload —
+  `2` native `FP4-Local` checkpoint import and inference-kernel commits (`d49b9af7`, `7fdc0eca` for
+  `GLM5Next` on DGX Spark `sm_121a`), `6` MoE commits, `5` `NVFP4` linear commits, `18` `MXFP8`
+  linear/split commits, `6` `Block-FP8` linear/split commits, `4` `SwiGLU` `fp8_block`/`A8` commits,
+  `13` vision/`KDA`/clamped-`A8`/`kpool`/`mhc`/Spark commits, and `1` formatting commit — are **not
+  applicable** to our dense `groupwise-int` `Qwen3.8-27B` runtime (per-commit path inspection
+  confirms none touch the `q4`/`q5`/`q8` groupwise kernels our main linears use, whereas the
+  `64d10fbf...77c2e5e2` watch receipt truncates aggregate file lists at GitHub's 300-file cap).
+- **Shipped-fork defects audited on `a87de361` (remedies for `#446`, `#440`, `#441`, and
+  `#402`/`#403` all shipped on the RTX 5090 lane in `v0.7.0-qwen38-5090-beta.6` / `F3` `e0971faf` in
+  `omp-ninfer` `v0.17.0`, published 2026-11-10, via
+  [`alphastorm/ninfer#97`](https://github.com/alphastorm/ninfer/pull/97) and
+  [`#98`](https://github.com/alphastorm/ninfer/pull/98); only the carried native `v0.8.0-beta.2`
+  runtimes remain on `a87de361`):**
+  - [`Neroued/ninfer#446`](https://github.com/Neroued/ninfer/issues/446) (open):
+    `src/models/common/qwen/frontend/chat_template.cpp:225-231` on `a87de361` re-renders historical
+    assistant `tool_calls` with a throwing `Json::parse(call.arguments_json)`, so one malformed
+    tool-call argument string emitted on an earlier turn throws `nlohmann` `parse_error.101` and
+    returns HTTP `500` on every subsequent turn in the conversation (and
+    `src/serve/anthropic_messages_response.cpp:37-41` throws `std::logic_error` on non-object
+    Anthropic tool input); non-throwing raw-input preservation shipped in
+    [`alphastorm/ninfer#98`](https://github.com/alphastorm/ninfer/pull/98) (`F3` `e0971faf`, RTX
+    5090 `v0.7.0-qwen38-5090-beta.6` in `v0.17.0`).
+  - [`Neroued/ninfer#440`](https://github.com/Neroued/ninfer/issues/440) and
+    [`#441`](https://github.com/Neroued/ninfer/issues/441) (both closed upstream on 2026-11-07):
+    `tools/chat_templates/qwen3_8.jinja:54` (and the template embedded in model v3 `81f924d4`)
+    accepts only `('xhigh', 'medium', 'low')` and returns HTTP `400` (`invalid prompt`) on `a87de361`
+    when a client sends `reasoning_effort` values `high`, `none`, `minimal`, or `max` (`#440`), while
+    `src/models/common/qwen/frontend/chat_template.cpp:91-93` throws
+    `reasoning_effort conflicts with enable_thinking` when Anthropic-style
+    `thinking: {type: "disabled"}` is combined with `output_config.effort` (`#441`);
+    artifact-template-aware effort normalization (mapping `minimal → low` and `high`/`max → xhigh`)
+    and ignoring effort when thinking is explicitly disabled shipped in
+    [`alphastorm/ninfer#98`](https://github.com/alphastorm/ninfer/pull/98) (`F3` `e0971faf`, RTX
+    5090 `v0.7.0-qwen38-5090-beta.6` in `v0.17.0`).
+  - [`Neroued/ninfer#402`](https://github.com/Neroued/ninfer/issues/402) /
+    [`#403`](https://github.com/Neroued/ninfer/pull/403) (closed upstream on 2026-10-29/30 as
+    superseded by `452c3f5f` on 2026-10-17, after our `64d10fbf` merge base): in
+    [`alphastorm/ninfer#93`](https://github.com/alphastorm/ninfer/pull/93) commit `8d7397bd5`
+    (ported without upstream's unified-storage `RecoveryIndex`),
+    `src/models/common/context/recovery_loss.h:23-46` initially called
+    `std::find(ordered.begin(), ordered.end(), retained)` inside the survivor loop ($O(n^2 \cdot m)$,
+    causing `~0.75 s` serving-thread stalls every `~1 s` at `~370` retained checkpoints / `81 GiB`
+    Host context); [`alphastorm/ninfer#97`](https://github.com/alphastorm/ninfer/pull/97) (`E1`,
+    shipped in `F3` `e0971faf`, RTX 5090 `v0.7.0-qwen38-5090-beta.6` in `omp-ninfer` `v0.17.0`)
+    replaced that `std::find` with an expected-$O(1)$ `unordered_set` removed-handle membership check
+    (`src/models/common/context/recovery_loss.h`, CPU proof at `32` removed / `256` survivors:
+    `246,768 → 224` comparisons), leaving the old lookup only in the carried native `v0.8.0-beta.2`
+    packages (`a87de361`).
+  - Other upstream issues audited: [`#396`](https://github.com/Neroued/ninfer/issues/396)
+    (`128`-character tool names) is already in `a87de361` and `F3` `e0971faf`;
+    [`#439`](https://github.com/Neroued/ninfer/issues/439) (`sm_120a` RTX 5090D startup crash in
+    `decode_graph.cpp:19` `cudaGraphAddChildGraphNode` at `a754fcf3`) is absent from `a87de361` and
+    `F3` `e0971faf`; [`#445`](https://github.com/Neroued/ninfer/issues/445)
+    (event-driven CUDA completion wakeups reducing `12.63M` `cudaEventQuery` calls / `~4.36 s` CPU API
+    and `~100% → ~3%` process CPU), [`#436`](https://github.com/Neroued/ninfer/pull/436) (Anthropic
+    `thinking.display: "updates"`), and [`#430`](https://github.com/Neroued/ninfer/pull/430)/[`#415`](https://github.com/Neroued/ninfer/issues/415)
+    (flag-gated prefix-cache inspection/eviction) stay on watch; [`#437`](https://github.com/Neroued/ninfer/issues/437)
+    (`NVFP4` `Compact64-T6` attention) and [`#431`](https://github.com/Neroued/ninfer/issues/431)
+    (GPU utilization ceiling) do not apply.
+- **`ashalliants/ninfer-3090` master `aa6566fc` (2026-11-09; `2,141` commits past `81c8ce09`;
+  release `v0.17.2-rtx3090` on 2026-11-07):**
+  - *n-gram copy drafting beside DFlash2 (`--ngram-draft-tokens 15`, 16-column verify, copy-miss
+    backoff `12 → 24 → 36`, `C2` partner-balance ledger):* reports `+42%` whole-session output
+    (`174.6 → 248.0 tok/s`, wall `786 → 677 s` across `4` RTX 3090 agent sessions at 350 W; `+76%`
+    file rewrite, `+73%` apply change, `+53%` function edit, `+22%` explore, `-0.1%` revert diff,
+    `-4.8%` explain, `95%` copy acceptance `117,476 / 124,280`, `+15%` two-lane batch output/s). Our
+    `sm_120` RTX 5090 `C2` ABBA evaluation on model v3 `81f924d4` reproduced the copy-turn gain (`+53.43%`
+    synthetic full-file edit, `+48.78%` concurrent copy request, `+41.46%` constrained copy request,
+    `+0.21%` role controls, `+0.27%` depth sweep), but regressed short Read turns (`-4.21%`) and free
+    partners (`-0.68%`) and preserved greedy byte identity on only `15/23` requests because 16-column
+    verification changes batch reductions; **no-go retained** under the byte-identical qualification
+    gate (and copy-drafting slice `E5` in [`alphastorm/ninfer#94`](https://github.com/alphastorm/ninfer/pull/94)
+    was declined, closed, and not shipped in `v0.17.0` after 3,000-turn coding-agent replay
+    projected `×1.055–1.093 < 1.15`).
+  - *`sm_86` `Q4`/`Q5`/`Q8` linear shape-table retune:* cold L2-flushed microbenchmarks
+    (`bench/ops/linear_schedule_bench.cu`) report `1.30×` to `3.84×` across `18` shapes (peak `3.84×`
+    on `q4 131072×5120` at `T=12`, `2.72×` on `q8 34816×5120` at `T=56`, `1.95×` on `q4 1024×5120`),
+    but no end-to-end decode figure is published, cold margins invert in situ (`GDN` width `7`
+    `+5.9%` cold → `-0.78%` in situ; `q5_linear_add` `T=10` `+8.0%` cold → `+13.59%` in situ), and our
+    shipped `DFlash2 K=7` (`8` columns, `v0.16.0`–`v0.17.0`) and prior `MTP3` (`4` columns,
+    `v0.3.1`–`v0.15.0`) profiles stay inside the `t <= 8` `launch_q4_draft_head_small_t` branch
+    (`watch`, RTX 3090 in-situ A/B only).
+  - *Tooling and `v0.17.2-rtx3090` robustness:* GPU-free byte/bandwidth performance model
+    (`tools/perf_model.py`, PR `#438` `d248479f`, and nsys capture validation PR `#439` `853377de`,
+    predicting 27B `MTP3` decode at `112.7` vs `107.1 tok/s` measured and `131K` prefill at `1,650` vs
+    `1,644 tok/s`), rented-GPU power-cap guard (`cae63825`), and request-scoped out-of-vocabulary
+    token fault handling (PR `#412` `2ac892d1` / `437a40cb`, matching upstream
+    [`#426`](https://github.com/Neroued/ninfer/issues/426) so an invalid token ends one request with
+    HTTP `500` `numerical_failure` instead of stopping the engine; request-local `numerical_failure`
+    retirement shipped on RTX 5090 `beta.6` in `v0.17.0` via
+    [`alphastorm/ninfer#98`](https://github.com/alphastorm/ninfer/pull/98)).
+- **`iamwavecut/ninfer-all` master `8412e774` (2026-11-10):** ranks the highest-leverage portable
+  candidates across the community fork network:
+  - *Concurrent prefill pacing (`--prefill-stall-budget-ms` / `--decode-rounds-per-prefill`, PR `#195`
+    `c87b836d` / `6152a3fb`):* cuts per-step decode pause on a generating stream beside a
+    `15.6K`-token prefill from `0.83 s` to `0.35–0.36 s` at a `250 ms` budget (`0.59–0.62 s` at
+    `500 ms`, `+11%` / `+2%` new-prompt TTFT) on RTX 3090 `Qwen3.8-27B` `DFlash2` (`chunk 2,048`), and
+    cuts worst inter-token gap behind four streams from `1,043 ms` (`chunk 1,024`) to `515 ms` (`512`)
+    / `312 ms` (`256`) against an `82 ms` median decode interval while prefill rate moves only
+    `1,135 → 1,130 → 1,110 tok/s` (prefill-pacing slice `E4` in
+    [`alphastorm/ninfer#95`](https://github.com/alphastorm/ninfer/pull/95) shipped **default-off**
+    in RTX 5090 `v0.7.0-qwen38-5090-beta.6` / `F3` `e0971faf` in `v0.17.0`).
+  - *Output-identical host-side TTFT micro-fixes:* Jinja `string::strip` boundary-only decoding
+    (`21d8b947`, `~14 ms` per `500K`-character render, skipped because our base validates interior
+    UTF-8 by contract), NFC boundary-scoped normalization (`4f8d324a`, `13.2 → 0.44 ms` on `507,749`
+    bytes; shipped as host-NFC slice `E3` in [`alphastorm/ninfer#96`](https://github.com/alphastorm/ninfer/pull/96)
+    in RTX 5090 `v0.7.0-qwen38-5090-beta.6` / `F3` `e0971faf` in `v0.17.0`), word-at-a-time
+    prefix-shortlist FNV digest mixing (`79774084`, `~23 ms` of a `30 ms` admission at `156K`
+    tokens), background n-gram index construction and zero/huge-page allocation (`51917102`,
+    `f76b614c`, `15–22 → 1.0–1.9 ms` / `-13 ms` TTFT at `3.6K`), and startup small-T attention module
+    preload (`79d657e0`, skipped as `<= 0.67 ms` on our shared `INT8` launch module).
+  - *In-situ RTX 3090 route calibration (`ninfer-calibrate`, PR `#191` `3fda3165` / `cdf5456c`):*
+    `1.28–1.49 ms` small-T MMA vs `2.21–2.51 ms` sliced-K (`~1.7×`) on the `Q6` head at `3–16` tokens
+    at 350 W, plus `Q4` output/down-projection boundary retunes.
+  - *Engine resilience and long-context attention numerics:* request-scoped non-finite logit faults
+    (PR `#299` `d82ccb4a` / `c8849f1c`; shipped in serving-robustness slice `E2`
+    [`alphastorm/ninfer#98`](https://github.com/alphastorm/ninfer/pull/98) in RTX 5090
+    `v0.7.0-qwen38-5090-beta.6` / `F3` `e0971faf` in `v0.17.0`) and online-softmax history rescaling
+    by the difference of rounded tile maxima (PR `#302` `fc884ec5` / `48783e2a`), while
+    `--fast-prefill-kernel` changes perplexity and requires the 1,120-prompt quality screen.
+- **`sergiuszm/ninfer-4090` (`master` `07811ec5` on 2026-08-08, `rtx4090-port` `7f47a622` on
+  2026-10-24, `catchup4b` `4a22fae7` on 2026-10-31):** no un-taken `sm_89` dense-27B decode or
+  prefill gain; PR `#15` `INT8` group-64 activation prefill (`--prefill-activations a16|int8`,
+  default `a16`, no end-to-end gain reported) is the same axis as our declined `Group64` A8 prefill
+  ([EXP-100](PERFORMANCE.md#experiment-ledger)), `rk8v4`/`rk4v4`/`rk4v4-e8`/`rk2v4-e8` KV storages
+  overlap our [EXP-107](PERFORMANCE.md#experiment-ledger) evaluation, and `--tolerant-tool-calls` /
+  `tool_constraints=auto` (recovering raw string arguments that quote `</parameter>`) stays on watch.
+  Other watched forks — `13thblade/ninfer-all-nvfp4` (`9b4b8a00`, 2026-11-02),
+  `IMGillusion/ninfer-engine` (`ae1ba85a`, 2026-11-02; phase-separated L3 disk KV reads/writes, two
+  materialization slots, and persisting only matchable states), `troyliu0105/ninfer-all` (`81bf00d0`,
+  2026-11-02), and `Saylek-ai/ninfer` (`fe84e749`, pushed 2026-11-03; Host `FreeExtents` placement and
+  duplicate-tool-parameter coalescing) — carry no dense-27B decode or prefill win.
+- **Oh My Pi releases after `v18.16.0` through `v18.18.6` (2026-11-09):** eight upstream releases
+  followed [`v18.16.0`](https://github.com/can1357/oh-my-pi/releases/tag/v18.16.0) (`650f3a10`,
+  2026-11-02): [`v18.17.0`](https://github.com/can1357/oh-my-pi/releases/tag/v18.17.0) (`75e7801e`,
+  2026-11-06), [`v18.18.0`](https://github.com/can1357/oh-my-pi/releases/tag/v18.18.0) (`b5a6b2f7`,
+  2026-11-07), [`v18.18.1`](https://github.com/can1357/oh-my-pi/releases/tag/v18.18.1) (`24439066`,
+  2026-11-08), [`v18.18.2`](https://github.com/can1357/oh-my-pi/releases/tag/v18.18.2) (`cb4801a7`,
+  2026-11-08), [`v18.18.3`](https://github.com/can1357/oh-my-pi/releases/tag/v18.18.3) (`21f1188c`,
+  2026-11-09), [`v18.18.4`](https://github.com/can1357/oh-my-pi/releases/tag/v18.18.4) (`0920fabe`,
+  2026-11-09), [`v18.18.5`](https://github.com/can1357/oh-my-pi/releases/tag/v18.18.5) (`1891f380`,
+  2026-11-09), and [`v18.18.6`](https://github.com/can1357/oh-my-pi/releases/tag/v18.18.6) (`9058ab9d`,
+  2026-11-09), with `main` at `f0200abf28e8` (`4,472` commits past `45c35e40`). Across `18.16.0 →
+  18.18.x`, changes are agent-surface rather than HTTP-wire changes: native-family token counting
+  (`qwen3.8-*` classifies to `qwen3`; unclassified IDs fall back to `o200k_base`), opt-in
+  `update.auto` and setup wizard v3 in `18.17.0` (`update: {auto: false}` and
+  `startup: {checkUpdate: false, setupWizard: false}` pins), `discarded-turn` usage journaling, Bash
+  5.3 semantics with `LANG`/`LC_ALL=C.UTF-8` and isolated Windows consoles, the
+  `5 / 10 / 30 / 60 / 300 s` `wait` idle ladder, nine-worker subagent threads, `qwen3.8` delegation
+  fallback moving from `eager` to `balanced` in `18.18.3`, and "Read small files whole; ranges only
+  for large files" prompt guidance. Published `v0.17.0` (2026-11-10) adopts stock OMP `18.18.6`
+  (`9058ab9d`, superseding `v0.16.2`'s `18.15.0` pin `3fedf8d5`; see the
+  [18.15.0→18.18.6 client review](measurements/2026-11-10-omp-18186-client-upgrade-review.json) and
+  [v0.17.0 release notes](../releases/v0.17.0/NINFER_RELEASE_NOTES.md)).
+- **Hugging Face `neroued/*` artifacts and model census:** `neroued/*` artifacts remain unchanged
+  since 2026-10-29 (`neroued/Qwen3.8-27B-NInfer` v3 `81f924d4` at `19.03 GiB` / `20,437,521,664`
+  bytes stands; `neroued/Qwen3.8-27B-nvfp4-NInfer` at `22.09 GiB`,
+  `neroued/Qwen3.6-35B-A3B-NInfer` at `21.23 GiB`, `neroued/Qwen3.8-Flash-Next-NInfer` at revision
+  `001057dd`, and `neroued/GLM-5.3-Flash-NInfer` at `f1c4e21` are unchanged). Across the 100-repo
+  Hugging Face `library_name: ninfer` census, `~75%` of the `ninfer` repositories touched in this
+  window are for a different engine than ours, with `iamwavecut/ninfer-all`'s `gguf_blocks_v1`
+  layout (`qwen3_8_27b_gguf`) as one cause (unloadable on `F3` `e0971faf` in RTX 5090 `beta.6` /
+  `v0.17.0`, `a87de361` in native `beta.2`, and upstream `Neroued/ninfer` master; upstream PR
+  [`#282`](https://github.com/Neroued/ninfer/pull/282) closed unmerged on 2026-11-02); see
+  [`ROADMAP.md`](../ROADMAP.md#deferred-and-rejected-decisions).
 
 ## v0.17.0 runtime and client binding
 

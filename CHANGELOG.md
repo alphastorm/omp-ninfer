@@ -13,6 +13,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   release history, upstream watch, reference docs, site, and brand assets; front-door install links
   return to the guide on `main`.
 
+### Documentation
+
+- Record the 2026-11-10 upstream `Neroued/ninfer` `77c2e5e2` watch (`63` commits after `a754fcf3`,
+  [`#434`](https://github.com/Neroued/ninfer/issues/434) closed by `77c2e5e2` + PR
+  [`#443`](https://github.com/Neroued/ninfer/pull/443) and shipped-fork
+  [`#446`](https://github.com/Neroued/ninfer/issues/446),
+  [`#440`](https://github.com/Neroued/ninfer/issues/440),
+  [`#441`](https://github.com/Neroued/ninfer/issues/441), and
+  [`#402`](https://github.com/Neroued/ninfer/issues/402)/[`#403`](https://github.com/Neroued/ninfer/pull/403)
+  expected-`O(1)` `unordered_set` removed-handle `recovery_loss.h` membership remedies — `246,768 →
+  224` comparisons at `32` removed / `256` survivors — shipped on RTX 5090
+  `v0.7.0-qwen38-5090-beta.6` from release source `F3` `e0971faf` = integration `F` `a3fa0550`
+  ([`alphastorm/ninfer#99`](https://github.com/alphastorm/ninfer/pull/99) integrating
+  [`#95`](https://github.com/alphastorm/ninfer/pull/95)–[`#98`](https://github.com/alphastorm/ninfer/pull/98))
+  + council remediation [`#101`](https://github.com/alphastorm/ninfer/pull/101) in `omp-ninfer`
+  `v0.17.0` on 2026-11-10, while only the carried native `v0.8.0-beta.2` packages remain on
+  `a87de361`), community fork watch
+  (`ashalliants/ninfer-3090` `aa6566fc`, `iamwavecut/ninfer-all` `8412e774`,
+  `sergiuszm/ninfer-4090` `master` `07811ec5` / `rtx4090-port` `7f47a622` / `catchup4b` `4a22fae7`),
+  stock OMP `v18.17.0`–`v18.18.6` watch (`v18.18.6` `9058ab9d` shipped in `v0.17.0`), and 2026-11-10
+  model census (`Qwen3.6-35B-A3B` fast auxiliary/subagent candidate, `gguf_blocks_v1`
+  incompatibility with upstream PR [`#282`](https://github.com/Neroued/ninfer/pull/282) closed
+  unmerged, `FP4-Local` `GLM-5.3`/DGX Spark-only scope, `Arete-27B` 27B fine-tune watch, and
+  `Qwen4-27B` `feat/qwen4-27b-ops` unchanged at `e1874e94`) in [`docs/UPSTREAM.md`](docs/UPSTREAM.md),
+  [`ROADMAP.md`](ROADMAP.md), [`upstream-watch.json`](upstream-watch.json), and
+  [`docs/measurements/2026-11-10-upstream-watch.json`](docs/measurements/2026-11-10-upstream-watch.json).
+
 ## [0.17.0] - 2026-11-10
 
 ### Fixed

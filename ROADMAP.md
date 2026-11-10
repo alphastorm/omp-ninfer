@@ -245,8 +245,8 @@ so future work does not repeat closed experiments:
   ([`docs/UPSTREAM.md`](docs/UPSTREAM.md),
   [`docs/measurements/2026-09-27-engine-window-upstream-e31bc99b-vs-shipped.json`](docs/measurements/2026-09-27-engine-window-upstream-e31bc99b-vs-shipped.json),
   [`docs/measurements/2026-10-10-upstream-81c8ce09-rtx5090.json`](docs/measurements/2026-10-10-upstream-81c8ce09-rtx5090.json)).
-- **Full upstream re-port from `64d10fbf` to `a754fcf3` — deferred in favor of targeted fix
-  cherry-picks (draft [`alphastorm/ninfer#93`](https://github.com/alphastorm/ninfer/pull/93)).**
+- **Full upstream re-port from `64d10fbf` to `a754fcf3` / `77c2e5e2` — deferred in favor of targeted
+  fix cherry-picks ([`alphastorm/ninfer#93`](https://github.com/alphastorm/ninfer/pull/93) `e6ac7b70`, marked merged on 2026-11-10 when fork `main` gained the `F3` merge `b871996a`; its ports are part of `F3` `e0971faf` and shipped in RTX 5090 `v0.7.0-qwen38-5090-beta.6` in `v0.17.0`).**
   As observed on 2026-11-04/05, upstream `Neroued/ninfer` master `a754fcf3` (2026-11-02; `dev` ==
   `master`) is 228 commits past the `v0.13.0`–`v0.17.0` merge base `64d10fbf`
   (`64d10fbf9f8e6bfc79ab0570b94674c5b9997929`), adding a native DGX Spark target (`sm_121a`),
@@ -288,40 +288,72 @@ so future work does not repeat closed experiments:
   [`docs/measurements/2026-11-05-p19-flash-next-and-starvation.json`](docs/measurements/2026-11-05-p19-flash-next-and-starvation.json)),
   upstream [`#378`](https://github.com/Neroued/ninfer/issues/378) Host placement (re-expressed from
   Saylek-ai `fix/378-host-placement`), and the `452c3f5f` recovery-loss formula — plus the `a754fcf3`
-  failure-diagnostics subset are ported onto `a87de361` in draft
-  [`alphastorm/ninfer#93`](https://github.com/alphastorm/ninfer/pull/93) (`e6ac7b70`, the integration
-  base for `v0.17.0`'s RTX 5090 `e0971faf` release in
-  [fork PR #101](https://github.com/alphastorm/ninfer/pull/101)). Everything else requires a full
-  re-port estimated at **7–10 multi-agent days** at
-  `a754fcf3` with low value for the dense 27B product today, so the deferral stands.
+  failure-diagnostics subset were ported onto `a87de361` in
+  [`alphastorm/ninfer#93`](https://github.com/alphastorm/ninfer/pull/93) (`e6ac7b70`, CI green on all
+  `8/8` jobs; marked merged on 2026-11-10 when fork `main` gained the `F3` merge `b871996a`), whose
+  ports are part of release source `F3` `e0971faf` (= integration `F` `a3fa0550`
+  [`#95`](https://github.com/alphastorm/ninfer/pull/95)–[`#99`](https://github.com/alphastorm/ninfer/pull/99)
+  + council remediation [`#101`](https://github.com/alphastorm/ninfer/pull/101)) and shipped in RTX
+  5090 `v0.7.0-qwen38-5090-beta.6` in `omp-ninfer` `v0.17.0` on 2026-11-10 (where `#97` also
+  replaced the `recovery_loss.h` survivor-loop `std::find` from
+  [`#402`](https://github.com/Neroued/ninfer/issues/402)/[`#403`](https://github.com/Neroued/ninfer/pull/403)
+  with an expected-$O(1)$ `unordered_set` removed-handle membership check cutting `32`-removed /
+  `256`-survivor comparisons from `246,768` to `224`, while only the carried native `v0.8.0-beta.2`
+  packages stay on `a87de361`). Everything else requires a full re-port estimated at
+  **7–10 multi-agent days** at `a754fcf3` / `77c2e5e2` with low value for the dense 27B product
+  today, so the deferral stands.
 - **No better primary model than `Qwen3.8-27B` (`groupwise-int` v3 `81f924d4`, `20,437,521,664`
-  bytes / `19.03 GiB`) as of 2026-11-05; alternative upstream artifacts and `Qwen4-27B` (`qwen4_exp`)
-  deferred or rejected.** Census checks through 2026-11-05 confirm `neroued/*` Hugging Face
-  artifacts are unchanged after 2026-10-29 (`neroued/Qwen3.8-27B-NInfer` v3 `81f924d4` at commit
-  `51630a0c`, 2026-09-15, with commits through `18caef28` on 2026-10-29 documentation-only;
-  `neroued/Qwen3.8-Flash-Next-NInfer` at revision `001057dd`, 4 files, `108,445,200,388` bytes), and
-  no candidate replaces `Qwen3.8-27B` as the primary model across the qualified 32 GB and 24 GB
-  single-GPU lanes:
+  bytes / `19.03 GiB`) as of 2026-11-10; alternative upstream and community artifacts, `FP4-Local`,
+  and `Qwen4-27B` (`qwen4_exp`) deferred, rejected, or kept on watch.** Census checks through 2026-11-10 across the
+  100-repo Hugging Face `library_name: ninfer` set confirm `neroued/*` artifacts are unchanged after
+  2026-10-29 (`neroued/Qwen3.8-27B-NInfer` v3 `81f924d4` at commit `51630a0c`, 2026-09-15, with
+  commits through `18caef28` on 2026-10-29 documentation-only; `neroued/Qwen3.8-Flash-Next-NInfer` at
+  revision `001057dd`, 4 files, `108,445,200,388` bytes), `~75%` of the `ninfer` repositories
+  touched in this window are for a different engine than ours (with `gguf_blocks_v1` carry-over
+  targeting `iamwavecut/ninfer-all` as one cause), and no open-weight model resident in 24–32 GB
+  beats `Qwen3.8-27B` on the published
+  `Qwen3.8-27B` model-card agentic-coding benchmarks (**Terminal-Bench 2.1 `73.0`, SWE-bench Pro
+  `61.7`, DeepSWE 1.1 `42.2`, SWE-bench Multilingual `73.8`, QwenSWEBench `79.0`**, Claude-Code
+  harness at 256K context) across the qualified 32 GB and 24 GB single-GPU lanes:
   1. **`neroued/Qwen3.8-27B-nvfp4-NInfer` (`74d2c571`, `6a534f28`, 2026-09-15) — rejected:** the v3
      artifact grew to **`23,719,715,844` bytes (`22.09 GiB`)**, `+2,227,020,804` bytes (`+2.07 GiB`)
      over the `21,492,695,040`-byte (`bb336052`) v2 artifact measured in EXP-008 and `+3.06 GiB`
      over our shipped `19.03 GiB` `groupwise-int` container, so it still cannot fit the RTX 5090
      `DFlash2 K=7` `BF16` KV `131,072`-token `C2` profile.
-  2. **`neroued/Qwen3.6-35B-A3B-NInfer` (`3e332976`, `22,790,484,480` bytes / `21.23 GiB`,
-     `Qwen3.5` MoE `35B` total / `3B` active, `DFlash` block-8 + multi-token prediction `MTP`) —
-     faster but lower-quality option, not a primary replacement:** while much faster on one RTX
-     5090 (`677.2 tok/s` `MTP3` code decode, `620.6 tok/s` `DFlash K=7` code decode, `17,705 tok/s`
-     `7.7K` prefill at `INT8` KV), its agentic-coding quality trails `Qwen3.8-27B` by a full
-     generation (**SWE-bench Pro `44.6` vs `61.7`** for `Qwen3.8-27B`, **`NL2Repo` `20.5` vs
-     `42.3`**) and its `21.23 GiB` container exceeds a zero-offload 24 GB native budget at `131,072`
-     tokens (candidate only for a separate fast/auxiliary tier spike with partial expert offload).
-     Older `Qwen3.6-27B` (`16.29 GiB` `groupwise-int` / `17.07 GiB` `nvfp4`) lacks `DFlash2` and
-     trails on SWE-bench Pro (`53.5` vs `61.7`).
+  2. **`neroued/Qwen3.6-35B-A3B-NInfer` (`3e332976`, `qwen3_6_35b_a3b.ninfer`, `22,790,484,480`
+     bytes / `21.23 GiB`, `Qwen3_5MoeForCausalLM` `35B` total / `3B` active, `256` experts with `8`
+     routed + `1` shared, `q4_g64_fp16` ×95 / `q5_g64_fp16` ×91 / `q6_g64_fp16` ×5 / `q8_g32_fp16`
+     ×195 / `bf16` ×487 / `fp32` ×60, text + vision + `MTP` + `DFlash` block-8, no `DFlash2`, minimum
+     upstream engine revision `98dada0e` predating our `64d10fbf` merge base) — possible fast auxiliary/subagent tier on the 32 GB RTX 5090 lane,
+     not a primary replacement:** delivers **`~4×` the single-stream decode of our dense 27B at
+     concurrency 1 (`C1`)** and higher at concurrency 2–8 (`C2`–`C8`) on one RTX 5090 (upstream card
+     claims `750.6 / 636.5 / 683.3 tok/s` `MTP3` and `866.8 / 641.6 / 732.6 tok/s` `DFlash K=7`
+     across three long fixtures, `649.8 → 1,267.5 tok/s` corpus `C1 → C8`, and `437.7 / 5,510 /
+     15,685 ms` TTFT at `7.7K / 64.5K / 130K`, alongside
+     `677.2 tok/s` `MTP3` code decode, `620.6 tok/s` `DFlash K=7` code decode, and `17,705 tok/s`
+     `7.7K` prefill at `INT8` KV; supported in the fork by `Architecture::Qwen3_5Moe` and SIMT
+     `groupwise_int` MoE kernels), but its agentic-coding scores trail `Qwen3.8-27B` (**SWE-bench
+     Pro `49.5` on the Qwen card / `44.6` in earlier NInfer card tables vs `61.7`** for `Qwen3.8-27B`,
+     **Terminal-Bench 2.0 `51.5` vs Terminal-Bench 2.1 `73.0`**, **SWE-bench Verified `73.4`**,
+     **SWE-bench Multilingual `67.2` vs `73.8`**, **`NL2Repo` `20.5` vs `42.3`**, `AIME25` `90.0`,
+     `AIME26` `90.0`, `GPQA-D` `85.35`) and its `21.23 GiB` container exceeds a zero-offload 24 GB
+     native budget at `131,072` tokens (`WaveCut/Qwen3.6-35B-A3B-NVFP4-NInfer-v3` at `21.04 GiB` also
+     requires `sm_120a` `NVFP4` MoE kernels absent from the fork). Older `Qwen3.6-27B` (`16.29 GiB`
+     `groupwise-int` / `17.07 GiB` `nvfp4`) lacks `DFlash2` and trails on SWE-bench Pro (`53.5` vs
+     `61.7`).
   3. **`neroued/Qwen3.8-Flash-Next-NInfer` (revision `001057dd` / `57cf9cd0`, 4 files,
-     `108,445,200,388` bytes / `101.00 GiB`, `Qwen4Exp` MoE + per-layer-embedding `PLE`) and
-     `neroued/GLM-5.3-Flash-NInfer` (`f1c4e21`, `191,484,328,832` bytes / `178.33 GiB`, `GLM5Next`)
-     — rejected for product lanes after EXP-108 (`Qwen3.8-Flash-Next` research screen and 32 GB
-     offload probe):** `Qwen3.8-Flash-Next` requires `~63.3 GiB` of pinned Host-resident
+     `108,445,200,388` bytes / `101.00 GiB`, `Qwen4Exp` MoE + per-layer-embedding `PLE`),
+     `neroued/GLM-5.3-Flash-NInfer` (`f1c4e21`, `191,484,328,832` bytes / `178.33 GiB`, `GLM5Next`),
+     and upstream `FP4-Local` (`d49b9af7`, `7fdc0eca`) — rejected for product lanes after EXP-108
+     (`Qwen3.8-Flash-Next` research screen and 32 GB offload probe):** `FP4-Local` is a
+     checkpoint-ingestion and kernel family for `GLM-5.3-Flash` (`glm5_3_flash_fp4_local.ninfer`,
+     `GLM5Next` native recipe preserving `NVFP4` multipliers, compressed Sparse Format (`CSF`)
+     scales, `MXFP8` groups, `FP32` block scales, and per-expert activation calibration) targeting
+     two-node DGX Spark `sm_121a` (`TP2` + `ADP2` two-way tensor and attention-data parallelism, with
+     Spark kernel shapes under `dgx_spark/` not compiled into the RTX 5090 build and `block_scaled`
+     MoE unsupported on `sm_89`/`sm_86`) and has no `Qwen3.5`/`Qwen3.8` dense 27B converter recipe or
+     kernel path. `Qwen3.8-Flash-Next` requires
+     `~63.3 GiB` of pinned Host-resident
      routed-expert (`Main-expert`) backing (exceeding the RTX 5090 container host's `47 GiB` physical
      / `~31 GiB` WSL2 RAM on `rtx5090-win-a`) plus `~37.7 GiB` of device-resident non-expert weights
      and KV/state (impossible on 24 GB `sm_89`/`sm_86`, where its `NVFP4`/`FP8`/block-scaled MoE
@@ -355,27 +387,60 @@ so future work does not repeat closed experiments:
      also refused, so no offload speed was measured. Decision: no Flash-Next lane; Strata stays the
      Flash-Next engine on the RTX PRO 6000 host (`rtxpro6000-win-a`); revisit only if upstream's
      offload planner starts on a 32 GB-class budget.
-  4. **`Qwen4-27B` (`qwen4_exp` dense 27B) — deferred (no public weights as of 2026-10-30; upstream
-     27B ops unmerged on `feat/qwen4-27b-ops`):** no public `Qwen4-27B` weights, model card,
-     license, context specification, or agentic-coding/tool-use benchmarks exist (`Qwen` and
-     `nvidia` Hugging Face organizations publish no `Qwen4` checkpoints, and
-     `IteraCompute/Qwen4-27B-NVFP4` remains an empty placeholder with no inference files). In
-     Hugging Face `transformers` (`Qwen4ExpTextConfig`) and upstream `Neroued/ninfer` master
-     (`src/models/qwen4_exp/config.cpp`, `docs/maintainer/qwen4_exp-model.md`), `qwen4_exp`
-     currently implements only the `Qwen3.8-Flash-Next` MoE+PLE variant (`hidden_size = 2560`, 48
-     layers, 512 experts, one PLE layer) and rejects the dense 27B variant (`hidden_size = 5120`, 64
-     layers, dense SwiGLU FFN, no PLE, query-sparse attention (`QSA`) with 24 query heads and 4 KV
-     heads, and a 4-bit `Q4` proposal head). Upstream `Neroued/ninfer` implements the 27B kernel
-     checklist across 19 commits on unmerged feature branch `feat/qwen4-27b-ops` (tip `e1874e94`,
-     2026-10-29, branched from 2026-10-27 master commit `04d0d15b`: RTX 5090 `NVFP4` `28672×5120` +
-     fused SwiGLU and `5120×14336`, `FP8` `14976×5120` and `5120×5120`, `Q4` `248320×5120`
-     vocabulary projection, hidden-size-5,120 (`H5120`) gated-residual norm/combine and `FP8`
-     four-stream residual mixing, and four-KV-head `QSA` preparation and tuned sparse GQA across
-     `BF16`, `INT8`, `NVFP4`, and 8-bit-key/4-bit-value (`K8V4`) KV caches), while upstream `master`
-     (`04d0d15b`/`1882c6ad`) carries only unchecked design docs
-     (`docs/designs/qwen4-27b-op-checklist.md`) and leaves the dense 27B model layer and converter
-     recipes (`tools/convert/official_recipes.py`) unimplemented. `feat/qwen4-27b-ops` stays on
-     watch until public weights and upstream model/converter support exist.
+  4. **GGUF-block `Qwen3.8-27B` community tiers (`DAXZEIT/Qwen3.8-27B-UD-Q4_K_XL-NInfer-v3` `16.37 GiB`
+     text+`MTP` / `16.65 GiB` +vision at `5.14` bits/weight, `WaveCut` `GSQ-RCO` `IQ3_S` `13.99 GiB`
+     at `3.5` bits/weight, `funnygeeker` `UD-Q5_K_S` `17.68 GiB` / `UD-Q6_K` `20.77 GiB`, `haiping`
+     `IQ3_XXS` `14.50 GiB` `_dflash2` / `16.01 GiB` `_a8`, `nerkyor` `Coder390` `12.64–27.34 GiB`
+     `Q2R`..`Q8_0` tiers) and community 27B fine-tunes — GGUF-block tiers unloadable on our engine
+     (upstream PR [`#282`](https://github.com/Neroued/ninfer/pull/282) closed unmerged); `Arete-27B`
+     on watch:** although `DAXZEIT`'s model-card RTX 3090 `B6`/`R6` evaluation reports lower held-out
+     suffix perplexity for `UD-Q4_K_XL` than the official `19.03 GiB` `groupwise-int` artifact
+     (`5.750982` vs `5.844164`, and `5.828615` on `WarlaxZ/Qwen3.8-27B-NInfer-3090`; stored-weight
+     99th-percentile Kullback–Leibler divergence `KLD99` `0.0738` vs `0.2105` and top-1 next-token
+     agreement `96.817%` vs `94.196%` in `llama.cpp`), every GGUF-block `.ninfer` container uses
+     `iamwavecut/ninfer-all`'s `gguf_blocks_v1` layout (`qwen3_8_27b_gguf`, pinned to `ninfer-all`
+     `b2913b65`) carrying raw `ggml` superblocks (`Q2_K`..`Q6_K`, `IQ1_S`..`IQ4_XS`, `Q4_0`/`Q5_0`/`Q8_0`)
+     that neither `alphastorm/ninfer` (release source `F3` `e0971faf` on RTX 5090 `v0.7.0-qwen38-5090-beta.6` in `v0.17.0`; `a87de361` on native `v0.8.0-beta.2`) nor upstream `Neroued/ninfer` master can load.
+     Upstream PR [`Neroued/ninfer#282`](https://github.com/Neroued/ninfer/pull/282) (`convert: read
+     GGUF (any ggml quant level) as a conversion source`) closed unmerged on 2026-11-02
+     (`merged_at: null`), and adopting `gguf_blocks_v1` would require porting `18` block decoders
+     across `src/artifact` and `sm_120`/`sm_89`/`sm_86` kernels plus full three-lane re-qualification
+     and 1,120-prompt quality screens. Among newer open-weight coding models and 27B fine-tunes,
+     `Arete-27B` (`Qwen3.8-27B` fine-tune, `~16.5 GB` in upstream `Q4_K_M` GGUF, convertible through
+     the native `qwen3_5` recipe because it shares the `Qwen3.8-27B` architecture) and native-format
+     community 27B conversions (`funnygeeker/Qwen3.8-27B-BaseQuant-V1-Ninfer-V3` `15.56 GiB`,
+     `jgamboa/Qwen3.8-27B-NInfer-4090`, `WarlaxZ/Qwen3.8-27B-NInfer-3090`) stay on watch, while
+     `Flint v1.0` (`40B` MoE, `23.38 GiB` `UD-Q4_K_XL`, SWE-bench Verified `74.2` but Terminal-Bench
+     2.1 `54.9` vs `73.0`, `ninfer-all` `flint_gguf` only), `SWE-2 Flash` (`276B` total / `12B`
+     active MoE, no public weights), `Nanbeige4.3-33B` (dense `33B`, published NInfer artifact uses
+     unloadable `IQ3_XXS` GGUF blocks), `North Mini Code 1.0` (`30B` MoE, `2026-06-09`, no NInfer
+     architecture support), `Nemotron 3.5 Bolt 74B` (`74B` / `9B` active MoE, no NInfer architecture
+     support), `MiniMax-M3.1-Flash` (`23B` active MoE, `194–249 GB` GGUFs exceed 24–32 GB), and
+     `DeepSeek-V4.1-Flash` (`106.7 GiB` experts exceed 24–32 GB, `ninfer-all` only) are rejected.
+  5. **`Qwen4-27B` (`qwen4_exp` dense 27B) — deferred (still no public weights as of 2026-11-10;
+     upstream `feat/qwen4-27b-ops` unchanged at `e1874e94`):** no public `Qwen4-27B` weights, model
+     card, license, context specification, or agentic-coding/tool-use benchmarks exist (`Qwen` and
+     `nvidia` Hugging Face organizations publish no `Qwen4` checkpoints, `IteraCompute/Qwen4-27B-NVFP4`
+     remains an empty placeholder with no inference files, and `Chungulus/Qwen4-27B-*` repositories
+     created on 2026-11-09 are tagged `placeholder`). In Hugging Face `transformers`
+     (`Qwen4ExpTextConfig`) and upstream `Neroued/ninfer` master (`src/models/qwen4_exp/config.cpp`,
+     `docs/maintainer/qwen4_exp-model.md`), `qwen4_exp` currently implements only the
+     `Qwen3.8-Flash-Next` MoE+PLE variant (`hidden_size = 2560`, 48 layers, 512 experts, one PLE
+     layer) and rejects the dense 27B variant (`hidden_size = 5120`, 64 layers, dense SwiGLU FFN, no
+     PLE, query-sparse attention (`QSA`) with 24 query heads and 4 KV heads, and a 4-bit `Q4`
+     proposal head). Upstream `Neroued/ninfer` implements the 27B kernel checklist across 19 commits
+     on unmerged feature branch `feat/qwen4-27b-ops` (tip `e1874e94`, 2026-10-29, unchanged on
+     2026-11-10 at `204` commits past `64d10fbf` in
+     [`docs/measurements/2026-11-10-upstream-watch.json`](docs/measurements/2026-11-10-upstream-watch.json),
+     branched from 2026-10-27 master commit `04d0d15b`: RTX 5090 `NVFP4` `28672×5120` + fused SwiGLU
+     and `5120×14336`, `FP8` `14976×5120` and `5120×5120`, `Q4` `248320×5120` vocabulary projection,
+     hidden-size-5,120 (`H5120`) gated-residual norm/combine and `FP8` four-stream residual mixing,
+     and four-KV-head `QSA` preparation and tuned sparse GQA across `BF16`, `INT8`, `NVFP4`, and
+     8-bit-key/4-bit-value (`K8V4`) KV caches), while upstream `master` (`04d0d15b`/`1882c6ad`/`77c2e5e2`)
+     carries only unchecked design docs (`docs/designs/qwen4-27b-op-checklist.md`) and leaves the
+     dense 27B model layer and converter recipes (`tools/convert/official_recipes.py`) unimplemented.
+     `feat/qwen4-27b-ops` stays on watch until public weights and upstream model/converter support
+     exist.
 - **DGX Spark (`sm_121a`, 128 GB single-node and two-Spark distributed) — do not buy for this
   workload (decision support, not measured by us).** Third-party NInfer measurements on one 128 GB
   DGX Spark (`baristahaus/ninfer-gb10`) reach `31.5–32.6 tok/s` without speculation, `59.9 tok/s`
