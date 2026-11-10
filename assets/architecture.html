@@ -2,51 +2,62 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>OMP NInfer — architecture</title>
+<title>OMP NInfer — how it works</title>
 <link rel="stylesheet" href="brand.css">
 <style>
-  .arch { width: 1240px; height: 420px; padding: 34px 42px 30px; display: grid; grid-template-rows: 40px 1fr 54px; }
-  .head, .rail { display: flex; align-items: center; justify-content: space-between; }
-  .head .brand img { width: 22px; height: 22px; }
-  .head .brand-name { font-size: 15px; }
-  .flow { display: grid; grid-template-columns: 1fr 190px 1fr; align-items: center; gap: 24px; }
-  .node { min-height: 204px; border: 1px solid var(--line); background: rgba(11,14,17,.7); padding: 24px; display: flex; flex-direction: column; justify-content: space-between; }
-  .node .index { color: var(--local); }
-  .node h2 { margin: 14px 0 8px; font-size: 29px; line-height: 1; letter-spacing: -.035em; font-weight: 600; }
-  .node p { margin: 0; max-width: 350px; color: var(--muted); font-size: 13px; line-height: 1.45; }
-  .tags { display: flex; gap: 7px; margin-top: 18px; }
-  .tags span { padding: 6px 8px; border: 1px solid var(--line); color: var(--body); font: 8px "JetBrains Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
-  .link { position: relative; text-align: center; }
-  .link::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: linear-gradient(90deg, var(--line), var(--local), var(--line)); }
-  .link .socket { position: relative; margin: 0 auto; width: 58px; height: 58px; border: 1px solid rgba(152,136,239,.58); background: var(--ground); border-radius: 50%; display: grid; place-items: center; box-shadow: 0 0 30px rgba(142,123,232,.12); }
-  .link .socket::after { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--local); box-shadow: 0 0 16px var(--local); }
-  .link .copy { position: relative; display: inline-block; margin-top: 14px; padding: 4px 7px; background: var(--ground); color: var(--muted); font: 8px "JetBrains Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
-  .rail { border-top: 1px solid var(--line); padding-top: 15px; }
-  .invariant { display: flex; align-items: center; gap: 10px; color: var(--body); font-size: 11px; }
-  .invariant b { color: var(--warm); font-weight: 500; }
-  .backend { color: var(--muted); font: 8px "JetBrains Mono", monospace; letter-spacing: .07em; text-transform: uppercase; }
+  .arch { width: 1240px; height: 580px; padding: 44px 48px 40px; display: grid; grid-template-rows: 20px 1fr auto; row-gap: 32px; }
+  .release { display: flex; align-items: center; gap: 20px; }
+  .release .rule { flex: 1; height: 1px; background: var(--line-strong); }
+  .nodes { display: grid; grid-template-columns: 1fr 290px 1fr; column-gap: 44px; align-items: start; align-self: center; }
+  .node h2 { margin: 16px 0 0; font-size: 44px; line-height: 1; letter-spacing: -.035em; font-weight: 600; }
+  .node .owns { margin: 16px 0 0; font-size: 24px; line-height: 1.2; font-weight: 500; }
+  .node.state .owns { color: var(--local-text); }
+  .node p { margin: 8px 0 0; font-size: 19px; line-height: 1.42; color: var(--body); }
+  .link { text-align: center; }
+  .link svg { display: block; margin: 18px auto 0; }
+  .link .route { margin-top: 16px; font-family: "JetBrains Mono", monospace; font-size: 18px; color: var(--body); letter-spacing: .01em; }
+  .outcomes { display: grid; grid-template-columns: repeat(3, 1fr); column-gap: 44px; border-top: 1px solid var(--line-strong); padding-top: 26px; }
+  .when { display: flex; align-items: center; gap: 12px; }
+  .outcomes p { margin: 14px 0 0; font-size: 22px; line-height: 1.25; letter-spacing: -.005em; }
+  .outcomes small { display: block; margin-top: 8px; font-size: 18px; line-height: 1.35; color: var(--body); }
 </style>
 </head>
 <body>
-<div class="canvas arch">
-  <div class="head">
-    <div class="brand"><img src="logo.svg" alt=""><span class="brand-name">OMP NInfer</span><span class="brand-rule"></span><span class="eyebrow">System boundary</span></div>
-    <div class="eyebrow">One truth · one accelerator · no hidden gateway</div>
+<div class="sheet arch">
+  <div class="release">
+    <span class="label"><b>OMP NInfer</b> · qualified release</span>
+    <span class="rule"></span>
+    <span class="label">One manifest pins client, runtime, model, profile</span>
   </div>
-  <div class="flow">
+  <div class="nodes">
     <section class="node">
-      <div><div class="eyebrow"><span class="index">[01]</span> Authoritative client</div><h2>OMP keeps the truth.</h2><p>Transcript, tools, branches, and replay commit locally before provider state advances.</p></div>
-      <div class="tags"><span>durable transcript</span><span>tools</span><span>forks</span></div>
+      <div class="label">Coding-agent client</div>
+      <h2>Oh My Pi</h2>
+      <div class="owns">Owns the truth.</div>
+      <p>Transcript, tools, branches, and replay. Written to disk before provider state advances.</p>
     </section>
-    <div class="link"><div class="socket"></div><div class="copy">authenticated loopback</div></div>
-    <section class="node">
-      <div><div class="eyebrow"><span class="index">[02]</span> Qualified runtime</div><h2>NInfer keeps it warm.</h2><p>Qwen3.8 and scoped Responses state stay on the selected GPU. Invalid state falls back to transcript replay.</p></div>
-      <div class="tags"><span>resident model</span><span>state cache</span><span>receipts</span></div>
+    <div class="link">
+      <div class="label">Authenticated loopback</div>
+      <svg width="270" height="150" viewBox="0 0 270 150" role="img" aria-label="The OMP NInfer mark as a diagram: the client leg, the loopback link, and the hardware boundary holding the session state.">
+        <rect x="0" y="6" width="14" height="138" rx="3" fill="#e8ecef"/>
+        <rect x="14" y="68" width="136" height="14" rx="3" fill="#e8ecef"/>
+        <rect x="157" y="29" width="106" height="92" rx="4" fill="none" stroke="#e8ecef" stroke-width="14"/>
+        <circle cx="210" cy="75" r="34" fill="rgba(142,123,232,.18)"/>
+        <circle cx="210" cy="75" r="17" fill="#8e7be8"/>
+      </svg>
+      <div class="route">127.0.0.1 · bearer token</div>
+    </div>
+    <section class="node state">
+      <div class="label">Inference engine on your GPU</div>
+      <h2>NInfer</h2>
+      <div class="owns">Owns the continuation.</div>
+      <p>Qwen3.8 27B and your session's Responses state stay resident, checkpointed to local disk.</p>
     </section>
   </div>
-  <div class="rail">
-    <div class="invariant"><span class="dot"></span><b>Commit boundary:</b><span>complete stream → durable transcript → provider state</span></div>
-    <div class="backend">5090 WSL2 · 4090 native · 3090 native · qualification-current</div>
+  <div class="outcomes">
+    <div><div class="when"><span class="dot"></span><span class="label">Server restarts</span></div><p>The session resumes from its checkpoint.</p><small>Best effort; same runtime, model, profile, and credentials.</small></div>
+    <div><div class="when"><span class="dot"></span><span class="label">No usable checkpoint</span></div><p>Oh My Pi replays the transcript.</p><small>A fresh prefill, never a broken session.</small></div>
+    <div><div class="when"><span class="dot fail"></span><span class="label">GPU unreachable</span></div><p>The turn fails.</p><small>Never answered by a cloud model.</small></div>
   </div>
 </div>
 </body>

@@ -12,6 +12,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mark v0.17.0 as the published release across the README, quickstart banner, facts, roadmap,
   release history, upstream watch, reference docs, site, and brand assets; front-door install links
   return to the guide on `main`.
+- Redesign the README banner, social preview, architecture figure, and qualification-receipt figure
+  as editorial sheets sized for the README column: every word is at least 12 px on screen at
+  GitHub's 838 px column, where the previous sources set 8–13 px type that rendered at 5–9 px.
+  The sheets have no inner frame and no drawn button. The banner and social preview drop the
+  release and client versions, so a release re-renders only `assets/benchmarks.png`; the
+  architecture figure shows who owns what and the three failure outcomes (server restart, no usable
+  checkpoint, unreachable GPU).
+- Restructure the README for a reader deciding whether to install: the single 47-line upgrade
+  sentence becomes a short "Upgrading from v0.16.2" list, the RTX 3090 known limitation becomes its
+  own note under the lanes table, the lanes table separates what differs per lane from what all
+  three share, and the contributor rehearsal note moves to "Help make it better". The release
+  detail it carried stays in the release notes, facts, and changelog; no release evidence changed.
 
 ### Documentation
 

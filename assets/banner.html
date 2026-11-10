@@ -5,42 +5,51 @@
 <title>OMP NInfer — banner</title>
 <link rel="stylesheet" href="brand.css">
 <style>
-  .banner { width: 1280px; height: 320px; padding: 42px 54px 38px; display: grid; grid-template-rows: 42px 1fr 42px; }
-  .top { display: flex; align-items: center; justify-content: space-between; }
-  .release { display: flex; align-items: center; gap: 12px; }
-  .release .index { color: var(--local); }
-  .hero { display: grid; grid-template-columns: 1fr 430px; align-items: center; gap: 70px; }
-  h1 { margin: 0; max-width: 660px; font-size: 48px; line-height: .98; letter-spacing: -.045em; font-weight: 600; }
-  h1 span { color: var(--local); }
-  .promise { margin-top: 15px; max-width: 650px; color: var(--body); font-size: 17px; line-height: 1.35; }
-  .proof { align-self: center; padding: 22px 0 22px 26px; border-left: 1px solid var(--line-strong); }
-  .proof strong { display: block; margin-top: 7px; color: var(--warm); font-size: 24px; line-height: 1.1; letter-spacing: -.025em; font-weight: 500; }
-  .proof p { margin: 9px 0 0; color: var(--muted); font-size: 13px; line-height: 1.4; }
-  .bottom { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 14px; }
-  .lane { display: flex; align-items: center; gap: 9px; color: var(--body); font-size: 11px; letter-spacing: .03em; }
-  .lane i { width: 6px; height: 6px; border-radius: 50%; background: var(--local); box-shadow: 0 0 12px var(--local); }
+  .banner { width: 1280px; height: 320px; padding: 34px 56px 30px; display: grid; grid-template-rows: 32px 1fr 22px; }
+  .top { display: flex; align-items: center; gap: 18px; }
+  .top .rule { width: 1px; height: 22px; background: var(--line-strong); }
+  .hero { display: grid; grid-template-columns: 1fr 430px; align-items: center; column-gap: 32px; }
+  h1 { margin: 0; font-size: 58px; line-height: 1.03; letter-spacing: -.04em; font-weight: 600; white-space: nowrap; }
+  h1 span { color: var(--local-text); }
+  .tagline { margin-top: 10px; color: var(--body); font-size: 24px; line-height: 1.2; letter-spacing: -.005em; }
+  svg { display: block; }
+  svg text { font-family: "JetBrains Mono", monospace; font-size: 18px; font-weight: 500; letter-spacing: .12em; fill: #b6bec7; }
+  svg text.state { fill: #ab9df0; }
 </style>
 </head>
 <body>
-<div class="canvas banner">
+<div class="sheet banner">
   <div class="top">
-    <div class="brand"><img src="logo.svg" alt=""><span class="brand-name">OMP NInfer</span><span class="brand-rule"></span><span class="eyebrow">Durable local inference for coding agents</span></div>
-    <div class="release eyebrow"><span class="index">[01]</span><span>Qualified appliance for Oh My Pi</span></div>
+    <div class="wordmark"><img src="logo.svg" alt=""><span>OMP NInfer</span></div>
+    <span class="rule"></span>
+    <div class="label">Durable local inference for coding agents</div>
   </div>
   <div class="hero">
     <div>
       <h1>Your coding session<br><span>should survive the process.</span></h1>
-      <div class="promise">Qwen3.8 27B for long Oh My Pi sessions. Transcript truth stays in OMP; durable continuation state survives process restarts.</div>
+      <div class="tagline">Durable session state on your GPU.</div>
     </div>
-    <div class="proof">
-      <div class="eyebrow">v0.17.0 · documented route · stock Oh My Pi 18.18.6</div>
-      <strong>Continues after a server restart.</strong>
-      <p>Tool turn, exact continuation, restart survival and fail-closed checks all passed on the published RTX 5090 image. Per-lane numbers and receipts: <span class="mono">docs/BENCHMARKS.md</span></p>
-    </div>
+    <svg width="430" height="164" viewBox="0 0 430 164" role="img" aria-label="The server process stops and is restarted; the session continues through a checkpoint.">
+      <text x="0" y="14">PROCESS</text>
+      <text x="430" y="14" text-anchor="end">RESTARTED</text>
+      <rect x="0" y="32" width="176" height="12" rx="3" fill="#e8ecef"/>
+      <rect x="254" y="32" width="176" height="12" rx="3" fill="#e8ecef"/>
+      <line x1="186" y1="38" x2="244" y2="38" stroke="rgba(232,236,239,.34)" stroke-width="2" stroke-dasharray="2 7" stroke-linecap="round"/>
+      <line x1="215" y1="48" x2="215" y2="76" stroke="rgba(171,157,240,.7)" stroke-width="2" stroke-dasharray="2 6" stroke-linecap="round"/>
+      <line x1="4" y1="100" x2="408" y2="100" stroke="#8e7be8" stroke-width="5" stroke-linecap="round"/>
+      <path d="M406 89 L424 100 L406 111 Z" fill="#8e7be8"/>
+      <circle cx="215" cy="100" r="21" fill="rgba(142,123,232,.18)" stroke="rgba(142,123,232,.6)" stroke-width="1.5"/>
+      <circle cx="215" cy="100" r="9" fill="#ab9df0"/>
+      <text x="0" y="152">SESSION</text>
+      <text x="215" y="152" text-anchor="middle" class="state">CHECKPOINT</text>
+    </svg>
   </div>
-  <div class="bottom">
-    <div class="lane mono"><i></i><span>Qualified on RTX 5090 · 4090 · 3090 — v0.17.0 · measured, hash-pinned, fail-closed</span></div>
-    <div class="cta"><span>Get started</span><b>↗</b></div>
+  <div class="status">
+    <span class="dot"></span><span>Qualified on RTX 5090 · 4090 · 3090</span>
+    <span class="sep">·</span>
+    <span class="quiet">loopback only · fail-closed</span>
+    <span class="sep">·</span>
+    <span class="kin"></span><span class="quiet">companion to oh-my-pi</span>
   </div>
 </div>
 </body>

@@ -5,48 +5,50 @@
 <title>OMP NInfer — social preview</title>
 <link rel="stylesheet" href="brand.css">
 <style>
-  .og { width: 1280px; height: 640px; padding: 58px 64px 48px; display: grid; grid-template-rows: 44px 1fr 62px; }
-  .top, .bottom { display: flex; align-items: center; justify-content: space-between; }
-  .top .brand img { width: 34px; height: 34px; }
-  .top .brand-name { font-size: 22px; }
-  .hero { display: grid; grid-template-columns: 1fr 300px; align-items: center; gap: 80px; }
-  h1 { margin: 0; font-size: 62px; line-height: .98; letter-spacing: -.05em; font-weight: 600; }
-  h1 span { color: var(--local); }
-  .subtitle { margin-top: 24px; max-width: 700px; color: var(--body); font-size: 21px; line-height: 1.42; }
-  .signal { position: relative; width: 260px; height: 260px; justify-self: end; }
-  .signal .ring { position: absolute; border: 1px solid var(--line-strong); border-radius: 50%; }
-  .signal .r1 { inset: 0; }
-  .signal .r2 { inset: 35px; border-color: rgba(152,136,239,.36); }
-  .signal .r3 { inset: 76px; background: var(--local-soft); border-color: rgba(152,136,239,.64); }
-  .signal .core { position: absolute; left: 50%; top: 50%; width: 18px; height: 18px; margin: -9px; border-radius: 50%; background: var(--local); box-shadow: 0 0 34px var(--local); }
-  .signal .axis { position: absolute; left: -26px; top: 50%; width: 312px; height: 1px; background: var(--line); }
-  .signal .label { position: absolute; left: 50%; bottom: -28px; transform: translateX(-50%); white-space: nowrap; }
-  .bottom { border-top: 1px solid var(--line); padding-top: 20px; }
-  .proof { display: flex; align-items: baseline; gap: 13px; }
-  .proof strong { color: var(--warm); font-size: 23px; letter-spacing: -.025em; }
-  .proof span { color: var(--muted); font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: .09em; text-transform: uppercase; }
+  .og { width: 1280px; height: 640px; padding: 54px 64px 48px; display: grid; grid-template-rows: 44px 1fr 34px; }
+  .top { display: flex; align-items: center; justify-content: space-between; }
+  .og .wordmark { font-size: 36px; gap: 16px; }
+  .og .wordmark img { width: 44px; height: 44px; }
+  .og .label { font-size: 26px; }
+  .hero { align-self: center; }
+  h1 { margin: 0; font-size: 86px; line-height: 1.02; letter-spacing: -.045em; font-weight: 600; white-space: nowrap; }
+  h1 span { color: var(--local-text); }
+  .tagline { margin-top: 16px; color: var(--body); font-size: 34px; line-height: 1.2; letter-spacing: -.01em; }
+  svg { display: block; margin-top: 34px; }
+  svg text { font-family: "JetBrains Mono", monospace; font-size: 26px; font-weight: 500; letter-spacing: .12em; fill: #b6bec7; }
+  .og .status { font-size: 28px; gap: 16px; }
+  .og .status .sep { margin: 0 8px; }
+  .og .dot { width: 14px; height: 14px; }
+  .og .kin { width: 12px; height: 12px; }
 </style>
 </head>
 <body>
-<div class="canvas og">
+<div class="sheet og">
   <div class="top">
-    <div class="brand"><img src="logo.svg" alt=""><span class="brand-name">OMP NInfer</span><span class="brand-rule"></span><span class="eyebrow">Durable local inference for coding agents</span></div>
-    <div class="pill"><span class="dot"></span>Private · local · fail-closed</div>
+    <div class="wordmark"><img src="logo.svg" alt=""><span>OMP NInfer</span></div>
+    <div class="label">Durable local inference for coding agents</div>
   </div>
   <div class="hero">
-    <div>
-      <div class="eyebrow">Qualified appliance for Oh My Pi</div>
-      <h1>Your coding session<br><span>should survive the process.</span></h1>
-      <div class="subtitle">Durable session state on a GPU you own. OMP keeps the truth; NInfer keeps the continuation.</div>
-    </div>
-    <div class="signal" aria-label="Illustration of retained private model state">
-      <div class="axis"></div><div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div><div class="core"></div>
-      <div class="label eyebrow">retained session state</div>
-    </div>
+    <h1>Your coding session<br><span>should survive the process.</span></h1>
+    <div class="tagline">Durable session state on your GPU.</div>
+    <svg width="1152" height="112" viewBox="0 0 1152 112" role="img" aria-label="The server process stops and is restarted; the session continues through a checkpoint.">
+      <text x="0" y="21">PROCESS</text>
+      <text x="1152" y="21" text-anchor="end">RESTARTED</text>
+      <rect x="150" y="5" width="350" height="16" rx="4" fill="#e8ecef"/>
+      <rect x="612" y="5" width="350" height="16" rx="4" fill="#e8ecef"/>
+      <line x1="512" y1="13" x2="600" y2="13" stroke="rgba(232,236,239,.34)" stroke-width="2" stroke-dasharray="2 8" stroke-linecap="round"/>
+      <line x1="556" y1="26" x2="556" y2="56" stroke="rgba(171,157,240,.7)" stroke-width="2" stroke-dasharray="2 6" stroke-linecap="round"/>
+      <line x1="150" y1="82" x2="1124" y2="82" stroke="#8e7be8" stroke-width="7" stroke-linecap="round"/>
+      <path d="M1120 67 L1146 82 L1120 97 Z" fill="#8e7be8"/>
+      <circle cx="556" cy="82" r="27" fill="rgba(142,123,232,.18)" stroke="rgba(142,123,232,.6)" stroke-width="1.5"/>
+      <circle cx="556" cy="82" r="12" fill="#ab9df0"/>
+      <text x="0" y="91">SESSION</text>
+    </svg>
   </div>
-  <div class="bottom">
-    <div class="proof"><strong>Qualified on RTX 5090 · 4090 · 3090</strong><span>v0.17.0 · stock Oh My Pi 18.18.6 · published 2026-11-10</span></div>
-    <div class="cta"><span>Get started</span><b>↗</b></div>
+  <div class="status">
+    <span class="dot"></span><span>Qualified on RTX 5090 · 4090 · 3090</span>
+    <span class="sep">·</span>
+    <span class="kin"></span><span class="quiet">companion to oh-my-pi</span>
   </div>
 </div>
 </body>
