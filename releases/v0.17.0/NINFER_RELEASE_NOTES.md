@@ -87,7 +87,7 @@ do not change:
   The projected session decode ratio **1.055–1.093** is a model, below the **15%** selection bar,
   not measured local-Qwen performance: the sample is **3,000 cloud-model turns**, no local-Qwen
   turns on the sampled Mac. The separate default-off draft remains unselected.
-- **rk4v4 remains outside this release:** on RTX 3090 the restored arm and geometry-matched cold
+- **`rk4v4` remains outside this release:** on RTX 3090 the restored arm and geometry-matched cold
   replay agree **32/32**, whereas ordinary 1024-chunk cold differs only at token **32**
   (**48117** versus **3635**). The matched split was **3066**, suffix **18/2/3/4**; transport
   was byte-exact and INT8 control **32/32**. A changed durability oracle and native adoption need
@@ -125,7 +125,7 @@ publication; none of these observations grants new-client or product-route quali
 | Image receipt release | `v0.7.0-qwen38-5090-runtime-beta.6` |
 | Runtime-base receipt / image | Reused `runtime-base-a87de361-20261103` / `ghcr.io/alphastorm/ninfer@sha256:28857182859a8f4993090521899b11a3f8676cb174c59adc626485e9f01472a3` |
 | Deployment profile / configuration SHA-256 | `qwen38-5090-v0.13.0` / `751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47` |
-| Published-image lane receipt | [qualification/rtx5090.json](qualification/rtx5090.json) |
+| Published-image lane receipt | [`qualification/rtx5090.json`](qualification/rtx5090.json) |
 
 The packaged build identity records GNU 13.3.0 / NVIDIA CUDA 13.1.115 / `sm_120a`, clean F3
 source. The exact-source RC batch passed all 12 phases: 66 historical host, 54 current host,

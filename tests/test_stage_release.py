@@ -220,6 +220,8 @@ class StageReleaseTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual((target / "NINFER_RELEASE_NOTES.md").read_text(), notes)
         self.assertEqual({path: path.read_bytes() for path in live}, original)
+        for path in (target / "profiles").glob("*.json"):
+            self.assertEqual(self.load(path)["server"]["checkpoint_host_directory"], "checkpoints-v099")
         qualification = self.load(target / "qualification.json")
         self.assertEqual(qualification["observed_gates"], {"fresh_runtime": {"status": "pending"}})
         self.assertEqual(qualification["composition"]["local_release_packaging"]["status"], "pending")
@@ -243,6 +245,7 @@ class StageReleaseTests(unittest.TestCase):
             self.assertEqual(profile["release"], TARGET)
             self.assertEqual(profile["server"]["status_schema_version"], 2)
             self.assertEqual(profile["server"]["checkpoint_mount_target"], "/checkpoints-v013")
+            self.assertEqual(profile["server"]["checkpoint_host_directory"], "checkpoints-v099")
             args = profile["server"]["arguments"]
             self.assertEqual(args[args.index("--binary-sha256") + 1],
                              manifest["components"]["ninfer"]["server_binary_sha256"])
@@ -728,6 +731,46 @@ class StageReleaseTests(unittest.TestCase):
                     self.assertEqual(after["qualification"].get(field),
                                      before["qualification"][field])
         self.assertEqual(self.load(source_path), source)
+
+    def test_staged_checkpoint_stores_allow_only_valid_root_draft_residue(self) -> None:
+        for store, expected_status in (("checkpoints-v013", 0),
+                                       ("checkpoints-v099", 0),
+                                       ("checkpoints-v098", 1)):
+            with self.subTest(root_store=store):
+                root = self.native_staging_copy()
+                profiles = sorted((root / "profiles").glob("*.json"))
+                for path in profiles:
+                    profile = self.load(path)
+                    profile["server"]["checkpoint_host_directory"] = store
+                    self.save(path, profile)
+                original = {path: path.read_bytes() for path in profiles}
+                result = self.stage(root, None, source_release="v0.16.0")
+                self.assertEqual(result.returncode, expected_status, result.stdout + result.stderr)
+                self.assertEqual({path: path.read_bytes() for path in profiles}, original)
+                target = root / "releases" / TARGET / "profiles"
+                for path in profiles:
+                    staged = self.load(target / path.name)
+                    self.assertEqual(staged["server"]["checkpoint_host_directory"], "checkpoints-v099")
+                    self.assertEqual(staged["server"]["checkpoint_mount_target"], "/checkpoints-v013")
+                    self.assertEqual(configuration_identity(staged), configuration_identity(self.load(path)))
+                errors = ["profile", "profiles/qwen38-rtx5090-manual-tunnel.json"]
+                if expected_status:
+                    for label in errors:
+                        self.assertIn(
+                            f"[UNEXPECTED] {label}: checkpoint host directory must be checkpoints-v099",
+                            result.stdout)
+                if store == "checkpoints-v013":
+                    for mode in ("--require-installable", "--require-ready"):
+                        strict = subprocess.run(
+                            [sys.executable, str(root / "scripts/verify_release.py"),
+                             "--release", TARGET, mode, "--json"],
+                            cwd=root, capture_output=True, text=True)
+                        self.assertEqual(strict.returncode, 1, strict.stdout + strict.stderr)
+                        report = json.loads(strict.stdout)
+                        for label in errors:
+                            self.assertIn(
+                                f"{label}: checkpoint host directory must be checkpoints-v099",
+                                report["errors"])
 
     def test_staged_native_manifest_refuses_removed_quality_and_fit_bindings(self) -> None:
         root = self.native_staging_copy()

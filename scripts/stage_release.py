@@ -16,6 +16,8 @@ doc prose remain the lead's job. What it owns:
   4. Rebase the release's compatibility.json (product_release, 5090 profile
      string, image digest, server binary, configuration hash).
   5. Rebase qualification.json identity and local-release-packaging pins.
+     Schema-2 staged profiles use the successor's checkpoint host directory;
+     the qualified container mount/configuration identity remains unchanged.
   6. Recompute the hash chain through `rebind_release.py --draft`: lane
      receipts -> compatibility variants/qualification/manifest bindings ->
      acceptance compatibility binding -> acceptance hash -> qualification
@@ -78,6 +80,7 @@ from verify_release import (
     validate_upstream_omp_component,
     configuration_identity,
     argument_value,
+    product_version,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -111,6 +114,14 @@ def load(path: Path) -> dict:
 
 def dump(path: Path, value: dict) -> None:
     path.write_text(json.dumps(value, indent=1) + "\n", encoding="utf-8")
+
+
+def checkpoint_host_directory(release: str) -> str:
+    version = product_version(release) or (0, 0, 0)
+    if version[:2] < (0, 17):
+        return "checkpoints-v013"
+    major, minor, patch = version
+    return f"checkpoints-v{major}{minor:02d}" + (f"-{patch}" if patch else "")
 
 
 def rewrite_text(path: Path, replacements: dict[str, str]) -> int:
@@ -503,6 +514,14 @@ def main() -> int:
         output = dst_dir / "profiles" / name
         output.parent.mkdir(exist_ok=True)
         dump(output, template)
+    checkpoint_host = checkpoint_host_directory(args.release)
+    for path in (dst_dir / "profiles").glob("*.json"):
+        profile = load(path)
+        server = profile["server"]
+        if (server.get("status_schema_version") == 2
+                and server.get("checkpoint_host_directory") != checkpoint_host):
+            server["checkpoint_host_directory"] = checkpoint_host
+            dump(path, profile)
     # A staged tree is a draft: the predecessor's acceptance does not carry, and the cut is
     # gated on a fresh composed acceptance against the published component.
     manifest["status"] = "draft"
@@ -692,7 +711,16 @@ def main() -> int:
                      *((f"profiles/{path.name}", path)
                        for path in (ROOT / "profiles").glob("*.json"))]
     for label, path in root_profiles:
-        if load(path)["model"]["artifact_sha256"] != model["artifact_sha256"]:
+        profile = load(path)
+        server = profile["server"]
+        # Only a valid predecessor store is draft residue. Staging writes the new
+        # store into its own profiles; an unrelated root store remains a defect.
+        if (server.get("status_schema_version") == 2
+                and server.get("checkpoint_host_directory") in {
+                    checkpoint_host_directory(profile["release"]), checkpoint_host}):
+            draft_residue.add(
+                f"{label}: checkpoint host directory must be {checkpoint_host}")
+        if profile["model"]["artifact_sha256"] != model["artifact_sha256"]:
             if label == "profile":
                 draft_residue.add("profile and manifest model hashes must match")
             for field in ("hash", "bytes"):
