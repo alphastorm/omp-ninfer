@@ -152,6 +152,7 @@ def campaign_waiver(release: str, candidate: str, route_sha256: str,
             "managed_stop": {**waiver["observed_summary"], "sessions_refused": 3},
         }
         waiver["evidence_sha256"]["compaction-probe.json"] = "c" * 64
+        waiver["probe_projection_sha256"] = {"compaction": "d" * 64}
     return waiver
 
 
@@ -413,6 +414,8 @@ class UpstreamCompositionTests(unittest.TestCase):
                 for name in ("parallel", "compaction"):
                     if name in probes:
                         probes[name]["omp"]["sha256"] = manifest["components"]["omp"]["binary_sha256"]
+                if evidence[lane].get("failed_phase") == "native-probes":
+                    probes["compaction"].update(passed=False, checks={}, compactions=[])
                 evidence[lane].update(runtime_configuration=configuration,
                                       probe_acceptance=native_probe_summary(probes))
                 install = evidence[lane].get("observations", {}).get("public_install")
@@ -854,8 +857,12 @@ class UpstreamCompositionTests(unittest.TestCase):
         self.bind_native_policies()
         if failed_phase == "native-probes":
             evidence = MODULE.load(self.root / "evidence.json")
-            evidence["rtx3090"]["probe_acceptance"]["compaction"].update(
-                passed=False, checks={}, committed=0)
+            waiver["probe_projection_sha256"]["compaction"] = (
+                evidence["rtx3090"]["probe_acceptance"]["compaction"]["sha256"])
+            MODULE.save(path, waiver)
+            binding["sha256"] = MODULE.sha256(path.read_bytes())
+            evidence["rtx3090"]["founder_waiver"] = binding
+            evidence["restoration"]["rtx3090"]["founder_waiver"] = binding
             MODULE.save(self.root / "evidence.json", evidence)
         self.argv += ["--native-route-waiver", f"rtx3090-native={binding['repository_path']}"]
         return path
@@ -925,6 +932,34 @@ class UpstreamCompositionTests(unittest.TestCase):
         validate_native_route_policy(self.root, self.release,
                                      MODULE.load(self.release_root / "manifest.json"), qualification, errors)
         self.assertEqual(errors, [])
+
+    def test_native_probe_waiver_binds_the_failed_projection_before_writing(self) -> None:
+        path = self.waive_3090(failed_phase="native-probes")
+        original, source = MODULE.load(path), MODULE.load(self.root / "evidence.json")
+        for case in ("missing object", "missing compaction", "non-object", "mismatched waiver",
+                     "mismatched projection"):
+            with self.subTest(case=case):
+                waiver, evidence = deepcopy(original), deepcopy(source)
+                if case == "missing object":
+                    waiver.pop("probe_projection_sha256")
+                elif case == "missing compaction":
+                    waiver["probe_projection_sha256"].clear()
+                elif case == "non-object":
+                    waiver["probe_projection_sha256"] = []
+                elif case == "mismatched waiver":
+                    waiver["probe_projection_sha256"]["compaction"] = "0" * 64
+                else:
+                    evidence["rtx3090"]["probe_acceptance"]["compaction"]["sha256"] = "0" * 64
+                MODULE.save(path, waiver)
+                binding = {"repository_path": path.relative_to(self.root).as_posix(),
+                           "sha256": MODULE.sha256(path.read_bytes())}
+                evidence["rtx3090"]["founder_waiver"] = binding
+                evidence["restoration"]["rtx3090"]["founder_waiver"] = binding
+                MODULE.save(self.root / "evidence.json", evidence)
+                with self.assertRaisesRegex(SystemExit, "compaction projection SHA-256"):
+                    self.compose()
+                self.assertFalse((self.release_root / "acceptance").exists())
+                self.assertEqual(list((self.root / "docs/measurements").iterdir()), [])
 
     def test_native_probe_waiver_does_not_excuse_other_probes_or_relabel_compaction_passed(self) -> None:
         self.waive_3090(failed_phase="native-probes")

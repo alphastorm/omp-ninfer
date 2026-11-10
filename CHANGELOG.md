@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Bind founder-waived native compaction projections to the waiver's canonical proof digest,
+  retaining the separate file-byte digest. Require each waived lane's composed limitation to
+  state that native behavior completion, wrapper restoration audit and anonymous public-install
+  acceptance are not claimed.
 - Prepare the next RTX 5090 route with a separate `checkpoints-v017` host store, leaving
   predecessor stores intact for rollback. Install the macOS bearer key through a same-directory
   temporary file and replace it only after SSH success and validation

@@ -35,6 +35,8 @@ still pass unchanged, and its candidate policy and unwaived probes still pass; o
 observations, the public install and the wrapper restoration audit are replaced by a hash-bound
 founder decision and lead recovery. A native-probes waiver identifies the compaction error,
 timeout, HTTP status counts and any subsequent refused managed Stop; its compaction proof stays failed.
+Its probe_projection_sha256.compaction must bind the canonical parsed-proof digest projected by
+native_probe_summary, separately from the evidence_sha256 file-byte digest.
 The collector's window-failure observations and digest must match that decision. Lead recovery
 must prove a graceful empty Stop and the stopped owner's census power; the aggregate restoration
 then says passed-with-founder-waiver, never passed.
@@ -65,6 +67,7 @@ from verify_release import (  # pyright: ignore[reportMissingImports]
     bound_file, native_profile, validate_native_route_waiver, validate_native_lead_recovery,
     validate_native_public_install_identity,
     NATIVE_ROUTE_LANES as NATIVE_LANES,
+    NATIVE_WAIVER_NON_CLAIM,
 )
 from rebind_release import RAW  # pyright: ignore[reportMissingImports]
 from compose_native_qualification import (
@@ -528,7 +531,8 @@ def main() -> int:
         validate_native_route_waiver(ROOT, args.release, candidate, lane,
                                     campaign["failed_phase"], reference, errors,
                                     window_failure=campaign["window_failure"],
-                                    stopped_owner_census=campaign["stopped_owner_census"])
+                                    stopped_owner_census=campaign["stopped_owner_census"],
+                                    probe_acceptance=native.get("probe_acceptance"))
         require(not errors, "; ".join(errors))
         require(campaign["status"] == "failed" and native.get("founder_waiver") == reference,
                 f"{lane}: waiver requires the failed campaign and matching founder binding")
@@ -568,8 +572,7 @@ def main() -> int:
         (f"{lane}: documented blocks passed, but the post-route native-probes compaction probe "
          if row["failed_phase"] == "native-probes" else
          f"{lane}: documented blocks passed, but the post-route {row['failed_phase']} managed Stop ")
-        + "failed and was waived by the founder. Native behavior completion, wrapper restoration "
-        "audit and anonymous public-install acceptance are not claimed; lead recovery is bound "
+        + "failed and was waived by the founder. " + NATIVE_WAIVER_NON_CLAIM + "; lead recovery is bound "
         "by the waiver." for lane, row in waived.items()]
     if waived:
         scope += " " + " ".join(waiver_limitations)

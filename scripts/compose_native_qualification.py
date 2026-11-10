@@ -216,10 +216,13 @@ def matches_native_configuration(value: Any, expected: dict[str, Any]) -> bool:
             and all(type(value[key]) is type(wanted) and value[key] == wanted for key, wanted in expected.items()))
 
 
+def digest(value: Any) -> str:
+    """Canonical parsed-proof digest shared by native projections and founder waiver preparation."""
+    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
 def native_probe_summary(probes: dict[str, Any]) -> dict[str, Any]:
     """Content-safe projection of actual probe receipts, not an authored boolean checks map."""
-    def digest(value):
-        return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
     fleet = probes["fleet"]
     summary = {"fleet": {
         "sha256": digest(fleet), "artifact_type": fleet.get("artifact_type"),

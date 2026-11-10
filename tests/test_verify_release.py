@@ -2279,7 +2279,10 @@ class ReleaseContractTest(unittest.TestCase):
         external["evidence"]["documented_routes"] = routes_ref
         external["evidence"]["restoration"] = deepcopy(routes["restoration_receipt"])
         del external["evidence"]["rtx3090_public_install"]
-        external["limitations"].append("rtx3090-native campaign failed and was waived by the founder.")
+        external["limitations"].append(
+            "rtx3090-native campaign failed and was waived by the founder. Native behavior completion, "
+            "wrapper restoration audit and anonymous public-install acceptance are not claimed; "
+            "lead recovery is bound by the waiver.")
         self.save(external_path, external)
         # Preserve a non-passing historical install record without claiming it as acceptance.
         public = release_root / "acceptance/rtx3090-public-install.json"
@@ -2318,8 +2321,44 @@ class ReleaseContractTest(unittest.TestCase):
             qualification["composition"]["documented_route_acceptance"]["sha256"] = VERIFY_RELEASE.sha256_file(routes_path)
             qualification["documented_route_acceptance"]["evidence_sha256"] = VERIFY_RELEASE.sha256_file(routes_path)
             qualification["composition"]["external_installation_acceptance"]["sha256"] = VERIFY_RELEASE.sha256_file(external_path)
+            restored = qualification["documented_route_acceptance"]["restoration"]
+            if "waived_native_campaigns" in restored:
+                restored["waived_native_campaigns"]["rtx3090-native"] = deepcopy(restoration["rtx3090"])
 
-        self.rebind_qualification(root / "releases" / PUBLIC_RELEASE, update)
+        self.rebind_qualification(routes_path.parent.parent, update)
+
+    def native_probe_waiver_copy(self) -> tuple[tempfile.TemporaryDirectory[str], Path, Path, Path, Path]:
+        """Exercise the ready gate with v0.16.2's authenticated C2 policy and other real probes."""
+        from compose_native_qualification import native_probe_summary
+        from test_compose_route_acceptance import campaign_waiver, waived_campaign_evidence
+        temporary, root = self.current_release_copy()
+        release_root = root / "releases/v0.16.2"
+        routes_path = release_root / "acceptance/documented-routes.json"
+        external_path = release_root / "acceptance/composed-external-installation.json"
+        path = release_root / "qualification/rtx3090-route-waiver.json"
+        routes, external = self.load(routes_path), self.load(external_path)
+        campaign = routes["native_campaigns"]["rtx3090-native"]
+        # Project a parsed failed fixture proof, not a passed proof with its projected verdict edited.
+        proof = {field: deepcopy(campaign["probe_acceptance"]["compaction"][field])
+                 for field in ("artifact_type", "model", "omp", "parameters")}
+        proof.update(passed=False, checks={}, compactions=[])
+        projection = native_probe_summary({"fleet": {}, "compaction": proof})["compaction"]
+        waiver = campaign_waiver("v0.16.2", routes["candidate_commit"],
+                                 routes["routes"]["rtx3090-native"]["sha256"],
+                                 failed_phase="native-probes")
+        waiver["evidence_sha256"]["compaction-probe.json"] = hashlib.sha256(
+            json.dumps(proof, indent=2).encode()).hexdigest()
+        waiver["probe_projection_sha256"]["compaction"] = projection["sha256"]
+        self.save(path, waiver)
+        campaign.update(failed_phase="native-probes", **waived_campaign_evidence(waiver),
+                        founder_waiver={"repository_path": path.relative_to(root).as_posix(),
+                                       "sha256": VERIFY_RELEASE.sha256_file(path)})
+        campaign["probe_acceptance"]["compaction"] = projection
+        external["steps"]["rtx3090-native"] = {**deepcopy(campaign), "blocks": 7}
+        self.save(routes_path, routes)
+        self.save(external_path, external)
+        self.rebind_failed_native_campaign(root, routes_path, external_path)
+        return temporary, root, path, routes_path, external_path
 
     def test_require_ready_accepts_the_failed_founder_waived_campaign_not_a_route_failure(self) -> None:
         temporary, root = self.public_draft_copy()
@@ -2332,16 +2371,97 @@ class ReleaseContractTest(unittest.TestCase):
         self.assertEqual(routes["native_campaigns"]["rtx3090-native"]["status"], "failed")
 
     def test_require_ready_accepts_a_failed_founder_waived_native_probe_campaign(self) -> None:
-        temporary, root = self.public_draft_copy()
+        temporary, root, path, routes_path, _ = self.native_probe_waiver_copy()
         self.addCleanup(temporary.cleanup)
-        _, routes_path, _ = self.bind_failed_native_campaign(root, failed_phase="native-probes")
-        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=True, product_release="v0.16.2")
         self.assertEqual(errors, [])
         routes = self.load(routes_path)
         self.assertEqual(routes["routes"]["rtx3090-native"]["status"], "passed")
         campaign = routes["native_campaigns"]["rtx3090-native"]
         self.assertEqual(campaign["status"], "failed")
         self.assertEqual(campaign["failed_phase"], "native-probes")
+        self.assertEqual(campaign["runtime_configuration"]["concurrency"], 2)
+        self.assertIs(campaign["probe_acceptance"]["compaction"]["passed"], False)
+        self.assertEqual(self.load(path)["probe_projection_sha256"]["compaction"],
+                         campaign["probe_acceptance"]["compaction"]["sha256"])
+
+    def test_require_ready_native_probe_waiver_keeps_unwaived_policy_mandatory(self) -> None:
+        temporary, root, _, routes_path, external_path = self.native_probe_waiver_copy()
+        self.addCleanup(temporary.cleanup)
+        original, original_external = self.load(routes_path), self.load(external_path)
+        cases = (
+            ("waiver removed", lambda campaign: campaign.pop("founder_waiver"),
+             "must bind a repository file"),
+            ("compaction relabeled passed", lambda campaign: campaign["probe_acceptance"]["compaction"].update(
+                passed=True), "retain its failed proof"),
+            ("fleet failed", lambda campaign: campaign["probe_acceptance"]["fleet"].update(
+                transient_retries=1), "fleet sequential regression"),
+            ("fanout failed", lambda campaign: campaign["probe_acceptance"]["fanout"].update(
+                ok=False), "real four-way fanout"),
+            ("parallel failed", lambda campaign: campaign["probe_acceptance"]["parallel"].update(
+                passed=False), "native C2 parallel must pass"),
+            ("client changed", lambda campaign: campaign["probe_acceptance"]["compaction"]["omp"].update(
+                sha256="0" * 64), "documented stock client/model"),
+            ("model changed", lambda campaign: campaign["probe_acceptance"]["compaction"].update(
+                model="ninfer-native-3090/another-model"), "documented stock client/model"),
+        )
+        for case, mutate, expected in cases:
+            with self.subTest(case=case):
+                routes, external = deepcopy(original), deepcopy(original_external)
+                campaign = routes["native_campaigns"]["rtx3090-native"]
+                mutate(campaign)
+                external["steps"]["rtx3090-native"] = {**deepcopy(campaign), "blocks": 7}
+                self.save(routes_path, routes)
+                self.save(external_path, external)
+                self.rebind_failed_native_campaign(root, routes_path, external_path)
+                _, errors = VERIFY_RELEASE.validate(root, require_ready=True, product_release="v0.16.2")
+                self.assertTrue(any(expected in error for error in errors), errors)
+
+    def test_require_ready_native_probe_waiver_binds_the_failed_projection_digest(self) -> None:
+        temporary, root, path, routes_path, external_path = self.native_probe_waiver_copy()
+        self.addCleanup(temporary.cleanup)
+        original_waiver = self.load(path)
+        original, original_external = self.load(routes_path), self.load(external_path)
+        for case in ("missing object", "missing compaction", "non-object", "mismatched waiver",
+                     "mismatched projection"):
+            with self.subTest(case=case):
+                waiver = deepcopy(original_waiver)
+                routes, external = deepcopy(original), deepcopy(original_external)
+                campaign = routes["native_campaigns"]["rtx3090-native"]
+                if case == "missing object":
+                    waiver.pop("probe_projection_sha256")
+                elif case == "missing compaction":
+                    waiver["probe_projection_sha256"].clear()
+                elif case == "non-object":
+                    waiver["probe_projection_sha256"] = []
+                elif case == "mismatched waiver":
+                    waiver["probe_projection_sha256"]["compaction"] = "0" * 64
+                else:
+                    campaign["probe_acceptance"]["compaction"]["sha256"] = "0" * 64
+                self.save(path, waiver)
+                campaign["founder_waiver"]["sha256"] = VERIFY_RELEASE.sha256_file(path)
+                external["steps"]["rtx3090-native"] = {**deepcopy(campaign), "blocks": 7}
+                self.save(routes_path, routes)
+                self.save(external_path, external)
+                self.rebind_failed_native_campaign(root, routes_path, external_path)
+                _, errors = VERIFY_RELEASE.validate(root, require_ready=True, product_release="v0.16.2")
+                self.assertTrue(any("compaction projection SHA-256" in error for error in errors), errors)
+
+    def test_require_ready_waived_limitation_contains_the_exact_non_claim_for_its_lane(self) -> None:
+        temporary, root, _, routes_path, external_path = self.native_probe_waiver_copy()
+        self.addCleanup(temporary.cleanup)
+        original = self.load(external_path)
+        non_claim = ("Native behavior completion, wrapper restoration audit and anonymous "
+                     "public-install acceptance are not claimed")
+        for limitations in (["rtx3090-native campaign failed and was founder-waived."],
+                            [non_claim], ["rtx3090-native campaign failed.", non_claim]):
+            with self.subTest(limitations=limitations):
+                external = deepcopy(original)
+                external["limitations"] = limitations
+                self.save(external_path, external)
+                self.rebind_failed_native_campaign(root, routes_path, external_path)
+                _, errors = VERIFY_RELEASE.validate(root, require_ready=True, product_release="v0.16.2")
+                self.assertTrue(any("composed limitations" in error for error in errors), errors)
 
     def test_native_probe_waiver_requires_bound_failure_details_and_graceful_recovery(self) -> None:
         from test_compose_route_acceptance import campaign_waiver, waived_campaign_evidence
@@ -2398,7 +2518,8 @@ class ReleaseContractTest(unittest.TestCase):
                     errors = []
                     valid = VERIFY_RELEASE.validate_native_route_waiver(
                         root, "v0.17.0", "1" * 40, "rtx3090-native", waiver["failed_phase"],
-                        reference, errors, **evidence)
+                        reference, errors, **evidence,
+                        probe_acceptance={"compaction": {"sha256": original["probe_projection_sha256"]["compaction"]}})
                     if expected is None:
                         self.assertTrue(valid, errors)
                         self.assertEqual(errors, [])

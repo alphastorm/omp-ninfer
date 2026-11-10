@@ -98,6 +98,8 @@ PENDING_PRODUCT_TERM_RE = re.compile(
 CLOSED_REVIEW_STATUS_RE = re.compile(r"^closed(?:-[a-z]+)*$")
 NATIVE_ROUTE_LANES = {"rtx4090-native": "rtx4090-windows-native",
                       "rtx3090-native": "rtx3090-windows-native"}
+NATIVE_WAIVER_NON_CLAIM = (
+    "Native behavior completion, wrapper restoration audit and anonymous public-install acceptance are not claimed")
 MARKDOWN_LINK_RE = re.compile(r'!?\[[^]]*\]\(([^)\s]+)(?:\s+["\'][^)]*["\'])?\)')
 MARKDOWN_REFERENCE_RE = re.compile(r'^\[[^]]+\]:\s+(\S+)', re.MULTILINE)
 ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -1206,6 +1208,7 @@ def _validate_native_refused_stop(observed: dict, label: str, errors: list[str])
 def validate_native_route_waiver(
     root: Path, release: str, candidate: str, lane: str, failed_phase: Any,
     reference: Any, errors: list[str], *, window_failure: Any, stopped_owner_census: Any,
+    probe_acceptance: Any,
 ) -> bool:
     """Bind a refused Stop or failed compaction probe, never a passing native campaign."""
     before = len(errors)
@@ -1274,6 +1277,12 @@ def validate_native_route_waiver(
         require_sha(evidence.get(name), f"{label} {name} SHA-256", errors)
     if failed_phase == "native-probes":
         require_sha(evidence.get("compaction-probe.json"), f"{label} compaction-probe.json SHA-256", errors)
+        projection = waiver.get("probe_projection_sha256")
+        compaction_sha = projection.get("compaction") if isinstance(projection, dict) else None
+        require_sha(compaction_sha, f"{label} compaction projection SHA-256", errors)
+        compaction = probe_acceptance.get("compaction") if isinstance(probe_acceptance, dict) else None
+        require(isinstance(compaction, dict) and compaction_sha == compaction.get("sha256"),
+                f"{label} compaction projection SHA-256 must match the campaign's failed proof", errors)
     failure = window_failure if isinstance(window_failure, dict) else {}
     require(failure.get("sha256") == evidence.get("window-failure.json")
             and failure.get("boundary") == failed_phase,
@@ -1327,7 +1336,8 @@ def validate_native_campaigns(root: Path, release: str, routes: dict[str, Any],
         validate_native_route_waiver(
             root, release, routes.get("candidate_commit"), lane, campaign.get("failed_phase"),
             campaign.get("founder_waiver"), errors, window_failure=campaign.get("window_failure"),
-            stopped_owner_census=campaign.get("stopped_owner_census"))
+            stopped_owner_census=campaign.get("stopped_owner_census"),
+            probe_acceptance=campaign.get("probe_acceptance"))
         row = route_rows.get(lane, {})
         binding = campaign.get("founder_waiver")
         waiver_path = bound_file(root, binding.get("repository_path") if isinstance(binding, dict) else None)
@@ -1441,8 +1451,10 @@ def composed_native_waivers(root: Path, release: str, qualification: dict[str, A
         require(f"{gpu}_public_install" not in composed.get("evidence", {})
                 and (not public_path.is_file() or load_json(public_path).get("status") != "passed"),
                 f"{lane} waived native campaign cannot also claim public-install acceptance", errors)
-        require(any(lane in text for text in composed.get("limitations", []) if isinstance(text, str)),
-                f"{lane} waived native campaign must be named in composed limitations", errors)
+        require(any(lane in text and NATIVE_WAIVER_NON_CLAIM in text
+                    for text in composed.get("limitations", []) if isinstance(text, str)),
+                f"{lane} waived native campaign must disclose the native acceptance non-claim "
+                "in composed limitations", errors)
     return waived
 
 
