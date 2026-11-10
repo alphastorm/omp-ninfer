@@ -49,10 +49,10 @@ OMP remains responsible for tool approval and workspace boundaries.
 5. OMP uses explicit local provider routes (`ninfer-beta/q38-ninfer`,
    `ninfer-native-4090/qwen3.8-27b`, or `ninfer-native-3090/q38-ninfer`) with retries, model
    fallback, and automatic client self-updates disabled (`examples/manual-tunnel/fail-closed.yml`).
-6. The upstream OMP 18.15.0 binaries, shared Qwen3.8 27B model container version 3 artifact
+6. The upstream OMP 18.18.6 binaries, shared Qwen3.8 27B model container version 3 artifact
    (`81f924d4`), NInfer container image and native packages, server binaries, SPDX and CycloneDX
    dependency SBOMs, seccomp profile, runtime configurations, and qualification summaries are pinned
-   by immutable SHA-256 digests and commits in `releases/v0.16.2/manifest.json` before release
+   by immutable SHA-256 digests and commits in `releases/v0.17.0/manifest.json` before release
    status becomes `ready`.
 7. The NInfer container image is pulled by OCI manifest digest (`@sha256:`), never a mutable tag.
 8. Support material excludes raw prompts, outputs, request logs, secrets, private paths, hostnames,
@@ -75,8 +75,8 @@ NInfer retains bounded in-memory Responses and cache state and writes durable se
 checkpoints across all three qualified lanes:
 
 - **RTX 5090 container lane:** Checkpoints and request logs (`requests.jsonl`) live in
-  operator-owned host directories (`chmod 700`, default `~/.local/share/omp-ninfer/checkpoints-v013` and
-  `~/.local/state/omp-ninfer`) bind-mounted into the container at `/checkpoints-v013` (24,576 MiB quota,
+  operator-owned host directories (`chmod 700`, default `~/.local/share/omp-ninfer/checkpoints-v017` for checkpoints—isolated from `~/.local/share/omp-ninfer/checkpoints-v013` in `v0.13.0`–`v0.16.2`—and
+  `~/.local/state/omp-ninfer` for logs) bind-mounted into the container at `/checkpoints-v013` (24,576 MiB quota,
   256 MiB staging, schema 3, mandatory `--session-checkpoint-require-origin-auth`) and `/logs`, written as the invoking user via `io_uring` and `O_DIRECT`.
 - **Native Windows RTX 4090 and RTX 3090 lanes:** Checkpoints (`cache/<release-instance-id>/session-checkpoints-v3`,
   where `<release-instance-id>` is the installed release ID such as
@@ -127,7 +127,7 @@ defect.
 
 ## Artifact verification
 
-Run from the exact release tag (`v0.16.2`):
+Run from the exact release tag (`v0.17.0`):
 
 ```sh
 python3 scripts/verify_release.py --require-ready

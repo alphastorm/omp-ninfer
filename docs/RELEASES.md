@@ -5,47 +5,85 @@ to NInfer (inference engine) serving Qwen3.8 27B (served model). OMP NInfer vers
 product; component repositories keep their own versions and tags, and the product manifest binds
 the exact combination.
 
-**Navigation:** [Current release (v0.16.2)](#v0162--durable-export-host-reclaim-and-stock-omp-18150) · [Previous v0.16.0](#v0160--native-dflash2-k7-rtx-3090-concurrency-2-and-unified-engine-fixes) ·
+**Navigation:** [Current release (v0.17.0)](#v0170--bounded-resume-admission-serving-robustness-and-stock-omp-18186) · [Previous v0.16.2](#v0162--durable-export-host-reclaim-and-stock-omp-18150) ·
 [Channels](#channels) · [Version identities](#version-identities) ·
 [Release state transition](#release-state-transition) · [Candidate freeze](#candidate-freeze) ·
 [Next native release sequencing](#next-native-release-sequencing) ·
 [External-install acceptance](#external-install-acceptance) · [Cut procedure](#cut-procedure) ·
 [Release notes](#release-notes)
 
-## v0.17.0 composition — beta.6 runtime and stock OMP 18.18.6
+## v0.17.0 — bounded resume admission, serving robustness, and stock OMP 18.18.6
 
-The successor composition selects published RTX 5090 `v0.7.0-qwen38-5090-beta.6` from F3
-`e0971faf221204047d5a4ed834e4e298740cee17` (image `7a19576b`, server `dc86e101`),
-stock OMP **18.18.6** (`9058ab9d`, tree `fd379b65`, release `439766193`) and unchanged native
-beta.2 packages at `a87de361`. The shared v3 model and serving policy stay fixed.
-The runtime RC passed 12/12 phases; 664 artifacts and three packages matched across the double build.
-Source/protocol evidence and historical native qualification remain distinct from product acceptance.
+Published **2026-11-10** (`2026-11-10T16:10:46Z`, GitHub release ID `440594229`, annotated tag
+`v0.17.0` → `97dea2f00bce385e7fb80c4fddeb38a8f5897385`) as GitHub `Latest`, succeeding `v0.16.2`
+(published 2026-11-04). The release binds published RTX 5090 `v0.7.0-qwen38-5090-beta.6` (release
+ID `440258810`, server `dc86e101`, image `7a19576b` on reused base `28857182` /
+`runtime-base-a87de361-20261103`, source archive release `v0.7.0-qwen38-5090-source.6` ID
+`440260408`, image receipt release `v0.7.0-qwen38-5090-runtime-beta.6` ID `440262722`) from release
+source F3 `e0971faf221204047d5a4ed834e4e298740cee17` ([fork PR #101](https://github.com/alphastorm/ninfer/pull/101))
+on upstream `Neroued/ninfer` master `64d10fbf9f8e6bfc79ab0570b94674c5b9997929`, unmodified upstream
+OMP **18.18.6** (`9058ab9d`, tree `fd379b65`, release `439766193`), and unchanged published native
+RTX 3090 / RTX 4090 `v0.8.0-qwen38-{3090,4090}-beta.2` packages at source
+`a87de3613c17bced777b446fb545f872d8395ec1` (packages `97a8e634` / `d9b10b47`, servers `15a4db46` /
+`ffee91bf`). The shared v3 model `81f924d4` (20,437,521,664 bytes, revision `1cbd84e7`) and serving
+policy stay fixed, with RTX 5090 using isolated host checkpoint directory `checkpoints-v017`
+mounted at `/checkpoints-v013`.
+The exact-source runtime RC passed all `12/12` phases (`66` historical host, `54` current host
+including `35/35` EngineCore and Scheduler regressions, `11` dense real-model tests, `1` overlap
+test); `664` build artifacts and all `3` package outputs matched bit for bit across the same-path
+double build, and the published-image lane receipt (`11fde294`) passed at **181.92 tok/s** server /
+**180.40 tok/s** wall decode and **56.63 s** cold exact 130,048-token retrieval (**2,296.5 tok/s**
+wall, **56.53 s** server). Source/protocol evidence and historical native qualification remain
+distinct from product acceptance.
 
-On 2026-11-10, candidate `076bbe4f5abd68c8a0a1ba2efa0d08e881970e11` passed all five documented
-routes (**2/10/5/7/7; 31/31 blocks**) and three exact stock clients. RTX 5090 hold **408.213 s**;
-the same healthy incumbent image/container, restart policy and checkpoint mounts were restored.
-RTX 4090's **508.420 s** campaign, public install and independent restoration passed.
-RTX 3090's seven blocks passed before its **1727.696 s** campaign failed at native-probes compaction
-(900 s timeout, eight 503 queue timeouts, two 499 cancellations, no resident work); managed Stop
-then refused three sessions. A new exact-subject founder waiver retains that failure.
-Lead recovery restored the stopped original lane at 370 W with no refused sessions and an unchanged
-cross-lane census; it is not a passing wrapper audit or anonymous public install.
-RTX 3090 users should keep v0.16.2 or restart after long sessions until a native re-cut is qualified.
+On **2026-11-10**, candidate `076bbe4f5abd68c8a0a1ba2efa0d08e881970e11` passed all five documented
+routes (**2/10/5/7/7; 31/31 blocks**) and three exact stock clients. RTX 5090 accepted and
+all-attempt hold **408.213 s** (one production window); the same healthy incumbent image/container,
+restart policy, and checkpoint mounts were restored. RTX 4090's **508.420 s** campaign, `C1` fleet
+probe, public install (`already_installed`, exact bytes, unchanged pointers), and independent
+restoration passed. RTX 3090's seven blocks, four-way `C2` fleet/fanout, and parallel stock OMP
+overlap at limit 2 passed before its **1,727.696 s** campaign failed at `native-probes` compaction
+(`900 s` timeout, eight HTTP `503` queue timeouts, two HTTP `499` cancellations, `0` resident
+work); managed Stop then returned `graceful_incomplete_shutdown` (saved `2` / skipped `5` / refused
+`3`, reason `capacity`). A new exact-subject
+[founder waiver](../releases/v0.17.0/qualification/rtx3090-route-waiver.json) (`19f2c0ef`) retains
+that failure. Lead recovery (`fabb50de`) restored the stopped original lane gracefully at 370 W with
+no refused sessions and an identical canonical cross-lane census (`db1634a7`); native behavior
+completion, structured-outage acceptance, a passing wrapper restoration audit, and anonymous
+public-install acceptance are not claimed. RTX 3090 users should keep `v0.16.2` or restart the lane
+after long sessions until a native re-cut is qualified.
 
 The closed runtime/product councils and waiver-focused review bind the
-[review ledger](../releases/v0.17.0/review/runtime-ledger.json); deferred tooling work is
-[#149](https://github.com/alphastorm/omp-ninfer/issues/149). The
+[review ledger](../releases/v0.17.0/review/runtime-ledger.json) (`5f8d6e4a`); deferred tooling work
+is [#149](https://github.com/alphastorm/omp-ninfer/issues/149). The
 [notes](../releases/v0.17.0/NINFER_RELEASE_NOTES.md),
-[route receipts](../releases/v0.17.0/acceptance/documented-routes.json) and
+[route receipts](../releases/v0.17.0/acceptance/documented-routes.json), and
 [composition](../releases/v0.17.0/acceptance/composed-external-installation.json) retain scope.
-Product publication and production promotion are founder-only. The published install authority
-and GitHub `Latest` stay **v0.16.2** until that separate action.
+Founder-owned publication completed on 2026-11-10; review approval and immutable evidence pins are
+separate gates.
+
+The [release notes](../releases/v0.17.0/NINFER_RELEASE_NOTES.md) and
+[client descriptor](../releases/v0.17.0/qualification/client-components.json) (`d840d5e5`) select
+upstream release `439766193` (`2026-11-09T23:30:49Z`), commit
+`9058ab9d229663e229e2867824ba6df6f21e9e59`, tree `fd379b65368a20c7648d97f2c2b99cc03e019254`.
+
+| Platform | Asset / ID | Bytes | SHA-256 |
+| --- | --- | ---: | --- |
+| Darwin arm64 | `omp-darwin-arm64` / `729375455` | 221867152 | `ed2e63eb43888eb76cb1409b245b1db4557c94dfad52dc545c9aaca01ebce82d` |
+| Windows x64 | `omp-windows-x64.exe` / `729375449` | 249985024 | `dfb15c27cb2ea192a94761c26aa5cd4eed54b1e0a5a85c02938ab07d769bc8f7` |
+| Linux x64 | `omp-linux-x64` / `729375448` | 286021808 | `a8059b95de5eaba0b3fb6f7182842d661feae29cb2931cdbeba2986db4751ecb` |
+
+`SHA256SUMS.txt` is asset `729375445`, 844 bytes, SHA-256
+`3d11ad7277e7ad65ea76963b60c0db21d57ad7c0621a94a9379f2e851939f280`.
+The [18.15.0→18.18.6 review](measurements/2026-11-10-omp-18186-client-upgrade-review.json)
+(`aad29cd6`) records all four independent downloads and `2,051` commits / `3,461` changed paths.
 
 ## v0.16.2 — durable-export Host reclaim and stock OMP 18.15.0
 
 Published **2026-11-04** (`2026-11-04T20:24:33Z`, GitHub release ID `434412723`, annotated tag
-`v0.16.2` → `4012e4d7d23b5af98068d008339293bb02bfddc7`) as GitHub `Latest`, succeeding `v0.16.0`
-(published 2026-11-01; the held `v0.16.1` client-only candidate remains unpublished). All three
+`v0.16.2` → `4012e4d7d23b5af98068d008339293bb02bfddc7`), succeeding `v0.16.0` (published
+2026-11-01; the held `v0.16.1` client-only candidate remains unpublished); superseded by `v0.17.0`
+on 2026-11-10. All three
 runtimes bind source `a87de3613c17bced777b446fb545f872d8395ec1` on upstream `Neroued/ninfer` master
 `64d10fbf9f8e6bfc79ab0570b94674c5b9997929`: RTX 5090 `v0.7.0-qwen38-5090-beta.5` (release ID
 `432317574`, server `cc99a460`, image `a0cbb8a5`, base receipt `runtime-base-a87de361-20261103`) and
@@ -565,18 +603,18 @@ native public installs, with independent restoration and production left unchang
 
 | Channel | Meaning | Recorded baseline |
 | --- | --- | --- |
-| Public release | Published exact profiles with stated limitations and non-claims | `v0.16.2`, published 2026-11-04 (`Latest`); predecessor `v0.16.0` (2026-11-01; held `v0.16.1` unpublished) |
+| Public release | Published exact profiles with stated limitations and non-claims | `v0.17.0`, published 2026-11-10 (`Latest`); predecessor `v0.16.2` (2026-11-04) |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release.
 The historical fork client used separate `omp-beta` and stable `omp` Homebrew casks through
 v0.7.4. v0.10.0 introduced upstream OMP 18.4.10 binaries and no client cask; v0.11.0 and v0.12.0
 pinned stock OMP 18.8.7, v0.12.1 pinned 18.10.1, and v0.12.2 pinned 18.12.1; `v0.13.0` through
-`v0.14.0` pinned stock OMP 18.12.6, `v0.15.0` through `v0.16.0` pinned stock OMP 18.14.0, and
-current `v0.16.2` pins stock OMP 18.15.0. All five documented routes and fresh platform-client
-acceptance passed on the published components (with RTX 3090's post-route native campaign
-founder-waived at structured-outage managed Stop); see
-[documented-route acceptance](../releases/v0.16.2/acceptance/documented-routes.json) and
-[composed acceptance](../releases/v0.16.2/acceptance/composed-external-installation.json).
+`v0.14.0` pinned stock OMP 18.12.6, `v0.15.0` through `v0.16.0` pinned stock OMP 18.14.0,
+`v0.16.2` pinned stock OMP 18.15.0, and current `v0.17.0` pins stock OMP 18.18.6. All five
+documented routes and fresh platform-client acceptance passed on the published components (with
+RTX 3090's post-route `native-probes` compaction campaign founder-waived with disclosure); see
+[documented-route acceptance](../releases/v0.17.0/acceptance/documented-routes.json) and
+[composed acceptance](../releases/v0.17.0/acceptance/composed-external-installation.json).
 
 ### Post-v0.4.7 development evidence (shipped in v0.4.8 where noted)
 
@@ -592,12 +630,140 @@ unresolved, but do not invalidate this no-change throughput decision. Public rec
 
 ## Version identities
 
+### v0.17.0 public release — bounded resume admission, serving robustness, and stock OMP 18.18.6
+
+Published 2026-11-10 (`2026-11-10T16:10:46Z`, GitHub release ID `440594229`, annotated tag
+`v0.17.0` → `97dea2f00bce385e7fb80c4fddeb38a8f5897385`); the current GitHub `Latest` release
+(predecessor `v0.16.2`, published 2026-11-04).
+
+The [release notes](../releases/v0.17.0/NINFER_RELEASE_NOTES.md) and
+[manifest](../releases/v0.17.0/manifest.json) rebuild the RTX 5090 container runtime from release
+source F3 `e0971faf221204047d5a4ed834e4e298740cee17` (`e0971faf`,
+[fork PR #101](https://github.com/alphastorm/ninfer/pull/101)) on upstream `Neroued/ninfer` master
+`64d10fbf9f8e6bfc79ab0570b94674c5b9997929`, carry both published native Windows RTX 4090 and RTX
+3090 `beta.2` packages unchanged at source `a87de3613c17bced777b446fb545f872d8395ec1` (`a87de361` on
+`64d10fbf`), retain the shared published model container version 3
+`81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da` (20,437,521,664 bytes, revision
+`1cbd84e7221e51186bd7f093a149912d2489625b`, downloaded to `qwen3_8_27b-v3.ninfer`), and advance to
+unmodified upstream OMP **18.18.6** client (`9058ab9d229663e229e2867824ba6df6f21e9e59`, tree
+`fd379b65368a20c7648d97f2c2b99cc03e019254`, release ID `439766193`,
+[client descriptor](../releases/v0.17.0/qualification/client-components.json) `d840d5e5`):
+
+- **RTX 5090 container (`rtx5090`):** component prerelease
+  [`v0.7.0-qwen38-5090-beta.6`](https://github.com/alphastorm/ninfer/releases/tag/v0.7.0-qwen38-5090-beta.6)
+  (release ID `440258810`, published `2026-11-10T11:12:10Z`; source archive release
+  [`v0.7.0-qwen38-5090-source.6`](https://github.com/alphastorm/ninfer/releases/tag/v0.7.0-qwen38-5090-source.6),
+  release ID `440260408`; runtime image receipt release
+  [`v0.7.0-qwen38-5090-runtime-beta.6`](https://github.com/alphastorm/ninfer/releases/tag/v0.7.0-qwen38-5090-runtime-beta.6),
+  release ID `440262722`), CUDA 13.1.115 (`sm_120a`), GCC 13.3.0, build profile `rtx5090`,
+  deployment profile `qwen38-5090-v0.13.0`, configuration
+  `751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47`, isolated host checkpoint
+  directory `checkpoints-v017` mounted at `/checkpoints-v013`, `ninfer-serve`
+  `dc86e101c2c6a0fb03875e746448c4008d5dfce0633a0c8e3e830b61ac820c29`, OCI image
+  `ghcr.io/alphastorm/ninfer-runtime@sha256:7a19576b334b54f8bfca0e022626969bd47ca376ac600a93eb6117dcafd89233`
+  on reused runtime base
+  `ghcr.io/alphastorm/ninfer@sha256:28857182859a8f4993090521899b11a3f8676cb174c59adc626485e9f01472a3`
+  (`runtime-base-a87de361-20261103`,
+  [base receipt](../releases/v0.17.0/qualification/runtime-base.json) `cf0fe8e6`), bit-identical
+  same-path double build across `664` build artifacts and all `3` package outputs
+  ([build identity](../releases/v0.17.0/qualification/runtime-build-identity.json),
+  [asset authentication](../releases/v0.17.0/qualification/runtime-artifacts.json) `37b6162c`,
+  [lane receipt](../releases/v0.17.0/qualification/rtx5090.json) `11fde294`: **181.92 tok/s** server
+  / **180.40 tok/s** wall decode over 2,048 tokens at **0.244** DFlash2 K=7 acceptance and **2.71
+  tokens/round**, **56.63 s** cold exact 130,048-token retrieval at **2,296.5 tok/s** wall / **56.53
+  s** server prefill, `agent_protocol` passed across Docker restart, **30,398 MiB** idle/final VRAM,
+  `0` transient retries; exact-source RC
+  [`runtime-rc.json`](../releases/v0.17.0/qualification/runtime-rc.json) `bed3a245`: `12/12` phases
+  passed, `66/66` historical host, `54/54` current host including `35/35` EngineCore and Scheduler
+  regressions, `11/11` dense real-model tests, `1/1` durable pressure overlap, four-boot schema 3
+  restart, product-shape, exact-profile, and PRODUCT protocol):
+
+| RTX 5090 asset (`v0.7.0-qwen38-5090-beta.6` / `source.6` / `runtime-beta.6`) | Asset ID | SHA-256 | Bytes |
+| --- | ---: | --- | ---: |
+| `ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.tar.gz` | `731137743` | `d7f1ca4fdca2555a2e36ce84121737e9910e559f4519e24a848f0451214ea180` | 580,026,014 |
+| `ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.spdx.json` | `731137751` | `d9ea727c7d415c8189f0c76708fa665ebd4df4c025764906f8e7c48cb6356a4e` | 3,596 |
+| `ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.SHA256SUMS` | `731137746` | `beb70158323695ac2bc562e0c2f0ae6c55ee5fb6e8270c1df5cfb09a0d9f994b` | 251 |
+| `runtime-source-e0971faf.tar.gz` (`v0.7.0-qwen38-5090-source.6`) | `731142675` | `73749f93241ff6990873b8d18a9c7d5687dee101af94683076d9c077795ce478` | 12,820,073 |
+| `ninfer-runtime-image-v0.7.0-qwen38-5090-beta.6.json` (`v0.7.0-qwen38-5090-runtime-beta.6`) | `731150672` | `c43645c8ef1906b36ec7f63f7de1e8c6eaef5b1d8e25c49e875b11140bc727e9` | 1,215 |
+
+- **RTX 4090 native Windows (`rtx4090-windows-native`, carried unchanged):** component prerelease
+  [`v0.8.0-qwen38-4090-beta.2`](https://github.com/alphastorm/ninfer/releases/tag/v0.8.0-qwen38-4090-beta.2)
+  (release ID `434179056`, published `2026-11-04T16:40:47Z`, source `a87de3613c17bced777b446fb545f872d8395ec1`,
+  package `d9b10b47` / 991,981,865 B, server `ffee91bf`, SPDX `e4be92e4`, CycloneDX `a341bb61`,
+  checksums `71181231`, profile `qwen38-4090-native-v0.8.0-beta.2`, public config `ae27dc44`,
+  `release-spec.json` `a8e4c408`, installed release ID `qwen38-4090-native-v0.8.0-beta.2-a87de3613c17`;
+  carried [lane receipt](../releases/v0.17.0/qualification/rtx4090.json) `254167f2`: **254.59 tok/s**
+  C1 decode at **83.88%** DFlash2 K=7 acceptance, **2,133.04 tok/s** prefill, **83.54 s** exact
+  130,048-token retrieval; carried quality screen `f6e5a913`, fit `b22956aa`, speed
+  [`rtx4090-speed.json`](../releases/v0.17.0/qualification/rtx4090-speed.json) `e48aba81` under
+  [`native-speed-decision.json`](../releases/v0.17.0/qualification/native-speed-decision.json)
+  `5c09de6a`, and rehearsal decision
+  [`rtx4090-rehearsal-harness-decision.json`](../releases/v0.17.0/qualification/rtx4090-rehearsal-harness-decision.json)
+  `f1fcd1bb`; full 11-asset table in the `v0.16.2` entry below).
+- **RTX 3090 native Windows (`rtx3090-windows-native`, carried unchanged):** component prerelease
+  [`v0.8.0-qwen38-3090-beta.2`](https://github.com/alphastorm/ninfer/releases/tag/v0.8.0-qwen38-3090-beta.2)
+  (release ID `434175815`, published `2026-11-04T16:38:17Z`, source `a87de3613c17bced777b446fb545f872d8395ec1`,
+  package `97a8e634` / 1,008,989,809 B, server `15a4db46`, SPDX `051a81e2`, CycloneDX `255874bf`,
+  checksums `289d7c94`, profile `qwen38-3090-native-v0.8.0-beta.2`, public config `238ccad7`,
+  `release-spec.json` `92ab0c4a`, installed release ID `qwen38-3090-native-v0.8.0-beta.2-a87de3613c17`;
+  carried [lane receipt](../releases/v0.17.0/qualification/rtx3090.json) `b742870e`: **148.70 tok/s**
+  C1 decode at **83.88%** DFlash2 K=7 acceptance, **978.72 tok/s** prefill, **188.94 s** exact
+  130,048-token retrieval; carried quality screen `20332928`, fit `c1c3d0aa`, and speed
+  [`rtx3090-speed.json`](../releases/v0.17.0/qualification/rtx3090-speed.json) `852e13ca` under
+  `5c09de6a`; full 11-asset table in the `v0.16.2` entry below, audited byte-for-byte in
+  [`receipt-audit.json`](../releases/v0.17.0/qualification/receipt-audit.json) `c137388a`).
+- **Oh My Pi client:** unmodified upstream `can1357/oh-my-pi` `v18.18.6`, release ID `439766193`,
+  published `2026-11-09T23:30:49Z`, source `9058ab9d229663e229e2867824ba6df6f21e9e59`, tree
+  `fd379b65368a20c7648d97f2c2b99cc03e019254` (`omp-darwin-arm64` asset `729375455`, SHA-256
+  `ed2e63eb43888eb76cb1409b245b1db4557c94dfad52dc545c9aaca01ebce82d`, 221,867,152 bytes;
+  `omp-windows-x64.exe` asset `729375449`, SHA-256
+  `dfb15c27cb2ea192a94761c26aa5cd4eed54b1e0a5a85c02938ab07d769bc8f7`, 249,985,024 bytes;
+  `omp-linux-x64` asset `729375448`, SHA-256
+  `a8059b95de5eaba0b3fb6f7182842d661feae29cb2931cdbeba2986db4751ecb`, 286,021,808 bytes;
+  `SHA256SUMS.txt` asset `729375445`, SHA-256
+  `3d11ad7277e7ad65ea76963b60c0db21d57ad7c0621a94a9379f2e851939f280`, 844 bytes in
+  [`client-components.json`](../releases/v0.17.0/qualification/client-components.json) `d840d5e5`;
+  [18.15.0→18.18.6 review](measurements/2026-11-10-omp-18186-client-upgrade-review.json) `aad29cd6`).
+
+The runtime full council (`CR-20261110T083627Z-a3fa0550` on `a3fa0550`, remediated at F3 `e0971faf`
+in [fork PR #101](https://github.com/alphastorm/ninfer/pull/101)), product full council
+(`CR-20261110T121737Z-c4afc44f-product` on `c4afc44f` with route stage `076bbe4f`), and focused
+waiver-support review (`CR-20261110T144437Z-f85af622-waiver` on `f85af622`, remediated at
+`bf2a63a0` in [#150](https://github.com/alphastorm/omp-ninfer/pull/150)) closed by accountable-lead
+disposition in [`review/runtime-ledger.json`](../releases/v0.17.0/review/runtime-ledger.json)
+(`5f8d6e4a`; deferred tooling items in [#149](https://github.com/alphastorm/omp-ninfer/issues/149)).
+Fresh authorized-window acceptance on frozen candidate `076bbe4f5abd68c8a0a1ba2efa0d08e881970e11` on
+2026-11-10 passed all five documented routes / 31 blocks (RTX 5090 host 2/2, macOS 10/10 preview,
+Windows 5/5, native RTX 4090 7/7, native RTX 3090 7/7), all three newly downloaded stock 18.18.6
+clients, and the `v0.8.0-beta.2` RTX 4090 native public-URL install (`already_installed`, exact
+bytes, unchanged pointers), `C1` fleet probe, and independent restoration (**408.213 s** RTX 5090
+accepted and all-attempt hold, restoring the incumbent container, digest-pinned image `a0cbb8a5`,
+checkpoint mount, and `unless-stopped`; **508.420 s** RTX 4090 campaign window, restoring 450 W).
+On RTX 3090, all seven documented route blocks, four-way `C2` fleet/fanout, and parallel stock OMP
+overlap at limit 2 passed before the post-route `native-probes` automatic-compaction campaign
+failed (**1,727.696 s** elapsed; `compaction` probe timed out after `900 s` with `8` HTTP `503`
+`request_queue_timeout` responses, `2` HTTP `499` cancellations, and `0` resident work; subsequent
+managed Stop `graceful_incomplete_shutdown` saved `2` / skipped `5` / refused `3`, reason
+`capacity`), waived by the founder in
+[`rtx3090-route-waiver.json`](../releases/v0.17.0/qualification/rtx3090-route-waiver.json)
+(`19f2c0ef`, canonical compaction projection `bcdf026d`); native behavior completion, structured
+outage, a passing wrapper restoration audit, and anonymous public-install acceptance are not
+claimed, and lead recovery via empty-session `Start` to ready then `Stop` (`graceful`, `0` refused,
+`370 W` restored, tasks `Ready`, `0` listeners, identical canonical cross-lane census `db1634a7`;
+evidence `fabb50de`) is bound separately.
+[Documented routes](../releases/v0.17.0/acceptance/documented-routes.json) ·
+[Composed acceptance](../releases/v0.17.0/acceptance/composed-external-installation.json) ·
+[RTX 4090 public install](../releases/v0.17.0/acceptance/rtx4090-public-install.json) ·
+[Restoration](measurements/2026-11-10-v0170-acceptance-restoration.json) ·
+[Qualification](../releases/v0.17.0/qualification.json) ·
+[Review ledger](../releases/v0.17.0/review/runtime-ledger.json).
+
 ### v0.16.2 public release — durable-export Host reclaim and stock OMP 18.15.0
 
 Published 2026-11-04 (`2026-11-04T20:24:33Z`, GitHub release ID `434412723`, annotated tag
-`v0.16.2` → `4012e4d7d23b5af98068d008339293bb02bfddc7`); the current GitHub `Latest` release
-(predecessor `v0.16.0`, published 2026-11-01; the held `v0.16.1` client-only candidate remains
-unpublished).
+`v0.16.2` → `4012e4d7d23b5af98068d008339293bb02bfddc7`); superseded as GitHub `Latest` by `v0.17.0`
+on 2026-11-10 (predecessor `v0.16.0`, published 2026-11-01; the held `v0.16.1` client-only candidate
+remains unpublished).
 
 The [release notes](../releases/v0.16.2/NINFER_RELEASE_NOTES.md) and
 [manifest](../releases/v0.16.2/manifest.json) bind all three GPU lanes to one frozen engine source
