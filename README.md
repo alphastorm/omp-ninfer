@@ -76,11 +76,14 @@ desktop GUI ([LM Studio](https://lmstudio.ai)), the widest hardware reach or App
 All three lanes share a 131,072-token context, DFlash2 speculative decoding with draft window 7,
 JSON-schema output, and the same 20.4 GB Qwen3.8 27B artifact (`81f924d4`).
 
-| Lane | Runs as | Serves | Decode | Exact 130,048-token retrieval |
+| Lane | Runs as | Serves | Decode | Exact&nbsp;130,048-token retrieval |
 | --- | --- | --- | --- | --- |
-| **RTX 5090** | Docker Desktop/WSL2 container on Windows 11; clients: Windows (local), macOS over a manual SSH tunnel (preview), Linux under WSL2 | Two requests in flight; vision, tools, and preserved thinking | 181.92 tok/s | 56.63 s from a cold start ([receipt](releases/v0.17.0/qualification/rtx5090.json)) |
-| **RTX 4090** | Native Windows 11 package; Windows client (local) | One request at a time; text and tools | 254.59 tok/s (`C1`) | 83.54 s ([receipt](releases/v0.17.0/qualification/rtx4090.json)) |
-| **RTX 3090** | Native Windows 11 package; Windows client (local) | Two requests in flight over one shared 131,072-token pool, under a 350 W serving cap; text and tools | 148.70 tok/s (`C1`) | 188.94 s ([receipt](releases/v0.17.0/qualification/rtx3090.json) · [known limitation](#rtx-3090-known-limitation)) |
+| **RTX&nbsp;5090** | Docker Desktop/WSL2 container on Windows 11; clients: Windows (local), macOS over a manual SSH tunnel (preview), Linux under WSL2 | Two requests in flight; vision, tools, and preserved thinking | [181.92&nbsp;tok/s](releases/v0.17.0/qualification/rtx5090.json) | [56.63&nbsp;s](releases/v0.17.0/qualification/rtx5090.json) |
+| **RTX&nbsp;4090** | Native Windows 11 package; Windows client (local) | One request at a time; text and tools | [254.59&nbsp;tok/s](releases/v0.17.0/qualification/rtx4090.json) | [83.54&nbsp;s](releases/v0.17.0/qualification/rtx4090.json) |
+| **RTX&nbsp;3090** | Native Windows 11 package; Windows client (local) | Two requests in flight over one shared 131,072-token pool, under a 350 W serving cap; text and tools | [148.70&nbsp;tok/s](releases/v0.17.0/qualification/rtx3090.json) | [188.94&nbsp;s](releases/v0.17.0/qualification/rtx3090.json) |
+
+Each number links to its qualification receipt. RTX 5090 retrieval is from a cold start; native
+decode is measured with one request at a time (`C1`).
 
 Both native lanes install on one two-GPU host, each bound to its GPU UUID, and run one at a time on
 port 18082. Checkpoints are best effort and restore only on the same runtime, model, profile, and
@@ -148,8 +151,8 @@ Native owners staying on `v0.10.0` keep the
 Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release layer) → NInfer
 (inference engine) → Qwen3.8 27B (served model).
 
-- **Oh My Pi owns the truth.** Transcript, tools, branches, and replay. A turn advances provider
-  state only after a complete stream and a durable transcript write.
+- **Oh My Pi owns the truth.** A turn advances provider state only after a complete stream and a
+  durable transcript write.
 - **NInfer owns inference and retained state.** The C++/CUDA engine from
   [Neroued/ninfer](https://github.com/Neroued/ninfer) and its GPU ports, plus this project's
   explicit Responses state and checkpoints. Retained state accelerates; it is never the source of truth.
