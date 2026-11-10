@@ -1,4 +1,4 @@
-[![OMP NInfer — your coding session should survive the process. Qualified on RTX 5090 · 4090 · 3090, v0.16.2.](assets/banner.png)](docs/QUICKSTART.md)
+[![OMP NInfer — your coding session should survive the process. Qualified on RTX 5090 · 4090 · 3090, v0.16.2.](assets/banner.png)](https://github.com/alphastorm/omp-ninfer/blob/v0.16.2/docs/QUICKSTART.md)
 
 <div align="center">
 
@@ -6,16 +6,16 @@
 keeps your session's continuation state resident on your GPU. **OMP NInfer** is the qualified release
 that binds them with one hash-pinned Qwen3.8 27B model on an RTX 5090, 4090, or 3090 you own.
 
-Every install route in the guide was run end to end on **v0.16.2** with unmodified
+Every install route in the published guide was run end to end on **v0.16.2** with unmodified
 [Oh My Pi 18.15.0](https://github.com/can1357/oh-my-pi/releases/tag/v18.15.0) — 31 steps,
 three client platforms, both native lanes
 ([receipt](releases/v0.16.2/acceptance/composed-external-installation.json)).
 
-### [Get started →](docs/QUICKSTART.md)
+### [Get started →](https://github.com/alphastorm/omp-ninfer/blob/v0.16.2/docs/QUICKSTART.md)
 
 [![CI][ci-badge]][ci] [![Release][release-badge]][releases] [![RTX 5090 decode][decode-badge]][benchmarks] [![Context][context-badge]][benchmarks] [![License][license-badge]][license]
 
-[Download v0.16.2](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.16.2) · [Lanes](docs/QUICKSTART.md#choose-your-lane) ·
+[Download v0.16.2](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.16.2) · [Lanes](https://github.com/alphastorm/omp-ninfer/blob/v0.16.2/docs/QUICKSTART.md#choose-your-lane) ·
 [Facts](docs/FACTS.md) · [Compare](docs/DECISION_GUIDE.md) · [Benchmarks](docs/BENCHMARKS.md) ·
 [Architecture](docs/ARCHITECTURE.md) · [Security](docs/SECURITY.md) · [Troubleshooting](docs/TROUBLESHOOTING.md) ·
 [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)
@@ -89,9 +89,9 @@ credentials. Exact component, source, and model identities: [facts](docs/FACTS.m
 
 ## Get started
 
-1. **[Choose your lane](docs/QUICKSTART.md#choose-your-lane)** and check its prerequisites.
+1. **[Choose your lane](https://github.com/alphastorm/omp-ninfer/blob/v0.16.2/docs/QUICKSTART.md#choose-your-lane)** and check its prerequisites.
 2. **Clone tag `v0.16.2`** and run `python3 scripts/verify_release.py --require-ready`.
-3. **[Install the stock Oh My Pi 18.15.0 client](docs/QUICKSTART.md#omp-18150-client)** with the
+3. **[Install the stock Oh My Pi 18.15.0 client](https://github.com/alphastorm/omp-ninfer/blob/v0.16.2/docs/QUICKSTART.md#omp-18150-client)** with the
    fail-closed config and per-model fragment.
 4. **Run the acceptance checks** at the end of your lane's route: tool turn, continuation, restart
    survival, fail closed.
@@ -139,6 +139,17 @@ public-install claim; follow-ups in fork [#87](https://github.com/alphastorm/nin
 and [#138](https://github.com/alphastorm/omp-ninfer/issues/138)) are bound in the
 [release notes](releases/v0.16.2/NINFER_RELEASE_NOTES.md). Native owners staying on `v0.10.0` keep
 the [v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md).
+
+**Next on main: v0.17.0** binds RTX 5090 beta.6 from F3 `e0971faf`, stock OMP **18.18.6**
+and unchanged native beta.2 packages. Fresh candidate `076bbe4f` passed all five documented
+routes (**31/31 blocks**) and three stock clients; the RTX 5090 hold was **408.213 s** and
+RTX 4090 native campaign/public install/restoration passed. RTX 3090's route passed, but its later
+native-probes compaction campaign failed and was specifically waived by the founder with disclosure;
+structured outage, a passing wrapper audit and anonymous public install are not claimed.
+RTX 3090 users should keep v0.16.2 or restart the lane after long sessions until a native re-cut
+is qualified. See the [successor notes](releases/v0.17.0/NINFER_RELEASE_NOTES.md) and
+[versioned guide](docs/QUICKSTART.md). Product publication and production promotion are
+founder-only; the published install authority stays v0.16.2.
 
 ## How it works
 

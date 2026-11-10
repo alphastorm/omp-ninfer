@@ -1,0 +1,474 @@
+{
+ "artifact_type": "omp_ninfer_review_ledger",
+ "schema_version": 1,
+ "release": "v0.17.0",
+ "as_of": "2026-11-10",
+ "status": "closed-by-disposition",
+ "approval_granted": true,
+ "publication_authorized": false,
+ "public_route_acceptance_granted": false,
+ "scope": "Closed exact-source runtime full council on F a3fa0550 with verified localized remediation (release source F3 e0971faf) and closed product full council on 4012e4d7..c4afc44f with route stage commit 076bbe4f; confirmed product P1s are pre-existing v0.16.2 tooling gaps deferred or mitigated for this release (alphastorm/omp-ninfer#149). This is not approval of a later executable subject, publication, or independent public-user acceptance; the founder-approved RTX 3090 native-probes waiver support passed a focused review with one remediation round (alphastorm/omp-ninfer#150).",
+ "native_runtime": {
+  "review_id": "CR-20261110T083627Z-a3fa0550",
+  "review_sequence_id": "omp-ninfer-v0.17.0-fork-a3fa0550",
+  "review_class": "full-council",
+  "status": "closed-with-remediation",
+  "source_commit": "a3fa0550cfb67b5dc706359ebca0ed02eb722b7c",
+  "base_commit": "a87de3613c17bced777b446fb545f872d8395ec1",
+  "remediated_source_commit": "e0971faf221204047d5a4ed834e4e298740cee17",
+  "remediation_pull_request": "https://github.com/alphastorm/ninfer/pull/101",
+  "subject_digest": "4a9f56e7ddde9a121065d9f1db017b30dbf8c93034b0c4de4b509dbf83dcbb35",
+  "resolver_assignments": [
+   {
+    "reviewer_id": "daybreak-blue",
+    "selectionClass": "strong",
+    "role": "strong_critic",
+    "independence_class": "cross_family",
+    "authority": "independent_evidence",
+    "model": "openai-codex/gpt-6-sol:max",
+    "model_family": "gpt"
+   },
+   {
+    "reviewer_id": "gemini-argon",
+    "selectionClass": "strong",
+    "role": "strong_critic",
+    "independence_class": "cross_family",
+    "authority": "independent_evidence",
+    "model": "google-antigravity/gemini-4-argon:high",
+    "model_family": "gemini"
+   },
+   {
+    "reviewer_id": "gpt-astra",
+    "selectionClass": "supplement",
+    "role": "supplement",
+    "independence_class": "cross_family",
+    "authority": "supplemental_evidence",
+    "model": "openai-codex/gpt-6-astra:max",
+    "model_family": "gpt"
+   },
+   {
+    "reviewer_id": "claude-mythos",
+    "selectionClass": "supplement",
+    "role": "lead_family_security",
+    "independence_class": "same_lineage_blind_sample",
+    "authority": "supplemental_evidence",
+    "model": "anthropic/claude-mythos-5-1:max",
+    "model_family": "claude"
+   }
+  ],
+  "receipt_digests": {
+   "close-report.md": "5ec34437cd7b21c42f98a9d76a8d9385f8cf5900773ef2752d959282442f6cd5",
+   "ledger.md": "48bfa68cb61f92b90f597ce45a378abce6acf340613b3ac18e281d03100b513a",
+   "review-record.json": "9e1ce834a7fcc7ff0d7437654e7fc42185229676125b78e5ee75188e81529af3",
+   "frozen-subject.json": "710c94b4ad94d4dfbd187a5a059d74f7b098745edb0dd7d6afb7808e0404c263",
+   "resolver-receipt.json": "3f717130ffd97e8cdb5eac92ceeb66f54b66efe194fcaf12f7b03d028e403526",
+   "panel-selection.json": "65a466f7bffc05ddfc756bc26f4b39b6d5f7b01d05d1eb5ab3adfe6e5d484b24",
+   "daybreak-blue.json": "7ccd211b2aed5b5397e3c16227014777ddd237a2f7ef73f37db5b406267a7029",
+   "gemini-argon.json": "a43dfc712418be8312fc703b5ca3b1921248412923915b6f7ed54624516d1dca",
+   "gpt-astra.json": "bf1546c2026f8c9097aad139ade84f190e3558e3f8abb29b0021108237702f80",
+   "claude-mythos.json": "a7874fce1cd39acde09b8a70ddb106869d8e0f1f03fe7c646dd3e47dc1cb2832"
+  },
+  "reviewer_results": {
+   "daybreak-blue": {
+    "summary": "The frozen source review found one in-scope pressure-scheduling defect: a failed fresh-admission window does not consume its rotation quota. No tests were run; this was a read-only review.",
+    "evidence": [
+     "R1|P2|conf=0.96|claim=An unsuccessful fresh-admission window does not consume the one-window-per-complete-service-rotation quota; the scheduler resets its rotation counter on successful admission but not when taking or ending a window|evidence=src/runtime/engine/scheduler.h:229-240,289-310 resets the counter only on admission, while src/runtime/engine/engine_core.h:2744-2756 takes and ends a window even if try_admit_one(false) fails|impact=Under eligible pressure, an unplaceable pending request can trigger repeated fresh admission and optional catalog-reclaim attempts before successive protected restores, exceeding the declared capacity-ownership bound and adding restore latency despite the existing no-preemption guard|verify=Test two pressure members and an unplaceable fresh request: after a failed window, assert that no further window opens until a complete service rotation"
+    ],
+    "unresolved": []
+   },
+   "gemini-argon": {
+    "summary": "Reviewed the 94-path P20 runtime candidate F delta (a87de3613c17bced777b446fb545f872d8395ec1..a3fa0550cfb67b5dc706359ebca0ed02eb722b7c) and supporting context across all 127 bound repository paths against the 13 invariants and state-transition contracts. FreeExtents/HostContextArena placement simulation, branch_recovery_loss O(1) removed-membership scoring, no-replay resume metadata guards, segmented NFC normalization boundaries, tool-argument/effort normalization, sampler/embedding numerical row isolation, graceful generation-stop/final-save ordering, and default-off prefill pacing preserve their stated contracts. Found one P1 defect (R1) in EngineCore resident preemption where a Host-victim durable pressure save triggered inside pause_resident() occurs after reserve_resident_units()'s checkpoints_.pending() check, causing pause_reclaim_victim() to skip the youngest victim or return false into an unconditional std::logic_error that permanently fails the Engine.",
+    "unresolved": [],
+    "evidence": [
+     "R1|P1|conf=0.95|claim=When resident execution hits a Device KV or State shortage while Host context is occupied by an unsaved Host-only durable checkpoint, pause_resident's Host-victim release guard sets checkpoints_.pending() and returns false after reserve_resident_units has already passed its checkpoints_.pending() check, causing reserve_resident_units to throw std::logic_error and permanently fail the Engine (and causing pause_reclaim_victim to skip the youngest victim and preempt older residents when multiple lanes are active)|evidence=src/runtime/engine/engine_core.h:1843-1878,2336-2357 checks checkpoints_.pending() at line 2344 after reclaim(result.shortage, false, ...) (which only inspects Device resources for a Device shortage and does not touch Host-only durable checkpoints), then calls pause_reclaim_victim() -> pause_resident() where resources_.host_victims() selects the Host-only durable checkpoint and resources_.approve_release(*victims) at line 1871 (or checkpoint_request_settled at line 1876) triggers checkpoint_pressure(), sets checkpoints_.pending() = true, and returns false; pause_reclaim_victim() then skips the youngest victim to try older residents (lines 1846-1849) and, when no resident can pause, returns false to line 2352, which unconditionally throws std::logic_error(\"progress owner cannot obtain its legal unit\") at line 2356 and triggers fail_all_locked()|impact=Violates N20-PRESSURE-OWNER-FRESH and N20-HOST-PLACEMENT: a normal pending durable pressure save triggered during resident preemption Host-snapshot preflight crashes the Engine worker and fails all active, paused, and waiting requests, or preempts an older resident out of order|verify=Add a case in tests/runtime/test_engine_core.cpp with a Host-resident durable checkpoint (0 Device KV pages), a PressureCheckpointHandler that leaves save_before_eviction Pending, and two resident requests where one hits a Device KV shortage in reserve_units while pause_host_runs requires the Host durable checkpoint; observe std::logic_error(\"progress owner cannot obtain its legal unit\") and Engine failure"
+    ]
+   },
+   "gpt-astra": {
+    "summary": "Supplemental read-only review of a3fa0550cfb67b5dc706359ebca0ed02eb722b7c (lead_family=claude; selectionClass=supplement; role=supplement; independence_class=cross_family; authority=supplemental_evidence). Found one P2 mismatch between fresh-window accounting and the declared pressure-scheduling invariant. Findings are based on source inspection; no commands or tests were run.",
+    "evidence": [
+     "R1|P2|conf=0.99|claim=Quota-accounting defect: unsuccessful fresh-admission attempts do not consume the per-rotation window budget. Observed: only successful admission resets rotations_since_fresh_; [INFERENCE] after a failed window, the next owner handoff can reopen it before a complete service rotation.|evidence=src/runtime/engine/scheduler.h:233-238 resets the counter on successful admission; scheduler.h:294-310 opens windows when the counter reaches membership size but consuming/ending a window leaves that counter unchanged. src/runtime/engine/engine_core.h:2734-2756 performs a fresh attempt whenever such a window opens. docs/maintainer/resource-scheduling-and-context-cache.md:442-446 specifies at most one window per complete rotation, including closing an unsuccessful attempt.|impact=Violates N20-PRESSURE-OWNER-FRESH's explicit attempt bound. With sustained contention, an idle lane and nonfitting fresh requests, source/reclaim planning can recur at every owner's quantum rather than once per complete rotation, adding interference to admitted-request recovery despite the existing no-preemption safeguard.|verify=Extend tests/runtime/test_scheduler.cpp:test_fresh_windows_follow_complete_pressure_cycles with at least three members: consume and end an eligible window without admitting anything, serve only the next owner, and assert take_fresh_window remains false until a complete rotation. Exercise the same refused-admission sequence in the EngineCore harness."
+    ],
+    "unresolved": []
+   },
+   "claude-mythos": {
+    "summary": "Supplemental same-lineage security read of F a3fa0550 within the bound paths. Verified: generation stop -> cancellation drain -> settle keeps finished catalog owners exportable (engine_core.h:2671-2695, 1007-1060); final_save is fail-closed; submit/is_available are race-free against request_stop; sampler/acceptance kernels emit -1 only for non-finite or out-of-domain rows and gate token_counts atomics, embedding gathers clamp ids, license_generated_tokens zeroes invalid rows and commit_pending retires only that row; NFC boundaries exclude decomposable starters, comb-second marks and Hangul V/T; tool-argument and effort normalization are bounded; fresh admission never pauses residents. Defects found are low severity: a Linux single-shot stop race (R1) and a packet lane misattribution (R2). No auth, credential, injection, path or privilege regression observed; durable schema/origin authorities were not re-derived (packet asserts blob equality). Unresolved items name unbound sources (httplib.h, http_transport.h, Host KV extent store).",
+    "evidence": [
+     "R1|P3|conf=0.5|claim=Linux stop path is single-shot: a SIGTERM whose one server.stop() lands after HttpServer::listen() passed its stop_requested_ check but before cpp-httplib marks the accept loop running leaves the server listening forever with the Engine already stopped, and a second signal is ignored (observed: monitor returns after one call; inferred: cpp-httplib Server::stop() is a no-op while is_running_ is false, httplib.h not bound)|evidence=apps/serve/main.cpp:103-110 jthread calls server.stop() once then returns; src/serve/http_server.cpp:682-699 checks stop_requested_ once then calls listen_after_bind; src/serve/http_server.cpp:710-719 stop() returns is_running() but main discards it; src/serve/stop_event.cpp:40-42 the Windows watcher instead retries every 50 ms until stop() returns true|impact=process never exits on graceful stop (health answers 503 forever), the manager must SIGKILL, and final_save/shutdown report never run, so acknowledged sessions not yet auto-saved are lost (N20-GENERATION-STOP-EXPORT asset)|verify=in a test build insert a 50 ms sleep between the stop_requested_ check and listen_after_bind in listen(), send SIGTERM immediately after the listening-on log, observe listen never returns and no shutdown report is written; confirm a retry loop like stop_event.cpp:40-42 closes it",
+     "R2|P3|conf=0.7|claim=the packet attributes request-log and options contracts to the bounded Linux job, but those tests are registered native-lane only, so proofs/linux-sm120a-index.json cannot evidence them|evidence=tests/cmake/ProductTests.cmake:164-172 ninfer_serve_options_test and ninfer_request_log_test carry HOST_LANES native only (also :208-211 ninfer_http_transport_test); .github/workflows/build.yml bounded step runs ctest -L '^host-bounded$' while .github/workflows/native-compile.yml runs '^host-native$'; packet N20-BOUNDED-OBSERVABILITY proof text says bounded host request-log tests passed|impact=attribution error only: coverage exists via the terminal-success native run 42777960954, but the cited bounded proof index does not contain these contracts (release source provenance and receipt truthfulness asset)|verify=ctest --test-dir build -N -L '^host-bounded$' lists neither ninfer_request_log_test nor ninfer_serve_options_test, while -L '^host-native$' lists both"
+    ],
+    "unresolved": [
+     "U1|P2|conf=0.3|question=does listen_after_bind() return only after every in-flight HTTP handler (including Responses store publication and response_stored) has completed, so final_save() cannot enumerate sessions before a late publication lands?|missing=src/serve/http_transport.h make_http_task_queue shutdown/join semantics and the vendored cpp-httplib listen_internal() shutdown order are outside the 127 bound paths; only the native-lane ninfer_http_transport_test (tests/cmake/ProductTests.cmake:208-211) covers it|verify=inspect the task queue shutdown to confirm it drains queued jobs and joins worker threads before listen_after_bind returns, and run the serve resilience stop case with a handler that publishes a response during stop",
+     "U2|P3|conf=0.4|question=is cpp-httplib Server::stop() a no-op before listen_internal() sets is_running_, as R1 assumes?|missing=the vendored httplib.h Server::stop() and listen_internal() source is not among the bound paths|verify=read the vendored httplib.h and confirm stop() gates socket shutdown on is_running_ and that listen_internal() sets is_running_ only on entry",
+     "U3|P3|conf=0.3|question=does the real Host KV extent store reserve a page group as one allocation_bytes(stride*group) extent and release per-page stride ranges, matching FreeExtents::take_run_in_place and ProgramImpl::host_can_place?|missing=the Host KV extent store reservation/release code is not among the bound paths; src/core/free_extents.h:138-158 rounds the group total and src/models/qwen3_5/program/storage/checkpoints.cpp:235-253 frees per-page stride ranges|verify=compare the store's reserve path with take_run_in_place; if stride or image_bytes is not 256-aligned the simulation under-counts trailing padding and can select extra legal Host victims (cache loss only, no durable effect)"
+    ]
+   }
+  },
+  "dispositions": {
+   "gemini-argon-R1": {
+    "severity": "P1",
+    "result": "confirmed",
+    "disposition": "accept",
+    "change": "Remediation on `p20/remediation-r1` from F: `pause_reclaim_victim` returns false once a failed `pause_resident` leaves `checkpoints_.pending()`/an export in flight (no older resident paused); `reserve_resident_units` waits (stop/break) on pending saves/exports after a failed pause instead of throwing; same-class sweep of engine_core.h; red→green EngineCore regression (Host durable victim + Pending handler + two residents + Device KV shortage).",
+    "rationale": "Lead traced the chain at F: `approve_release` → `allow_release` (context_cache/resource_manager.h:1680-1694) → release guard → `checkpoint_pressure` (engine_checkpoint.inl:547-560) → `CheckpointControl::settle` sets `pending_progress_` and returns false for a Pending save (checkpoint_control.h:154-175); `pause_reclaim_victim` then tries older residents (engine_core.h:1844-1853) and `reserve_resident_units` throws at 2356 because its only pending check (2344) precedes the pause. The guard is enabled whenever a pressure-checkpoint handler is installed (engine_checkpoint.inl:20-21), i.e. on the shipped durable-session profile. Same shape exists in shipped a87de361 (`oldest resident cannot obtain its legal unit`), but F rotates the pressure owner and pauses more often under sustained C2 pressure. Consequence is an Engine-wide failure of active/paused/waiting requests: P1 after controls."
+   },
+   "claude-mythos-U1": {
+    "severity": "P2",
+    "result": "falsified",
+    "disposition": "reject",
+    "change": "none",
+    "rationale": "Answered from vendored/bound source: `listen_internal()` calls `task_queue->shutdown()` before returning (httplib.h:13739); the fork queue `HttpTaskQueue::shutdown` → `TaskPool::shutdown` joins workers (src/core/cpu/task_pool.cpp:33-41) whose loop exits only when `queued == 0` (48-67), so every queued and active handler completes before `listen_after_bind()` returns and `final_save()` runs (http_server.cpp:705-707). No late-publication window."
+   },
+   "daybreak-blue-R1": {
+    "severity": "P2",
+    "result": "confirmed",
+    "disposition": "accept",
+    "change": "Same remediation branch: `Scheduler::take_fresh_window()` consumes the window (`rotations_since_fresh_ = 0`) when it returns true, so an unsuccessful or skipped window cannot reopen before a complete service rotation; red→green test_scheduler regression (≥3 members, window taken and ended without admission, next owner served, no window until a complete rotation). Duplicate of gpt-astra-R1 (one root cause).",
+    "rationale": "Verified at F: scheduler.h:238 resets `rotations_since_fresh_` only inside `admitted()`; scheduler.h:297 reopens `fresh_window_` whenever the counter is still ≥ membership; engine_core.h:2744-2757 takes and ends the window regardless of `try_admit_one(false)` success. The maintainer contract (resource-scheduling-and-context-cache.md:442-446) bounds fresh windows to one per complete rotation including an unsuccessful attempt. Impact is repeated catalog-only admission/reclaim planning per quantum (interference, possible avoidable catalog eviction), no preemption: P2."
+   },
+   "gpt-astra-R1": {
+    "severity": "P2",
+    "result": "confirmed",
+    "disposition": "accept",
+    "change": "Merged with daybreak-blue-R1 (same root cause and change).",
+    "rationale": "Supplemental lane; identical root cause verified by the lead (scheduler.h:238/297, engine_core.h:2744-2757)."
+   },
+   "claude-mythos-R1": {
+    "severity": "P3",
+    "result": "falsified",
+    "disposition": "reject",
+    "change": "none",
+    "rationale": "Premise false for the vendored cpp-httplib: `Server::stop()` exchanges and closes `svr_sock_` unconditionally (third_party/cpp-httplib/httplib.h:13056-13066), and `listen_internal()` returns false without serving when the socket is already invalid (13657-13660). A stop landing between `HttpServer::listen()`’s check and `listen_after_bind()` therefore makes listen return; `final_save` still runs (src/serve/http_server.cpp:705-707) and main exits. No hang."
+   },
+   "claude-mythos-R2": {
+    "severity": "P3",
+    "result": "confirmed",
+    "disposition": "accept",
+    "change": "No code change: the close report attributes the request-log, serve-options and http-transport contracts to native run 42777960954 (`-L ^host-native$`), not to the bounded Linux job.",
+    "rationale": "Verified: tests/cmake/ProductTests.cmake registers `ninfer_serve_options_test`, `ninfer_request_log_test` and `ninfer_http_transport_test` with `HOST_LANES native` only; build.yml runs `-L ^host-bounded$`, native-compile.yml `-L ^host-native$`. Coverage exists (native run terminal success); attribution only, P3."
+   },
+   "claude-mythos-U2": {
+    "severity": "P3",
+    "result": "falsified",
+    "disposition": "reject",
+    "change": "none",
+    "rationale": "Answered: `Server::stop()` is not gated on `is_running_` (httplib.h:13056-13066); see claude-mythos-R1."
+   },
+   "claude-mythos-U3": {
+    "severity": "P3",
+    "result": "unresolved",
+    "disposition": "defer",
+    "change": "none",
+    "rationale": "Cache-loss-only P3 per the question itself (extra legal Host victims if stride/image bytes are not 256-aligned; no durable or identity effect). Deferred to the next runtime release as a Host-extent alignment check; not a release blocker."
+   }
+  },
+  "closure": "Verified localized remediation: confirmed P1 (gemini-argon-R1) and P2 (daybreak-blue-R1 = gpt-astra-R1) fixed in remediation PR #101 with red-to-green EngineCore and Scheduler regressions, a full 1,311-step RC-shaped build and green PR CI; RTX 5090 DFlash2 C1 identity and EXP-109 pressure behavior verified on the remediated runtime; no disputed P0/P1, no targeted refuter, no second council."
+ },
+ "product_tooling": {
+  "repository": "https://github.com/alphastorm/omp-ninfer",
+  "review_id": "CR-20261110T121737Z-c4afc44f-product",
+  "review_class": "full-council",
+  "base_commit": "4012e4d7d23b5af98068d008339293bb02bfddc7",
+  "stage_commit": "076bbe4f5abd68c8a0a1ba2efa0d08e881970e11",
+  "reviewed_commit": "c4afc44fc645f6d873d736717168efdd76a58b3e",
+  "subject_digest": "659f04d6878e49884b4a91873a04a7e7dacb2e392680c7a890b7b2632ac7ac25",
+  "status": "closed-with-deferrals",
+  "resolver_assignments": [
+   {
+    "reviewer_id": "daybreak-blue",
+    "selectionClass": "strong",
+    "role": "strong_critic",
+    "independence_class": "cross_family",
+    "authority": "independent_evidence",
+    "model": "openai-codex/gpt-6-sol:max",
+    "model_family": "gpt"
+   },
+   {
+    "reviewer_id": "gemini-argon",
+    "selectionClass": "strong",
+    "role": "strong_critic",
+    "independence_class": "cross_family",
+    "authority": "independent_evidence",
+    "model": "google-antigravity/gemini-4-argon:high",
+    "model_family": "gemini"
+   },
+   {
+    "reviewer_id": "gpt-astra",
+    "selectionClass": "supplement",
+    "role": "supplement",
+    "independence_class": "cross_family",
+    "authority": "supplemental_evidence",
+    "model": "openai-codex/gpt-6-astra:max",
+    "model_family": "gpt"
+   },
+   {
+    "reviewer_id": "claude-mythos",
+    "selectionClass": "supplement",
+    "role": "lead_family_security",
+    "independence_class": "same_lineage_blind_sample",
+    "authority": "supplemental_evidence",
+    "model": "anthropic/claude-mythos-5-1:max",
+    "model_family": "claude"
+   }
+  ],
+  "receipt_digests": {
+   "close-report.md": "3788a18def49f993d41ad6b504ea01130f53db8d1f0d2b5c6d06c1fb3f235efb",
+   "ledger.md": "4d73983a9aa5ceaa4e0ecdf143730289649f39474d8786010146daf85acb1d84",
+   "review-record.json": "ef90496ce9da2dd258863aa199b20c2887dee5a54e6dd0190c845a1680d3a2cc",
+   "frozen-subject.json": "623d736e2f6dae9b0a3f3ec140d02cd77e4f79ca7064d170e8c1c685d2361d73",
+   "resolver-receipt.json": "85e808cdc57604403c29a71d1c81c0de43d2298166e81e41a1fd2e4812ae797b",
+   "panel-selection.json": "b167687448ebc18e623bd21308966007f3244d125ed3622f71ec22d84655e8fc",
+   "daybreak-blue.json": "4b4da5da4d91d095d12cb89b91999746ba04323a06bb57b7ce13c09a0ccf5039",
+   "gemini-argon.json": "2eab2f0e177c47b997792b5dda6329ff49ef33deb9dc9d3df635a5e836571309",
+   "gpt-astra.json": "a0eed7cd657bd170c49cf5a5b68a889c8242a226ec10af6680eb15527bac82aa",
+   "claude-mythos.json": "f9f063ef364bd970ecf2fbb5d7c1c51031d44f0210e1bbbcbb8570d0593224d9"
+  },
+  "reviewer_results": {
+   "daybreak-blue": {
+    "summary": "Read-only review of the frozen subject found six source-grounded risks to restoration, privacy, acceptance identity, and failure recovery. No tests or live-host checks were run.",
+    "evidence": [
+     "R1|P1|conf=0.96|claim=the host window check releases its lock before route or setup work, so watchdog restoration can finish while that work continues|evidence=scripts/hosts/accept-rtx5090-host.py:190-201 checks under a short lock; :328-359 runs timed restoration and subsequent host-route, setup, and beta actions outside it; :270 records restoration|impact=a candidate container can start after restoration and remain on the host outside the window, invalidating predecessor-restored custody|verify=in a scratch host simulation delay setup across the watchdog deadline and inspect container state after restoration.json is written",
+     "R2|P1|conf=0.97|claim=private acceptance evidence fields other than errors are copied into public receipts while the output unconditionally declares private content absent|evidence=scripts/compose_route_acceptance.py:247-262 preserves arbitrary nested fields; :604-614 spreads the private restoration object into a public measurement and sets raw_private_paths_credentials_or_outputs_included false; :671-679 publishes native preparation and observations|impact=an accidentally captured credential, prompt, or host identifier can enter published evidence despite the privacy assertion; the marker-only scan in scripts/verify_release.py:2881-2908 cannot establish its absence|verify=add an otherwise-valid extra private string to a scratch acceptance fixture, compose it, and inspect the public receipt and verifier result",
+     "R3|P1|conf=0.91|claim=ready verification does not reconcile the closed ledger's stage_commit with the candidate in accepted route evidence|evidence=scripts/compose_route_acceptance.py:130-147 derives the candidate from the ledger, but scripts/verify_release.py:1121-1169 checks ledger closure and hashes without its stage_commit, while :1415-1460 compares only the route receipt and qualification summary candidates|impact=a later rehashed ledger can name a different frozen source while the release still verifies ready against the earlier route acceptance, breaking the source-to-acceptance invariant|verify=on a scratch ready fixture change only the ledger stage_commit, update dependent hashes and pins, then check whether require-ready rejects the candidate mismatch",
+     "R4|P2|conf=0.99|claim=composition mutates public receipts and release authorities before its final refusal checks|evidence=scripts/compose_route_acceptance.py:570-599 overwrites route measurements before validating current block hashes; :718-736 writes root and release compatibility and client components before checking public_client_downloads|impact=a failed composition leaves partially replaced evidence or qualified-looking profile state without a completed acceptance, requiring manual recovery of the prior bytes|verify=in a scratch candidate supply valid evidence except failed public_client_downloads and compare all affected files before and after refusal",
+     "R5|P2|conf=0.91|claim=the composer equates the actual incumbent image with the latest ready product predecessor rather than the host's observed baseline|evidence=scripts/compose_route_acceptance.py:282-319 selects a predecessor manifest digest and requires the restored image to equal it; :555-557 applies that check; scripts/hosts/accept-rtx5090-host.py:152-169,227-230 instead records and restores the actual production image; releases/v0.16.2/manifest.json:45-48 pins beta.5|impact=if the legitimate production incumbent has a different image, truthful restoration is refused even when the host restored exactly its observed starting state|verify=compare the live window baseline image with the predecessor digest, then check composition using a restoration receipt that matches that baseline",
+     "R6|P2|conf=0.98|claim=backup transfer pull and fetch truncate an existing destination before transfer and whole-file verification succeed|evidence=scripts/hosts/pscp.py:161-166,192-195 and :339-355,376-379 open the destination with wb before ranged reads and digest comparison; docs/QUICKSTART.md:1140-1148 recommends these modes for bulk archive transfer|impact=an interrupted retry to an existing checkpoint replica can destroy its last verified local archive despite the transfer reporting failure|verify=retry an interrupted scratch pull or fetch onto a pre-existing verified archive and compare its bytes after failure"
+    ],
+    "unresolved": []
+   },
+   "gemini-argon": {
+    "summary": "Reviewed commit c4afc44fc645f6d873d736717168efdd76a58b3e across the 132 bound product paths for omp-ninfer v0.17.0 (from base 4012e4d7d23b5af98068d008339293bb02bfddc7, retaining route stage_commit 076bbe4f5abd68c8a0a1ba2efa0d08e881970e11). Core checkpoint namespace isolation (checkpoints-v017 vs retained /checkpoints-v013 mount and predecessor custody), atomic same-directory macOS/WSL client key installation, stock OMP 18.18.6 pins, qwen3 opaque-alias tokenizers, carried native beta.2 bindings, and composer stage_commit bindings hold. Two P2 defects were identified: (1) stage_release.py and rebind_release.py leave release-local profile snapshots (releases/<release>/profiles/*.json) with predecessor client/runtime fields and mismatched indentation when staging and promoting from a v0.16.0+ release without --profile-template-dir, breaking --require-clean-client and post-cut validate_release_identity_snapshots without manual copying; and (2) compatibility.json, releases/v0.17.0/compatibility.json, docs/COMPATIBILITY.md, and releases/v0.17.0/COMPATIBILITY.md retain the stale predecessor \"RTX 5090 beta.5 container\" label in runtime_contracts[0].lane while v0.17.0 ships v0.7.0-qwen38-5090-beta.6.",
+    "unresolved": [],
+    "evidence": [
+     "R1|P2|conf=0.98|claim=staging and lane-pinning a release from a v0.16.0+ predecessor leaves release-local profile snapshots stale and out of sync with root profiles|evidence=scripts/stage_release.py:333-358 only rewrites server.checkpoint_host_directory (using indent=1 via dump at lines 67-68) in releases/<release>/profiles/*.json when --profile-template-dir is omitted, leaving release, model, server.arguments, and client on predecessor values (causing client_pin_locations at line 495 and --require-clean-client at lines 553-557 to fail on releases/<release>/profiles/*.json); subsequently scripts/rebind_release.py:109-135 (promote_root) writes promoted profile fields with indent=2 only to ROOT/profiles/*.json and never updates releases/<release>/profiles/*.json, while tests/test_stage_release.py:18,86-94,424-458 only tests descriptor=None without promote_root on v0.16.0|impact=After PT017-CHECKPOINT-NAMESPACE and PT017-RECEIPT-WAIVER-LINEAGE controls, mechanized staging from v0.16.0+ with --omp-component --require-clean-client fails on leftover predecessor client pins in releases/<release>/profiles/*.json, and rebind_release.py --stage lane leaves releases/<release>/profiles/*.json byte-unequal to profiles/*.json so verify_release.py:2362-2368 (validate_release_identity_snapshots) fails unless manually copied|verify=In tests/test_stage_release.py, run self.stage(root, DESCRIPTOR, require_clean_client=True, source_release=\"v0.16.0\") on self.native_staging_copy(), and run REBIND_RELEASE.promote_root(TARGET, root / \"releases\" / TARGET / \"manifest.json\") followed by VERIFY_RELEASE.validate_release_identity_snapshots on a staged v0.16.0 copy",
+     "R2|P2|conf=0.99|claim=v0.17.0 compatibility.json and rendered COMPATIBILITY.md retain the predecessor RTX 5090 beta.5 component label in runtime_contracts without verifier detection|evidence=compatibility.json:318-324 and releases/v0.17.0/compatibility.json:396-402 declare runtime_contracts[0].lane as \"RTX 5090 beta.5 container\" (rendered into docs/COMPATIBILITY.md:39 and releases/v0.17.0/COMPATIBILITY.md:39 by scripts/render_compatibility.py:293-305) while releases/v0.17.0/manifest.json:33-34 binds v0.7.0-qwen38-5090-beta.6; neither scripts/stage_release.py:412-419 nor scripts/rebind_release.py:55-97 updates runtime_contracts, and scripts/verify_release.py:665-728,859-888 does not check compatibility.runtime_contracts against manifest component tags|impact=After PT017-RELEASE-EVIDENCE and PT017-PUBLIC-FACTS-PRIVACY controls, the v0.17.0 compatibility authority and matrix linked by docs/QUICKSTART.md:786-787 misidentify the v0.17.0 RTX 5090 protocol boundary as the predecessor beta.5 container rather than beta.6, and verify_release.py passes --require-installable and --require-ready with stale cross-release metadata|verify=Inspect compatibility.json:320, releases/v0.17.0/compatibility.json:398, docs/COMPATIBILITY.md:39, and releases/v0.17.0/COMPATIBILITY.md:39 against releases/v0.17.0/manifest.json:34, and run python3 scripts/verify_release.py --release v0.17.0 --require-installable"
+    ]
+   },
+   "gpt-astra": {
+    "summary": "Read-only review of c4afc44fc645f6d873d736717168efdd76a58b3e. Standing: lead_family=claude; selectionClass=supplement; role=supplement; independence_class=cross_family; authority=supplemental_evidence. Found two P1 issues affecting restoration and native acceptance provenance, plus one P2 hold-reconciliation issue. One restoration-baseline question remains unresolved. Findings are source-derived; no commands, tests, or live-host operations were run.",
+    "evidence": [
+     "R1|P1|conf=0.98|claim=Concurrency/TOCTOU: host-route and setup release the restoration lock before their effects; [INFERENCE] a launcher spanning watchdog expiry can recreate candidate state after restoration completes.|evidence=scripts/hosts/accept-rtx5090-host.py:190-202 checks the window under a short-lived lock and makes subsequent restoration calls no-ops; :265-270 releases the hold and records completion; :337-348 runs the launcher outside that lock. scripts/hosts/accept-rtx5090-routes.py:399-408 permits a shortened positive watchdog interval followed by a 1250-second setup.|impact=The protected production/container/directory baseline can change after a successful restoration receipt and hold release; the later finally restoration does not repair it.|verify=Use a disposable lifecycle fixture to pause the launcher before container creation, let watchdog restoration finish, then resume it; require no post-restoration container or directory mutation and no premature successful restoration receipt.",
+     "R2|P1|conf=0.98|claim=Acceptance-provenance validation: RTX4090 campaign inputs are not bound to the frozen product candidate or observed OMP client before being labeled current; [INFERENCE] predecessor beta.2 campaign/public-install observations can be relabeled as v0.17.0 acceptance.|evidence=scripts/compose_route_acceptance.py:510-551 checks native observations/configuration without checking their candidate or release, then :647-677 writes the current candidate and manifest client. scripts/verify_release.py:2252-2271 checks nested package/binary/configuration identities but ignores the producer's source.product_release recorded at scripts/hosts/accept-native-public-install.ps1:58. scripts/compose_native_qualification.py:275-300 returns for C1 before client-hash validation. releases/v0.16.2/manifest.json:136-153 and releases/v0.17.0/manifest.json:136-153 bind identical RTX4090 component bytes.|impact=Fresh documented blocks and component-hash checks do not prevent historical post-route/native-public-install evidence from becoming a fresh-client pass, violating the explicit separation between component carry and successor acceptance.|verify=With otherwise valid current route/restoration inputs, substitute the predecessor RTX4090 campaign and public-install observations, retaining their old product/client provenance; composition and ready verification must reject them before assigning current identities.",
+     "R3|P2|conf=0.96|claim=Partial-failure reconciliation: a successful remote Hold followed by a lost SSH acknowledgement is not released; [INFERENCE] the driver leaves its lane pause marker behind because acquisition is tracked only after the remote call returns successfully.|evidence=scripts/hosts/accept-windows-client.ps1:75-90 persists ownership and creates the hold before returning success. scripts/hosts/accept-rtx5090-routes.py:405-418 and :464-509 set held=True only after win('Hold') returns and invoke restoration only when held is true. The watchdog is armed later by scripts/hosts/accept-rtx5090-host.py:306-315.|impact=Production may remain running, but its protected hold state and automatic lane recovery remain altered indefinitely despite local acquisition cleanup and the advertised independent watchdog.|verify=Simulate a remote Hold that creates its owned marker and receipt, then reports a transport failure before acknowledgement; verify the driver reconciles that receipt and releases only its own hold without starting a production window."
+    ],
+    "unresolved": [
+     "U1|P2|conf=0.82|question=Will the approved RTX5090 starting image equal the published v0.16.2 beta.5 image, or will truthful restoration of an independently promoted beta.6 incumbent be rejected by composition?|missing=The actual approved pre-window baseline is not bound here. scripts/compose_route_acceptance.py:282-318,556-557 requires the latest ready product predecessor image; releases/v0.16.2/manifest.json:47 names beta.5, while releases/v0.17.0/manifest.json:47 names beta.6. The host helper instead captures and compares the actual incumbent at scripts/hosts/accept-rtx5090-host.py:152-169,228-230.|verify=Compare the approved pre-window image with the composer's derived predecessor digest, then exercise composition using truthful unchanged-restoration evidence for that baseline; resolve any mismatch without relabeling restoration or changing the incumbent merely to satisfy the receipt."
+    ]
+   },
+   "claude-mythos": {
+    "summary": "Supplemental same-lineage security review (lead_family=claude, role=lead_family_security, authority=supplemental_evidence) of c4afc44f over the 132 bound paths. Verified in source: the macOS/WSL key block (umask 077 mktemp, pipefail SSH, >32-byte check, chmod 600, same-directory mv) leaves an existing key intact on every tested failure path; start-ninfer.sh refuses a checkpoint dir whose basename is not checkpoints-v017 or is a symlink and keeps config hash 751d22dc because configuration_identity omits checkpoint_host_directory; stager, verifier and host helper derive the same namespace; the composer takes acceptance identity from the hash-bound ledger stage_commit; publisher preflight, CI permissions/pins and fail-closed fragments hold. One P2 gap: the ready gate re-checks only per-file hashes, not the composition-time cross-checks (current block hashes, document hash, routes candidate vs ledger stage_commit), so post-composition route-byte or subject drift is not mechanically caught before the hard-to-reverse tag. No fail-open, injection, secret-exposure or escalation defect found in the delta under the declared single-owner model.",
+    "evidence": [
+     "R1|P2|conf=0.75|claim=the ready gate does not re-derive the composition-time route-identity cross-checks against the tagged tree: after composition an executable quickstart block, the launcher it invokes, or the ledger's product_tooling.stage_commit can change while documented-routes.json still asserts executed_blocks_match_current=true and verify_release --require-ready --check-pins passes (observed: verifier code paths; inferred: consequence under an accidental post-composition edit in the pin-dance window)|evidence=scripts/verify_release.py:1415-1470 validate_documented_route_acceptance checks only receipt sha256, status, release and that the summary restates routes.candidate_commit; :3591-3596 is its only ready-mode call site; grep finds no current_block_addresses, current_document_sha256, product_tooling or stage_commit use anywhere in verify_release.py; scripts/compose_route_acceptance.py:134-148 and :594-600,693-700 enforce stage_commit equality and blocks_match only at composition time; scripts/verify_release.py:2357-2384 binds profile snapshots but no launcher or fragment bytes; tests/test_documented_route.py:183-198 compares only slug/heading/index to the v0.16.2 addresses, not the current release's accepted hashes|impact=a hard-to-reverse tag can ship route bytes or a subject identity that no receipt executed while the receipts state equality, defeating the exact-route-bytes and truthful accepted-state assets; the residual control is human council review during the pin dance|verify=in a scratch clone of the v0.16.2 tag append a comment line inside the fenced block under heading 6. Install the same key on the Mac (and separately change product_tooling.stage_commit in the bound ledger and re-pin g4_review.sha256), run python3 scripts/verify_release.py --release v0.16.2 --require-ready --check-pins and observe no error, while python3 scripts/documented_route.py steps --lane rtx5090-macos-client no longer matches releases/v0.16.2/acceptance/documented-routes.json current_block_addresses"
+    ],
+    "unresolved": [
+     "U1|P3|conf=0.3|question=can a login-shell profile on the inference host that writes to stdout (the block runs sh -lc, which sources /etc/profile and ~/.profile) pass the >32-byte length check so the key block replaces a valid ninfer-beta.key with contaminated bytes and still exits 0?|missing=evidence that the documented Ubuntu 24.04 WSL2 host emits nothing on stdout for a non-interactive sh -l, and whether the published v0.16.2 block (outside the bound paths) carried the same assumption so this is not a regression; the packet declares no new format validation, so only the protocol's quiet-login-shell assumption is in question|verify=on a scratch host add an echo line to ~/.profile, run the docs/QUICKSTART.md:879-892 block against it, then inspect the exit status and the bytes of ~/.omp/agent/ninfer-beta.key",
+     "U2|P3|conf=0.25|question=does window.sh restore recreate production ninfer-5090-v070p with a bind mount of the documented key path ~/.config/omp-ninfer/api-key, so production is recreated against the route-generated key before original-api-key is renamed back?|missing=window.sh and production's Mounts are private to --window-dir and the WSL workspace; scripts/hosts/accept-rtx5090-host.py:197-244 runs window.sh restore and only the unauthenticated /health probe before the key rename at line 243, so a shared key path would not be detected by the restoration proof|verify=run docker inspect ninfer-5090-v070p on the host (or read the last window's baseline.json mounts) and confirm no Mount Source equals ~/.config/omp-ninfer/api-key; if one does, issue an authenticated /v1/ninfer/status with the original key immediately after a restoration"
+    ]
+   }
+  },
+  "dispositions": {
+   "daybreak-blue-R1": {
+    "severity": "P1",
+    "result": "confirmed",
+    "disposition": "defer",
+    "change": "none in v0.17.0; tracked in the follow-up tooling issue",
+    "rationale": "Pre-existing in the published v0.16.2 tooling (tag 4012e4d7): the flagged code path is unchanged by this delta (lead diff/grep check). `require_open_window` already documents that an action started before a restoration is not stopped. v0.17.0 consequence: none — the window restored before any watchdog expiry (hold 408.213 s vs 3,000 s watchdog) and production restoration was independently verified (same container/image, unless-stopped, health 200, Fleet). Severity after controls for this release: P2 (requires setup crossing the watchdog deadline during an operator-run acceptance window)."
+   },
+   "daybreak-blue-R2": {
+    "severity": "P1",
+    "result": "confirmed",
+    "disposition": "mitigate",
+    "change": "For v0.17.0 composition: the lead screens every composed public receipt for private content (verify_release private-marker scan plus a manual field review) before the compose commit; the composer allowlist fix is tracked in the follow-up tooling issue.",
+    "rationale": "Pre-existing in the published v0.16.2 tooling (tag 4012e4d7): the flagged code path is unchanged by this delta (lead diff/grep check). This delta reduced exposure (client error strings now become digests, compose_route_acceptance.py public_observations). v0.17.0 has not composed yet, so the mitigation applies before any public byte is written."
+   },
+   "daybreak-blue-R3": {
+    "severity": "P1",
+    "result": "confirmed",
+    "disposition": "mitigate",
+    "change": "Lead check at pin time: ledger product_tooling.stage_commit == every route receipt clone_commit == 076bbe4f; verifier binding tracked in the follow-up tooling issue.",
+    "rationale": "Pre-existing in the published v0.16.2 tooling (tag 4012e4d7): the flagged code path is unchanged by this delta (lead diff/grep check). verify_release.py has no stage_commit reference in base or candidate; the composer enforces the equality at composition time. Residual for v0.17.0 is an accidental post-composition edit, covered by the explicit lead check."
+   },
+   "gpt-astra-R1": {
+    "severity": "P1",
+    "result": "confirmed",
+    "disposition": "defer",
+    "change": "merged with daybreak-blue-R1",
+    "rationale": "Same root cause as daybreak-blue-R1; same rationale."
+   },
+   "gpt-astra-R2": {
+    "severity": "P1",
+    "result": "confirmed",
+    "disposition": "mitigate",
+    "change": "v0.17.0 composes only campaign/public-install evidence produced in this window for candidate 076bbe4f (RTX 4090 evidence under the current acceptance root); provenance binding in the composer/verifier tracked in the follow-up tooling issue.",
+    "rationale": "Pre-existing in the published v0.16.2 tooling (tag 4012e4d7): the flagged code path is unchanged by this delta (lead diff/grep check). This delta added validate_native_public_install_identity but not the candidate/client binding. Residual for v0.17.0: none when only fresh evidence is composed, which the lead verifies by evidence path and timestamps."
+   },
+   "claude-mythos-R1": {
+    "severity": "P2",
+    "result": "confirmed",
+    "disposition": "mitigate",
+    "change": "Same pin-time lead check as daybreak-blue-R3, plus documented-route block re-derivation (`documented_route.py steps` vs composed current_block_addresses) before the manifest pin.",
+    "rationale": "Same gap class as daybreak-blue-R3 (ready gate does not re-derive composition cross-checks); pre-existing; mitigated by explicit checks for this release."
+   },
+   "daybreak-blue-R4": {
+    "severity": "P2",
+    "result": "confirmed",
+    "disposition": "defer",
+    "change": "Tracked in the follow-up tooling issue.",
+    "rationale": "Pre-existing in the published v0.16.2 tooling (tag 4012e4d7): the flagged code path is unchanged by this delta (lead diff/grep check). A refused composition is recoverable from git (all affected files are tracked); P2."
+   },
+   "daybreak-blue-R5": {
+    "severity": "P2",
+    "result": "falsified",
+    "disposition": "reject",
+    "change": "none",
+    "rationale": "For this release the incumbent equals the predecessor manifest image: releases/v0.16.2/manifest.json components.ninfer.oci_reference = ghcr.io/alphastorm/ninfer-runtime@sha256:a0cbb8a5…, the production container image observed before and after the window. The general design point is tracked with the other composer items."
+   },
+   "daybreak-blue-R6": {
+    "severity": "P2",
+    "result": "confirmed",
+    "disposition": "defer",
+    "change": "Tracked in the follow-up tooling issue.",
+    "rationale": "pscp pull/fetch destination handling is unchanged in substance by this delta (2-line diff); operator backup tooling, not part of the documented route or release artifacts; P2."
+   },
+   "gemini-argon-R1": {
+    "severity": "P2",
+    "result": "confirmed",
+    "disposition": "defer",
+    "change": "Tracked in the follow-up tooling issue.",
+    "rationale": "For v0.17.0 the release-local RTX 5090 profile snapshots equal the root profiles (lead JSON comparison at c4afc44), so this release is unaffected; mechanized staging for future releases needs the stager/rebind fix; P2."
+   },
+   "gemini-argon-R2": {
+    "severity": "P2",
+    "result": "confirmed",
+    "disposition": "accept",
+    "change": "Fix in the v0.17.0 compose commit: runtime_contracts[0].lane in compatibility.json and releases/v0.17.0/compatibility.json → \"RTX 5090 beta.6 container\", re-render COMPATIBILITY.md (root + release), rebind; a verifier check against manifest component tags is tracked in the follow-up tooling issue.",
+    "rationale": "Verified: compatibility.json:397 at c4afc44 still says \"RTX 5090 beta.5 container\" while releases/v0.17.0/manifest.json binds v0.7.0-qwen38-5090-beta.6. Public-facing stale metadata; data fix."
+   },
+   "gpt-astra-R3": {
+    "severity": "P2",
+    "result": "confirmed",
+    "disposition": "defer",
+    "change": "Tracked in the follow-up tooling issue.",
+    "rationale": "Lost-acknowledgement Hold reconciliation is pre-existing (this delta only added undo on local creation failure); v0.17.0 windows released their holds (verified restoration); P2."
+   },
+   "gpt-astra-U1": {
+    "severity": "P2",
+    "result": "falsified",
+    "disposition": "reject",
+    "change": "none",
+    "rationale": "Answered: the approved starting image is a0cbb8a5…, equal to the v0.16.2 manifest image; composition will accept truthful unchanged restoration."
+   },
+   "claude-mythos-U1": {
+    "severity": "P3",
+    "result": "unresolved",
+    "disposition": "defer",
+    "change": "none",
+    "rationale": "P3 question about a non-quiet login shell on the inference host; the documented Ubuntu WSL host emits nothing on non-interactive login in this window (key block passed); tracked as a hardening question in the follow-up issue."
+   },
+   "claude-mythos-U2": {
+    "severity": "P3",
+    "result": "falsified",
+    "disposition": "reject",
+    "change": "none",
+    "rationale": "The route window restored production and health 200 was verified; the production container mounts are recorded in the window baseline (private); no shared key-path mount was observed in the restoration evidence. P3."
+   }
+  },
+  "follow_up": "https://github.com/alphastorm/omp-ninfer/issues/149"
+ },
+ "product_waiver_support": {
+  "repository": "https://github.com/alphastorm/omp-ninfer",
+  "review_id": "CR-20261110T144437Z-f85af622-waiver",
+  "review_class": "focused",
+  "subject": {
+   "base_commit": "c4afc44fc645f6d873d736717168efdd76a58b3e",
+   "reviewed_commit": "f85af622be50874e6791119ce3767a29b13ccf19",
+   "remediated_commit": "bf2a63a078e0329ba6deb82a7622c0342be2c3a3",
+   "pull_request": "https://github.com/alphastorm/omp-ninfer/pull/150"
+  },
+  "status": "closed-with-remediation",
+  "resolver_assignments": [
+   {
+    "reviewer_id": "daybreak-blue",
+    "selectionClass": "focused",
+    "role": "strong_critic",
+    "independence_class": "cross_family",
+    "authority": "independent_evidence",
+    "model": "openai-codex/gpt-6-sol:max",
+    "model_family": "gpt"
+   },
+   {
+    "reviewer_id": "gemini-argon",
+    "selectionClass": "focused",
+    "role": "strong_critic",
+    "independence_class": "cross_family",
+    "authority": "independent_evidence",
+    "model": "google-antigravity/gemini-4-argon:high",
+    "model_family": "gemini"
+   },
+   {
+    "reviewer_id": "gpt-astra",
+    "selectionClass": "supplement",
+    "role": "supplement",
+    "independence_class": "cross_family",
+    "authority": "supplemental_evidence",
+    "model": "openai-codex/gpt-6-astra:max",
+    "model_family": "gpt"
+   }
+  ],
+  "receipt_digests": {
+   "dispositions.md": "f4c819cd0050f194d084296806f717ec1c50b38ea197711eedf1da6a1c07d8fe",
+   "review-record.json": "1fb4d63f70dd26fd11a822d513d030ce91015dc02b73d75c5a764030467cf970",
+   "frozen-subject.json": "f37eb27a050cb0807b8eef78caf3ed2ac3da7c25c6789d361f489fad237f28b4",
+   "resolver-receipt.json": "6737193d7cbbeed192ba7cde6966566709af587c956e008ab2462bc15bbb9401",
+   "daybreak-blue.json": "4e323e782cfac59a59fe5219a1db1ade5a07ff63ab35c6c620fc4258ab72274d",
+   "gemini-argon.json": "0e5114da3b278cffd200558fcdb856069e06aa9b78d7d3c92e20810ce4f7221e",
+   "gpt-astra.json": "7dc89c3b5a8d28f2cd1c173a851981579e6f1d8fb3ad3d3c0f9fa3f8456fc270",
+   "round2/frozen-subject.json": "cd3234722f23b2d68e0f6480c3aa9fce2cd507692cbe6a642fa55c36249fbea8",
+   "round2/resolver-receipt.json": "fe9f074ecf839b2e804bc8f7fddec90a8a866b7a4f0cc635d311ff0857b83009",
+   "round2/daybreak-blue.json": "97f00424b97707a5befd18a91d1fc70bf6b640327f62d56cb6af1c3c88d486c1",
+   "round2/budget/e2e-r2.json": "2fb66fe8a73e9201e2d179c4851127bba02551381e5a2ed62561d172fdd0af33"
+  },
+  "reviewer_results": {
+   "round1": {
+    "daybreak-blue": {
+     "summary": "Focused independent review of f85af622be50874e6791119ce3767a29b13ccf19. The trust boundary is the founder’s private decision projected into release evidence. Its weakest assumption is that a probe projection still describes the receipt named by its digest; the digest check fails first. A separate ready check does not preserve the required public limitation wording.",
+     "evidence": [
+      "R1|P1|conf=0.98|claim=An underlying passed compaction proof can be relabeled failed in the waived campaign projection without changing its digest; the composer and ready verifier do not establish that the founder-waived failure belongs to that proof|evidence=tests/test_native_candidate_policy.py:91-96 creates a passed proof; scripts/compose_native_qualification.py:258-266 hashes it into a projection; tests/test_compose_route_acceptance.py:416-417,855-859,900-909 changes only projected passed/checks/committed and asserts successful composition; scripts/verify_release.py:1275-1279 checks the compaction-probe digest’s syntax but not its source or equality to the projected receipt|impact=the release can be marked ready under a founder waiver despite a stale or mismatched compaction proof, violating the failed-proof and observed-failure binding invariants after candidate/client/model checks|verify=retain a passed source probe and its digest, relabel only its projection as failed, then confirm composition and --require-ready reject the mismatched waiver",
+      "R2|P2|conf=0.91|claim=Ready verification accepts a waived lane’s external receipt with only its lane named in limitations, even if the explicit non-claims for native behavior, wrapper audit and anonymous install are removed or contradicted|evidence=scripts/compose_route_acceptance.py:567-573,793-795 authors the three non-claims; scripts/verify_release.py:1437-1445 checks only that a limitation contains the lane name; tests/test_verify_release.py:2281-2283,2334-2339 supplies a generic lane-only limitation and asserts ready verification succeeds|impact=accidental relabeling can leave the standalone public acceptance receipt misleading about the waived lane despite its waived status and absent public-install evidence, violating the public-limitation invariant|verify=replace a composed waived receipt’s limitation with a lane-named completion claim, update enclosing hashes and run --require-ready; it should reject the contradictory receipt"
+     ],
+     "unresolved": []
+    },
+    "gemini-argon": {
+     "unresolved": [],
+     "evidence": [],
+     "summary": "Reviewed commit f85af622be50874e6791119ce3767a29b13ccf19 across the 6 bound files (scripts/compose_native_qualification.py, scripts/compose_route_acceptance.py, scripts/verify_release.py, and their corresponding test modules) against the assurance scope and immutable review packet.\n\nAll stated invariants and requirements hold:\n1. Shared probe-acceptance predicate (compose_native_qualification.py:234-298): native_probe_acceptance_errors enforces that waived_failed_compaction is only valid for C2 campaigns (concurrency > 1), requires the compaction proof to retain passed is False while still binding the candidate's stock OMP client SHA-256, model identifier, and omp_ninfer_long_session_proof artifact type, and keeps all fleet, fanout, and parallel probe requirements intact.\n2. Founder waiver and window-failure binding (verify_release.py:1186-1271, compose_route_acceptance.py:360-400): validate_native_route_waiver restricts native-probes waivers to observed_summary.probe == 'compaction' with a non-empty error string, positive integer timeout_seconds, valid HTTP status codes with positive integer counts, optional refused managed_stop validation, required compaction-probe.json digest in evidence_sha256, exact agreement with window_failure.observed_summary, stopped-owner census power binding, and graceful lead restoration.\n3. Receipt posture and limitations (compose_route_acceptance.py:406-414, 548, 571, 579; verify_release.py:1351-1436, 2249-2299): waived native-probes campaigns retain failed campaign status, omit the lane's public-install receipt, record passed-with-founder-waiver restoration and waived-by-founder external installation status, and append explicit limitation prose. Unwaived failures and existing structured-outage waivers behave as before.\n\nNo defects or unresolved questions identified."
+    },
+    "gpt-astra": {
+     "summary": "Reviewed f85af622be50874e6791119ce3767a29b13ccf19 under lead_family=claude, selectionClass=supplement, role=supplement, independence_class=cross_family, authority=supplemental_evidence. Found a compaction-evidence binding gap and a ready-verifier regression-coverage gap. Static inspection only; no commands or tests executed.",
+     "evidence": [
+      "R1|P2|conf=0.96|claim=Evidence-binding gap: the waiver's compaction-probe.json digest is never connected to the failed compaction proof being accepted.|evidence=scripts/verify_release.py:1271-1280 validates only the compaction digest's format, while explicitly matching the window-failure digest; scripts/compose_native_qualification.py:285-290,327-334 independently checks the projected proof's digest format, verdict and client/model; scripts/verify_release.py:2321-2333 supplies only a waiver flag, not the approved probe digest. tests/test_compose_route_acceptance.py:147-154 supplies an arbitrary compaction digest.|impact=[INFERENCE] An accidentally copied probe digest or mixed-run proof can survive the founder-file, route, window-failure and recovery checks, undermining invariant 2's evidence binding even though the proof remains failed.|verify=In an otherwise valid v0.17.0 fixture, change only the waiver's compaction-probe digest to another valid SHA-256 and refresh enclosing bindings. Require composition and ready verification to reject the mismatch against the selected proof's original-source digest.",
+      "R2|P2|conf=1.00|claim=Regression-coverage gap: the new require-ready native-probes test uses a release that skips native probe policy validation entirely.|evidence=tests/test_verify_release.py:15 fixes PUBLIC_RELEASE at v0.10.0; :1256-1273 promotes that historical fixture; :2334-2344 runs the new waived-native-probe readiness case against it. scripts/verify_release.py:2311-2312 returns before probe validation for releases below v0.16.0.|impact=[INFERENCE] The full ready-path test cannot detect missing enforcement of invariant 1's failed-proof, other-probe and candidate-binding requirements; direct helper/composer tests do not establish the require-ready integration.|verify=Exercise require_ready=True using a v0.17.0 fixture carrying authenticated native policy and probe projections. Assert acceptance of the valid waiver and rejection of rehashed mutations removing the waiver, marking compaction passed, failing another probe, or changing the client/model."
+     ],
+     "unresolved": []
+    }
+   },
+   "round2": {
+    "daybreak-blue": {
+     "summary": "Receipt authority: independent_evidence. Reviewed the bound files without running checks. Found a credential-exposure path from private native failure evidence to public acceptance JSON. The packet discloses prior reviewers’ conclusions, so the named remediation findings cannot receive a blind independent assessment from this assignment.",
+     "evidence": [
+      "R1|P1|conf=0.90|claim=Credential exposure: an otherwise trusted owner's native-probes failure evidence can carry a credential through the unrestricted window_failure object into a public release receipt|evidence=scripts/verify_release.py:1252-1256 accepts any nonblank observed_summary.error; scripts/compose_route_acceptance.py:527-529,714-723 copies the full window_failure object into documented-routes.json; scripts/verify_release.py:2935-2955 scans public files only for fixed private path and host markers|impact=credential secrecy can fail after waiver hash binding and ready verification succeed if private failure evidence contains a token without those markers|verify=place a harmless credential-shaped sentinel in an extra window_failure field of an otherwise valid native-probes waiver fixture, compose and require-ready verify, then inspect the generated documented-routes.json"
+     ],
+     "unresolved": [
+      "U1|P2|conf=1.00|question=can the named W-1 and W-3 remediations receive a blind independent review under this packet?|missing=an uncontaminated assignment: the supplied requirements disclose gpt-astra's prior-round findings and anchors|verify=redispatch a packet without peer findings or attributions for an independent review"
+     ]
+    }
+   }
+  },
+  "dispositions": {
+   "W-1": "confirmed; mitigate: waiver probe_projection_sha256.compaction bound to the campaign projection in composer and ready verifier",
+   "W-2": "confirmed; mitigate: ready verifier requires the exact non-claim sentence in the waived lane limitation",
+   "W-3": "confirmed; mitigate: require-ready integration coverage at a release with native probe policy",
+   "W-4": "confirmed class; P1 as filed, P2 after controls for v0.17.0: lead-authored waiver text plus manual public-output screen; tool fix tracked in alphastorm/omp-ninfer#149",
+   "W-5": "design decision; reject: fix-only packets list prior finding IDs by design"
+  }
+ }
+}

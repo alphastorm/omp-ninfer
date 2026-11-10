@@ -50,10 +50,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Stage v0.17.0 with published RTX 5090 runtime beta.6 from `e0971faf`, stock OMP 18.18.6
-  and unchanged native beta.2 components. Bind fresh published-image/artifact receipts, preserve
-  predecessor checkpoint stores, and prepare the full successor guide. New-client five-route
-  acceptance, final review/composition pins and founder-owned product publication remain separate.
+- Compose v0.17.0 with published RTX 5090 beta.6/F3 `e0971faf`, stock OMP 18.18.6 and
+  unchanged native beta.2 components. Fresh candidate `076bbe4f` passed five routes (**31/31
+  blocks**) and three clients, with a **408.213 s** RTX 5090 hold and passing RTX 4090
+  campaign/public-install/restoration. Preserve RTX 3090's passed seven-block route and failed
+  native-probes compaction campaign under its exact founder-approved disclosure waiver; no
+  structured-outage, passing wrapper-audit or anonymous public-install claim is added.
+  Bind independent lead recovery, current councils and immutable evidence pins; correct the
+  compatibility label to beta.6. Deferred tooling is tracked in
+  [#149](https://github.com/alphastorm/omp-ninfer/issues/149). Product publication stays founder-only.
 - Prepare the reviewed stock-client fragments for the next release: pin `tokenizer: qwen3`
   on opaque aliases and disable automatic updates and the setup wizard explicitly, while
   retaining effort clamps, async compaction and concurrency. Explicit `omp update` remains an

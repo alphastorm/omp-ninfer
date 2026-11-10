@@ -1,11 +1,11 @@
 # Quickstart
 
-> **Prepared guide: v0.17.0 · stock Oh My Pi 18.18.6 · fresh route acceptance required**
+> **Versioned guide: v0.17.0 · stock Oh My Pi 18.18.6 · five documented routes accepted**
 
-This guide prepares the v0.17.0 runtime-and-client candidate; it does not claim completed product
-acceptance or publication. Use the [immutable published v0.16.2 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.16.2/docs/QUICKSTART.md)
-for installation until this release is published. The new host checkpoint and atomic macOS key
-blocks must execute in fresh candidate-bound acceptance; predecessor receipts are not transferred.
+This guide describes the v0.17.0 runtime-and-client composition, not a publication authorization.
+Use the [immutable published v0.16.2 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.16.2/docs/QUICKSTART.md)
+for installation until founder-owned publication. Fresh acceptance executed the new host checkpoint
+and atomic macOS key blocks; no predecessor product-route receipt is transferred.
 
 OMP NInfer is the qualified local inference appliance and release layer connecting the
 [Oh My Pi](https://github.com/can1357/oh-my-pi) (OMP) coding-agent client over authenticated
@@ -17,8 +17,8 @@ loopback to the NInfer inference engine serving Qwen3.8 27B on your GPU.
 | --- | --- | --- |
 | RTX 5090 container on Windows 11 + Docker Desktop / WSL2 | Native Windows x64 client over local loopback `127.0.0.1:18089` | [RTX 5090 Windows route](#ready-route-native-windows-and-docker-desktop-wsl2) |
 | RTX 5090 container on Windows 11 / WSL2 or Linux | macOS arm64 client over a manual SSH tunnel (preview) | [macOS manual SSH route (preview)](#macos-client-over-a-manual-ssh-tunnel-preview) |
-| RTX 4090 native Windows 11 (alone or beside RTX 3090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; `v0.8.0-qwen38-4090-beta.2` DFlash2 K=7, one request at a time (`C1`); carried beta.2 component, fresh new-client route acceptance required | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) |
-| RTX 3090 native Windows 11 (alone or beside RTX 4090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; `v0.8.0-qwen38-3090-beta.2` DFlash2 K=7, two requests in flight (`C2`) over one shared 131,072-token pool; carried beta.2 component, fresh new-client route acceptance required; no new waiver or public-install pass claimed | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
+| RTX 4090 native Windows 11 (alone or beside RTX 3090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; `v0.8.0-qwen38-4090-beta.2` DFlash2 K=7, one request at a time (`C1`); carried component, fresh route/campaign/public install passed | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) |
+| RTX 3090 native Windows 11 (alone or beside RTX 4090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; `v0.8.0-qwen38-3090-beta.2` DFlash2 K=7, two requests in flight (`C2`) over one shared 131,072-token pool; fresh route passed, later compaction campaign failed under a specific founder waiver; no public-install pass | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
 | RTX 5090 container with Linux x64 client under WSL2 only | WSL2 shell client over local loopback `127.0.0.1:18089` (no native Linux OS qualification) | [WSL2 Linux client](#wsl2-linux-client-over-local-loopback) |
 | Other GPU, non-WSL Linux client, or concurrent native serving | Unsupported | [Compatibility boundary](COMPATIBILITY.md) |
 
@@ -142,23 +142,33 @@ covers source behavior and independent public-download integrity, not client exe
 
 ## Acceptance evidence
 
-Fresh v0.17.0 acceptance is not yet composed. The frozen candidate must execute all five documented
-routes: RTX 5090 host 2 blocks, macOS 10, Windows 5, RTX 4090 7 and RTX 3090 7 (31 executable
-blocks), plus structured acceptance on all three exact stock OMP 18.18.6 clients, native probes,
-public installs and independent restoration. macOS remains preview; Linux is WSL2-only; image
-input remains macOS/Windows against RTX 5090 only.
+On 2026-11-10, frozen candidate `076bbe4f5abd68c8a0a1ba2efa0d08e881970e11` passed all five
+documented routes: RTX 5090 host **2/2**, macOS **10/10**, Windows **5/5**, RTX 4090 **7/7**
+and RTX 3090 **7/7** (**31/31 executable blocks**). All three exact stock OMP 18.18.6 clients
+passed structured tool/continuation/fail-closed acceptance. The RTX 5090 production hold was
+**408.213 s**; the same healthy incumbent container/image, checkpoint mounts and `unless-stopped`
+policy were restored. RTX 4090 probes, public install and independent restoration passed.
+See [route receipts](../releases/v0.17.0/acceptance/documented-routes.json) and
+[composition](../releases/v0.17.0/acceptance/composed-external-installation.json).
 
-The published runtime component and carried native qualifications are separate from those new-client
-and product-route obligations. Historical acceptance, failed native campaign disclosures and founder
-waivers remain with the [immutable v0.16.2 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.16.2/docs/QUICKSTART.md).
-No old waiver, product acceptance or review approval is relabeled as a v0.17.0 result. No host window,
-production promotion or product publication is authorized by this prepared guide.
+**RTX 3090 limitation:** its seven blocks passed before a failed native-probes compaction campaign
+(900 s timeout, eight HTTP 503 queue timeouts, two HTTP 499 cancellations, no resident work).
+Subsequent managed Stop refused three sessions. The founder waived only that exact campaign
+failure with disclosure; lead recovery restored the stopped original lane gracefully at 370 W
+with an identical cross-lane census. Structured outage, a passing wrapper restoration audit and
+anonymous public install were not completed. **Keep v0.16.2 or restart the RTX 3090 lane after
+long sessions until a native re-cut is qualified.** The
+[waiver](../releases/v0.17.0/qualification/rtx3090-route-waiver.json) retains the failures.
+
+macOS stays preview; Linux is WSL2-only; image input covers macOS/Windows against RTX 5090 only.
+Historical native component qualification is separate same-byte evidence. No old waiver or review
+approval transfers, and this guide authorizes no host window, production promotion or publication.
 
 ## Current release at a glance
 
 | Lane | Runtime component and source | Model artifact | Serving profile and limits |
 | --- | --- | --- | --- |
-| RTX 5090 container (`127.0.0.1:18089`) | `v0.7.0-qwen38-5090-beta.6`, source `e0971faf`, server `dc86e101`, image `7a19576b`; current published-image lane receipt is required before the candidate pin | Published v3 `81f924d4` (20,437,521,664 bytes) | Retained `qwen38-5090-v0.13.0` / config `751d22dc`: strict origin auth, DFlash2 K7, BF16 KV, 131,072 context, C2, two extra device-state slots, 180 s pending timeout; successor host store `checkpoints-v017` |
+| RTX 5090 container (`127.0.0.1:18089`) | `v0.7.0-qwen38-5090-beta.6`, source `e0971faf`, server `dc86e101`, image `7a19576b`; current published-image lane and fresh route acceptance bound | Published v3 `81f924d4` (20,437,521,664 bytes) | Retained `qwen38-5090-v0.13.0` / config `751d22dc`: strict origin auth, DFlash2 K7, BF16 KV, 131,072 context, C2, two extra device-state slots, 180 s pending timeout; successor host store `checkpoints-v017` |
 | RTX 4090 native Windows (`127.0.0.1:18082`) | Carried `v0.8.0-qwen38-4090-beta.2`, source `a87de361`; package `d9b10b47`, server `ffee91bf`, config `ae27dc44` | Same model v3 | Unchanged INT8 DFlash2 K7, 131,072 context, C1, 30 s pending timeout, two extra slots, 1,024-token prefill, 640 MiB admission headroom |
 | RTX 3090 native Windows (`127.0.0.1:18082`) | Carried `v0.8.0-qwen38-3090-beta.2`, source `a87de361`; package `97a8e634`, server `15a4db46`, config `238ccad7` | Same model v3 | Unchanged INT8 DFlash2 K7, C2 over one 131,072-token pool, 180 s pending timeout, two extra slots, 1,024-token prefill, 768 MiB headroom, 350 W serving cap |
 
@@ -688,7 +698,7 @@ release failure. Restart NInfer with section 4 only after observing the failure.
 ## macOS client over a manual SSH tunnel (preview)
 
 The macOS arm64 client is a preview platform (stock upstream binary over a manual OpenSSH loopback
-tunnel, without a managed macOS installer or appliance service). Fresh v0.17.0 acceptance must run
+tunnel, without a managed macOS installer or appliance service). Fresh v0.17.0 acceptance passed
 all 10 executable blocks against the `v0.7.0-qwen38-5090-beta.6` RTX 5090 container lane. Sections 3 and 4 also serve as
 the inference-host setup for the Windows and WSL2 Linux client routes.
 

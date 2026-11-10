@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.17.0",
-  "status": "candidate",
+  "status": "ready",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -15,7 +15,7 @@
     "omp": {
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
       "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/079406cec355dbe54175dba1257bd8297802cf9e/compatibility.json",
-      "compatibility_sha256": "b870226634f4d60ab0bd537bc3cdfb4a7e230908f987de204230ceef99a4d988",
+      "compatibility_sha256": "2cbd593ae6de3af616cd5ccb0279064ffc57131be12e5f3e8bd34ed224c62180",
       "distribution_kind": "upstream-release",
       "upstream_repository": "https://github.com/can1357/oh-my-pi",
       "upstream_tag": "v18.18.6",
@@ -217,10 +217,10 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "65ae72aa0340a8a88906753a2f732dbd584d015688156b68659686b4dd5be8c2",
+    "summary_sha256": "0b108462908beb543938f3b31426b3c48f0d84962c3afbb320076fc1cfde0ab6",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/079406cec355dbe54175dba1257bd8297802cf9e/releases/v0.17.0/qualification.json",
     "runtime_release_eligible": true,
-    "external_installation_passed": false
+    "external_installation_passed": true
   },
   "installation": {
     "mode": "native-windows-docker-local",
@@ -246,9 +246,7 @@
       "NInfer native v0.8.0-qwen38-4090-beta.2 (carried unchanged)",
       "OMP client: unmodified upstream Oh My Pi v18.18.6; no client published here"
     ],
-    "blockers": [
-      "external-installation acceptance has not been rerun against the published v0.7.0-qwen38-5090-beta.6 component and runtime image 7a19576b; the composed acceptance receipt is absent until it is"
-    ],
-    "external_installation_qualified": false
+    "blockers": [],
+    "external_installation_qualified": true
   }
 }

@@ -99,22 +99,128 @@
       "sha256": "dd5a752a2fa81536544d4db929a68418db651cb8c77748b43da40fee3cd3a6f3"
     },
     "external_installation_acceptance": {
-      "status": "pending",
-      "note": "Fresh upstream OMP 18.18.6 platform and five documented-route/public-install/restoration acceptance must be composed on one candidate; no predecessor acceptance is inherited."
+      "status": "waived-by-founder",
+      "repository_path": "releases/v0.17.0/acceptance/composed-external-installation.json",
+      "sha256": "a2d77ccbfd35d80e192b6efe7128dd62a1d74907e256a8585004d0b45ce2a29c",
+      "public_url": null,
+      "as_of": "2026-11-10",
+      "release": "v0.17.0",
+      "component_release_tag": "v18.18.6",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "dfb15c27cb2ea192a94761c26aa5cd4eed54b1e0a5a85c02938ab07d769bc8f7",
+      "windows_binary_sha256": "dfb15c27cb2ea192a94761c26aa5cd4eed54b1e0a5a85c02938ab07d769bc8f7",
+      "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+      "compatibility_sha256": "2cbd593ae6de3af616cd5ccb0279064ffc57131be12e5f3e8bd34ed224c62180",
+      "platform_receipts": [
+        {
+          "profile": "darwin-remote-ssh",
+          "sha256": "7eacc24dbcf8b5d0a21ec7825740dad0ed09f47371328b97fdc4371105d24df3"
+        },
+        {
+          "profile": "windows-docker-local",
+          "sha256": "8f66cc01ee1f6b686c887eca9ece58d71617c2c6c4df903dedb72e784213cf48"
+        },
+        {
+          "profile": "linux-docker-local",
+          "sha256": "96ac8bb18ea6cae22a6bcbeb8acc530bc17acdc75d4c28cc503158e0ca502012"
+        }
+      ],
+      "note": "Five documented routes, three stock clients and RTX 4090 native acceptance passed. rtx3090-native: all seven documented blocks passed; the later native campaign failed at native-probes compaction and was waived by the founder. Behavior completion, wrapper restoration and anonymous public-install acceptance are not claimed; the documented controller lead recovery is separately bound. rtx3090-native: documented blocks passed, but the post-route native-probes compaction probe failed and was waived by the founder. Native behavior completion, wrapper restoration audit and anonymous public-install acceptance are not claimed; lead recovery is bound by the waiver."
+    },
+    "documented_route_acceptance": {
+      "status": "passed",
+      "repository_path": "releases/v0.17.0/acceptance/documented-routes.json",
+      "sha256": "3f89e10b9db22156a3b7911fa40491a91c3b99430a11e9780dedfc1d367ce8e3"
     }
   },
-  "as_of": "2026-11-04",
+  "as_of": "2026-11-10",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
-  "scope": "Published F3/beta.6 RTX 5090 component and exact-profile published-image lane are bound with independently authenticated public artifacts. Both native beta.2 components carry unchanged historical qualification. Stock OMP 18.18.6 source/download review is bound; fresh client/platform/five-route/public-install/restoration acceptance is not performed.",
-  "interpretation": "Runtime eligibility permits a lane-pinned installable candidate for fresh route acceptance, not product publication. No predecessor waiver, client execution, product-route verdict or review approval transfers. Investigative slice/proxy measurements retain their actual subjects; native component evidence is historical same-byte qualification.",
+  "external_installation_qualified": true,
+  "scope": "Fresh acceptance on candidate 076bbe4f binds all five documented routes (31 blocks) and three stock OMP 18.18.6 clients to published RTX 5090 F3/beta.6 and unchanged native beta.2 components. RTX 4090 native campaign, anonymous public install and independent restoration passed. RTX 3090 documented route passed, while its later native-probes compaction campaign remains failed under the exact founder waiver; structured outage, a passing wrapper restoration audit and anonymous public install are not claimed. Lead-only recovery restored the stopped native baseline and identical cross-lane census.",
+  "interpretation": "Ready composition binds actual current-window route/client observations, the narrowly scoped failed-campaign founder waiver and closed exact-subject reviews without authorizing publication or promotion. Historical native beta.2 component qualification and investigative slice/proxy results retain their original subjects; no predecessor route receipt, waiver, client execution or review approval transfers. macOS is manual-SSH preview, Linux is WSL2-scoped, and native first-lineage route rollback is not_applicable with zero directions.",
   "eligibility_scope": "Windows x64 and Linux x64 under WSL2 qualified within measured scope; macOS arm64 manual SSH remains preview; vision covers macOS/Windows against RTX 5090 only. Native routes are first-lineage with zero-direction not_applicable rollback; separate predecessor rehearsals are not route rollback. Owner-operated tester-equivalent observations are not independent external-user acceptance. Closed review approval covers only the bound subjects and completed composition controls, not publication.",
   "documented_route_acceptance": {
-    "status": "pending",
-    "scope": "All five fresh candidate-bound routes and three stock 18.18.6 clients remain to be accepted. Historical waivers and acceptance do not carry."
+    "status": "passed",
+    "scope": "All five candidate-bound documented routes and three stock OMP 18.18.6 clients passed. RTX 4090 native public-install and candidate-profile probes passed. rtx3090-native: all seven documented blocks passed; the later native campaign failed at native-probes compaction and was waived by the founder. Behavior completion, wrapper restoration and anonymous public-install acceptance are not claimed; the documented controller lead recovery is separately bound. rtx3090-native: documented blocks passed, but the post-route native-probes compaction probe failed and was waived by the founder. Native behavior completion, wrapper restoration audit and anonymous public-install acceptance are not claimed; lead recovery is bound by the waiver.",
+    "candidate_commit": "076bbe4f5abd68c8a0a1ba2efa0d08e881970e11",
+    "evidence_commit_changes_candidate": false,
+    "evidence_path": "releases/v0.17.0/acceptance/documented-routes.json",
+    "evidence_sha256": "3f89e10b9db22156a3b7911fa40491a91c3b99430a11e9780dedfc1d367ce8e3",
+    "document_change": "Only later non-executable release-state prose may change; composer must independently require every executed block to remain byte-identical.",
+    "documented_route_steps": {
+      "rtx5090-container-host": "2/2",
+      "rtx5090-macos-client": "10/10",
+      "rtx5090-windows-client": "5/5",
+      "rtx4090-native": "7/7",
+      "rtx3090-native": "7/7"
+    },
+    "platform_receipts": [
+      "releases/v0.17.0/acceptance/darwin-arm64-18.18.6.json",
+      "releases/v0.17.0/acceptance/windows-x64-18.18.6.json",
+      "releases/v0.17.0/acceptance/linux-x64-18.18.6.json"
+    ],
+    "fresh_product_acceptance": true,
+    "restoration": {
+      "path": "docs/measurements/2026-11-10-v0170-acceptance-restoration.json",
+      "status": "passed-with-founder-waiver",
+      "driver_hold_s": 408.213,
+      "production_upgrade_activated": false,
+      "documented_directory_presence_restored": true,
+      "native_documented_stage_restored": true,
+      "native_driver_window_s": {
+        "rtx4090": 508.4204189777374
+      },
+      "waived_native_campaigns": {
+        "rtx3090-native": {
+          "status": "restored-by-lead",
+          "method": "Preserve the failed candidate root and stage untouched, restore the original root, stage, support files, task and power, then Start to ready and Stop without client sessions.",
+          "outcome": "graceful",
+          "sessions_refused": 0,
+          "runtime_record_absent": true,
+          "gpu_owner_lease_absent": true,
+          "power_limit_w": 370,
+          "all_native_tasks_ready": true,
+          "server_processes": 0,
+          "port_18082_listeners": 0,
+          "canonical_cross_lane_census_identical": true,
+          "holds_and_client_files_unchanged": true,
+          "failed_evidence_unchanged": true,
+          "acceptance_rerun": false,
+          "scope": "Lead recovery only. The native campaign and wrapper restoration remain failed; no public-install pass is claimed.",
+          "founder_waiver": {
+            "repository_path": "releases/v0.17.0/qualification/rtx3090-route-waiver.json",
+            "sha256": "19f2c0ef0f9bbf38b6debaacdbb84e8e219c1f03b1d26671ca3fdfcbf63943f0"
+          },
+          "lead_evidence": {
+            "evidence_name": "lead-restoration.out",
+            "sha256": "fabb50de111656ba8598a9de97bab501fef99bd5c62acd65aa96dbf05caecdd8"
+          },
+          "wrapper_audit_status": "failed"
+        }
+      }
+    },
+    "composition_run": true
   },
   "observed_gates": {
+    "changed_client_acceptance": {
+      "status": "passed-with-founder-waiver",
+      "scope": "Five fresh documented routes and three exact stock OMP 18.18.6 client binaries passed tools, continuation and fail-closed checks on candidate 076bbe4f; macOS additionally exercised documented server-restart survival and macOS/Windows exercised image input against RTX 5090. RTX 4090 native acceptance passed. RTX 3090 native-probes compaction remains failed with its founder-bound canonical projection, explicit non-claims and separate lead recovery. Small fanout does not qualify worker threads or unrelated optional surfaces. Closed reviews and publication authority remain separate."
+    },
+    "g4_review": {
+      "status": "passed",
+      "repository_path": "releases/v0.17.0/review/runtime-ledger.json",
+      "sha256": "5f8d6e4a0d698f227237b1cf420a8da87182a7c0197ce05e3744fc2f485bce5f",
+      "ledger_status": "closed-by-disposition",
+      "approval_granted": true,
+      "publication_authorized": false,
+      "public_route_acceptance_granted": false,
+      "scope": "Closed runtime full council with exact-F3 localized remediation, product full council with explicit lead controls and tracked deferrals, and focused native-probes waiver support review with one fix-only round. Review approval does not authorize publication or grant public-route acceptance."
+    },
     "rtx5090_lane": {
       "status": "passed",
       "repository_path": "releases/v0.17.0/qualification/rtx5090.json",
@@ -145,16 +251,12 @@
       "sha256": "aad29cd65a31e3246fbf6eeb4a01ea33a368decc79fa6b169e5fc829ccd8c611",
       "descriptor": {
         "repository_path": "releases/v0.17.0/qualification/client-components.json",
-        "sha256": "dff02bf5e95e0b603cba78b0779536b0cb02e55cae195ea99418f97f964b4ad2"
+        "sha256": "d840d5e5abd2d7cc29f1754458343aef092ad6f077d5a75143a1a178af4fbe4d"
       },
       "scope": "18.15.0 to 18.18.6 source review and independent asset integrity; no client execution, inference or predecessor acceptance is transferred."
     }
   },
-  "remaining_release_gates": [
-    "Fresh stock OMP 18.18.6 platform and five-route candidate-bound acceptance, native public installs and independent restoration.",
-    "Bind exact-F3 runtime review dispositions and current product review/composition evidence.",
-    "Platform, acceptance and manifest pins; final strict ready/pin checks and founder-owned publication."
-  ],
+  "remaining_release_gates": [],
   "receipt_audit": {
     "repository_path": "releases/v0.17.0/qualification/receipt-audit.json",
     "sha256": "ab71499ddd029af1532d7f42fdd739a6295f5928f21f2d771bc40c8ade155688"

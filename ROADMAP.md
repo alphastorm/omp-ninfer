@@ -21,6 +21,18 @@ with or endorsed by Oh My Pi, Qwen, or NVIDIA.
 
 ## Current release
 
+The published install authority stays **v0.16.2**. The **v0.17.0** successor composition selects
+stock OMP 18.18.6, RTX 5090 beta.6/F3 `e0971faf` and unchanged native beta.2 components.
+Fresh `076bbe4f` acceptance passed all five documented routes (31 blocks) and three clients,
+with a **408.213 s** RTX 5090 hold and passing RTX 4090 native/public-install/restoration checks.
+RTX 3090's later native-probes compaction campaign failed and is specifically founder-waived;
+its seven documented blocks passed, but structured outage, passing wrapper audit and anonymous
+public install are not claimed. Lead recovery restored both stopped native baselines exactly.
+RTX 3090 users should keep v0.16.2 or restart after long sessions until a native re-cut is qualified.
+The [successor notes](releases/v0.17.0/NINFER_RELEASE_NOTES.md) and closed review ledger bind
+the scope; tooling residuals are tracked in [#149](https://github.com/alphastorm/omp-ninfer/issues/149).
+Founder-owned product publication and production promotion are separate from review/acceptance.
+
 **v0.16.2** (published 2026-11-04, GitHub `Latest`; superseding `v0.16.0`, 2026-11-01, while the
 held `v0.16.1` client-only candidate remains unpublished) pins unmodified upstream Oh My Pi
 **18.15.0** (`3fedf8d53267e32a6d7521ce725fdcc4a36fdc67`, tree

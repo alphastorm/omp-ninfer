@@ -1,0 +1,88 @@
+{
+  "artifact_type": "omp_ninfer_founder_gate_waiver",
+  "schema_version": 1,
+  "release": "v0.17.0",
+  "lane": "rtx3090-native",
+  "candidate": "076bbe4f5abd68c8a0a1ba2efa0d08e881970e11",
+  "status": "waived-by-founder",
+  "observed_status": "failed",
+  "documented_route_status": "passed",
+  "failed_phase": "native-probes",
+  "decision": "The founder approved disclosure and waived only this exact RTX 3090 post-route native-probes compaction campaign failure. All seven documented blocks passed; the original route receipt, failed probe verdicts and every other gate remain unchanged. This decision does not authorize publication.",
+  "observed_summary": {
+    "probe": "compaction",
+    "error": "RuntimeError: timed out after 900 s; last events ['agent_start', 'turn_start', 'message_start', 'message_end']",
+    "timeout_seconds": 900,
+    "http_status_counts": {
+      "200": 4,
+      "503": 8,
+      "499": 2
+    },
+    "http_error_counts": {
+      "request_queue_timeout": 8,
+      "client_disconnected": 2
+    },
+    "resident_work_during_blockage": 0,
+    "durable_save_refusal_reason": "capacity",
+    "classification": "Observed admission blockage under retained-context pressure with no resident work; the precise native defect or client causality is not established.",
+    "managed_stop": {
+      "action": "Control-Release.ps1 -Action Stop after failed native probes",
+      "outcome": "graceful_incomplete_shutdown",
+      "sessions_saved": 2,
+      "sessions_skipped": 5,
+      "sessions_refused": 3,
+      "shutdown_complete": false,
+      "forced": false
+    },
+    "blocked_results": [
+      "completed automatic-compaction behavior observations",
+      "structured outage acceptance",
+      "passing wrapper restoration receipt and final audit",
+      "anonymous public-install acceptance"
+    ]
+  },
+  "restoration_summary": {
+    "status": "restored-by-lead",
+    "method": "Preserve the failed candidate root and stage untouched, restore the original root, stage, support files, task and power, then Start to ready and Stop without client sessions.",
+    "outcome": "graceful",
+    "sessions_refused": 0,
+    "runtime_record_absent": true,
+    "gpu_owner_lease_absent": true,
+    "power_limit_w": 370,
+    "all_native_tasks_ready": true,
+    "server_processes": 0,
+    "port_18082_listeners": 0,
+    "canonical_cross_lane_census_identical": true,
+    "holds_and_client_files_unchanged": true,
+    "failed_evidence_unchanged": true,
+    "acceptance_rerun": false,
+    "scope": "Lead recovery only. The native campaign and wrapper restoration remain failed; no public-install pass is claimed."
+  },
+  "evidence_sha256": {
+    "documented-route.json": "9f3d24a2447b1666277ae74018e82b7d9bd319befc4b5b4af7b1db1b3a475bc5",
+    "window-failure.json": "a345d206bef2f13f8420151129f06e6e17702b03dba92055bd3312d3bcac2d07",
+    "compaction-probe.json": "59163a126aaf47d0bdc3f8d92d5b0aae476b598c92b667eda82ee5690edd1721",
+    "driver-window.json": "f623db45419c1cd8152b04bc30fe2f647e5342263b8991c235bbe95ea5e86558",
+    "lead-restoration.out": "fabb50de111656ba8598a9de97bab501fef99bd5c62acd65aa96dbf05caecdd8",
+    "lead-restoration.json": "04c86c33d91685e7492e14b9dac71d16f24c589bd74134c22e692e1dccb458d5",
+    "pre-window-census.json": "db1634a7e11935dd26b7c7cef62602260b785ca959e8d6ed4cfa9ee5fdc25eb2",
+    "post-recovery-census.json": "db1634a7e11935dd26b7c7cef62602260b785ca959e8d6ed4cfa9ee5fdc25eb2",
+    "evidence-archive.tar.gz": "7706f3bfaf6ede7836871876f51665fb2ccd189f748ca03ed88f75468cdaccd3",
+    "window-driver.log": "8dc141365b65309c8aa4f6dd26b737e9d117336b1193ee876893c362bcaea68a",
+    "restoration-prerequisites.json": "6dc0febfc69b6174645e01f3c34e4f6612b5633e29c525ca13800fb76cf1713f",
+    "preserved-shutdown.json": "64e696cf50ac9b9b7e335746031823d633319906fb42e156f81d7327c2b137f7",
+    "server-requests.jsonl": "cb56a084cf51166cfe4856108811dbc690f6f9eeb6c8b40f41ed16a0c401468f",
+    "server-stderr.log": "1eb6ef69a74d5871af58030b27fb1cd9c352dc814d9b65b7baf806a62244e837",
+    "compaction-diagnosis.md": "13d8a888d97f6e87f1d98176ca7ef29c643796d09c843a591116fb3afd1e9f18",
+    "compaction-metrics.json": "7f5034a6c50c0fadf52a7ee97086975d0a5cb707da67e4dfa6b5a30da9e55eb4"
+  },
+  "probe_projection_sha256": {
+    "compaction": "bcdf026d9e68dd8aaf67e8999b411cddbf1ba785e9b370983ec4f1735ae69e02"
+  },
+  "application_rule": "Only this release, candidate, native lane and native-probes compaction failure are eligible. The seven passed documented blocks remain hash-bound and byte-identical. The failed compaction proof must remain failed and all other native probes must pass. Other native lanes, RTX 5090 routes, stock clients and every other gate remain mandatory. Native behavior completion, wrapper restoration audit and anonymous public install are not claimed.",
+  "provenance": {
+    "source_sha256": "9be501f5a2d147fd3e25cdaf93c083bd76d91158a6847f30182c5a8a668173ba",
+    "projection": "Content-safe projection of the founder decision. Machine identities, private paths and credentials are omitted; original failure verdicts and evidence digests are preserved."
+  },
+  "disclosure_required": "Distinguish the passed seven-block RTX 3090 documented route from the failed post-route compaction campaign under retained-context pressure, disclose the subsequent Stop refusing three sessions and successful lead recovery, and state that structured outage, passing wrapper restoration audit and anonymous public install were not completed. Advise RTX 3090 users to keep v0.16.2 or restart the lane after long sessions until a native re-cut is qualified."
+}

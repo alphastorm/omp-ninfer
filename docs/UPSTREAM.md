@@ -10,6 +10,19 @@ watch manifest is [`upstream-watch.json`](../upstream-watch.json); the watch too
 
 ## Current positions
 
+The **v0.17.0** successor composition selects unmodified OMP **18.18.6** at
+`9058ab9d229663e229e2867824ba6df6f21e9e59`, tree `fd379b65368a20c7648d97f2c2b99cc03e019254`,
+release `439766193`, and RTX 5090 beta.6/F3 `e0971faf221204047d5a4ed834e4e298740cee17`
+([fork PR #101](https://github.com/alphastorm/ninfer/pull/101)). The native beta.2 packages stay
+at `a87de361`, with historical same-byte component evidence. Fresh candidate `076bbe4f` passed
+31 documented blocks and all three stock clients; RTX 4090 native acceptance passed, while RTX
+3090's subsequent native-probes compaction failure is specifically founder-waived with disclosure,
+not a demonstrated client regression. Its original failures and lead-only recovery are retained in
+the [notes](../releases/v0.17.0/NINFER_RELEASE_NOTES.md). Deferred product-tooling residuals are
+tracked in [#149](https://github.com/alphastorm/omp-ninfer/issues/149).
+The published position table below stays v0.16.2; no product publication or production promotion
+is implied by successor review and acceptance.
+
 | Component / upstream | Current position (v0.16.2) | Upstream base / watch head | Evidence and notes |
 | --- | --- | --- | --- |
 | `can1357/oh-my-pi` (client) | Unmodified upstream **OMP 18.15.0**, source `3fedf8d53267e32a6d7521ce725fdcc4a36fdc67`, tree `48bc72ba2418c0b78163d9769e91a0d8683e642b`, release `430630500` | Upstream release [`v18.15.0`](https://github.com/can1357/oh-my-pi/releases/tag/v18.15.0) (2026-11-01) | Retains Qwen's exact-loop guard with a 1,024-character floor on short newline-spanning cycles and rejects incomplete length-stopped summaries while retiring obsolete operator `compat.thinkingLoopGuard`, stripping only `internal_chat_message_metadata_passthrough` on shared Responses replay copies, gating missing-key fallback behind explicit `retry.modelFallback=false`, and waiting for persistence replacement on manual compaction before delivering queued background results; accepted across all five `v0.16.2` routes (`PASS 31/31 blocks on c6fc8465, 2026-11-04`); see [client setup](QUICKSTART.md#omp-18150-client), [release notes](../releases/v0.16.2/NINFER_RELEASE_NOTES.md), [18.14.2 review](measurements/2026-11-01-omp-18142-client-upgrade-review.json), and [18.15.0 review](measurements/2026-11-01-omp-18150-client-upgrade-review.json). |

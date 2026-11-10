@@ -1,13 +1,13 @@
 # OMP NInfer — canonical facts
 
-Updated: 2026-11-04 · Published release: v0.16.2 (2026-11-04) · stock Oh My Pi 18.15.0
+Updated: 2026-11-10 · Published release: v0.16.2 (2026-11-04) · stock Oh My Pi 18.15.0
 
 Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release layer) → NInfer
 (inference engine) → Qwen3.8 27B (served model).
 
 **Qualified on RTX 5090 · 4090 · 3090**, bound to the exact profiles in
 [`releases/v0.16.2/manifest.json`](../releases/v0.16.2/manifest.json).
-[Get started](QUICKSTART.md) ·
+[Get started](https://github.com/alphastorm/omp-ninfer/blob/v0.16.2/docs/QUICKSTART.md) ·
 [Download v0.16.2](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.16.2)
 
 ## What it is
@@ -49,6 +49,21 @@ All of these should be materially true:
 See the [decision guide](DECISION_GUIDE.md) for the side-by-side comparison.
 
 ## Current release
+
+**Staged next: v0.17.0** composes stock OMP 18.18.6 (`9058ab9d`, tree `fd379b65`, release
+`439766193`), RTX 5090 beta.6/F3 `e0971faf` (image `7a19576b`, server `dc86e101`,
+archive `d7f1ca4f`, retained config `751d22dc`) and unchanged native beta.2 packages.
+Fresh candidate `076bbe4f` passed five documented routes (**31/31 blocks**) and three clients
+on 2026-11-10; RTX 5090 hold **408.213 s**, RTX 4090 campaign **508.420 s**, public install and
+independent restoration passed. RTX 3090's **1727.696 s** post-route campaign failed at
+native-probes compaction and is specifically waived with disclosure; structured outage, passing
+wrapper restoration and anonymous public install are not claimed. Lead recovery restored the
+stopped 370 W original lane and identical cross-lane census. Keep v0.16.2 or restart RTX 3090
+after long sessions until a native re-cut is qualified. Native historical component evidence is
+not relabeled as F3 qualification. [Successor notes](../releases/v0.17.0/NINFER_RELEASE_NOTES.md) ·
+[manifest](../releases/v0.17.0/manifest.json) ·
+[waiver](../releases/v0.17.0/qualification/rtx3090-route-waiver.json).
+Review and acceptance do not authorize founder-only publication or production promotion.
 
 Published release **v0.16.2** (2026-11-04, GitHub `Latest`; superseding `v0.16.0`, 2026-11-01, while
 the held `v0.16.1` client-only candidate remains unpublished) pins unmodified upstream Oh My Pi

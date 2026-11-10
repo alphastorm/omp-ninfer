@@ -12,6 +12,35 @@ the exact combination.
 [External-install acceptance](#external-install-acceptance) · [Cut procedure](#cut-procedure) ·
 [Release notes](#release-notes)
 
+## v0.17.0 composition — beta.6 runtime and stock OMP 18.18.6
+
+The successor composition selects published RTX 5090 `v0.7.0-qwen38-5090-beta.6` from F3
+`e0971faf221204047d5a4ed834e4e298740cee17` (image `7a19576b`, server `dc86e101`),
+stock OMP **18.18.6** (`9058ab9d`, tree `fd379b65`, release `439766193`) and unchanged native
+beta.2 packages at `a87de361`. The shared v3 model and serving policy stay fixed.
+The runtime RC passed 12/12 phases; 664 artifacts and three packages matched across the double build.
+Source/protocol evidence and historical native qualification remain distinct from product acceptance.
+
+On 2026-11-10, candidate `076bbe4f5abd68c8a0a1ba2efa0d08e881970e11` passed all five documented
+routes (**2/10/5/7/7; 31/31 blocks**) and three exact stock clients. RTX 5090 hold **408.213 s**;
+the same healthy incumbent image/container, restart policy and checkpoint mounts were restored.
+RTX 4090's **508.420 s** campaign, public install and independent restoration passed.
+RTX 3090's seven blocks passed before its **1727.696 s** campaign failed at native-probes compaction
+(900 s timeout, eight 503 queue timeouts, two 499 cancellations, no resident work); managed Stop
+then refused three sessions. A new exact-subject founder waiver retains that failure.
+Lead recovery restored the stopped original lane at 370 W with no refused sessions and an unchanged
+cross-lane census; it is not a passing wrapper audit or anonymous public install.
+RTX 3090 users should keep v0.16.2 or restart after long sessions until a native re-cut is qualified.
+
+The closed runtime/product councils and waiver-focused review bind the
+[review ledger](../releases/v0.17.0/review/runtime-ledger.json); deferred tooling work is
+[#149](https://github.com/alphastorm/omp-ninfer/issues/149). The
+[notes](../releases/v0.17.0/NINFER_RELEASE_NOTES.md),
+[route receipts](../releases/v0.17.0/acceptance/documented-routes.json) and
+[composition](../releases/v0.17.0/acceptance/composed-external-installation.json) retain scope.
+Product publication and production promotion are founder-only. The published install authority
+and GitHub `Latest` stay **v0.16.2** until that separate action.
+
 ## v0.16.2 — durable-export Host reclaim and stock OMP 18.15.0
 
 Published **2026-11-04** (`2026-11-04T20:24:33Z`, GitHub release ID `434412723`, annotated tag

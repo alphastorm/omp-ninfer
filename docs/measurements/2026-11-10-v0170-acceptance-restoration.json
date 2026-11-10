@@ -1,0 +1,148 @@
+{
+  "artifact_type": "omp_ninfer_acceptance_restoration",
+  "schema_version": 1,
+  "release": "v0.17.0",
+  "as_of": "2026-11-10",
+  "status": "passed-with-founder-waiver",
+  "candidate_commit": "076bbe4f5abd68c8a0a1ba2efa0d08e881970e11",
+  "rtx5090": {
+    "original_runtime_healthy": true,
+    "original_image_retained": true,
+    "original_image": "ghcr.io/alphastorm/ninfer-runtime@sha256:a0cbb8a5f933ec8aeec9a7defa07d78a835c1093d1d98f5f842267287efa3f71",
+    "restart_policy": "unless-stopped",
+    "checkpoint_mount_retained": true,
+    "documented_route_key_restored": true,
+    "original_checkout_restored": true,
+    "route_container_absent": true,
+    "window_hold_removed": true,
+    "preexisting_markers_and_supervisors_unchanged": true,
+    "documented_directories_restored": true,
+    "retained_window_created_parents": [],
+    "windows_health_ok": true,
+    "wsl_health_ok": true,
+    "same_container_retained": true,
+    "fleet_phase": "Fleet",
+    "fleet_healthy": true,
+    "completed_utc": "2026-11-10T11:45:19.257270+00:00",
+    "window_hold_seconds": [
+      408.213
+    ],
+    "production_windows": 1,
+    "source_summary": {
+      "evidence_name": "rtx5090/final-summary.json",
+      "sha256": "a08fa2f13d08eaf8fb368574e1122d5d0b0d09a2279635bb486db128343010b8"
+    },
+    "source_restoration": {
+      "evidence_name": "rtx5090/restoration.json",
+      "sha256": "4e1b015081ee07aebd196cef9a88c18d9d1010ce6d7a40979b2433c79d1ee724"
+    },
+    "accepted_window_hold_seconds": 408.213
+  },
+  "rtx4090": {
+    "status": "passed",
+    "restoration_checks": {
+      "state_bytes_identical": true,
+      "state_acl_identical": true,
+      "root_acl_identical": true,
+      "task_xml_identical": true,
+      "task_ready": true,
+      "no_process": true,
+      "no_listener": true,
+      "no_lease": true,
+      "power_identical": true,
+      "pointers_identical": true,
+      "holds_identical": true,
+      "client_files_identical": true,
+      "support_identical": true,
+      "support_inventory_identical": true,
+      "directory_acls_identical": true,
+      "directory_presence_identical": true,
+      "pending_preserved_moves": true,
+      "documented_stage_identical": true
+    },
+    "final_audit_checks": {
+      "state_bytes_identical": true,
+      "state_acl_identical": true,
+      "root_acl_identical": true,
+      "task_xml_identical": true,
+      "task_ready": true,
+      "no_process": true,
+      "no_listener": true,
+      "no_lease": true,
+      "power_identical": true,
+      "pointers_identical": true,
+      "holds_identical": true,
+      "client_files_identical": true,
+      "support_identical": true,
+      "support_inventory_identical": true,
+      "directory_acls_identical": true,
+      "directory_presence_identical": true,
+      "pending_preserved_moves": true,
+      "documented_stage_identical": true
+    },
+    "window_hold_seconds": 508.4204189777374,
+    "power_limit_w": 450,
+    "public_install_restored": true,
+    "canonical_cross_lane_census_identical": true,
+    "holds_and_client_files_unchanged": true,
+    "documented_directory_presence_restored": true,
+    "documented_stage_restored": true,
+    "active_release": "qwen38-4090-native-v0.8.0-beta.2-a87de3613c17",
+    "state_sha256": "4fd08571d18dea1dee46d66ee664ddd4b7bc70b08a991081adb89a251e946568",
+    "task_state": "Ready",
+    "processes": 0,
+    "listeners": 0,
+    "lease_entries": 0,
+    "sources": [
+      {
+        "evidence_name": "rtx4090/evidence/restoration.json",
+        "sha256": "68f23303b9d86a75006cc8673960fae4b1f69dd1217336d779ec199643698044"
+      },
+      {
+        "evidence_name": "rtx4090/evidence/final-audit.json",
+        "sha256": "b1a2103358bf6429487f9746e1702efcc460e8b183b2b25d71e09ac0fcad10a8"
+      },
+      {
+        "evidence_name": "rtx4090/driver-window.json",
+        "sha256": "daba8c078120367ecaa8e7c911e37ad408f6d3e071947ee79b1dc951f68ee9cd"
+      },
+      {
+        "evidence_name": "rtx4090/public-install.json",
+        "sha256": "31d42f25991107e38cfb8b53a111ea4c2f43e2b7fa906bba60ae0229ca75cf74"
+      },
+      {
+        "evidence_name": "native-before-3090.json",
+        "sha256": "db1634a7e11935dd26b7c7cef62602260b785ca959e8d6ed4cfa9ee5fdc25eb2"
+      }
+    ],
+    "scope": "Restored the same carried beta.2 stopped canonical root and stage; any pre-existing preserved lineages remain untouched. This completed non-waived lane's census predates the failed RTX 3090 campaign; the later lead recovery is bound separately."
+  },
+  "rtx3090": {
+    "status": "restored-by-lead",
+    "method": "Preserve the failed candidate root and stage untouched, restore the original root, stage, support files, task and power, then Start to ready and Stop without client sessions.",
+    "outcome": "graceful",
+    "sessions_refused": 0,
+    "runtime_record_absent": true,
+    "gpu_owner_lease_absent": true,
+    "power_limit_w": 370,
+    "all_native_tasks_ready": true,
+    "server_processes": 0,
+    "port_18082_listeners": 0,
+    "canonical_cross_lane_census_identical": true,
+    "holds_and_client_files_unchanged": true,
+    "failed_evidence_unchanged": true,
+    "acceptance_rerun": false,
+    "scope": "Lead recovery only. The native campaign and wrapper restoration remain failed; no public-install pass is claimed.",
+    "founder_waiver": {
+      "repository_path": "releases/v0.17.0/qualification/rtx3090-route-waiver.json",
+      "sha256": "19f2c0ef0f9bbf38b6debaacdbb84e8e219c1f03b1d26671ca3fdfcbf63943f0"
+    },
+    "lead_evidence": {
+      "evidence_name": "lead-restoration.out",
+      "sha256": "fabb50de111656ba8598a9de97bab501fef99bd5c62acd65aa96dbf05caecdd8"
+    },
+    "wrapper_audit_status": "failed"
+  },
+  "production_upgrade_activated": false,
+  "raw_private_paths_credentials_or_outputs_included": false
+}
