@@ -30,9 +30,11 @@ accepted posture is decided. documented_routes.scope states what the accepted ro
 restoration is the restoration receipt's body in v0.14.0's shape (candidate_commit, rtx5090 and
 one section per accepted native lane); every displaced incumbent must be observed back in place,
 or nothing is written. An explicit --native-route-waiver LANE=REPO_PATH admits only a failed
-post-route structured-outage native campaign. Its documented blocks must still pass unchanged,
-and its candidate policy/probes still pass; only native observations, the public install and the
-wrapper restoration audit are replaced by a hash-bound founder decision and lead recovery.
+post-route structured-outage or native-probes compaction campaign. Its documented blocks must
+still pass unchanged, and its candidate policy and unwaived probes still pass; only native
+observations, the public install and the wrapper restoration audit are replaced by a hash-bound
+founder decision and lead recovery. A native-probes waiver identifies the compaction error,
+timeout, HTTP status counts and any subsequent refused managed Stop; its compaction proof stays failed.
 The collector's window-failure observations and digest must match that decision. Lead recovery
 must prove a graceful empty Stop and the stopped owner's census power; the aggregate restoration
 then says passed-with-founder-waiver, never passed.
@@ -262,7 +264,8 @@ def public_observations(value: Any) -> Any:
     return result
 
 
-def check_native_policy(release: str, variant: dict, native: dict, client_sha256: str) -> dict | None:
+def check_native_policy(release: str, variant: dict, native: dict, client_sha256: str,
+                        *, waived_failed_compaction: bool = False) -> dict | None:
     if (product_version(release) or (0, 0, 0)) < (0, 16, 0):
         return None
     errors: list[str] = []
@@ -270,7 +273,9 @@ def check_native_policy(release: str, variant: dict, native: dict, client_sha256
     require(configuration is not None and not errors, "; ".join(errors))
     require(matches_native_configuration(native.get("runtime_configuration"), configuration),
             f"{variant['id']}: acceptance must bind the candidate's actual runtime configuration")
-    errors = native_probe_acceptance_errors(configuration, native.get("probe_acceptance"), variant, client_sha256)
+    errors = native_probe_acceptance_errors(
+        configuration, native.get("probe_acceptance"), variant, client_sha256,
+        waived_failed_compaction=waived_failed_compaction)
     require(not errors, f"{variant['id']}: " + "; ".join(errors))
     return configuration
 
@@ -545,7 +550,8 @@ def main() -> int:
                 native["observations"]["public_install"], variant, errors)
             require(not errors, "; ".join(errors))
         native_configurations[variant["id"]] = check_native_policy(
-            args.release, variant, native, manifest["components"]["omp"]["binary_sha256"])
+            args.release, variant, native, manifest["components"]["omp"]["binary_sha256"],
+            waived_failed_compaction=lane in waived and waived[lane]["failed_phase"] == "native-probes")
         lane_receipt = variant.get("qualification", {}).get("summary")
         receipt_path = ROOT / lane_receipt if lane_receipt and lane_receipt.startswith("releases/") else release_root / str(lane_receipt)
         check_native_first_release(native, load(receipt_path) if lane_receipt else {})
@@ -559,8 +565,10 @@ def main() -> int:
     require(isinstance(scope, str) and bool(scope.strip()),
             "evidence documented_routes needs the scope the accepted routes cover")
     waiver_limitations = [
-        f"{lane}: documented blocks passed, but the post-route {row['failed_phase']} managed Stop "
-        "failed and was waived by the founder. Native behavior completion, wrapper restoration "
+        (f"{lane}: documented blocks passed, but the post-route native-probes compaction probe "
+         if row["failed_phase"] == "native-probes" else
+         f"{lane}: documented blocks passed, but the post-route {row['failed_phase']} managed Stop ")
+        + "failed and was waived by the founder. Native behavior completion, wrapper restoration "
         "audit and anonymous public-install acceptance are not claimed; lead recovery is bound "
         "by the waiver." for lane, row in waived.items()]
     if waived:

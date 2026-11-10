@@ -2243,7 +2243,8 @@ class ReleaseContractTest(unittest.TestCase):
                     else:
                         self.assertEqual(errors, [])
 
-    def bind_failed_native_campaign(self, root: Path) -> tuple[Path, Path, Path]:
+    def bind_failed_native_campaign(self, root: Path,
+                                    *, failed_phase: str = "structured-outage") -> tuple[Path, Path, Path]:
         """Admit the campaign separately; retain the original passed documented blocks."""
         from test_compose_route_acceptance import campaign_waiver, waived_campaign_evidence
         release_root = root / "releases" / PUBLIC_RELEASE
@@ -2251,9 +2252,10 @@ class ReleaseContractTest(unittest.TestCase):
         routes = self.load(routes_path)
         path = release_root / "qualification/rtx3090-route-waiver.json"
         waiver = campaign_waiver(PUBLIC_RELEASE, routes["candidate_commit"],
-                                 routes["routes"]["rtx3090-native"]["sha256"])
+                                 routes["routes"]["rtx3090-native"]["sha256"],
+                                 failed_phase=failed_phase)
         self.save(path, waiver)
-        campaign = {"status": "failed", "failed_phase": "structured-outage",
+        campaign = {"status": "failed", "failed_phase": failed_phase,
                     **waived_campaign_evidence(waiver),
                     "founder_waiver": {"repository_path": path.relative_to(root).as_posix(),
                                        "sha256": VERIFY_RELEASE.sha256_file(path)}}
@@ -2328,6 +2330,80 @@ class ReleaseContractTest(unittest.TestCase):
         routes = self.load(routes_path)
         self.assertEqual(routes["routes"]["rtx3090-native"]["status"], "passed")
         self.assertEqual(routes["native_campaigns"]["rtx3090-native"]["status"], "failed")
+
+    def test_require_ready_accepts_a_failed_founder_waived_native_probe_campaign(self) -> None:
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        _, routes_path, _ = self.bind_failed_native_campaign(root, failed_phase="native-probes")
+        _, errors = VERIFY_RELEASE.validate(root, require_ready=True)
+        self.assertEqual(errors, [])
+        routes = self.load(routes_path)
+        self.assertEqual(routes["routes"]["rtx3090-native"]["status"], "passed")
+        campaign = routes["native_campaigns"]["rtx3090-native"]
+        self.assertEqual(campaign["status"], "failed")
+        self.assertEqual(campaign["failed_phase"], "native-probes")
+
+    def test_native_probe_waiver_requires_bound_failure_details_and_graceful_recovery(self) -> None:
+        from test_compose_route_acceptance import campaign_waiver, waived_campaign_evidence
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            path = root / "releases/v0.17.0/qualification/rtx3090-route-waiver.json"
+            original = campaign_waiver("v0.17.0", "1" * 40, "2" * 64, failed_phase="native-probes")
+            cases = [
+                ("valid", lambda waiver, evidence: None, None),
+                ("wrong phase", lambda waiver, evidence: (
+                    waiver.update(failed_phase="behavior-evidence"),
+                    evidence["window_failure"].update(boundary="behavior-evidence")), "campaign phase"),
+                ("pending founder", lambda waiver, evidence: waiver.update(status="PENDING-FOUNDER"),
+                 "preserve the failed campaign"),
+                ("wrong probe", lambda waiver, evidence: waiver["observed_summary"].update(probe="parallel"),
+                 "observed_summary.probe"),
+                ("empty error", lambda waiver, evidence: waiver["observed_summary"].update(error=" "),
+                 "observed_summary.error"),
+                ("invalid timeout", lambda waiver, evidence: waiver["observed_summary"].update(timeout_seconds=True),
+                 "observed_summary.timeout_seconds"),
+                ("invalid HTTP counts", lambda waiver, evidence: waiver["observed_summary"].update(
+                    http_status_counts={"503": True}), "observed_summary.http_status_counts"),
+                ("missing probe digest", lambda waiver, evidence: waiver["evidence_sha256"].pop(
+                    "compaction-probe.json"), "compaction-probe.json SHA-256"),
+                ("wrong failure digest", lambda waiver, evidence: evidence["window_failure"].update(
+                    sha256="0" * 64), "original failure digest and phase"),
+                ("wrong boundary", lambda waiver, evidence: evidence["window_failure"].update(
+                    boundary="structured-outage"), "original failure digest and phase"),
+                ("different error", lambda waiver, evidence: evidence["window_failure"]["observed_summary"].update(
+                    error="different error"), "observations must agree"),
+                ("omitted subsequent Stop", lambda waiver, evidence: waiver["observed_summary"].pop("managed_stop"),
+                 "observations must agree"),
+                ("non-graceful recovery", lambda waiver, evidence: waiver["restoration_summary"].update(
+                    outcome="forced"), "restoration_summary.outcome"),
+                ("invalid subsequent Stop", lambda waiver, evidence: waiver["observed_summary"]["managed_stop"].update(
+                    sessions_refused=0), "managed_stop.sessions_refused"),
+                ("no subsequent refused Stop", lambda waiver, evidence: (
+                    waiver["observed_summary"].pop("managed_stop"),
+                    evidence["window_failure"]["observed_summary"].pop("managed_stop")), None),
+            ]
+            for field in ("probe", "error", "timeout_seconds", "http_status_counts"):
+                cases.append((f"missing {field}",
+                              lambda waiver, evidence, field=field: waiver["observed_summary"].pop(field),
+                              f"observed_summary.{field}"))
+            for case, mutate, expected in cases:
+                with self.subTest(case=case):
+                    waiver = deepcopy(original)
+                    evidence = waived_campaign_evidence(waiver)
+                    mutate(waiver, evidence)
+                    self.save(path, waiver)
+                    reference = {"repository_path": path.relative_to(root).as_posix(),
+                                 "sha256": VERIFY_RELEASE.sha256_file(path)}
+                    errors = []
+                    valid = VERIFY_RELEASE.validate_native_route_waiver(
+                        root, "v0.17.0", "1" * 40, "rtx3090-native", waiver["failed_phase"],
+                        reference, errors, **evidence)
+                    if expected is None:
+                        self.assertTrue(valid, errors)
+                        self.assertEqual(errors, [])
+                    else:
+                        self.assertFalse(valid)
+                        self.assertTrue(any(expected in error for error in errors), errors)
 
     def test_waived_campaign_substitution_is_limited_to_an_explained_clone(self) -> None:
         for slug, explanation, refused in (

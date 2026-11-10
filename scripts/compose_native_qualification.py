@@ -273,11 +273,14 @@ def native_probe_summary(probes: dict[str, Any]) -> dict[str, Any]:
 
 
 def native_probe_acceptance_errors(configuration: dict[str, Any], probes: Any,
-                                   variant: dict[str, Any], client_sha256: str | None = None) -> list[str]:
-    """Judge sequential regression separately from C2 fanout and real stock-OMP proofs."""
+                                   variant: dict[str, Any], client_sha256: str | None = None,
+                                   *, waived_failed_compaction: bool = False) -> list[str]:
+    """Only a validated native-probes founder waiver may retain failed compaction evidence."""
     if not isinstance(probes, dict):
         return ["native probe acceptance must carry actual probe projections"]
     errors = []
+    if waived_failed_compaction and configuration["concurrency"] <= 1:
+        errors.append("waived failed compaction requires a C2 native campaign")
     names = ["fleet"] + (["fanout", "parallel", "compaction"] if configuration["concurrency"] > 1 else [])
     for name in names:
         row = probes.get(name)
@@ -323,10 +326,12 @@ def native_probe_acceptance_errors(configuration: dict[str, Any], probes: Any,
     for name, artifact in (("parallel", "omp_ninfer_parallel_proof"), ("compaction", "omp_ninfer_long_session_proof")):
         proof = probes.get(name, {})
         checks = proof.get("checks")
-        if (proof.get("artifact_type") != artifact or proof.get("passed") is not True
+        waived = name == "compaction" and waived_failed_compaction
+        if (proof.get("artifact_type") != artifact or proof.get("passed") is not (False if waived else True)
                 or proof.get("model") != model or (client_sha256 is not None
                 and proof.get("omp", {}).get("sha256") != client_sha256)):
-            errors.append(f"native C2 {name} must pass using the candidate's documented stock client/model")
+            verdict = "retain its failed proof" if waived else "pass"
+            errors.append(f"native C2 {name} must {verdict} using the candidate's documented stock client/model")
         if name == "parallel":
             runs = proof.get("scenarios", [])
             mandatory = {"logged_requests", "all_logged_requests_completed", "single_server_instance",
@@ -339,7 +344,7 @@ def native_probe_acceptance_errors(configuration: dict[str, Any], probes: Any,
                            or not all(value is True for value in row["checks"].values())
                            for row in runs)):
                 errors.append("native C2 must prove OMP subagent/session overlap at provider limit two")
-        elif (not isinstance(checks, dict)
+        elif not waived and (not isinstance(checks, dict)
               or not {"every_turn_completed", "compactions_committed", "no_failed_compaction",
                       "control_recalled_after_each_compaction", "one_session"}.issubset(checks)
               or not all(value is True for value in checks.values())

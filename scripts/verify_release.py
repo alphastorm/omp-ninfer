@@ -1189,15 +1189,29 @@ def validate_native_lead_recovery(summary: Any, stopped_owner_power: Any,
             errors)
 
 
+def _validate_native_refused_stop(observed: dict, label: str, errors: list[str]) -> None:
+    action = observed.get("action")
+    require(isinstance(action, str)
+            and re.fullmatch(r"Control-Release\.ps1 -Action Stop(?: after .+)?", action) is not None,
+            f"{label}.action must identify Control-Release.ps1 -Action Stop", errors)
+    require(observed.get("outcome") == "graceful_incomplete_shutdown",
+            f"{label}.outcome must be graceful_incomplete_shutdown", errors)
+    refused = observed.get("sessions_refused")
+    require(isinstance(refused, int) and not isinstance(refused, bool) and refused >= 1,
+            f"{label}.sessions_refused must be an integer >= 1", errors)
+    require(observed.get("shutdown_complete") is False,
+            f"{label}.shutdown_complete must be false", errors)
+
+
 def validate_native_route_waiver(
     root: Path, release: str, candidate: str, lane: str, failed_phase: Any,
     reference: Any, errors: list[str], *, window_failure: Any, stopped_owner_census: Any,
 ) -> bool:
-    """Bind the specific refused managed Stop and the census-backed lead recovery."""
+    """Bind a refused Stop or failed compaction probe, never a passing native campaign."""
     before = len(errors)
     label = f"{lane} native campaign waiver"
-    require(lane in NATIVE_ROUTE_LANES and failed_phase == "structured-outage",
-            f"{label} must name the structured-outage native campaign phase", errors)
+    require(lane in NATIVE_ROUTE_LANES and failed_phase in ("structured-outage", "native-probes"),
+            f"{label} must name the structured-outage or native-probes native campaign phase", errors)
     if not isinstance(reference, dict):
         errors.append(f"{label} must bind a repository file and SHA-256")
         return False
@@ -1226,33 +1240,53 @@ def validate_native_route_waiver(
                 f"{label} founder record SHA-256", errors)
     observed = waiver.get("observed_summary")
     if not isinstance(observed, dict):
-        errors.append(f"{label} must identify the observed managed Stop failure")
+        failure_kind = "probe" if failed_phase == "native-probes" else "managed Stop"
+        errors.append(f"{label} must identify the observed {failure_kind} failure")
         observed = {}
-    action = observed.get("action")
-    require(isinstance(action, str)
-            and re.fullmatch(r"Control-Release\.ps1 -Action Stop(?: after .+)?", action) is not None,
-            f"{label} observed_summary.action must identify Control-Release.ps1 -Action Stop", errors)
-    require(observed.get("outcome") == "graceful_incomplete_shutdown",
-            f"{label} observed_summary.outcome must be graceful_incomplete_shutdown", errors)
-    refused = observed.get("sessions_refused")
-    require(isinstance(refused, int) and not isinstance(refused, bool) and refused >= 1,
-            f"{label} observed_summary.sessions_refused must be an integer >= 1", errors)
-    require(observed.get("shutdown_complete") is False,
-            f"{label} observed_summary.shutdown_complete must be false", errors)
+    observed_fields = ("action", "outcome", "sessions_refused", "shutdown_complete")
+    if failed_phase == "native-probes":
+        # This extension covers the observed compaction timeout, not arbitrary probe failures.
+        observed_fields = ("probe", "error", "timeout_seconds", "http_status_counts")
+        require(observed.get("probe") == "compaction",
+                f"{label} observed_summary.probe must identify compaction", errors)
+        require(isinstance(observed.get("error"), str) and bool(observed["error"].strip()),
+                f"{label} observed_summary.error must identify the probe error", errors)
+        timeout = observed.get("timeout_seconds")
+        require(type(timeout) is int and timeout > 0,
+                f"{label} observed_summary.timeout_seconds must be a positive integer", errors)
+        counts = observed.get("http_status_counts")
+        require(isinstance(counts, dict) and bool(counts) and all(
+            isinstance(status, str) and re.fullmatch(r"[1-5][0-9]{2}", status) is not None
+            and type(count) is int and count > 0 for status, count in counts.items()),
+            f"{label} observed_summary.http_status_counts must record HTTP statuses and positive integer counts",
+            errors)
+        if "managed_stop" in observed:
+            stop = observed["managed_stop"]
+            require(isinstance(stop, dict),
+                    f"{label} observed_summary.managed_stop must identify the subsequent refused Stop", errors)
+            _validate_native_refused_stop(stop if isinstance(stop, dict) else {},
+                                          f"{label} observed_summary.managed_stop", errors)
+    else:
+        _validate_native_refused_stop(observed, f"{label} observed_summary", errors)
     evidence = waiver.get("evidence_sha256", {})
     for name in ("documented-route.json", "window-failure.json", "driver-window.json",
                  "lead-restoration.out", "pre-window-census.json"):
         require_sha(evidence.get(name), f"{label} {name} SHA-256", errors)
+    if failed_phase == "native-probes":
+        require_sha(evidence.get("compaction-probe.json"), f"{label} compaction-probe.json SHA-256", errors)
     failure = window_failure if isinstance(window_failure, dict) else {}
     require(failure.get("sha256") == evidence.get("window-failure.json")
             and failure.get("boundary") == failed_phase,
             f"{label} window-failure must bind the original failure digest and phase", errors)
     failure_observed = failure.get("observed_summary", {})
+    if (failed_phase == "native-probes" and isinstance(failure_observed, dict)
+            and ("managed_stop" in observed or "managed_stop" in failure_observed)):
+        observed_fields += ("managed_stop",)
     require(isinstance(failure_observed, dict) and all(
         field in observed and field in failure_observed
         and type(failure_observed[field]) is type(observed[field])
         and failure_observed[field] == observed[field]
-        for field in ("action", "outcome", "sessions_refused", "shutdown_complete")),
+        for field in observed_fields),
         f"{label} window-failure observations must agree with observed_summary", errors)
     census = stopped_owner_census if isinstance(stopped_owner_census, dict) else {}
     power = census.get("power_limit_w")
@@ -2294,7 +2328,8 @@ def validate_native_route_policy(root: Path, release: str, manifest: dict[str, A
             if configuration is not None:
                 errors.extend(f"{lane} waived campaign: {error}" for error in native_probe_acceptance_errors(
                     configuration, campaign.get("probe_acceptance"), variant,
-                    manifest["components"]["omp"]["binary_sha256"]))
+                    manifest["components"]["omp"]["binary_sha256"],
+                    waived_failed_compaction=campaign.get("failed_phase") == "native-probes"))
             continue
         label = f"{lane} public-install acceptance"
         ref = composed.get("evidence", {}).get(f"{lane}_public_install", {})

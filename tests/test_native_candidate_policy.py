@@ -314,6 +314,31 @@ class NativeConcurrentProtocolTests(unittest.TestCase):
         self.assertTrue(native.native_probe_acceptance_errors(
             configuration, native.native_probe_summary(sequential), variant, "1" * 64))
 
+    def test_explicit_failed_compaction_waiver_preserves_all_other_probe_requirements(self):
+        _, _, configuration = candidate_profile("rtx3090")
+        variant = {"id": "rtx3090-windows-native", "server_binary_sha256": "a" * 64,
+                   "configuration_sha256": "b" * 64, "model_artifact_sha256": "c" * 64}
+        raw = probe_receipts(variant, configuration)
+        raw["compaction"].update(passed=False, checks={}, compactions=[])
+        summary = native.native_probe_summary(raw)
+        self.assertTrue(native.native_probe_acceptance_errors(configuration, summary, variant, "1" * 64))
+        self.assertEqual(native.native_probe_acceptance_errors(
+            configuration, summary, variant, "1" * 64, waived_failed_compaction=True), [])
+        for mutate in (
+            lambda value: value["fleet"].update(transient_retries=1),
+            lambda value: value["fanout"].update(ok=False),
+            lambda value: value["parallel"].update(passed=False),
+            lambda value: value["compaction"].update(passed=True),
+            lambda value: value["compaction"].update(model="wrong-model"),
+            lambda value: value["compaction"]["omp"].update(sha256="0" * 64),
+            lambda value: value["compaction"].update(artifact_type="wrong-artifact"),
+            lambda value: value.pop("compaction"),
+        ):
+            value = deepcopy(summary)
+            mutate(value)
+            self.assertTrue(native.native_probe_acceptance_errors(
+                configuration, value, variant, "1" * 64, waived_failed_compaction=True))
+
     def test_serial_4090_campaign_accepts_dflash2_without_an_mtp_proposal_head(self):
         from test_run_variant_campaign import matrix_for, server_start, test_manifest, MODEL
         manifest = test_manifest()

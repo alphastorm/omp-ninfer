@@ -123,8 +123,9 @@ def route_receipt(lane: str) -> dict:
             "clone_commit": CANDIDATE, "document_sha256": "f" * 64, "steps": steps}
 
 
-def campaign_waiver(release: str, candidate: str, route_sha256: str) -> dict:
-    return {
+def campaign_waiver(release: str, candidate: str, route_sha256: str,
+                    *, failed_phase: str = "structured-outage") -> dict:
+    waiver = {
         "artifact_type": "omp_ninfer_founder_gate_waiver", "schema_version": 1,
         "release": release, "candidate": candidate, "lane": "rtx3090-native",
         "status": "waived-by-founder", "observed_status": "failed",
@@ -143,6 +144,15 @@ def campaign_waiver(release: str, candidate: str, route_sha256: str) -> dict:
                             "window-failure.json": "8" * 64, "driver-window.json": "9" * 64,
                             "lead-restoration.out": "a" * 64, "pre-window-census.json": "b" * 64},
     }
+    if failed_phase == "native-probes":
+        waiver["failed_phase"] = failed_phase
+        waiver["observed_summary"] = {
+            "probe": "compaction", "error": "RuntimeError: timed out after 900 s",
+            "timeout_seconds": 900, "http_status_counts": {"503": 8, "499": 2},
+            "managed_stop": {**waiver["observed_summary"], "sessions_refused": 3},
+        }
+        waiver["evidence_sha256"]["compaction-probe.json"] = "c" * 64
+    return waiver
 
 
 def waived_campaign_evidence(waiver: dict) -> dict:
@@ -150,7 +160,7 @@ def waived_campaign_evidence(waiver: dict) -> dict:
     return {
         "window_failure": {"evidence_name": "rtx3090/evidence/window-failure.json",
                            "sha256": waiver["evidence_sha256"]["window-failure.json"],
-                           "boundary": "structured-outage",
+                           "boundary": waiver["failed_phase"],
                            "observed_summary": deepcopy(waiver["observed_summary"])},
         "stopped_owner_census": {"evidence_name": "native-pre-window-census.json",
                                  "sha256": waiver["evidence_sha256"]["pre-window-census.json"],
@@ -824,23 +834,29 @@ class UpstreamCompositionTests(unittest.TestCase):
             self.assertEqual(receipt["lane"], f"{lane}-windows-native")
             self.assertEqual(external["evidence"][f"{lane}_public_install"]["sha256"], MODULE.sha256(path.read_bytes()))
 
-    def waive_3090(self) -> Path:
+    def waive_3090(self, *, failed_phase: str = "structured-outage") -> Path:
         self.add_3090(evidence=False)
         route = self.root / "rtx3090-native.json"
         path = self.release_root / "qualification/rtx3090-route-waiver.json"
-        waiver = campaign_waiver(self.release, CANDIDATE, MODULE.sha256(route.read_bytes()))
+        waiver = campaign_waiver(self.release, CANDIDATE, MODULE.sha256(route.read_bytes()),
+                                 failed_phase=failed_phase)
         MODULE.save(path, waiver)
         binding = {"repository_path": path.relative_to(self.root).as_posix(),
                    "sha256": MODULE.sha256(path.read_bytes())}
         evidence = MODULE.load(self.root / "evidence.json")
         evidence["rtx3090"] = {
-            "status": "failed", "failed_phase": "structured-outage", "founder_waiver": binding,
+            "status": "failed", "failed_phase": failed_phase, "founder_waiver": binding,
             **waived_campaign_evidence(waiver),
             "preparation": {"lineage_mode": "first_release", "previous_release_present": False},
             "observations": {"rollback": deepcopy(FIRST_RELEASE["rollback"])}}
         evidence["restoration"]["rtx3090"] = {**waiver["restoration_summary"], "founder_waiver": binding}
         MODULE.save(self.root / "evidence.json", evidence)
         self.bind_native_policies()
+        if failed_phase == "native-probes":
+            evidence = MODULE.load(self.root / "evidence.json")
+            evidence["rtx3090"]["probe_acceptance"]["compaction"].update(
+                passed=False, checks={}, committed=0)
+            MODULE.save(self.root / "evidence.json", evidence)
         self.argv += ["--native-route-waiver", f"rtx3090-native={binding['repository_path']}"]
         return path
 
@@ -880,6 +896,60 @@ class UpstreamCompositionTests(unittest.TestCase):
         validate_native_route_policy(self.root, self.release,
                                      MODULE.load(self.release_root / "manifest.json"), qualification, errors)
         self.assertEqual(errors, [])
+
+    def test_native_probes_waiver_composes_and_verifies_the_failed_compaction(self) -> None:
+        self.waive_3090(failed_phase="native-probes")
+        raw = (self.root / "rtx3090-native.json").read_bytes()
+        self.assertEqual(self.compose(), 0)
+        qualification = MODULE.load(self.release_root / "qualification.json")
+        routes = MODULE.load(self.release_root / "acceptance/documented-routes.json")
+        campaign = routes["native_campaigns"]["rtx3090-native"]
+        self.assertEqual(campaign["status"], "failed")
+        self.assertEqual(campaign["failed_phase"], "native-probes")
+        self.assertIs(campaign["probe_acceptance"]["compaction"]["passed"], False)
+        self.assertEqual(campaign["probe_acceptance"]["compaction"]["checks"], {})
+        self.assertEqual(campaign["window_failure"]["observed_summary"]["managed_stop"]["sessions_refused"], 3)
+        self.assertEqual((self.root / routes["routes"]["rtx3090-native"]["receipt"]).read_bytes(), raw)
+        external = MODULE.load(self.release_root / "acceptance/composed-external-installation.json")
+        self.assertEqual(external["status"], "waived-by-founder")
+        self.assertEqual(external["steps"]["rtx3090-native"]["status"], "failed")
+        self.assertNotIn("rtx3090_public_install", external["evidence"])
+        self.assertFalse((self.release_root / "acceptance/rtx3090-public-install.json").exists())
+        restoration = MODULE.load(self.root / routes["restoration_receipt"]["repository_path"])
+        self.assertEqual(restoration["status"], "passed-with-founder-waiver")
+        self.assertEqual(restoration["rtx3090"]["outcome"], "graceful")
+        self.assertTrue(any("native-probes compaction probe failed" in note
+                            for note in external["limitations"]))
+        errors = []
+        validate_documented_route_acceptance(self.root, qualification, errors)
+        validate_native_route_policy(self.root, self.release,
+                                     MODULE.load(self.release_root / "manifest.json"), qualification, errors)
+        self.assertEqual(errors, [])
+
+    def test_native_probe_waiver_does_not_excuse_other_probes_or_relabel_compaction_passed(self) -> None:
+        self.waive_3090(failed_phase="native-probes")
+        source = MODULE.load(self.root / "evidence.json")
+        for name in ("fleet", "fanout", "parallel", "compaction"):
+            with self.subTest(probe=name):
+                evidence = deepcopy(source)
+                proof = evidence["rtx3090"]["probe_acceptance"][name]
+                if name == "fleet":
+                    proof["transient_retries"] = 1
+                elif name == "fanout":
+                    proof["ok"] = False
+                else:
+                    proof["passed"] = name == "compaction"
+                MODULE.save(self.root / "evidence.json", evidence)
+                with self.assertRaisesRegex(SystemExit, name):
+                    self.compose()
+                self.assertFalse((self.release_root / "acceptance").exists())
+
+    def test_native_probe_failure_without_a_founder_waiver_is_refused(self) -> None:
+        self.waive_3090(failed_phase="native-probes")
+        del self.argv[-2:]
+        with self.assertRaisesRegex(SystemExit, "explicit founder waiver"):
+            self.compose()
+        self.assertFalse((self.release_root / "acceptance").exists())
 
     def test_waiver_requires_the_specific_refused_managed_stop_observations(self) -> None:
         path = self.waive_3090()
