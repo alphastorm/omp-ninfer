@@ -15,8 +15,8 @@ ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / "assets"
 TARGETS = {
     "banner": (1280, 320, 2),
-    "benchmarks": (1240, 360, 2),
-    "architecture": (1240, 420, 2),
+    "benchmarks": (1240, 500, 2),
+    "architecture": (1240, 580, 2),
     "og": (1280, 640, 1),
     "chart-warm-cold": (1240, 420, 2),
     "chart-prefill": (1240, 420, 2),

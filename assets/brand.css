@@ -54,7 +54,6 @@ body {
   z-index: -2;
 }
 
-.mono { font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace; }
 .eyebrow {
   font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
   font-size: 10px;
@@ -86,20 +85,42 @@ body {
   color: var(--body);
 }
 .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--local); box-shadow: 0 0 14px var(--local); }
-.cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 14px;
-  min-height: 36px;
-  padding: 0 14px;
-  border: 1px solid rgba(152, 136, 239, .55);
-  background: var(--local-soft);
+
+/* Editorial sheets: the README banner, the social preview, the architecture figure, and the
+   receipts figure. Token values are BRAND.md's; the ground stays open, with no frame, grid, or
+   glow. A 1240-1280 px sheet shows at about two-thirds scale in the README column, so nothing
+   meant to be read is set below 18 px (12 px on screen). The rules above this line draw the
+   framed canvas the historical benchmark charts were published with. */
+.sheet {
+  --ink: #e8ecef;
+  --body: #b6bec7;
+  --line: rgba(232, 236, 239, 0.14);
+  --line-strong: rgba(232, 236, 239, 0.26);
+  --local: #8e7be8;
+  --local-text: #ab9df0;
+  --fail: #c85045;
+  --kinship: #f97316;
+  position: relative;
+  overflow: hidden;
+  background: var(--ground);
+  color: var(--ink);
+}
+.sheet .label {
   font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
-  font-size: 10px;
+  font-size: 18px;
+  line-height: 1;
   font-weight: 500;
   letter-spacing: .12em;
   text-transform: uppercase;
-  color: #dcd6ff;
+  color: var(--body);
 }
-.cta b { color: var(--local); font-size: 15px; font-weight: 400; }
-.hairline { height: 1px; background: var(--line); }
+.sheet .label b { color: var(--ink); font-weight: 500; }
+.sheet .wordmark { display: flex; align-items: center; gap: 12px; font-size: 26px; font-weight: 600; letter-spacing: -.015em; }
+.sheet .wordmark img { width: 32px; height: 32px; }
+.sheet .status { display: flex; align-items: center; gap: 12px; font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace; font-size: 18px; letter-spacing: .02em; color: var(--ink); }
+.sheet .status .sep { margin: 0 6px; color: var(--line-strong); }
+.sheet .status .quiet { color: var(--body); }
+.sheet .dot { flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--local); }
+.sheet .dot.fail { background: var(--fail); }
+/* Kinship: upstream orange, once per surface, only beside an Oh My Pi mention. */
+.sheet .kin { flex: none; width: 9px; height: 9px; border-radius: 50%; background: var(--kinship); }

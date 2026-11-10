@@ -25,6 +25,9 @@ stay retired. Do not reuse them.
   (what it is, for whom), proof (one receipt line from the current release), one action.
   The enemy is the cold context rebuild and implicit-cache roulette; the promise is one
   private, long-lived coding session that is explicitly resumable across process restarts.
+  On the README the stack is split: the banner carries the category, headline, tagline, and
+  status; the text under it carries the entity statement, the current-release proof with its
+  receipt, and the one action. Artwork never draws a button.
 - Entity grammar: state the four-part relationship in nearly identical words on every
   surface — *Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release
   layer) → NInfer (inference engine) → Qwen3.8 27B (served model).* Spell out "Oh My Pi"
@@ -98,6 +101,13 @@ containers. Violet is an action or retained-state accent, not decoration. Avoid 
 grids, glowing tiles, ornamental gradients, and more than one primary call to action. At thumbnail
 size, the headline and one proof must remain legible without reading labels.
 
+Artwork is sized for where it is read. A 1240–1280 px sheet shows at about two-thirds scale in the
+README column (838 px wide on a desktop), so nothing meant to be read is set below 18 px (12 px on
+screen); the social preview is read at link-card size, so its floor is 26 px. Small text is Body,
+never Muted. The banner, the social preview, and the architecture figure carry no release version,
+client version, or date, so a release never re-renders them; the receipts figure names its release
+because its numbers belong to it.
+
 Voice: the gateway's sober register, operator-flavored. Sentence case, no
 emoji, no exclamation marks. Claims stated as invariants:
 
@@ -132,15 +142,15 @@ imply official partnership.
 | `assets/lockup.png` / `lockup-light.png` | horizontal lockup, transparent @2x |
 | `assets/lockup-x.png` / `lockup-x-light.png` | OMP × NInfer alternate, transparent @2x |
 | `assets/lockups.html` | lockup source |
-| `assets/brand.css` | shared color, type, spacing, and guide tokens for campaign assets |
-| `assets/banner.html` | README banner source (1280×320): headline, promise, one current-release proof line, status strip |
-| `assets/banner.png` | rendered banner @2x (2560×640); the README links it to the quickstart so its "Get started" works |
-| `assets/og.html` | GitHub social preview source (1280×640) |
+| `assets/brand.css` | shared tokens for exported artwork: the `.sheet` scope (BRAND token values, 18 px type floor) for the banner, social preview, architecture figure, and receipts figure; the framed `.canvas` rules stay for the historical benchmark charts |
+| `assets/banner.html` | README banner source (1280×320): category, headline, tagline, the restart figure (the process stops and restarts, the session continues through a checkpoint), status strip; no release version |
+| `assets/banner.png` | rendered banner @2x (2560×640); the README links it to the quickstart |
+| `assets/og.html` | GitHub social preview source (1280×640): the banner's composition at link-card scale; no release version |
 | `assets/og.png` | GitHub social preview (1280×640) |
-| `assets/architecture.html` | architecture illustration source (1240×420) |
-| `assets/architecture.png` | rendered architecture @2x (2480×840) — for the README |
-| `assets/benchmarks.html` | qualification-receipt strip source (1240×360): one column per lane, each on its own gate |
-| `assets/benchmarks.png` | rendered receipt strip @2x — for the README and benchmarks page; re-render only with a new receipt |
+| `assets/architecture.html` | architecture figure source (1240×580): who owns what (Oh My Pi the truth, NInfer the continuation, joined by the mark drawn as the authenticated loopback) and the three failure outcomes |
+| `assets/architecture.png` | rendered architecture figure @2x (2480×1160) — for the README and the site |
+| `assets/benchmarks.html` | qualification-receipt figure source (1240×500): one row per lane, each on its own gate; the only artwork that names a release |
+| `assets/benchmarks.png` | rendered receipt figure @2x (2480×1000) — for the README; re-render only with a new receipt |
 | `assets/chart-warm-cold.html` / `chart-warm-cold.png` | warm vs cold TTFT chart source (1240×420) and @2x render — benchmarks page |
 | `assets/chart-prefill.html` / `chart-prefill.png` | 5090 prefill-curve chart source (1240×420) and @2x render — benchmarks page |
 | `assets/chart-decode.html` / `chart-decode.png` | per-lane decode chart source (1240×420) and @2x render — benchmarks page |
@@ -175,13 +185,15 @@ replacing displayed home-path prefixes with the normalized cast text. `docs/medi
 owns the demo hashes, exact cast trims and render commands, including the disclosed historical
 social reconstruction details. No demo files or published release trees were removed or rewritten.
 
-Brand-image regeneration: run `python3 scripts/render_assets.py`. It renders the banner, architecture,
-benchmark, and social-preview HTML sources with headless Chrome and verifies every PNG dimension;
-`python3 scripts/render_assets.py --check` fails when a committed raster is stale. Render
+Brand-image regeneration: run `python3 scripts/render_assets.py banner og architecture benchmarks`.
+It renders the named HTML sources with headless Chrome and verifies every PNG dimension;
+`python3 scripts/render_assets.py --check banner og architecture benchmarks` fails when a committed
+raster is stale. Name the targets: the three historical chart sources are also registered, and a
+bare run would re-render them. A release edits only `assets/benchmarks.html`. Render
 `#lk-dark`/`#lk-light`/`#lkx-dark`/`#lkx-light` from `assets/lockups.html` at
 2× for transparent lockups, `icon.svg` at 512, and `favicon.svg` at 32/16. Expected raster
-dimensions are 2560×640 for the banner, 2480×840 for architecture, 2480×720 for the benchmark
-story, 1720×360 for each lockup, and 1280×640 for the social preview.
+dimensions are 2560×640 for the banner, 2480×1160 for the architecture figure, 2480×1000 for the
+receipts figure, 1720×360 for each lockup, and 1280×640 for the social preview.
 
 Demo captures are real sessions, never mockups presented as recordings: record against a real
 qualified-profile runtime, use synthetic task content only, and verify no hostname, username,
@@ -192,14 +204,16 @@ be labelled as such in the media provenance file; provenance for every demo live
 
 ## README header (drop-in)
 
-The banner is the hero: it already carries the category eyebrow, headline, tagline, one proof line
-and the status strip, so the text under it must not repeat them. The header adds only what the
-image cannot: a plain three-sentence entity statement, the current-release proof with its receipt,
-the primary action, badges, and the documentation row. No `# OMP NInfer` heading (the wordmark is in
-the banner), no restated headline, no caveat lines above the fold.
+The banner is the hero: it carries the category, headline, tagline, the restart figure, and the
+status strip, so the text under it must not repeat them. The header adds only what the image
+cannot: a plain three-sentence entity statement, the current-release proof with its receipt, the
+primary action, badges, and the documentation row. No `# OMP NInfer` heading (the wordmark is in
+the banner), no restated headline, no caveat lines above the fold. The block below is `README.md`
+from its first line through the closing `</div>`; a release edits the proof paragraph and the
+download link in both.
 
 ```md
-[![OMP NInfer — your coding session should survive the process. Qualified on RTX 5090 · 4090 · 3090, v0.17.0.](assets/banner.png)](docs/QUICKSTART.md)
+[![OMP NInfer — durable local inference for coding agents. Your coding session should survive the process. Durable session state on your GPU. Qualified on RTX 5090 · 4090 · 3090.](assets/banner.png)](docs/QUICKSTART.md)
 
 <div align="center">
 
@@ -212,13 +226,14 @@ Every install route in the guide was run end to end on **v0.17.0** with unmodifi
 three client platforms, both native lanes
 ([receipt](releases/v0.17.0/acceptance/composed-external-installation.json)).
 
-**[Get started →](docs/QUICKSTART.md)** &nbsp;·&nbsp; [Download v0.17.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.17.0)
+### [Get started →](docs/QUICKSTART.md)
 
 [![CI][ci-badge]][ci] [![Release][release-badge]][releases] [![RTX 5090 decode][decode-badge]][benchmarks] [![Context][context-badge]][benchmarks] [![License][license-badge]][license]
 
-[Lanes](docs/QUICKSTART.md#choose-your-lane) · [Facts](docs/FACTS.md) · [Compare](docs/DECISION_GUIDE.md) ·
-[Benchmarks](docs/BENCHMARKS.md) · [Architecture](docs/ARCHITECTURE.md) · [Security](docs/SECURITY.md) ·
-[Troubleshooting](docs/TROUBLESHOOTING.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)
+[Download v0.17.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.17.0) · [Lanes](docs/QUICKSTART.md#choose-your-lane) ·
+[Facts](docs/FACTS.md) · [Compare](docs/DECISION_GUIDE.md) · [Benchmarks](docs/BENCHMARKS.md) ·
+[Architecture](docs/ARCHITECTURE.md) · [Security](docs/SECURITY.md) · [Troubleshooting](docs/TROUBLESHOOTING.md) ·
+[Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)
 
 </div>
 ```
@@ -228,9 +243,9 @@ surface `#1C232B` — never green/red status colors, never more than one row. Sa
 CI, release, measured decode, measured context, license. A measured-value badge must match the
 qualified numbers in `docs/BENCHMARKS.md` and changes only with a new qualification receipt.
 
-Place `![OMP NInfer architecture](assets/architecture.png)` under `## How it works` and the
-qualification-receipt strip at `assets/benchmarks.png` under `## Measured, not estimated`; neither
-is part of the header.
+Place the architecture figure (`assets/architecture.png`) under `## How it works` and the
+qualification-receipt figure (`assets/benchmarks.png`) under `## Measured, not estimated`, each
+with alt text that states everything the figure shows; neither is part of the header.
 
 The demo GIF sits under `## What it does`, centered at width 900 with a full alt description and a
 one-line caption naming the release it was recorded on; link the MP4 and provenance beside it. It is
