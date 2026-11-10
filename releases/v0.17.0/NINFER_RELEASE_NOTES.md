@@ -134,7 +134,7 @@ One pair is not qualification or a pacing gain; pacing remains default off.
 | Frontend CPU report | `96819447174b8d81a9353ddc2162099b682abcdcdc151113c5b3816e5f1ac779` |
 | Native configuration investigation | `293a10f5455909fcef1248be85ccb578d05399d01f3e8dcd9491c398daf20240` |
 | Copyability investigation | `0aa575a59ba067626ee4df531c617cb7f989929d3cd70216ce6f0e4d17dd09f1` |
-| Native rk4v4 investigation | `ffc6399304a0d75af10f39267004e24b55c703ac9e0a294b9b1b77319e2cd38a` |
+| Native `rk4v4` investigation | `ffc6399304a0d75af10f39267004e24b55c703ac9e0a294b9b1b77319e2cd38a` |
 | Historical traffic investigation | `a0933fa949148db0a5bc1d41083a450d2124fc49828c9b4dc85d0fa236a4ac58` |
 | Partial pacing summary | `535f58ae3d78c678b51411cd740f6093e57454a853fc6073dd028ddbdf8b1e52` |
 
