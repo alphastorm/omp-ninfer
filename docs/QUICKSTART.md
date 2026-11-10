@@ -1,11 +1,6 @@
 # Quickstart
 
-> **Versioned guide: v0.17.0 · stock Oh My Pi 18.18.6 · five documented routes accepted**
-
-This guide describes the v0.17.0 runtime-and-client composition, not a publication authorization.
-Use the [immutable published v0.16.2 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.16.2/docs/QUICKSTART.md)
-for installation until founder-owned publication. Fresh acceptance executed the new host checkpoint
-and atomic macOS key blocks; no predecessor product-route receipt is transferred.
+> **Versioned guide: v0.17.0 · stock Oh My Pi 18.18.6 · Qualified on RTX 5090 · 4090 · 3090**
 
 OMP NInfer is the qualified local inference appliance and release layer connecting the
 [Oh My Pi](https://github.com/can1357/oh-my-pi) (OMP) coding-agent client over authenticated
@@ -161,14 +156,14 @@ long sessions until a native re-cut is qualified.** The
 [waiver](../releases/v0.17.0/qualification/rtx3090-route-waiver.json) retains the failures.
 
 macOS stays preview; Linux is WSL2-only; image input covers macOS/Windows against RTX 5090 only.
-Historical native component qualification is separate same-byte evidence. No old waiver or review
-approval transfers, and this guide authorizes no host window, production promotion or publication.
+Historical native component qualification is separate same-byte evidence. No predecessor waiver,
+client execution, or product-route receipt transfers. See [Releases](RELEASES.md).
 
 ## Current release at a glance
 
 | Lane | Runtime component and source | Model artifact | Serving profile and limits |
 | --- | --- | --- | --- |
-| RTX 5090 container (`127.0.0.1:18089`) | `v0.7.0-qwen38-5090-beta.6`, source `e0971faf`, server `dc86e101`, image `7a19576b`; current published-image lane and fresh route acceptance bound | Published v3 `81f924d4` (20,437,521,664 bytes) | Retained `qwen38-5090-v0.13.0` / config `751d22dc`: strict origin auth, DFlash2 K7, BF16 KV, 131,072 context, C2, two extra device-state slots, 180 s pending timeout; successor host store `checkpoints-v017` |
+| RTX 5090 container (`127.0.0.1:18089`) | `v0.7.0-qwen38-5090-beta.6`, source `e0971faf` on upstream `64d10fbf`, server `dc86e101`, image `7a19576b`; current published-image lane and fresh route acceptance bound | Published v3 `81f924d4` (20,437,521,664 bytes) | Retained `qwen38-5090-v0.13.0` / config `751d22dc`: strict origin auth, DFlash2 K7, BF16 KV, 131,072 context, C2, two extra device-state slots, 180 s pending timeout; host store `checkpoints-v017` |
 | RTX 4090 native Windows (`127.0.0.1:18082`) | Carried `v0.8.0-qwen38-4090-beta.2`, source `a87de361`; package `d9b10b47`, server `ffee91bf`, config `ae27dc44` | Same model v3 | Unchanged INT8 DFlash2 K7, 131,072 context, C1, 30 s pending timeout, two extra slots, 1,024-token prefill, 640 MiB admission headroom |
 | RTX 3090 native Windows (`127.0.0.1:18082`) | Carried `v0.8.0-qwen38-3090-beta.2`, source `a87de361`; package `97a8e634`, server `15a4db46`, config `238ccad7` | Same model v3 | Unchanged INT8 DFlash2 K7, C2 over one 131,072-token pool, 180 s pending timeout, two extra slots, 1,024-token prefill, 768 MiB headroom, 350 W serving cap |
 
@@ -186,8 +181,8 @@ qualification does not cover the new client. No canonical native promotion is ne
 - **Checkpoint boundary:** restore requires the same binary, model, profile and bearer key. Saves
   are best effort under traffic; authoritative OMP transcripts remain replayable. The new container
   host store `checkpoints-v017` is separate from predecessor `checkpoints-v013`, while the retained
-  container mount stays `/checkpoints-v013`. Never import prior generations or write the successor
-  into the predecessor store.
+  container mount stays `/checkpoints-v013`. Never import prior generations or write into the
+  predecessor store.
 - **Session capability:** `prompt_cache_key` names a session within one authenticated API-key
   principal. Use high-entropy unique keys; do not share that principal among mutually untrusted clients.
 - **Native durability:** the unchanged native schema-3 store is
@@ -196,7 +191,7 @@ qualification does not cover the new client. No canonical native promotion is ne
   and a bearer key of at least 32 bytes. Preserve legacy generations without migration.
 - **Legacy owners:** use the immutable [v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md)
   or [v0.7.2 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.7.2/docs/QUICKSTART.md) for those lineages;
-  do not mix their clients/fragments with this prepared route.
+  do not mix their clients/fragments with this route.
 
 ## Ready route: native Windows and Docker Desktop WSL2
 
@@ -791,23 +786,22 @@ A rerun keeps an existing nonempty key, because checkpoint MACs and the copy eac
 bound to it. To rotate the key, stop NInfer, move the old key aside, rerun this block, and install
 the new key on every client; checkpoints saved under the old key no longer load.
 
-The successor uses the separate host directory `checkpoints-v017`, still mounted at the profile's
-`/checkpoints-v013` container path. Keep the predecessor's `checkpoints-v013` and older `checkpoints`
-stores untouched for rollback; never mount either read-write into the successor or import their
+Release `v0.17.0` uses the separate host directory `checkpoints-v017`, still mounted at the profile's
+`/checkpoints-v013` container path. Keep `v0.16.2`'s `checkpoints-v013` and older `checkpoints`
+stores untouched for rollback; never mount either read-write into `v0.17.0` or import their
 generations. Retained profile/mount names do not establish cross-binary checkpoint compatibility.
 Resume earlier sessions by replaying the authoritative client transcript for a fresh prefill.
 New exact-runtime checkpoints accelerate later continuations. The retained serving contract includes
-JSON-schema structured output and 128-character Chat/Responses tool names. Historical v0.16.2
-receipts do not qualify these successor route changes. See the
-[v0.17.0 compatibility matrix](../releases/v0.17.0/COMPATIBILITY.md).
+JSON-schema structured output and 128-character Chat/Responses tool names. Current `v0.17.0` lane
+receipts bind the runtime protocol, and fresh five-route acceptance passed on the frozen candidate.
+See the [v0.17.0 compatibility matrix](../releases/v0.17.0/COMPATIBILITY.md).
 
 ## 4. Start NInfer on the inference host
 
-For the successor upgrade from v0.16.2, stop the incumbent with its matching published v0.16.2
-stop script before using the staged successor's launcher. Keeping the predecessor container running
-does not activate a rebuilt runtime. Follow the immutable guide for the incumbent, preserve its
-stores, and replay prior transcripts rather than importing them. The published component identities are staged here; product-route acceptance and publication
-remain separate gates.
+For an upgrade from v0.16.2, stop the incumbent with its matching published v0.16.2
+stop script before using this release's launcher. Keeping a v0.16.2 container running
+does not activate `v0.7.0-qwen38-5090-beta.6`. Follow the immutable guide for the incumbent, preserve its
+stores, and replay prior transcripts rather than importing them.
 
 ```sh
 ./examples/manual-tunnel/start-ninfer.sh \

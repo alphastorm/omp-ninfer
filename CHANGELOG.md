@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Mark v0.17.0 as the published release across the README, quickstart banner, facts, roadmap,
+  release history, upstream watch, reference docs, site, and brand assets; front-door install links
+  return to the guide on `main`.
+
+## [0.17.0] - 2026-11-10
+
 ### Fixed
 
 - Bind founder-waived native compaction projections to the waiver's canonical proof digest,
@@ -2922,7 +2930,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.16.2...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.17.0...HEAD
+[0.17.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.16.2...v0.17.0
 [0.16.2]: https://github.com/alphastorm/omp-ninfer/compare/v0.16.0...v0.16.2
 [0.16.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.14.0...v0.15.0
