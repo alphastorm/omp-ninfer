@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   temporary file and replace it only after SSH success and validation
   ([#138](https://github.com/alphastorm/omp-ninfer/issues/138), items 6–7). Published release
   receipts and pins are unchanged; these executable changes require fresh successor acceptance.
+- Validate the successor checkpoint host directory by product release, independently of the
+  retained schema-2 container mount and configuration identity; reject a predecessor host store
+  even when the successor keeps the qualified deployment-profile name.
 - Guard release receipts against nested predecessor public-install identities and non-clone
   route substitutions. Project arbitrary probe error strings to public digests, scan host-helper
   Python literals for private markers, and require explicit operator host/window inputs.

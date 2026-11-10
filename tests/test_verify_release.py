@@ -1711,6 +1711,29 @@ class ReleaseContractTest(unittest.TestCase):
                 self.assertEqual(len(errors), 2, errors)
                 self.assertTrue(all("unqualified client candidate" in item for item in errors))
 
+    def test_successor_checkpoint_host_store_is_release_bound_not_mount_bound(self) -> None:
+        for release, store in (("v0.16.2", "checkpoints-v013"),
+                               ("v0.17.0", "checkpoints-v017"),
+                               ("v0.17.1", "checkpoints-v017-1"),
+                               ("v0.18.0", "checkpoints-v018")):
+            for accepted in (True, False):
+                with self.subTest(release=release, accepted=accepted):
+                    profile = self.load(ROOT / "profiles/qwen38-rtx5090-manual-tunnel.json")
+                    config = VERIFY_RELEASE.configuration_identity(profile)
+                    profile["release"] = release
+                    wrong = "checkpoints-v013" if store != "checkpoints-v013" else "checkpoints-v017"
+                    profile["server"]["checkpoint_host_directory"] = store if accepted else wrong
+                    errors = []
+                    VERIFY_RELEASE.validate_profile_contract(
+                        profile, "candidate", release, profile["model"],
+                        profile["model"]["public_id"], profile["server"]["deployment_profile"],
+                        errors, upstream_client=True, per_model_stateful=True)
+                    checkpoint_errors = [error for error in errors if "checkpoint host directory" in error]
+                    self.assertEqual(checkpoint_errors, [] if accepted else [
+                        f"candidate: checkpoint host directory must be {store}"])
+                    self.assertEqual(profile["server"]["checkpoint_mount_target"], "/checkpoints-v013")
+                    self.assertEqual(VERIFY_RELEASE.configuration_identity(profile), config)
+
     def test_client_candidate_requires_per_model_stateful_responses(self) -> None:
         for value in (None, False, "true", 1):
             with self.subTest(value=value):

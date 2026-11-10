@@ -2737,8 +2737,13 @@ def validate_profile_contract(
     require(server.get("checkpoint_mount_target") == checkpoint_target,
             f"{label}: checkpoint mount target must be {checkpoint_target}", errors)
     if server.get("status_schema_version") == 2:
-        require(server.get("checkpoint_host_directory") == "checkpoints-v013",
-                f"{label}: checkpoint host directory must be checkpoints-v013", errors)
+        version = product_version(release) or (0, 0, 0)
+        checkpoint_host = "checkpoints-v013"
+        if version[:2] >= (0, 17):
+            major, minor, patch = version
+            checkpoint_host = f"checkpoints-v{major}{minor:02d}" + (f"-{patch}" if patch else "")
+        require(server.get("checkpoint_host_directory") == checkpoint_host,
+                f"{label}: checkpoint host directory must be {checkpoint_host}", errors)
     seccomp_path = server.get("checkpoint_seccomp_profile")
     require(seccomp_path == "examples/manual-tunnel/ninfer_io_uring_seccomp.json",
             f"{label}: checkpoint seccomp profile must be the repository-owned io_uring profile",
