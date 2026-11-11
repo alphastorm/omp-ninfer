@@ -16,6 +16,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import speed_gate as SPEED
 
 ROOT = Path(__file__).resolve().parents[1]
+SCREEN_RULE = ("required within each engine (A0/A3, B1/B2); "
+               "cross-engine differences require a bound passing EXP-085 verdict")
 
 
 def digest(value):
@@ -139,6 +141,19 @@ class SpeedGateTests(unittest.TestCase):
         self.assertEqual(result["status"], "PASS")
         self.assertEqual(result["thresholds"], {"weighted_minimum": 0.98, "every_case_minimum": 0.95})
         self.assertEqual(result["decision_sha256"], digest(gate["decision"]))
+
+    def test_recorded_v0162_verdicts_keep_their_decision_and_result(self):
+        decision = json.loads((ROOT / "releases/v0.16.2/qualification/native-speed-decision.json").read_text())
+        thresholds = SPEED.recorded_thresholds(decision, "v0.16.2")
+        for lane, names in (("rtx3090", ("role84_depth0",)),
+                            ("rtx4090", ("role108", "all115"))):
+            recorded = json.loads((ROOT / f"releases/v0.16.2/qualification/{lane}-speed.json").read_text())
+            self.assertEqual(recorded["gate"], thresholds)
+            for name in names:
+                suite = recorded[name]
+                self.assertGreaterEqual(suite["weighted_decode_ratio"], thresholds["weighted_minimum"])
+                self.assertGreaterEqual(suite["minimum_case_ratio"], thresholds["every_case_minimum"])
+            self.assertEqual(recorded["status"], "PASS")
 
     def test_recorded_no_regression_weighted_and_case_floors_are_inclusive(self):
         for candidate_tokens, expected in (((98, 98), "PASS"), ((97, 97), "FAIL"),

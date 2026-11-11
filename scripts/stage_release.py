@@ -18,6 +18,8 @@ doc prose remain the lead's job. What it owns:
   5. Rebase qualification.json identity and local-release-packaging pins.
      Schema-2 staged profiles use the successor's checkpoint host directory;
      the qualified container mount/configuration identity remains unchanged.
+     Existing release-local snapshots are identity-stamped even without new
+     templates; an unrepresentable configuration requires --profile-template-dir.
   6. Recompute the hash chain through `rebind_release.py --draft`: lane
      receipts -> compatibility variants/qualification/manifest bindings ->
      acceptance compatibility binding -> acceptance hash -> qualification
@@ -66,6 +68,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from render_compatibility import OMP_PROFILE_PLATFORMS
+from rebind_release import stamp_profile, save as save_profile
 from verify_release import (
     ContractError,
     NINFER_VARIANT_IDS,
@@ -440,6 +443,28 @@ def main() -> int:
         parser.error(f"--config-sha is {args.source}'s configuration identity, which hashes its "
                      f"deployment profile {profile_from}; to keep the configuration, pass "
                      "--keep-deployment-profile")
+    # Without new shapes, the release-local snapshots are the source of truth, not
+    # whichever release is currently promoted at the root.
+    staged_profiles = profile_templates or {
+        path.name: load(path) for path in sorted((src_dir / "profiles").glob("*.json"))}
+    profile_manifest = {
+        "components": {
+            "model": model,
+            "ninfer": {"server_binary_sha256": args.binary_sha},
+            "omp": omp_descriptor["omp"] if omp_descriptor else source_manifest["components"]["omp"],
+        },
+        "runtime_identity": {"deployment_profile": profile_to, "configuration_sha256": config_sha},
+    }
+    clients = {row["id"]: row["client_distribution"]
+               for row in load(src_dir / "compatibility.json")["profiles"]}
+    if omp_descriptor:
+        clients = {key: omp_descriptor["platforms"][platform]
+                   for key, platform in OMP_PROFILE_PLATFORMS.items()}
+    for name, profile in staged_profiles.items():
+        stamp_profile(profile, args.release, profile_manifest, clients)
+        if configuration_identity(profile) != config_sha:
+            parser.error(f"profile snapshot {name} cannot represent --config-sha; "
+                         "supply matching shapes with --profile-template-dir")
 
     # 1. Copy the tree.
     shutil.copytree(src_dir, dst_dir, dirs_exist_ok=bool(prepared))
@@ -494,26 +519,10 @@ def main() -> int:
     })
     manifest["runtime_identity"]["deployment_profile"] = profile_to
     manifest["runtime_identity"]["configuration_sha256"] = config_sha
-    for name, template in profile_templates.items():
-        template["release"] = args.release
-        template["model"].update(artifact_sha256=model["artifact_sha256"],
-                                 artifact_bytes=model["artifact_bytes"])
-        arguments = template["server"]["arguments"]
-        for flag, value in (
-            ("--binary-sha256", args.binary_sha),
-            ("--artifact-sha256", model["artifact_sha256"]),
-            ("--config-sha256", config_sha),
-            ("--deployment-profile", profile_to),
-        ):
-            arguments[arguments.index(flag) + 1] = value
-        if omp_descriptor is not None:
-            platform = {"manual-ssh-tunnel": "darwin-arm64",
-                        "native-windows-docker-local": "windows-x64"}[
-                            template["installation_mode"]]
-            template["client"] = dict(omp_descriptor["platforms"][platform])
+    for name, template in staged_profiles.items():
         output = dst_dir / "profiles" / name
         output.parent.mkdir(exist_ok=True)
-        dump(output, template)
+        save_profile(output, template)
     checkpoint_host = checkpoint_host_directory(args.release)
     for path in (dst_dir / "profiles").glob("*.json"):
         profile = load(path)
@@ -521,7 +530,7 @@ def main() -> int:
         if (server.get("status_schema_version") == 2
                 and server.get("checkpoint_host_directory") != checkpoint_host):
             server["checkpoint_host_directory"] = checkpoint_host
-            dump(path, profile)
+            save_profile(path, profile)
     # A staged tree is a draft: the predecessor's acceptance does not carry, and the cut is
     # gated on a fresh composed acceptance against the published component.
     manifest["status"] = "draft"

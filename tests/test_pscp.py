@@ -2,9 +2,15 @@
 from __future__ import annotations
 
 import base64
+import hashlib
 import importlib.util
+import io
+import os
+import tempfile
+import types
 import unittest
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location("pscp", ROOT / "scripts" / "hosts" / "pscp.py")
@@ -22,6 +28,68 @@ def decoded_shell(argv: list[str]) -> str:
 
 
 class PscpTest(unittest.TestCase):
+    def receive(self, direction, payload, destination, failure=None):
+        expected = hashlib.sha256(payload).hexdigest()
+
+        def remote_text(_host, command, **_kwargs):
+            kind = decoded_shell(command)
+            if "stat -c" in kind:
+                return str(len(payload))
+            self.assertEqual(destination.read_bytes(), b"last verified replica")
+            return "0" * 64 if failure == "digest" else expected
+
+        def run(_argv, *, stdout, **_kwargs):
+            self.assertEqual(destination.read_bytes(), b"last verified replica")
+            script = decoded_shell(_argv[len(PSCP.SSH) + 1:])
+            offset = int(script.split("skip=")[1].split()[0])
+            length = int(script.split("count=")[1].split()[0])
+            os.write(stdout, payload[offset:offset + length])
+            if failure == "interrupted":
+                raise TimeoutError("injected interrupted transfer")
+            return types.SimpleNamespace(returncode=0)
+
+        def urlopen(request, **_kwargs):
+            self.assertEqual(destination.read_bytes(), b"last verified replica")
+            if request.get_method() == "HEAD":
+                result = io.BytesIO()
+                result.headers = {"Content-Length": str(len(payload))}
+                return result
+            if request.full_url.endswith("/sha256"):
+                return io.BytesIO(("0" * 64 if failure == "digest" else expected).encode())
+            if failure == "interrupted":
+                raise TimeoutError("injected interrupted transfer")
+            first, last = request.get_header("Range").removeprefix("bytes=").split("-")
+            return io.BytesIO(payload[int(first):int(last) + 1])
+
+        with mock.patch.object(PSCP, "remote_text", side_effect=remote_text), \
+             mock.patch.object(PSCP.subprocess, "run", side_effect=run), \
+             mock.patch.object(PSCP.urllib.request, "urlopen", side_effect=urlopen):
+            if direction == "pull":
+                return PSCP.pull("transfer.invalid", "posix", "/transfer/replica", destination, 3, 2)
+            return PSCP.fetch("http://transfer.invalid", "fixture-token", destination, 3, 2)
+
+    def test_pull_and_fetch_replace_only_after_verification(self):
+        for direction in ("pull", "fetch"):
+            for payload in (b"new verified bytes" * 31, b""):
+                with self.subTest(direction=direction, size=len(payload)), tempfile.TemporaryDirectory() as directory:
+                    destination = Path(directory) / "replica.tar"
+                    destination.write_bytes(b"last verified replica")
+                    result = self.receive(direction, payload, destination)
+                    self.assertEqual(destination.read_bytes(), payload)
+                    self.assertEqual(result["sha256"], hashlib.sha256(payload).hexdigest())
+                    self.assertEqual(list(Path(directory).iterdir()), [destination])
+
+    def test_pull_and_fetch_preserve_existing_bytes_on_failed_transfer_or_digest(self):
+        for direction in ("pull", "fetch"):
+            for failure in ("interrupted", "digest"):
+                with self.subTest(direction=direction, failure=failure), tempfile.TemporaryDirectory() as directory:
+                    destination = Path(directory) / "replica.tar"
+                    destination.write_bytes(b"last verified replica")
+                    with self.assertRaises((PSCP.TransferError, TimeoutError)):
+                        self.receive(direction, b"new unverified bytes" * 31, destination, failure)
+                    self.assertEqual(destination.read_bytes(), b"last verified replica")
+                    self.assertEqual(list(Path(directory).iterdir()), [destination])
+
     def test_ranges_partition_exactly(self) -> None:
         for size, streams in ((100, 8), (1, 8), (268435456, 8), (7, 3), (0, 4)):
             parts = PSCP.ranges(size, streams)

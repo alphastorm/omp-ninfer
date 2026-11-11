@@ -518,6 +518,32 @@ class BindNativeVariantTest(unittest.TestCase):
         self.assertEqual(variant["runtime_shape"]["speculative_backend"], "mtp")
         self.assertEqual(variant["runtime_shape"]["fit"]["device_state_slots"], 2)
 
+    def test_identity_proof_is_forwarded_as_its_own_receipt_not_relabelled_as_a_screen(self):
+        self.prepare_p15()
+        proof = self.workspace / "identity.json"
+        proof.write_text('{"artifact_type":"omp-ninfer.native-identity-proof"}', encoding="utf-8")
+        # This isolates the binder-to-verifier interface. The unmocked admission regression
+        # accompanies the verifier owner's hunk; speed_gate's receipt validation runs separately.
+        with mock.patch.object(BINDER, "validate_ninfer_variants") as validate:
+            variant = BINDER.bind(
+                self.manifest, "rtx4090", "v0.8.0-qwen38-4090-beta.1", self.checksums_path,
+                self.receipt_path, "v0.15.0", identity_proof=proof)
+        reference = variant["qualification"]["identity_proof"]
+        self.assertEqual(reference["sha256"], hashlib.sha256(proof.read_bytes()).hexdigest())
+        self.assertNotIn("quality_screen", variant["qualification"])
+        self.assertEqual(validate.call_args.kwargs["incoming_identity_proofs"],
+                         {"rtx4090-windows-native": proof})
+
+    def test_identity_proof_and_screen_or_t1_cannot_claim_two_admission_paths(self):
+        self.prepare_p15()
+        before = deepcopy(self.manifest)
+        for extra in ({"quality_screen": self.screen_path}, {"t1_parity": self.screen_path}):
+            with self.subTest(extra=extra), self.assertRaisesRegex(BINDER.BindError, "one native quality"):
+                BINDER.bind(
+                    self.manifest, "rtx4090", "v0.8.0-qwen38-4090-beta.1", self.checksums_path,
+                    self.receipt_path, "v0.15.0", identity_proof=self.screen_path, **extra)
+        self.assertEqual(self.manifest, before)
+
     def test_p15_refuses_unauthenticated_tar_or_screen_before_writing(self):
         package = self.prepare_p15()
         before = deepcopy(self.manifest)

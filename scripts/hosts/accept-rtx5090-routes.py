@@ -107,6 +107,19 @@ def correction_records(prior):
     return records
 
 
+def acquire_windows_hold(win):
+    """An SSH failure is not evidence that Hold had no effect; probe its ownership receipt."""
+    try:
+        win('Hold')
+    except Exception:
+        try:
+            owned = json.loads(win('HoldStatus', capture=True)).get('status') == 'owned'
+        except Exception:
+            owned = False
+        if not owned:
+            raise
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--action', choices=('preflight', 'window', 'windows-live-only', 'restore', 'collect', 'summarize'), required=True)
@@ -168,7 +181,7 @@ def main():
         if dry:
             args.append('--dry-run')
         return remote(args, 'host-' + action + ('-dry-run' if dry else ''), timeout)
-    def win(action, timeout=120, dry=False, model_id=None):
+    def win(action, timeout=120, dry=False, model_id=None, capture=False):
         quote = lambda s: "'" + str(s).replace("'", "''") + "'"
         ps = "& ([scriptblock]::Create([IO.File]::ReadAllText(" + quote(windows + '\\accept-windows-client.ps1') + "))) -Action " + action + " -Workspace " + quote(windows) + " -Release " + quote(a.release) + " -Candidate " + quote(a.candidate)
         if model_id:
@@ -177,10 +190,10 @@ def main():
             ps += ' -DryRun'
         # Only owner-hold operations use bypass. The documented runner is launched as text.
         args = ['powershell', '-NoProfile']
-        if action in ('Hold', 'Release'):
+        if action in ('Hold', 'HoldStatus', 'Release'):
             args += ['-ExecutionPolicy', 'Bypass']
         args += ['-EncodedCommand', base64.b64encode(ps.encode('utf-16le')).decode()]
-        return run(['ssh', '-o', 'BatchMode=yes', a.windows_host, ' '.join(args)], 'windows-' + action.lower() + ('-dry-run' if dry else ''), timeout)
+        return run(['ssh', '-o', 'BatchMode=yes', a.windows_host, ' '.join(args)], 'windows-' + action.lower() + ('-dry-run' if dry else ''), timeout, capture=capture)
     def isolated(home):
         (home / 'tmp').mkdir(parents=True, exist_ok=True)
         return dict(os.environ, HOME=str(home), XDG_DATA_HOME=str(home / '.local/share'), XDG_CONFIG_HOME=str(home / '.config'),
@@ -403,7 +416,7 @@ def main():
         save('window-attempt.json', {'attempt': 'explicitly-authorized Windows first-live completion', 'started_utc': now(), 'no_documented_route_runner': True})
         held, error = False, None
         try:
-            win('Hold'); held = True
+            acquire_windows_hold(win); held = True
             host('begin', 300)
             host('setup', 1250)
             host('identity')
@@ -462,7 +475,7 @@ def main():
         tunnel = None
         error = None
         try:
-            win('Hold'); held = True
+            acquire_windows_hold(win); held = True
             host('begin', 300); started = True
             host('host-route', 1250)
             host('identity')

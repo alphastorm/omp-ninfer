@@ -71,6 +71,20 @@ class PromoteRootTests(unittest.TestCase):
             arguments = profile["server"]["arguments"]
             self.assertEqual(arguments[arguments.index("--artifact-sha256") + 1], model["artifact_sha256"])
 
+    def test_promotion_keeps_existing_release_local_snapshots_byte_equal(self) -> None:
+        root, module = self.promotion_copy()
+        release = root / "releases" / CURRENT
+        shutil.copytree(root / "profiles", release / "profiles", dirs_exist_ok=True)
+        manifest = self.load(release / "manifest.json")
+        manifest["components"]["ninfer"]["server_binary_sha256"] = "e" * 64
+        module.save(release / "manifest.json", manifest)
+        module.promote_root(CURRENT, release / "manifest.json")
+        for path in (root / "profiles").glob("*.json"):
+            snapshot = release / "profiles" / path.name
+            self.assertEqual(snapshot.read_bytes(), path.read_bytes())
+            arguments = self.load(snapshot)["server"]["arguments"]
+            self.assertEqual(arguments[arguments.index("--binary-sha256") + 1], "e" * 64)
+
     def test_lane_stage_repins_profile_client_archives_to_the_manifest_client(self) -> None:
         """v0.8.4 moved the client from OMP 18.3.0 to 18.3.5; the lane stage promoted the
         release into the root profiles but left the Windows profile's archive on 18.3.0."""

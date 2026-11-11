@@ -69,6 +69,35 @@ PROFILE_ARGUMENTS = (("--binary-sha256", ("components", "ninfer", "server_binary
 CLIENT_ARCHIVE_KEYS = ("component_release_tag", "asset_url", "asset_sha256", "binary_sha256")
 
 
+def stamp_profile(profile: dict, release: str, manifest: dict, clients: dict) -> None:
+    """Use the same identity projection for staged snapshots and their promoted copies."""
+    profile["release"] = release
+    model = manifest["components"]["model"]
+    profile["model"].update(artifact_sha256=model["artifact_sha256"],
+                            artifact_bytes=model["artifact_bytes"])
+    profile["server"]["deployment_profile"] = manifest["runtime_identity"]["deployment_profile"]
+    arguments = profile["server"]["arguments"]
+    for flag, keys in PROFILE_ARGUMENTS:
+        value = manifest
+        for key in keys:
+            value = value[key]
+        arguments[arguments.index(flag) + 1] = value
+    omp = manifest["components"]["omp"]
+    client = profile.get("client", {})
+    if omp.get("distribution_kind") == "upstream-release":
+        compatibility_id = {"manual-ssh-tunnel": "darwin-remote-ssh",
+                            "native-windows-docker-local": "windows-docker-local"}[
+                                profile["installation_mode"]]
+        profile["client"] = dict(clients[compatibility_id])
+        if profile.get("status") == "candidate":
+            profile.pop("status")
+    elif any(key in client for key in CLIENT_ARCHIVE_KEYS):
+        client["component_release_tag"] = omp["component_release_tag"]
+        client["asset_url"] = omp["artifact_url"]
+        client["asset_sha256"] = omp["artifact_sha256"]
+        client["binary_sha256"] = omp["binary_sha256"]
+
+
 def bind_lane_receipts(release: str, compatibility_path: Path, manifest_path: Path,
                        qualification_path: Path) -> None:
     """Hash the release's lane receipts into every record that names them, and copy the
@@ -134,45 +163,23 @@ def bind_lane_receipts(release: str, compatibility_path: Path, manifest_path: Pa
 
 def promote_root(release: str, manifest_path: Path) -> None:
     """The cut: the release's compatibility copy becomes the root authority, the root profiles
-    and launcher examples take the manifest's identities, and a draft manifest becomes a
-    candidate that route acceptance can install."""
+    and their existing release-local snapshots take identical manifest-stamped bytes,
+    launcher pins advance, and a draft becomes an installable candidate."""
     release_root = ROOT / "releases" / release
     shutil.copy(release_root / "compatibility.json", ROOT / "compatibility.json")
     manifest = load(manifest_path)
     if manifest["status"] == "draft":
         manifest["status"] = "candidate"
         save(manifest_path, manifest)
-    omp = manifest["components"]["omp"]
     clients = {row["id"]: row["client_distribution"]
                for row in load(release_root / "compatibility.json")["profiles"]}
     for profile_path in sorted((ROOT / "profiles").glob("*.json")):
         staged_profile = release_root / "profiles" / profile_path.name
         profile = load(staged_profile if staged_profile.is_file() else profile_path)
-        profile["release"] = release
-        model = manifest["components"]["model"]
-        profile["model"].update(artifact_sha256=model["artifact_sha256"],
-                                artifact_bytes=model["artifact_bytes"])
-        profile["server"]["deployment_profile"] = manifest["runtime_identity"]["deployment_profile"]
-        arguments = profile["server"]["arguments"]
-        for flag, keys in PROFILE_ARGUMENTS:
-            value = manifest
-            for key in keys:
-                value = value[key]
-            arguments[arguments.index(flag) + 1] = value
-        client = profile.get("client", {})
-        if omp.get("distribution_kind") == "upstream-release":
-            compatibility_id = {"manual-ssh-tunnel": "darwin-remote-ssh",
-                                "native-windows-docker-local": "windows-docker-local"}[
-                                    profile["installation_mode"]]
-            profile["client"] = dict(clients[compatibility_id])
-            if profile.get("status") == "candidate":
-                profile.pop("status")
-        elif any(key in client for key in CLIENT_ARCHIVE_KEYS):
-            client["component_release_tag"] = omp["component_release_tag"]
-            client["asset_url"] = omp["artifact_url"]
-            client["asset_sha256"] = omp["artifact_sha256"]
-            client["binary_sha256"] = omp["binary_sha256"]
+        stamp_profile(profile, release, manifest, clients)
         save(profile_path, profile)
+        if staged_profile.is_file():
+            staged_profile.write_bytes(profile_path.read_bytes())
     for name, pattern, replacement in (
         ("start-ninfer.sh", r'^MANIFEST="\$ROOT/releases/[^/]+/manifest\.json"$',
          f'MANIFEST="$ROOT/releases/{release}/manifest.json"'),

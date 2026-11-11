@@ -29,6 +29,9 @@ From v0.15.0 supply the authenticated tar beside SHA256SUMS (or --package). Its
 schema-5 runtime_shape is derived from bytes. New/changed native runtimes bind
 --quality-screen; unchanged MTP rebuilds may instead bind --t1-parity with 84/84
 actual retained-output-byte comparisons. DFlash2 also requires --fit-proof.
+An explicitly recorded identity-first decision may instead admit --identity-proof:
+all speed-ABBA outputs and 80 sealed incumbent determinism outputs must match,
+and the authenticated candidate must use the default, non-output-changing build profile.
 --maximum-context-tokens replaces both an existing row and its release-local mirror.
 From v0.16.0 the binder also stages the authenticated release-spec/server-config
 under profiles/<lane>/ and binds both in qualification. The native fit and lane
@@ -104,11 +107,14 @@ def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
          qualification_commit: str | None = None, add: bool = False,
          quality_screen: Path | None = None, t1_parity: Path | None = None,
          fit_proof: Path | None = None, package_path: Path | None = None,
-         staged_profiles: dict[str, bytes] | None = None) -> dict[str, Any]:
+         staged_profiles: dict[str, bytes] | None = None,
+         identity_proof: Path | None = None) -> dict[str, Any]:
     """Derive the lane's row, have the verifier accept it, and only then put it in `manifest`.
 
     Nothing is written: the caller checks the set into the release tree after this returns.
     """
+    if sum(path is not None for path in (quality_screen, t1_parity, identity_proof)) > 1:
+        raise BindError("select only one native quality admission receipt")
     variant_id = LANE_VARIANTS.get(lane)
     if variant_id is None:
         raise BindError(f"unknown native lane: {lane}")
@@ -202,6 +208,8 @@ def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
     if (product_version(release) or (0, 0, 0)) >= (0, 15, 0):
         metadata = package_metadata(package_path or checksums.parent / package_name, receipt)
         variant["runtime_shape"] = json.loads(metadata["release-spec.json"])["runtime_shape"]
+    if identity_proof is not None and metadata is None:
+        raise BindError("identity proof requires authenticated native package metadata")
     for field, asset in SUPPORT_ASSETS.items():
         variant[f"{field}_url"] = f"{DOWNLOAD}/{tag}/{asset}"
         variant[f"{field}_sha256"] = require(entries, asset)
@@ -224,6 +232,7 @@ def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
     qualification["sha256"] = hashlib.sha256(summary_path.read_bytes()).hexdigest()
     for field, path, suffix in (("quality_screen", quality_screen, "quality-screen"),
                                 ("t1_parity", t1_parity, "t1-parity"),
+                                ("identity_proof", identity_proof, "identity-proof"),
                                 ("fit", fit_proof, "fit")):
         qualification.pop(field, None)
         if path is not None:
@@ -237,6 +246,8 @@ def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
             f"{qualification_commit}/{qualification['summary']}"
         )
     errors: list[str] = []
+    incoming_identity = ({"incoming_identity_proofs": {variant_id: identity_proof}}
+                         if identity_proof is not None else {})
     validate_ninfer_variants(
         ROOT, release, [variant], {"runtime_variants": [variant]},
         native_model.get("artifact_sha256"), errors,
@@ -246,6 +257,7 @@ def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
         incoming_t1_parities={variant_id: t1_parity} if t1_parity else None,
         incoming_fits={variant_id: fit_proof} if fit_proof else None,
         incoming_profiles={variant_id: metadata} if metadata is not None else None,
+        **incoming_identity,
     )
     if errors:
         raise BindError("; ".join(errors))
@@ -354,8 +366,11 @@ def main() -> int:
     parser.add_argument("--add", action="store_true", help="explicitly admit a missing native lane")
     parser.add_argument("--maximum-context-tokens", type=int,
                         help="qualified context ceiling; may replace an existing lane's ceiling")
-    parser.add_argument("--quality-screen", type=Path, help="passing powered native screen verdict")
-    parser.add_argument("--t1-parity", type=Path, help="84/84 retained-byte parity for an unchanged MTP rebuild")
+    quality = parser.add_mutually_exclusive_group()
+    quality.add_argument("--quality-screen", type=Path, help="passing powered native screen verdict")
+    quality.add_argument("--t1-parity", type=Path, help="84/84 retained-byte parity for an unchanged MTP rebuild")
+    quality.add_argument("--identity-proof", type=Path,
+                         help="decision-authorized speed-ABBA and sealed 80-prompt incumbent byte-identity proof")
     parser.add_argument("--fit-proof", type=Path, help="shipping-config native DFlash2 fit receipt")
     parser.add_argument("--package", type=Path, help="native tar; defaults to beside SHA256SUMS (v0.15.0+)")
     parser.add_argument("--qualification-commit",
@@ -377,7 +392,8 @@ def main() -> int:
                    maximum_context_tokens=args.maximum_context_tokens,
                    qualification_commit=args.qualification_commit, add=args.add,
                    quality_screen=args.quality_screen, t1_parity=args.t1_parity,
-                   fit_proof=args.fit_proof, package_path=args.package, staged_profiles=metadata)
+                   fit_proof=args.fit_proof, package_path=args.package, staged_profiles=metadata,
+                   identity_proof=args.identity_proof)
     compatibility_path = ROOT / "releases" / args.release / "compatibility.json"
     compatibility = None
     if not is_new and (args.maximum_context_tokens is not None
@@ -402,6 +418,7 @@ def main() -> int:
     checked_in = ROOT / "releases" / args.release / "qualification" / f"{variant['id']}.SHA256SUMS"
     checked_in.write_bytes(args.checksums.read_bytes())
     for field, path in (("quality_screen", args.quality_screen), ("t1_parity", args.t1_parity),
+                        ("identity_proof", args.identity_proof),
                         ("fit", args.fit_proof)):
         if path is not None:
             (ROOT / variant["qualification"][field]["path"]).write_bytes(path.read_bytes())
