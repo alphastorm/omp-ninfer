@@ -795,6 +795,121 @@ so future work does not repeat closed experiments:
   `progress owner cannot obtain its legal unit` and severity-`P2` defect where a failed fresh window did not consume
   its rotation in `take_fresh_window()`, passing `EngineCore` `35/35`, `1,311/1,311` Ninja steps, and
   all CI) matched production `a87de361` (`cc99a460`) byte-for-byte on `DFlash2` `C1`.
+- **2026-11-11 upstream, community, client, and external-research deferrals and rejections for
+  `v0.18.0` ([`docs/UPSTREAM.md#2026-11-11-upstream-and-fork-watch`](docs/UPSTREAM.md#2026-11-11-upstream-and-fork-watch)):**
+  1. *Upstream warm-turn prefill split removal (`Neroued/ninfer` `77418cfec`) — deferred to a
+     stretch branch and a later release:* removes the chat-template rewrite-execution prefill splits
+     (`rewrite_execution_boundaries`/`frontiers`, `PrefixExecutionTracker`,
+     `prefix_execution_split_after`, `InputWindow::execution_splits`) that caused four `2–3`-token
+     fragment passes costing `59–60 ms` (`115–130 ms` estimated when folding six passes into two on
+     a `307 ms` warm turn at `~25K`–`29K` context in
+     [`EXP-059`](docs/PERFORMANCE.md#experiment-ledger), or `-0.06` to `-0.13 s` / `-23%` to `-49%`
+     `[derived]` against recent RTX 5090 strict-warm TTFT p50 `0.265 s` at `474` computed tokens in
+     [`EXP-110`](docs/PERFORMANCE.md#experiment-ledger); native-lane savings in ms are probably
+     larger `[INFERENCE, unmeasured]` and the `EXP-059` trace predates `DFlash2` draft-context
+     materialization `[INFERENCE]`), but is **deferred** because
+     removing the separate `2`-token `<|im_start|>assistant\n<think>\n` pass
+     (`qwen3_8.jinja:177-183`, `prompt_layout.cpp:91-104`) and historical assistant splits changes
+     output tokens (`output-changing`, requiring the `EXP-085` 1,120-prompt powered screen per lane)
+     and invalidates durable schema 3 session identity (`DurableIdentity` serializes
+     `execution_frontiers` in `checkpoint_codec.cpp:25-26,174-178`, re-injects them in
+     `checkpoint_api.cpp:153-154`, and mixes them into the shortlist digest in
+     `durable_checkpoint_set.h:58-62` and `prefix_identity.cpp:114-117`, requiring a
+     `kIdentityCodec` `qwen-identity/1` bump in `prefix_identity.h:18` that makes sessions saved
+     under `v0.17.0` or `beta.2` load as incompatible and run a cold first turn).
+  2. *Upstream malformed tool-call history rejection (`Neroued/ninfer` `4461c9683`) — error behavior
+     rejected, bad-argument test vectors adopted:* `4461c9683` turns malformed or non-object
+     historical tool `arguments` into `invalid_argument` / HTTP `400`, which is **rejected** because
+     a stock Oh My Pi coding-agent client replays its full stored conversation history every turn,
+     so one malformed historical tool call would cause every later turn to fail with HTTP `400`
+     (moving [`Neroued/ninfer#446`](https://github.com/Neroued/ninfer/issues/446) from HTTP `500` to
+     HTTP `400`); `alphastorm/ninfer` retains `F3`'s non-throwing `{"input": raw}` wrapping
+     (`src/text/tool_arguments.cpp:5-12`,
+     `src/models/common/qwen/frontend/chat_template.cpp:263-265`,
+     `tests/models/common/qwen/test_frontend.cpp:2222`) and ports `4461c9683`'s bad-argument vectors
+     (`{"x": nope}`, truncated JSON, `[]`, `null`, `1e99999`) as lenient-rendering regression tests.
+  3. *Other `Neroued/ninfer` `77c2e5e2..13ebb92f6` commits (`33` total) and `feat/qwen4-27b-ops`
+     (`e1874e94`) — deferred or rejected:* pressure-path commits `e8059c32b` (input-replay capture
+     admission/retention, subset stretch) and `41da21f47` (resident unit reservation and prefill
+     fallback) are **deferred** because they target upstream's `session/*` / `ContextDirectory`
+     architecture rather than `F3`'s council-remediated durable-save/export waits
+     (`engine_core.h:1412-1437,2266-2390`, `capture.cpp:38-68,141-147`,
+     `resource_manager.h:733-764`), neither fixes
+     [`alphastorm/ninfer#89`](https://github.com/alphastorm/ninfer/issues/89) (`0` resident
+     requests, `2,032/2,048` KV page groups, `4/4` device state slots, `390 MiB` Host free) or
+     [`alphastorm/ninfer#102`](https://github.com/alphastorm/ninfer/issues/102)
+     (resident-reservation `DemoteOperation` holding the context-operation slot `[INFERENCE]`;
+     whether `e8059c32b` reduces optional demotions is unproven `[INFERENCE]`), and neither defect
+     appeared in `180/180` recent completions (`0` preemptions, `0` `paused_ns`); the Jinja chain
+     (`52e7cd7e0`, `13ebb92f6`, and the `third_party/llama-jinja` hunks of `77418cfec`) is
+     **deferred** because host rendering is `~1.16 ms` per `500K`-character render (`<= 1 ms` gain)
+     and edge semantics change; `feat/qwen4-27b-ops` (`e1874e94`, unchanged since `2026-10-29`)
+     remains **deferred** on watch without public `Qwen4-27B` weights or upstream model/converter
+     support; and `9eff5314f` (`ninfer_bench`), `41da21f47`'s nullable-TTFT log change, and the
+     remaining `26` Spark/distributed/`glm5next`/MoE commits (including `ad49b325d`, `6a753af33`,
+     `b5008303b`, `dc4e789b2`, `d5d535956` `DFlash2` draft-op generalizations and `e871c41b1`,
+     `12d5b72ab`, `4ac06e5ad`, `b5008303b` `BF16` sliced-K partial-reduction changes) are
+     **rejected** because they do not help `H5120` on `sm_120`/`sm_89`/`sm_86`
+     and risk `DFlash2` token identity.
+  4. *Community fork candidates (`iamwavecut/ninfer-all` `8412e774..64bd1115` and
+     `ashalliants/ninfer-3090` `2026-11-10`/`2026-11-11` branches) — deferred or rejected:* across
+     `28` `iamwavecut/ninfer-all` commits (`0` with a dense-`Qwen3.8-27B` speed number), stop-string
+     state holds (`52dfc488`, `9fbb8098`, `#307` `857d172`), in-pass prefix-cache taps (`458d8fb8`,
+     `#308` `4d6327d`), and `bf16p` packed `BF16` KV rows (`cc65dbb3`, `#316` `6e71b0ed`, `392 B`
+     vs `512 B` / `23%` fewer bytes, poison row decoding to `NaN` above six exponent escapes) are
+     **deferred** because `F3` lacks their subsystems (`CommitDecision` hold/rewind in
+     `execution.h:49-53` and whether OMP sends stop strings is unverified; `hybrid_program` /
+     `tap_planner` absent in `F3`, which captures via `split_frontier` at
+     `prefill.cpp:80-83,618-622`; packed `KvCacheStorage` absent in `include/ninfer/types.h:29-34`),
+     while the remaining `19` lookup/multi-GPU/build/MoE/A6000 commits are **rejected** as
+     inapplicable. On `ashalliants/ninfer-3090`, adaptive `DFlash2` `K=3`/`K=7` drafting
+     (`perf/adaptive-dflash-k` `4ff617181` / `5dd329830` / `c385455b`, `58.9 / 53.2 / 46.1 tok/s` at
+     `K=3/7/12` on a single-lane RTX 3090 low-acceptance workload, `"Nothing here has run on a GPU"`
+     in `TODO.md` `[INFERENCE]`), `--relaxed-drafting` (`cd596378c`), and `--draft-context-rows`
+     (`b654456b7` on `feat/basalt-learnings` `5ccab0c5c`, `docs/serving.md` figures unverified in
+     the log-only bundle) are **rejected / deferred** for `v0.18.0` because low-acceptance decode is
+     `<= 0.6%` of decode (`EXP-110`), `F3` has no `SpeculativeRoundShape` round-family machinery, a
+     second CUDA-graph family costs VRAM, verify-width and relaxed-drafting changes alter outputs,
+     and `--draft-context-rows` is refused above one lane; `feat/sensitivity-allocation`
+     (`66e31f3b6`) is **deferred** as unvalidated (`"not yet measured with KLD or on a GPU"`) and
+     requiring artifact re-quantization.
+  5. *Client compaction workarounds, model watch, external techniques, and fork backlog — deferred
+     or rejected:* RTX 3090 profile workarounds (`compaction.asyncEnabled: false`, local-first
+     `compaction.methodOrder`, or a `~60K` `thresholdTokens` cap;
+     `packages/agent/src/compaction/compaction.ts:328-330,379-381,394-421,1095-1155`,
+     `speculation-lead.ts:1-24`) are **rejected / deferred** because they mask the
+     [`alphastorm/ninfer#89`](https://github.com/alphastorm/ninfer/issues/89) Host-arena state-image
+     export deadlock (`~196 MB` state images, fixed in `v0.18.0` by device-staged state-image export
+     fallback) and `scripts/hosts/accept-rtx4090-route.ps1:356-359` forbids disabling async
+     compaction to pass the gate (while stock OMP
+     [`v18.18.7`](https://github.com/can1357/oh-my-pi/releases/tag/v18.18.7)
+     `e325ffc73ab86e03bdd20a91b77d8e2b3964c906` is adopted for `v0.18.0` by founder decision).
+     Same-architecture 27B derivatives (`NousResearch/Arete-27B`, whose
+     `DAXZEIT/Arete-27B-NInfer-v3` conversion uses unloadable GGUF blocks, and
+     `ConceptCountry/qwen-concept-27b`) and external `DFlash` drafters
+     (`nchapman/Qwen3.8-27B-DFlash2-W4A16-HGPTQ`, `amd/Qwen3.8-27B-Quark-DFlash2`,
+     `StillDeadcode/qwen3.8-27b-iq8r-dflash`) are **deferred**, closing the `v0.18.0` model watch.
+     While `v0.18.0` gates RTX 5090 cadence-only pacing (`0 / 32` via `--prefill-stall-budget-ms 0`
+     and `--decode-rounds-per-prefill 32`), RTX 5090 and RTX 3090 `Group64` A8 prefill, and RTX
+     3090/4090 tensor-core verify on preregistered bars (keeping RTX 4090 A8 off at its
+     `1.0985 / 1.10` leak bound) and runs `rk4v4` cheap deciders (`~31` GPU-hours for full
+     qualification on the single native host), tool-call-span copy-drafting replay,
+     restore-preparation instrumentation
+     ([`alphastorm/ninfer#59`](https://github.com/alphastorm/ninfer/issues/59)) / readiness
+     attribution, byte-identical `pad16` / 2-stage native verify schedules (`~1–3%`), and RTX 3090
+     locked-clocks screening in idle stretch slots, it **defers or rejects** 8-column token-tree
+     verification (Medusa and EAGLE-2/3 use `32–64` verify nodes and EAGLE-3 `arXiv:2503.01840`
+     abstract-level claims report `3.0–6.5×` with mean accepted length `7.5`, not verified for 8
+     columns), typical acceptance (Medusa `arXiv:2401.10774`, gain unknown for an 8-column block
+     drafter and inactive at temperature `0`), KIVI asymmetric KV (`arXiv:2402.02750`),
+     CUDA-graph/launch-overhead reduction (`<= 1%` of a `17.7 ms` round, `EXP-054`/`EXP-058`),
+     `cuBLAS` `INT8` prefill, the
+     [`alphastorm/ninfer#50`](https://github.com/alphastorm/ninfer/issues/50) hold state machine
+     ([`alphastorm/ninfer#66`](https://github.com/alphastorm/ninfer/pull/66) closed),
+     [`alphastorm/ninfer#72`](https://github.com/alphastorm/ninfer/pull/72) (closed, no consumer
+     since `#58` was dropped), RTX 3090 prefill pacing (no config key or baseline),
+     [`alphastorm/omp-ninfer#28`](https://github.com/alphastorm/omp-ninfer/issues/28) (closed as not
+     planned), and RTX 5080.
 
 ## Path to v1.0
 

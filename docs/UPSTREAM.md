@@ -37,6 +37,314 @@ unchanged at `e1874e94` (`204` commits), `sergiuszm/ninfer-4090` `rtx4090-port` 
 Recommendations are commit-subject/path heuristics, not a security assessment or a qualification
 result.
 
+## 2026-11-11 upstream and fork watch
+
+Observed on 2026-11-11 against fork release source `F3` `e0971faf` (`main` `b871996a`), product
+`main` `ea639bb`, and published `v0.17.0` (tag `97dea2f0`):
+
+- **`Neroued/ninfer` master `77c2e5e2..13ebb92f6` (`33` commits since `77c2e5e2` on 2026-11-10):**
+  - `77418cfec`: removes `rewrite_execution_boundaries`/`frontiers`, `PrefixExecutionTracker`,
+    `prefix_execution_split_after`, `InputWindow::execution_splits`, the rewrite digest domain, and
+    the frontier comparison in `matches`/`prefix_equals` (`inspect_prompt_layout` boundaries,
+    `encode_rendered_chat` frontier mapping,
+    `ResidentPrefixIdentity::{assign, append_generated, truncate, matches, prefix_equals}` frontier
+    handling, `append_digest` rewrite mixing, `initialize_forward`'s `next_split`, `validate_work`
+    split checks, `input_window`/`window_end` replay splits, `start_control`'s `splits`, and the
+    `CommitDecision`/`OutputDecision` field and `Engine` validation), so prefill splits only at
+    `prefill_chunk`, capture reservation, prompt end, and vision. It renames
+    `rewrite_segments_share_prefill_unit` to `chat_markers_share_prefill_unit` (asserting a chat
+    prompt no longer than one chunk completes in one prefill step with
+    `processed_prompt_tokens == tokens`), deletes tests asserting that a different Gated DeltaNet
+    (`GDN`) decomposition blocks reuse (`test_runtime_mechanisms.cpp` and `GLM` `identities()`), and
+    rewrites Jinja scoping (scope chain instead of copying variables) with a lazy `range`.
+  - `52e7cd7e0` and `13ebb92f6`: Jinja runtime updates where statements render into one string, loop
+    flow uses flags instead of exceptions, and literal constants are cached (`52e7cd7e0`), followed
+    by capture-lifetime and iteration fixes, reserved loop-target rejection, and divisor/modulo edge
+    cases (`13ebb92f6`; live iteration over a list mutated during the loop visits appended items, and
+    `d[1]` vs `d[true]` dictionary-key edge semantics change).
+  - `e8059c32b`: admits input-replay captures against cold history, protects other active owners'
+    `InputReplay` points (`protected_points`), reserves replacement capacity before retiring old
+    snapshots, adds `retry_capture` at committed boundaries and `share_capture` snapshot
+    deduplication, and stops skipping a capture on `ContextStart::Deferred`.
+  - `41da21f47`: reserves `Control`/`Decode` units before optional capture preparation, falls back to
+    another runnable prefill when one prefill's capture waits, frees an unused device reservation in
+    `directory.cpp` before the Host fallback, and makes TTFT optional (`null`) in request logs.
+  - `4461c9683`: turns malformed or non-object historical tool-call `arguments` into
+    `invalid_argument` / HTTP `400` with message, call, and byte position.
+  - `9eff5314f`: warms all `C` concurrent inputs instead of `C-1` in `ninfer_bench`.
+  - `26` other commits: Spark ops, distributed backends (`src/distributed`), `glm5next` `DFlash2`,
+    MoE `FP4`, and `runtime/executor`, including `5` commits (`ad49b325d`, `6a753af33`, `b5008303b`,
+    `dc4e789b2`, `d5d535956`) that turn constants (`H4096`, `eps`/`theta`) into
+    parameters in upstream `qwen3_5/execution/draft.cpp`, `planning/startup.cpp`, and shared ops
+    (`rmsnorm_pack_tail`, `rmsnorm_rope`, `context_kv_materialize`, `candidate_selector`,
+    `dynamic_grouped_conv`) for the `GLM` drafter, and `4` commits (`e871c41b1`, `12d5b72ab`,
+    `4ac06e5ad`, `b5008303b`) that change pairwise partial-reduction storage in the shared `BF16`
+    sliced-K kernel (`src/ops/linear/kernels/bf16`). Upstream test results, blob-level pre-image
+    identity, and upstream issue [`#446`](https://github.com/Neroued/ninfer/issues/446)'s text were
+    not verified in the read-only clone; commit messages for `77418cfec`, `52e7cd7e0`, `41da21f47`,
+    and `9eff5314f` are empty so upstream states no numbers for them, and the `26` other patches
+    were inspected through the stat file and their `src/models/qwen3_5`,
+    `src/ops/linear/kernels/bf16`, and `src/runtime` hunks only.
+- **Classification of `77c2e5e2..13ebb92f6` and `v0.18.0` runtime dispositions (adopt now, defer,
+  reject):**
+  - *Adopt now:* only `4461c9683`'s bad-argument vectors (`{"x": nope}`, truncated JSON, `[]`,
+    `null`, `1e99999`) are adopted, inverted as regression tests in
+    `tests/models/common/qwen/test_frontend.cpp` and `test_serve_resilience.cpp` asserting `F3`'s
+    lenient `{"input": raw}` rendering and ordered-object preservation. Because nothing in the `33`
+    upstream commits fixes the RTX 3090 compaction dead-end
+    ([`alphastorm/ninfer#89`](https://github.com/alphastorm/ninfer/issues/89)) or the arrival wait
+    ([`alphastorm/ninfer#102`](https://github.com/alphastorm/ninfer/issues/102)), `v0.18.0` builds
+    all three lanes (native Windows `v0.8.0-qwen38-{3090,4090}-beta.3` and RTX 5090
+    `v0.7.0-qwen38-5090-beta.7`) from one planned common fork engine source `F4` carrying
+    fork-owned fixes: device-staged state-image export fallback when the Host arena is full
+    (`~196 MB` state images, with save-refusal reasons recorded in receipts, folding
+    [`alphastorm/ninfer#84`](https://github.com/alphastorm/ninfer/issues/84)) for
+    [`#89`](https://github.com/alphastorm/ninfer/issues/89), a bounded fresh-admission attempt at
+    context-operation boundaries for [`#102`](https://github.com/alphastorm/ninfer/issues/102),
+    native controller GPU-owner lease restoration after a proven-stopped incomplete shutdown plus
+    uninstall task absence and junction containment
+    ([`alphastorm/ninfer#87`](https://github.com/alphastorm/ninfer/issues/87) items 1 and 3),
+    exact-byte package digest archiving
+    ([`alphastorm/ninfer#91`](https://github.com/alphastorm/ninfer/pull/91)), product release-tooling
+    fixes ([`alphastorm/omp-ninfer#149`](https://github.com/alphastorm/omp-ninfer/issues/149) items
+    `T1`–`T6`, `T8`, `T10`, `T12`), stock Oh My Pi
+    [`v18.18.7`](https://github.com/can1357/oh-my-pi/releases/tag/v18.18.7)
+    (`e325ffc73ab86e03bdd20a91b77d8e2b3964c906`), and gated performance levers that ship default-on
+    only if they pass preregistered bars (RTX 5090 cadence-only prefill pacing `0 / 32` via
+    `--prefill-stall-budget-ms 0` and `--decode-rounds-per-prefill 32`, RTX 5090 `Group64` A8
+    prefill at a `512`-token minimum pass width, RTX 3090 tensor-core verify at verify width
+    `T=8/16`, RTX 3090 `Group64` A8 prefill for passes above `32` tokens, and an RTX 4090
+    tensor-core verify prescreen).
+  - *Defer and why:*
+    - `77418cfec` (warm-turn prefill split removal): `F3` records an execution boundary after every
+      assistant opener, after `<think>\n`, and after the canonical reasoning close
+      (`prompt_layout.cpp:91-104`, `prefill.cpp:627-637`, `replay.cpp:49-50,196-200`,
+      `output_session.cpp:119,520,658`, `commit.cpp:120-146`, `engine_core.h:1223-1233,2501-2519`),
+      which in [EXP-059](PERFORMANCE.md#experiment-ledger) split a `~400`-token warm turn at
+      `~25K`–`29K` context into six passes across `283–307 ms` where the four `2–3`-token fragments
+      cost `59–60 ms` and folding six passes into two was estimated at `115–130 ms` (`-0.06` to
+      `-0.13 s`, or `-23%` to `-49%` `[derived]` against recent RTX 5090 strict-warm TTFT p50
+      `0.265 s` at `474` computed tokens in [EXP-110](PERFORMANCE.md#experiment-ledger); the
+      `EXP-059` trace predates `DFlash2` draft-context materialization so the saving may be larger
+      `[INFERENCE]`, and native-lane savings in ms are probably larger `[INFERENCE, unmeasured]`).
+      Adopting `77418cfec` is **deferred** to a non-gating stretch branch and a later release
+      because (1) removing the separate `2`-token `<|im_start|>assistant\n<think>\n` final pass
+      (`qwen3_8.jinja:177-183`) and historical assistant splits changes output tokens
+      (`output-changing`, requiring the `EXP-085` 1,120-prompt powered quality screen per lane) and
+      (2) `DurableIdentity` serializes `execution_frontiers` in schema 3 checkpoints
+      (`checkpoint_codec.cpp:25-26,174-178`), re-injects them on import
+      (`checkpoint_api.cpp:153-154`), and mixes them into the shortlist digest
+      (`durable_checkpoint_set.h:58-62`, `prefix_identity.cpp:114-117`), so removing them requires
+      bumping `kIdentityCodec` (`qwen-identity/1` in `prefix_identity.h:18`), which invalidates the
+      durable identity of every session saved under `v0.17.0` or `beta.2` and forces a cold
+      first turn on upgrade ([`alphastorm/ninfer#46`](https://github.com/alphastorm/ninfer/issues/46)
+      is untouched, and [`#60`](https://github.com/alphastorm/ninfer/issues/60)'s
+      checkpoint-boundary vs `1,024`-chunk mismatch remains even though the restored arm's
+      `18/2/3/4`-token suffix fragments in `EXP-116` collapse to one pass).
+    - `e8059c32b` and `41da21f47` (pressure-path capture retention and prefill fallback):
+      **deferred** (`e8059c32b` subset as stretch; `41da21f47` deferred) because both target
+      upstream's `session/*` and `ContextDirectory` architecture (`F3` has no `ReclaimSelection`,
+      `CaptureStorage`, `ContextStart`, or context maintenance, and the corresponding `F3` functions
+      `prepare_semantic_capture`, `reserve_active_capture`, `capture.cpp`,
+      `resource_manager.h::recycle_input/capture_admission`, and `reserve_resident_units` sit next
+      to council-remediated `F2`/`F3` durable-save and export-wait code), neither fixes
+      [`#89`](https://github.com/alphastorm/ninfer/issues/89) (which had `0` running, prefilling, or
+      paused requests, `2,032/2,048` KV page groups, `4/4` device state slots, and `390 MiB` Host
+      free) or [`#102`](https://github.com/alphastorm/ninfer/issues/102) (whose leading inferred
+      gate is a resident-reservation `DemoteOperation` holding the single context-operation slot
+      with no fresh-admission retry `[INFERENCE]`; whether `e8059c32b`'s
+      `preserve_capture`/`capture_victims` reduces optional demotions is unproven `[INFERENCE]`),
+      and neither defect appeared in recent production logs (`180/180` completions with `0`
+      preemptions and `0` `paused_ns`).
+    - Jinja runtime chain (`52e7cd7e0`, `13ebb92f6`, and the `third_party/llama-jinja` hunks of
+      `77418cfec`): **deferred** because host-side template rendering takes `~1.16 ms` per
+      `500K`-character render on this base (worth `~1 ms` or less per render), `13ebb92f6` must
+      travel with the first two commits to fix capture-lifetime bugs they introduce, and edge
+      semantics (`d[1]` vs `d[true]`, live iteration over mutated lists) change.
+    - `feat/qwen4-27b-ops` (`e1874e94`): **deferred** (kept on watch) because the branch has not
+      moved since `2026-10-29`, no public `Qwen4-27B` weights exist, upstream has no dense model
+      layer or converter, and its `K8V4` KV kernel is tied to query-sparse attention (`QSA`).
+  - *Reject and why:*
+    - `4461c9683` (returning `invalid_argument` / HTTP `400` on malformed or non-object historical
+      tool `arguments`): **rejected** because a stock Oh My Pi client resends the whole stored
+      conversation history every turn, so one malformed historical tool call makes every later turn
+      return HTTP `400` until the user rewrites history (moving
+      [`Neroued/ninfer#446`](https://github.com/Neroued/ninfer/issues/446) from HTTP `500` to HTTP
+      `400`); `F3` retains non-throwing `{"input": raw}` wrapping (`src/text/tool_arguments.cpp:5-12`)
+      and its `Custom`-tool branch (`src/models/common/qwen/frontend/chat_template.cpp:263-265`,
+      `tests/models/common/qwen/test_frontend.cpp:2222`).
+    - `9eff5314f` (`ninfer_bench` warming `C` inputs instead of `C-1`): **rejected** because `F3`'s
+      `ninfer_bench` has a different design (`bench/inference/ninfer_bench.cpp:263`) and product
+      scripts do not call it.
+    - `41da21f47`'s nullable-TTFT request-log change: **rejected** unless product log reducers are
+      updated with it.
+    - Remaining `26` commits (Spark ops, distributed backends, `glm5next` `DFlash2`, MoE `FP4`, the
+      `5` `DFlash2` draft-path op generalizations `ad49b325d`, `6a753af33`, `b5008303b`,
+      `dc4e789b2`, `d5d535956`, and the `4` `BF16` sliced-K partial-reduction commits `e871c41b1`,
+      `12d5b72ab`, `4ac06e5ad`, `b5008303b`): **rejected** because `F3` has no `src/distributed`,
+      `glm5next`, or `runtime/executor`, and the draft-op and `BF16` sliced-K refactors do not help
+      `H5120` on `sm_120`/`sm_89`/`sm_86` while risking `DFlash2` token
+      identity.
+- **Community fork deltas (`iamwavecut/ninfer-all`, `ashalliants/ninfer-3090`, and other watched
+  forks):**
+  - `iamwavecut/ninfer-all` `8412e774..64bd1115` (`28` commits: `16` non-merge, `12` merges
+    `#307`–`#318`; `0` commits carry a measured dense-`Qwen3.8-27B` speed number, with the only
+    benchmark in the range in `31171f52` for Flash-Next/DeepSeek on an RTX A6000):
+    - *Stop-string state hold (`52dfc488`, test `9fbb8098`, docs `6464c9de`, merge `#307`
+      `857d172`):* folds one extra `StateImage` per request (`C` extra device state images across
+      `C` concurrent requests) ahead of the round's normal fold and rewinds on a stop-string cut
+      (`stop_hold_rewind`) when a stop string spans decode rounds; `F3` commits only to
+      `match.committed_tokens` (`src/models/common/qwen/frontend/output_session.cpp:560-566`,
+      `src/runtime/engine/engine_core.h:1221-1233`, `src/runtime/contract/execution.h:49-53`) with
+      no hold or rewind `[INFERENCE: the consequence is a lost endpoint and a re-prefill of the tail,
+      not wrong output]`. Deferred: no measured numbers are published, it costs `C` extra device
+      state images, and whether stock OMP emits `stop_string`/`stop_sequences` is unverified.
+    - *Exact in-pass prefix-cache tap (`458d8fb8`, docs `a1f37fbd`, merge `#308` `4d6327d`):* splits
+      each Gated DeltaNet layer's convolution and recurrence at up to four tap columns per chunk
+      (`TextContext::gdn_mix`) instead of ending the chunk at the tap; **deferred** (stretch)
+      because `F3` has no hybrid cache (`hybrid_program`, `tap_planner`, `TapPlacement`,
+      `hybrid_lane`, `use_alt_prefix` absent) and captures checkpoints by chunk split
+      (`src/models/qwen3_5/program/prefill.cpp:80-83,618-622`), and no speed numbers are published.
+    - *`bf16p` lossless packed `BF16` KV rows (`cc65dbb3`, merge `#316` `6e71b0ed`):* packs a
+      `512 B` `D256` `BF16` KV row into `392 B` (`256 B` sign+mantissa, `128 B` 4-bit exponent
+      offsets, `8 B` side record; `23%` fewer KV bytes, capacity only with no speed claim) and turns
+      a row needing more than six exponent escapes into a poison row decoding to `NaN` that ends the
+      request; **deferred** because `F3`'s `KvCacheStorage` (`include/ninfer/types.h:29-34`) has
+      five values and no packed form, every `BF16` attention decode path (`prompt_bf16`,
+      `small_t_bf16`, `sparse_attention`) would need the codec, and the poison-row escape case is
+      output-changing.
+    - *Remaining `19` commits:* lookup copy cursor (`e813b68d`, merge `#314` `ceefc03f`), multi-GPU
+      hybrid prefix cache (`af60c489`, `38a10aa4`, merge `#309` `06e54f66`), build-graph changes
+      (`95d58aee` merge `#311` `7d9ef4a5`, `092893a9` merge `#312` `faf65e4f`), DeepSeek and
+      Flash-Next MoE (`a8cc8401` `#310` `8b792715`, `283072a1` `#313` `6ed13c35`, `05c4d195` `#315`
+      `a4149d2f`, `31171f52` `#317` `53dd1936`), and the built-in RTX A6000 device profile
+      (`9538a2dc` `#318` `64bd1115`) are **rejected** as inapplicable (`F3` has no lookup drafting,
+      hybrid prefix cache, multi-GPU pipeline/TP, `ninfer_core_device`, `NINFER_WINDOWS_KERNEL_DLL`,
+      or RTX A6000 lane; the `--use-alt-prefix-caching` hybrid cache itself, which reports an RTX
+      3090 27B `rk4v4` `131K` agentic replay at `55.6 s` vs `97.9 s` average TTFT, `84%` vs `46%`
+      cached prompt tokens, `43.6` vs `60.2` minutes, one history-edit turn at `389 s` vs `183 s`,
+      and `1.4%` slower decode against the catalog, is an XL subsystem not scoped for `v0.18.0`).
+  - `ashalliants/ninfer-3090` branches (`2026-11-10` / `2026-11-11`):
+    - *`perf/adaptive-dflash-k` (`4ff617181`, `5dd329830`, `c385455b`):* captures a second `DFlash2`
+      round family at `K=3` beside `K=7` with a per-round acceptance/cost policy
+      (`speculative/draft_window_policy.h`, `5%` margin / `8`-round dwell hysteresis; single-lane
+      RTX 3090 27B `DFlash2` low-acceptance basis `24.1 / 26.8 / 31.0 ms` rounds and
+      `58.9 / 53.2 / 46.1 tok/s` at `K=3/7/12`, geometric model crossover near `55%` acceptance and
+      `~10%` gain at `30%`, while `TODO.md` states `"Nothing here has run on a GPU"` `[INFERENCE]`).
+      **Rejected / deferred** for `v0.18.0` because low-acceptance decode is `<= 0.6%` of decode
+      time (`EXP-110`), `F3` has no `SpeculativeRoundShape` round-family machinery, a second
+      CUDA-graph family is charged like the wide family (`startup.cpp`), and changing verify width
+      alters batch arithmetic (`output-changing`).
+    - *`feat/basalt-learnings` (`5ccab0c5c`, `2026-11-11`; doc commits `d734acd4b`, `a94fc0783`,
+      `7fb902d91`, `52b131553`, `5ccab0c5c`, plus `b654456b7` and `cd596378c`):* **rejected /
+      deferred** for `v0.18.0` because `--relaxed-drafting` (`cd596378c`) changes the output
+      distribution (`<= 0.6%` of decode) and `--draft-context-rows` (`b654456b7`) is refused above
+      one lane (its `docs/serving.md` figures were not in the log-only bundle and are unverified).
+    - *`feat/sensitivity-allocation` (`66e31f3b6`):* `allocation.py` and
+      `allocation_activations.py` Q4/Q5 layer assignment for the `128` `attention/output`,
+      `gdn/output`, and `mlp/down` projections (`4.641 / 4.640 GB` vs `4.643 GB`); **deferred**
+      because both candidates are explicitly unvalidated (`"not yet measured with KLD or on a GPU"`)
+      and require artifact re-quantization and re-qualification.
+    - *`feat/numeric-tripwire` + `fix/tripwire-fp16-bits` (`235061874`, `1f4dffba2`, `2855914c7`,
+      `bd97f346e`, `e6bcb8df7`), `fix/engine-scheduling-context-store-tests` (`83ea5e315`), and
+      `perf/expert-cache-windowed-policy` (`4e576c094`):* diagnostic/test or MoE-only (`dense 27B`
+      has no expert cache).
+  - *Other community forks (commit subjects only; diffs were not materialized and are unverified):*
+    `IMGillusion/ninfer-engine` (`ae1ba85a6` single-pass probe walk, `f9ba4cc98`, `658138370`,
+    `a42934545`, `767e67e26`, `28aa9e2d9` L3 disk KV), `troyliu0105/ninfer-all` (`81bf00d09` device
+    KV pool usage log), `13thblade/ninfer-all-nvfp4` (`9b4b8a007`, `269d3b193`, `7d7ca4877`,
+    `a677ba59b`, `75bffc0b2` `NVFP4` `W4A16`/`W4A8-int` and tensor parallelism),
+    `Don-Chad/ninfer-3090` (`115dee6b4` Studio dashboard and Windows launcher), and
+    `Saylek-ai/ninfer` (`a754fcf3b`, `c5627cdd5`, `45f742877`, `2cf044529`).
+- **Oh My Pi [`v18.18.7`](https://github.com/can1357/oh-my-pi/releases/tag/v18.18.7)
+  (`2026-11-10T20:23Z`) and client compaction audit:**
+  - `v18.18.7` (`e325ffc73ab86e03bdd20a91b77d8e2b3964c906`, `64` commits ahead of `v18.18.6`
+    `9058ab9d`, `behind_by: 0`) touches no path under `packages/ai/src/providers/`, `compaction/`,
+    `tokenizer.ts`, `session-maintenance.ts`, `session-migrations.ts`, retry classifiers, or
+    edit/write/read tool prompts (`packages/catalog/src/compat/resolve.ts` and `hosts.ts` add
+    `x-session-id` for Morph only; `taxonomy/meta.kdl` and `models.json` add `muse-ember`;
+    `prompts/tools/bash.md` and `crates/pi-shell/src/cmd_dialect.rs` add a Windows-only bash prompt
+    sentence and `cmd`-dialect `System32` resolver; remaining commits cover LiteLLM usage budgets,
+    per-window saved-reset redemption, `session_before_shutdown`, collab backpressure, `grep`
+    0-match rendering, and an Antigravity login warning). While the initial client review
+    recommended keeping `18.18.6` (`9058ab9d`, tree `fd379b65`) to avoid a full re-pin cycle,
+    founder decision adopts stock OMP `18.18.7` for `v0.18.0`.
+  - Compaction audit on `18.18.6`: `contextTokens = max(billed provider context, local stored
+    estimate)` (`packages/agent/src/compaction/compaction.ts:379-381`, called at
+    `session-maintenance.ts:3570`) triggers at `resolveThresholdTokens = 131,072 - max(15%, 16,384)
+    = 111,412` (`compaction.ts:328-330,394-421`), and `maybeStartSpeculativeCompaction`
+    (`session-maintenance.ts:2298-2345`) fires inside the pre-threshold band `[97,486, 111,412)`
+    where `lead = clamp(threshold * 0.125, 8,192, 32,000) = 13,926`
+    (`packages/coding-agent/src/session/speculation-lead.ts:1-24`), selecting `handoff`
+    (`toolChoice: "none"`, output budget `32,768`, `compaction.ts:1095-1155`) from
+    `compaction.methodOrder` (`["remote","snapcompact","handoff","shake","soft"]`,
+    `compaction-methods.ts:49-55,119-140`). The `37,277 → 78,107` local-estimate jump between
+    `18.15.0` and `18.18.6` on opaque `q38-ninfer` (`2.10×`) was the `bytes/4` → `o200k_base`
+    fallback change (`packages/agent/src/tokenizer.ts:87-94,283-285`; whether `qwen3` counting on
+    the opaque alias would raise or lower `78,107` is unmeasured `[INFERENCE]`, and the `18.15.0`
+    `#estimateStoredContextTokens` body was read from derived diffs rather than a source tree),
+    which cannot move a `max(billed, stored)` trigger when billed context was `~79K` (`79,164` at
+    the last completed turn, below `97,486`; rejected-request prompt sizes and arrival timestamps
+    are unlogged `[INFERENCE]`). Profile workarounds on the RTX 3090 (`compaction.asyncEnabled:
+    false`, local-first `compaction.methodOrder`, or a `~60K` `thresholdTokens` cap) are
+    **rejected / deferred** because they mask the
+    [`alphastorm/ninfer#89`](https://github.com/alphastorm/ninfer/issues/89) durability cycle (`0`
+    resident requests, `2,032/2,048` device page groups, `21,872,391,168 / 21,881,405,440` Host
+    bytes / `390 MiB` Host free across `179` samples) and
+    `scripts/hosts/accept-rtx4090-route.ps1:356-359` forbids disabling async compaction to pass the
+    gate.
+- **Hugging Face artifacts, models, and external serving techniques:**
+  - `neroued/*` Hugging Face artifacts remain at `lastModified 2026-10-29T09:22Z` (`Qwen3.8-27B` v3
+    `81f924d4` unchanged), `Neroued/ninfer` GitHub releases return `[]`, and the `Qwen`
+    organization's newest update is a `2026-11-07` metadata refresh of the `3.8` family with no
+    public `Qwen4-27B` weights or repository. Same-architecture 27B derivatives
+    `NousResearch/Arete-27B` (SFT-only, `apache-2.0`, model card reports Terminal-Bench 2.1
+    `67% → 70%` and Hermes `65.77 → 65.60` with `"we do not take credit for any seeming
+    improvement"`, published NInfer conversion `DAXZEIT/Arete-27B-NInfer-v3` /
+    `Arete-27B-Q4_K_M-text-vision-Q8-mtp-Q6_K*` in unloadable GGUF blocks) and
+    `ConceptCountry/qwen-concept-27b` (weight-edited, `apache-2.0`, `59K` downloads, no published
+    coding benchmarks), plus new `DFlash` drafters in compressed-tensors / Quark / ROCm formats
+    (`nchapman/Qwen3.8-27B-DFlash2-W4A16-HGPTQ`, `amd/Qwen3.8-27B-Quark-DFlash2`,
+    `StillDeadcode/qwen3.8-27b-iq8r-dflash` vs our `Q4_G64_FP16` draft MLP), are **deferred**,
+    closing the model replacement watch for `v0.18.0`.
+  - Recent `v0.13`–`v0.16.2` filtered traffic (`n=176`, [EXP-110](PERFORMANCE.md#experiment-ledger))
+    is `50.21%` prefill, `31.89%` decode, `8.16%` queue, and `3.65%` prepare (against `69.42%`
+    decode / `28.58%` prefill in the `v0.10.0+` cohort), with decode at `~77%` of the weight-read
+    floor and prefill at `74%` of the dense `BF16` FLOP floor (`MLP` `gate`/`up` at `81.7%`,
+    [EXP-059](PERFORMANCE.md#experiment-ledger)). `v0.18.0` gates `Group64` A8 prefill on RTX 3090
+    and RTX 5090 (SmoothQuant `arXiv:2211.10438` reports up to `1.56×`, and QServe
+    `arXiv:2405.04532` reports `1.2–1.4×` at 8B and `2.4–3.5×` at 72B over TensorRT-LLM on
+    A100/L40S, not verified on our engine or a dense 27B model; RTX 4090 A8 stays off at its
+    `1.0985 / 1.10` leak bound) and two-request (`C2`) cadence-only prefill pacing (`0 / 32` via
+    `--prefill-stall-budget-ms 0` and `--decode-rounds-per-prefill 32`; Sarathi-Serve
+    `arXiv:2403.02310` reports `2.6×` capacity on Mistral-7B/A100 and `3.5×` at a `100 ms` SLO on
+    Yi-34B) on preregistered bars, runs tool-call-span copy-drafting replay (SuffixDecoding
+    `arXiv:2411.04975` reports up to `5.3×` on AgenticSQL, `~2.5×` on SWE-Bench, `2.8×` over
+    EAGLE-2/3, and `6.3–7.8` mean accepted tokens/step from its abstract and project page, not
+    verified against a neural block drafter on our corpus), restore-preparation instrumentation
+    ([`alphastorm/ninfer#59`](https://github.com/alphastorm/ninfer/issues/59)) and readiness
+    attribution (`cuCheckpointProcess*` is Linux-only in NVIDIA driver docs and untested in our
+    WSL2/Docker lane `[INFERENCE]`), `rk4v4` cheap deciders (`~31` GPU-hours for full qualification
+    on the single native host), byte-identical `pad16` / 2-stage native verify schedules (`~1–3%`),
+    and RTX 3090 locked-clocks screening (`nvidia-smi` persistence mode is Linux-only and GeForce
+    `-lgc`/`-lmc` `P2` hold is not verified at vendor source) in non-gating stretch slots, and
+    **defers or rejects** token-tree verification in 8 columns (Medusa and EAGLE-2/3 use `32–64`
+    verify nodes and EAGLE-3 `arXiv:2503.01840` abstract-level claims report `3.0–6.5×` over vanilla
+    with mean accepted length `7.5`, not verified for 8 columns), typical acceptance (Medusa
+    `arXiv:2401.10774`, gain unknown for an 8-column block drafter and reduces to greedy at
+    temperature `0`), KIVI-style asymmetric KV compression (`arXiv:2402.02750`, `2.35–3.47×`
+    throughput and `2.6×` memory reduction at `<= 2%` LM-Eval drop), CUDA-graph/launch-overhead
+    reduction (`815` kernel boundaries at `0.21 µs` = `169.5 µs` of a `17.7 ms` round, `<= 1%`
+    decode, `99.2%` GPU busy, PDL `4.7–6.2%` slower in `EXP-054`/`EXP-058`), prefill/decode
+    disaggregation, SGLang RadixAttention (`arXiv:2312.07104`; our cached token share is already
+    `91.32%`), EAGLE-3 trained drafters, `cuBLAS` `INT8` prefill, the
+    [`alphastorm/ninfer#50`](https://github.com/alphastorm/ninfer/issues/50) hold state machine
+    ([`alphastorm/ninfer#66`](https://github.com/alphastorm/ninfer/pull/66) closed),
+    [`alphastorm/ninfer#72`](https://github.com/alphastorm/ninfer/pull/72) (closed, no consumer
+    since `#58` was dropped), RTX 3090 prefill pacing (no config key or baseline),
+    [`alphastorm/omp-ninfer#28`](https://github.com/alphastorm/omp-ninfer/issues/28) (closed as not
+    planned), and RTX 5080; see [`ROADMAP.md`](../ROADMAP.md#deferred-and-rejected-decisions).
+
 ## 2026-11-10 upstream and fork watch
 
 Observed on 2026-11-10 (companion watch receipt:
