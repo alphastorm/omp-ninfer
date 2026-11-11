@@ -1,0 +1,124 @@
+{
+  "artifact_type": "omp_ninfer_release_qualification",
+  "schema_version": 1,
+  "release": "v0.18.0",
+  "runtime_identity": {
+    "public_model_id": "q38-ninfer",
+    "deployment_profile": "qwen38-5090-v0.13.0",
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "maximum_context_tokens": 131072,
+    "kv_dtype": "bf16",
+    "maximum_concurrency": 2,
+    "speculative_backend": "dflash2",
+    "draft_tokens": 7,
+    "vision": true,
+    "preserve_thinking": true,
+    "require_origin_auth": true,
+    "repository": "https://github.com/alphastorm/ninfer",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "behavioral_source_commit": "48c8ac4644322f024b5c3bd5b657af5874567251",
+    "release_source_commit": "48c8ac4644322f024b5c3bd5b657af5874567251",
+    "release_source_archive_sha256": "7ced9ab1d163e7ac7220752790cc09a53e6863ecbb2fdaf81e4f1d422a67b33d",
+    "release_server_binary_sha256": "804ef8ac6d062dc8da8784ba3f52e5cece2178a5f5bc46cb2c7bc1d3e8937fe3",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "model_artifact_bytes": 20437521664
+  },
+  "native_runtime_identity": {
+    "status": "pending",
+    "repository": "https://github.com/alphastorm/ninfer",
+    "source_commit": null,
+    "scope": "Final selected native beta.3 identities and current proofs are not bound in this runtime-only stage."
+  },
+  "composition": {
+    "behavioral_qualification": {
+      "status": "passed",
+      "repository_path": "releases/v0.18.0/qualification/rtx5090.json",
+      "sha256": "763178cbcee0aa999b4647fe52f9879603891d6211a13c264b7f78bf70e71d17",
+      "source_commit": "48c8ac4644322f024b5c3bd5b657af5874567251",
+      "server_binary_sha256": "804ef8ac6d062dc8da8784ba3f52e5cece2178a5f5bc46cb2c7bc1d3e8937fe3",
+      "scope": "Fresh exact-profile gate on the published F4/beta.7 image; not stock-client or documented-route acceptance."
+    },
+    "local_release_packaging": {
+      "status": "passed",
+      "published": true,
+      "release_source_commit": "48c8ac4644322f024b5c3bd5b657af5874567251",
+      "release_server_binary_sha256": "804ef8ac6d062dc8da8784ba3f52e5cece2178a5f5bc46cb2c7bc1d3e8937fe3",
+      "registry_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:496195ecd6cf1f50fcd9dc62cf7b51787f599cc2b196e194baf050c4b149e119",
+      "oci_manifest_digest": "sha256:496195ecd6cf1f50fcd9dc62cf7b51787f599cc2b196e194baf050c4b149e119",
+      "binary_package_sha256": "823d9357f90051564068a8504695a0ec57eb4016681bfd83097f453fcf9eb6ae",
+      "binary_package_bytes": 580020196,
+      "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.7.0-qwen38-5090-beta.7/ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.spdx.json",
+      "sbom_sha256": "1f935ae2ad4ad9ca139b6d50f9ea6db6d186e80921f96c6be5808500e2011e25",
+      "runtime_base_reference": "ghcr.io/alphastorm/ninfer@sha256:28857182859a8f4993090521899b11a3f8676cb174c59adc626485e9f01472a3",
+      "runtime_base_receipt_release": "runtime-base-a87de361-20261103",
+      "runtime_base_receipt": {
+        "repository_path": "releases/v0.18.0/qualification/runtime-base.json",
+        "sha256": "cf0fe8e668920eb54f8c724d9607ef8b7b2861c778330be6a8d13887cc9268ca"
+      },
+      "publication_receipt": {
+        "repository_path": "releases/v0.18.0/qualification/runtime-publication.json",
+        "sha256": "851157cb75e7eaf4823880f48cd7ef5b248d867c805a88284d4f411eba002f5b"
+      },
+      "component_release_url": "https://github.com/alphastorm/ninfer/releases/tag/v0.7.0-qwen38-5090-beta.7",
+      "checksums_verified": true,
+      "artifact_authentication": {
+        "repository_path": "releases/v0.18.0/qualification/runtime-artifacts.json",
+        "sha256": "41faabf4de95da9ba3a35a2ed7301fa75ba433c05f59206d30802d7373519287"
+      }
+    },
+    "native_runtime_variants": {
+      "rtx3090-windows-native": {
+        "status": "pending",
+        "beta_qualified": false,
+        "installable": false,
+        "scope": "Unbound predecessor identity placeholder; final beta.3 package and current quality, speed, fit and lane receipts await binding."
+      },
+      "rtx4090-windows-native": {
+        "status": "pending",
+        "beta_qualified": false,
+        "installable": false,
+        "scope": "Unbound predecessor identity placeholder; final beta.3 package and current quality, speed, fit and lane receipts await binding."
+      }
+    },
+    "native_publication": {
+      "status": "pending"
+    },
+    "external_installation_acceptance": {
+      "status": "pending",
+      "note": "rerun against the published v0.7.0-qwen38-5090-beta.7 component (image 496195ec) before the cut; the receipt lands at releases/v0.18.0/acceptance/composed-external-installation.json"
+    },
+    "review": {
+      "status": "pending",
+      "scope": "The predecessor review ledger is not retained as successor approval; the current product council and combined ledger remain unbound."
+    }
+  },
+  "as_of": "2026-11-11",
+  "status": "runtime-only-stage",
+  "publication_authorized": false,
+  "external_installation_qualified": false,
+  "scope": "Runtime-only draft with authenticated published RTX 5090 F4/beta.7, unchanged pacing-OFF configuration and stock OMP 18.18.7 identities. Native components, five-route acceptance and three client-platform executions are not yet bound.",
+  "interpretation": "The RTX 5090 published-image lane and runtime packaging are proven by current receipts. No predecessor native proof, acceptance, waiver or review approval transfers to this stage.",
+  "documented_route_acceptance": {
+    "status": "pending"
+  },
+  "observed_gates": {
+    "runtime_rc": {
+      "repository_path": "releases/v0.18.0/qualification/runtime-rc.json",
+      "sha256": "ca17283887cfad131374fefe6c27488bfcfc171de2a114d17aa97e8b30b8567d"
+    },
+    "runtime_build_identity": {
+      "repository_path": "releases/v0.18.0/qualification/runtime-build-identity.json",
+      "sha256": "9cef5d7f3970e8fe0334168e41c93a7dcbf83d26ac6ddc7093aa7a6899fcba8f"
+    }
+  },
+  "remaining_release_gates": [
+    "Bind both final native beta.3 packages and current selected-profile quality, speed, fit and lane evidence.",
+    "Bind actual native publication and exact-subject founder decisions; preserve any measured failed verdicts and authorized applications.",
+    "Prepare the five-route guide and run fresh candidate-bound routes, three stock-client platforms, native campaigns/public installs and restoration.",
+    "Bind the current product council/combined review ledger and complete immutable evidence pins before publication admission."
+  ],
+  "receipt_audit": {
+    "repository_path": "releases/v0.18.0/receipt-audit.json",
+    "sha256": "38e77fb54ce379180761418f38777d7878a879e360a465b31d8afa141391741f"
+  }
+}

@@ -1,0 +1,272 @@
+{
+  "artifact_type": "omp_ninfer_release_receipt_audit",
+  "schema_version": 1,
+  "release": "v0.18.0",
+  "as_of": "2026-11-11",
+  "source_release": "v0.17.0",
+  "status": "staged-runtime-only",
+  "policy": "Current beta.7 runtime and stock OMP 18.18.7 identities only. Drop predecessor native proofs/snapshots, acceptance, waivers and review ledger; preserve their bytes privately. Native beta.2 manifest identity rows are non-installable preview placeholders for section 2, not carried qualification.",
+  "files": [
+    {
+      "file": "COMPATIBILITY.md",
+      "predecessor_sha256": "2446f3152727fcc17235a09a37cc78e8d1f5b34f134762bdb1d418eff1a2765b",
+      "disposition": "replaced",
+      "reason": "Current runtime/client draft and explicit pending native, route and review composition; no predecessor pass transfers.",
+      "binding": "Mutable release state/prose: bound by the evidence hash chain and later immutable pin stages, not a retained-byte audit snapshot."
+    },
+    {
+      "file": "NINFER_RELEASE_NOTES.md",
+      "predecessor_sha256": "e1dfc3dcfd7a2db386379fe4596f15c39359707826599fef75eaccd3ff094f74",
+      "disposition": "replaced",
+      "reason": "Current runtime/client draft and explicit pending native, route and review composition; no predecessor pass transfers.",
+      "binding": "Mutable release state/prose: bound by the evidence hash chain and later immutable pin stages, not a retained-byte audit snapshot."
+    },
+    {
+      "file": "acceptance/composed-external-installation.json",
+      "predecessor_sha256": "e20d5376642113f7f7392f6284e757d4ca2de57ed712bd1725a1f5fe5e55020d",
+      "disposition": "dropped",
+      "reason": "predecessor evidence; replaced in \u00a72 or by the v0.18.0 product council"
+    },
+    {
+      "file": "acceptance/darwin-arm64-18.18.6.json",
+      "predecessor_sha256": "7eacc24dbcf8b5d0a21ec7825740dad0ed09f47371328b97fdc4371105d24df3",
+      "disposition": "dropped",
+      "reason": "predecessor evidence; replaced in \u00a72 or by the v0.18.0 product council"
+    },
+    {
+      "file": "acceptance/documented-routes.json",
+      "predecessor_sha256": "3f89e10b9db22156a3b7911fa40491a91c3b99430a11e9780dedfc1d367ce8e3",
+      "disposition": "dropped",
+      "reason": "predecessor evidence; replaced in \u00a72 or by the v0.18.0 product council"
+    },
+    {
+      "file": "acceptance/linux-x64-18.18.6.json",
+      "predecessor_sha256": "96ac8bb18ea6cae22a6bcbeb8acc530bc17acdc75d4c28cc503158e0ca502012",
+      "disposition": "dropped",
+      "reason": "predecessor evidence; replaced in \u00a72 or by the v0.18.0 product council"
+    },
+    {
+      "file": "acceptance/rtx4090-public-install.json",
+      "predecessor_sha256": "b45d704fecb553a54b6e66bcc34032fa23786b40db557d427ca5dcdac0bd262e",
+      "disposition": "dropped",
+      "reason": "predecessor evidence; replaced in \u00a72 or by the v0.18.0 product council"
+    },
+    {
+      "file": "acceptance/windows-x64-18.18.6.json",
+      "predecessor_sha256": "8f66cc01ee1f6b686c887eca9ece58d71617c2c6c4df903dedb72e784213cf48",
+      "disposition": "dropped",
+      "reason": "predecessor evidence; replaced in \u00a72 or by the v0.18.0 product council"
+    },
+    {
+      "file": "compatibility.json",
+      "predecessor_sha256": "360a595f086b87941c9ae3f3526b2077809919b5c7e6b8dd8465e31e8fb04514",
+      "disposition": "replaced",
+      "reason": "Current runtime/client draft and explicit pending native, route and review composition; no predecessor pass transfers.",
+      "binding": "Mutable release state/prose: bound by the evidence hash chain and later immutable pin stages, not a retained-byte audit snapshot."
+    },
+    {
+      "file": "manifest.json",
+      "predecessor_sha256": "9fcc50e951e0ca55f19a9f764f0a213eb4bb6d199c92d8cd90221bc01391934e",
+      "disposition": "replaced",
+      "reason": "Current runtime/client draft and explicit pending native, route and review composition; no predecessor pass transfers.",
+      "binding": "Mutable release state/prose: bound by the evidence hash chain and later immutable pin stages, not a retained-byte audit snapshot."
+    },
+    {
+      "file": "profiles/qwen38-rtx5090-manual-tunnel.json",
+      "predecessor_sha256": "980a564801b7b27d2223844c5a21304370811ea8cf608a924642b78e701226b7",
+      "disposition": "replaced",
+      "reason": "Current beta.7 runtime or stock OMP 18.18.7 receipt/profile; predecessor bytes are not current proof.",
+      "staged_sha256": "d8d2310bdea004ddd307e54abd229b2d5033d34bbe06a7dc81e32fe498ce9c74"
+    },
+    {
+      "file": "profiles/qwen38-rtx5090-windows-docker-local.json",
+      "predecessor_sha256": "c6a095e731e313a769517d1373152981cc945238dcf91032a5a88d61d6d9bf02",
+      "disposition": "replaced",
+      "reason": "Current beta.7 runtime or stock OMP 18.18.7 receipt/profile; predecessor bytes are not current proof.",
+      "staged_sha256": "1065cca6da67de771776a8477bd6f76b35b8afbeb0527759d97900c41776e0f0"
+    },
+    {
+      "file": "profiles/rtx3090/release-spec.json",
+      "predecessor_sha256": "92ab0c4a09382ac737172591530f4d87b0c580e06361a495e1af5b9e3685b2bf",
+      "disposition": "dropped",
+      "reason": "predecessor evidence; replaced in \u00a72 or by the v0.18.0 product council"
+    },
+    {
+      "file": "profiles/rtx3090/server-config.json",
+      "predecessor_sha256": "238ccad7ba6dca673d845c183b6c3de3a49bd2ce75090f20f669b2d6f83dda6f",
+      "disposition": "dropped",
+      "reason": "predecessor evidence; replaced in \u00a72 or by the v0.18.0 product council"
+    },
+    {
+      "file": "profiles/rtx4090/release-spec.json",
+      "predecessor_sha256": "a8e4c40878d4fa20724e309bc7752e14312022eee4a3602bb47cc1ee3d47e30a",
+      "disposition": "dropped",
+      "reason": "predecessor evidence; replaced in \u00a72 or by the v0.18.0 product council"
+    },
+    {
+      "file": "profiles/rtx4090/server-config.json",
+      "predecessor_sha256": "ae27dc446634048cec913fd42efc5971fb0ad950eed154ecce6aaa981eec4c9b",
+      "disposition": "dropped",
+      "reason": "predecessor evidence; replaced in \u00a72 or by the v0.18.0 product council"
+    },
+    {
+      "file": "qualification/client-components.json",
+      "predecessor_sha256": "d840d5e5abd2d7cc29f1754458343aef092ad6f077d5a75143a1a178af4fbe4d",
+      "disposition": "replaced",
+      "reason": "Current beta.7 runtime or stock OMP 18.18.7 receipt/profile; predecessor bytes are not current proof.",
+      "staged_sha256": "19f03c849ffd68f4f35873379b3ed46d4b3abadf4da0fc9aa393b46daeb4ee75"
+    },
+    {
+      "file": "qualification/native-publication.json",
+      "predecessor_sha256": "dd5a752a2fa81536544d4db929a68418db651cb8c77748b43da40fee3cd3a6f3",
+      "disposition": "dropped",
+      "reason": "predecessor evidence; replaced in \u00a72 or by the v0.18.0 product council"
+    },
+    {
+      "file": "qualification/native-speed-decision.json",
+      "predecessor_sha256": "5c09de6a54bfbc7f52a83eb333436bdf9e025b864a458c0541c882e7560ecc4d",
+      "disposition": "dropped",
+      "reason": "predecessor evidence; replaced in \u00a72 or by the v0.18.0 product council"
+    },
+    {
+      "file": "qualification/receipt-audit.json",
+      "predecessor_sha256": "c137388a72a3be70d1926d57cc07d7a21b9b6dfbf2fa58f1eca04047050a2d84",
+      "disposition": "dropped",
+      "reason": "predecessor evidence; replaced in \u00a72 or by the v0.18.0 product council"
+    },
+    {
+      "file": "qualification/rtx3090-route-waiver.json",
+      "predecessor_sha256": "19f2c0ef0f9bbf38b6debaacdbb84e8e219c1f03b1d26671ca3fdfcbf63943f0",
+      "disposition": "dropped",
+      "reason": "predecessor evidence; replaced in \u00a72 or by the v0.18.0 product council"
+    },
+    {
+      "file": "qualification/rtx3090-speed.json",
+      "predecessor_sha256": "852e13ca25efe62305ed40d5ffdc39e31efc9a091bf2ecf272a716daaa14e450",
+      "disposition": "dropped",
+      "reason": "predecessor evidence; replaced in \u00a72 or by the v0.18.0 product council"
+    },
+    {
+      "file": "qualification/rtx3090-windows-native.SHA256SUMS",
+      "predecessor_sha256": "289d7c94eae315a3aa4cc1c73c0f7e937b1e4ee430f0ec18e3ba35186436d24d",
+      "disposition": "dropped",
+      "reason": "predecessor evidence; replaced in \u00a72 or by the v0.18.0 product council"
+    },
+    {
+      "file": "qualification/rtx3090-windows-native.fit.json",
+      "predecessor_sha256": "c1c3d0aa7027caf45efef2624337af0bc8f8fb4e7c911e6455591ec3d86e0954",
+      "disposition": "dropped",
+      "reason": "predecessor evidence; replaced in \u00a72 or by the v0.18.0 product council"
+    },
+    {
+      "file": "qualification/rtx3090-windows-native.quality-screen.json",
+      "predecessor_sha256": "20332928c82cc9445b3dab4c58207181ce49dce4706e97f3a6ba365ac942481e",
+      "disposition": "dropped",
+      "reason": "predecessor evidence; replaced in \u00a72 or by the v0.18.0 product council"
+    },
+    {
+      "file": "qualification/rtx3090.json",
+      "predecessor_sha256": "b742870ef0df32d4aa02657ddf3111be39e4b6823a8dd6b2a70237c251f5c39a",
+      "disposition": "dropped",
+      "reason": "predecessor evidence; replaced in \u00a72 or by the v0.18.0 product council"
+    },
+    {
+      "file": "qualification/rtx4090-rehearsal-harness-decision.json",
+      "predecessor_sha256": "f1fcd1bb162e9107b528c239c6c6ec251d461fe2a7c14664f8d1ea9bd6257a19",
+      "disposition": "dropped",
+      "reason": "predecessor evidence; replaced in \u00a72 or by the v0.18.0 product council"
+    },
+    {
+      "file": "qualification/rtx4090-speed.json",
+      "predecessor_sha256": "e48aba8161a008231930bd4024eab719d9a50ca08a5ed62a3f7890178aeb4cc8",
+      "disposition": "dropped",
+      "reason": "predecessor evidence; replaced in \u00a72 or by the v0.18.0 product council"
+    },
+    {
+      "file": "qualification/rtx4090-windows-native.SHA256SUMS",
+      "predecessor_sha256": "71181231e7507dbd7bdc8106891c759f18fe6bb8439753212e6d7dfc6d356ef7",
+      "disposition": "dropped",
+      "reason": "predecessor evidence; replaced in \u00a72 or by the v0.18.0 product council"
+    },
+    {
+      "file": "qualification/rtx4090-windows-native.fit.json",
+      "predecessor_sha256": "b22956aa10ec57f3bfe4d6a081eaf05e37166696211ceec03e1a369999f2af83",
+      "disposition": "dropped",
+      "reason": "predecessor evidence; replaced in \u00a72 or by the v0.18.0 product council"
+    },
+    {
+      "file": "qualification/rtx4090-windows-native.quality-screen.json",
+      "predecessor_sha256": "f6e5a91360ccec19b406c628444f8ce0899d3603b232ca192b9333b7ec871554",
+      "disposition": "dropped",
+      "reason": "predecessor evidence; replaced in \u00a72 or by the v0.18.0 product council"
+    },
+    {
+      "file": "qualification/rtx4090.json",
+      "predecessor_sha256": "254167f25f663c7d0774ee51cccf8d63b93b07489fbc1ca114fb6b63a71cdd74",
+      "disposition": "dropped",
+      "reason": "predecessor evidence; replaced in \u00a72 or by the v0.18.0 product council"
+    },
+    {
+      "file": "qualification/rtx5090.json",
+      "predecessor_sha256": "11fde294fbaeb7711d8526ad35c65f9941ef2eb0a24d799cecf84711a0717152",
+      "disposition": "replaced",
+      "reason": "Current beta.7 runtime or stock OMP 18.18.7 receipt/profile; predecessor bytes are not current proof.",
+      "staged_sha256": "763178cbcee0aa999b4647fe52f9879603891d6211a13c264b7f78bf70e71d17"
+    },
+    {
+      "file": "qualification/runtime-artifacts.json",
+      "predecessor_sha256": "37b6162c964c8e3b0a9451d4b2e65d05107c263aabac452e86ad570fb17a37b0",
+      "disposition": "replaced",
+      "reason": "Current beta.7 runtime or stock OMP 18.18.7 receipt/profile; predecessor bytes are not current proof.",
+      "staged_sha256": "41faabf4de95da9ba3a35a2ed7301fa75ba433c05f59206d30802d7373519287"
+    },
+    {
+      "file": "qualification/runtime-base.json",
+      "predecessor_sha256": "cf0fe8e668920eb54f8c724d9607ef8b7b2861c778330be6a8d13887cc9268ca",
+      "disposition": "kept-unchanged-subject",
+      "reason": "Authenticated immutable runtime-base reuse; current beta.7 image receipt binds these exact base bytes/reference and its source is a proven F4 ancestor.",
+      "staged_sha256": "cf0fe8e668920eb54f8c724d9607ef8b7b2861c778330be6a8d13887cc9268ca"
+    },
+    {
+      "file": "qualification/runtime-build-identity.json",
+      "predecessor_sha256": "697bf002029b539163b390800148024c79e6fa55be7c314bcad19cb912574839",
+      "disposition": "replaced",
+      "reason": "Current beta.7 runtime or stock OMP 18.18.7 receipt/profile; predecessor bytes are not current proof.",
+      "staged_sha256": "9cef5d7f3970e8fe0334168e41c93a7dcbf83d26ac6ddc7093aa7a6899fcba8f"
+    },
+    {
+      "file": "qualification/runtime-publication.json",
+      "predecessor_sha256": "c43645c8ef1906b36ec7f63f7de1e8c6eaef5b1d8e25c49e875b11140bc727e9",
+      "disposition": "replaced",
+      "reason": "Current beta.7 runtime or stock OMP 18.18.7 receipt/profile; predecessor bytes are not current proof.",
+      "staged_sha256": "851157cb75e7eaf4823880f48cd7ef5b248d867c805a88284d4f411eba002f5b"
+    },
+    {
+      "file": "qualification/runtime-rc.json",
+      "predecessor_sha256": "bed3a245125001e30fee289bb6bd138e861952623a5661ce5587661f184ad443",
+      "disposition": "replaced",
+      "reason": "Current beta.7 runtime or stock OMP 18.18.7 receipt/profile; predecessor bytes are not current proof.",
+      "staged_sha256": "ca17283887cfad131374fefe6c27488bfcfc171de2a114d17aa97e8b30b8567d"
+    },
+    {
+      "file": "qualification/stock-omp.json",
+      "predecessor_sha256": "aad29cd65a31e3246fbf6eeb4a01ea33a368decc79fa6b169e5fc829ccd8c611",
+      "disposition": "replaced",
+      "reason": "Current beta.7 runtime or stock OMP 18.18.7 receipt/profile; predecessor bytes are not current proof.",
+      "staged_sha256": "98a1e24d7e3d0ec03e6ffcc9c44ed7aad2e40dcaf923ead83b66d4ea5a216f38"
+    },
+    {
+      "file": "qualification.json",
+      "predecessor_sha256": "cab5b2dcbcb17d34208e8991e9b9ed5aa6f41dcb6551df9ef5b080541c6466ec",
+      "disposition": "replaced",
+      "reason": "Current runtime/client draft and explicit pending native, route and review composition; no predecessor pass transfers.",
+      "binding": "Mutable release state/prose: bound by the evidence hash chain and later immutable pin stages, not a retained-byte audit snapshot."
+    },
+    {
+      "file": "review/runtime-ledger.json",
+      "predecessor_sha256": "5f8d6e4a0d698f227237b1cf420a8da87182a7c0197ce05e3744fc2f485bce5f",
+      "disposition": "dropped",
+      "reason": "predecessor evidence; replaced in \u00a72 or by the v0.18.0 product council"
+    }
+  ]
+}
