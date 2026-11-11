@@ -1030,6 +1030,26 @@ class WindowsNativeCommandTests(unittest.TestCase):
                 with self.subTest(lane=lane, failed_action=action):
                     self.assertEqual(self.run_block(tail, {"omp"}, prelude), (expected_calls, reached))
 
+    def test_native_operate_stops_at_each_failed_lifecycle_command(self) -> None:
+        actions = ["Status", "Stop", "Start", "Status"]
+        for lane in ("rtx4090-native", "rtx3090-native"):
+            block = self.steps(lane)["operate"]
+            for failed_call in range(5):
+                prelude = (
+                    "$StateRoot = 'fixture'\n$script:ControllerCall = 0\n"
+                    "function Join-Path { 'Fixture-Controller' }\n"
+                    "function Fixture-Controller { param($Action, $StateRoot)\n"
+                    "  $script:ControllerCall++\n"
+                    "  Add-Content (\"$PSScriptRoot/calls.txt\") \"controller-$Action\"\n"
+                    f"  $global:LASTEXITCODE = if ($script:ControllerCall -eq {failed_call}) "
+                    "{ 7 } else { 0 }\n"
+                    "}\n")
+                expected = actions[:failed_call] if failed_call else actions
+                with self.subTest(lane=lane, failed_call=failed_call):
+                    self.assertEqual(
+                        self.run_block(block, set(), prelude),
+                        (["controller-" + action for action in expected], failed_call == 0))
+
 
 @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed to execute the Windows host scripts")
 @unittest.skipIf(os.name == "nt", "the native command stubs are POSIX shell scripts")

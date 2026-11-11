@@ -371,9 +371,13 @@ $Installer = Join-Path $Stage 'Install-Release.ps1'
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 $Controller = Join-Path $StateRoot 'Control-Release.ps1'
 & $Controller -Action Status -StateRoot $StateRoot   # the installed release, its identity, endpoint state
+if ($LASTEXITCODE -ne 0) { throw 'native status failed' }
 & $Controller -Action Stop -StateRoot $StateRoot     # checkpoints live sessions; inspect any refusals
+if ($LASTEXITCODE -ne 0) { throw 'native stop failed; do not restart after a refusal' }
 & $Controller -Action Start -StateRoot $StateRoot    # the same command brings the lane back after a reboot
+if ($LASTEXITCODE -ne 0) { throw 'native start failed' }
 & $Controller -Action Status -StateRoot $StateRoot
+if ($LASTEXITCODE -ne 0) { throw 'native status failed' }
 ```
 
 
@@ -573,9 +577,13 @@ $Installer = Join-Path $Stage 'Install-Release.ps1'
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 $Controller = Join-Path $StateRoot 'Control-Release.ps1'
 & $Controller -Action Status -StateRoot $StateRoot   # the installed release, its identity, endpoint state
+if ($LASTEXITCODE -ne 0) { throw 'native status failed' }
 & $Controller -Action Stop -StateRoot $StateRoot     # checkpoints live sessions; inspect any refusals
+if ($LASTEXITCODE -ne 0) { throw 'native stop failed; do not restart after a refusal' }
 & $Controller -Action Start -StateRoot $StateRoot    # the same command brings the lane back after a reboot
+if ($LASTEXITCODE -ne 0) { throw 'native start failed' }
 & $Controller -Action Status -StateRoot $StateRoot
+if ($LASTEXITCODE -ne 0) { throw 'native status failed' }
 ```
 
 
