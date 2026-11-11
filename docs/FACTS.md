@@ -132,7 +132,7 @@ and are immutable after the freeze, and the publication record is this section,
   contradictory thinking/effort fields are handled, numerical failures are isolated to the failing
   request, and graceful shutdown drains cancellation and final-save work before stopping the service
   (upstream
-  [#440](https://github.com/Neroued/ninfer/issues/440)/[#441](https://github.com/Neroued/ninfer/issues/441)/[#446](https://github.com/alphastorm/ninfer/issues/446));
+  [#440](https://github.com/Neroued/ninfer/issues/440)/[#441](https://github.com/Neroued/ninfer/issues/441)/[#446](https://github.com/Neroued/ninfer/issues/446));
   and optional prefill pacing remains default off. Both RTX 5090 (`e0971faf`) and carried native
   `beta.2` (`a87de361`) include byte-proven durable-generation Host reclaim before export refusal
   ([fork #78](https://github.com/alphastorm/ninfer/issues/78),

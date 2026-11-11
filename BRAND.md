@@ -92,7 +92,8 @@ Space Grotesk 500/600 (headings, wordmark, −0.015em) + JetBrains Mono 400/500
 (eyebrows, stats, paths; labels 10–12px uppercase, letter-spacing 0.1–0.2em).
 Webfonts on marketing surfaces only. The public site self-hosts latin subsets of both faces as
 first-party assets (`site/fonts/`, variable weight, OFL-1.1 license texts beside the files) and
-loads nothing remote; artwork sources still import them from Google Fonts at render time only.
+loads nothing remote; artwork sources load the same files through `assets/fonts.css` at the four
+weights above, so headless renders need no network and repeat byte for byte.
 Body text on the site stays on the system sans stack.
 
 Composition is editorial, not dashboard-like: one message wins the first read, one proof wins the
@@ -143,6 +144,7 @@ imply official partnership.
 | `assets/lockup-x.png` / `lockup-x-light.png` | OMP × NInfer alternate, transparent @2x |
 | `assets/lockups.html` | lockup source |
 | `assets/brand.css` | shared tokens for exported artwork: the `.sheet` scope (BRAND token values, 18 px type floor) for the banner, social preview, architecture figure, and receipts figure; the framed `.canvas` rules stay for the historical benchmark charts |
+| `assets/fonts.css` | `@font-face` rules for exported artwork: the site's latin subsets in `site/fonts/` at Space Grotesk 500/600 and JetBrains Mono 400/500; `brand.css` and `lockups.html` load it |
 | `assets/banner.html` | README banner source (1280×320): category, headline, tagline, the restart figure (the process stops and restarts, the session continues through a checkpoint), status strip; no release version |
 | `assets/banner.png` | rendered banner @2x (2560×640); the README links it to the quickstart |
 | `assets/og.html` | GitHub social preview source (1280×640): the banner's composition at link-card scale; no release version |

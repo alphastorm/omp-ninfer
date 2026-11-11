@@ -115,7 +115,7 @@
         <p class="eyebrow">Measured, not estimated</p>
         <h2>Three lanes, each bound to exact bytes and a receipt.</h2>
       </div>
-      <p>Every number names its release, hardware lane, and measurement boundary. Retrieval figures are fresh-process cold starts; decode figures are the lane's own qualification gate, never an ordinary in-process cached follow-up.</p>
+      <p>Every number names its release, hardware lane, and measurement boundary. RTX 5090 retrieval is a cold start that reused no cached prefix; native retrieval figures are each lane's long-session gate. Decode figures are the lane's own qualification gate, never an ordinary in-process cached follow-up.</p>
     </div>
     <table class="measured">
       <thead>
@@ -130,13 +130,13 @@
         </tr>
         <tr>
           <td class="first"><span class="lane">RTX 4090</span><span class="tag">native Windows 11 · runtime <span class="nowrap">v0.8.0-qwen38-4090-beta.2</span> · DFlash2 draft window 7 · INT8 KV · C1 · model 81f924d4</span></td>
-          <td data-label="Exact 130,048-token retrieval"><span class="num">83.54<small>s</small></span><span class="sub">cold start</span></td>
+          <td data-label="Exact 130,048-token retrieval"><span class="num">83.54<small>s</small></span><span class="sub">long-session gate</span></td>
           <td data-label="Decode"><span class="num">254.59<small>tok/s</small></span><span class="sub">C1 decode; 83.88% DFlash2 acceptance, 2,133.04 tok/s prefill</span></td>
           <td class="last" data-label="Receipt"><a class="receipt-link" href="https://github.com/alphastorm/omp-ninfer/blob/v0.17.0/releases/v0.17.0/qualification/rtx4090.json">rtx4090.json · 2026-11-03</a></td>
         </tr>
         <tr>
           <td class="first"><span class="lane">RTX 3090</span><span class="tag">native Windows 11 · runtime <span class="nowrap">v0.8.0-qwen38-3090-beta.2</span> · DFlash2 draft window 7 · INT8 KV · C2 shared pool · 350 W serving cap · model 81f924d4</span></td>
-          <td data-label="Exact 130,048-token retrieval"><span class="num">188.94<small>s</small></span><span class="sub">cold start</span></td>
+          <td data-label="Exact 130,048-token retrieval"><span class="num">188.94<small>s</small></span><span class="sub">long-session gate</span></td>
           <td data-label="Decode"><span class="num">148.70<small>tok/s</small></span><span class="sub">C1 decode; 83.88% DFlash2 acceptance, 978.72 tok/s prefill</span></td>
           <td class="last" data-label="Receipt"><a class="receipt-link" href="https://github.com/alphastorm/omp-ninfer/blob/v0.17.0/releases/v0.17.0/qualification/rtx3090.json">rtx3090.json · 2026-11-04</a></td>
         </tr>
