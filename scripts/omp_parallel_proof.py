@@ -60,7 +60,7 @@ Operator example (only while the lead has opened the non-production lane):
     --home ~/.cache/omp-ninfer-v080-scratch/v087/proof-seed \
     --provider ninfer-beta --model ninfer-beta/q38-ninfer \
     --scenario subagents --scenario sessions --max-in-flight 1 --seed 50901840 \
-    --log-cmd 'ssh nyc-pc-wsl cat /path/to/window/requests.jsonl' --receipt /tmp/c1.json
+    --log-cmd 'ssh rtx5090-win-a cat /path/to/window/requests.jsonl' --receipt /tmp/c1.json
   # Repeat with --max-in-flight 2 --baseline /tmp/c1.json --receipt /tmp/c2.json.
 """
 from __future__ import annotations

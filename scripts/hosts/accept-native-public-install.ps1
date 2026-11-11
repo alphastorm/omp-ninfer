@@ -6,6 +6,8 @@ param(
     [Parameter(Mandatory = $true)][string]$StateRoot,
     [Parameter(Mandatory = $true)][string]$Workspace,
     [Parameter(Mandatory = $true)][string]$ReceiptPath,
+    [Parameter(Mandatory = $true)][string]$CandidateClone,
+    [Parameter(Mandatory = $true)][string]$ClientBinary,
     [string]$ModelArtifactPath = ''
 )
 # Public-URL install acceptance for a native Windows lane. Downloads every manifest-bound asset
@@ -14,6 +16,9 @@ param(
 # already_installed verification or a member-by-member comparison where the installer refuses
 # a duplicate instance), then smokes the installed release through its own controller and
 # restores the machine. Records identities as digests only; no hostnames, paths, or outputs.
+# CandidateClone supplies observed git/manifest product provenance, not package provenance.
+# ClientBinary is the stock client actually invoked for its version and hashed; the installed
+# source/package/binary/configuration record is captured separately under installed.
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 . ([scriptblock]::Create([IO.File]::ReadAllText((Join-Path $PSScriptRoot 'native-gpu.ps1'))))
@@ -55,7 +60,11 @@ try {
     }
     New-Item -ItemType Directory -Force -Path $Workspace | Out-Null
     $baseUrl = ([string]$v.package_url).Substring(0, ([string]$v.package_url).LastIndexOf('/'))
-    $receipt.source = [ordered]@{ release_tag=[string]$v.release_tag; base_url=$baseUrl; product_release=[string]$manifest.release }
+    $observedCandidate = (& git -C $CandidateClone rev-parse HEAD | Out-String).Trim()
+    $observedManifest = Get-Content -LiteralPath (Join-Path $CandidateClone "releases\$($manifest.release)\manifest.json") -Raw -Encoding UTF8 | ConvertFrom-Json
+    $observedVersion = (& $ClientBinary --version | Out-String).Trim()
+    $receipt.source = [ordered]@{ release_tag=[string]$v.release_tag; base_url=$baseUrl; product_release=[string]$observedManifest.release; candidate_commit=$observedCandidate }
+    $receipt.client = [ordered]@{ version=$observedVersion; binary_sha256=(Sha $ClientBinary) }
     # 1. Closed checksum set from the public release must equal the product-bound bytes.
     $sumsPath = Join-Path $Workspace 'SHA256SUMS'
     Invoke-WebRequest -Uri "$baseUrl/SHA256SUMS" -OutFile $sumsPath -UseBasicParsing
@@ -97,7 +106,7 @@ try {
     $installedConfig = Sha ([string]$rel.config_file)
     if ($installedBinary -cne [string]$v.server_binary_sha256) { throw 'installed server binary is not the manifest binary' }
     if ($installedConfig -cne [string]$v.configuration_sha256) { throw 'installed configuration is not the manifest configuration' }
-    $receipt.installed = [ordered]@{ release_id=$active; server_binary_sha256=$installedBinary; configuration_sha256=$installedConfig; matches_manifest=$true }
+    $receipt.installed = [ordered]@{ release_id=$active; server_binary_sha256=$installedBinary; configuration_sha256=$installedConfig; matches_manifest=$true; source_commit=[string]$rel.patch_stack_sha; package_sha256=[string]$rel.package_sha256; binary_sha256=[string]$rel.binary_sha256; config_sha256=[string]$rel.config_sha256 }
     $controller = Join-Path $StateRoot 'Control-Release.ps1'
     # 4. Public bytes are the installed qualified bytes. The native tar.gz packages (RTX 3090
     #    since v0.2, RTX 4090 since v0.6.0) carry an installer whose already_installed

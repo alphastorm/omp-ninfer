@@ -15,7 +15,12 @@ evidence record per client profile. This turns them into the release's acceptanc
 and moves the manifest, qualification (with the documented-route acceptance summary the ready gate
 reads) and compatibility authority to the ready posture. Stock client identity comes from this
 release's upstream manifest and compatibility profiles, never from a previous fork's receipts.
-Installed binaries must match the published upstream assets.
+Installed binaries must match the published upstream assets. From v0.18.0, native captures
+also retain their observed candidate_commit, release and client {version, binary_sha256};
+the nested public install carries source {product_release, candidate_commit} and that client.
+All receipts are assembled and checked in memory before the first public file is written.
+Private observations, preparation, restoration and probe failures use explicit public-field
+allowlists; omitted private details remain bound by a canonical parsed-capture SHA-256.
 
     python3 scripts/compose_route_acceptance.py --release v0.8.0 \\
         --candidate <40-hex> --as-of 2026-09-25 --measurement-prefix 2026-09-25-v080 \\
@@ -53,8 +58,8 @@ import argparse
 import hashlib
 import importlib.util
 import json
+import math
 import re
-import shutil
 import sys
 from pathlib import Path
 from typing import Any
@@ -66,6 +71,9 @@ from verify_release import (  # pyright: ignore[reportMissingImports]
     validate_upstream_omp_component, ga_release, product_version, OCI_DIGEST_RE,
     bound_file, native_profile, validate_native_route_waiver, validate_native_lead_recovery,
     validate_native_public_install_identity,
+    frozen_product_candidate, validate_native_acceptance_subject, validate_observed_native_client,
+    validate_native_installed_record,
+    public_native_failure_summary,
     NATIVE_ROUTE_LANES as NATIVE_LANES,
     NATIVE_WAIVER_NON_CLAIM,
 )
@@ -138,18 +146,9 @@ def require(condition: bool, message: str) -> None:
 
 def frozen_candidate(release: str, qualification: dict) -> str:
     """The hash-bound product review subject owns acceptance identity, not --candidate."""
-    gate = qualification.get("observed_gates", {}).get("g4_review", {})
-    path = bound_file(ROOT, gate.get("repository_path"))
-    require(path is not None and path.is_relative_to((ROOT / "releases" / release).resolve())
-            and sha256(path.read_bytes()) == gate.get("sha256"),
-            "acceptance requires a hash-bound frozen product subject in this release")
-    ledger = load(path)
-    require(ledger.get("artifact_type") == "omp_ninfer_review_ledger"
-            and ledger.get("release") == release,
-            "the frozen product subject ledger must belong to this release")
-    candidate = ledger.get("product_tooling", {}).get("stage_commit")
-    require(isinstance(candidate, str) and COMMIT_RE.fullmatch(candidate) is not None,
-            "the frozen product subject must name product_tooling.stage_commit")
+    errors: list[str] = []
+    candidate = frozen_product_candidate(ROOT, release, qualification, errors)
+    require(candidate is not None and not errors, "; ".join(errors))
     return candidate
 
 
@@ -249,22 +248,190 @@ def check_native_observations(lane: str, observations: Any) -> None:
             f"{lane}: the native public install did not pass")
 
 
-def public_observations(value: Any) -> Any:
-    """Project arbitrary client error strings to digests; keep originals in the private capture."""
-    if isinstance(value, list):
-        return [public_observations(child) for child in value]
-    if not isinstance(value, dict):
-        return value
-    result = {}
-    for key, child in value.items():
-        if key == "errors":
-            require(isinstance(child, list) and all(isinstance(error, str) for error in child),
-                    "client errors must be a list of strings in the private capture")
-            result[key] = [{"kind": "client-error", "sha256": sha256(error.encode("utf-8"))}
-                           for error in child]
+def capture_digest(value: Any) -> str:
+    return sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8"))
+
+
+def public_error(value: Any) -> dict:
+    if isinstance(value, str):
+        return {"kind": "client-error", "sha256": sha256(value.encode("utf-8"))}
+    return public_projection(value, {"kind": frozenset(("client-error",)), "sha256": HASH})
+
+
+def public_projection(value: Any, schema: Any) -> Any:
+    """Only named fields and bounded scalar values cross the private/public boundary."""
+    if isinstance(schema, dict):
+        require(isinstance(value, dict), "public receipt section must be an object")
+        return {key: public_projection(value[key], child) for key, child in schema.items() if key in value}
+    if isinstance(schema, list):
+        require(isinstance(value, list), "public receipt field must be a list")
+        return [public_projection(child, schema[0]) for child in value]
+    if isinstance(schema, re.Pattern):
+        require(isinstance(value, str) and schema.fullmatch(value) is not None,
+                "public receipt string does not match its bounded field vocabulary")
+    elif isinstance(schema, frozenset):
+        require(isinstance(value, (str, type(None))) and value in schema,
+                "public receipt string is outside its field vocabulary")
+    elif schema in (bool, int, float):
+        require(type(value) is schema, "public receipt scalar has the wrong type")
+    elif schema == (int, float):
+        require(type(value) in (int, float) and math.isfinite(value),
+                "public receipt number must be finite")
+    else:
+        return schema(value)
+    return value
+
+
+HASH = re.compile(r"[0-9a-f]{64}")
+COMMIT = re.compile(r"[0-9a-f]{40}")
+VERSION = re.compile(r"omp/\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?")
+RELEASE = re.compile(r"v\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?")
+STATUS = frozenset(("passed", "failed", "not_applicable", "not_exercised"))
+CLIENT = {"version": VERSION, "binary_sha256": HASH}
+INSTALLED = {"source_commit": COMMIT, "package_sha256": HASH,
+             "binary_sha256": HASH, "config_sha256": HASH}
+FAIL_CLOSED = {"exit_code": int, "no_model_response": bool,
+               "only_selected_local_provider_observed": bool, "errors": [public_error]}
+LIVE_FIELDS = {
+    **{key: bool for key in LIVE_TRUE if key not in ("typed_read_tool_calls", "linked_tool_results")},
+    "typed_read_tool_calls": int, "linked_tool_results": int, "omp_version": VERSION,
+    "event_counts": {key: int for key in (
+        "session", "agent_start", "turn_start", "message_start", "message_end", "message_update",
+        "tool_execution_start", "tool_execution_end", "turn_end", "agent_end")},
+    "raw_transcript_included": bool, "runtime_image_digest": re.compile(r"sha256:[0-9a-f]{64}"),
+    **{key: HASH for key in ("runtime_server_binary_sha256", "runtime_configuration_sha256",
+                             "model_sha256")},
+    "fail_closed": FAIL_CLOSED,
+    "documented_server_restart_nonce_returned": bool,
+}
+ROLLBACK = {"status": STATUS, "directions": int,
+            "reason": frozenset(("first release of the lineage",)),
+            **{key: re.compile(r"qwen38-(?:3090|4090)-native-v\d+\.\d+\.\d+-beta\.\d+(?:-[0-9a-f]+)?")
+               for key in ("intermediate_release", "active_release")}}
+ASSET = {"sha256": HASH, "bytes": int, "in_checksum_set": bool}
+PUBLIC_INSTALL = {
+    "status": STATUS, "source": {"product_release": RELEASE, "candidate_commit": COMMIT},
+    "client": CLIENT,
+    "integrity": {"checksum_set_sha256": HASH, "checksum_entries": int,
+                  "all_manifest_assets_downloaded_from_public_urls": bool,
+                  "all_manifest_asset_hashes_verified": bool,
+                  "assets": {key: ASSET for key in (
+                      "package", "sbom", "source_archive", "installer", "controller",
+                      "gpu_owner_controller", "state_protection")}},
+    "installed": {**INSTALLED, "server_binary_sha256": HASH,
+                  "configuration_sha256": HASH, "matches_manifest": bool},
+    "install": {"execution_source": frozenset(("downloaded-public-url",)),
+                "outcome": frozenset(("already_installed", "already-installed-exact-bytes")),
+                "package_sha256": HASH, "exact_qualified_bytes_accepted": bool,
+                "lifecycle_pointers_changed": bool, "runtime_start_requested": bool,
+                **{key: int for key in ("members_in_package", "members_compared", "mismatches")}},
+    "smoke": {**{key: (int, float) for key in (
+        "authenticated_status_http", "status_ms", "anonymous_status_http", "completion_http",
+        "completion_ms", "completion_tokens")},
+        "served_identity_matches_installed": bool, "output_sha256": HASH, "output_contains_marker": bool,
+        "speculative_backend": frozenset(("mtp", "dflash2"))},
+    "restoration": {"process_state": frozenset(("running", "stopped")),
+                    "endpoint_state": frozenset(("ready", "unavailable")),
+                    "prior_state_restored": bool, "power_limit_w": (int, float)},
+}
+PREPARATION = {
+    "lineage_mode": frozenset(("first_release", "upgrade")), "previous_release_present": bool,
+    **{key: bool for key in ("qualification_installed_instance_preserved", "documented_stage_preserved",
+                             "two_gpu_host", "one_native_lane_at_a_time")},
+    "shared_port": int,
+}
+OBSERVATIONS = {
+    **{key: bool for key in (*NATIVE_OBSERVED, "cloud_fallback_observed", "documented_marker_bare_line")},
+    "server_tool_calls": int, "local_reasoning_compatibility_retries": int,
+    "continuation_reuse": frozenset(("private_endpoint", "none", "checkpoint")),
+    "structured_client": LIVE_FIELDS, "rollback": ROLLBACK, "public_install": PUBLIC_INSTALL,
+}
+AUDIT_FIELDS = {key: bool for key in (
+    "state_bytes_identical", "state_acl_identical", "root_acl_identical", "task_xml_identical",
+    "task_ready", "no_process", "no_listener", "no_lease", "power_identical", "pointers_identical",
+    "holds_identical", "client_files_identical", "support_identical", "support_inventory_identical",
+    "directory_acls_identical", "directory_presence_identical", "pending_preserved_moves",
+    "documented_stage_identical")}
+LEAD_RESTORATION = {
+    "status": frozenset(("restored-by-lead",)), "outcome": frozenset(("graceful",)),
+    **{key: bool for key in ("runtime_record_absent", "gpu_owner_lease_absent", "all_native_tasks_ready")},
+    **{key: int for key in ("sessions_refused", "server_processes", "port_18082_listeners")},
+    "power_limit_w": (int, float),
+}
+
+
+def public_observations(value: Any) -> dict:
+    schema = OBSERVATIONS if "structured_client" in value or "public_install" in value else LIVE_FIELDS
+    return {**public_projection(value, schema), "capture_sha256": capture_digest(value)}
+
+
+def public_restoration(value: dict, lanes: tuple[str, ...], waived: dict) -> dict:
+    incumbent = value["rtx5090"]
+    result = {"candidate_commit": value["candidate_commit"], "rtx5090": public_projection(incumbent, {
+        **{key: bool for key in INCUMBENT_RESTORED},
+        "restart_policy": frozenset(("unless-stopped",)), "window_hold_seconds": [(int, float)],
+    }), "capture_sha256": capture_digest(value)}
+    # Image aliases can name a private registry even when the digest is the public incumbent.
+    result["rtx5090"]["original_image_digest"] = incumbent["original_image"].rsplit("@", 1)[1]
+    for lane in lanes:
+        if lane not in NATIVE_LANES:
+            continue
+        key = lane.removesuffix("-native")
+        if lane in waived:
+            result[key] = {**public_projection(value[key], LEAD_RESTORATION),
+                           "founder_waiver": waived[lane]["founder_waiver"]}
         else:
-            result[key] = public_observations(child)
+            result[key] = public_projection(value[key], {
+                "status": frozenset(("passed",)), **{key: bool for key in NATIVE_RESTORED},
+                **{key: AUDIT_FIELDS for key in NATIVE_AUDITS}, "window_hold_seconds": (int, float),
+                "power_limit_w": (int, float),
+            })
     return result
+
+
+def public_probes(value: dict, configuration: dict, variant: dict) -> dict:
+    """Project even already-summarized probes: nested check maps/parameters are still untrusted."""
+    model = configuration["public_model_id"]
+    identity = {**{key: HASH for key in ("binary_sha256", "config_sha256", "model_artifact_sha256")},
+                "model_id": frozenset((model,)), "source_dirty": bool}
+    checks = {key: bool for key in (
+        "logged_requests", "all_logged_requests_completed", "single_server_instance",
+        "provider_limit_respected", "concurrency_expected", "every_turn_completed",
+        "compactions_committed", "no_failed_compaction", "control_recalled_after_each_compaction",
+        "one_session")}
+    status = {"artifact_type": frozenset(("ninfer_server_status",)), "schema_version": int,
+              "status": frozenset(("ok",)), "identity": identity,
+              "runtime": {"max_context": int}, "scheduler": {"max_concurrency": int}}
+    proof = {"sha256": HASH, "passed": bool,
+             "model": frozenset((f"ninfer-native-{variant['id'].split('-')[0][3:]}/{model}",)),
+             "omp": {"sha256": HASH, "version": VERSION},
+             "checks": lambda child: None if child is None else public_projection(child, checks)}
+    result = public_projection(value, {
+        "fleet": {"sha256": HASH, "artifact_type": frozenset(("omp_ninfer_fleet_fanout_probe",)),
+                  "identity": identity, "branches": int, "transient_retries": int,
+                  "steps": [frozenset(("base_prefill", "warm_edit", "checkpoint_save", "session_delete",
+                                      *(f"branch_{index}" for index in range(4))))]},
+        "fanout": {"sha256": HASH, "artifact_type": frozenset(("omp_ninfer_concurrency_probe",)),
+                   "ok": bool, "arguments": {"arm": frozenset((variant["id"].split("-")[0] + "-C2-acceptance",)),
+                   "scenario": [frozenset(("fanout",))], "fanout_concurrency": int, "branches": int,
+                   "model": frozenset((model,))},
+                   "statuses": {"server_before": status, "server_after": status},
+                   "scenarios": [{"name": frozenset(("fanout",)), "ok": bool,
+                       "requests": [{"label": frozenset(("fanout-base", *(f"branch-{i}" for i in range(4)))),
+                                     "ok": bool, "http_status": int,
+                                     "submitted_monotonic_s": (int, float),
+                                     "completed_monotonic_s": (int, float)}]}]},
+        "parallel": {**proof, "artifact_type": frozenset(("omp_ninfer_parallel_proof",)),
+                     "max_in_flight": int, "scenarios": [{
+                         "scenario": frozenset(("subagents", "sessions")), "passed": bool,
+                         "max_in_flight": int, "overlap_seconds": (int, float), "checks": checks}]},
+        "compaction": {**proof, "artifact_type": frozenset(("omp_ninfer_long_session_proof",)),
+                       "committed": int, "parameters": {
+                           **{key: int for key in ("compactions", "seed", "filler_bytes", "plant_after")},
+                           "restart": bool, "expect_method": frozenset((
+                               None, "handoff", "snapcompact", "context-full", "shake"))}},
+    })
+    return {**result, "capture_sha256": capture_digest(value)}
 
 
 def check_native_policy(release: str, variant: dict, native: dict, client_sha256: str,
@@ -450,6 +617,15 @@ def main() -> int:
     args = parser.parse_args()
     require(COMMIT_RE.fullmatch(args.candidate) is not None, "--candidate must be a 40-hex commit")
     require(re.fullmatch(r"\d{4}-\d{2}-\d{2}", args.as_of) is not None, "--as-of must be an ISO date")
+    require(re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", args.measurement_prefix) is not None,
+            "--measurement-prefix must be a public filename prefix, not a path")
+    pending: dict[Path, bytes] = {}
+
+    def stage(path: Path, value: Any) -> None:
+        pending[path] = (json.dumps(value, indent=2, allow_nan=False) + "\n").encode("utf-8")
+
+    def staged_sha(path: Path) -> str:
+        return sha256(pending[path])
 
     routes: dict[str, Path] = {}
     for item in args.route:
@@ -516,15 +692,23 @@ def main() -> int:
         if lane not in NATIVE_LANES:
             continue
         native = evidence[lane.removesuffix("-native")]
+        subject = {}
+        if (product_version(args.release) or (0, 0, 0)) >= (0, 18, 0):
+            errors = []
+            validate_native_acceptance_subject(native, args.release, candidate, omp, lane, errors)
+            require(not errors, "; ".join(errors))
+            subject = {"candidate_commit": native["candidate_commit"], "release": native["release"],
+                       "client": public_projection(native["client"], CLIENT),
+                       "installed": public_projection(native.get("installed", {}), INSTALLED)}
         if lane not in waiver_paths:
             require(native.get("status", "passed") == "passed",
                     f"{lane}: failed native campaign requires an explicit founder waiver")
-            native_campaigns[lane] = {"status": "passed"}
+            native_campaigns[lane] = {"status": "passed", **subject}
             continue
         path = bound_file(ROOT, waiver_paths[lane])
         require(path is not None, f"{lane}: native campaign waiver file is missing")
         reference = {"repository_path": waiver_paths[lane], "sha256": sha256(path.read_bytes())}
-        campaign = {"status": native.get("status"), "failed_phase": native.get("failed_phase"),
+        campaign = {"status": native.get("status"), **subject, "failed_phase": native.get("failed_phase"),
                     "founder_waiver": reference, "window_failure": native.get("window_failure"),
                     "stopped_owner_census": native.get("stopped_owner_census")}
         errors = []
@@ -547,11 +731,28 @@ def main() -> int:
                 f"{variant['id']}: runtime model must match the effective native model")
         native = evidence[variant["id"].split("-")[0]]
         lane = variant["id"].split("-")[0] + "-native"
+        if (product_version(args.release) or (0, 0, 0)) >= (0, 18, 0):
+            errors = []
+            validate_native_installed_record(native.get("installed"), variant, lane, errors)
+            require(not errors, "; ".join(errors))
         if lane not in waived:
             check_native_observations(variant["id"], native.get("observations"))
             errors = []
             validate_native_public_install_identity(
                 native["observations"]["public_install"], variant, errors)
+            if (product_version(args.release) or (0, 0, 0)) >= (0, 18, 0):
+                install = native["observations"]["public_install"]
+                source = install.get("source", {})
+                require(native["observations"].get("structured_client", {}).get("omp_version")
+                        == native["client"]["version"],
+                        f"{lane}: structured_client.omp_version must match the observed stock client")
+                require(source.get("product_release") == args.release,
+                        f"{lane}: public-install source.product_release must match this release")
+                require(source.get("candidate_commit") == candidate,
+                        f"{lane}: public-install source.candidate_commit must match the frozen product subject")
+                validate_observed_native_client(install.get("client"), omp, f"{lane} nested install", errors)
+                validate_native_installed_record(install.get("installed"), variant,
+                                                 f"{lane} nested install", errors)
             require(not errors, "; ".join(errors))
         native_configurations[variant["id"]] = check_native_policy(
             args.release, variant, native, manifest["components"]["omp"]["binary_sha256"],
@@ -561,10 +762,21 @@ def main() -> int:
         check_native_first_release(native, load(receipt_path) if lane_receipt else {})
         if lane in waived and native_configurations[variant["id"]] is not None:
             waived[lane]["runtime_configuration"] = native_configurations[variant["id"]]
-            waived[lane]["probe_acceptance"] = native["probe_acceptance"]
+            waived[lane]["probe_acceptance"] = public_probes(
+                native["probe_acceptance"], native_configurations[variant["id"]], variant)
     # The restoration receipt and every incumbent-restored claim below rest on this evidence.
     check_restoration(evidence["restoration"], lanes, candidate,
                       predecessor_image_digest(args.release), waived)
+    restoration = public_restoration(evidence["restoration"], lanes, waived)
+    for lane, campaign in waived.items():
+        failure = campaign["window_failure"]
+        campaign["window_failure"] = {
+            "projection_schema": 1, "sha256": failure["sha256"], "boundary": campaign["failed_phase"],
+            "observed_summary": public_native_failure_summary(failure["observed_summary"]),
+            "capture_sha256": capture_digest(failure),
+        }
+        campaign["stopped_owner_census"] = public_projection(campaign["stopped_owner_census"], {
+            "sha256": HASH, "lane": frozenset(("rtx3090", "rtx4090")), "power_limit_w": (int, float)})
     scope = evidence["documented_routes"].get("scope")
     require(isinstance(scope, str) and bool(scope.strip()),
             "evidence documented_routes needs the scope the accepted routes cover")
@@ -578,7 +790,7 @@ def main() -> int:
         scope += " " + " ".join(waiver_limitations)
     acceptance_status = "waived-by-founder" if waived else "passed"
 
-    # 1. Route runner receipts, checked and copied byte for byte.
+    # 1. Route runner receipts, checked and retained byte for byte in the write plan.
     receipts: dict[str, dict] = {}
     route_rows: dict[str, dict] = {}
     for lane in lanes:
@@ -591,7 +803,7 @@ def main() -> int:
                     f"{lane}: waiver must bind the original documented-route digest")
         receipts[lane] = receipt
         target = measurements / f"{args.measurement_prefix}-{lane}-run.json"
-        target.write_bytes(raw)
+        pending[target] = raw
         route_rows[lane] = {
             "status": "passed",
             "steps": [step["slug"] for step in receipt["steps"]],
@@ -599,6 +811,15 @@ def main() -> int:
             "receipt": relative(target),
             "sha256": sha256(raw),
         }
+        if lane in NATIVE_LANES and "candidate_commit" in native_campaigns[lane]:
+            route_rows[lane].update({field: native_campaigns[lane][field]
+                                    for field in ("candidate_commit", "release", "client", "installed")})
+            errors = []
+            validate_native_acceptance_subject(receipt, args.release, candidate, omp, f"{lane} runner", errors)
+            variant = next(item for item in manifest["components"]["ninfer_variants"]
+                           if item["id"] == NATIVE_LANES[lane])
+            validate_native_installed_record(receipt.get("installed"), variant, f"{lane} runner", errors)
+            require(not errors, "; ".join(errors))
     executed_documents = {receipt["document_sha256"] for receipt in receipts.values()}
     require(len(executed_documents) == 1, f"routes ran different documents: {executed_documents}")
     executed_document = executed_documents.pop()
@@ -612,18 +833,18 @@ def main() -> int:
 
     # 2. Restoration receipt.
     restoration_path = measurements / f"{args.measurement_prefix}-acceptance-restoration.json"
-    save(restoration_path, {
+    stage(restoration_path, {
         "artifact_type": "omp_ninfer_acceptance_restoration",
         "schema_version": 1,
         "release": args.release,
         "as_of": args.as_of,
         "status": "passed-with-founder-waiver" if waived else "passed",
-        **evidence["restoration"],
+        **restoration,
         "production_upgrade_activated": False,
         "raw_private_paths_credentials_or_outputs_included": False,
     })
     restoration_ref = {"repository_path": relative(restoration_path),
-                       "sha256": sha256(restoration_path.read_bytes())}
+                       "sha256": staged_sha(restoration_path)}
 
     # 3. One platform receipt per client profile, named for its platform and the client version.
     platform_rows, platform_paths = [], []
@@ -631,8 +852,8 @@ def main() -> int:
         platform_evidence = evidence["platforms"][profile["id"]]
         filename = f"{OMP_PROFILE_PLATFORMS[profile['id']]}-{omp['distribution_version']}.json"
         receipt = platform_receipts[profile["id"]]
-        save(acceptance_root / filename, receipt)
-        digest = sha256((acceptance_root / filename).read_bytes())
+        stage(acceptance_root / filename, receipt)
+        digest = staged_sha(acceptance_root / filename)
         # This is product qualification metadata; stock OMP does not read the authority. The URL
         # names the candidate until rebind_release.py --stage platform pins the receipt's commit.
         status = platform_evidence["status"]
@@ -655,7 +876,7 @@ def main() -> int:
         variant = next(v for v in manifest["components"]["ninfer_variants"] if v["id"] == native_variant)
         native = evidence[gpu_lane]
         native_path = acceptance_root / f"{gpu_lane}-public-install.json"
-        save(native_path, {
+        stage(native_path, {
             "artifact_type": "omp_ninfer_native_public_install_acceptance",
             "schema_version": 1,
             "release": args.release,
@@ -665,8 +886,11 @@ def main() -> int:
             "candidate_commit": candidate,
             "client": {
                 **windows["client_distribution"],
-                "version": f"omp/{omp['distribution_version']}",
+                **(public_projection(native["client"], CLIENT) if "client" in native else
+                   {"version": f"omp/{omp['distribution_version']}"}),
             },
+            **({"installed": public_projection(native["installed"], INSTALLED)}
+               if "installed" in native else {}),
             "runtime": {
                 "tag": variant["release_tag"],
                 "source_commit": variant["source_commit"],
@@ -679,9 +903,11 @@ def main() -> int:
                     "runtime_shape": variant["runtime_shape"]}
                    if native_configurations[native_variant] is not None else {}),
             },
-            **({"probe_acceptance": native["probe_acceptance"]}
+            **({"probe_acceptance": public_probes(
+                native["probe_acceptance"], native_configurations[native_variant], variant)}
                if native_configurations[native_variant] is not None else {}),
-            "preparation": native["preparation"],
+            "preparation": {**public_projection(native["preparation"], PREPARATION),
+                            "capture_sha256": capture_digest(native["preparation"])},
             "observations": public_observations(native["observations"]),
             "documented_route": {"repository_path": route_rows[native_lane]["receipt"],
                                  "sha256": route_rows[native_lane]["sha256"]},
@@ -689,7 +915,7 @@ def main() -> int:
             "limitations": native["limitations"],
         })
         native_refs[f"{gpu_lane}_public_install"] = {
-            "repository_path": relative(native_path), "sha256": sha256(native_path.read_bytes())}
+            "repository_path": relative(native_path), "sha256": staged_sha(native_path)}
 
     # 5. The documented-route acceptance.
     routes_doc: dict[str, Any] = {
@@ -721,19 +947,19 @@ def main() -> int:
         "qualification_environment": evidence["documented_routes"]["qualification_environment"],
     })
     routes_path = acceptance_root / "documented-routes.json"
-    save(routes_path, routes_doc)
+    stage(routes_path, routes_doc)
 
     # 6. The composed external-installation acceptance.
     composed = evidence["composed"]
     # Hash the promoted authority, not the draft snapshot that predates these receipts.
     authority["composition"]["status"] = composed["authority_status"]
     authority["composition"]["blockers"] = []
-    save(authority_path, authority)
-    shutil.copy(authority_path, release_root / "compatibility.json")
-    compatibility_sha = sha256(authority_path.read_bytes())
+    stage(authority_path, authority)
+    pending[release_root / "compatibility.json"] = pending[authority_path]
+    compatibility_sha = staged_sha(authority_path)
     omp["compatibility_sha256"] = compatibility_sha
     client_components = release_root / "qualification" / "client-components.json"
-    save(client_components, {
+    stage(client_components, {
         "artifact_type": "omp_ninfer_upstream_client_components",
         "schema_version": 1,
         "release": args.release,
@@ -756,8 +982,12 @@ def main() -> int:
     steps = {lane: {**native_campaigns.get(lane, {"status": "passed"}),
                     "blocks": len(route_rows[lane]["steps"])} for lane in lanes}
     steps = {"public_client_downloads": public_client_downloads, **steps,
-             "linux_live_client": composed["linux_live_client"]}
-    save(composed_path, {
+             "linux_live_client": {
+                 **public_projection(composed["linux_live_client"], {
+                     "status": STATUS, "omp_version": VERSION, "binary_sha256": HASH,
+                     "profile": frozenset(("linux-docker-local",)), "fail_closed": FAIL_CLOSED}),
+                 "capture_sha256": capture_digest(composed["linux_live_client"])}}
+    stage(composed_path, {
         "artifact_type": "omp_ninfer_composed_external_installation",
         "schema_version": 1,
         "release": args.release,
@@ -788,11 +1018,11 @@ def main() -> int:
         "runtime_qualification": composed["runtime_qualification"],
         "evidence": {
             "documented_routes": {"repository_path": relative(routes_path),
-                                  "sha256": sha256(routes_path.read_bytes())},
+                                  "sha256": staged_sha(routes_path)},
             **native_refs,
             "restoration": restoration_ref,
             "published_client_components": {"repository_path": relative(client_components),
-                                            "sha256": sha256(client_components.read_bytes())},
+                                            "sha256": staged_sha(client_components)},
         },
         "limitations": composed["limitations"] + waiver_limitations,
         "raw_prompts_outputs_or_secrets_included": False,
@@ -803,7 +1033,7 @@ def main() -> int:
     composition["external_installation_acceptance"] = {
         "status": acceptance_status,
         "repository_path": relative(composed_path),
-        "sha256": sha256(composed_path.read_bytes()),
+        "sha256": staged_sha(composed_path),
         "public_url": composition["external_installation_acceptance"].get("public_url"),
         "as_of": args.as_of,
         "release": args.release,
@@ -820,7 +1050,7 @@ def main() -> int:
         "platform_receipts": platform_rows,
         "note": " ".join([composed["qualification_note"], *waiver_limitations]),
     }
-    routes_ref = {"repository_path": relative(routes_path), "sha256": sha256(routes_path.read_bytes())}
+    routes_ref = {"repository_path": relative(routes_path), "sha256": staged_sha(routes_path)}
     composition["documented_route_acceptance"] = {"status": "passed", **routes_ref}
     # The summary the ready gate reads replaces the pending one staging wrote, restating this
     # composition instead of waiting for a hand edit.
@@ -842,7 +1072,7 @@ def main() -> int:
                                    for lane in lanes},
         "platform_receipts": platform_paths,
         "fresh_product_acceptance": True,
-        "restoration": restoration_summary(evidence["restoration"], lanes,
+        "restoration": restoration_summary(restoration, lanes,
                                            restoration_ref["repository_path"], waived),
         "composition_run": True,
     })
@@ -854,14 +1084,18 @@ def main() -> int:
                 *(ROOT / path for path in platform_paths),
                 *(ROOT / row["receipt"] for row in route_rows.values()),
                 *(ROOT / row["repository_path"] for row in native_refs.values())]
-    rebind_composed_evidence(qualification, {relative(path): sha256(path.read_bytes()) for path in authored})
-    save(qualification_path, qualification)
-    manifest["qualification"]["summary_sha256"] = sha256(qualification_path.read_bytes())
+    rebind_composed_evidence(qualification, {relative(path): staged_sha(path) for path in authored})
+    stage(qualification_path, qualification)
+    manifest["qualification"]["summary_sha256"] = staged_sha(qualification_path)
     manifest["status"] = "ready"
     manifest["publication"]["blockers"] = []
     manifest["publication"]["external_installation_qualified"] = True
     manifest["qualification"]["external_installation_passed"] = True
-    save(manifest_path, manifest)
+    stage(manifest_path, manifest)
+    # No refusal checks, parsing, projection or serialization occur after this boundary.
+    for path, data in pending.items():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(data)
     print(f"composed {args.release} acceptance: {len(lanes)} routes, {len(platform_rows)} client "
           f"receipts; commit, then rebind_release.py --pin <commit> --stage platform")
     return 0

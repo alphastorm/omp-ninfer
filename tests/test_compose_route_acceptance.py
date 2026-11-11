@@ -333,7 +333,8 @@ class UpstreamCompositionTests(unittest.TestCase):
             "model_artifact_sha256": "c" * 64,
             "qualification": {"summary": "qualification/rtx4090.json"}}]
         MODULE.save(self.release_root / "qualification" / "rtx4090.json", FIRST_RELEASE)
-        manifest.update(status="candidate", publication={"blockers": ["acceptance"]}, qualification={})
+        manifest.update(release=self.release, status="candidate",
+                        publication={"blockers": ["acceptance"]}, qualification={})
         MODULE.save(self.release_root / "manifest.json", manifest)
         MODULE.save(self.root / "releases/v0.14.0/manifest.json", {
             "release": "v0.14.0", "status": "ready", "components": {"ninfer": {
@@ -410,6 +411,23 @@ class UpstreamCompositionTests(unittest.TestCase):
                     "path": path.relative_to(self.root).as_posix(), "sha256": MODULE.sha256(path.read_bytes())}
             variant["configuration_sha256"] = variant["qualification"]["server_config"]["sha256"]
             if lane in evidence:
+                client = {"version": f"omp/{manifest['components']['omp']['distribution_version']}",
+                          "binary_sha256": manifest["components"]["omp"]["binary_sha256"]}
+                evidence[lane].update(candidate_commit=CANDIDATE, release=self.release,
+                                      client=deepcopy(client))
+                if "structured_client" in evidence[lane].get("observations", {}):
+                    evidence[lane]["observations"]["structured_client"]["omp_version"] = client["version"]
+                installed = {"source_commit": variant["source_commit"],
+                             "package_sha256": variant["package_sha256"],
+                             "binary_sha256": variant["server_binary_sha256"],
+                             "config_sha256": variant["configuration_sha256"]}
+                evidence[lane]["installed"] = deepcopy(installed)
+                route_path = self.root / f"{lane}-native.json"
+                if route_path.is_file():
+                    receipt = MODULE.load(route_path)
+                    receipt.update(candidate_commit=CANDIDATE, release=self.release,
+                                   client=deepcopy(client), installed=deepcopy(installed))
+                    MODULE.save(route_path, receipt)
                 probes = probe_receipts(variant, configuration)
                 for name in ("parallel", "compaction"):
                     if name in probes:
@@ -420,6 +438,10 @@ class UpstreamCompositionTests(unittest.TestCase):
                                       probe_acceptance=native_probe_summary(probes))
                 install = evidence[lane].get("observations", {}).get("public_install")
                 if install is not None:
+                    install["source"] = {"product_release": self.release,
+                                         "candidate_commit": CANDIDATE}
+                    install["client"] = deepcopy(client)
+                    install["installed"].update(installed)
                     install["integrity"]["assets"]["package"].update(
                         sha256=variant["package_sha256"], bytes=variant["package_bytes"])
                     install["installed"].update(
@@ -663,6 +685,221 @@ class UpstreamCompositionTests(unittest.TestCase):
             self.compose()
         self.assertFalse((self.release_root / "acceptance").exists())
 
+    def test_ready_routes_reconcile_the_rehashed_review_candidate(self):
+        self.assertEqual(self.compose(), 0)
+        path = self.release_root / "review/runtime-ledger.json"
+        ledger = MODULE.load(path)
+        ledger["product_tooling"]["stage_commit"] = "2" * 40
+        MODULE.save(path, ledger)
+        qualification = MODULE.load(self.release_root / "qualification.json")
+        qualification["observed_gates"]["g4_review"]["sha256"] = MODULE.sha256(path.read_bytes())
+        errors = []
+        validate_documented_route_acceptance(self.root, qualification, errors)
+        self.assertTrue(any("frozen product subject" in error for error in errors), errors)
+
+    def test_ready_routes_rederive_current_document_and_block_addresses(self):
+        self.assertEqual(self.compose(), 0)
+        path = self.release_root / "acceptance/documented-routes.json"
+        original = MODULE.load(path)
+        qualification = MODULE.load(self.release_root / "qualification.json")
+        for case in ("document", "address", "clone", "block"):
+            with self.subTest(case=case):
+                routes = deepcopy(original)
+                if case == "document":
+                    routes["current_document_sha256"] = "0" * 64
+                elif case == "address":
+                    routes["current_block_addresses"]["rtx4090-native"][0]["index"] += 1
+                else:
+                    receipt_path = self.root / routes["routes"]["rtx4090-native"]["receipt"]
+                    receipt = MODULE.load(receipt_path)
+                    if case == "clone":
+                        receipt["clone_commit"] = "2" * 40
+                    else:
+                        receipt["steps"][0]["executed_sha256"] = "0" * 64
+                    MODULE.save(receipt_path, receipt)
+                    routes["routes"]["rtx4090-native"]["sha256"] = MODULE.sha256(receipt_path.read_bytes())
+                MODULE.save(path, routes)
+                digest = MODULE.sha256(path.read_bytes())
+                qualification["composition"]["documented_route_acceptance"]["sha256"] = digest
+                qualification["documented_route_acceptance"]["evidence_sha256"] = digest
+                errors = []
+                validate_documented_route_acceptance(self.root, qualification, errors)
+                self.assertTrue(errors, case)
+
+    def test_ready_routes_reject_a_guide_edit_after_composition(self):
+        self.assertEqual(self.compose(), 0)
+        self.document.write_bytes(self.document.read_bytes() + b"\nPost-composition prose.\n")
+        errors = []
+        validate_documented_route_acceptance(
+            self.root, MODULE.load(self.release_root / "qualification.json"), errors)
+        self.assertTrue(any("current_document_sha256" in error for error in errors), errors)
+
+    def test_native_campaign_and_nested_install_bind_observed_candidate_release_and_client(self):
+        self.refused_before_writing(lambda evidence: evidence["rtx4090"], (
+            ("campaign candidate", lambda native: native.update(candidate_commit="2" * 40),
+             "candidate_commit"),
+            ("campaign release", lambda native: native.update(release="v0.17.0"), "release"),
+            ("campaign client", lambda native: native["client"].update(binary_sha256="0" * 64),
+             "client.binary_sha256"),
+            ("campaign version", lambda native: native["client"].update(version="omp/18.2.3"),
+             "client.version"),
+            ("structured predecessor client", lambda native: native["observations"]["structured_client"].update(
+                omp_version="omp/18.2.3"), "structured_client.omp_version"),
+            ("campaign installed package", lambda native: native["installed"].update(
+                package_sha256="0" * 64), "installed.package_sha256"),
+            ("campaign installed source", lambda native: native["installed"].update(
+                source_commit="0" * 40), "installed.source_commit"),
+            ("install candidate", lambda native: native["observations"]["public_install"]["source"].update(
+                candidate_commit="2" * 40), "candidate_commit"),
+            ("install release", lambda native: native["observations"]["public_install"]["source"].update(
+                product_release="v0.17.0"), "product_release"),
+            ("install client", lambda native: native["observations"]["public_install"]["client"].update(
+                binary_sha256="0" * 64), "client.binary_sha256"),
+            ("install version", lambda native: native["observations"]["public_install"]["client"].update(
+                version="omp/18.2.3"), "client.version"),
+            ("install package record", lambda native: native["observations"]["public_install"]["installed"].update(
+                package_sha256="0" * 64), "installed.package_sha256"),
+            ("install binary record", lambda native: native["observations"]["public_install"]["installed"].update(
+                binary_sha256="0" * 64), "installed.binary_sha256"),
+            ("missing candidate", lambda native: native.pop("candidate_commit"), "candidate_commit"),
+        ))
+
+    def test_every_composed_native_receipt_keeps_the_observed_client_and_candidate(self):
+        self.assertEqual(self.compose(), 0)
+        native = MODULE.load(self.root / "evidence.json")["rtx4090"]
+        routes = MODULE.load(self.release_root / "acceptance/documented-routes.json")
+        install = MODULE.load(self.release_root / "acceptance/rtx4090-public-install.json")
+        for row in (routes["routes"]["rtx4090-native"], routes["native_campaigns"]["rtx4090-native"],
+                    install):
+            self.assertEqual(row["candidate_commit"], CANDIDATE)
+            self.assertEqual(row["client"]["version"], native["client"]["version"])
+            self.assertEqual(row["client"]["binary_sha256"], native["client"]["binary_sha256"])
+
+    def test_ready_verifier_refuses_rehashed_native_candidate_and_client_relabels(self):
+        self.assertEqual(self.compose(), 0)
+        path = self.release_root / "acceptance/rtx4090-public-install.json"
+        original = MODULE.load(path)
+        external_path = self.release_root / "acceptance/composed-external-installation.json"
+        original_external = MODULE.load(external_path)
+        for section, field, value in (
+            ("outer", "candidate_commit", "2" * 40), ("client", "binary_sha256", "0" * 64),
+            ("nested_source", "candidate_commit", "2" * 40),
+            ("nested_source", "product_release", "v0.17.0"),
+            ("nested_client", "version", "omp/18.2.3"),
+            ("structured_client", "omp_version", "omp/18.2.3"),
+        ):
+            with self.subTest(section=section, field=field):
+                receipt, external = deepcopy(original), deepcopy(original_external)
+                target = {"outer": receipt, "client": receipt["client"],
+                          "nested_source": receipt["observations"]["public_install"]["source"],
+                          "nested_client": receipt["observations"]["public_install"]["client"],
+                          "structured_client": receipt["observations"]["structured_client"]}[section]
+                target[field] = value
+                MODULE.save(path, receipt)
+                external["evidence"]["rtx4090_public_install"]["sha256"] = MODULE.sha256(path.read_bytes())
+                MODULE.save(external_path, external)
+                qualification = MODULE.load(self.release_root / "qualification.json")
+                qualification["composition"]["external_installation_acceptance"]["sha256"] = MODULE.sha256(
+                    external_path.read_bytes())
+                errors = []
+                validate_native_route_policy(
+                    self.root, self.release, MODULE.load(self.release_root / "manifest.json"),
+                    qualification, errors)
+                self.assertTrue(any(field in error for error in errors), errors)
+
+    def test_every_late_refusal_preserves_the_entire_tree(self):
+        for case in ("downloads", "last route", "documents", "blocks", "document change"):
+            with self.subTest(case=case):
+                fixture = UpstreamCompositionTests()
+                fixture.setUp()
+                try:
+                    if case in ("downloads", "document change"):
+                        evidence = MODULE.load(fixture.root / "evidence.json")
+                        if case == "downloads":
+                            evidence["composed"]["public_client_downloads"]["anonymous"] = False
+                        else:
+                            for lane in (*MODULE.LANES, "rtx4090-native"):
+                                path = fixture.root / f"{lane}.json"
+                                receipt = MODULE.load(path)
+                                receipt["document_sha256"] = "0" * 64
+                                MODULE.save(path, receipt)
+                        MODULE.save(fixture.root / "evidence.json", evidence)
+                    else:
+                        path = fixture.root / "rtx4090-native.json"
+                        receipt = MODULE.load(path)
+                        if case == "last route":
+                            receipt["status"] = "failed"
+                        elif case == "documents":
+                            receipt["document_sha256"] = "0" * 64
+                        else:
+                            receipt["steps"][0]["block_sha256"] = "0" * 64
+                            receipt["steps"][0]["executed_sha256"] = "0" * 64
+                        MODULE.save(path, receipt)
+                    def snapshot():
+                        return {path.relative_to(fixture.root).as_posix():
+                                path.read_bytes() if path.is_file() else None
+                                for path in fixture.root.rglob("*")}
+                    before = snapshot()
+                    with self.assertRaises(SystemExit):
+                        fixture.compose()
+                    self.assertEqual(snapshot(), before)
+                finally:
+                    fixture.doCleanups()
+
+    def test_public_projection_excludes_nested_errors_paths_and_unknown_keys(self):
+        evidence = MODULE.load(self.root / "evidence.json")
+        sentinel = "sk-live-CREDENTIAL_SENTINEL_493817"
+        for row in (
+            evidence["platforms"]["darwin-remote-ssh"]["live_acceptance"],
+            evidence["rtx4090"]["preparation"], evidence["rtx4090"]["observations"],
+            evidence["rtx4090"]["observations"]["public_install"]["installed"],
+            evidence["restoration"]["rtx5090"], evidence["restoration"]["rtx4090"],
+            evidence["composed"]["linux_live_client"],
+            evidence["rtx4090"]["probe_acceptance"]["fleet"],
+            evidence["rtx4090"]["probe_acceptance"]["fleet"]["identity"],
+        ):
+            row.update(error=sentinel, path=sentinel, unexpected={sentinel: sentinel})
+        evidence["rtx4090"]["preparation"]["documented_install"] = sentinel
+        evidence["rtx4090"]["observations"]["structured_client"]["fail_closed"].update(
+            endpoint=sentinel, method=sentinel)
+        for key in ("restoration_checks", "final_audit_checks"):
+            evidence["restoration"]["rtx4090"][key][sentinel] = True
+        MODULE.save(self.root / "evidence.json", evidence)
+        self.assertEqual(self.compose(), 0)
+        published = [*self.release_root.rglob("*.json"), *(
+            self.root / "docs/measurements").glob("*.json")]
+        self.assertTrue(published)
+        for path in published:
+            self.assertNotIn(sentinel, path.read_text(encoding="utf-8"), path)
+        self.assertEqual(MODULE.load(self.root / "evidence.json"), evidence)
+
+    def test_public_window_failure_projects_error_to_digest(self):
+        path = self.waive_3090(failed_phase="native-probes")
+        sentinel = "sk-live-CREDENTIAL_SENTINEL_205361"
+        waiver = MODULE.load(path)
+        waiver["observed_summary"]["error"] = sentinel
+        MODULE.save(path, waiver)
+        evidence = MODULE.load(self.root / "evidence.json")
+        binding = {"repository_path": path.relative_to(self.root).as_posix(),
+                   "sha256": MODULE.sha256(path.read_bytes())}
+        native = evidence["rtx3090"]
+        native["founder_waiver"] = binding
+        native["window_failure"]["observed_summary"]["error"] = sentinel
+        native["window_failure"]["path"] = sentinel
+        evidence["restoration"]["rtx3090"]["founder_waiver"] = binding
+        MODULE.save(self.root / "evidence.json", evidence)
+        self.assertEqual(self.compose(), 0)
+        for name in ("documented-routes.json", "composed-external-installation.json"):
+            self.assertNotIn(sentinel, (self.release_root / "acceptance" / name).read_text())
+        routes = MODULE.load(self.release_root / "acceptance/documented-routes.json")
+        observed = routes["native_campaigns"]["rtx3090-native"]["window_failure"]["observed_summary"]
+        self.assertEqual(observed["error"], {"kind": "probe-error",
+                                           "sha256": MODULE.sha256(sentinel.encode())})
+        errors = []
+        validate_documented_route_acceptance(
+            self.root, MODULE.load(self.release_root / "qualification.json"), errors)
+        self.assertEqual(errors, [])
+
     def test_composition_rebinds_references_to_the_evidence_it_rewrites(self):
         descriptor = self.release_root / "qualification/client-components.json"
         MODULE.save(descriptor, {"old": "staged descriptor"})
@@ -855,15 +1092,16 @@ class UpstreamCompositionTests(unittest.TestCase):
         evidence["restoration"]["rtx3090"] = {**waiver["restoration_summary"], "founder_waiver": binding}
         MODULE.save(self.root / "evidence.json", evidence)
         self.bind_native_policies()
+        evidence = MODULE.load(self.root / "evidence.json")
+        waiver["evidence_sha256"]["documented-route.json"] = MODULE.sha256(route.read_bytes())
         if failed_phase == "native-probes":
-            evidence = MODULE.load(self.root / "evidence.json")
             waiver["probe_projection_sha256"]["compaction"] = (
                 evidence["rtx3090"]["probe_acceptance"]["compaction"]["sha256"])
-            MODULE.save(path, waiver)
-            binding["sha256"] = MODULE.sha256(path.read_bytes())
-            evidence["rtx3090"]["founder_waiver"] = binding
-            evidence["restoration"]["rtx3090"]["founder_waiver"] = binding
-            MODULE.save(self.root / "evidence.json", evidence)
+        MODULE.save(path, waiver)
+        binding["sha256"] = MODULE.sha256(path.read_bytes())
+        evidence["rtx3090"]["founder_waiver"] = binding
+        evidence["restoration"]["rtx3090"]["founder_waiver"] = binding
+        MODULE.save(self.root / "evidence.json", evidence)
         self.argv += ["--native-route-waiver", f"rtx3090-native={binding['repository_path']}"]
         return path
 
@@ -1159,6 +1397,7 @@ class UpstreamCompositionTests(unittest.TestCase):
         self.release_root = target
         self.argv[self.argv.index("--release") + 1] = self.release
         manifest = MODULE.load(target / "manifest.json")
+        manifest["release"] = self.release
         evidence = MODULE.load(self.root / "evidence.json")
         for variant in manifest["components"]["ninfer_variants"]:
             gpu = variant["id"].split("-")[0]

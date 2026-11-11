@@ -14,7 +14,7 @@ after so an exhaustion that did not cost reuse is still visible.
 Example:
   python3 scripts/multisession_probe.py --lane rtx5090-v063 --base-url http://127.0.0.1:18189 \
     --api-key-file ~/.omp/agent/ninfer-5090.key --sessions 3 --base-tokens 100000 --rounds 2 \
-    --log-cmd "ssh nyc-pc-wsl cat /home/sunil/.local/state/omp-ninfer/requests-*.jsonl" \
+    --log-cmd "ssh rtx5090-win-a cat /path/to/window/requests-*.jsonl" \
     --receipt docs/measurements/$(date +%F)-multisession-probe-rtx5090.json
 """
 

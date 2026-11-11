@@ -1,5 +1,11 @@
 [CmdletBinding()]
-param([switch]$Preflight)
+param(
+    [switch]$Preflight,
+    [Parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][string]$CampaignRoot,
+    [Parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][string]$GroupwiseIntModel,
+    [Parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][string]$Nvfp4Model,
+    [Parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][string]$ApiKeyFile
+)
 
 # RTX 5090 lane runner for scripts/run_variant_campaign.py. Runs on the Windows host of the
 # WSL2/Docker appliance. Every arm is one fresh container started from the frozen experiment
@@ -15,17 +21,15 @@ $ProgressPreference = 'SilentlyContinue'
 $lane = 'rtx5090'
 $incumbent = 'ninfer-5090-v046p'
 $image = 'ninfer-mtp-ablation-5090:ce51ccb6'
-$campaignRoot = '/home/sunil/services/variant-5090'
 $runner = "$campaignRoot/run_variant_campaign.py"
 $corpusRunner = "$campaignRoot/run_mtp_ablation.py"
 $arms = "$campaignRoot/variant-campaign-arms.json"
 $campaignIdFile = "$campaignRoot/campaign-id.txt"
 $qualityScript = "$campaignRoot/quality.sh"
 $models = @{
-    'groupwise-int' = '/home/sunil/builds/models/qwen3_8_27b.ninfer'
-    'nvfp4' = '/home/sunil/builds/models/qwen3_8_27b_nvfp4.ninfer'
+    'groupwise-int' = $GroupwiseIntModel
+    'nvfp4' = $Nvfp4Model
 }
-$apiKeyFile = '/home/sunil/services/ninfer-5090/secrets/api_key'
 # Run this launcher from the product checkout; staged child tools receive its exact selector.
 $modelId = (& python -c 'import sys; sys.path.insert(0, sys.argv[1]); from client_acceptance import documented_model_id; print(documented_model_id(sys.argv[2]))' (Join-Path $PSScriptRoot '..') 'rtx5090-macos-client' | Out-String).Trim()
 if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($modelId)) { throw 'documented RTX 5090 model lookup failed' }

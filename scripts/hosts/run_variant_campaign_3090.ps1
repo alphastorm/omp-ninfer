@@ -1,6 +1,9 @@
 [CmdletBinding()]
 param(
     [switch]$Preflight,
+    [Parameter(Mandatory=$true)]
+    [ValidateScript({if(-not (Test-Path -LiteralPath $_ -PathType Leaf)){throw 'GroupwiseIntModel must name an existing model file'};$true})]
+    [string]$GroupwiseIntModel,
     [string]$AcceptanceRelease='',
     [string]$AcceptanceKeyFile='',
     [string]$AcceptanceReceipt=''
@@ -34,7 +37,7 @@ $taskName = 'NInfer-Qwen38-3090-OMP-v0.2'
 $root = Join-Path $env:USERPROFILE 'variant-3090'
 $binary = Join-Path (Join-Path $env:USERPROFILE 'mtp-ablation-3090-3e37b03e') 'bin\ninfer-serve.exe'
 $models = @{
-    'groupwise-int' = 'C:\Users\sunil\OMP\qualification\ninfer-3090-v020\qwen3_8_27b.ninfer'
+    'groupwise-int' = $GroupwiseIntModel
 }
 $apiKeyFile = Join-Path $stateRoot 'secrets\qwen38-3090-omp-v0.2.2-beta.1-72d34b706f18\api-key.txt'
 $runner = Join-Path $root 'run_variant_campaign.py'

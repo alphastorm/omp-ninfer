@@ -10,9 +10,9 @@ Example:
   python3 scripts/qualify_rtx5090_profile.py --base-url http://127.0.0.1:18191 \
     --api-key-file ~/.omp/agent/ninfer-5090.key --model q38-ninfer \
     --long-fixture ../ninfer/examples/cli/messages/long_niah_128k.json \
-    --restart-cmd "ssh nyc-pc wsl.exe -d Ubuntu-24.04 -e docker restart ninfer-5090-v048c" \
-    --log-cmd "ssh nyc-pc wsl.exe -d Ubuntu-24.04 -e cat /home/sunil/services/variant-5090/v048/logs/requests-*.jsonl" \
-    --vram-cmd "ssh nyc-pc wsl.exe -d Ubuntu-24.04 -e nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits" \
+    --restart-cmd "ssh rtx5090-win-a wsl.exe -d Ubuntu-24.04 -e docker restart ninfer-5090-v048c" \
+    --log-cmd "ssh rtx5090-win-a wsl.exe -d Ubuntu-24.04 -e cat /path/to/window/requests-*.jsonl" \
+    --vram-cmd "ssh rtx5090-win-a wsl.exe -d Ubuntu-24.04 -e nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits" \
     --receipt docs/measurements/2026-09-05-rtx5090-v048-profile-gates.json
 """
 from __future__ import annotations
