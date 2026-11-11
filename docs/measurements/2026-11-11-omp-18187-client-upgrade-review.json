@@ -1,0 +1,364 @@
+{
+  "artifact_type": "omp_ninfer_client_upgrade_review",
+  "schema_version": 1,
+  "as_of": "2026-11-11",
+  "product_release": "v0.18.0",
+  "provenance": {
+    "review": "Host-free tagged 18.18.6..18.18.7 source review: complete 64-commit/145-path classification, detailed local-route/tool-sensitive inspection, 26 equal route-sensitive Git objects, static generated-catalog decoding and independent full three-platform asset/checksum download hashing. No downloaded executable, semantic rehearsal, inference server, GPU, host window, release staging, profile/config mutation, merge or publication was executed. Product artifact checks are reported separately in the draft PR; no CI or inference qualification is inferred.",
+    "implementation_commits": [],
+    "ci": null,
+    "ci_conclusion": "not-claimed",
+    "ci_head": null
+  },
+  "client_upgrade": {
+    "from": "18.18.6",
+    "to": "18.18.7",
+    "reason": "Prepare the selected stock-client bump for v0.18.0 without staging. No new blocking mismatch was found for the documented static three-tier custom Responses configuration. Native Windows bash tool-description bytes and shell command/path dispatch do change, and PATH reassignment is fixed on every platform, so fresh tool/wire acceptance is required. Core provider/compaction/tokenizer/edit implementations are carried; this increment does not fix or waive the predecessor RTX 3090 retained-cache/compaction failure. Existing v0.17.0 fragments apply unchanged; the stager must replace only the appropriate release/client identities and rebind compatibility.",
+    "upstream_commit": "e325ffc73ab86e03bdd20a91b77d8e2b3964c906",
+    "upstream_tree": "9ba2abe1f1dd7c64b8d3f99dc0e41d689d96886c",
+    "release_id": 440868478,
+    "published_at": "2026-11-10T20:23:32Z",
+    "stable_releases_reviewed": [
+      "18.18.6",
+      "18.18.7"
+    ]
+  },
+  "descriptor_inputs": "releases/v0.17.0/qualification/client-components.json",
+  "host_free_checks": {
+    "asset_identity": {
+      "method": "Downloaded all three complete raw executables and SHA256SUMS.txt with gh release download after saving the published release API. Independently counted bytes and computed SHA-256; all four match API sizes/digests and all executable hashes match downloaded checksum rows. Reproducible download/hash commands and the new stager descriptor are retained with the intake evidence. This proves asset integrity, not binary behavior or a new compatibility authority. descriptor_inputs names the public predecessor schema.",
+      "release_checksum_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.18.7/SHA256SUMS.txt",
+      "release_checksum_sha256": "9a33908bc535d1fdc28997cd26f3056fb581558f8b0e812988ffd486f0112606",
+      "release_checksum_asset_id": 732828898,
+      "release_checksum_bytes": 844,
+      "release_checksum_api_digest": "sha256:9a33908bc535d1fdc28997cd26f3056fb581558f8b0e812988ffd486f0112606",
+      "release_checksum_api_bytes_match": true,
+      "release_checksum_api_digest_match": true,
+      "assets": [
+        {
+          "name": "omp-darwin-arm64",
+          "asset_id": 732828892,
+          "bytes": 221982864,
+          "sha256": "0cecaac781d3c37f32ff7ecf3b6ba94842e7f058358e4748d5071d772f0aa4df",
+          "api_digest": "sha256:0cecaac781d3c37f32ff7ecf3b6ba94842e7f058358e4748d5071d772f0aa4df",
+          "api_bytes_match": true,
+          "api_digest_match": true,
+          "download_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.18.7/omp-darwin-arm64",
+          "sha256sums_match": true
+        },
+        {
+          "name": "omp-windows-x64.exe",
+          "asset_id": 732828893,
+          "bytes": 250108928,
+          "sha256": "4a6e39ea34633e03d07a1543ba30842362311f920341378433aa31b6c1404491",
+          "api_digest": "sha256:4a6e39ea34633e03d07a1543ba30842362311f920341378433aa31b6c1404491",
+          "api_bytes_match": true,
+          "api_digest_match": true,
+          "download_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.18.7/omp-windows-x64.exe",
+          "sha256sums_match": true
+        },
+        {
+          "name": "omp-linux-x64",
+          "asset_id": 732828896,
+          "bytes": 286136496,
+          "sha256": "ea6c216feb260a3766a591760aad06bdc608efd5c632912603f5ccb41b0a4bb1",
+          "api_digest": "sha256:ea6c216feb260a3766a591760aad06bdc608efd5c632912603f5ccb41b0a4bb1",
+          "api_bytes_match": true,
+          "api_digest_match": true,
+          "download_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.18.7/omp-linux-x64",
+          "sha256sums_match": true
+        }
+      ]
+    },
+    "semantic_rehearsals": {
+      "execution_kind": "not executed; source review, static catalog comparison and independent asset download hashing only",
+      "guide_sha256": null,
+      "binary_version": null,
+      "binary_sha256": null,
+      "checks": [],
+      "runs": [],
+      "scope_limit": "No stock executable, model call, inference server, GPU or route driver ran. Upstream regression tests were inspected, not executed. Measurement/schema/descriptor checks are not candidate stock-binary rehearsals. Fresh three-platform/five-route/31-block, Windows bash/edit/dialect/path, general PATH, C1/C2/fanout, compaction/control recall, preserved-session continuation, native public install and restoration acceptance remain unperformed."
+    }
+  },
+  "behavior_review": [
+    {
+      "id": "complete-tagged-source-and-asset-census",
+      "predicate": "The complete v18.18.6..v18.18.7 Git range contains 64 commits and 145 changed paths. Every path is classified in the retained source census (SHA-256 596fa186fcee48d21d7b1433700590959a1cdecc8955daa8d30d3da43f1b4964); all route-sensitive runtime deltas are reviewed below. This is complete path classification, not an audit of every unrelated collab/UI line. Tag v18.18.7 resolves to commit e325ffc73ab86e03bdd20a91b77d8e2b3964c906, tree 9ba2abe1f1dd7c64b8d3f99dc0e41d689d96886c; GitHub release 440868478 is non-draft/non-prerelease, published 2026-11-10T20:23:32Z. Three full raw executables and SHA256SUMS.txt were independently downloaded, counted and hashed against both API metadata and checksum rows.",
+      "lane_effect": "The selected intake is 18.18.6 -> 18.18.7 for v0.18.0, following the decision to bump. No latest-version claim, candidate staging, client execution, inference run or acceptance transfer is made.",
+      "action": "Give the verified descriptor to the release stager; keep v0.17.0 authorities unchanged until the separately authorized integration and fresh acceptance.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/compare/v18.18.6...v18.18.7",
+        "https://api.github.com/repos/can1357/oh-my-pi/releases/tags/v18.18.7"
+      ]
+    },
+    {
+      "id": "responses-transport-carried-morph-only-header-policy",
+      "predicate": "The entire packages/ai/src/providers tree is byte-identical, including openai-responses, its state/session/WebSocket helpers and openai-shared. Error classifiers and openai-http.ts are also byte-carried. Changed catalog paths are compat/resolve.ts, compat/axes.ts, hosts.ts and types.ts: x-session-id is added for the api.morphllm.com host; the existing xAI header remains. hostMatchesUrl checks URL markers; our 127.0.0.1 endpoints match neither. The local-serving streamFirstEventTimeoutMs=0 and LOCAL_OPENAI_COMPAT_STREAM_IDLE_TIMEOUT_MS branch are unchanged.",
+      "lane_effect": "[INFERENCE; source-derived] No NInfer Responses HTTP schema, serializer, tool-name encoding, stateful/stream choice, reasoning dialect or local transport timeout changes in this increment. That is not byte-identical Windows request content: the tool description below changes when bash is advertised.",
+      "action": "Preserve openai-responses, loopback endpoints, auth and statefulResponses=true; add no Morph session header, WebSocket, discovery, verbosity, service-tier or provider override. Capture actual staged request bodies during fresh route acceptance.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/catalog/src/compat/resolve.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/catalog/src/compat/axes.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/catalog/src/hosts.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/catalog/src/types.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/ai/src/providers/openai-responses.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/ai/src/providers/openai-shared.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/ai/src/utils/openai-http.ts"
+      ]
+    },
+    {
+      "id": "core-compaction-and-stored-history-carried",
+      "predicate": "The complete packages/agent/src/compaction tree, tokenizer.ts, session-maintenance.ts, context-settings.ts, speculation-lead.ts, session-context.ts, session-manager.ts, session-migrations.ts and session-persistence.ts are byte-identical across the tags. No core threshold, reserve, speculative handoff, asyncEnabled, summary cap, native-reader or session-store migration change is introduced. agent-session.ts changes close confirmation and hosted saved-reset consent, not the compaction controller. Optional extension pre-event dialog timing changes are separately classified below.",
+      "lane_effect": "[INFERENCE; source-derived] The C2 RTX 5090 and RTX 3090 retain existing foreground/background compaction pressure; the C1 RTX 4090 retains its serialized provider slot. This client increment supplies no fix or waiver for the predecessor RTX 3090 retained-cache/automatic-compaction failure.",
+      "action": "Keep stock compaction and current limits; do not import the optional synchronous-compaction patch. Fresh C2 long-session evidence must commit two real automatic compactions, recall each control and continue without a waived timeout. Re-prove persisted client-session readability and restart continuation.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/agent/src/compaction/compaction.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/session/session-maintenance.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/session/context-settings.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/session/speculation-lead.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/session/session-migrations.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/session/session-persistence.ts",
+        "https://github.com/alphastorm/omp-ninfer/blob/ea639bb8116026bf9589b56b3954ab71b4bfdc62/scripts/omp_long_session_proof.py",
+        "https://github.com/alphastorm/omp-ninfer/blob/ea639bb8116026bf9589b56b3954ab71b4bfdc62/scripts/hosts/accept-rtx4090-route.ps1"
+      ]
+    },
+    {
+      "id": "tokenizer-qwen-definitions-and-effort-lists-carried",
+      "predicate": "tokenizer.ts, model-tokenizer.ts, model-thinking.ts, build.ts, custom-models.ts, the model-config schema bundle and taxonomy/qwen.kdl are byte-carried. Changed generated models.json was statically decoded: 5968 -> 5970 rows, only meta/muse-ember-1.0 and muse-code/muse-ember-1.0 added, zero prior rows changed/removed, all 650 Qwen-named rows equal. Changed compiled rules.json preserves Qwen taxonomy and the behavior section; ignoring source-line anchors its cascade adds only three Muse Ember rules and removes none. Auth changes concern Google Antigravity. The source KDL edits are Meta class, taxonomy, Meta provider and Muse Code provider, not Qwen.",
+      "lane_effect": "[INFERENCE; source-derived] There is no new Qwen tokenizer/counting or effort normalization change. v0.17.0 already carries tokenizer:qwen3 on opaque q38-ninfer entries; canonical qwen3.8-27b still infers it. The explicit low/medium/xhigh lists remain necessary; this review does not qualify unconstrained raw high/minimal/max against the engine template.",
+      "action": "Carry all five model fragments unchanged, including four explicit alias tokenizers, existing effort clamps, 131072/32768 bounds, text/image capabilities and stateful compatibility. Do not rename models or add effortMap. Recheck resolved stock models on all three platforms.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/agent/src/tokenizer.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/catalog/src/model-tokenizer.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/catalog/src/model-thinking.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/catalog/src/build.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/catalog/src/compat/rules/taxonomy/qwen.kdl",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/catalog/src/models.json",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/catalog/src/model-catalog-format.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/catalog/src/compat/rules.json",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/catalog/src/compat/rules/classes/meta.kdl",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/catalog/src/compat/rules/taxonomy/meta.kdl",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/catalog/src/compat/rules/providers/meta.kdl",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/catalog/src/compat/rules/providers/muse-code.kdl",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/config/custom-models.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/config/models-config-schema-bundle.ts"
+      ]
+    },
+    {
+      "id": "edit-implementations-and-tool-parameter-schemas-carried",
+      "predicate": "The entire coding-agent src/tools tree, coding-agent src/edit tree and crates/pi-edit tree are byte-identical. No edit/read/write implementation or parameter-schema change appears in the uncapped path inventory. Of prompts/tools files only bash.md changes. Agent tool normalization and append-only tool fingerprints are byte-carried; fingerprints include description as well as parameters, so a same-schema Windows bash tool is not an identical wire tool spec.",
+      "lane_effect": "[INFERENCE; source-derived] Existing canonical-Qwen versus opaque-alias edit defaults remain. Windows may receive different model-selected shell arguments because its description changes, not because JSON parameters were widened or typed calls were converted to text.",
+      "action": "Propose no edit-mode or tool-schema override. Re-prove actual typed call/result linkage and exact edited/read-back file bytes with the staged client; a source equality assertion or a model answer alone does not prove tool execution.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/tools/bash.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/tools/read.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/tools/write.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/agent/src/agent-loop.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/agent/src/append-only-context.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/ai/src/providers/openai-responses.ts"
+      ]
+    },
+    {
+      "id": "windows-bash-description-changes-on-the-wire",
+      "predicate": "prompts/tools/bash.md adds a conditional Windows sentence: emulated bash, not cmd/PowerShell syntax; powershell -c is the explicit PowerShell escape; $TEMP rather than %TEMP%; &&/; rather than the backgrounding &; no dir/copy/set X=; paths C:/x or /c/x; GNU find/sort/timeout when builtins are enabled. The unchanged BashTool.description renderer supplies isWindows = process.platform === win32 and hasShellBuiltins from settings. The unchanged Responses function-tool builder sends tool.description on the wire.",
+      "lane_effect": "[INFERENCE; source-derived] YES: both native Windows lanes send changed tool-description/prompt bytes when bash is advertised, and the model may choose different command text/arguments. Tool names, JSON parameter shapes and Responses protocol are unchanged. The RTX 5090 Windows-client route has the same exposure; macOS and Linux/WSL clients do not render this sentence. Transcript bytes and prompt-token totals are not assumed comparable; no token delta or model behavior was measured.",
+      "action": "In isolated Windows acceptance homes, advertise bash and capture the rendered description, emitted typed bash arguments and linked results. Exercise bash syntax, explicit PowerShell invocation and the Windows dialect/path cases below on the RTX 4090, RTX 3090 and RTX 5090 Windows-client routes. Existing --tools read route checks alone do not cover this change.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/prompts/tools/bash.md",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/tools/bash.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/ai/src/providers/openai-responses.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/agent/src/append-only-context.ts",
+        "https://github.com/alphastorm/omp-ninfer/blob/ea639bb8116026bf9589b56b3954ab71b4bfdc62/scripts/hosts/omp-client-probe.py"
+      ]
+    },
+    {
+      "id": "windows-cmd-dialect-path-deferral-and-find-quoting",
+      "predicate": "New crates/pi-shell/src/cmd_dialect.rs recognizes cmd switches for find/sort/timeout/whoami; any GNU option/expression marker keeps GNU behavior, cmd markers select PATH-first unless operand count exceeds that program grammar, and unmarked forms remain GNU. host.rs implements Windows-only defers_to_path; bash/host.rs exposes the hook and bash/vm/command.rs implements PATH lookup plus host fallback when no program exists; lib.rs registers the module. sys/cmdline.rs quotes FIND search/file operands but leaves recognized switches bare. sys/spawn/windows.rs applies that quoting only to System32 find.exe, not every executable with that basename.",
+      "lane_effect": "[INFERENCE; source-derived] Native Windows shell dispatch can change even for identical command text. PATH contents remain material: this is PATH-first deferral, not unconditional direct System32 dispatch. find /c must not silently walk the drive; GNU-marker forms must stay GNU; slash-leading FIND operands must be quoted correctly.",
+      "action": "Mirror the tagged regression with synthetic input: find /c /v empty-string -> 3 lines; find /i /API -> the matching GET line; find . -maxdepth 0 -> dot. Observe actual tool calls and linked results; also cover marker precedence, extra operands, no PATH target and explicit System32 FIND slash/quote operands. Do not alter product gates or use a real drive walk as a probe.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/cmd_dialect.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/host.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/bash/host.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/bash/vm/command.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/lib.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/sys/cmdline.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/sys/spawn/windows.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/shell/tests/builtins.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/testkit/suites/executor.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/docs/natives-shell-pty-process.md"
+      ]
+    },
+    {
+      "id": "windows-msys-drive-aliases-and-cross-platform-path-cache",
+      "predicate": "pi-vfs/src/path.rs adds msys_drive and lib.rs exports it; pi-builtins/src/host.rs reuses the parser. pi-shell bash/fs.rs adds drive spelling, bash/vm/probe.rs applies it in Windows absolute resolution, and bash/vm/builtins/dir.rs applies it to logical cwd resolution. /c/x and /mnt/c/x therefore name C:/x for command paths, redirections, test and directory resolution, not just builtins. Separately, names.rs adds resets_hash and vars.rs/command.rs route assignments through it: PATH reassignment/append/unset now flushes command hashes on every platform; PATHEXT does so on Windows. builtins/mod.rs re-exports the helper.",
+      "lane_effect": "[INFERENCE; source-derived] The MSYS rule is Windows-specific, but the PATH reassignment fix is not: Linux/WSL and macOS shell behavior may also change after PATH mutation. No provider protocol or tokenization algorithm changes follow. Single-letter fixture roots were renamed because they now denote Windows drive aliases.",
+      "action": "Use owned scratch paths for Windows file test/input-output redirection/executable alias/directory checks and exact file read-back. Run a synthetic PATH reassignment/append/unset hash check on all three platforms, plus Windows PATHEXT. Keep product profiles and prompt cwd policy unchanged.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-vfs/src/path.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-vfs/src/lib.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-builtins/src/host.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/bash/fs.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/bash/vm/probe.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/bash/vm/builtins/dir.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/bash/vm/builtins/names.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/bash/vm/builtins/vars.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/bash/vm/builtins/mod.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/bash/vm/command.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/shell/tests/env_cwd.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/testkit/suites/expand.rs"
+      ]
+    },
+    {
+      "id": "all-changed-native-shell-test-paths-accounted-for",
+      "predicate": "The 17 changed native-shell regression/testkit paths are all linked here. builtins.rs adds real-Windows cmd FIND/GNU precedence coverage; env_cwd.rs adds Windows MSYS test/redirection/executable/cwd coverage; executor.rs adds host PATH deferral/fallback coverage; expand.rs adds PATH reassignment/append/unset hash coverage; testkit/host.rs adds the test hook. The remaining conformance/job/history/variable fixtures migrate ambiguous single-letter roots for the Windows drive rule. These are inspected upstream tests, not tests run in this intake.",
+      "lane_effect": "No upstream Rust build or Windows shell test was executed. The regression code describes expected behavior; downloaded asset execution remains a fresh acceptance obligation.",
+      "action": "Retain explicit Windows cmd/MSYS and all-platform PATH smoke coverage in the release acceptance work; do not substitute the unchanged typed-read-only route for these cases.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/shell/tests/builtins.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/shell/tests/env_cwd.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/testkit/conformance.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/testkit/host.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/testkit/suites/bang_pid.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/testkit/suites/executor.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/testkit/suites/expand.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/testkit/suites/host_hooks.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/testkit/suites/interactive_builtins.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/testkit/suites/lineage.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/testkit/suites/nested_shell.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/testkit/suites/orphan_jobs.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/testkit/suites/tool_profile.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/testkit/suites/vars.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/testkit/suites/zsh_history.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/testkit/suites/zsh_mod_example.rs",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/crates/pi-shell/src/testkit/suites/zsh_mod_zprof.rs"
+      ]
+    },
+    {
+      "id": "local-retries-carried-hosted-saved-reset-recovery-changed",
+      "predicate": "The error tree, openai-http.ts and session/turn-recovery.ts are byte-carried: no local HTTP retry classifier, retry budget, session fallback gate or inference deadline changes. Changed agent-session.ts, claude-auto-reset.ts, codex-auto-reset.ts, reset-expiry.ts, session/settings.ts and config/settings.ts instead split hosted saved-reset consent into 5h/weekly/Fable keys, migrate the old hosted settings, require explicit consent even for imminent headless resets and refine hosted 429 window classification. ai/usage/claude-reset.ts maps Fable weekly reset scope. agent-session gates blocked reset recovery to provider anthropic or openai-codex.",
+      "lane_effect": "[INFERENCE; source-derived] These hosted reset/retry changes do not select or recover our ninfer-* custom providers. It would be inaccurate to say no retry-adjacent code changed anywhere; the bounded claim is unchanged local inference retry/timeout behavior. No-cloud/fail-closed still depends on the explicit retry pins and isolated local credentials.",
+      "action": "Carry retry.enabled=false, retry.modelFallback=false and fallbackRevertPolicy=never, provider limits and the update/setup opt-outs unchanged. Re-prove selected-provider outage, nonzero error/no assistant response, request counts and no fallback. Do not add hosted reset settings to local profiles.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/ai/src/error/retryable.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/ai/src/utils/openai-http.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/ai/src/usage/claude-reset.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/session/turn-recovery.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/session/agent-session.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/session/claude-auto-reset.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/session/codex-auto-reset.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/session/reset-expiry.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/session/settings.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/config/settings.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/docs/settings.md"
+      ]
+    },
+    {
+      "id": "optional-usage-oauth-and-worker-auth-registration",
+      "predicate": "Changed ai auth-storage.ts, auth/types.ts, auth/usage.ts, usage.ts and new usage/litellm.ts add configuration-sourced LiteLLM budget adapters, request-key-only probes and registration carryover. model-registry.ts registers them for litellm and discovery.type=litellm, mirrored through thread/services/auth-protocol.ts, auth-remote.ts and auth.ts. auth/oauth.ts, registry/oauth/index.ts, catalog compat/auth.ts/types.ts, compile-auth.ts and auth/google-antigravity.kdl replace that provider pause with an explicit login-risk warning. Catalog rules.json reflects it. /usage CLI/display files expose budgets, not a new Responses route.",
+      "lane_effect": "[INFERENCE; source-derived] Our static model fragments have no LiteLLM discovery or Antigravity selection. Those local inference requests gain no usage-management endpoint, but a non-isolated operator home with optional credentials/features can make separate usage/OAuth calls. Existing optional-provider tests change to remove the Antigravity-pause override; that does not qualify NInfer.",
+      "action": "Use isolated acceptance homes and only selected local credentials, with no new discovery, usage, OAuth or auxiliary role opt-in. Attribute any separate network traffic instead of treating inference-provider equality as a universal no-side-request guarantee.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/ai/src/auth-storage.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/ai/src/auth/types.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/ai/src/auth/usage.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/ai/src/usage.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/ai/src/usage/litellm.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/ai/src/auth/oauth.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/ai/src/registry/oauth/index.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/catalog/src/compat/auth.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/catalog/src/compat/types.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/catalog/scripts/compat-compiler/compile-auth.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/catalog/src/compat/rules/auth/google-antigravity.kdl",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/config/model-registry.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/thread/services/auth-protocol.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/thread/services/auth-remote.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/thread/services/auth.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/cli/usage-cli.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/tui/src/overlays/usage-display.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/docs/provider-quirks.md"
+      ]
+    },
+    {
+      "id": "extension-hook-timeouts-advisor-and-terminal-surface",
+      "predicate": "Changed extensions/runner.ts/types.ts, shared-events.ts, agent-session.ts, interactive-mode.ts, modes/types.ts and command-controller.ts add cancellable interactive session_before_shutdown; forced RPC/print/subagent/signal disposal does not emit it. Pre-event dialog time no longer consumes the 30-second handler budget, including session_before_compact; compact/tree signals remain cooperative. Advisor advise-tool.ts/runtime.ts and session-advisors.ts cancel superseded reviews and owe a replacement review. TUI grep.ts/ast-grep.ts only change zero-match rendering; core tool implementations are carried. Optional collab host/guest/relay/protocol, collab-web and wire queue changes are path-classified but not a live shared-session qualification.",
+      "lane_effect": "[INFERENCE; source-derived] No ordinary NInfer transport timeout change follows, but hook-enabled interactive compaction/quit timing and optional advisor traffic may differ. No profile adds these extensions/advisors/collab features. Display-only grep changes do not establish altered tool-call arguments or inference payloads.",
+      "action": "Retain ordinary client-session shutdown/read/resume evidence. If optional hooks/advisors/collab are claimed, qualify their changed boundaries separately; do not infer their coverage from print-mode routes or claim all timeout-related code is unchanged.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/extensibility/extensions/runner.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/extensibility/extensions/types.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/extensibility/shared-events.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/session/agent-session.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/modes/interactive-mode.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/modes/types.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/modes/controllers/command-controller.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/advisor/advise-tool.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/advisor/runtime.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/coding-agent/src/session/session-advisors.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/tui/src/tools/grep.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/packages/tui/src/tools/ast-grep.ts",
+        "https://github.com/can1357/oh-my-pi/blob/e325ffc73ab86e03bdd20a91b77d8e2b3964c906/docs/extensions.md"
+      ]
+    },
+    {
+      "id": "three-platform-profile-effects",
+      "predicate": "The compatibility profiles are darwin-remote-ssh, windows-docker-local and linux-docker-local, consuming darwin-arm64, windows-x64 and linux-x64 respectively. The same six model/config fragment blobs in v0.17.0 and this review base are equal. Existing alias tokenizers, three-tier efforts, stateful Responses, update.auto=false, startup.checkUpdate=false, startup.setupWizard=false and retry/fallback pins already include the prior intake recommendations.",
+      "lane_effect": "[INFERENCE; source-derived] darwin-remote-ssh: no Windows bash sentence or cmd/MSYS routing, but the general PATH hash fix applies. windows-docker-local: the sentence changes advertised tool-description bytes and Windows cmd/MSYS/PATHEXT execution may change. linux-docker-local: Linux/WSL does not count as a win32 client, so no Windows sentence/cmd/MSYS rule; the general PATH hash fix still applies. All three need new executable identities and acceptance; hardware does not choose the prompt platform.",
+      "action": "No behavioral profile or fragment patch is proposed: v0.17.0 fragments apply unchanged. Only integration/staging may replace version/source/asset pins and rebind the compatibility authority. All three platform executions remain unperformed in this host-free review.",
+      "sources": [
+        "https://github.com/alphastorm/omp-ninfer/blob/ea639bb8116026bf9589b56b3954ab71b4bfdc62/compatibility.json",
+        "https://github.com/alphastorm/omp-ninfer/blob/ea639bb8116026bf9589b56b3954ab71b4bfdc62/examples/fleet/models.fragment.yml",
+        "https://github.com/alphastorm/omp-ninfer/blob/ea639bb8116026bf9589b56b3954ab71b4bfdc62/examples/manual-tunnel/models.fragment.yml",
+        "https://github.com/alphastorm/omp-ninfer/blob/ea639bb8116026bf9589b56b3954ab71b4bfdc62/examples/windows-docker-local/models.fragment.yml",
+        "https://github.com/alphastorm/omp-ninfer/blob/ea639bb8116026bf9589b56b3954ab71b4bfdc62/examples/windows-native/models.fragment.yml",
+        "https://github.com/alphastorm/omp-ninfer/blob/ea639bb8116026bf9589b56b3954ab71b4bfdc62/examples/windows-native/models-rtx3090.fragment.yml",
+        "https://github.com/alphastorm/omp-ninfer/blob/ea639bb8116026bf9589b56b3954ab71b4bfdc62/examples/manual-tunnel/fail-closed.yml"
+      ]
+    },
+    {
+      "id": "three-hardware-lane-effects",
+      "predicate": "RTX 5090 routes use q38-ninfer, explicit qwen3, text+image and provider cap two; RTX 4090 native uses canonical qwen3.8-27b, text-only and cap one; RTX 3090 native uses q38-ninfer, explicit qwen3, text-only and cap two. Each retains [low,medium,xhigh], contextWindow=131072, maxTokens=32768 and statefulResponses=true. This describes the predecessor client settings, not a new engine-source or runtime qualification.",
+      "lane_effect": "[INFERENCE; source-derived] RTX 5090: Windows-client tool descriptions change, Linux host/macOS descriptions do not; general PATH reset behavior changes on all platforms. RTX 4090 and RTX 3090: stock native Windows clients have the same bash-description and Windows dispatch changes regardless of C1/C2, while serializer/parameter schemas remain carried. RTX 3090 retains the known compaction acceptance obligation; 18.18.7 is not a retained-cache mitigation.",
+      "action": "Carry behavioral fragments, platform-specific capabilities and provider caps unchanged. Fresh Windows bash/edit/path probes cover both natives and the Windows 5090 route; existing C1/C2, fanout/parallel, compaction, documented route, native install and restoration gates remain mandatory and are not exercised here.",
+      "sources": [
+        "https://github.com/alphastorm/omp-ninfer/blob/ea639bb8116026bf9589b56b3954ab71b4bfdc62/examples/windows-docker-local/models.fragment.yml",
+        "https://github.com/alphastorm/omp-ninfer/blob/ea639bb8116026bf9589b56b3954ab71b4bfdc62/examples/windows-native/models.fragment.yml",
+        "https://github.com/alphastorm/omp-ninfer/blob/ea639bb8116026bf9589b56b3954ab71b4bfdc62/examples/windows-native/models-rtx3090.fragment.yml",
+        "https://github.com/alphastorm/omp-ninfer/blob/ea639bb8116026bf9589b56b3954ab71b4bfdc62/examples/manual-tunnel/fail-closed.yml"
+      ]
+    },
+    {
+      "id": "required-route-acceptance-and-explicit-coverage-gap",
+      "predicate": "The existing omp-client-probe.py live phase uses --tools read and gates one typed read, linked result, exact marker, same-session cross-process nonce and selected runtime/provider/model; outage gates nonzero exit, an error and no assistant response without switching configuration. It does not expose bash or edit. Native C2 acceptance separately invokes omp_parallel_proof.py and omp_long_session_proof.py --compactions 2 with stock async settings. The predecessor documented acceptance binds five routes and 31 guide blocks.",
+      "lane_effect": "A read-only route pass cannot prove the new Windows bash guidance, model-shaped bash arguments, cmd marker precedence, MSYS aliases, FIND quoting or general PATH hash behavior. No 18.18.6 transcript/receipt is substituted for a new client run, and no new gate implementation or waiver is introduced by this document.",
+      "action": "After staging, re-verify compatibility/manifest source/tree/release/three asset pins; parse unchanged fragments and resolved tokenizer/efforts/update pins on all platforms; execute five routes/31 blocks and both native public installs with restoration. Capture store, stream, max_output_tokens, reasoning.effort, tool_choice, tool descriptions/parameter schemas, call/result IDs and previous_response_id. Supplement Windows routes with synthetic bash/dialect/MSYS/edit read-back probes and all platforms with PATH-cache checks. Retain fail-closed request-count, C1/C2/fanout, two real C2 compactions/control recall and persisted-session restart evidence. These remain lead-owned acceptance effects, not host-free proof.",
+      "sources": [
+        "https://github.com/alphastorm/omp-ninfer/blob/ea639bb8116026bf9589b56b3954ab71b4bfdc62/scripts/hosts/omp-client-probe.py",
+        "https://github.com/alphastorm/omp-ninfer/blob/ea639bb8116026bf9589b56b3954ab71b4bfdc62/scripts/hosts/accept-rtx4090-route.ps1",
+        "https://github.com/alphastorm/omp-ninfer/blob/ea639bb8116026bf9589b56b3954ab71b4bfdc62/scripts/hosts/accept-rtx5090-routes.py",
+        "https://github.com/alphastorm/omp-ninfer/blob/ea639bb8116026bf9589b56b3954ab71b4bfdc62/scripts/omp_parallel_proof.py",
+        "https://github.com/alphastorm/omp-ninfer/blob/ea639bb8116026bf9589b56b3954ab71b4bfdc62/scripts/omp_long_session_proof.py",
+        "https://github.com/alphastorm/omp-ninfer/blob/ea639bb8116026bf9589b56b3954ab71b4bfdc62/releases/v0.17.0/acceptance/documented-routes.json"
+      ]
+    }
+  ],
+  "verdict": {
+    "host_free_blocker_found": false,
+    "qualification_claimed": false,
+    "new_client_inference_qualification_claimed": false,
+    "predecessor_acceptance_transferred": false,
+    "scope_limit": "Host-free intake supports preparing the selected 18.18.7 pin with v0.17.0 behavioral fragments unchanged, not declaring v0.18.0 ready. Both native Windows lanes and the RTX 5090 Windows-client route have changed bash tool-description content and may shape different commands, despite unchanged serializer/tool parameter schemas; Windows cmd/MSYS/FIND behavior and cross-platform PATH reassignment also change. No live wire equality, tool execution, model performance or regression-free inference is claimed. No runtime/profile/compatibility authority, release pin, product gate or waiver changed. No engine fix, acceptance window, merge or publication is performed."
+  },
+  "sources": [
+    "https://api.github.com/repos/can1357/oh-my-pi/releases/tags/v18.18.7",
+    "https://github.com/can1357/oh-my-pi/releases/tag/v18.18.7",
+    "https://github.com/can1357/oh-my-pi/compare/v18.18.6...v18.18.7",
+    "https://github.com/can1357/oh-my-pi/releases/download/v18.18.7/SHA256SUMS.txt",
+    "https://github.com/can1357/oh-my-pi/releases/download/v18.18.7/omp-darwin-arm64",
+    "https://github.com/can1357/oh-my-pi/releases/download/v18.18.7/omp-windows-x64.exe",
+    "https://github.com/can1357/oh-my-pi/releases/download/v18.18.7/omp-linux-x64",
+    "https://github.com/alphastorm/omp-ninfer/blob/ea639bb8116026bf9589b56b3954ab71b4bfdc62/docs/measurements/2026-11-10-omp-18186-client-upgrade-review.json",
+    "https://github.com/alphastorm/omp-ninfer/blob/ea639bb8116026bf9589b56b3954ab71b4bfdc62/releases/v0.17.0/manifest.json",
+    "https://github.com/alphastorm/omp-ninfer/blob/ea639bb8116026bf9589b56b3954ab71b4bfdc62/releases/v0.17.0/qualification/client-components.json"
+  ]
+}
