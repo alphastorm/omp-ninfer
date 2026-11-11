@@ -685,7 +685,7 @@ def validate_native_receipt_bindings(
             continue
         lane = variant["id"].split("-")[0]
         bindings = variant.get("qualification", {})
-        for field in ("quality_screen", "fit"):
+        for field in ("quality_screen", "identity_proof", "fit"):
             gate_name = f"{lane}_{field}"
             reference = gates.get(gate_name)
             # Historical releases need not invent gates they never declared.
@@ -2195,6 +2195,7 @@ def validate_ninfer_variants(
     incoming_checksums: dict[str, Path] | None = None,
     incoming_quality_screens: dict[str, Path] | None = None,
     incoming_t1_parities: dict[str, Path] | None = None,
+    incoming_identity_proofs: dict[str, Path] | None = None,
     incoming_fits: dict[str, Path] | None = None,
     incoming_profiles: dict[str, dict[str, bytes]] | None = None,
 ) -> None:
@@ -2370,6 +2371,7 @@ def validate_ninfer_variants(
             root, release, item, errors,
             incoming_screen=(incoming_quality_screens or {}).get(variant_id),
             incoming_parity=(incoming_t1_parities or {}).get(variant_id),
+            incoming_identity_proof=(incoming_identity_proofs or {}).get(variant_id),
             incoming_fit=(incoming_fits or {}).get(variant_id),
             incoming_profile=(incoming_profiles or {}).get(variant_id),
         )
@@ -2763,6 +2765,23 @@ def validate_quality_screen(root: Path, release: str, variant: dict[str, Any],
             f"{label} production lane must match the variant", errors)
 
 
+def validate_native_identity_proof(root: Path, release: str, variant: dict[str, Any],
+                                  predecessor: dict[str, Any] | None, errors: list[str],
+                                  incoming: Path | None = None,
+                                  incoming_profile: dict[str, bytes] | None = None) -> None:
+    value = native_evidence(root, release, variant, "identity_proof", errors, incoming)
+    if value is None or native_profile(root, release, variant, errors, incoming_profile) is None:
+        return
+    reference = variant["qualification"]["release_spec"]
+    data = (incoming_profile["release-spec.json"] if incoming_profile is not None
+            else (root / reference["path"]).read_bytes())
+    from speed_gate import validate_identity_proof
+    try:
+        validate_identity_proof(value, root, release, variant, predecessor or {}, json.loads(data))
+    except (OSError, ValueError) as error:
+        errors.append(f"{variant['id']}.qualification.identity_proof: {error}")
+
+
 def validate_t1_parity(root: Path, release: str, variant: dict[str, Any],
                        predecessor: dict[str, Any] | None, errors: list[str],
                        incoming: Path | None = None) -> None:
@@ -2839,6 +2858,7 @@ def validate_native_fit(root: Path, release: str, variant: dict[str, Any],
 
 def validate_native_quality(root: Path, release: str, variant: dict[str, Any], errors: list[str],
                             *, incoming_screen: Path | None = None, incoming_parity: Path | None = None,
+                            incoming_identity_proof: Path | None = None,
                             incoming_fit: Path | None = None,
                             incoming_profile: dict[str, bytes] | None = None) -> None:
     qualification = variant.get("qualification", {})
@@ -2855,7 +2875,7 @@ def validate_native_quality(root: Path, release: str, variant: dict[str, Any], e
     carried = unchanged_native_variant(variant, predecessor) and shape == previous_shape
     if carried:
         previous_bindings = (predecessor or {}).get("qualification", {})
-        for field in ("quality_screen", "fit"):
+        for field in ("quality_screen", "identity_proof", "fit"):
             if field in previous_bindings:
                 require(qualification.get(field) == previous_bindings[field],
                         f"{variant['id']}.qualification.{field} must match the carried predecessor binding",
@@ -2863,26 +2883,35 @@ def validate_native_quality(root: Path, release: str, variant: dict[str, Any], e
             if field in qualification:
                 native_evidence_path(root, release, qualification[field],
                                      f"{variant['id']}.qualification.{field}", errors,
-                                     incoming_screen if field == "quality_screen" else incoming_fit,
+                                     {"quality_screen": incoming_screen, "identity_proof": incoming_identity_proof,
+                                      "fit": incoming_fit}[field],
                                      carried=True)
         # Inherited screens describe their original production/candidate pair,
         # not a fresh comparison with this release's immediate predecessor.
         if "quality_screen" in qualification and "quality_screen" not in previous_bindings:
             validate_quality_screen(root, release, variant, errors, incoming_screen)
+        if "identity_proof" in qualification and "identity_proof" not in previous_bindings:
+            validate_native_identity_proof(root, release, variant, predecessor, errors,
+                                           incoming_identity_proof, incoming_profile)
         return
     if "quality_screen" in qualification:
         validate_quality_screen(root, release, variant, errors, incoming_screen)
+    if "identity_proof" in qualification:
+        require("quality_screen" not in qualification and "t1_parity" not in qualification,
+                f"{variant['id']} must select only one native quality admission receipt", errors)
+        validate_native_identity_proof(root, release, variant, predecessor, errors,
+                                       incoming_identity_proof, incoming_profile)
     require(isinstance(shape, dict) and shape.get("speculative_backend") in ("mtp", "dflash2")
             and isinstance(shape.get("fit"), dict) and set(shape["fit"]) == set(FIT_FIELDS),
             f"{variant['id']}.runtime_shape must bind backend and fit", errors)
     if "t1_parity" in qualification:
         validate_t1_parity(root, release, variant, predecessor, errors, incoming_parity)
-    elif "quality_screen" not in qualification:
+    elif "quality_screen" not in qualification and "identity_proof" not in qualification:
         errors.append(f"{variant['id']}.qualification.quality_screen is required for a new native runtime; "
                       "unchanged MTP rebuilds may bind 84/84 t1_parity instead")
     if shape and shape.get("speculative_backend") == "dflash2":
-        require("quality_screen" in qualification,
-                f"{variant['id']} DFlash2 requires qualification.quality_screen", errors)
+        require("quality_screen" in qualification or "identity_proof" in qualification,
+                f"{variant['id']} DFlash2 requires qualification.quality_screen or decision-authorized identity_proof", errors)
         validate_native_fit(root, release, variant, errors, incoming_fit, incoming_profile)
 
 
