@@ -732,6 +732,53 @@ class StageReleaseTests(unittest.TestCase):
                                      before["qualification"][field])
         self.assertEqual(self.load(source_path), source)
 
+    def test_snapshot_without_templates_is_stamped_before_the_lane_cut(self) -> None:
+        root = self.native_staging_copy()
+        before = {path: path.read_bytes() for path in (root / "profiles").glob("*.json")}
+        descriptor = ROOT / "docs/measurements/2026-10-25-omp-18126-client-components.json"
+        result = self.stage(root, descriptor, source_release="v0.16.0")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        release = root / "releases" / TARGET
+        for path in (release / "profiles").glob("*.json"):
+            profile = self.load(path)
+            self.assertEqual(profile["release"], TARGET)
+            platform = {"manual-ssh-tunnel": "darwin-arm64",
+                        "native-windows-docker-local": "windows-x64"}[profile["installation_mode"]]
+            self.assertEqual(profile["client"], self.load(descriptor)["platforms"][platform])
+        self.assertEqual({path: path.read_bytes() for path in before}, before)
+        shutil.copytree(ROOT / "examples/manual-tunnel", root / "examples/manual-tunnel")
+        spec = importlib.util.spec_from_file_location("snapshot_rebind", root / "scripts/rebind_release.py")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        module.promote_root(TARGET, release / "manifest.json")
+        for path in (release / "profiles").glob("*.json"):
+            self.assertEqual(path.read_bytes(), (root / "profiles" / path.name).read_bytes())
+
+    def test_snapshot_without_templates_refuses_an_unrepresentable_configuration(self) -> None:
+        root = self.native_staging_copy()
+        result = self.stage(root, None, source_release="v0.16.0", config_sha="f" * 64)
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+        self.assertIn("--profile-template-dir", result.stderr)
+        self.assertFalse((root / "releases" / TARGET).exists())
+
+    def test_snapshot_without_templates_derives_the_renamed_deployment_identity(self) -> None:
+        root = self.native_staging_copy()
+        path = next((root / "releases/v0.16.0/profiles").glob("*.json"))
+        profile = self.load(path)
+        server = profile["server"]
+        server["deployment_profile"] = f"qwen38-5090-{TARGET}"
+        arguments = server["arguments"]
+        arguments[arguments.index("--deployment-profile") + 1] = server["deployment_profile"]
+        config = configuration_identity(profile)
+        result = self.stage(root, None, source_release="v0.16.0", config_sha=config)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        for path in (root / "releases" / TARGET / "profiles").glob("*.json"):
+            staged = self.load(path)
+            self.assertEqual(staged["server"]["deployment_profile"], server["deployment_profile"])
+            self.assertEqual(configuration_identity(staged), config)
+            args = staged["server"]["arguments"]
+            self.assertEqual(args[args.index("--config-sha256") + 1], config)
+
     def test_staged_checkpoint_stores_allow_only_valid_root_draft_residue(self) -> None:
         for store, expected_status in (("checkpoints-v013", 0),
                                        ("checkpoints-v099", 0),

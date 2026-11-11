@@ -46,7 +46,9 @@ $logs = Join-Path $root 'logs'
 $traces = Join-Path $root 'traces'
 $receipts = Join-Path $root 'receipts'
 $quality = Join-Path $root 'quality'
-$modelId = 'qwen3.8-27b'
+# Resolve the candidate guide before host work, as on the other campaign lanes.
+$modelId = (& python -c 'import sys; sys.path.insert(0, sys.argv[1]); from client_acceptance import documented_model_id; print(documented_model_id(sys.argv[2]))' (Join-Path $PSScriptRoot '..') 'rtx4090-native' | Out-String).Trim()
+if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($modelId)) { throw 'documented RTX 4090 model lookup failed' }
 $sourceCommit = '32aa589982c49d540a68a831d2c89aa83247f5c7'
 $binarySha256 = 'a5b501ecdcf00031945bddac0732ba302aa2250d529076a41f592e7038aff4a2'
 $corpusSha256 = '9bf5957482dc5f86d6cb04d4c82a55c2d0c9ad01f1f3595dc54727e44b896623'

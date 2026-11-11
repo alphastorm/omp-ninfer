@@ -13,7 +13,8 @@ eight times faster - and pull it with ``--platform windows``.)
 Pushes go the other way round
 as N part files over N parallel ``scp`` connections joined on the remote side (PowerShell's
 standard input does not stream under the Windows sshd). Both directions verify the whole file
-by SHA-256 on both ends before reporting success.
+by SHA-256 on both ends before reporting success. Pull/fetch receive into a sibling temporary
+file and replace the destination only after verification; failures preserve its verified bytes.
 
 Between two Windows hosts neither ssh direction works for bulk: ``ssh.exe`` acting as a client
 inside an sshd session stalls on any large binary stream, whatever the far side is. For that
@@ -158,18 +159,30 @@ def sha256_local(path: Path) -> str:
     return digest.hexdigest()
 
 
+@contextlib.contextmanager
+def receiving_file(local: Path, size: int):
+    """Keep the previous replica intact until the caller verifies every received byte."""
+    local.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, name = tempfile.mkstemp(prefix=f".{local.name}.", suffix=".pscp", dir=local.parent)
+    temporary = Path(name)
+    try:
+        with os.fdopen(descriptor, "wb") as handle:
+            handle.truncate(size)
+        yield temporary
+        os.replace(temporary, local)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
 def pull(host: str, platform: str, remote: str, local: Path, streams: int, timeout: float) -> dict:
     size = int(remote_text(host, remote_command(platform, "size", remote)))
     started = time.monotonic()
-    local.parent.mkdir(parents=True, exist_ok=True)
-    with local.open("wb") as handle:
-        handle.truncate(size)
 
     def fetch(item: tuple[int, int]) -> int:
         offset, length = item
-        # The child writes straight into the destination through its own descriptor, positioned
+        # The child writes into the temporary replica through its own descriptor, positioned
         # at this range's offset: no pipe, no staging copy, no seek races between streams.
-        descriptor = os.open(local, os.O_WRONLY | getattr(os, "O_BINARY", 0))
+        descriptor = os.open(temporary, os.O_WRONLY | getattr(os, "O_BINARY", 0))
         try:
             os.lseek(descriptor, offset, os.SEEK_SET)
             with tempfile.TemporaryDirectory() as scratch:
@@ -186,13 +199,14 @@ def pull(host: str, platform: str, remote: str, local: Path, streams: int, timeo
             os.close(descriptor)
         return received
 
-    with concurrent.futures.ThreadPoolExecutor(streams) as pool:
-        moved = sum(pool.map(fetch, ranges(size, streams)))
-    wall = time.monotonic() - started
-    remote_digest = remote_text(host, remote_command(platform, "sha256", remote), timeout=timeout)
-    local_digest = sha256_local(local)
-    if moved != size or remote_digest != local_digest:
-        raise TransferError(f"pull did not verify: moved {moved}/{size}, remote {remote_digest[:12]} local {local_digest[:12]}")
+    with receiving_file(local, size) as temporary:
+        with concurrent.futures.ThreadPoolExecutor(streams) as pool:
+            moved = sum(pool.map(fetch, ranges(size, streams)))
+        wall = time.monotonic() - started
+        remote_digest = remote_text(host, remote_command(platform, "sha256", remote), timeout=timeout)
+        local_digest = sha256_local(temporary)
+        if moved != size or remote_digest != local_digest:
+            raise TransferError(f"pull did not verify: moved {moved}/{size}, remote {remote_digest[:12]} local {local_digest[:12]}")
     return {"direction": "pull", "bytes": size, "streams": streams, "wall_s": round(wall, 2),
             "mb_per_s": round(size / 1e6 / wall, 1) if wall else None, "sha256": local_digest}
 
@@ -350,16 +364,13 @@ def fetch(url: str, token: str, local: Path, streams: int, timeout: float) -> di
         size = int(probe.headers["Content-Length"])
     with request("/sha256") as answer:
         remote_digest = answer.read().decode().strip()
-    local.parent.mkdir(parents=True, exist_ok=True)
-    with local.open("wb") as handle:
-        handle.truncate(size)
     started = time.monotonic()
 
     def grab(item: tuple[int, int]) -> int:
         offset, length = item
         received = 0
         with request("/file", offset, length) as response, \
-                os.fdopen(os.open(local, os.O_WRONLY | getattr(os, "O_BINARY", 0)), "r+b", buffering=0) as out:
+                os.fdopen(os.open(temporary, os.O_WRONLY | getattr(os, "O_BINARY", 0)), "r+b", buffering=0) as out:
             out.seek(offset)
             while received < length:
                 chunk = response.read(min(BUFFER, length - received))
@@ -371,12 +382,13 @@ def fetch(url: str, token: str, local: Path, streams: int, timeout: float) -> di
             raise TransferError(f"range {offset}+{length} received {received}")
         return received
 
-    with concurrent.futures.ThreadPoolExecutor(streams) as pool:
-        moved = sum(pool.map(grab, ranges(size, streams)))
-    wall = time.monotonic() - started
-    local_digest = sha256_local(local)
-    if moved != size or local_digest != remote_digest:
-        raise TransferError(f"fetch did not verify: moved {moved}/{size}, remote {remote_digest[:12]} local {local_digest[:12]}")
+    with receiving_file(local, size) as temporary:
+        with concurrent.futures.ThreadPoolExecutor(streams) as pool:
+            moved = sum(pool.map(grab, ranges(size, streams)))
+        wall = time.monotonic() - started
+        local_digest = sha256_local(temporary)
+        if moved != size or local_digest != remote_digest:
+            raise TransferError(f"fetch did not verify: moved {moved}/{size}, remote {remote_digest[:12]} local {local_digest[:12]}")
     return {"direction": "fetch", "bytes": size, "streams": streams, "wall_s": round(wall, 2),
             "mb_per_s": round(size / 1e6 / wall, 1) if wall else None, "sha256": local_digest}
 

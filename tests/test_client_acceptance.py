@@ -303,7 +303,8 @@ class ProbeModelDefaultsTests(unittest.TestCase):
                 target = root / "scripts" / relative
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_bytes((ROOT / "scripts" / relative).read_bytes())
-            for gpu, expected in (("3090", "candidate-3090"), ("5090", "candidate-5090")):
+            for gpu, expected in (("3090", "candidate-3090"), ("4090", "candidate-4090"),
+                                  ("5090", "candidate-5090")):
                 source = (ROOT / "scripts/hosts" / f"run_variant_campaign_{gpu}.ps1").read_text()
                 lookup = source[source.index("$modelId ="):source.index("$sourceCommit =")]
                 quote = lambda value: "'" + str(value).replace("'", "''") + "'"

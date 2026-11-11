@@ -2,7 +2,7 @@
    -DryRun never changes the filesystem, host markers, tasks, or processes. #>
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory=$true)][ValidateSet('Preflight','Inventory','Hold','Release','Route','Live','Outage')][string]$Action,
+    [Parameter(Mandatory=$true)][ValidateSet('Preflight','Inventory','Hold','HoldStatus','Release','Route','Live','Outage')][string]$Action,
     [Parameter(Mandatory=$true)][string]$Workspace,
     [Parameter(Mandatory=$true)][string]$Release,
     [Parameter(Mandatory=$true)][string]$Candidate,
@@ -21,6 +21,15 @@ $Bundle=Join-Path $Workspace 'windows-bundle'
 $Hold=Join-Path $ControlRoot 'state\lane-container-paused'
 $HoldDirectory=Split-Path $Hold -Parent
 function Save-Json($Name,$Value) { [IO.File]::WriteAllText((Join-Path $Workspace $Name),($Value|ConvertTo-Json -Depth 20),[Text.UTF8Encoding]::new($false)) }
+function Own-Hold {
+    $receipt=Join-Path $Workspace 'own-hold.json'
+    if(!(Test-Path -LiteralPath $receipt) -or !(Test-Path -LiteralPath $Hold -PathType Leaf)){return $false}
+    $owner=Get-Content -Raw -Encoding UTF8 -LiteralPath $receipt|ConvertFrom-Json
+    return ($owner.hold_created -eq $true -and $owner.path -ceq $Hold -and
+        $owner.release -ceq $Release -and $owner.candidate -ceq $Candidate -and
+        $owner.ownership_id -match '^[0-9a-f]{32}$' -and
+        [IO.File]::ReadAllText($Hold) -ceq $owner.ownership_id)
+}
 function DirectorySnapshot($Path) {
     $exists=Test-Path -LiteralPath $Path
     if(-not $exists){return @{path=$Path;exists=$false;sddl=$null;creation_time_utc_ticks=$null;last_write_time_utc_ticks=$null}}
@@ -64,23 +73,32 @@ function Probe($Phase) {
     if($LASTEXITCODE -ne 0){throw "structured probe $Phase failed (exit $LASTEXITCODE)"}
 }
 if($Action -eq 'Inventory') { Snapshot | ConvertTo-Json -Depth 20; return }
+if($Action -eq 'HoldStatus') {
+    $status=if(!(Test-Path -LiteralPath $Hold)){'absent'}elseif(Own-Hold){'owned'}else{'foreign'}
+    @{status=$status}|ConvertTo-Json -Compress; return
+}
 if($Action -eq 'Hold') {
-    if(Test-Path $Hold){throw 'lane hold already exists; refusing ownership'}
+    if(Test-Path $Hold){
+        if(Own-Hold){Write-Output 'own lane hold reconciled'; return}
+        throw 'lane hold already exists without matching ownership receipt; refusing ownership'
+    }
     $baseline=Snapshot
     Save-Json 'windows-baseline.json' $baseline
     . (Join-Path $ControlRoot 'bin\windows-host-common.ps1')
-    $ownership=@{created_utc=[DateTime]::UtcNow.ToString('o');path=$Hold;hold_created=$false}
+    $ownership=@{created_utc=[DateTime]::UtcNow.ToString('o');path=$Hold;hold_created=$false;
+        release=$Release;candidate=$Candidate;ownership_id=[Guid]::NewGuid().ToString('N')}
     Save-Json 'own-hold.json' $ownership
     New-Item -ItemType Directory -Path $HoldDirectory -Force | Out-Null
     try {
-        New-Item -ItemType File -Path $Hold | Out-Null
+        New-Item -ItemType File -Path $Hold -Value $ownership.ownership_id | Out-Null
         $ownership.hold_created=$true
         Save-Json 'own-hold.json' $ownership
         Set-OmpAdminOnlyFile -Path $Hold
     } catch {
         # The caller never receives a successful acquisition on this path. Undo only a file
         # whose exclusive creation completed here, never a pre-existing/racing owner's hold.
-        if($ownership.hold_created) {
+        if($ownership.hold_created -and (Test-Path -LiteralPath $Hold) -and
+            [IO.File]::ReadAllText($Hold) -ceq $ownership.ownership_id) {
             Remove-Item -LiteralPath $Hold -Force
             $ownership.hold_created=$false
             Save-Json 'own-hold.json' $ownership
@@ -93,8 +111,12 @@ if($Action -eq 'Release') {
     $health=Invoke-RestMethod -Uri 'http://127.0.0.1:18088/health' -TimeoutSec 10
     if($health.status -ne 'ok'){throw 'refusing hold release before Windows production health'}
     if(!(Test-Path (Join-Path $Workspace 'own-hold.json'))){throw 'no ownership receipt'}
-    $ownership=Get-Content -Raw (Join-Path $Workspace 'own-hold.json')|ConvertFrom-Json
+    $ownership=Get-Content -Raw -Encoding UTF8 (Join-Path $Workspace 'own-hold.json')|ConvertFrom-Json
+    if($ownership.path -cne $Hold -or $ownership.release -cne $Release -or $ownership.candidate -cne $Candidate){throw 'ownership receipt belongs to another window'}
+    if(Test-Path -LiteralPath $Hold){if(!(Own-Hold)){throw 'refusing release of another owner lane hold'}}
     if($ownership.hold_created -and (Test-Path $Hold)){Remove-Item -LiteralPath $Hold -Force}
+    $ownership.hold_created=$false
+    Save-Json 'own-hold.json' $ownership
     $before=Get-Content -Raw (Join-Path $Workspace 'windows-baseline.json')|ConvertFrom-Json
     foreach($path in @($HoldDirectory,$ControlRoot)) {
         $original=@($before.directories|Where-Object path -EQ $path)[0]

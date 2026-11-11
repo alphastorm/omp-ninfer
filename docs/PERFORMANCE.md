@@ -93,10 +93,13 @@ requires **weighted decode ratio `>= 0.98`, every case `>= 0.95`, and byte-ident
 normalized outputs** against the published beta.1 incumbent. The earlier v0.16.0
 speedup-claim rule remains expressible by recording `1.08` / `0.95` instead.
 Both role-only and combined role-plus-supplemental weighted ratios must clear the
-recorded weighted floor; the every-case floor covers the combined suite. Neither
-rule permits different normalized output bytes. There is no separate threshold
-override or built-in waiver: a release waiver does not turn a failed reduction
-into a pass.
+recorded weighted floor; the every-case floor covers the combined suite.
+The default output rule requires identity within **and across** engines. A second,
+explicitly decision-selected rule requires identity **within each engine**
+(`A0/A3`, `B1/B2`) and admits cross-engine differences only with that decision's
+SHA-256-bound passing EXP-085 verdict for the exact lane, incumbent and candidate.
+Neither a screen for another lane/build nor a release waiver supplies that permission.
+There is no separate threshold override: a waiver does not turn a failed reduction into a pass.
 
 Before collecting candidate data, freeze one `gate.json` declaration:
 
@@ -115,6 +118,16 @@ Before collecting candidate data, freeze one `gate.json` declaration:
   `"role weighted"`, `"all-cases weighted"`, and `"every case"`. The complete
   decision is included in the declaration digest; changing it invalidates the
   recorded pre-screen plan.
+- To select the second output rule, the decision instead records
+  `byte_identical_normalized_outputs:
+  "required within each engine (A0/A3, B1/B2); cross-engine differences require a bound passing EXP-085 verdict"`.
+  The declaration must name `lane: "rtx3090"` or `"rtx4090"`. The decision's
+  `quality_screens` array contains `{lane, repository_path, sha256}` bindings.
+  Each admitted verdict must pass and be valid under EXP-085, bind the frozen
+  1,120/80 prompt sets and four native screen/determinism arms, and match both
+  measured binary/configuration identities. Missing, failed, foreign or rehashed
+  evidence cannot authorize differences. Byte-identical cross-engine outputs
+  need no screen under either output rule; within-engine differences always fail.
 - `comparator`: `binary_sha256` of the shipped incumbent executable and
   `configuration_sha256` of its measured configuration. A candidate executable
   configured for MTP3 is **not** the shipped-incumbent comparator.
@@ -189,6 +202,12 @@ It also records the release and canonical `decision_sha256` (not the formatted
 decision file's byte hash), numerical `thresholds_passed`, `normalized_outputs_identical`,
 and `output_mismatch_case_ids`. Output comparisons use the actual UTF-8 bytes at
 all four ABBA positions; safe arm receipts retain only normalized-output hashes.
+The second rule additionally records `output_rule_passed`,
+`within_engine_outputs_identical`, `within_engine_output_mismatch_case_ids` and
+the authorizing `quality_screen_sha256` (null when no screen authorizes differences).
+`normalized_outputs_identical` still describes all four arms, even when an
+authorized cross-engine difference passes. The default result shape and v0.16.2
+decision remain unchanged.
 
 Weighted throughput is pooled completion tokens divided by pooled decode seconds
 for each arm, then candidate divided by comparator. Each case's ratio uses the
@@ -208,11 +227,52 @@ The declaration remains the campaign authority; the reducer does not hardcode a 
 Thus the v0.16.0 same-binary MTP3 pre-screen cannot claim
 to predict the shipped-incumbent gate; an isolated subset cannot claim the full
 role-suite gate either. Missing normalized output bytes are invalid input; differing
-bytes are a gate failure even when every numerical threshold passes. Properly bound
+bytes fail unless the selected output rule explicitly admits that cross-engine
+difference. Properly bound
 historical v0.16.0 final RTX 4090 measurements still fail
 the `log-024@0` floor at `0.933832`, rather than inheriting the historical waiver.
 Exit status is `0` for a gate pass, `1` for a failure or diagnostic, and `2` for
 invalid/incomplete inputs.
+
+### Decision-authorized identity-first native admission
+
+A release may bind `observed_gates.native_identity_decision` to a schema-1
+`omp_ninfer_founder_gate_decision` whose `rule.quality_admission` is
+`"speed-ABBA byte identity and 80/80 sealed incumbent determinism byte identity"`.
+Its `lanes` selects the permitted native lanes. For each lane,
+`sealed_incumbent_determinism[lane]` records the incumbent's
+`package_sha256`, `server_binary_sha256`, `configuration_sha256` and
+`model_artifact_sha256` under `identity`, plus the sealed `responses_sha256`,
+`prompt_count: 80` and frozen `prompt_ids_sha256`.
+Draft decisions are not admission records.
+
+Generate a content-safe proof from retained speed captures and the native
+determinism run directories (`arm.json` and `responses.jsonl`):
+
+```sh
+python3 scripts/speed_gate.py identity-proof --gate gate.json --plan prescreen-plan.json \
+  --capture A0.json --capture B1.json --capture B2.json --capture A3.json \
+  --incumbent-determinism sealed-incumbent --candidate-determinism fresh-candidate \
+  --release-spec candidate-release-spec.json --out native-identity-proof.json
+```
+
+Every declared speed-ABBA case must match the incumbent, and all frozen 80
+determinism prompts must match its sealed outputs. Determinism normalization
+retains content, reasoning and ordered tool calls with their raw argument strings;
+only transport tool IDs are removed. The producer compares those UTF-8 bytes,
+not pass flags. The public `omp-ninfer.native-identity-proof` schema-1 receipt
+retains the decision file hash, exact native identities, default build profile,
+speed declaration/plan/arm digests and per-prompt output digests; it includes no
+raw output text.
+
+`bind_native_variant.py --identity-proof native-identity-proof.json` selects this
+admission path instead of `--quality-screen` or `--t1-parity`. Binder/verifier
+validation rechecks the release decision, all speed cases, sealed membership and
+all 80 pairs. The authenticated package must have the standard
+`native-vX.Y.Z[-beta.N]-rtx3090` or `...-rtx4090` build profile: output-changing
+tensor-core/A8 variants still require a powered-screen verdict, even if sampled
+outputs happen to match. Identity-first does not waive native fit, speed floors,
+durability, parity or release acceptance.
 
 ## Current state
 
