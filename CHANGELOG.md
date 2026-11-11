@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Point the upstream `#441` and `#446` issue links in `docs/FACTS.md` and `docs/UPSTREAM.md` at
+  `Neroued/ninfer`; the `alphastorm/ninfer` URLs returned 404.
+- Stop labelling the native RTX 4090 and RTX 3090 retrieval figures on the site as cold starts: the
+  native `long_session` receipts record no prefix-cache counters, so the site names each lane's
+  long-session gate, and the `docs/BENCHMARKS.md` method says only the RTX 5090 `prefill_curve`
+  receipt records zero prefix-cache reuse.
+- Re-render the three historical benchmark charts so `scripts/render_assets.py --check` passes.
+  `chart-warm-cold.png` still showed the `~192×` and `~77×` speedup ratios its source dropped on
+  2026-09-18; it now shows the separate timing boundaries its caption describes.
+- Load the artwork fonts from the site's own font files through `assets/fonts.css` instead of
+  Google Fonts. With the network import, 3 of 60 headless renders of unchanged sources differed by
+  antialiasing, so `--check` failed at random; with the local files, 84 of 84 checks passed and
+  every committed raster, including `og.png`, renders byte for byte unchanged.
+
 ### Changed
 
 - Mark v0.17.0 as the published release across the README, quickstart banner, facts, roadmap,

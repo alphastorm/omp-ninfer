@@ -216,9 +216,12 @@ without repeating the full corpus comparison.
 
 ## Method
 
-- **`prefill_curve` and `long_session`:** Cold-process exact retrieval at **130,048 prompt tokens**
-  (17 completion tokens, zero prefix-cache hit) against the 131,072-token context ceiling. The gate
-  verifies exact needle output (`ORCHID=493817; COLOR=COBALT`) rather than perplexity.
+- **`prefill_curve` (RTX 5090 container) and `long_session` (native Windows):** Exact retrieval at
+  **130,048 prompt tokens** (17 completion tokens) from the same fixture against the 131,072-token
+  context ceiling. The gate verifies exact needle output (`ORCHID=493817; COLOR=COBALT`) rather than
+  perplexity. Only `prefill_curve` records the server's prefix-cache counters (zero hit tokens, so
+  its figure is a cold start); the native `long_session` receipts record wall time and the exact
+  output, not cache counters.
 - **`decode` (RTX 5090 container):** A 2,048-completion-token generation from a 118-token prompt on
   the published deployment profile, recording server-side decode throughput
   (`decode_tokens_per_second`), client-side wall throughput
