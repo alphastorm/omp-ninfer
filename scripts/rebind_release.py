@@ -132,6 +132,9 @@ def bind_lane_receipts(release: str, compatibility_path: Path, manifest_path: Pa
         source = variants[variant["id"]]
         for key in VARIANT_ROW_KEYS:
             variant[key] = source[key]
+        variant.pop("build_profile", None)
+        if "build_profile" in source:
+            variant["build_profile"] = source["build_profile"]
         if "runtime_shape" in source:
             variant["runtime_shape"] = source["runtime_shape"]
         variant.update(model_url=native_model["artifact_url"],
@@ -156,6 +159,9 @@ def bind_lane_receipts(release: str, compatibility_path: Path, manifest_path: Pa
         source = variants[variant_id]
         entry["release_tag"] = source["release_tag"]
         entry["package_sha256"] = source["package_sha256"]
+        entry.pop("build_profile", None)
+        if "build_profile" in source:
+            entry["build_profile"] = source["build_profile"]
         entry["repository_path"] = source["qualification"]["summary"]
         entry["sha256"] = source["qualification"]["sha256"]
     save(qualification_path, qualification)

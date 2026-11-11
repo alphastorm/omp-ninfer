@@ -7,6 +7,8 @@
 # The outer set includes a distinct dependency CycloneDX SBOM; the inner SPDX remains unchanged.
 # That inventory must be a component graph rooted at the server that maps every DLL the package
 # archive ships to one SHA-256-bound component; an identity-only document is refused.
+# Build variants must select a committed lane build_profiles entry and carry that exact
+# build_profile in both the package receipt and packaged release-spec. Older specs keep equality.
 # Live --publish is FOUNDER-ONLY / AGENT MUST NOT EXECUTE.
 #
 # Usage:
@@ -89,9 +91,25 @@ for name, expected in entries.items():
             raise SystemExit(f"checksum mismatch: {name}")
 
 receipt = json.loads((root / "package-build-receipt.json").read_text(encoding="utf-8"))
-for key in ("release_id", "release_version", "deployment_profile", "build_profile"):
+for key in ("release_id", "release_version", "deployment_profile"):
     if receipt.get(key) != spec.get(key):
         raise SystemExit(f"package receipt {key} disagrees with the lane specification")
+profile = receipt.get("build_profile")
+if not isinstance(profile, str) or not profile or profile != profile.strip():
+    raise SystemExit("package receipt build_profile must be a nonempty string")
+if "build_profiles" not in spec:
+    if profile != spec.get("build_profile"):
+        raise SystemExit("package receipt build_profile disagrees with the lane specification")
+else:
+    profiles = spec["build_profiles"]
+    if (not isinstance(profiles, dict) or set(profiles) != {"default", "a8", "tc", "tc-a8"}
+            or any(not isinstance(value, str) or not value or value != value.strip()
+                   for value in profiles.values())
+            or len(set(profiles.values())) != len(profiles)
+            or spec.get("build_profile") not in profiles.values()):
+        raise SystemExit("lane specification committed build_profiles is malformed")
+    if profile not in profiles.values():
+        raise SystemExit("package receipt build_profile is not in the committed build_profiles")
 for key in ("patch_stack_sha", "runtime_source_sha", "package_source_sha"):
     if receipt.get(key) != commit:
         raise SystemExit(f"package receipt {key} is not {commit}")
@@ -161,12 +179,21 @@ while frontier:
 if reached != set(edges):
     raise SystemExit("dependency SBOM leaves components unreachable from the server")
 packaged = {}
+packaged_spec = None
 with tarfile.open(root / package, "r|gz") as bundle:
     for member in bundle:
         parts = pathlib.PurePosixPath(member.name).parts[1:]
+        if parts == ("release-spec.json",):
+            if packaged_spec is not None or not member.isfile() or member.size > 1024 * 1024:
+                raise SystemExit("package must carry one regular release-spec.json")
+            packaged_spec = json.load(bundle.extractfile(member))
+            if not isinstance(packaged_spec, dict):
+                raise SystemExit("packaged release-spec must be an object")
         if member.isfile() and parts and parts[-1].lower().endswith(".dll"):
             packaged["/".join(parts).casefold()] = hashlib.file_digest(
                 bundle.extractfile(member), "sha256").hexdigest()
+if packaged_spec is None or packaged_spec.get("build_profile") != profile:
+    raise SystemExit("packaged release-spec build_profile disagrees with the package receipt")
 for path in sorted(packaged.keys() | mapped.keys()):
     if path not in mapped:
         raise SystemExit(f"dependency SBOM does not map packaged DLL {path}")

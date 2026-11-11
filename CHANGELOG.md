@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Accept native build-profile variants only when their package receipt and packaged release spec
+  select the same profile from the lane allowlist committed at the source revision. Specs without
+  an allowlist retain exact profile equality; selected profiles remain visible in native
+  qualification, manifest and compatibility records instead of being replaced by a default.
+- Compare native speed-admission build profiles when both evidence records carry one, while
+  always checking both binary and configuration digests. Profile-bearing variants can use their
+  bound passing screen; default-profile byte-identity proofs remain admissible, but output-changing
+  profiles still require a powered screen.
 - Point the upstream `#441` and `#446` issue links in `docs/FACTS.md` and `docs/UPSTREAM.md` at
   `Neroued/ninfer`; the `alphastorm/ninfer` URLs returned 404.
 - Stop labelling the native RTX 4090 and RTX 3090 retrieval figures on the site as cold starts: the

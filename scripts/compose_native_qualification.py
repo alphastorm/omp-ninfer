@@ -8,6 +8,9 @@ tree copies it unchanged and nothing in this repository composes one. ``verify_r
 predicates: the two honest rollback outcomes, and the canonical schema-2 product protocol
 evidence and shared Host profile that native components from v0.7.0 must carry. Published
 historical receipts remain immutable; no legacy checks map is synthesized.
+Build-profile variants select the committed lane allowlist independently of runtime policy.
+The selected receipt profile is retained in new qualification/probe identities; no default is
+substituted for observed identity, and receipts published before that projection remain unchanged.
 """
 
 from __future__ import annotations
@@ -23,6 +26,32 @@ NATIVE_RECEIPT_POLICY_FIELDS = (
     "device_state_slots", "admission_headroom_mib", "host_context_mib", "host_context_bytes",
     "speculative_backend", "speculative_draft_tokens", "public_model_id",
 )
+
+
+def native_build_profile(spec: dict[str, Any], selected_profile: Any) -> str:
+    """Authorize a receipt profile; callers separately bind the packaged spec's selected value.
+
+    At cut time ``spec`` must come from the exact source commit, never the package's allowlist.
+    A packaged spec may select any committed member while retaining the same allowlist map.
+    Absence of that map preserves historical exact equality; a malformed present map fails closed.
+    """
+    if (not isinstance(selected_profile, str) or not selected_profile
+            or selected_profile != selected_profile.strip()):
+        raise ValueError("native build_profile must be a nonempty string")
+    if "build_profiles" not in spec:
+        if selected_profile != spec.get("build_profile"):
+            raise ValueError("native build_profile must match the lane specification")
+    else:
+        profiles = spec["build_profiles"]
+        if (not isinstance(profiles, dict) or set(profiles) != {"default", "a8", "tc", "tc-a8"}
+                or any(not isinstance(value, str) or not value or value != value.strip()
+                       for value in profiles.values())
+                or len(set(profiles.values())) != len(profiles)
+                or spec.get("build_profile") not in profiles.values()):
+            raise ValueError("native build_profiles must be the committed four-profile map")
+        if selected_profile not in profiles.values():
+            raise ValueError("native build_profile must be in the committed build_profiles")
+    return selected_profile
 
 
 def first_release_rollback(value: Any) -> bool:
@@ -197,6 +226,10 @@ def native_status_errors(status: Any, variant: dict[str, Any], configuration: di
     ):
         if identity.get(field) != expected or not isinstance(expected, str):
             errors.append(f"native served {field} must match the candidate")
+    if "build_profile" in variant:
+        profile = variant["build_profile"]
+        if not isinstance(profile, str) or not profile or identity.get("build_profile") != profile:
+            errors.append("native served build_profile must match the candidate")
     if (status.get("status") != "ok" or status.get("artifact_type") != "ninfer_server_status"
             or type(status.get("schema_version")) is not int or status["schema_version"] not in (1, 2)
             or identity.get("source_dirty") is not False):
@@ -232,6 +265,8 @@ def native_probe_summary(probes: dict[str, Any]) -> dict[str, Any]:
         "transient_retries": fleet.get("transient_retries"),
         "steps": [step.get("step") for step in fleet.get("steps", [])],
     }}
+    if "build_profile" in fleet.get("identity", {}):
+        summary["fleet"]["identity"]["build_profile"] = fleet["identity"]["build_profile"]
     if "fanout" in probes:
         fanout = probes["fanout"]
         scenarios = fanout.get("scenarios", [])
@@ -254,6 +289,9 @@ def native_probe_summary(probes: dict[str, Any]) -> dict[str, Any]:
                 "runtime": {"max_context": status.get("runtime", {}).get("max_context")},
                 "scheduler": {"max_concurrency": status.get("scheduler", {}).get("max_concurrency")},
             }
+            if "build_profile" in status.get("identity", {}):
+                summary["fanout"]["statuses"][phase]["identity"]["build_profile"] = (
+                    status["identity"]["build_profile"])
     for name in ("parallel", "compaction"):
         if name not in probes:
             continue
@@ -293,6 +331,10 @@ def native_probe_acceptance_errors(configuration: dict[str, Any], probes: Any,
         return errors
     fleet = probes.get("fleet", {})
     identity = fleet.get("identity", {})
+    if "build_profile" in variant:
+        profile = variant["build_profile"]
+        if not isinstance(profile, str) or not profile or identity.get("build_profile") != profile:
+            errors.append("native fleet build_profile must match the candidate")
     if (fleet.get("artifact_type") != "omp_ninfer_fleet_fanout_probe" or fleet.get("branches") != 4
             or fleet.get("transient_retries") != 0
             or identity.get("model_id") != configuration["public_model_id"]
@@ -357,9 +399,16 @@ def native_probe_acceptance_errors(configuration: dict[str, Any], probes: Any,
 
 
 def native_protocol_qualification_errors(receipt: dict[str, Any],
-                                         candidate_configuration: dict[str, Any] | None = None) -> list[str]:
+                                         candidate_configuration: dict[str, Any] | None = None, *,
+                                         candidate_build_profile: str | None = None) -> list[str]:
     """The native release shape preserves actual phase wrappers around canonical payloads."""
     errors = []
+    if candidate_build_profile is not None:
+        identity = receipt.get("identity", {})
+        if (not isinstance(candidate_build_profile, str) or not candidate_build_profile
+                or not isinstance(identity, dict)
+                or identity.get("build_profile") != candidate_build_profile):
+            errors.append("qualification identity.build_profile must match the candidate")
     gates = receipt.get("deterministic_gates", {})
     if not isinstance(gates, dict):
         gates = {}

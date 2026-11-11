@@ -5,6 +5,8 @@ The declaration embeds the release's hash-bound qualification decision, binding
 its authenticated rule into the pre-screen plan. Both weighted suites and every case
 must pass. Output bytes must match across all arms unless the decision selects
 within-engine identity and binds this lane/candidate's passing EXP-085 screen.
+Identity comparisons always bind both digests and compare build profiles when both records
+carry them; an absent historical profile is not replaced by a lane default.
 Neither a digest-only capture nor a waiver supplies a pass.
 No host is contacted and normalized output text is never copied into the result.
 """
@@ -65,8 +67,22 @@ def request_suite(rows: Any) -> list[dict[str, str]]:
 def arm_identity(value: Any) -> dict[str, str]:
     if not isinstance(value, dict):
         raise SpeedGateError("arm identity must be an object")
-    return {key: require_sha256(value.get(key), key)
-            for key in ("binary_sha256", "configuration_sha256")}
+    identity = {key: require_sha256(value.get(key), key)
+                for key in ("binary_sha256", "configuration_sha256")}
+    if "build_profile" in value:
+        profile = value["build_profile"]
+        if (not isinstance(profile, str)
+                or re.fullmatch(r"native-v[0-9][0-9A-Za-z.-]*-rtx(?:3090|4090)", profile) is None):
+            raise SpeedGateError("build_profile must name the observed native build variant")
+        identity["build_profile"] = profile
+    return identity
+
+
+def _arm_mismatches(observed: dict[str, str], expected: dict[str, str]) -> list[str]:
+    fields = ("binary_sha256", "configuration_sha256")
+    if "build_profile" in observed and "build_profile" in expected:
+        fields += ("build_profile",)
+    return [field for field in fields if observed.get(field) != expected.get(field)]
 
 
 def recorded_thresholds(decision: Any, release: Any) -> dict[str, float]:
@@ -171,8 +187,10 @@ def receipts(captures: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
         request_suite(rows)
         arm = arms.setdefault(index, {"arm": ORDER[index], "index": index, "identity": safe_identity,
                                       "capture_sha256s": [], "requests": []})
-        if arm["identity"] != safe_identity:
+        if _arm_mismatches(arm["identity"], safe_identity):
             raise SpeedGateError("one ABBA position has inconsistent shard binary/configuration identities")
+        if "build_profile" in safe_identity:
+            arm["identity"]["build_profile"] = safe_identity["build_profile"]
         for row in rows:
             tokens = row.get("completion_tokens")
             if type(tokens) is not int or tokens <= 0:
@@ -271,14 +289,22 @@ def passing_screen(gate: dict[str, Any], candidate: dict[str, str], root: Path) 
                     or value.get("raw_prompts_outputs_or_secrets_included") is not False):
                 continue
             runs = value["runs"]
-            selected = {role: {**runs[role], "arm": native_arm(runs[role]["arm"])} for role in (
-                "production", "candidate", "production_determinism", "candidate_determinism")}
+            selected, identities = {}, {}
+            for role in ("production", "candidate", "production_determinism", "candidate_determinism"):
+                raw_arm = runs[role]["arm"]
+                arm = native_arm({key: child for key, child in raw_arm.items() if key != "build_profile"})
+                selected[role] = {**runs[role], "arm": arm}
+                identities[role] = arm_identity({
+                    "binary_sha256": arm["server_binary_sha256"],
+                    "configuration_sha256": arm["configuration_sha256"],
+                    **({"build_profile": raw_arm["build_profile"]} if "build_profile" in raw_arm else {}),
+                })
             validate_native_arms(selected)
             for role, expected in (("production", gate["comparator"]), ("candidate", candidate)):
                 arm = selected[role]["arm"]
                 if (arm["lane"] != gate["lane"]
-                        or arm_identity({"binary_sha256": arm["server_binary_sha256"],
-                                         "configuration_sha256": arm["configuration_sha256"]}) != expected):
+                        or _arm_mismatches(identities[role], expected)
+                        or _arm_mismatches(identities[role], identities[role + "_determinism"])):
                     raise SpeedGateError("screen arm differs from the speed comparison")
             return binding["sha256"]
         except (ScreenError, OSError, ValueError, KeyError, TypeError, AttributeError):
@@ -301,22 +327,19 @@ def identity_differences(gate: dict[str, Any], arms: Sequence[dict[str, Any]],
     for field in ("gate_sha256", "role_case_ids", "request_suite", "request_suite_sha256", "order"):
         if plan.get(field) != expected_plan[field]:
             reasons.append(f"plan.{field} differs from gate declaration")
-    if planned_arms["A"] != gate["comparator"]:
+    if _arm_mismatches(planned_arms["A"], gate["comparator"]):
         reasons.append("plan.arms.A differs from gate comparator")
     for arm in arms:
         name = f"{arm['arm']}{arm['index']}"
         if arm["arm"] == "A":
-            for field, expected in gate["comparator"].items():
-                if arm["identity"][field] != expected:
-                    reasons.append(f"{name}.{field} differs from gate comparator")
+            for field in _arm_mismatches(arm["identity"], gate["comparator"]):
+                reasons.append(f"{name}.{field} differs from gate comparator")
         if arm["request_suite_sha256"] != gate["request_suite_sha256"]:
             reasons.append(f"{name}.request_suite_sha256 differs from gate role suite")
-        for field, expected in planned_arms[arm["arm"]].items():
-            if arm["identity"][field] != expected:
-                reasons.append(f"{name}.{field} differs from plan arm {arm['arm']}")
-    for field in ("binary_sha256", "configuration_sha256"):
-        if arms[1]["identity"][field] != arms[2]["identity"][field]:
-            reasons.append(f"candidate {field} differs between B1 and B2")
+        for field in _arm_mismatches(arm["identity"], planned_arms[arm["arm"]]):
+            reasons.append(f"{name}.{field} differs from plan arm {arm['arm']}")
+    for field in _arm_mismatches(arms[1]["identity"], arms[2]["identity"]):
+        reasons.append(f"candidate {field} differs between B1 and B2")
     return reasons
 
 
@@ -471,6 +494,8 @@ def validate_identity_proof(value: Any, root: Path, release: str, variant: dict[
 
     lane = variant["id"].split("-")[0]
     profile = default_native_build(spec, lane)
+    if "build_profile" in variant and variant["build_profile"] != profile:
+        raise SpeedGateError("identity-first requires the default native build profile")
     decision, decision_sha = identity_decision(root, release, lane)
     fields = {"artifact_type", "schema_version", "status", "release", "lane", "decision_sha256",
               "candidate", "predecessor", "build_profile", "speed_abba", "determinism",
@@ -496,10 +521,16 @@ def validate_identity_proof(value: Any, root: Path, release: str, variant: dict[
                 or identity_differences(gate, arms, speed["plan"], root=root)):
             raise SpeedGateError("identity proof speed ABBA must match its complete declaration and plan")
         for index, arm in enumerate(arms):
-            expected = previous if ORDER[index] == "A" else current
+            expected = predecessor if ORDER[index] == "A" else variant
+            expected_arm = {"binary_sha256": expected["server_binary_sha256"],
+                            "configuration_sha256": expected["configuration_sha256"]}
+            if ORDER[index] == "B":
+                expected_arm["build_profile"] = profile
+            elif "build_profile" in expected:
+                expected_arm["build_profile"] = expected["build_profile"]
             if (arm["arm"] != ORDER[index] or type(arm["index"]) is not int or arm["index"] != index
-                    or arm["identity"] != {"binary_sha256": expected["server_binary_sha256"],
-                                           "configuration_sha256": expected["configuration_sha256"]}
+                    or set(arm["identity"]) - {"binary_sha256", "configuration_sha256", "build_profile"}
+                    or _arm_mismatches(arm_identity(arm["identity"]), arm_identity(expected_arm))
                     or request_suite(arm["requests"]) != gate["request_suite"]):
                 raise SpeedGateError("identity proof speed ABBA identities and every declared case must match")
             for row in arm["requests"]:

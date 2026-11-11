@@ -394,6 +394,8 @@ def public_probes(value: dict, configuration: dict, variant: dict) -> dict:
     model = configuration["public_model_id"]
     identity = {**{key: HASH for key in ("binary_sha256", "config_sha256", "model_artifact_sha256")},
                 "model_id": frozenset((model,)), "source_dirty": bool}
+    if "build_profile" in variant:
+        identity["build_profile"] = frozenset((variant["build_profile"],))
     checks = {key: bool for key in (
         "logged_requests", "all_logged_requests_completed", "single_server_instance",
         "provider_limit_respected", "concurrency_expected", "every_turn_completed",
@@ -899,6 +901,7 @@ def main() -> int:
                 "binary_sha256": variant["server_binary_sha256"],
                 "configuration_sha256": variant["configuration_sha256"],
                 "model_sha256": native_model["artifact_sha256"],
+                **({"build_profile": variant["build_profile"]} if "build_profile" in variant else {}),
                 **({"configuration": native_configurations[native_variant],
                     "runtime_shape": variant["runtime_shape"]}
                    if native_configurations[native_variant] is not None else {}),
