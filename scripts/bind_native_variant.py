@@ -53,7 +53,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from render_compatibility import RUNTIME_VARIANT_IDS
-from compose_native_qualification import native_runtime_configuration
+from compose_native_qualification import native_build_profile, native_runtime_configuration
 from verify_release import (
     effective_native_model,
     native_dependency_sbom_filename,
@@ -201,6 +201,12 @@ def bind(manifest: dict[str, Any], lane: str, tag: str, checksums: Path,
         "checksums_url": f"{DOWNLOAD}/{tag}/{checksums.name}",
         "checksums_sha256": hashlib.sha256(checksums.read_bytes()).hexdigest(),
     })
+    variant.pop("build_profile", None)
+    if "build_profile" in receipt:
+        profile = receipt["build_profile"]
+        if not isinstance(profile, str) or not profile or profile != profile.strip():
+            raise BindError("package receipt build_profile must be a nonempty string")
+        variant["build_profile"] = profile
     for field in ("sbom_dependency_url", "sbom_dependency_sha256"):
         variant.pop(field, None)
     variant.update(dependency_pins)
@@ -300,6 +306,10 @@ def package_metadata(path: Path, receipt: dict[str, Any]) -> dict[str, bytes]:
             or shape.get("speculative_backend") != config.get("speculative", {}).get("backend")):
         raise BindError("schema-5 package policy/config identity must match the build receipt")
     try:
+        if any(field in spec for field in ("build_profile", "build_profiles")) or "build_profile" in receipt:
+            native_build_profile(spec, receipt.get("build_profile"))
+            if spec.get("build_profile") != receipt.get("build_profile"):
+                raise ValueError("packaged release-spec build_profile must match the package receipt")
         native_runtime_configuration(spec, config)
     except ValueError as error:
         raise BindError(str(error)) from error
@@ -338,6 +348,7 @@ def add_lane_rows(release: str, variant: dict[str, Any]) -> None:
             "package_bytes", "maximum_context_tokens")},
         "qualification_receipt": {"path": summary["summary"], "url": summary["public_url"],
                                   "sha256": summary["sha256"]},
+        **({"build_profile": variant["build_profile"]} if "build_profile" in variant else {}),
         **({"runtime_shape": variant["runtime_shape"]} if "runtime_shape" in variant else {}),
     })
     rows.sort(key=lambda row: RUNTIME_VARIANT_IDS.index(row["id"]))
@@ -346,6 +357,7 @@ def add_lane_rows(release: str, variant: dict[str, Any]) -> None:
         "status": "passed", "beta_qualified": True, "installable": True,
         "repository_path": summary["summary"], "sha256": summary["sha256"],
         "release_tag": variant["release_tag"], "package_sha256": variant["package_sha256"],
+        **({"build_profile": variant["build_profile"]} if "build_profile" in variant else {}),
     }
     qualification["composition"]["native_runtime_variants"] = {
         key: native[key] for key in RUNTIME_VARIANT_IDS if key in native
@@ -405,6 +417,9 @@ def main() -> int:
         mirror["maximum_context_tokens"] = variant["maximum_context_tokens"]
         if "runtime_shape" in variant:
             mirror["runtime_shape"] = variant["runtime_shape"]
+        mirror.pop("build_profile", None)
+        if "build_profile" in variant:
+            mirror["build_profile"] = variant["build_profile"]
     if is_new:
         add_lane_rows(args.release, variant)
     if (product_version(args.release) or (0, 0, 0)) >= (0, 16, 0):

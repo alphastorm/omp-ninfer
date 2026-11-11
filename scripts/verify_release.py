@@ -39,6 +39,7 @@ from compose_native_qualification import (
     bidirectional_rollback,
     first_release_rollback,
     native_protocol_qualification_errors,
+    native_build_profile,
     native_runtime_configuration,
     native_probe_acceptance_errors,
     matches_native_configuration,
@@ -740,7 +741,7 @@ def validate_ga_evidence_bindings(
             continue
         prefix = f"compatibility.runtime_variants[{item.get('id')}]"
         for key in ("release_tag", "source_commit", "package_name", "package_url",
-                    "package_sha256", "package_bytes", "maximum_context_tokens"):
+                    "package_sha256", "package_bytes", "maximum_context_tokens", "build_profile"):
             require(item.get(key) == source_item.get(key),
                     f"{prefix}.{key} must equal the manifest component", errors)
         receipt = item.get("qualification_receipt", {})
@@ -765,6 +766,7 @@ def validate_ga_evidence_bindings(
         for key, expected in (
             ("release_tag", source_item.get("release_tag")),
             ("package_sha256", source_item.get("package_sha256")),
+            ("build_profile", source_item.get("build_profile")),
             ("repository_path", qual.get("summary")),
             ("sha256", qual.get("sha256")),
         ):
@@ -2240,6 +2242,12 @@ def validate_ninfer_variants(
                 f"{prefix}.status must match compatibility", errors)
         require(compatibility_item.get("installable") is item.get("installable"),
                 f"{prefix}.installable must match compatibility", errors)
+        if "build_profile" in item or "build_profile" in compatibility_item:
+            profile = item.get("build_profile")
+            require(isinstance(profile, str) and bool(profile) and profile == profile.strip(),
+                    f"{prefix}.build_profile must record the selected package profile", errors)
+            require(compatibility_item.get("build_profile") == profile,
+                    f"{prefix}.build_profile must match compatibility", errors)
         require(item.get("repository") == "https://github.com/alphastorm/ninfer",
                 f"{prefix}.repository must be the public NInfer repository", errors)
         require_git_sha(item.get("source_commit"), f"{prefix}.source_commit", errors)
@@ -2408,8 +2416,14 @@ def validate_ninfer_variants(
             validate_native_gates(receipt, prefix, errors, complete=rebased)
             if rebased:
                 errors.extend(f"{prefix}: {error}"
-                              for error in native_protocol_qualification_errors(receipt, candidate_configuration))
+                              for error in native_protocol_qualification_errors(
+                                  receipt, candidate_configuration,
+                                  candidate_build_profile=item.get("build_profile")))
         identity = receipt.get("identity", {})
+        if "build_profile" in item:
+            observed_profile = receipt.get("build_profile") if native_receipt else identity.get("build_profile")
+            require(observed_profile == item["build_profile"],
+                    f"{prefix} qualification build_profile must match the selected package profile", errors)
         package = receipt.get("package", {})
         require(package.get("filename") == package_name,
                 f"{prefix} qualification package name must match", errors)
@@ -2503,6 +2517,10 @@ def native_profile(root: Path, release: str, variant: dict[str, Any], errors: li
     require(spec.get("runtime_shape") == variant.get("runtime_shape"),
             f"{label}.release_spec runtime_shape must match the candidate", errors)
     try:
+        if "build_profile" in variant or "build_profiles" in spec:
+            profile = native_build_profile(spec, variant.get("build_profile"))
+            if spec.get("build_profile") != profile:
+                raise ValueError("packaged release-spec build_profile must match the selected package profile")
         configuration = native_runtime_configuration(spec, metadata["server_config"])
     except ValueError as error:
         errors.append(f"{label}: {error}")
@@ -2595,6 +2613,7 @@ def validate_native_route_policy(root: Path, release: str, manifest: dict[str, A
                                 ("binary_sha256", variant.get("server_binary_sha256")),
                                 ("configuration_sha256", variant.get("configuration_sha256")),
                                 ("model_sha256", variant.get("model_artifact_sha256")),
+                                ("build_profile", variant.get("build_profile")),
                                 ("runtime_shape", variant.get("runtime_shape"))):
             require(runtime.get(field) == expected, f"{label} runtime.{field} must match candidate", errors)
         configuration = native_profile(root, release, variant, errors)
