@@ -92,6 +92,100 @@ class NativeProtocolQualificationTests(unittest.TestCase):
                 self.assertEqual(CONTRACT.native_protocol_qualification_errors(receipt), [expected])
 
 
+class NativeBuildProfileTests(unittest.TestCase):
+    def spec(self, lane: str = "rtx3090") -> dict[str, Any]:
+        profiles = {key: f"native-v0.8.0-beta.3{suffix}-{lane}" for key, suffix in
+                    (("default", ""), ("a8", "-a8"), ("tc", "-tc"), ("tc-a8", "-tc-a8"))}
+        return {"lane": lane, "build_profile": profiles["default"], "build_profiles": profiles}
+
+    def test_committed_allowlist_selects_each_exact_profile(self) -> None:
+        for lane in ("rtx3090", "rtx4090"):
+            spec = self.spec(lane)
+            for profile in spec["build_profiles"].values():
+                with self.subTest(lane=lane, profile=profile):
+                    self.assertEqual(CONTRACT.native_build_profile(spec, profile), profile)
+                    packaged = {**spec, "build_profile": profile}
+                    self.assertEqual(CONTRACT.native_build_profile(packaged, profile), profile)
+
+    def test_absent_allowlist_keeps_published_exact_equality(self) -> None:
+        for release in ("v0.16.2", "v0.17.0"):
+            for lane in ("rtx3090", "rtx4090"):
+                path = ROOT / "releases" / release / "profiles" / lane / "release-spec.json"
+                spec = json.loads(path.read_text(encoding="utf-8"))
+                receipt = json.loads((ROOT / "releases" / release / "qualification" /
+                                      f"{lane}.json").read_text(encoding="utf-8"))
+                config = json.loads(path.with_name("server-config.json").read_text(encoding="utf-8"))
+                configuration = CONTRACT.native_runtime_configuration(spec, config)
+                observed = receipt["identity"]["build_profile"]
+                with self.subTest(release=release, lane=lane):
+                    self.assertNotIn("build_profiles", spec)
+                    self.assertEqual(CONTRACT.native_build_profile(spec, observed), observed)
+                    self.assertEqual(CONTRACT.native_protocol_qualification_errors(
+                        receipt, configuration, candidate_build_profile=observed), [])
+                    with self.assertRaises(ValueError):
+                        CONTRACT.native_build_profile(spec, observed + "-other")
+
+    def test_present_invalid_allowlists_and_unlisted_profiles_fail_closed(self) -> None:
+        spec = self.spec()
+        profiles = spec["build_profiles"]
+        for value in (None, [], {}, [*profiles.values()],
+                      {key: profile for key, profile in profiles.items() if key != "tc-a8"},
+                      {**profiles, "other": "native-other"},
+                      {**profiles, "a8": profiles["default"]},
+                      {**profiles, "a8": None}, {**profiles, "a8": ""}):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                CONTRACT.native_build_profile({**spec, "build_profiles": value}, spec["build_profile"])
+        for profile in (None, "", True, [], "native-v0.8.0-beta.3-uncommitted-rtx3090"):
+            with self.subTest(profile=profile), self.assertRaises(ValueError):
+                CONTRACT.native_build_profile(spec, profile)
+
+    def test_qualification_binds_observed_profile_without_defaulting(self) -> None:
+        profile = self.spec()["build_profiles"]["tc-a8"]
+        receipt = deepcopy(SHIPPED_RECEIPT)
+        receipt["identity"]["build_profile"] = profile
+        self.assertEqual(CONTRACT.native_protocol_qualification_errors(
+            receipt, candidate_build_profile=profile), [])
+        for value in (None, self.spec()["build_profile"]):
+            with self.subTest(value=value):
+                receipt["identity"]["build_profile"] = value
+                self.assertIn("qualification identity.build_profile must match the candidate",
+                              CONTRACT.native_protocol_qualification_errors(
+                                  receipt, candidate_build_profile=profile))
+
+    def test_status_and_probe_projections_retain_the_selected_profile(self) -> None:
+        profile = self.spec()["build_profiles"]["a8"]
+        variant = {"server_binary_sha256": "b" * 64, "configuration_sha256": "c" * 64,
+                   "model_artifact_sha256": "d" * 64, "build_profile": profile}
+        configuration = {"concurrency": 1, "max_context": 131072, "public_model_id": "q38-ninfer"}
+        identity = {"binary_sha256": "b" * 64, "config_sha256": "c" * 64,
+                    "model_artifact_sha256": "d" * 64, "source_dirty": False,
+                    "build_profile": profile, "model_id": "q38-ninfer"}
+        status = {"artifact_type": "ninfer_server_status", "schema_version": 2, "status": "ok",
+                  "identity": identity, "scheduler": {"max_concurrency": 1},
+                  "runtime": {"max_context": 131072}}
+        fleet = {"artifact_type": "omp_ninfer_fleet_fanout_probe", "identity": identity,
+                 "branches": 4, "transient_retries": 0,
+                 "steps": [{"step": step} for step in (
+                     "base_prefill", "warm_edit", "checkpoint_save", "session_delete",
+                     "branch_0", "branch_1", "branch_2", "branch_3")]}
+        probes = {"fleet": fleet, "fanout": {
+            "identity": {phase: {"body": status} for phase in ("server_before", "server_after")}}}
+        summary = CONTRACT.native_probe_summary(probes)
+        self.assertEqual(summary["fleet"]["identity"]["build_profile"], profile)
+        for phase in ("server_before", "server_after"):
+            self.assertEqual(summary["fanout"]["statuses"][phase]["identity"]["build_profile"], profile)
+        self.assertEqual(CONTRACT.native_status_errors(status, variant, configuration), [])
+        self.assertEqual(CONTRACT.native_probe_acceptance_errors(configuration, summary, variant), [])
+        for value in (None, self.spec()["build_profile"]):
+            with self.subTest(value=value):
+                status["identity"]["build_profile"] = value
+                self.assertIn("native served build_profile must match the candidate",
+                              CONTRACT.native_status_errors(status, variant, configuration))
+                wrong = CONTRACT.native_probe_summary(probes)
+                self.assertIn("native fleet build_profile must match the candidate",
+                              CONTRACT.native_probe_acceptance_errors(configuration, wrong, variant))
+
+
 class ProductProtocolContractTests(unittest.TestCase):
     def test_exact_private_reuse_and_isolated_public_path_classes_are_accepted(self) -> None:
         for private in ("private_endpoint", "private_input_replay", "private_long_anchor"):

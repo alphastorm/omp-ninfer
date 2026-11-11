@@ -102,25 +102,30 @@ class NativeCutterTests(unittest.TestCase):
         # Redirect only public tag discovery. All local archive/ref operations and the actual
         # push --dry-run use Git itself against a disposable local bare origin.
         (tools / "git").write_text(
-            '#!/bin/sh\nif [ "$1" = ls-remote ]; then shift; shift; shift; '
+            '#!/bin/sh\ncase "$1" in ls-remote|push) echo "$*" >> "$EXTERNAL_LOG";; esac\n'
+            'if [ "$1" = ls-remote ]; then shift; shift; shift; '
             'exec "$REAL_GIT" ls-remote --tags "$LOCAL_ORIGIN" "$@"; fi\n'
             'exec "$REAL_GIT" "$@"\n')
         (tools / "gh").write_text(
-            '#!/bin/sh\ncase "$1 $2" in\n'
+            '#!/bin/sh\necho "gh $*" >> "$EXTERNAL_LOG"\ncase "$1 $2" in\n'
             ' "auth status") exit 0;;\n "api repos/alphastorm/ninfer") echo true;;\n'
             ' "release view") exit 1;;\n *) echo "unexpected GitHub operation" >&2; exit 99;;\nesac\n')
         for path in tools.iterdir():
             path.chmod(0o755)
+        self.external_log = self.root / "external.log"
         self.env = {**os.environ, "PATH": f"{tools}:{os.environ['PATH']}",
                     "REAL_GIT": self.git, "LOCAL_ORIGIN": str(self.remote),
+                    "EXTERNAL_LOG": str(self.external_log),
                     "NINFER_RUNTIME_DIR": str(self.runtime)}
 
     def git_run(self, *args: str) -> str:
         return subprocess.run([self.git, "-C", str(self.runtime), *args], check=True,
                               capture_output=True, text=True).stdout
 
-    def assets(self, lane: str, unlisted_package_files: dict[str, str] | None = None) -> Path:
+    def assets(self, lane: str, unlisted_package_files: dict[str, str] | None = None, *,
+               build_profile: str | None = None, packaged_profile: str | None = None) -> Path:
         spec = self.specs[lane]
+        selected_profile = spec["build_profile"] if build_profile is None else build_profile
         root = self.root / f"{lane}-assets"
         root.mkdir()
         stem = f"{spec['product_prefix']}-v{spec['release_version']}"
@@ -137,6 +142,9 @@ class NativeCutterTests(unittest.TestCase):
             for path, content in SBOM_FIXTURE[key].items():
                 (directory / path).parent.mkdir(parents=True, exist_ok=True)
                 (directory / path).write_bytes(content.encode())
+        packaged_spec = {**spec, "build_profile": (
+            selected_profile if packaged_profile is None else packaged_profile)}
+        (payload / "release-spec.json").write_text(json.dumps(packaged_spec), encoding="utf-8")
         inputs = {key: work / f"{key}.json" for key in ("manifest", "lock", "cuda", "third_party")}
         for key, path in inputs.items():
             path.write_text(json.dumps(SBOM_FIXTURE[key]))
@@ -166,6 +174,7 @@ class NativeCutterTests(unittest.TestCase):
                                         for name in (package, source, sbom)))
         receipt = {key: spec[key] for key in
                    ("lane", "release_id", "release_version", "deployment_profile", "build_profile")}
+        receipt["build_profile"] = selected_profile
         receipt.update({"patch_stack_sha": self.commit, "runtime_source_sha": self.commit,
                         "package_source_sha": self.commit, "secret_values_recorded": 0,
                         "package": {"filename": package, "sha256": digest((root / package).read_bytes()),
@@ -186,10 +195,95 @@ class NativeCutterTests(unittest.TestCase):
     def command(self, lane: str, assets: Path) -> list[str]:
         return ["bash", str(CUTTER), "--version", "v" + self.specs[lane]["release_version"].split("-")[0],
                 "--commit", self.commit, "--assets", str(assets), "--checksums-sha",
-                digest((assets / "SHA256SUMS").read_bytes()), "--notes-file", str(self.notes)]
+                digest((assets / "SHA256SUMS").read_bytes()), "--notes-file", str(self.notes),
+                "--beta", self.specs[lane]["release_version"].rsplit(".", 1)[1]]
 
     def run_cut(self, command: list[str]) -> subprocess.CompletedProcess:
         return subprocess.run(command, env=self.env, cwd=self.root, capture_output=True, text=True)
+
+    def commit_profiles(self) -> None:
+        for lane, spec in self.specs.items():
+            version = "0.8.0-beta.3"
+            spec.update(release_version=version, release_id=f"qwen38-{lane[3:]}-native-v{version}",
+                        deployment_profile=f"qwen38-{lane[3:]}-native-v{version}",
+                        build_profile=f"native-v{version}-{lane}")
+            spec["build_profiles"] = {
+                key: f"native-v{version}{suffix}-{lane}" for key, suffix in
+                (("default", ""), ("a8", "-a8"), ("tc", "-tc"), ("tc-a8", "-tc-a8"))}
+            path = self.runtime / "packaging/windows/lanes" / lane / "release-spec.json"
+            path.write_text(json.dumps(spec), encoding="utf-8")
+        self.git_run("add", ".")
+        self.git_run("commit", "-qm", "committed build profiles")
+        self.commit = self.git_run("rev-parse", "HEAD").strip()
+        self.git_run("update-ref", "refs/remotes/origin/main", self.commit)
+
+    def test_every_committed_build_variant_preflights_for_both_lanes(self) -> None:
+        self.commit_profiles()
+        for lane, spec in self.specs.items():
+            for key, profile in spec["build_profiles"].items():
+                with self.subTest(lane=lane, profile=key):
+                    assets = self.assets(lane, build_profile=profile)
+                    try:
+                        result = self.run_cut(self.command(lane, assets) + ["--lane", lane, "--dry-run"])
+                        self.assertEqual(result.returncode, 0, result.stderr)
+                        self.assertIn("preflight ok", result.stdout)
+                    finally:
+                        shutil.rmtree(assets)
+
+    def test_profile_outside_committed_allowlist_is_refused_before_external_operations(self) -> None:
+        self.commit_profiles()
+        for lane in self.specs:
+            with self.subTest(lane=lane):
+                profile = f"native-v0.8.0-beta.3-uncommitted-{lane}"
+                self.specs[lane]["build_profiles"]["a8"] = profile
+                path = self.runtime / "packaging/windows/lanes" / lane / "release-spec.json"
+                path.write_text(json.dumps(self.specs[lane]), encoding="utf-8")
+                assets = self.assets(lane, build_profile=profile)
+                result = self.run_cut(self.command(lane, assets) + ["--lane", lane, "--publish"])
+                self.assertEqual(result.returncode, 1, result.stderr)
+                self.assertIn("committed build_profiles", result.stderr)
+                self.assertFalse(self.external_log.exists())
+                self.assertNotIn("preflight ok", result.stdout)
+
+    def test_receipt_and_packaged_spec_must_select_the_same_allowlisted_profile(self) -> None:
+        self.commit_profiles()
+        for lane, spec in self.specs.items():
+            with self.subTest(lane=lane):
+                assets = self.assets(lane, build_profile=spec["build_profiles"]["a8"],
+                                     packaged_profile=spec["build_profiles"]["tc"])
+                result = self.run_cut(self.command(lane, assets) + ["--lane", lane, "--publish"])
+                self.assertEqual(result.returncode, 1, result.stderr)
+                self.assertIn("packaged release-spec build_profile", result.stderr)
+                self.assertFalse(self.external_log.exists())
+
+    def test_legacy_spec_keeps_exact_profile_equality(self) -> None:
+        lane = "rtx4090"
+        assets = self.assets(lane, build_profile="native-v0.6.2-beta.1-a8-rtx4090")
+        result = self.run_cut(self.command(lane, assets) + ["--publish"])
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("receipt build_profile disagrees with the lane specification", result.stderr)
+        self.assertFalse(self.external_log.exists())
+
+    def test_legacy_receipt_cannot_disagree_with_the_packaged_spec(self) -> None:
+        lane = "rtx4090"
+        assets = self.assets(lane, packaged_profile="native-v0.6.2-beta.1-a8-rtx4090")
+        result = self.run_cut(self.command(lane, assets) + ["--publish"])
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("packaged release-spec build_profile", result.stderr)
+        self.assertFalse(self.external_log.exists())
+
+    def test_packaged_spec_cannot_omit_the_selected_profile_or_be_a_nonobject(self) -> None:
+        lane = "rtx4090"
+        for value in ({}, {"build_profile": None}, [], None):
+            with self.subTest(value=value):
+                assets = self.assets(lane, {"release-spec.json": json.dumps(value)})
+                try:
+                    result = self.run_cut(self.command(lane, assets) + ["--publish"])
+                    self.assertEqual(result.returncode, 1, result.stderr)
+                    self.assertIn("packaged release-spec", result.stderr)
+                    self.assertFalse(self.external_log.exists())
+                finally:
+                    shutil.rmtree(assets)
 
     def test_both_lanes_close_the_eleven_file_set_without_creating_a_tag(self) -> None:
         for lane in self.specs:
