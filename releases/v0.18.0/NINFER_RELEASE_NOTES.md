@@ -239,7 +239,7 @@ above, never `v0.18.0` component qualification or product-route acceptance:
 
 | Investigation / subject | Observed baseline | Observed result and boundary |
 | --- | --- | --- |
-| Warm-history arrival wait under long prefill ([fork #102](https://github.com/alphastorm/ninfer/issues/102)), `rtxpro6000-win-a` proxy, `3` interleaved pairs (`DFlash2 K=7`, `131,072` context, `C2`, `1,024` chunk, `180 s` timeout) | Base `b871996a` (server `962559a5`): arrival `A` source wait **44.576 / 45.030 / 44.999 s**, queue wait **44.797 / 45.127 / 45.097 s**, client TTFT **44.970 / 45.219 / 45.190 s**; long-request `B` wall **46.102 / 46.349 / 46.320 s** (server prefill **44.954 / 45.652 / 45.627 s**) | Candidate `e6d6c667` (server `e38a7508`, source-equivalent to pre-rebase `5af279271` outside `#106` test files and the `#89` queue-expiry suffix; subsequently rebased onto `#111` as `6ec05f211`): arrival `A` source wait **0.000 / 0.000 / 0.000 s**, queue wait **0.096 / 0.097 / 0.212 s**, client TTFT **0.131 / 0.133 / 0.288 s** (**3/3 < 2 s**); **111/111** preferred-and-actual reused tokens in **3/3**; **0** HTTP `503`; **1** priority attempt per arrival (**2** refused scans each, **0** own-demote rounds, `K = 4` never exhausted); long-request `B` wall **47.258 / 47.328 / 47.531 s** (ratios **1.0251× / 1.0211× / 1.0261×**, bar `<= 1.05×`). Single-request greedy parity **6/6** byte-identical (`3` `MTP3` + `3` `DFlash2`). Proxy engineering evidence only; exact-F4 RC2 passed separately below, while full native qualification and selected-profile published-image acceptance remain pending. |
+| Warm-history arrival wait under long prefill ([fork #102](https://github.com/alphastorm/ninfer/issues/102)), `rtxpro6000-win-a` proxy, `3` interleaved pairs (`DFlash2 K=7`, `131,072` context, `C2`, `1,024` chunk, `180 s` timeout) | Base `b871996a` (server `962559a5`): arrival `A` source wait **44.576 / 45.030 / 44.999 s**, queue wait **44.797 / 45.127 / 45.097 s**, client TTFT **44.970 / 45.219 / 45.190 s**; long-request `B` wall **46.102 / 46.349 / 46.320 s** (server prefill **44.954 / 45.652 / 45.627 s**) | Candidate `e6d6c667` (server `e38a7508`, source-equivalent to pre-rebase `5af279271` outside `#106` test files and the `#89` queue-expiry suffix; subsequently rebased onto `#111` as `6ec05f211`): arrival `A` source wait **0.000 / 0.000 / 0.000 s**, queue wait **0.096 / 0.097 / 0.212 s**, client TTFT **0.131 / 0.133 / 0.288 s** (**3/3 < 2 s**); **111/111** preferred-and-actual reused tokens in **3/3**; **0** HTTP `503`; **1** priority attempt per arrival (**2** refused scans each, **0** own-demote rounds, `K = 4` never exhausted); long-request `B` wall **47.258 / 47.328 / 47.531 s** (ratios **1.0251× / 1.0211× / 1.0261×**, bar `<= 1.05×`). Single-request greedy parity **6/6** byte-identical (`3` `MTP3` + `3` `DFlash2`). Proxy engineering evidence only; exact-F4 `RC2` passed separately below, while full native qualification and selected-profile published-image acceptance remain pending. |
 | Reduced-Host durable save at `Stop` ([fork #89](https://github.com/alphastorm/ninfer/issues/89) + [PR #111](https://github.com/alphastorm/ninfer/pull/111)), `rtxpro6000-win-a` proxy (`913,612,800` B Host, `3` device-state slots, `DFlash2`, `15 s` timeout) | Base `b871996a` (server `f5100de7`), deleted occupant: continuation HTTP **200**, managed `Stop` **refused 1** session (`capacity`, **0** reclaimed); covered occupant: `Stop` saved **1**, refused **0** via Host reclaim | Head `3213508fe` (server `860f68a1`) and `#111` `611e4821a`, deleted occupant: continuation HTTP **200**, managed `Stop` **refused 0**, saved **1** via Device-staged final save (`device_staged_states: 2`, `device_staged_hold_ms: 1332` in run 4 / `1310` in run 1, `host_shortage: host_capacity`); `State` digests (`5ed1d134…`, `8bd4f2b8…`, `fc493f91…`) match the base Host route; **0** `transaction_busy` receipts across all runs (`9` initial runs + run 4). Request-level HTTP `503` half did not reproduce on the proxy in **3** fixtures. The exact-F4 default RTX 3090 NativeProbes observation now records two committed handoffs, **0 HTTP 503**, **0 queue timeouts**, complete managed Stop with **0 refusals**, and exact restoration; the distinct tc package and fresh product routes are not covered by it. |
 | Malformed historical tool-call vectors ([fork PR #106](https://github.com/alphastorm/ninfer/pull/106)), `rtxpro6000-win-a` proxy (`92209112`, server `0898c280`) | Upstream `Neroued/ninfer` `4461c9683` rejects malformed/non-object historical `arguments` with HTTP **400** `invalid_argument` | All **5** vectors (`{"x": nope}`, `{"x":`, `[]`, `null`, `{"x":1e99999}`) returned HTTP **200** on the initial 3-message request and on the replayed 5-message turn (**10/10** HTTP `200`), preserving `{"input": raw}` wrapping and ordered-object keys (`2/2` CTest targets in **1.27 s**). |
 | `sm_120` `Group64` `A8` prefill ([fork PR #105](https://github.com/alphastorm/ninfer/pull/105)), `rtxpro6000-win-a` proxy (`93348eb9`) | Default-`OFF` build (`b871996a`): **15/15** affected shipped translation units token-identical across `sm_86`/`sm_89`/`sm_120a`; default prefill signature `cf336425…` (**132,636** bytes) identical; `K0` mathematical/GPU correctness oracles **8/8** (**344.45 s**) | **`K1` prefill-speed prescreen KILL — excluded from `v0.18.0`:** cold-L2 complete-op weighted prefill speedup **0.784860×** at `512`-token pass width and **0.983623×** at `1,024`-token pass width (below the `1.00×` kill bar and `1.15×` continuation go bar; `SwiGLU` **1.269767× / 1.300676×**, residual `k17408+k6144` **0.569991× / 0.953988×**, `GDN` **0.719792× / 0.745151×**, attention **0.503593× / 0.607777×**). Later end-to-end (`K2`) and quality-screen (`K3`) stages were not executed; [fork PR #105](https://github.com/alphastorm/ninfer/pull/105) closed unmerged. |
@@ -249,7 +249,7 @@ above, never `v0.18.0` component qualification or product-route acceptance:
 ## RTX 5090 published component identity
 
 The component and companion source tags resolve to F4. Public release API sizes and digests,
-anonymous small-asset downloads, the accepted exact-F4 RC2 asset set and its independent mirror
+anonymous small-asset downloads, the accepted exact-F4 `RC2` asset set and its independent mirror
 authenticate the values below. The binary archive was re-hashed locally against the public API
 digest and independent mirror; it was not downloaded again. Product-route acceptance remains pending.
 
@@ -276,20 +276,20 @@ profile, PRODUCT smokes and both help inventories. JUnit recorded **66** host, *
 and **1** overlap tests with zero failures/skips, plus **54** current host tests. Its authentic
 RC receipt SHA-256 is `ca17283887cfad131374fefe6c27488bfcfc171de2a114d17aa97e8b30b8567d`.
 The first attempt failed before server launch in the exact-profile phase because the harness
-input was a stale release profile; that attempt is retained, and only the corrected RC2 batch
+input was a stale release profile; that attempt is retained, and only the corrected `RC2` batch
 qualifies these tested bytes.
 
-**RC-repeat reproducibility disclosure:** two RC builds of F4 produced different receipt hashes,
+**RC-repeat reproducibility disclosure:** two RC builds of F4 (`RC1`, `RC2`) produced different `ninfer-serve` SHA-256 digests,
 `d4b8442df49c6882dfcfc049a79cf04abd8caf3c76b8c3f665d9c0736c2c8eb9` versus
 `804ef8ac6d062dc8da8784ba3f52e5cece2178a5f5bc46cb2c7bc1d3e8937fe3`, both **327,065,128 B**.
 The first executable was not retained, so the locations and cause of that difference are
 unrecoverable; a benign timestamp/build-ID-only explanation is not proven. Section-level
-differences in `.text`, `.rodata`, CUDA payloads and build ID were measured **only RC2 versus
-the different RDC-recipe binary**, not RC1 versus RC2. The release's reproducibility evidence
+differences in `.text`, `.rodata`, CUDA payloads and build ID were measured **only `RC2` versus
+the different RDC-recipe binary**, not `RC1` versus `RC2`. The release's reproducibility evidence
 remains the separate same-path RDC double build: **664 graph artifacts + three package outputs**
 byte-identical, including `ninfer-serve`
 `f68279dc72fca47a9daf1e91bb4a0c641e2e10e5acbb9e9b36ff56bad3dca04e`.
-The published runtime binary is the **single tested RC2 build**; its different RC recipe
+The published runtime binary is the **single tested `RC2` build**; its different RC recipe
 is not claimed run-to-run reproducible. Follow-up to make the RC recipe deterministic or
 publish the RDC-recipe binary: [fork #120](https://github.com/alphastorm/ninfer/issues/120).
 
@@ -302,7 +302,7 @@ decode **181.52** tok/s server / **180.01** tok/s wall, cold exact 130,048-token
 installed for this runtime-only stage. Anonymous digest pull, exact image-member binary identity,
 agent/restart/no-resurrection gates passed, with zero retries. The incumbent
 `v0.7.0-qwen38-5090-beta.6` `1,120`-prompt quality screen capture completed `1,120/1,120` rows with
-`0` errors or retries, and its `80`-prompt determinism seal is complete. The RC2 candidate's
+`0` errors or retries, and its `80`-prompt determinism seal is complete. The `RC2` candidate's
 full quality screen and fresh-80 determinism passed against that sealed incumbent: all primary
 deltas zero, leak ratio **1.0**, and zero determinism mismatches. Pacing remains OFF as described
 above; the failed pacing bars are not relabeled as passes.
