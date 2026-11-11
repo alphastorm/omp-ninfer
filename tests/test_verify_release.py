@@ -127,6 +127,91 @@ class ReleaseIdentitySnapshotTests(unittest.TestCase):
             self.assertEqual(errors, [])
 
 
+class RuntimeContractLabelTests(unittest.TestCase):
+    def validate(self, release="v0.18.0", labels=None):
+        manifest = {"release": release, "components": {
+            "ninfer": {"release_tag": "v0.7.0-qwen38-5090-beta.7"},
+            "ninfer_variants": [{"id": "rtx4090-windows-native",
+                                 "release_tag": "v0.9.0-qwen38-4090-beta.1"}]}}
+        compatibility = {"runtime_variants": [{"id": "rtx4090-windows-native"}],
+                         "runtime_contracts": [{"lane": label} for label in (
+                             labels if labels is not None else
+                             ["RTX 5090 beta.7 container", "RTX 4090 native Windows v0.9.0-beta.1"])]}
+        qualification = {"composition": {"native_runtime_variants": {"rtx4090-windows-native": {}}}}
+        errors = []
+        VERIFY_RELEASE.validate_exact_lane_set(manifest, compatibility, qualification, errors)
+        return errors
+
+    def test_runtime_contract_labels_name_each_manifest_component(self):
+        self.assertEqual(self.validate(), [])
+        for labels in (
+            ["RTX 5090 beta.6 container", "RTX 4090 native Windows v0.9.0-beta.1"],
+            ["RTX 5090 beta.7 container", "RTX 4090 native Windows v0.8.0-beta.2"],
+            ["RTX 5090 beta.7 container", "RTX 3090 native Windows v0.9.0-beta.1"],
+            ["RTX 5090 beta.7 container"], [],
+        ):
+            with self.subTest(labels=labels):
+                self.assertTrue(any("runtime_contracts" in error for error in self.validate(labels=labels)))
+
+    def test_historical_runtime_contract_labels_are_not_retroactively_rewritten(self):
+        self.assertEqual(self.validate(release="v0.17.0", labels=["historical lane"]), [])
+
+
+class FrozenNativePinTests(unittest.TestCase):
+    def test_native_pins_are_authenticated_against_the_executed_git_commit(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            release = "v0.18.0"
+            manifest = {"release": release, "components": {
+                "omp": {"binary_sha256": "a" * 64, "distribution_version": "18.18.7"},
+                "ninfer_variants": [{"id": "rtx4090-windows-native", "source_commit": "b" * 40,
+                                     "package_sha256": "c" * 64, "server_binary_sha256": "d" * 64,
+                                     "configuration_sha256": "e" * 64}]}}
+            path = root / "releases" / release / "manifest.json"
+            path.parent.mkdir(parents=True)
+            path.write_text(json.dumps(manifest), encoding="utf-8")
+            for command in (["init", "-q"], ["add", "."],
+                            ["-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid",
+                             "commit", "-qm", "test: freeze native candidate"]):
+                subprocess.run(["git", "-C", str(root), *command], check=True, capture_output=True)
+            candidate = subprocess.check_output(
+                ["git", "-C", str(root), "rev-parse", "HEAD"], text=True, encoding="utf-8").strip()
+            ledger = path.parent / "review/runtime-ledger.json"
+            ledger.parent.mkdir()
+            ledger.write_text(json.dumps({"artifact_type": "omp_ninfer_review_ledger", "release": release,
+                                           "product_tooling": {"stage_commit": candidate}}), encoding="utf-8")
+            qualification = {"observed_gates": {"g4_review": {
+                "repository_path": ledger.relative_to(root).as_posix(),
+                "sha256": VERIFY_RELEASE.sha256_file(ledger)}}}
+            errors = []
+            VERIFY_RELEASE.validate_frozen_native_pins(root, release, manifest, qualification, errors)
+            self.assertEqual(errors, [])
+            for field in ("source_commit", "package_sha256", "server_binary_sha256",
+                          "configuration_sha256"):
+                with self.subTest(field=field):
+                    changed = deepcopy(manifest)
+                    changed["components"]["ninfer_variants"][0][field] = "0" * len(
+                        changed["components"]["ninfer_variants"][0][field])
+                    errors = []
+                    VERIFY_RELEASE.validate_frozen_native_pins(
+                        root, release, changed, qualification, errors)
+                    self.assertEqual(len(errors), 1, errors)
+                    self.assertIn(field, errors[0])
+            changed = deepcopy(manifest)
+            changed["components"]["omp"]["binary_sha256"] = "0" * 64
+            errors = []
+            VERIFY_RELEASE.validate_frozen_native_pins(root, release, changed, qualification, errors)
+            self.assertEqual(len(errors), 1, errors)
+            self.assertIn("native client binary_sha256", errors[0])
+            ledger.write_text(ledger.read_text(encoding="utf-8").replace(candidate, "0" * 40),
+                              encoding="utf-8")
+            qualification["observed_gates"]["g4_review"]["sha256"] = VERIFY_RELEASE.sha256_file(ledger)
+            errors = []
+            VERIFY_RELEASE.validate_frozen_native_pins(root, release, manifest, qualification, errors)
+            self.assertEqual(errors, [
+                "native acceptance requires the frozen candidate manifest in local git history"])
+
+
 class DependencySbomContractTests(unittest.TestCase):
     def setUp(self) -> None:
         self.release = ROOT / "releases" / PUBLIC_RELEASE
@@ -784,6 +869,44 @@ class ReleaseContractTest(unittest.TestCase):
                     VERIFY_RELEASE.validate_public_text(root, errors)
                     self.assertTrue(any("scripts/hosts/probe.py contains private marker" in error
                                         for error in errors), errors)
+
+    def test_public_text_scan_includes_all_scripts_and_shell_helpers(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            for name, source in (
+                ("scripts/probe.py", '"""Connect to /home/synthetic-operator."""\n'),
+                ("scripts/helper.ps1", "# Connect to sf-pc\n"),
+                ("scripts/hosts/helper.sh", "# Connect to sf-old\n"),
+                ("scripts/hosts/run_variant_campaign_3090.ps1", "# C:\\Users\\synthetic-operator\n"),
+                ("scripts/hosts/run_variant_campaign_4090.ps1", "# C:\\Users\\synthetic-operator\n"),
+                ("scripts/nested/helper", "#!/bin/sh\n# Connect to /Users/synthetic-operator\n"),
+                ("scripts/nested/helper.custom", "# Connect to sf-pc\n"),
+                ("helper.ps1", "# Connect to sf-pc\n"),
+            ):
+                with self.subTest(name=name):
+                    path = root / name
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    path.write_text(source, encoding="utf-8")
+                    errors = []
+                    VERIFY_RELEASE.validate_public_text(root, errors)
+                    self.assertTrue(any(f"{name} contains private marker" in error for error in errors),
+                                    errors)
+
+    def test_public_text_scan_excludes_generated_bytecode_without_excluding_source(self):
+        import py_compile
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "scripts/probe.py"
+            source.parent.mkdir()
+            source.write_text("VALUE = 1\n", encoding="utf-8")
+            py_compile.compile(str(source), doraise=True)
+            errors = []
+            VERIFY_RELEASE.validate_public_text(root, errors)
+            self.assertEqual(errors, [])
+            source.write_text('"""Connect to /home/synthetic-operator."""\n', encoding="utf-8")
+            VERIFY_RELEASE.validate_public_text(root, errors)
+            self.assertTrue(any("scripts/probe.py contains private marker" in error for error in errors),
+                            errors)
 
     def test_receipt_command_text_is_not_a_json_evidence_reference(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

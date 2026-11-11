@@ -141,6 +141,186 @@ class RequestShapeTests(unittest.TestCase):
 
 
 class NativeLaneTests(unittest.TestCase):
+    def test_assessor_retains_observed_subject_instead_of_relabelling_from_cli(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            window = rtx3090_window(Path(directory), "q38-ninfer")
+            observed = {"candidate_commit": "2" * 40, "release": "v0.18.0",
+                        "client": {"version": "omp/18.18.7", "binary_sha256": "f" * 64},
+                        "installed": {"source_commit": "d" * 40, "package_sha256": "e" * 64,
+                                      "binary_sha256": "a" * 64, "config_sha256": "b" * 64}}
+            write_json(window["evidence"] / "route.json", {**window["route"], **observed})
+            result = DRIVER.assess_evidence(
+                window["evidence"], window["clone"], window["bundle"], "v0.9.1", "1" * 40,
+                "rtx3090")
+            for field, expected in observed.items():
+                self.assertEqual(result[field], expected)
+
+    @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed for native observed identities")
+    def test_route_observes_executed_clone_client_and_installed_record_and_preserves_exit(self):
+        proof = r'''
+param($Source,$Scratch,$ExitCode)
+$ErrorActionPreference='Stop'
+$text=[IO.File]::ReadAllText($Source)
+$tokens=$null;$errors=$null
+$ast=[Management.Automation.Language.Parser]::ParseInput($text,[ref]$tokens,[ref]$errors)
+if($errors.Count){throw ($errors|Out-String)}
+foreach($name in @('Hash','ReadJson','SaveJson')){
+    $node=$ast.Find({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq $name},$true)
+    Invoke-Expression $node.Extent.Text
+}
+$utf8=[Text.UTF8Encoding]::new($false)
+function SetIsolation {param($Name)}
+function observed-client {$global:LASTEXITCODE=0;'omp/18.18.7'}
+function Join-Path {
+    param($Path,$ChildPath)
+    if($ChildPath -ceq 'OMP\omp.exe'){return 'observed-client'}
+    Microsoft.PowerShell.Management\Join-Path $Path $ChildPath
+}
+$Workspace=Join-Path $Scratch 'window';$StateRoot=Join-Path $Scratch 'installed'
+$Release='v0.18.0';$Candidate='1'*40;$Bundle='unused'
+$env:LOCALAPPDATA='unused';$runner=Join-Path $Scratch 'runner.ps1'
+$node=$ast.Find({param($n) $n -is [Management.Automation.Language.IfStatementAst] -and
+    $n.Clauses[0].Item1.Extent.Text -ceq "`$Mode -eq 'Route'"},$true)
+$body=$node.Clauses[0].Item2.Extent.Text
+$env:FIXTURE_EXECUTED_CLONE=Join-Path $Scratch 'executed'
+$env:FIXTURE_ROUTE_EXIT=$ExitCode
+Invoke-Expression $body.Substring(1,$body.Length-2)
+'''
+        for original_exit in (0, 23):
+            with self.subTest(original_exit=original_exit), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                clone = root / "executed"
+                write_json(clone / "releases/v0.18.0/manifest.json", {"release": "v0.18.0"})
+                binary = clone / "observed-client"
+                binary.write_bytes(b"observed stock client bytes")
+                for command in (["init", "-q"], ["add", "."],
+                                ["-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid",
+                                 "commit", "-qm", "test: freeze executed route"]):
+                    subprocess.run(["git", "-C", str(clone), *command], check=True, capture_output=True)
+                candidate = subprocess.check_output(["git", "-C", str(clone), "rev-parse", "HEAD"],
+                                                    text=True, encoding="utf-8").strip()
+                installed = {"patch_stack_sha": "a" * 40, "package_sha256": "b" * 64,
+                             "binary_sha256": "c" * 64, "config_sha256": "d" * 64}
+                write_json(root / "installed/state.json", {
+                    "active_release": "actual", "releases": {"actual": installed}})
+                (root / "window").mkdir()
+                (root / "runner.ps1").write_text(r'''
+param($Bundle,$WorkDir,$Receipt,$CloneOverride)
+Set-Location $env:FIXTURE_EXECUTED_CLONE
+@{clone_commit=((& git rev-parse HEAD|Out-String).Trim());status='passed'}|ConvertTo-Json|Set-Content -LiteralPath $Receipt -Encoding UTF8
+$global:LASTEXITCODE=[int]$env:FIXTURE_ROUTE_EXIT
+''', encoding="utf-8")
+                script = root / "proof.ps1"
+                script.write_text(proof, encoding="utf-8")
+                result = subprocess.run(
+                    [shutil.which("pwsh"), "-NoProfile", "-File", str(script),
+                     str(ROOT / "scripts/hosts/accept-rtx4090-route.ps1"), directory, str(original_exit)],
+                    capture_output=True, text=True, encoding="utf-8", timeout=30)
+                self.assertEqual(result.returncode, original_exit, result.stdout + result.stderr)
+                # .NET file APIs use Windows backslashes literally on the Unix test host.
+                receipt = json.loads(Path(str(root / "window") + "\\route.json").read_text(encoding="utf-8"))
+                self.assertEqual(receipt["clone_commit"], candidate)
+                self.assertIn("candidate_commit", receipt, result.stdout + result.stderr)
+                self.assertEqual(receipt["candidate_commit"], candidate)
+                self.assertEqual(receipt["release"], "v0.18.0")
+                self.assertEqual(receipt["client"], {"version": "omp/18.18.7",
+                    "binary_sha256": hashlib.sha256(binary.read_bytes()).hexdigest()})
+                self.assertEqual(receipt["installed"], {
+                    "source_commit": installed["patch_stack_sha"],
+                    **{key: installed[key] for key in ("package_sha256", "binary_sha256", "config_sha256")}})
+
+    @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed for fail-closed parameter binding")
+    def test_private_paths_are_explicit_required_launcher_and_install_inputs(self):
+        scripts = {
+            "accept-native-public-install.ps1": {
+                "Lane": "rtx4090", "ManifestPath": "unused", "ExpectedSums": "unused",
+                "StateRoot": "unused", "Workspace": "unused", "ReceiptPath": "unused",
+                "CandidateClone": "unused", "ClientBinary": "unused"},
+            "run_variant_campaign_5090.ps1": {
+                "CampaignRoot": "/operator/window", "GroupwiseIntModel": "/operator/int.ninfer",
+                "Nvfp4Model": "/operator/nvfp4.ninfer", "ApiKeyFile": "/operator/key"},
+        }
+        for name, parameters in scripts.items():
+            source = ROOT / "scripts/hosts" / name
+            declarations = source.read_text(encoding="utf-8").split("Set-StrictMode")[0]
+            required = ("CandidateClone", "ClientBinary") if name.startswith("accept-") else tuple(parameters)
+            for parameter in required:
+                with self.subTest(script=name, missing=parameter):
+                    self.assertRegex(declarations, r"\[Parameter\(Mandatory\s*=\s*\$true\)\]"
+                                     r"[^\n]*\$" + parameter + r"\b")
+                    arguments = [argument for key, value in parameters.items() if key != parameter
+                                 for argument in ("-" + key, value)]
+                    result = subprocess.run(
+                        [shutil.which("pwsh"), "-NoProfile", "-NonInteractive", "-File", str(source),
+                         *arguments], capture_output=True, text=True, encoding="utf-8", timeout=30)
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn(parameter, result.stdout + result.stderr)
+
+    @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed for required native model paths")
+    def test_native_campaign_model_paths_refuse_absence_and_missing_files_before_effects(self):
+        for lane in ("3090", "4090"):
+            source = ROOT / "scripts/hosts" / f"run_variant_campaign_{lane}.ps1"
+            declarations = source.read_text(encoding="utf-8").split("# RTX")[0]
+            self.assertIn("[Parameter(Mandatory=$true)]", declarations)
+            self.assertIn("[string]$GroupwiseIntModel", declarations)
+            for arguments in ([], ["-GroupwiseIntModel", "missing-model-file.ninfer"]):
+                with self.subTest(lane=lane, arguments=arguments):
+                    result = subprocess.run(
+                        [shutil.which("pwsh"), "-NoProfile", "-NonInteractive", "-File", str(source),
+                         *arguments], capture_output=True, text=True, encoding="utf-8", timeout=30)
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn("GroupwiseIntModel", result.stdout + result.stderr)
+                    if arguments:
+                        self.assertIn("must name an existing model file", result.stdout + result.stderr)
+
+    @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed for public-install subject observations")
+    def test_public_install_observes_clone_and_installed_sources_separately(self):
+        proof = r'''
+param($Source,$Scratch)
+$ErrorActionPreference='Stop'
+$text=[IO.File]::ReadAllText($Source)
+$start=$text.IndexOf('    $observedCandidate =')
+$end=$text.IndexOf('    # 1. Closed checksum',$start)
+$subject=$text.Substring($start,$end-$start)
+$record=($text.Split("`n")|Where-Object {$_.StartsWith('    $receipt.installed =')}) -join "`n"
+$CandidateClone=Join-Path $Scratch 'clone';$ClientBinary='observed-client'
+Set-Location $Scratch
+function observed-client {'omp/18.18.7'}
+function Sha {param($Path) (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()}
+$manifest=@{release='v0.18.0'};$v=@{release_tag='component'};$baseUrl='https://example.invalid'
+$receipt=[ordered]@{};$active='installed';$installedBinary='c'*64;$installedConfig='d'*64
+$rel=@{patch_stack_sha='a'*40;package_sha256='b'*64;binary_sha256='c'*64;config_sha256='d'*64}
+Invoke-Expression $subject
+Invoke-Expression $record
+$receipt|ConvertTo-Json -Depth 8 -Compress
+'''
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            clone = root / "clone"
+            write_json(clone / "releases/v0.18.0/manifest.json", {"release": "v0.18.0"})
+            for command in (["init", "-q"], ["add", "."],
+                            ["-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid",
+                             "commit", "-qm", "test: freeze public install candidate"]):
+                subprocess.run(["git", "-C", str(clone), *command], check=True, capture_output=True)
+            candidate = subprocess.check_output(["git", "-C", str(clone), "rev-parse", "HEAD"],
+                                                text=True, encoding="utf-8").strip()
+            binary = root / "observed-client"
+            binary.write_bytes(b"observed stock client bytes")
+            script = root / "proof.ps1"
+            script.write_text(proof, encoding="utf-8")
+            result = subprocess.run(
+                [shutil.which("pwsh"), "-NoProfile", "-File", str(script),
+                 str(ROOT / "scripts/hosts/accept-native-public-install.ps1"), directory],
+                capture_output=True, text=True, encoding="utf-8", timeout=30)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            receipt = json.loads(result.stdout)
+            self.assertEqual(receipt["source"]["candidate_commit"], candidate)
+            self.assertEqual(receipt["source"]["product_release"], "v0.18.0")
+            self.assertEqual(receipt["installed"]["source_commit"], "a" * 40)
+            self.assertEqual(receipt["installed"]["package_sha256"], "b" * 64)
+            self.assertEqual(receipt["client"]["version"], "omp/18.18.7")
+            self.assertEqual(receipt["client"]["binary_sha256"], hashlib.sha256(binary.read_bytes()).hexdigest())
+
     @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed for the native baseline contract")
     def test_powershell_baseline_enforces_lane_power_and_operator_holds(self) -> None:
         # Execute the production declarations/functions, stopping before any host operation.

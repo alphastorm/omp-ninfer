@@ -19,7 +19,7 @@ Example:
     --base-url http://127.0.0.1:18191 --api-key-file ~/.omp/agent/ninfer-5090.key \
     --base-tokens 56000 --branches 4 \
     --restart-cmd 'ssh qwen-5090 "docker restart --time 30 ninfer-5090"' \
-    --log-cmd 'ssh qwen-5090 "wsl -d Ubuntu-24.04 -e bash -c \"cat /home/sunil/services/ninfer-5090/logs/requests-*.jsonl\""' \
+    --log-cmd 'ssh qwen-5090 "wsl -d Ubuntu-24.04 -e bash -c \"cat /path/to/window/requests-*.jsonl\""' \
     --receipt docs/measurements/$(date +%F)-fanout-probe-main.json
 """
 

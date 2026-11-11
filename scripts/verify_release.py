@@ -12,6 +12,10 @@ including their cited bytes, without relabelling proofs as fresh admission.
 Waivers bind only their recorded release/lane subjects and failures. Receipt
 audits check staged hashes; stock-client descriptors must match all platform
 binary identities, not mutable compatibility URL metadata.
+From v0.18.0, ready acceptance re-derives the guide's current hash and block addresses,
+reconciles every runner clone with the frozen review stage, and checks native observed
+client/package records against that candidate's committed manifest. Older published
+receipts retain their historical contract; public-text scanning covers every script.
 """
 
 from __future__ import annotations
@@ -1205,6 +1209,25 @@ def _validate_native_refused_stop(observed: dict, label: str, errors: list[str])
             f"{label}.shutdown_complete must be false", errors)
 
 
+def public_native_failure_summary(observed: dict) -> dict:
+    """Publish bounded failure facts and digests, never the private exception or action suffix."""
+    if observed.get("probe") == "compaction":
+        result = {
+            "probe": "compaction",
+            "error": {"kind": "probe-error",
+                      "sha256": hashlib.sha256(observed["error"].encode("utf-8")).hexdigest()},
+            "timeout_seconds": observed["timeout_seconds"],
+            "http_status_counts": {status: count for status, count in observed["http_status_counts"].items()
+                                   if re.fullmatch(r"[1-5][0-9]{2}", status) and type(count) is int},
+        }
+        if isinstance(observed.get("managed_stop"), dict):
+            result["managed_stop"] = public_native_failure_summary(observed["managed_stop"])
+        return result
+    return {"action": "Control-Release.ps1 -Action Stop",
+            "outcome": "graceful_incomplete_shutdown",
+            "sessions_refused": observed["sessions_refused"], "shutdown_complete": False}
+
+
 def validate_native_route_waiver(
     root: Path, release: str, candidate: str, lane: str, failed_phase: Any,
     reference: Any, errors: list[str], *, window_failure: Any, stopped_owner_census: Any,
@@ -1291,12 +1314,22 @@ def validate_native_route_waiver(
     if (failed_phase == "native-probes" and isinstance(failure_observed, dict)
             and ("managed_stop" in observed or "managed_stop" in failure_observed)):
         observed_fields += ("managed_stop",)
-    require(isinstance(failure_observed, dict) and all(
-        field in observed and field in failure_observed
-        and type(failure_observed[field]) is type(observed[field])
-        and failure_observed[field] == observed[field]
-        for field in observed_fields),
-        f"{label} window-failure observations must agree with observed_summary", errors)
+    if failure.get("projection_schema") == 1:
+        # The private collector was compared before projection. Re-derive the same public facts
+        # from the hash-bound decision rather than requiring its exception text in a receipt.
+        try:
+            expected_observed = public_native_failure_summary(observed)
+        except (KeyError, TypeError, AttributeError):
+            expected_observed = None
+        require(failure_observed == expected_observed,
+                f"{label} window-failure observations must agree with observed_summary", errors)
+    else:
+        require(isinstance(failure_observed, dict) and all(
+            field in observed and field in failure_observed
+            and type(failure_observed[field]) is type(observed[field])
+            and failure_observed[field] == observed[field]
+            for field in observed_fields),
+            f"{label} window-failure observations must agree with observed_summary", errors)
     census = stopped_owner_census if isinstance(stopped_owner_census, dict) else {}
     power = census.get("power_limit_w")
     require(census.get("sha256") == evidence.get("pre-window-census.json")
@@ -1313,6 +1346,8 @@ def validate_native_campaigns(root: Path, release: str, routes: dict[str, Any],
     """Documented blocks and the subsequent native campaign have separate raw verdicts."""
     campaigns = routes.get("native_campaigns")
     if campaigns is None:
+        require((product_version(release) or (0, 0, 0)) < (0, 18, 0),
+                "native_campaigns must retain each native campaign's observed subject", errors)
         return {}  # Historical passed receipts predate the separate campaign summary.
     if not isinstance(campaigns, dict):
         errors.append("native_campaigns must be an object")
@@ -1326,6 +1361,15 @@ def validate_native_campaigns(root: Path, release: str, routes: dict[str, Any],
         if not isinstance(campaign, dict):
             errors.append(f"{lane} native campaign must be an object")
             continue
+        if (product_version(release) or (0, 0, 0)) >= (0, 18, 0):
+            manifest = load_json(root / "releases" / release / "manifest.json")
+            validate_native_acceptance_subject(
+                campaign, release, routes.get("candidate_commit"),
+                manifest.get("components", {}).get("omp", {}), f"{lane} campaign", errors)
+            variant = next((item for item in manifest.get("components", {}).get("ninfer_variants", [])
+                            if item.get("id") == NATIVE_ROUTE_LANES.get(lane)), {})
+            validate_native_installed_record(campaign.get("installed"), variant,
+                                             f"{lane} campaign", errors)
         if campaign.get("status") == "passed":
             require("founder_waiver" not in campaign,
                     f"{lane} passed native campaign cannot have a founder waiver", errors)
@@ -1472,6 +1516,9 @@ def validate_documented_route_acceptance(
     bound = composition.get("documented_route_acceptance") if isinstance(composition, dict) else None
     summary = qualification.get("documented_route_acceptance")
     if bound is None and summary is None:
+        require((product_version(str(qualification.get("release"))) or (0, 0, 0)) < (0, 18, 0),
+                "qualification.composition.documented_route_acceptance is required in ready mode",
+                errors)
         return
     label = "qualification.composition.documented_route_acceptance"
     if not isinstance(bound, dict):
@@ -1489,6 +1536,8 @@ def validate_documented_route_acceptance(
             f"{label} receipt release must match qualification release", errors)
     require(routes.get("status") == "passed",
             f"{label} receipt status must be passed", errors)
+    if (product_version(str(release)) or (0, 0, 0)) >= (0, 18, 0):
+        validate_route_provenance(root, str(release), qualification, routes, errors)
     waived = validate_native_campaigns(root, str(release), routes, errors)
     validate_native_restoration(root, str(release), routes, waived, errors)
     if summary is None:
@@ -1512,6 +1561,156 @@ def validate_documented_route_acceptance(
         require(isinstance(restoration, dict)
                 and restoration.get("status") == ("passed-with-founder-waiver" if waived else "passed"),
                 "qualification restoration summary must preserve the aggregate restoration status", errors)
+
+
+def frozen_product_candidate(root: Path, release: str, qualification: dict,
+                             errors: list[str]) -> str | None:
+    """The hash-bound review subject, not a relabelled receipt, owns the route candidate."""
+    gate = qualification.get("observed_gates", {}).get("g4_review", {})
+    path = bound_file(root, gate.get("repository_path"))
+    if (path is None or not path.is_relative_to((root / "releases" / release).resolve())
+            or sha256_file(path) != gate.get("sha256")):
+        errors.append("acceptance requires a hash-bound frozen product subject in this release")
+        return None
+    ledger = load_json(path)
+    candidate = ledger.get("product_tooling", {}).get("stage_commit")
+    if (ledger.get("artifact_type") != "omp_ninfer_review_ledger" or ledger.get("release") != release
+            or not isinstance(candidate, str) or GIT_SHA_RE.fullmatch(candidate) is None):
+        errors.append("the frozen product subject must name this release and product_tooling.stage_commit")
+        return None
+    return candidate
+
+
+def validate_observed_native_client(client: Any, omp: dict, label: str,
+                                    errors: list[str]) -> None:
+    observed = client if isinstance(client, dict) else {}
+    for field, expected in (("version", f"omp/{omp.get('distribution_version')}"),
+                            ("binary_sha256", omp.get("binary_sha256"))):
+        require(expected is not None and observed.get(field) == expected,
+                f"{label} client.{field} must match the observed stock client", errors)
+
+
+def validate_native_installed_record(installed: Any, variant: dict, label: str,
+                                     errors: list[str]) -> None:
+    observed = installed if isinstance(installed, dict) else {}
+    for field, pin in (("source_commit", "source_commit"), ("package_sha256", "package_sha256"),
+                       ("binary_sha256", "server_binary_sha256"),
+                       ("config_sha256", "configuration_sha256")):
+        require(variant.get(pin) is not None and observed.get(field) == variant[pin],
+                f"{label} installed.{field} must match the candidate manifest", errors)
+
+
+def validate_native_acceptance_subject(receipt: Any, release: str, candidate: str | None,
+                                       omp: dict, label: str, errors: list[str]) -> None:
+    observed = receipt if isinstance(receipt, dict) else {}
+    require(candidate is not None and observed.get("candidate_commit") == candidate,
+            f"{label} candidate_commit must match the frozen product subject", errors)
+    require(observed.get("release") == release, f"{label} release must match this release", errors)
+    validate_observed_native_client(observed.get("client"), omp, label, errors)
+
+
+def validate_frozen_native_pins(root: Path, release: str, manifest: dict, qualification: dict,
+                                errors: list[str]) -> None:
+    """A rehashed current manifest cannot silently change what the executed candidate pinned."""
+    if (product_version(release) or (0, 0, 0)) < (0, 18, 0):
+        return
+    candidate = frozen_product_candidate(root, release, qualification, errors)
+    if candidate is None:
+        return
+    shown = subprocess.run(
+        ["git", "-C", str(root), "show", f"{candidate}:releases/{release}/manifest.json"],
+        capture_output=True,
+    )
+    try:
+        frozen = json.loads(shown.stdout) if shown.returncode == 0 else None
+    except (ValueError, UnicodeError):
+        frozen = None
+    if not isinstance(frozen, dict) or frozen.get("release") != release:
+        errors.append("native acceptance requires the frozen candidate manifest in local git history")
+        return
+    current = {row["id"]: row for row in manifest.get("components", {}).get("ninfer_variants", [])}
+    previous = {row["id"]: row for row in frozen.get("components", {}).get("ninfer_variants", [])}
+    require(set(current) == set(previous),
+            "native acceptance lane set must match the frozen candidate manifest", errors)
+    for lane in current.keys() & previous.keys():
+        for field in ("source_commit", "package_sha256", "server_binary_sha256", "configuration_sha256"):
+            require(current[lane].get(field) == previous[lane].get(field),
+                    f"{lane} {field} must match the frozen candidate manifest", errors)
+    for field in ("binary_sha256", "distribution_version"):
+        require(manifest.get("components", {}).get("omp", {}).get(field)
+                == frozen.get("components", {}).get("omp", {}).get(field),
+                f"native client {field} must match the frozen candidate manifest", errors)
+
+
+def validate_route_provenance(root: Path, release: str, qualification: dict, routes: dict,
+                              errors: list[str]) -> None:
+    """Re-derive composition's claims after the final pin dance, including each raw route."""
+    from documented_route import LANES, lane_blocks
+    candidate = frozen_product_candidate(root, release, qualification, errors)
+    require(candidate is not None and routes.get("candidate_commit") == candidate,
+            "documented routes candidate_commit must match the frozen product subject", errors)
+    manifest_path = root / "releases" / release / "manifest.json"
+    manifest = load_json(manifest_path) if manifest_path.is_file() else {}
+    omp = manifest.get("components", {}).get("omp", {})
+    variants = {variant.get("id") for variant in manifest.get("components", {}).get("ninfer_variants", [])}
+    expected = {lane for lane in LANES if lane not in NATIVE_ROUTE_LANES
+                or NATIVE_ROUTE_LANES[lane] in variants}
+    rows = routes.get("routes", {})
+    if not isinstance(rows, dict):
+        errors.append("documented routes routes must be an object")
+        return
+    require(set(rows) == expected, "documented routes must name exactly the manifest's lanes", errors)
+    document = root / "docs" / "QUICKSTART.md"
+    require(document.is_file() and sha256_file(document) == routes.get("current_document_sha256"),
+            "documented routes current_document_sha256 must match the current guide bytes", errors)
+    require(routes.get("executed_blocks_match_current") is True,
+            "documented routes must retain executed_blocks_match_current", errors)
+    addresses = {}
+    for lane, row in rows.items():
+        if lane not in expected or not isinstance(row, dict):
+            errors.append(f"documented routes has an invalid lane {lane!r}")
+            continue
+        try:
+            blocks = lane_blocks(document, lane)
+        except (OSError, KeyError, ValueError) as error:
+            errors.append(f"{lane} current guide blocks cannot be derived: {error}")
+            continue
+        addresses[lane] = [{"slug": step.slug, "heading": step.heading, "index": step.index,
+                            "sha256": block.sha256} for step, block in blocks]
+        path = bound_file(root, row.get("receipt"))
+        require(row.get("status") == "passed" and path is not None
+                and sha256_file(path) == row.get("sha256"),
+                f"{lane} route must retain its hash-bound passed runner receipt", errors)
+        if path is None:
+            continue
+        receipt = load_json(path)
+        require(receipt.get("artifact_type") == "omp_ninfer_documented_route_run"
+                and receipt.get("lane") == lane and receipt.get("status") == "passed",
+                f"{lane} runner receipt must pass for this lane", errors)
+        require(candidate is not None and receipt.get("clone_commit") == candidate,
+                f"{lane} clone_commit must match the frozen product subject", errors)
+        require(receipt.get("document_sha256") == routes.get("document_sha256"),
+                f"{lane} document_sha256 must match the executed guide", errors)
+        steps = receipt.get("steps", [])
+        require(isinstance(steps, list) and len(steps) == len(blocks) and all(
+            isinstance(observed, dict) and observed.get("slug") == step.slug
+            and observed.get("block_sha256") == observed.get("executed_sha256") == block.sha256
+            and (observed.get("status") == "passed" or (
+                step.slug == "clone-and-verify" and observed.get("status") == "substituted"
+                and isinstance(observed.get("substitution"), str) and observed["substitution"].strip()))
+            for observed, (step, block) in zip(steps, blocks)),
+            f"{lane} runner must execute every current documented block unchanged", errors)
+        if lane in NATIVE_ROUTE_LANES:
+            validate_native_acceptance_subject(row, release, candidate, omp, f"{lane} route", errors)
+            variant = next(item for item in manifest["components"]["ninfer_variants"]
+                           if item["id"] == NATIVE_ROUTE_LANES[lane])
+            validate_native_installed_record(row.get("installed"), variant, f"{lane} route", errors)
+            validate_native_acceptance_subject(receipt, release, candidate, omp,
+                                               f"{lane} runner", errors)
+            validate_native_installed_record(receipt.get("installed"), variant,
+                                             f"{lane} runner", errors)
+    require(routes.get("current_block_addresses") == addresses,
+            "documented routes current_block_addresses must match the re-derived guide blocks", errors)
 
 
 def validate_exact_lane_set(
@@ -1553,6 +1752,22 @@ def validate_exact_lane_set(
         "ready components.ninfer_variants ids must exactly match qualification.composition.native_runtime_variants keys",
         errors,
     )
+    if (product_version(str(manifest.get("release"))) or (0, 0, 0)) >= (0, 18, 0):
+        components = manifest.get("components", {})
+        tag = components.get("ninfer", {}).get("release_tag", "")
+        match = re.fullmatch(r"v\d+\.\d+\.\d+-qwen38-5090-(beta\.\d+)", tag)
+        expected = {f"RTX 5090 {match[1]} container"} if match else set()
+        for variant in components.get("ninfer_variants", []):
+            match = re.fullmatch(r"(v\d+\.\d+\.\d+)-qwen38-(3090|4090)-(beta\.\d+)",
+                                variant.get("release_tag", ""))
+            if match:
+                expected.add(f"RTX {match[2]} native Windows {match[1]}-{match[3]}")
+        rows = compatibility.get("runtime_contracts")
+        require(isinstance(rows, list) and len(rows) == len(expected)
+                and {row.get("lane") for row in rows if isinstance(row, dict)} == expected
+                and len(expected) == 1 + len(manifest_variant_ids),
+                "compatibility.runtime_contracts lanes must name exactly the manifest runtime components",
+                errors)
 
 
 # The capability an 18.2.3 client uses to continue a session whose server restarted. The
@@ -2354,6 +2569,23 @@ def validate_native_route_policy(root: Path, release: str, manifest: dict[str, A
         require(receipt.get("status") == "passed" and receipt.get("release") == release
                 and receipt.get("lane") == variant["id"],
                 f"{label} must pass for this release and lane", errors)
+        if (product_version(release) or (0, 0, 0)) >= (0, 18, 0):
+            candidate = frozen_product_candidate(root, release, qualification, errors)
+            omp = manifest["components"]["omp"]
+            validate_native_acceptance_subject(receipt, release, candidate, omp, label, errors)
+            install = receipt.get("observations", {}).get("public_install", {})
+            source = install.get("source", {})
+            require(source.get("product_release") == release,
+                    f"{label} source.product_release must match this release", errors)
+            require(candidate is not None and source.get("candidate_commit") == candidate,
+                    f"{label} source.candidate_commit must match the frozen product subject", errors)
+            validate_observed_native_client(install.get("client"), omp, f"{label} nested install", errors)
+            require(receipt.get("observations", {}).get("structured_client", {}).get("omp_version")
+                    == f"omp/{omp.get('distribution_version')}",
+                    f"{label} structured_client.omp_version must match the observed stock client", errors)
+            validate_native_installed_record(receipt.get("installed"), variant, label, errors)
+            validate_native_installed_record(install.get("installed"), variant,
+                                             f"{label} nested install", errors)
         validate_native_public_install_identity(
             receipt.get("observations", {}).get("public_install"), variant, errors)
         runtime = receipt.get("runtime", {})
@@ -2927,8 +3159,12 @@ def validate_release_documentation(root: Path, release: str, errors: list[str]) 
 
 
 def validate_public_text(root: Path, errors: list[str]) -> None:
-    documents = set(repository_files(root, (".md",)))
-    documents.update(repository_files(root, (".py",), "scripts/hosts"))
+    documents = set(repository_files(root, (".md", ".ps1", ".sh")))
+    # Every shipped script counts, including extensionless helpers and non-host Python tools.
+    script_suffixes = tuple({path.suffix for path in (root / "scripts").rglob("*") if path.is_file()})
+    documents.update(path for path in repository_files(root, script_suffixes, "scripts")
+                     if path.suffix not in (".pyc", ".pyo")
+                     and "__pycache__" not in path.relative_to(root / "scripts").parts)
     documents.update(repository_files(root, (".html", ".svg"), "assets"))
     documents.update(repository_files(root, (".json", ".SHA256SUMS", ".jsonl"), "releases"))
     # Dated receipts are published alongside the docs that cite them, and they are written from
@@ -2940,7 +3176,22 @@ def validate_public_text(root: Path, errors: list[str]) -> None:
         source = document.read_text(encoding="utf-8")
         if document.suffix == ".py":
             try:
-                source += "\n" + "\n".join(node.value for node in ast.walk(ast.parse(source))
+                parsed = ast.parse(source)
+                # This exact declaration is the scan policy, not a connection or private path.
+                # Nothing else in this file (or another script) receives an exemption.
+                if document.relative_to(root).as_posix() == "scripts/verify_release.py":
+                    for node in parsed.body:
+                        if (isinstance(node, ast.Assign)
+                                and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)
+                                and node.targets[0].id == "PRIVATE_MARKERS"
+                                and ast.literal_eval(node.value) == PRIVATE_MARKERS):
+                            lines = source.splitlines(keepends=True)
+                            lines[node.lineno - 1:node.end_lineno] = ["\n"] * (
+                                node.end_lineno - node.lineno + 1)
+                            source = "".join(lines)
+                            parsed = ast.parse(source)
+                            break
+                source += "\n" + "\n".join(node.value for node in ast.walk(parsed)
                                            if isinstance(node, ast.Constant) and isinstance(node.value, str))
             except SyntaxError:
                 errors.append(f"{document.relative_to(root).as_posix()} must contain valid Python")
@@ -3637,6 +3888,7 @@ def validate(
             )
             validate_review_ledger(root, release, qualification, errors)
             validate_documented_route_acceptance(root, qualification, errors)
+            validate_frozen_native_pins(root, release, manifest, qualification, errors)
             validate_native_route_policy(root, release, manifest, qualification, errors)
             validate_ga_evidence_bindings(
                 release, manifest, compatibility, qualification, errors

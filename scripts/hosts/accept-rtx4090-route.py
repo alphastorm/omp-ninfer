@@ -205,6 +205,11 @@ def assess_evidence(evidence: Path, clone: Path, bundle: Path, release: str, can
                 "local_compatibility_errors": [row["error"] for row in rejected],
                 "offline_provider_errors": [{key: row.get(key) for key in ("provider", "model", "errorMessage")} for row in provider_errors],
                 "live_acceptance": live}
+    # These came from the runner's executed clone/client and the installed package record.
+    # A later collector must not author them from its own --candidate or expected manifest.
+    for field in ("candidate_commit", "release", "client", "installed"):
+        if field in route:
+            behavior[field] = route[field]
     if configuration is not None:
         behavior["runtime_configuration"] = configuration
         behavior["probe_acceptance"] = probe_acceptance

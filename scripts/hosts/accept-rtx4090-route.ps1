@@ -321,7 +321,28 @@ if($Mode -eq 'Route') {
     if(Test-Path $work){throw 'route work already exists; use a new attempt workspace'}
     New-Item -ItemType Directory -Path $work|Out-Null
     & ([scriptblock]::Create([IO.File]::ReadAllText($runner))) -Bundle $Bundle -WorkDir $work -Receipt "$Workspace\route.json" -CloneOverride $Candidate
-    exit $LASTEXITCODE
+    $routeExit=$LASTEXITCODE
+    # The runner leaves this session in the clone it actually executed. Observe its HEAD and
+    # manifest, the invoked stock client, and the installed record; never restate CLI labels.
+    $executedClone=(Get-Location).ProviderPath
+    $observedCandidate=(& git -C $executedClone rev-parse HEAD|Out-String).Trim()
+    $observedManifest=ReadJson (Join-Path $executedClone "releases\$Release\manifest.json")
+    $observedBinary=Join-Path $env:LOCALAPPDATA 'OMP\omp.exe'
+    $observedVersion=(& $observedBinary --version|Out-String).Trim()
+    $observedState=ReadJson "$StateRoot\state.json"
+    $observedInstalled=$observedState.releases.([string]$observedState.active_release)
+    $route=ReadJson "$Workspace\route.json"
+    $subject=@{
+        candidate_commit=$observedCandidate;release=[string]$observedManifest.release
+        client=@{version=$observedVersion;binary_sha256=(Hash $observedBinary)}
+        installed=@{source_commit=[string]$observedInstalled.patch_stack_sha
+            package_sha256=[string]$observedInstalled.package_sha256
+            binary_sha256=[string]$observedInstalled.binary_sha256
+            config_sha256=[string]$observedInstalled.config_sha256}
+    }
+    foreach($field in $subject.Keys){$route|Add-Member -NotePropertyName $field -NotePropertyValue $subject[$field] -Force}
+    SaveJson "$Workspace\route.json" $route
+    exit $routeExit
 }
 if($Mode -in @('Live','Offline')) {
     SetIsolation 'route';$env:NINFER_NATIVE_API_KEY=[IO.File]::ReadAllText($KeyFile).Trim()

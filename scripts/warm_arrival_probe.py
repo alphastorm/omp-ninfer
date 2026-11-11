@@ -18,7 +18,7 @@ Example:
   python3 scripts/warm_arrival_probe.py --lane rtx5090-candidate \
     --base-url http://127.0.0.1:18099 --api-key-file ~/.omp/agent/ninfer-5090.key \
     --base-tokens 56000 --order both \
-    --restart-cmd 'ssh nyc-pc-wsl "docker restart --time 90 ninfer-5090-warm"' \
+    --restart-cmd 'ssh rtx5090-win-a "docker restart --time 90 ninfer-5090-warm"' \
     --receipt docs/measurements/$(date +%F)-warm-arrival-rtx5090.json
 """
 

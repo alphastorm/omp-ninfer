@@ -1,6 +1,9 @@
 [CmdletBinding()]
 param(
     [switch]$Preflight,
+    [Parameter(Mandatory=$true)]
+    [ValidateScript({if(-not (Test-Path -LiteralPath $_ -PathType Leaf)){throw 'GroupwiseIntModel must name an existing model file'};$true})]
+    [string]$GroupwiseIntModel,
     [string]$AcceptanceRelease='',
     [string]$AcceptanceKeyFile='',
     [string]$AcceptanceReceipt=''
@@ -33,7 +36,7 @@ $controller = Join-Path $stateRoot 'Control-Release.ps1'
 $releaseRoot = Join-Path $stateRoot 'releases\qwen38-4090-v0.2-32aa589982c4'
 $binary = Join-Path $releaseRoot 'bin\ninfer-serve.exe'
 $models = @{
-    'groupwise-int' = 'C:\Users\sunil\local-4090-data\sf-long-persistent\models\qwen3_8_27b.ninfer'
+    'groupwise-int' = $GroupwiseIntModel
 }
 $apiKeyFile = Join-Path $stateRoot 'secrets\qwen38-4090-v0.2-32aa589982c4\api-key.txt'
 $root = Join-Path $env:USERPROFILE 'variant-4090'
