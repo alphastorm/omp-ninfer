@@ -39,8 +39,8 @@ result.
 
 ## 2026-11-11 upstream and fork watch
 
-Observed on 2026-11-11 against fork release source `F3` `e0971faf` (`main` `b871996a`) and
-published `v0.17.0` (`ea639bb`, tag `97dea2f0`):
+Observed on 2026-11-11 against fork release source `F3` `e0971faf` (`main` `b871996a`), product
+`main` `ea639bb`, and published `v0.17.0` (tag `97dea2f0`):
 
 - **`Neroued/ninfer` master `77c2e5e2..13ebb92f6` (`33` commits since `77c2e5e2` on 2026-11-10):**
   - `77418cfec`: removes `rewrite_execution_boundaries`/`frontiers`, `PrefixExecutionTracker`,
@@ -74,7 +74,7 @@ published `v0.17.0` (`ea639bb`, tag `97dea2f0`):
   - `9eff5314f`: warms all `C` concurrent inputs instead of `C-1` in `ninfer_bench`.
   - `26` other commits: Spark ops, distributed backends (`src/distributed`), `glm5next` `DFlash2`,
     MoE `FP4`, and `runtime/executor`, including `5` commits (`ad49b325d`, `6a753af33`, `b5008303b`,
-    `dc4e789b2`, `d5d535956`) that turn constants (hidden-size-4,096 `H4096`, `eps`/`theta`) into
+    `dc4e789b2`, `d5d535956`) that turn constants (`H4096`, `eps`/`theta`) into
     parameters in upstream `qwen3_5/execution/draft.cpp`, `planning/startup.cpp`, and shared ops
     (`rmsnorm_pack_tail`, `rmsnorm_rope`, `context_kv_materialize`, `candidate_selector`,
     `dynamic_grouped_conv`) for the `GLM` drafter, and `4` commits (`e871c41b1`, `12d5b72ab`,
@@ -136,7 +136,7 @@ published `v0.17.0` (`ea639bb`, tag `97dea2f0`):
       (`checkpoint_api.cpp:153-154`), and mixes them into the shortlist digest
       (`durable_checkpoint_set.h:58-62`, `prefix_identity.cpp:114-117`), so removing them requires
       bumping `kIdentityCodec` (`qwen-identity/1` in `prefix_identity.h:18`), which invalidates the
-      durable identity of every session saved under `v0.17.0` or `v0.8.0-beta.2` and forces a cold
+      durable identity of every session saved under `v0.17.0` or `beta.2` and forces a cold
       first turn on upgrade ([`alphastorm/ninfer#46`](https://github.com/alphastorm/ninfer/issues/46)
       is untouched, and [`#60`](https://github.com/alphastorm/ninfer/issues/60)'s
       checkpoint-boundary vs `1,024`-chunk mismatch remains even though the restored arm's
@@ -146,8 +146,8 @@ published `v0.17.0` (`ea639bb`, tag `97dea2f0`):
       upstream's `session/*` and `ContextDirectory` architecture (`F3` has no `ReclaimSelection`,
       `CaptureStorage`, `ContextStart`, or context maintenance, and the corresponding `F3` functions
       `prepare_semantic_capture`, `reserve_active_capture`, `capture.cpp`,
-      `resource_manager.h::recycle_input/capture_admission`, and `reserve_resident_units` sit in
-      council-remediated `F2`/`F3` durable-save and export-wait code), neither fixes
+      `resource_manager.h::recycle_input/capture_admission`, and `reserve_resident_units` sit next
+      to council-remediated `F2`/`F3` durable-save and export-wait code), neither fixes
       [`#89`](https://github.com/alphastorm/ninfer/issues/89) (which had `0` running, prefilling, or
       paused requests, `2,032/2,048` KV page groups, `4/4` device state slots, and `390 MiB` Host
       free) or [`#102`](https://github.com/alphastorm/ninfer/issues/102) (whose leading inferred
@@ -183,7 +183,7 @@ published `v0.17.0` (`ea639bb`, tag `97dea2f0`):
       `dc4e789b2`, `d5d535956`, and the `4` `BF16` sliced-K partial-reduction commits `e871c41b1`,
       `12d5b72ab`, `4ac06e5ad`, `b5008303b`): **rejected** because `F3` has no `src/distributed`,
       `glm5next`, or `runtime/executor`, and the draft-op and `BF16` sliced-K refactors do not help
-      hidden-size-5,120 (`H5120`) on `sm_120`/`sm_89`/`sm_86` while risking `DFlash2` token
+      `H5120` on `sm_120`/`sm_89`/`sm_86` while risking `DFlash2` token
       identity.
 - **Community fork deltas (`iamwavecut/ninfer-all`, `ashalliants/ninfer-3090`, and other watched
   forks):**
@@ -213,7 +213,7 @@ published `v0.17.0` (`ea639bb`, tag `97dea2f0`):
       five values and no packed form, every `BF16` attention decode path (`prompt_bf16`,
       `small_t_bf16`, `sparse_attention`) would need the codec, and the poison-row escape case is
       output-changing.
-    - *Remaining `21` commits:* lookup copy cursor (`e813b68d`, merge `#314` `ceefc03f`), multi-GPU
+    - *Remaining `19` commits:* lookup copy cursor (`e813b68d`, merge `#314` `ceefc03f`), multi-GPU
       hybrid prefix cache (`af60c489`, `38a10aa4`, merge `#309` `06e54f66`), build-graph changes
       (`95d58aee` merge `#311` `7d9ef4a5`, `092893a9` merge `#312` `faf65e4f`), DeepSeek and
       Flash-Next MoE (`a8cc8401` `#310` `8b792715`, `283072a1` `#313` `6ed13c35`, `05c4d195` `#315`

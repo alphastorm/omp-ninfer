@@ -816,7 +816,7 @@ so future work does not repeat closed experiments:
      `checkpoint_api.cpp:153-154`, and mixes them into the shortlist digest in
      `durable_checkpoint_set.h:58-62` and `prefix_identity.cpp:114-117`, requiring a
      `kIdentityCodec` `qwen-identity/1` bump in `prefix_identity.h:18` that makes sessions saved
-     under `v0.17.0` or `v0.8.0-beta.2` load as incompatible and run a cold first turn).
+     under `v0.17.0` or `beta.2` load as incompatible and run a cold first turn).
   2. *Upstream malformed tool-call history rejection (`Neroued/ninfer` `4461c9683`) — error behavior
      rejected, bad-argument test vectors adopted:* `4461c9683` turns malformed or non-object
      historical tool `arguments` into `invalid_argument` / HTTP `400`, which is **rejected** because
@@ -849,7 +849,7 @@ so future work does not repeat closed experiments:
      remaining `26` Spark/distributed/`glm5next`/MoE commits (including `ad49b325d`, `6a753af33`,
      `b5008303b`, `dc4e789b2`, `d5d535956` `DFlash2` draft-op generalizations and `e871c41b1`,
      `12d5b72ab`, `4ac06e5ad`, `b5008303b` `BF16` sliced-K partial-reduction changes) are
-     **rejected** because they do not help hidden-size-5,120 (`H5120`) on `sm_120`/`sm_89`/`sm_86`
+     **rejected** because they do not help `H5120` on `sm_120`/`sm_89`/`sm_86`
      and risk `DFlash2` token identity.
   4. *Community fork candidates (`iamwavecut/ninfer-all` `8412e774..64bd1115` and
      `ashalliants/ninfer-3090` `2026-11-10`/`2026-11-11` branches) — deferred or rejected:* across
@@ -861,7 +861,7 @@ so future work does not repeat closed experiments:
      `execution.h:49-53` and whether OMP sends stop strings is unverified; `hybrid_program` /
      `tap_planner` absent in `F3`, which captures via `split_frontier` at
      `prefill.cpp:80-83,618-622`; packed `KvCacheStorage` absent in `include/ninfer/types.h:29-34`),
-     while the remaining `21` lookup/multi-GPU/build/MoE/A6000 commits are **rejected** as
+     while the remaining `19` lookup/multi-GPU/build/MoE/A6000 commits are **rejected** as
      inapplicable. On `ashalliants/ninfer-3090`, adaptive `DFlash2` `K=3`/`K=7` drafting
      (`perf/adaptive-dflash-k` `4ff617181` / `5dd329830` / `c385455b`, `58.9 / 53.2 / 46.1 tok/s` at
      `K=3/7/12` on a single-lane RTX 3090 low-acceptance workload, `"Nothing here has run on a GPU"`
