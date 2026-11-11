@@ -29,7 +29,7 @@
       "fork_point": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
       "fork_point_meaning": "research comparison against the upstream base of the shipped v0.14.0 lineage; this feature branch is watched, not adopted",
       "last_observed_head": "e1874e940d5be18fd5edd2cff2c259cb11142e54",
-      "last_observed_date": "2026-11-10",
+      "last_observed_date": "2026-11-11",
       "overlap_paths": [
         "src/artifact/",
         "src/runtime/",
