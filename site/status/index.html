@@ -25,9 +25,9 @@
  "name": "OMP NInfer",
  "applicationCategory": "DeveloperApplication",
  "operatingSystem": "Windows 11 — RTX 5090 via Docker Desktop/WSL2, RTX 4090 and RTX 3090 native; clients macOS preview, Windows, Linux under WSL2",
- "description": "Durable local inference for coding agents. Qualified on RTX 5090, RTX 4090, and RTX 3090 in v0.17.0 (published 2026-11-10) with stock Oh My Pi 18.18.6 and Qwen3.8 27B via NInfer.",
- "softwareVersion": "0.17.0",
- "datePublished": "2026-11-10",
+ "description": "Durable local inference for coding agents. Qualified on RTX 5090, RTX 4090, and RTX 3090 in v0.18.0 (published 2026-11-12) with stock Oh My Pi 18.18.7 and Qwen3.8 27B via NInfer.",
+ "softwareVersion": "0.18.0",
+ "datePublished": "2026-11-12",
  "url": "https://alphastorm.github.io/omp-ninfer/",
  "codeRepository": "https://github.com/alphastorm/omp-ninfer",
  "license": "https://github.com/alphastorm/omp-ninfer/blob/main/LICENSE"}
@@ -43,7 +43,7 @@
       <a href="../compare/">Compare</a>
       <a href="../security/">Security</a>
       <a href="../status/" aria-current="page">Status</a>
-      <a class="ext" href="https://github.com/alphastorm/omp-ninfer/blob/v0.17.0/docs/QUICKSTART.md">Quickstart</a>
+      <a class="ext" href="https://github.com/alphastorm/omp-ninfer/blob/v0.18.0/docs/QUICKSTART.md">Quickstart</a>
       <a class="ext" href="https://github.com/alphastorm/omp-ninfer">GitHub</a>
     </nav>
   </div>
@@ -54,27 +54,27 @@
 <p class="eyebrow">Status</p>
 <h1>Qualified on RTX 5090 · 4090 · 3090</h1>
 <p class="lede">Published on GitHub <code>Latest</code>, OMP NInfer (the qualified appliance and
-release layer) connects unmodified upstream <strong>Oh My Pi</strong> (coding-agent client, source
-<code>9058ab9d</code>) and shared published Qwen3.8&nbsp;27B model artifact v3 <code>81f924d4</code>
-(20,437,521,664&nbsp;B) to the RTX 5090 container runtime
-(<code>v0.7.0-qwen38-5090-beta.6</code>, release source F3 <code>e0971faf</code>, retained strict-origin profile <code>qwen38-5090-v0.13.0</code>) and
-the carried native Windows RTX 4090 (<code>v0.8.0-qwen38-4090-beta.2</code>, DFlash2 K=7, C1) and RTX 3090
-(<code>v0.8.0-qwen38-3090-beta.2</code>, DFlash2 K=7, C2 shared pool, 350&nbsp;W serving cap) packages (source <code>a87de361</code>) on
+release layer) connects unmodified upstream <a href="https://github.com/can1357/oh-my-pi">Oh My Pi</a> (coding-agent client, source
+<code>e325ffc7</code>) and shared published Qwen3.8&nbsp;27B model artifact v3 <code>81f924d4</code>
+(20,437,521,664&nbsp;B) to one frozen engine source <code>48c8ac46</code> on
 <a href="https://github.com/Neroued/ninfer">Neroued/ninfer</a> (inference engine, master
-<code>64d10fbf</code>).</p>
+<code>64d10fbf</code>) across all three qualified GPU lanes: the RTX 5090 container runtime
+(<code>v0.7.0-qwen38-5090-beta.7</code>, retained strict-origin profile <code>qwen38-5090-v0.13.0</code>) and
+the native Windows RTX 4090 (<code>v0.8.0-qwen38-4090-beta.3</code>, DFlash2 K=7, one active request / C1) and RTX 3090
+(<code>v0.8.0-qwen38-3090-beta.3</code>, <code>tc</code> tensor-core draft-verification build profile, DFlash2 K=7, two requests in flight / C2 shared pool, 350&nbsp;W serving cap) packages.</p>
 
 <div class="receipt">
 <span class="k">Qualified on RTX 5090 · 4090 · 3090</span>
-<span class="v">v0.17.0 · stock Oh My Pi 18.18.6 · published 2026-11-10</span>
-<span class="s">Fresh acceptance on frozen candidate commit <code>076bbe4f</code>: five documented routes
+<span class="v">v0.18.0 · stock Oh My Pi 18.18.7 · published 2026-11-12</span>
+<span class="s">Fresh acceptance on frozen candidate commit <code>2a735da0</code>: five documented routes
 (31 executable blocks), all three stock client binaries (typed tool turn, exact
 continuation, fail-closed request, plus macOS/Windows image input on RTX 5090; WSL2 Linux client URL/hash installation, live tool/continuation, and runtime-outage checks), and the
-<code>v0.8.0-qwen38-4090-beta.2</code> RTX 4090 native Windows public-URL package install, C1 fleet probe, and independent restoration passed (408.213&nbsp;s RTX 5090 hold, 508.420&nbsp;s RTX 4090 window); on RTX 3090, all seven documented route blocks, C2 4-way fanout, and parallel stock OMP overlap at limit 2 passed before the separate post-route <code>native-probes</code> automatic-compaction campaign failed (900&nbsp;s timeout, 8 HTTP 503 queue timeouts, 2 HTTP 499 cancellations, 0 resident work; subsequent managed Stop <code>graceful_incomplete_shutdown</code> saved 2 / skipped 5 / refused 3, reason <code>capacity</code>; 1,727.696&nbsp;s failed RTX 3090 campaign) under an exact <a href="https://github.com/alphastorm/omp-ninfer/blob/v0.17.0/releases/v0.17.0/qualification/rtx3090-route-waiver.json">founder waiver</a> with empty-session <code>Control-Release.ps1 -Action Start</code> then <code>-Action Stop</code> lead recovery (no RTX 3090 campaign behavior completion, structured outage, wrapper restoration audit pass, or anonymous public-install claim); owner-operated evidence.
-<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.17.0/releases/v0.17.0/acceptance/documented-routes.json">Documented routes</a> ·
-<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.17.0/releases/v0.17.0/acceptance/composed-external-installation.json">Composed installation proof</a>.</span>
+<code>v0.8.0-qwen38-{4090,3090}-beta.3</code> initial-window RTX 4090 and third-execution RTX 3090 native Windows public-URL package installs, C1/C2 probes, and independent restorations passed without a waiver (406.876&nbsp;s RTX 5090 hold, 509.857&nbsp;s RTX 4090 window, 1,439.367&nbsp;s RTX 3090 window; on RTX 3090, attempt 1 passed all seven documented route blocks, failed its post-route stock OMP subagent check on malformed <code>task</code> tool arguments, and restored; attempt 2 ran while the host's system drive was full with 0.39&nbsp;GiB free when measured afterwards — 27 checkpoint writes failed with OS disk-full error 112, checkpoint saves were refused for capacity, and admission waited behind an unsettled checkpoint save across 4 HTTP 503 <code>request_queue_timeout</code> responses with <code>deferred by a pending checkpoint save</code> before a 900&nbsp;s compaction timeout and 9 refused sessions at <code>Control-Release.ps1 -Action Stop</code> prior to empty-session <code>Start</code>/<code>Stop</code> recovery; the founder-authorized third execution in fresh workspaces with an enforced 60&nbsp;GiB free-space floor, 63.08&nbsp;GiB free, recorded in shared native driver <code>accept-rtx4090-route.py</code>'s single <code>--attempt 2</code> rerun slot because the frozen driver accepts only <code>--attempt 1|2</code>, passed every phase with zero disk-full errors, 2 committed compactions in 747.00&nbsp;s, and zero HTTP 503 responses (compaction receipt <code>cfa89628</code>), showing the request-level HTTP 503 half of <a href="https://github.com/alphastorm/ninfer/issues/89">ninfer#89</a> reproduced in acceptance only under disk exhaustion); owner-operated evidence.
+<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.18.0/releases/v0.18.0/acceptance/documented-routes.json">Documented routes</a> ·
+<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.18.0/releases/v0.18.0/acceptance/composed-external-installation.json">Composed installation proof</a>.</span>
 </div>
 
-<div class="actions"><a class="cta" href="https://github.com/alphastorm/omp-ninfer/blob/v0.17.0/docs/QUICKSTART.md">Get started</a></div>
+<div class="actions"><a class="cta" href="https://github.com/alphastorm/omp-ninfer/blob/v0.18.0/docs/QUICKSTART.md">Get started</a></div>
 
 <h2>Current qualified lanes</h2>
 <div class="table-scroll">
@@ -82,24 +82,24 @@ continuation, fail-closed request, plus macOS/Windows image input on RTX 5090; W
 <tr><th>Lane</th><th>Runtime tag &amp; artifacts</th><th>Client</th><th>State &amp; serving profile</th><th>Receipt</th></tr>
 <tr>
 <td>RTX 5090 (Windows 11 + Docker Desktop/WSL2, <code>127.0.0.1:18089</code>)</td>
-<td data-label="Runtime tag & artifacts"><code>v0.7.0-qwen38-5090-beta.6</code> (source <code>e0971faf</code> on <code>64d10fbf</code>, image <code>7a19576b</code>, server <code>dc86e101</code>, model <code>81f924d4</code> · 20,437,521,664&nbsp;B)</td>
+<td data-label="Runtime tag & artifacts"><code>v0.7.0-qwen38-5090-beta.7</code> (source <code>48c8ac46</code> on <code>64d10fbf</code>, image <code>496195ec</code>, server <code>804ef8ac</code>, model <code>81f924d4</code> · 20,437,521,664&nbsp;B)</td>
 <td data-label="Client">Stock Oh My Pi (<code>omp</code> on Windows x64 local, macOS arm64 manual SSH tunnel preview, and Linux x64 under WSL2)</td>
-<td data-label="State & serving profile">Qualified — <code>qwen38-5090-v0.13.0</code>, config <code>751d22dc</code>: DFlash2 draft window 7, BF16 KV (146,368 automatic tokens), 131,072 context, two requests in flight, schema 3 checkpoints (host <code>checkpoints-v017</code> mounted at <code>/checkpoints-v013</code>, strict origin auth), JSON-schema output, 128-character tool names, vision + tools + preserved thinking</td>
-<td data-label="Receipt"><a href="https://github.com/alphastorm/omp-ninfer/blob/v0.17.0/releases/v0.17.0/qualification/rtx5090.json">rtx5090.json</a></td>
+<td data-label="State & serving profile">Qualified — <code>qwen38-5090-v0.13.0</code>, config <code>751d22dc</code>: DFlash2 draft window 7, BF16 KV (146,368 automatic tokens), 131,072 context, two requests in flight, schema 3 checkpoints (host <code>checkpoints-v018</code> mounted at <code>/checkpoints-v013</code>, strict origin auth), JSON-schema output, 128-character tool names, vision + tools + preserved thinking</td>
+<td data-label="Receipt"><a href="https://github.com/alphastorm/omp-ninfer/blob/v0.18.0/releases/v0.18.0/qualification/rtx5090.json">rtx5090.json</a></td>
 </tr>
 <tr>
 <td>RTX 4090 native Windows 11 (<code>127.0.0.1:18082</code>)</td>
-<td data-label="Runtime tag & artifacts"><code>v0.8.0-qwen38-4090-beta.2</code> (source <code>a87de361</code> on <code>64d10fbf</code>, package <code>d9b10b47</code> · 991,981,865&nbsp;B, server <code>ffee91bf</code>, SPDX SBOM <code>e4be92e4</code>, CycloneDX SBOM <code>a341bb61</code>, model <code>81f924d4</code> · 20,437,521,664&nbsp;B)</td>
-<td data-label="Client">Stock Oh My Pi (<code>omp-windows-x64.exe</code>, SHA-256 <code>dfb15c27</code>)</td>
-<td data-label="State & serving profile">Qualified — <code>qwen38-4090-native-v0.8.0-beta.2</code>, config <code>ae27dc44</code>: DFlash2 draft window 7, INT8 KV, <code>Group64</code> A8 and FP32 head logits off, 131,072 context, 15,747.734375&nbsp;MiB shared Host budget, 640&nbsp;MiB admission headroom, one request at a time, schema 3 checkpoints (<code>session-checkpoints-v3</code>, strict origin auth), JSON-schema output, 128-character tool names, text + tools (no vision)</td>
-<td data-label="Receipt"><a href="https://github.com/alphastorm/omp-ninfer/blob/v0.17.0/releases/v0.17.0/qualification/rtx4090.json">rtx4090.json</a></td>
+<td data-label="Runtime tag & artifacts"><code>v0.8.0-qwen38-4090-beta.3</code> (source <code>48c8ac46</code> on <code>64d10fbf</code>, build profile <code>native-v0.8.0-beta.3-rtx4090</code>, package <code>ac41700a</code> · 992,131,123&nbsp;B, server <code>a5266ae6</code>, SPDX SBOM <code>4ad1f5e8</code>, CycloneDX SBOM <code>60a1d35d</code>, model <code>81f924d4</code> · 20,437,521,664&nbsp;B)</td>
+<td data-label="Client">Stock Oh My Pi (<code>omp-windows-x64.exe</code>, SHA-256 <code>4a6e39ea</code>)</td>
+<td data-label="State & serving profile">Qualified — <code>qwen38-4090-native-v0.8.0-beta.3</code>, config <code>b71a2cff</code>: DFlash2 draft window 7, INT8 KV, <code>Group64</code> A8 and FP32 head logits off, 131,072 context, 15,747.734375&nbsp;MiB shared Host budget, 640&nbsp;MiB admission headroom, one request at a time, schema 3 checkpoints (<code>session-checkpoints-v3</code>, strict origin auth), JSON-schema output, 128-character tool names, text + tools (no vision)</td>
+<td data-label="Receipt"><a href="https://github.com/alphastorm/omp-ninfer/blob/v0.18.0/releases/v0.18.0/qualification/rtx4090.json">rtx4090.json</a></td>
 </tr>
 <tr>
 <td>RTX 3090 native Windows 11 (<code>127.0.0.1:18082</code>)</td>
-<td data-label="Runtime tag & artifacts"><code>v0.8.0-qwen38-3090-beta.2</code> (source <code>a87de361</code> on <code>64d10fbf</code>, package <code>97a8e634</code> · 1,008,989,809&nbsp;B, server <code>15a4db46</code>, SPDX SBOM <code>051a81e2</code>, CycloneDX SBOM <code>255874bf</code>, model <code>81f924d4</code> · 20,437,521,664&nbsp;B)</td>
-<td data-label="Client">Stock Oh My Pi (<code>omp-windows-x64.exe</code>, SHA-256 <code>dfb15c27</code>)</td>
-<td data-label="State & serving profile">Qualified — <code>qwen38-3090-native-v0.8.0-beta.2</code>, config <code>238ccad7</code>: DFlash2 draft window 7, INT8 KV, <code>Group64</code> A8 and FP32 head logits off, two requests in flight over one shared 131,072-token pool, 20,867.734375&nbsp;MiB shared Host budget, 768&nbsp;MiB admission headroom, 350&nbsp;W serving power cap, schema 3 checkpoints (<code>session-checkpoints-v3</code>, strict origin auth), JSON-schema output, 128-character tool names, text + tools (no vision)</td>
-<td data-label="Receipt"><a href="https://github.com/alphastorm/omp-ninfer/blob/v0.17.0/releases/v0.17.0/qualification/rtx3090.json">rtx3090.json</a></td>
+<td data-label="Runtime tag & artifacts"><code>v0.8.0-qwen38-3090-beta.3</code> (source <code>48c8ac46</code> on <code>64d10fbf</code>, build profile <code>native-v0.8.0-beta.3-tc-rtx3090</code>, package <code>bf1ceaa9</code> · 1,011,087,765&nbsp;B, server <code>e5713286</code>, SPDX SBOM <code>8ac165c5</code>, CycloneDX SBOM <code>269941ec</code>, model <code>81f924d4</code> · 20,437,521,664&nbsp;B)</td>
+<td data-label="Client">Stock Oh My Pi (<code>omp-windows-x64.exe</code>, SHA-256 <code>4a6e39ea</code>)</td>
+<td data-label="State & serving profile">Qualified — <code>qwen38-3090-native-v0.8.0-beta.3</code>, config <code>674d5260</code>: DFlash2 draft window 7, small-T tensor-core verify at T=8/16, INT8 KV, <code>Group64</code> A8 and FP32 head logits off, two requests in flight over one shared 131,072-token pool, 20,867.734375&nbsp;MiB shared Host budget, 768&nbsp;MiB admission headroom, 350&nbsp;W serving power cap, schema 3 checkpoints (<code>session-checkpoints-v3</code>, strict origin auth), JSON-schema output, 128-character tool names, text + tools (no vision)</td>
+<td data-label="Receipt"><a href="https://github.com/alphastorm/omp-ninfer/blob/v0.18.0/releases/v0.18.0/qualification/rtx3090.json">rtx3090.json</a></td>
 </tr>
 </table>
 </div>
@@ -112,21 +112,21 @@ UUID and PCI address. Only one native lane runs at a time on authenticated loopb
 <code>127.0.0.1:18082</code> (within the active RTX 3090 lane, up to two requests run concurrently
 over one shared 131,072-token INT8 pool). This is not multi-GPU inference and not simultaneous RTX 4090 and RTX 3090
 serving.</li>
-<li><strong>Direct running-lane native upgrade and rollback:</strong> In <code>v0.16.2</code>–<code>v0.17.0</code>
-(<code>v0.8.0-qwen38-4090-beta.2</code> and <code>v0.8.0-qwen38-3090-beta.2</code>),
+<li><strong>Direct running-lane native upgrade and rollback:</strong> In <code>v0.16.2</code>–<code>v0.18.0</code>
+(<code>v0.8.0-qwen38-4090-beta.3</code> and <code>v0.8.0-qwen38-3090-beta.3</code> in <code>v0.18.0</code>),
 <code>Install-Release.ps1</code> stops a running incumbent lane through its own controller and hands
 off the GPU-owner lease across power-cap transitions, closing <a href="https://github.com/alphastorm/omp-ninfer/issues/94">#94</a>
-(removing the historical stop-before-upgrade prerequisite) and retaining <code>v0.8.0-qwen38-{4090,3090}-beta.1</code>
-as <code>previous_release</code> for <code>Control-Release.ps1 -Action Rollback</code>. Keep prior
+and retaining <code>v0.8.0-qwen38-{4090,3090}-beta.2</code> as <code>previous_release</code> for
+<code>Control-Release.ps1 -Action Rollback</code> (while <code>Control-Release.ps1</code> restores the GPU-owner lease on a refused <code>Stop</code>; for a stopped <code>beta.2</code> lane stuck after an incomplete shutdown, run explicit <code>Start</code> on the installed <code>beta.2</code> controller and then run the <code>beta.3</code> installer). Keep prior
 checkpoint roots untouched for rollback and let OMP replay transcripts for fresh sessions.</li>
 </ul>
 
 <h2>Client scope and operating boundaries</h2>
 <ul>
 <li><strong>Stock Oh My Pi client:</strong> Unmodified upstream release assets
-(<code>omp-darwin-arm64</code> <code>ed2e63eb</code>, <code>omp-windows-x64.exe</code>
-<code>dfb15c27</code>, <code>omp-linux-x64</code> <code>a8059b95</code>) pinned in
-<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.17.0/releases/v0.17.0/qualification/client-components.json"><code>client-components.json</code></a>.
+(<code>omp-darwin-arm64</code> <code>0cecaac7</code>, <code>omp-windows-x64.exe</code>
+<code>4a6e39ea</code>, <code>omp-linux-x64</code> <code>ea6c216f</code>) pinned in
+<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.18.0/releases/v0.18.0/qualification/client-components.json"><code>client-components.json</code></a>.
 Stock OMP has no <code>omp appliance</code> commands; model fragments set per-model
 <code>compat.statefulResponses: true</code>, <code>PI_OPENAI_STATEFUL</code> must be absent, and
 <code>examples/manual-tunnel/fail-closed.yml</code> limits in-flight requests per provider
@@ -143,11 +143,11 @@ unsaved work), and universal warm reuse is not promised.
 <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/FACTS.md#checkpoint-transport-and-nas-replication">Checkpoint transport and NAS replication</a>.</li>
 </ul>
 <p>Machine-readable truth:
-<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.17.0/releases/v0.17.0/manifest.json">release manifest</a> ·
-<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.17.0/releases/v0.17.0/NINFER_RELEASE_NOTES.md">release notes</a> ·
+<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.18.0/releases/v0.18.0/manifest.json">release manifest</a> ·
+<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.18.0/releases/v0.18.0/NINFER_RELEASE_NOTES.md">release notes</a> ·
 <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/COMPATIBILITY.md">compatibility</a> ·
 <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/RELEASES.md">release lifecycle</a></p>
-<p class="verified">Support boundary: the 0.x series supports only the latest published release and its exact manifest and hardware profiles at engine sources <code>e0971faf</code> (RTX 5090) and <code>a87de361</code> (native Windows); no SLA, stable/v1.0 support, or cross-release checkpoint compatibility is claimed.</p>
+<p class="verified">Support boundary: the 0.x series supports only the latest published release and its exact manifest and hardware profiles at common engine source <code>48c8ac46</code>; no SLA, stable/v1.0 support, or cross-release checkpoint compatibility is claimed.</p>
 </div>
 </section>
 </main>

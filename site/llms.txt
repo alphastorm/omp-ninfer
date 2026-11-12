@@ -6,26 +6,29 @@
 > (served model). Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or
 > NVIDIA.
 
-Qualified on RTX 5090 · 4090 · 3090 — **v0.17.0** (published 2026-11-10, GitHub Latest), stock
-**Oh My Pi 18.18.6** (`9058ab9d`). The 0.x series supports only the latest published release and its
+Qualified on RTX 5090 · 4090 · 3090 — **v0.18.0** (published 2026-11-12, GitHub Latest), stock
+**Oh My Pi 18.18.7** (`e325ffc7`). The 0.x series supports only the latest published release and its
 exact manifest and profiles.
 - **RTX 5090 container lane:** Windows 11 + Docker Desktop/WSL2 on loopback `127.0.0.1:18089`
-  (local Windows client, manual macOS SSH tunnel preview, or Linux x64 client under WSL2); `v0.7.0-qwen38-5090-beta.6` (source
-  `e0971faf` on `Neroued/ninfer` master `64d10fbf`, image `7a19576b`, server `dc86e101`), profile
+  (local Windows client, manual macOS SSH tunnel preview, or Linux x64 client under WSL2); `v0.7.0-qwen38-5090-beta.7` (source
+  `48c8ac46` on [`Neroued/ninfer`](https://github.com/Neroued/ninfer) master `64d10fbf`, image `496195ec` on reused base `28857182`, server `804ef8ac`), profile
   `qwen38-5090-v0.13.0` (config `751d22dc`, kept from v0.13.0), model container v3 `81f924d4` (20.4 GB, served model ID `q38-ninfer`), DFlash2 draft window
   7, BF16 KV (146,368 automatic tokens), 131,072-token context, two requests in flight, schema 3
-  checkpoints (isolated host `checkpoints-v017` mounted at `/checkpoints-v013`, strict origin auth, bounded resume/fresh admission, byte-proven durable-generation Host reclaim, non-blocking export), JSON-schema output,
+  checkpoints (isolated host `checkpoints-v018` mounted at the profile's `/checkpoints-v013` container path, strict origin auth, GPU-staged durable checkpoint export when the host RAM cache is full, operation-free prepare holding, bounded fresh-admission priority of 4 turns, bounded resume/fresh admission, byte-proven durable-generation host-cache reclaim, non-blocking export), JSON-schema output,
   128-character tool names, vision + tools.
-- **RTX 4090 and RTX 3090 native Windows 11 lanes:** `v0.8.0-qwen38-4090-beta.2` (package
-  `d9b10b47`, server `ffee91bf`, profile `qwen38-4090-native-v0.8.0-beta.2`, config `ae27dc44`,
-  one active request / `C1`, 30 s pending timeout, 15,747.734375 MiB shared Host budget, 640 MiB
-  admission headroom) and `v0.8.0-qwen38-3090-beta.2` (package `97a8e634`, server `15a4db46`, profile
-  `qwen38-3090-native-v0.8.0-beta.2`, config `238ccad7`, two requests in flight / `C2` over one
-  shared 131,072-token pool, 180 s pending timeout, `ninfer-native-3090: 2` in `examples/manual-tunnel/fail-closed.yml`,
-  20,867.734375 MiB shared Host budget, 768 MiB admission headroom, 350 W serving cap;
-  `Install-Release.ps1` upgrades running or stopped `v0.8.0-qwen38-{4090,3090}-beta.1` lanes directly and preserves
-  them for rollback, closing [#94](https://github.com/alphastorm/omp-ninfer/issues/94))
-  on loopback `127.0.0.1:18082`, carried unchanged at `a87de361` source on `Neroued/ninfer` master
+- **RTX 4090 and RTX 3090 native Windows 11 lanes:** `v0.8.0-qwen38-4090-beta.3` (package
+  `ac41700a`, server `a5266ae6`, profile `qwen38-4090-native-v0.8.0-beta.3`, build profile
+  `native-v0.8.0-beta.3-rtx4090`, config `b71a2cff`, one active request / `C1`, 30 s pending
+  timeout, 15,747.734375 MiB shared host RAM budget, 640 MiB admission headroom) and
+  `v0.8.0-qwen38-3090-beta.3` (package `bf1ceaa9`, server `e5713286`, profile
+  `qwen38-3090-native-v0.8.0-beta.3`, build profile `native-v0.8.0-beta.3-tc-rtx3090` enabling
+  `sm_86` small-T tensor-core draft verification at `T=8/16`, config `674d5260`, two requests in flight / `C2`
+  over one shared 131,072-token pool, 180 s pending timeout, `ninfer-native-3090: 2` in
+  `examples/manual-tunnel/fail-closed.yml`, 20,867.734375 MiB shared host RAM budget, 768 MiB admission
+  headroom, 350 W serving cap; `Install-Release.ps1` stops a running `v0.8.0-qwen38-{4090,3090}-beta.2`
+  lane through its own controller and preserves it for `Control-Release.ps1 -Action Rollback`, while
+  `Control-Release.ps1` restores the GPU-owner lease on a refused `Stop`) on loopback
+  `127.0.0.1:18082`, rebuilt from shared frozen engine source `48c8ac46` on `Neroued/ninfer` master
   `64d10fbf`, UUID-bound on one two-GPU host (sequential single-GPU serving, one lane at a time),
   shared model container v3 `81f924d4` (20.4 GB, `qwen3_8_27b-v3.ninfer`; served model IDs
   `qwen3.8-27b` on RTX 4090 and `q38-ninfer` on RTX 3090), DFlash2 draft window 7 (`K=7`,
@@ -33,26 +36,33 @@ exact manifest and profiles.
   `Group64` A8 and FP32 head logits off, 131,072-token context, 1,024-token prefill chunk, two extra
   device-state slots, schema 3 checkpoints (`session-checkpoints-v3`, strict origin auth),
   JSON-schema output, 128-character tool names, SPDX + CycloneDX dependency SBOMs, text + tools (no vision).
-- **Proof:** Fresh v0.17.0 acceptance on frozen candidate commit `076bbe4f` across five documented routes
-  (31 steps), all three stock Oh My Pi 18.18.6 client binaries (macOS arm64 preview, Windows x64, Linux x64
-  under WSL2), and RTX 4090 native Windows public install, C1 fleet probe, and independent restoration
-  (owner-operated, 408.213 s RTX 5090 hold, 508.420 s RTX 4090 window; RTX 3090's post-route
-  `native-probes` automatic-compaction campaign failed at a 900 s timeout with 8 HTTP 503 queue
-  timeouts, 2 HTTP 499 cancellations, and 3 sessions refused at subsequent managed Stop
-  `graceful_incomplete_shutdown`, founder-waived with disclosure and empty-session Start/Stop
-  lead recovery; no RTX 3090 behavior completion, structured outage, wrapper restoration audit pass,
-  or anonymous public-install claim); RTX 5090 runtime qualification is fresh at `e0971faf` (181.92
-  tok/s server decode and 56.63 s cold exact 130,048-token retrieval) and native Windows `beta.2`
-  runtime qualifications are carried at `a87de361` (RTX 4090 254.59 tok/s C1 decode and 83.54 s exact
-  retrieval; RTX 3090 148.70 tok/s C1 decode and 188.94 s exact retrieval; native no-regression speed
-  gates vs published `beta.1`: RTX 3090 weighted 1.0003 / min 0.9988, 84/84 identical; RTX 4090
-  weighted 0.9996 / min 0.9989, 115/115 identical).
+- **Proof:** Fresh v0.18.0 acceptance on frozen candidate commit `2a735da0` across five documented routes
+  (31 executable blocks), all three stock Oh My Pi 18.18.7 client binaries (macOS arm64 preview, Windows x64, Linux x64
+  under WSL2), initial-window RTX 4090 and third-execution RTX 3090 native Windows public installs, C1/C2
+  probes, and independent restoration without a waiver (owner-operated, 406.876 s RTX 5090 hold, 509.857 s
+  RTX 4090 window, 1,439.367 s RTX 3090 window; on RTX 3090, attempt 1 passed all 7 documented
+  blocks, failed its post-route stock OMP subagent check on malformed `task` tool arguments, and restored,
+  attempt 2 ran while the host's system drive was full with 0.39 GiB free when measured afterwards — 27 checkpoint writes failed with
+  OS disk-full error 112, checkpoint saves were refused for capacity, and admission waited behind an
+  unsettled checkpoint save across 4 HTTP 503 `deferred by a pending checkpoint save` timeouts before a 900 s
+  compaction timeout and empty-session Start/Stop recovery — and a founder-authorized third execution in fresh
+  workspaces with an enforced 60 GiB free-space floor (`63.08` GiB free, recorded in
+  shared native driver `accept-rtx4090-route.py`'s single `--attempt 2` rerun slot because the frozen driver accepts only `--attempt 1|2`) passed every phase with zero disk-full errors,
+  `2` committed compactions in `747.00` s, zero HTTP
+  503 responses, compaction receipt `cfa89628`, and anonymous public install, showing the request-level HTTP 503 half of
+  [`alphastorm/ninfer#89`](https://github.com/alphastorm/ninfer/issues/89) reproduced in acceptance only under
+  disk exhaustion); all three lane runtime qualifications are fresh at `48c8ac46` (RTX
+  5090 181.52 tok/s server decode and 56.90 s / 56.896 s cold exact 130,048-token retrieval; RTX 4090
+  253.71 tok/s C1 decode and 83.45 s / 83.451 s exact retrieval; RTX 3090 `tc` 227.17 tok/s C1 decode and
+  189.12 s / 189.119 s exact retrieval; native speed gates vs published `beta.2` under bound passing
+  1,120-prompt EXP-085 quality screens: RTX 3090 `tc` weighted 1.5373 / min 1.3503, 84/84 within-engine
+  and 35/84 cross-engine identical; RTX 4090 weighted 1.0000 / min 0.9992, 115/115 identical).
 
 ## Release authorities
 
-- [Release manifest](https://github.com/alphastorm/omp-ninfer/blob/v0.17.0/releases/v0.17.0/manifest.json): exact client, runtime, model, and profile pins
-- [Release notes](https://github.com/alphastorm/omp-ninfer/blob/v0.17.0/releases/v0.17.0/NINFER_RELEASE_NOTES.md): release composition, client SHA-256 digests, acceptance, and support boundaries
-- [Tagged quickstart](https://github.com/alphastorm/omp-ninfer/blob/v0.17.0/docs/QUICKSTART.md): immutable installation guide for the current release
+- [Release manifest](https://github.com/alphastorm/omp-ninfer/blob/v0.18.0/releases/v0.18.0/manifest.json): exact client, runtime, model, and profile pins
+- [Release notes](https://github.com/alphastorm/omp-ninfer/blob/v0.18.0/releases/v0.18.0/NINFER_RELEASE_NOTES.md): release composition, client SHA-256 digests, acceptance, and support boundaries
+- [Tagged quickstart](https://github.com/alphastorm/omp-ninfer/blob/v0.18.0/docs/QUICKSTART.md): immutable installation guide for the current release
 
 ## Living canonical documents
 
@@ -70,7 +80,7 @@ exact manifest and profiles.
 
 - [Roadmap](https://github.com/alphastorm/omp-ninfer/blob/main/ROADMAP.md): remaining engineering gates and non-promises
 - [Releases](https://github.com/alphastorm/omp-ninfer/blob/main/docs/RELEASES.md): version identity archive and release cut procedure
-- [Performance program](https://github.com/alphastorm/omp-ninfer/blob/main/docs/PERFORMANCE.md): append-only experiment ledger (EXP-001..109)
+- [Performance program](https://github.com/alphastorm/omp-ninfer/blob/main/docs/PERFORMANCE.md): append-only experiment ledger (EXP-001..121)
 - [Upstream tracking](https://github.com/alphastorm/omp-ninfer/blob/main/docs/UPSTREAM.md): Oh My Pi and NInfer source-applicability ledger
 - [Changelog](https://github.com/alphastorm/omp-ninfer/blob/main/CHANGELOG.md): chronological release summary
 

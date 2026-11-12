@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Mark v0.18.0 as the published release across the README, facts, roadmap, release history,
+  upstream watch, reference docs, site, and brand assets; front-door install links point to
+  `v0.18.0` and `docs/QUICKSTART.md` on `main`.
+
+## [0.18.0] - 2026-11-12
+
 ### Fixed
 
 - Close the release verifier and composer gaps in [#149](https://github.com/alphastorm/omp-ninfer/issues/149)
@@ -3152,7 +3160,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.17.0...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.18.0...HEAD
+[0.18.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.17.0...v0.18.0
 [0.17.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.16.2...v0.17.0
 [0.16.2]: https://github.com/alphastorm/omp-ninfer/compare/v0.16.0...v0.16.2
 [0.16.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.15.0...v0.16.0

@@ -42,7 +42,7 @@ stay retired. Do not reuse them.
   the better choice (breadth, GUI, portability, multi-user throughput). The narrow target
   is what makes the recommendation credible; never publish a self-assigned score.
 - Status grammar: when lane status is stated, write **"Qualified on RTX 5090 · 4090 · 3090"**.
-  When install authority matters, bind it to the current ready release (`v0.17.0`) instead of
+  When install authority matters, bind it to the current ready release (`v0.18.0`) instead of
   restating per-lane caveats inline; per-lane evidence lives in the manifest and benchmarks.
 - Primary conversion action: **Get started**, linked to `docs/QUICKSTART.md`. Put it before
   documentation links whenever the surface has room for only one action. The GitHub `Latest`
@@ -223,16 +223,16 @@ download link in both.
 keeps your session's continuation state resident on your GPU. **OMP NInfer** is the qualified release
 that binds them with one hash-pinned Qwen3.8 27B model on an RTX 5090, 4090, or 3090 you own.
 
-Every install route in the guide was run end to end on **v0.17.0** with unmodified
-[Oh My Pi 18.18.6](https://github.com/can1357/oh-my-pi/releases/tag/v18.18.6) — 31 steps,
+Every install route in the guide was run end to end on **v0.18.0** with unmodified
+[Oh My Pi 18.18.7](https://github.com/can1357/oh-my-pi/releases/tag/v18.18.7) — 31 steps,
 three client platforms, both native lanes
-([receipt](releases/v0.17.0/acceptance/composed-external-installation.json)).
+([receipt](releases/v0.18.0/acceptance/composed-external-installation.json)).
 
 ### [Get started →](docs/QUICKSTART.md)
 
 [![CI][ci-badge]][ci] [![Release][release-badge]][releases] [![RTX 5090 decode][decode-badge]][benchmarks] [![Context][context-badge]][benchmarks] [![License][license-badge]][license]
 
-[Download v0.17.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.17.0) · [Lanes](docs/QUICKSTART.md#choose-your-lane) ·
+[Download v0.18.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.18.0) · [Lanes](docs/QUICKSTART.md#choose-your-lane) ·
 [Facts](docs/FACTS.md) · [Compare](docs/DECISION_GUIDE.md) · [Benchmarks](docs/BENCHMARKS.md) ·
 [Architecture](docs/ARCHITECTURE.md) · [Security](docs/SECURITY.md) · [Troubleshooting](docs/TROUBLESHOOTING.md) ·
 [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)
