@@ -907,8 +907,11 @@ class DocumentedHostNamesTests(unittest.TestCase):
         assignment = lambda name: re.search(rf'^{name}="\$(?:HOME|ROOT)/([^"]+)"$', text, re.M).group(1)
         self.assertEqual(assignment("ROOT"), ".local/share/omp-ninfer")
         names = (assignment("CHECKPOINTS"), assignment("MODEL"))
-        self.assertEqual(names, ("checkpoints-v017", "qwen3_8_27b-v3.ninfer"))
-        self.assertEqual(host.documented_host_names("v0.17.0"), names)
+        release = re.search(r"releases/(v[0-9.]+)/manifest\.json", text).group(1)
+        self.assertEqual(host.documented_host_names(release), names)
+        self.assertEqual(names[1], "qwen3_8_27b-v3.ninfer")
+        self.assertEqual(host.documented_host_names("v0.17.0"),
+                         ("checkpoints-v017", names[1]))
         self.assertEqual(host.documented_host_names("v0.17.1"),
                          ("checkpoints-v017-1", names[1]))
         self.assertEqual(host.documented_host_names("v0.18.0"),
