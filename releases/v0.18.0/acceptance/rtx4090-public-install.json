@@ -256,7 +256,7 @@
   },
   "restoration": {
     "repository_path": "docs/measurements/2026-11-12-v0180-acceptance-restoration.json",
-    "sha256": "b5ccb28bd16536fb03ef92b557488e668461130700b20ca7619b2b02db978198"
+    "sha256": "eeb00906bad0dfd8a6ff4be1a0486f2a2f83c6bf8b3e01a06698fc6a8d7a6aac"
   },
   "limitations": [
     "One two-GPU Windows host, native serving sequential on shared port 18082.",

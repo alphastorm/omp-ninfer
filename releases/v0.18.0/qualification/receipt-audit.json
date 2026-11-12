@@ -45,7 +45,7 @@
       "disposition": "replaced",
       "reason": "Current successor identity, authored prose or evidence; its admitted producer retains its actual subject and scope.",
       "predecessor_sha256": "3f89e10b9db22156a3b7911fa40491a91c3b99430a11e9780dedfc1d367ce8e3",
-      "staged_sha256": "5c51cb958837c7e47d23f02593039ebfc7192ca3c02a493edb651af510ad5fc6"
+      "staged_sha256": "9eefb58d2980dd8cf4c1b49deb36add412e5cf2c1594347525d465b9e328f046"
     },
     {
       "file": "acceptance/linux-x64-18.18.6.json",
@@ -60,11 +60,17 @@
       "staged_sha256": "0e092283e98d820d1c129fb3b135dae66f23e672e37f4163d4747af8231602f5"
     },
     {
+      "file": "acceptance/rtx3090-public-install.json",
+      "disposition": "added",
+      "reason": "Current successor identity, authored prose or evidence; its admitted producer retains its actual subject and scope.",
+      "staged_sha256": "6b1ccac0d1d9cd6cd04d63940e8c9f46bc4c4ddf1393c4e403c2303ee6a4865e"
+    },
+    {
       "file": "acceptance/rtx4090-public-install.json",
       "disposition": "replaced",
       "reason": "Current successor identity, authored prose or evidence; its admitted producer retains its actual subject and scope.",
       "predecessor_sha256": "b45d704fecb553a54b6e66bcc34032fa23786b40db557d427ca5dcdac0bd262e",
-      "staged_sha256": "dd5642d5be81b90c5946a6b8e35399ef5e7645614dff72470a20a81cc2ac5dff"
+      "staged_sha256": "dc6bb12e675141a1134a0bd80f1986926e83b866923e31f66ccdedb9900d9b40"
     },
     {
       "file": "acceptance/windows-x64-18.18.6.json",
@@ -146,7 +152,7 @@
       "disposition": "replaced",
       "reason": "Current successor identity, authored prose or evidence; its admitted producer retains its actual subject and scope.",
       "predecessor_sha256": "d840d5e5abd2d7cc29f1754458343aef092ad6f077d5a75143a1a178af4fbe4d",
-      "staged_sha256": "8cb03061a2ac69967409f7964cae104600e23fad5ad7f76ebee84912f22b3952"
+      "staged_sha256": "210660f4959b46491c067e06d0310d70321fb44da045d653d5d1bf3e5b577afa"
     },
     {
       "file": "qualification/native-identity-decision.json",
@@ -189,10 +195,9 @@
     },
     {
       "file": "qualification/rtx3090-route-waiver.json",
-      "disposition": "replaced",
-      "reason": "Current successor identity, authored prose or evidence; its admitted producer retains its actual subject and scope.",
-      "predecessor_sha256": "19f2c0ef0f9bbf38b6debaacdbb84e8e219c1f03b1d26671ca3fdfcbf63943f0",
-      "staged_sha256": "13bcf02764501f17b1a251e82ee6ef1750f2e0fbc4ddd0637def0c018cf8722b"
+      "disposition": "dropped",
+      "reason": "Predecessor evidence is not a current successor result, waiver or review approval.",
+      "predecessor_sha256": "19f2c0ef0f9bbf38b6debaacdbb84e8e219c1f03b1d26671ca3fdfcbf63943f0"
     },
     {
       "file": "qualification/rtx3090-speed.json",
@@ -741,7 +746,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "94bee86c1bfb32fa1a40e00fa90b02572e891536b5bedc7a867665f9f6c3c26e",
-      "staged_value_sha256": "a9f5a11952cf591c0bc034b769d4ef1ae45404ecf3ad73562e2072f846c67ab1"
+      "staged_value_sha256": "f3323d8627307b0d9bf442949ad9ae59d897c6c0298f0b5d29c27748a183cf6d"
     },
     {
       "file": "manifest.json",
@@ -1148,7 +1153,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "0fe2ad733c7c81451f9848bd963d49440a78fb967b1f9f359b6635c12a8a4c50",
-      "staged_value_sha256": "0b53bd4cee8972e30ad564cb8fc7c469c0381a346323a4469f6b1f40a4f18f39"
+      "staged_value_sha256": "b1aa49a11c5b75c44e7ceb92b3621b5cd482ea9d173471e7ab115fb3af6c1b53"
     },
     {
       "file": "manifest.json",
@@ -1468,15 +1473,15 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "5016d760232df4b1ad3dda0da2ed30467554ce970dd3186813f7045eae91ad71",
-      "staged_value_sha256": "5bf794de8432a10593ac2536cd43935a4dec3c20f31267ec89b08d105b76f4c2"
+      "staged_value_sha256": "723c0cc14ffc1401de9166758971dae9d2d288ce8e565b8c57e64c74679ba9b9"
     },
     {
       "file": "manifest.json",
       "pointer": "/components/omp/compatibility_url",
-      "disposition": "kept",
+      "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "0b64497c585b460d7f533d5ef60605fdb0c7f3242d4aa6e78a260051f647f8c3",
-      "staged_value_sha256": "0b64497c585b460d7f533d5ef60605fdb0c7f3242d4aa6e78a260051f647f8c3"
+      "staged_value_sha256": "3880581e9ae5974197a9d796950436036bfc99abd9152087ec0d63f2c25aa665"
     },
     {
       "file": "manifest.json",
@@ -1620,7 +1625,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "1316218a4ccb4379bbecf54738f203f54dd3c975d462450d7bca07cdc97399b0",
-      "staged_value_sha256": "3819884f4bc82f9bf0a24807bb8a321a1c4d6acbdf44b0166e481109f8988038"
+      "staged_value_sha256": "57e6094952f29f7004dfe138854b35cb85a78c192bc18dc0fde06d02c6e79e57"
     },
     {
       "file": "manifest.json",
@@ -1740,7 +1745,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "04f4b54522942de66d6f5cd8dd93ae9bbbd41dad828a2d968b2ed6959752fd0f",
-      "staged_value_sha256": "b7c959aade89211bd8557f60bd32ae0bf23646560d5df4ff926d35810f3eeb10"
+      "staged_value_sha256": "9e7c21de4299993b06a94d2bbe87a2476eed9d1aa8574793f0f11bf501aca1ed"
     },
     {
       "file": "manifest.json",
@@ -1764,7 +1769,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "9185addf6502e71d9a46bbf38afb1cd142917df4acbd6c27ec233f41b3e46168",
-      "staged_value_sha256": "18d501c3f1e3d0bc5ddc515e77d5511887302b0bf814a0e436696e0d8a6e69a6"
+      "staged_value_sha256": "3f8c40c431c4158249cdb0cffec8ec365338dac946a19858314e2815921f471a"
     },
     {
       "file": "manifest.json",
@@ -1956,7 +1961,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "06cf2b7760822c7917ac64bd2ed9e4e734c30b3b7efb883f4be4e3fad5bd6a2b",
-      "staged_value_sha256": "02bd381e421d31c240ebd493d09808ee946c96d7e72595c9be18e5b5819ce381"
+      "staged_value_sha256": "ebc3faaa5aa3cf7c32e72376dfa20a9579e31f5742cdc84370bb600b4d91fa91"
     },
     {
       "file": "qualification.json",
@@ -1988,7 +1993,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "5016d760232df4b1ad3dda0da2ed30467554ce970dd3186813f7045eae91ad71",
-      "staged_value_sha256": "5bf794de8432a10593ac2536cd43935a4dec3c20f31267ec89b08d105b76f4c2"
+      "staged_value_sha256": "723c0cc14ffc1401de9166758971dae9d2d288ce8e565b8c57e64c74679ba9b9"
     },
     {
       "file": "qualification.json",
@@ -2012,7 +2017,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "baf915a793a6933a8ab042e698279b3fe04ed97e769b189e48128f58cd004642",
-      "staged_value_sha256": "0f1ca68a7db903446c68ab270a758a408360bd67ca209d64f4ab25010741bd58"
+      "staged_value_sha256": "1556989f84b7482ab297a0a2d9ad69fc3c4ae6bded8f50ab419437b39602195f"
     },
     {
       "file": "qualification.json",
@@ -2100,7 +2105,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "9a951ebffcb5e054aff34f0ee48074fb6e65b05ca90efd3355c85712d7e8d8a3",
-      "staged_value_sha256": "7ae7ec294c700f1fe058c808d67779740ec04e9b8cf3384ce449691910049b93"
+      "staged_value_sha256": "ceb381fff19ff05b0182c10946ab3a1c32da298feadf84e63b8d0449de4ca617"
     },
     {
       "file": "qualification.json",
@@ -2113,10 +2118,10 @@
     {
       "file": "qualification.json",
       "pointer": "/composition/external_installation_acceptance/status",
-      "disposition": "kept",
+      "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "bc9d037c04e92d2c4c2dbe98665810c112a9a2567baad040d4057471d1bf72f5",
-      "staged_value_sha256": "bc9d037c04e92d2c4c2dbe98665810c112a9a2567baad040d4057471d1bf72f5"
+      "staged_value_sha256": "559532ad927252eed5d9b6687d55203a96b956d822055f4570f196a93a42bece"
     },
     {
       "file": "qualification.json",
@@ -2630,7 +2635,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "06cf2b7760822c7917ac64bd2ed9e4e734c30b3b7efb883f4be4e3fad5bd6a2b",
-      "staged_value_sha256": "02bd381e421d31c240ebd493d09808ee946c96d7e72595c9be18e5b5819ce381"
+      "staged_value_sha256": "ebc3faaa5aa3cf7c32e72376dfa20a9579e31f5742cdc84370bb600b4d91fa91"
     },
     {
       "file": "qualification.json",
@@ -2690,6 +2695,13 @@
     },
     {
       "file": "qualification.json",
+      "pointer": "/documented_route_acceptance/restoration/native_driver_window_s/rtx3090",
+      "disposition": "added",
+      "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
+      "staged_value_sha256": "b3ded29b6c47cceb4e9bb27aba7f15fff4a9601d2462550e05f9ab2f57914563"
+    },
+    {
+      "file": "qualification.json",
       "pointer": "/documented_route_acceptance/restoration/native_driver_window_s/rtx4090",
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
@@ -2715,10 +2727,10 @@
     {
       "file": "qualification.json",
       "pointer": "/documented_route_acceptance/restoration/status",
-      "disposition": "kept",
+      "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "0f8efc99a73df7f45df535b921edbee841baded99fe22f140187f8ab9dbcb7b2",
-      "staged_value_sha256": "0f8efc99a73df7f45df535b921edbee841baded99fe22f140187f8ab9dbcb7b2"
+      "staged_value_sha256": "559532ad927252eed5d9b6687d55203a96b956d822055f4570f196a93a42bece"
     },
     {
       "file": "qualification.json",
@@ -2730,10 +2742,9 @@
     {
       "file": "qualification.json",
       "pointer": "/documented_route_acceptance/restoration/waived_native_campaigns/rtx3090-native/all_native_tasks_ready",
-      "disposition": "kept",
+      "disposition": "dropped",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
-      "predecessor_value_sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
-      "staged_value_sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
+      "predecessor_value_sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
     },
     {
       "file": "qualification.json",
@@ -2752,26 +2763,23 @@
     {
       "file": "qualification.json",
       "pointer": "/documented_route_acceptance/restoration/waived_native_campaigns/rtx3090-native/founder_waiver/repository_path",
-      "disposition": "replaced",
+      "disposition": "dropped",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
-      "predecessor_value_sha256": "87b3d43d4db5b61fb2e289cc5b09f33422f5b1cc9fe290990f837bf80f984a0b",
-      "staged_value_sha256": "f24eb7a284cfb10ed71c68218943864040b8d9c19059a50dfdee0078f83ec2c7"
+      "predecessor_value_sha256": "87b3d43d4db5b61fb2e289cc5b09f33422f5b1cc9fe290990f837bf80f984a0b"
     },
     {
       "file": "qualification.json",
       "pointer": "/documented_route_acceptance/restoration/waived_native_campaigns/rtx3090-native/founder_waiver/sha256",
-      "disposition": "replaced",
+      "disposition": "dropped",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
-      "predecessor_value_sha256": "b95c062e6a1e2bfca55fb996ef4fbd6dabb0b20ba5ad67e59d34ab782eac9ccf",
-      "staged_value_sha256": "5a104bb605dcb4f0e6297c4fe555d973561a179055a52dba9ece4801e07b26ae"
+      "predecessor_value_sha256": "b95c062e6a1e2bfca55fb996ef4fbd6dabb0b20ba5ad67e59d34ab782eac9ccf"
     },
     {
       "file": "qualification.json",
       "pointer": "/documented_route_acceptance/restoration/waived_native_campaigns/rtx3090-native/gpu_owner_lease_absent",
-      "disposition": "kept",
+      "disposition": "dropped",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
-      "predecessor_value_sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
-      "staged_value_sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
+      "predecessor_value_sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
     },
     {
       "file": "qualification.json",
@@ -2804,34 +2812,30 @@
     {
       "file": "qualification.json",
       "pointer": "/documented_route_acceptance/restoration/waived_native_campaigns/rtx3090-native/outcome",
-      "disposition": "kept",
+      "disposition": "dropped",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
-      "predecessor_value_sha256": "5ab044a81ca17c023163b61335196bc275e173b1e4fa0520cb26a48630a0bf4f",
-      "staged_value_sha256": "5ab044a81ca17c023163b61335196bc275e173b1e4fa0520cb26a48630a0bf4f"
+      "predecessor_value_sha256": "5ab044a81ca17c023163b61335196bc275e173b1e4fa0520cb26a48630a0bf4f"
     },
     {
       "file": "qualification.json",
       "pointer": "/documented_route_acceptance/restoration/waived_native_campaigns/rtx3090-native/port_18082_listeners",
-      "disposition": "kept",
+      "disposition": "dropped",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
-      "predecessor_value_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
-      "staged_value_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+      "predecessor_value_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
     },
     {
       "file": "qualification.json",
       "pointer": "/documented_route_acceptance/restoration/waived_native_campaigns/rtx3090-native/power_limit_w",
-      "disposition": "kept",
+      "disposition": "dropped",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
-      "predecessor_value_sha256": "f1607c19a0f910ca1b8dce18843bc34e46a533c87e3524ea75798949f7a352d5",
-      "staged_value_sha256": "f1607c19a0f910ca1b8dce18843bc34e46a533c87e3524ea75798949f7a352d5"
+      "predecessor_value_sha256": "f1607c19a0f910ca1b8dce18843bc34e46a533c87e3524ea75798949f7a352d5"
     },
     {
       "file": "qualification.json",
       "pointer": "/documented_route_acceptance/restoration/waived_native_campaigns/rtx3090-native/runtime_record_absent",
-      "disposition": "kept",
+      "disposition": "dropped",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
-      "predecessor_value_sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
-      "staged_value_sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
+      "predecessor_value_sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
     },
     {
       "file": "qualification.json",
@@ -2843,26 +2847,23 @@
     {
       "file": "qualification.json",
       "pointer": "/documented_route_acceptance/restoration/waived_native_campaigns/rtx3090-native/server_processes",
-      "disposition": "kept",
+      "disposition": "dropped",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
-      "predecessor_value_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
-      "staged_value_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+      "predecessor_value_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
     },
     {
       "file": "qualification.json",
       "pointer": "/documented_route_acceptance/restoration/waived_native_campaigns/rtx3090-native/sessions_refused",
-      "disposition": "kept",
+      "disposition": "dropped",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
-      "predecessor_value_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
-      "staged_value_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+      "predecessor_value_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
     },
     {
       "file": "qualification.json",
       "pointer": "/documented_route_acceptance/restoration/waived_native_campaigns/rtx3090-native/status",
-      "disposition": "kept",
+      "disposition": "dropped",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
-      "predecessor_value_sha256": "1925bbe41c0bff140bfd16e06c4054e777214bfed03ffb096db189a7a669d93d",
-      "staged_value_sha256": "1925bbe41c0bff140bfd16e06c4054e777214bfed03ffb096db189a7a669d93d"
+      "predecessor_value_sha256": "1925bbe41c0bff140bfd16e06c4054e777214bfed03ffb096db189a7a669d93d"
     },
     {
       "file": "qualification.json",
@@ -2877,7 +2878,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "a37623dcf98dcc35d931019660ade0fb226fafb481e1fbd13d86035ecea6382b",
-      "staged_value_sha256": "69d064ba9d23309ec32a8ce24ccbe1e2b4a9ff88b731b73bbc59d371bd3be0a0"
+      "staged_value_sha256": "a2c54a25fb8bcbd18623c7d7a43b3a022ff628a89b25139b49a992ff33257b67"
     },
     {
       "file": "qualification.json",
@@ -2893,7 +2894,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "8e7f89a4e5d19afb85dda5a60e49f06004fa58558d1e71c0075d1170bca13873",
-      "staged_value_sha256": "aa4071f5a477a72a4d1dedb44579969d8020bb5c028496a18b015e030ee2a63d"
+      "staged_value_sha256": "b65cf8c4870537ead3e2ada3d677ac0b741f0764a1020f5f4d501e5ad0c58fb0"
     },
     {
       "file": "qualification.json",
@@ -3835,7 +3836,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "7b91d1c76095ba81085521e70ef514bc90d4fc68f7876efdb0289ba18d8ce2d4",
-      "staged_value_sha256": "a726d6d24c7f302066953ff0040ca1886ab8dc4986816279b2a9c0ccd778c5cf"
+      "staged_value_sha256": "d9fc92886f8b3dc3a7f941421f1396f3a0b496857751fd5480ea6a0b14e07cdf"
     },
     {
       "file": "qualification.json",
@@ -3931,7 +3932,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "3fd206616a40447dd1166c2c9ffea4fe4af737c87ba193d18f0668ab3fc4bd76",
-      "staged_value_sha256": "9e59c70d3ae0044238963702f7da68f6a1bc09db89e4906bf0f3fb176152c1fd"
+      "staged_value_sha256": "89932a6f8e9a13a12124fd765d478684a86793f201adbd53e972a492ff1df1c7"
     },
     {
       "file": "compatibility.json",
@@ -4523,7 +4524,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "1d9188b47df13b4e5de872d2198288a6b4e70d91456762b825d49e491fd82187",
-      "staged_value_sha256": "4ecddcb6917dd757148a0fb707941e4def6d9253c8a97b15a6217a6d139db310"
+      "staged_value_sha256": "9321fb61386d6d4bf3e45d2a576a4ef7b1d88099bc764c9cce45974f5d4e49fb"
     },
     {
       "file": "compatibility.json",
@@ -5107,7 +5108,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "f33eb19fc1af3d8ce8fec9038a819575b216cd995dfd2ee9791ff5305ad8acb2",
-      "staged_value_sha256": "1f6af2288b5afb27050f68b785a5ccaa91f41e8001a45050435039c803ce50c1"
+      "staged_value_sha256": "f7f0db7644f87ca353ec4800235736a56411d01a9bfe8dddaf55818e52e7d34e"
     },
     {
       "file": "compatibility.json",

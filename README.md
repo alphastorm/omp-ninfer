@@ -199,25 +199,29 @@ profile `native-v0.8.0-beta.3-tc-rtx3090`), with unmodified upstream
   is advertised; `scripts/hosts/omp-client-probe.py` invokes `omp` with `--tools read` and does not
   separately probe `bash` or `edit` beyond the `31`-block route acceptance
   ([18.18.7 review](docs/measurements/2026-11-11-omp-18187-client-upgrade-review.json)). The
-  request-level HTTP `503` half of [fork #89](https://github.com/alphastorm/ninfer/issues/89)
-  reproduced on the selected `beta.3` RTX 3090 C2 lane in the corrected automatic-compaction
-  proof, while admission was deferred by an outstanding checkpoint save. C2 long-session
-  compaction remains a known limitation;
+  request-level HTTP `503` half of [fork #89](https://github.com/alphastorm/ninfer/issues/89) did
+  not reproduce on the proxy GPU (`3` fixtures) or the pre-cut default RTX 3090 probe; in product
+  acceptance on the selected `beta.3` RTX 3090 `C2` `tc` lane, it reproduced only under host
+  system-drive exhaustion in attempt 2 (`0.39 GiB` free when measured afterwards, `27` checkpoint writes failing with OS
+  disk-full error `112` and `capacity` save refusals) and did not reproduce with free disk space in
+  attempt 3 (`63.08` GiB free, `2` committed
+  compactions in `747.00` s, zero HTTP `503` responses, compaction receipt
+  `cfa89628`), while its pressure-save deferral
+  path remains tracked alongside
   the [Neroued/ninfer#434](https://github.com/Neroued/ninfer/issues/434) per-rotation fresh-window
-  consumption while a pressure save is outstanding or no lane is free remains
-  tracked in [fork #103](https://github.com/alphastorm/ninfer/issues/103). Component cuts and
+  consumption while a pressure save is outstanding or no lane is free in
+  [fork #103](https://github.com/alphastorm/ninfer/issues/103). Component cuts and
   qualification receipts passed; runtime and product councils closed by disposition. Candidate
-  `2a735da0` passed all five documented block sets (**31/31**) and three client-platform checks.
-  RTX 4090 campaign, public install and restoration passed. RTX 3090 attempt 1 failed its
-  post-route stock OMP subagent proof: five task calls were rejected for a missing `context`
-  argument; the lane was restored. The founder-authorized corrected attempt passed the seven
-  documented blocks again and its subagent/session proofs, then automatic compaction timed out
-  after **900 s** with HTTP `503` admission timeouts while a checkpoint save was outstanding.
-  Managed Stop refused **9** sessions; the lead restored the canonical lane with an unchanged
-  cross-lane census. The founder
-  [waived only this attempt-2 RTX 3090 post-route compaction campaign failure](releases/v0.18.0/qualification/rtx3090-route-waiver.json);
-  original failed verdicts remain failed. RTX 3090 native behavior completion, wrapper
-  restoration audit and anonymous public-install acceptance are not claimed.
+  `2a735da0` passed all five documented block sets (**31/31**) and three client-platform checks,
+  plus RTX 4090 acceptance on its initial window and RTX 3090 acceptance on its third execution
+  without a waiver: on RTX 3090, attempt 1 failed its post-route subagent check on malformed `task`
+  tool arguments (five calls rejected for missing `context`) and restored; attempt 2 ran on a full
+  system drive (admission waited behind an unsettled checkpoint save across `4` HTTP `503`
+  `deferred by a pending checkpoint save` timeouts before a **900 s** compaction timeout, **9**
+  sessions refused at `Stop`, installed lane restored by empty-session `Start`/`Stop` recovery);
+  the founder-authorized third execution in fresh workspaces with a **60 GiB** free-space floor
+  (recorded in `accept-rtx4090-route.py`'s single `--attempt 2` rerun slot) passed every phase,
+  including public install and independent restoration (`1,439.367` s window).
   The lead owns final composition, audit reconciliation and immutable pins; product publication
   stays founder-owned. The [release notes](releases/v0.18.0/NINFER_RELEASE_NOTES.md) retain that scope.
   Published install authority stays `v0.17.0`

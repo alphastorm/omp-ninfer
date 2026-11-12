@@ -132,12 +132,16 @@ at `1,024`-token pass width, below the `1.00×` kill bar); restricted tool-argum
 baseline committed tokens per neural round; `+6.6167%` to `+9.6008%` and `+6.4980%` to `+10.1177%`
 at rebased `m = 3.875` across `2,998` retained turns, below the `+15%` session-decode bar) is not
 shipped. The request-level HTTP `503` half of
-[fork #89](https://github.com/alphastorm/ninfer/issues/89) reproduced on the selected `beta.3`
-RTX 3090 C2 lane in the corrected automatic-compaction proof, while admission was deferred by an
-outstanding checkpoint save. C2 long-session compaction remains a known limitation; the
-[Neroued/ninfer#434](https://github.com/Neroued/ninfer/issues/434) per-rotation fresh-window
-consumption while a pressure save is outstanding or no lane is free remains
-recorded in [fork #103](https://github.com/alphastorm/ninfer/issues/103).
+[fork #89](https://github.com/alphastorm/ninfer/issues/89) did not reproduce on the proxy GPU (`3`
+fixtures) or the pre-cut default RTX 3090 probe; on the selected `beta.3` RTX 3090 `C2` `tc` lane,
+it reproduced in acceptance only under host system-drive exhaustion in attempt 2 and did not
+reproduce with free space in attempt 3 (`2` committed
+compactions in `747.00` s, zero HTTP `503` responses, compaction receipt
+`cfa89628`), while its pressure-save deferral
+residual and the [Neroued/ninfer#434](https://github.com/Neroued/ninfer/issues/434) per-rotation
+fresh-window consumption while a pressure save is outstanding or no lane is free remain recorded in
+[fork #89](https://github.com/alphastorm/ninfer/issues/89) and
+[fork #103](https://github.com/alphastorm/ninfer/issues/103).
 
 Selected client: unmodified upstream `v18.18.7` (release `440868478`, `2026-11-10T20:23:32Z`,
 source `e325ffc73ab86e03bdd20a91b77d8e2b3964c906`, tree `9ba2abe1f1dd7c64b8d3f99dc0e41d689d96886c`;
@@ -154,16 +158,19 @@ sent to the model whenever `bash` is advertised and updates `cmd`/MSYS path disp
 `scripts/hosts/omp-client-probe.py` invokes `omp` with `--tools read` and does not separately probe
 `bash` or `edit` beyond the `31`-block route acceptance. Component cuts and lane/speed/quality
 receipts passed, and runtime/product councils closed by disposition. Candidate `2a735da0` passed
-all five documented block sets (**31/31**) and three stock-client platform checks. RTX 4090
-campaign, public install and restoration passed. RTX 3090 attempt 1 failed its post-route stock
-OMP subagent proof: five task calls were rejected for a missing `context` argument; the lane was
-restored. The founder-authorized corrected attempt passed the seven documented blocks again and
-its subagent/session proofs, then automatic compaction timed out after **900 s** with HTTP `503`
-admission timeouts while a checkpoint save was outstanding. Managed Stop refused **9** sessions;
-the lead restored the canonical lane with an unchanged cross-lane census. The founder
-[waived only this attempt-2 RTX 3090 post-route compaction campaign failure](../releases/v0.18.0/qualification/rtx3090-route-waiver.json);
-original failed verdicts remain failed. RTX 3090 native behavior completion, wrapper restoration
-audit and anonymous public-install acceptance are not claimed.
+all five documented block sets (**31/31**), three stock-client platform checks, RTX 4090
+campaign/public install/restoration on its initial window, and RTX 3090 campaign/public
+install/restoration on its third execution without a waiver: on RTX 3090, attempt 1 failed its
+post-route stock OMP subagent check on malformed `task` tool arguments (five calls rejected for
+missing `context`) and restored; attempt 2 ran while the host's system drive was full (`0.39 GiB`
+free when measured afterwards; `27` checkpoint writes failed with OS disk-full error `112`, checkpoint saves were refused
+for `capacity`, admission waited behind an unsettled checkpoint save across `4` HTTP `503`
+`deferred by a pending checkpoint save` timeouts before a **900 s** compaction timeout,
+`Control-Release.ps1 -Action Stop` refused **9** sessions, and empty-session `Start`/`Stop`
+recovery restored the installed lane); the founder-authorized third execution in fresh workspaces
+with an enforced **60 GiB** free-space floor (`63.08` GiB free, recorded in
+`accept-rtx4090-route.py`'s single `--attempt 2` rerun slot) passed every phase
+(`1,439.367` s window).
 The lead completes composition, audit reconciliation and immutable pins; product publication is
 founder-owned. See the [release notes](../releases/v0.18.0/NINFER_RELEASE_NOTES.md).
 Published install authority stays `v0.17.0`

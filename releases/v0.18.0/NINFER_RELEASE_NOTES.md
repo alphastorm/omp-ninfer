@@ -3,16 +3,20 @@
 > Component-qualified successor composition — all three GPU lanes bind one frozen fork engine
 > source `F4` (`48c8ac4644322f024b5c3bd5b657af5874567251` in `alphastorm/ninfer`) with stock Oh My Pi
 > **18.18.7**. Component cuts, current hardware qualification, all **31/31** documented blocks and
-> three stock-client platform checks passed. RTX 4090 campaign/public install/restoration passed.
-> RTX 3090 attempt 1 failed its post-route stock OMP subagent proof (five task calls rejected for
-> missing `context`) and was restored. The founder-authorized corrected attempt passed the seven
-> documented blocks and subagent/session proofs, then automatic compaction timed out after **900 s**
-> with HTTP `503` admission timeouts during an outstanding checkpoint save, reproducing the
-> request-level HTTP `503` half of [#89](https://github.com/alphastorm/ninfer/issues/89) on `beta.3` C2.
-> Managed Stop refused **9** sessions; the lead restored the canonical lane. The founder
-> [waived only this attempt-2 RTX 3090 post-route compaction campaign failure](qualification/rtx3090-route-waiver.json).
-> RTX 3090 native behavior completion, wrapper restoration audit and anonymous public-install
-> acceptance are not claimed. C2 long-session compaction remains a known limitation.
+> three stock-client platform checks passed; RTX 4090 passed on its initial window and RTX 3090
+> passed every post-route campaign, anonymous public-install and independent restoration phase on
+> its third execution without a waiver. On RTX 3090, attempt 1 failed its post-route stock OMP
+> subagent check on malformed `task` tool arguments and restored; attempt 2 ran while the host's
+> system drive was full (`0.39 GiB` free when measured afterwards; `27` checkpoint writes failed with Windows disk-full
+> error `112`, checkpoint saves were refused for `capacity`, admission waited behind an unsettled
+> checkpoint save across `4` HTTP `503` `deferred by a pending checkpoint save` queue timeouts
+> before a **900 s** compaction timeout, `Control-Release.ps1 -Action Stop` refused **9** sessions,
+> and empty-session `Start`/`Stop` recovery restored the canonical lane); the founder-authorized
+> third execution in fresh workspaces with an enforced **60 GiB** free-space floor
+> (`63.08` GiB free, recorded in `accept-rtx4090-route.py`'s single `--attempt 2`
+> rerun slot) passed every phase (`2` committed compactions in
+> `747.00` s, zero HTTP `503` responses, public install `6b1ccac0`,
+> `1,439.367` s window).
 > Runtime and product councils closed by disposition. Final composition, audit reconciliation
 > and immutable evidence pins are lead-owned; product publication is a separate founder-owned action.
 
@@ -104,13 +108,20 @@ fork `main` `b871996a`), in landing order:
   `complete=true`; the owner lease was absent, the card returned to **370 W**, and canonical
   restoration was exact. This pre-cut acceptance-class probe does not qualify the different
   `tc` package or replace fresh product-route/campaign acceptance.
-  On the selected `beta.3` RTX 3090 C2 `tc` lane, the founder-authorized corrected product attempt
-  **reproduced** the request-level HTTP `503` half of [#89](https://github.com/alphastorm/ninfer/issues/89):
-  automatic compaction timed out after **900 s** with admission deferred by an outstanding
-  checkpoint save. C2 long-session compaction remains a known limitation; only this attempt's
-  post-route compaction campaign failure was
-  [founder-waived](qualification/rtx3090-route-waiver.json), not native behavior completion,
-  wrapper restoration audit or anonymous public-install acceptance.
+  On the selected `beta.3` RTX 3090 `C2` `tc` lane, the request-level HTTP `503` deferral
+  occurred in product acceptance **only under host system-drive exhaustion**: attempt 2 ran out of system-drive space
+  (`0.39 GiB` free when measured afterwards), logging `27` checkpoint `payload_write` failures with
+  Windows error `112` (`ERROR_DISK_FULL`), `capacity` save refusals, `4` HTTP `503`
+  `request_queue_timeout` (`deferred by a pending checkpoint save`) responses and a **900 s**
+  compaction timeout. With at least **60 GiB** of free system-drive space enforced in the
+  founder-authorized third execution (`63.08` GiB free before acceptance), it did
+  **not** reproduce: automatic compaction committed **`2`**
+  handoffs across **`16`** turns in **`747.00` s**
+  with zero HTTP `503` responses and zero disk-full
+  errors (compaction projection SHA-256 `cfa896288add3c14479367e4374db291db93928a5de6c51348fc8a14e2f647f9`). Because queued
+  requests can still wait behind an unsettled pressure save in the engine, the architectural
+  request-level deferral path remains tracked as an open residual in
+  [#89](https://github.com/alphastorm/ninfer/issues/89).
 - **Durable checkpoint prepares held to an operation-free boundary ([fork PR #111](https://github.com/alphastorm/ninfer/pull/111), head `33088ad2cd023dce85201618516a3ce7b895bcd8`: `a8230894e` → `611e4821a` → `7ca395f47` → `9c6394077` → `33088ad2c`):**
   Off-worker checkpoint export and import prepares that arrive while a context operation is in
   flight are held in `checkpoint_held_commands_` and serviced immediately after the top-of-turn
@@ -254,7 +265,7 @@ above, never `v0.18.0` component qualification or product-route acceptance:
 | Investigation / subject | Observed baseline | Observed result and boundary |
 | --- | --- | --- |
 | Warm-history arrival wait under long prefill ([fork #102](https://github.com/alphastorm/ninfer/issues/102)), proxy GPU, `3` interleaved pairs (`DFlash2 K=7`, `131,072` context, `C2`, `1,024` chunk, `180 s` timeout) | Base `b871996a` (server `962559a5`): arrival `A` source wait **44.576 / 45.030 / 44.999 s**, queue wait **44.797 / 45.127 / 45.097 s**, client TTFT **44.970 / 45.219 / 45.190 s**; long-request `B` wall **46.102 / 46.349 / 46.320 s** (server prefill **44.954 / 45.652 / 45.627 s**) | Candidate `e6d6c667` (server `e38a7508`, source-equivalent to pre-rebase `5af279271` outside `#106` test files and the `#89` queue-expiry suffix; subsequently rebased onto `#111` as `6ec05f211`): arrival `A` source wait **0.000 / 0.000 / 0.000 s**, queue wait **0.096 / 0.097 / 0.212 s**, client TTFT **0.131 / 0.133 / 0.288 s** (**3/3 < 2 s**); **111/111** preferred-and-actual reused tokens in **3/3**; **0** HTTP `503`; **1** priority attempt per arrival (**2** refused scans each, **0** own-demote rounds, `K = 4` never exhausted); long-request `B` wall **47.258 / 47.328 / 47.531 s** (ratios **1.0251× / 1.0211× / 1.0261×**, bar `<= 1.05×`). Single-request greedy parity **6/6** byte-identical (`3` `MTP3` + `3` `DFlash2`). Proxy engineering evidence only; the exact-F4 `RC2`, current native qualification and selected-profile published-image gates passed separately below. |
-| Reduced-Host durable save at `Stop` ([fork #89](https://github.com/alphastorm/ninfer/issues/89) + [PR #111](https://github.com/alphastorm/ninfer/pull/111)), proxy GPU (`913,612,800` B Host, `3` device-state slots, `DFlash2`, `15 s` timeout) | Base `b871996a` (server `f5100de7`), deleted occupant: continuation HTTP **200**, managed `Stop` **refused 1** session (`capacity`, **0** reclaimed); covered occupant: `Stop` saved **1**, refused **0** via Host reclaim | Head `3213508fe` (server `860f68a1`) and `#111` `611e4821a`, deleted occupant: continuation HTTP **200**, managed `Stop` **refused 0**, saved **1** via Device-staged final save (`device_staged_states: 2`, `device_staged_hold_ms: 1332` in run 4 / `1310` in run 1, `host_shortage: host_capacity`); `State` digests (`5ed1d134…`, `8bd4f2b8…`, `fc493f91…`) match the base Host route; **0** `transaction_busy` receipts across all runs (`9` initial runs + run 4). The proxy's **3** fixtures and the exact-F4 default RTX 3090 NativeProbes observation (**0 HTTP 503**, **0 queue timeouts**, complete managed Stop with **0 refusals**, exact restoration) are pre-cut engineering evidence only. The corrected product attempt **reproduced** the request-level HTTP `503` half of [#89](https://github.com/alphastorm/ninfer/issues/89) on the selected `beta.3` RTX 3090 C2 `tc` lane; its failed post-route compaction campaign was [founder-waived](qualification/rtx3090-route-waiver.json), not a native behavior, wrapper restoration audit or anonymous public-install acceptance pass. |
+| Reduced-Host durable save at `Stop` ([fork #89](https://github.com/alphastorm/ninfer/issues/89) + [PR #111](https://github.com/alphastorm/ninfer/pull/111)), proxy GPU (`913,612,800` B Host, `3` device-state slots, `DFlash2`, `15 s` timeout) | Base `b871996a` (server `f5100de7`), deleted occupant: continuation HTTP **200**, managed `Stop` **refused 1** session (`capacity`, **0** reclaimed); covered occupant: `Stop` saved **1**, refused **0** via Host reclaim | Head `3213508fe` (server `860f68a1`) and `#111` `611e4821a`, deleted occupant: continuation HTTP **200**, managed `Stop` **refused 0**, saved **1** via Device-staged final save (`device_staged_states: 2`, `device_staged_hold_ms: 1332` in run 4 / `1310` in run 1, `host_shortage: host_capacity`); `State` digests (`5ed1d134…`, `8bd4f2b8…`, `fc493f91…`) match the base Host route; **0** `transaction_busy` receipts across all runs (`9` initial runs + run 4). The proxy's **3** fixtures and the exact-F4 default RTX 3090 NativeProbes observation (**0 HTTP 503**, **0 queue timeouts**, complete managed Stop with **0 refusals**, exact restoration) are pre-cut engineering evidence only; on the selected `beta.3` RTX 3090 C2 `tc` lane, HTTP `503` pressure-save deferral occurred in attempt 2 only under host system-drive exhaustion (`27` OS error-`112` checkpoint write failures) and did not reproduce in the third execution with an enforced `60 GiB` free-space floor (**`0` HTTP 503**, **`2`** committed compactions in **`747.00` s**, projection `cfa89628`), while the architectural deferral residual remains tracked in [#89](https://github.com/alphastorm/ninfer/issues/89). |
 | Malformed historical tool-call vectors ([fork PR #106](https://github.com/alphastorm/ninfer/pull/106)), proxy GPU (`92209112`, server `0898c280`) | Upstream `Neroued/ninfer` `4461c9683` rejects malformed/non-object historical `arguments` with HTTP **400** `invalid_argument` | All **5** vectors (`{"x": nope}`, `{"x":`, `[]`, `null`, `{"x":1e99999}`) returned HTTP **200** on the initial 3-message request and on the replayed 5-message turn (**10/10** HTTP `200`), preserving `{"input": raw}` wrapping and ordered-object keys (`2/2` CTest targets in **1.27 s**). |
 | `sm_120` `Group64` `A8` prefill ([fork PR #105](https://github.com/alphastorm/ninfer/pull/105)), proxy GPU (`93348eb9`) | Default-`OFF` build (`b871996a`): **15/15** affected shipped translation units token-identical across `sm_86`/`sm_89`/`sm_120a`; default prefill signature `cf336425…` (**132,636** bytes) identical; `K0` mathematical/GPU correctness oracles **8/8** (**344.45 s**) | **`K1` prefill-speed prescreen KILL — excluded from `v0.18.0`:** cold-L2 complete-op weighted prefill speedup **0.784860×** at `512`-token pass width and **0.983623×** at `1,024`-token pass width (below the `1.00×` kill bar and `1.15×` continuation go bar; `SwiGLU` **1.269767× / 1.300676×**, residual `k17408+k6144` **0.569991× / 0.953988×**, `GDN` **0.719792× / 0.745151×**, attention **0.503593× / 0.607777×**). Later end-to-end (`K2`) and quality-screen (`K3`) stages were not executed; [fork PR #105](https://github.com/alphastorm/ninfer/pull/105) closed unmerged. |
 | Restricted tool-argument copy drafting, offline CPU replay | Unrestricted retained control (`2,998` turns / `648` sessions / `1,760,181` decode tokens, excluding `1` rewritten live source `b41d66cd…` / `2` turns): **20.5548%** fixed-`12` (12-token minimum n-gram match) / **13.2623%** `12→24→36` copy-miss backoff coverage; modeled decode gain **+5.4889% to +9.3212%** at `m = 4.631` baseline committed tokens per neural round (**+7.2442% to +12.2459%** at rebased `m = 3.875`) across `C = 1.41` to `1.22` relative 16-column copy-round cost | **Below `+15%` session-decode bar — excluded from `v0.18.0`:** `Mode A` (copy rounds restricted to tool-call argument value spans, minimum match `12`: `15.3941%` fixed-`12` / `11.3099%` `12→24→36` backoff coverage) projects **+5.2439% to +7.6563%** at `m = 4.631` (**+6.6167% to +9.6008%** at `m = 3.875`); `Mode B` (same span restriction with minimum match `8` and frequency ranking across distinct source ends: `18.6963%` fixed-`8` / `11.5312%` `8→24→36` backoff coverage) projects **+4.7949% to +7.3278%** at `m = 4.631` (**+6.4980% to +10.1177%** at `m = 3.875`). Neither reaches `+15%` or beats the unrestricted control (`-1.6649` / `-2.1283` percentage points at `C = 1.22`). |
@@ -400,25 +411,8 @@ The three `v0.18.0` founder gate decision records in `releases/v0.18.0/qualifica
 
 Both native cards passed **83/83** judged parity positions with `raw_passed: true` and
 `accepted_under_exact_waiver: false`. No slow-first-request parity waiver
-(`rtx{5090,4090,3090}_{restore,sibling}_waiver`) was applied.
-
-### Exact-subject RTX 3090 campaign waiver — original failures retained
-
-One new post-route native-campaign waiver applies: RTX 3090 **attempt 2**, product candidate
-`2a735da0367214b35a325f61865fb47f0ce872c7`, after all seven documented blocks and the corrected
-subagent/session proofs passed. The subsequent automatic-compaction proof failed its
-**900-second** completion boundary with HTTP `503` admission timeouts during an outstanding
-checkpoint save. This reproduced the request-level HTTP `503` half of
-[#89](https://github.com/alphastorm/ninfer/issues/89) on the selected `beta.3` RTX 3090 C2 lane;
-it is not a numbered agent-parity position. The founder
-[waived only this exact attempt-2 `native-probes` compaction campaign failure](qualification/rtx3090-route-waiver.json)
-with disclosure, not another gate or publication. Original failed verdicts remain failed.
-Attempt 1's missing-`context` subagent failure and restoration remain separate observations;
-they are not relabeled as a pass or covered by this waiver.
-
-Managed Stop refused **9** sessions; the lead restored the canonical lane with an unchanged
-cross-lane census. RTX 3090 native behavior completion, wrapper restoration audit and anonymous
-public-install acceptance are not claimed. C2 long-session compaction remains a known limitation.
+(`rtx{5090,4090,3090}_{restore,sibling}_waiver`) or route-campaign waiver was applied in `v0.18.0`;
+all judged parity positions and final route campaigns passed without a waiver application.
 
 ## Stock OMP 18.18.7
 
@@ -488,7 +482,7 @@ both extracted block SHA-256 digests from `7cae194b…` to `4ea38c9b…`), and t
 launchers (`scripts/hosts/run_variant_campaign_{3090,4090,5090}.ps1`) require an explicit
 `-GroupwiseIntModel` file path (plus `-Nvfp4Model`, `-CampaignRoot`, and `-ApiKeyFile` on
 `run_variant_campaign_5090.ps1`). The
-[receipt audit](qualification/receipt-audit.json) records Of 809 audited subjects, 388 were kept, 298 were replaced, 35 were dropped, 88 were added.
+[receipt audit](qualification/receipt-audit.json) records: of 811 audited subjects, 376 were kept, 298 were replaced, 47 were dropped, 90 were added.
 
 ### Native upgrade, shutdown and exact fallback disclosures
 
@@ -539,32 +533,45 @@ date `2026-11-12`, frozen product candidate
 (`acceptance/{darwin-arm64,windows-x64,linux-x64}-18.18.7.json`, where `omp-linux-x64` under WSL2
 is a client-platform acceptance check rather than a sixth documented route), executed guide SHA-256
 `e22b1a4d915a34059ed851e2207d57469743ecd949ffe01d06aba0e2f3223636`, and final prose-only guide SHA-256
-`37ad538962cf7238be014d79e3ed20367cf26ccb3681172d3cc89958b21cb51d`. These documented-block passes do not turn the separate
-[founder-waived RTX 3090 compaction campaign failure](qualification/rtx3090-route-waiver.json) into a pass.
+`69bc7ead2d69cdd3e5208a98ed29a37ba091157cfda0dbbf308919dd8efd9aea`.
 
-RTX 4090 campaign, public install and restoration passed. RTX 3090 attempt 1 passed all seven
-documented blocks but failed its post-route stock OMP subagent proof: five task calls were rejected
-for a missing `context` argument after malformed context tags; the lane was
-restored. Its ordinary parallel-session scenario passed; its subagent scenario remained failed.
-The founder-authorized corrected attempt passed all seven documented blocks again, the sequential
-fleet and C2 fanout probes, and both the subagent and session proofs. Its subsequent
-automatic-compaction proof timed out after **900 s**: after two completed requests, the compaction
-session received four HTTP `503` `request_queue_timeout` admission failures while a checkpoint save
-was outstanding, then HTTP `499` cancellation at the probe timeout. The request-level HTTP `503`
-half of [#89](https://github.com/alphastorm/ninfer/issues/89) **reproduced** on this `beta.3`
-RTX 3090 C2 lane.
+RTX 4090 campaign, public install and independent restoration passed. On RTX 3090, three executions
+ran on unchanged candidate `2a735da0367214b35a325f61865fb47f0ce872c7`, and all earlier failed
+workspaces remain preserved:
 
-The corrected attempt's managed Stop refused **9** sessions; its shutdown report retained
-`complete: false`, saved **0**, refused **9**, skipped **1**, and the managed Restore failed.
-The lead restored the canonical stopped lane using the prior release's recovery procedure:
-empty-session Start/Stop, zero refused sessions, no runtime record, GPU-owner lease, server or
-listener, **370 W** restored and an unchanged cross-lane census. This lead recovery is not a
-passing wrapper restoration audit. The founder
-[waived only this attempt-2 RTX 3090 post-route compaction campaign failure](qualification/rtx3090-route-waiver.json);
-original failed verdicts remain failed. RTX 3090 native behavior completion, wrapper restoration
-audit and anonymous public-install acceptance are not claimed; structured-outage acceptance was
-not reached. C2 long-session compaction remains a
-[known limitation (#89)](https://github.com/alphastorm/ninfer/issues/89).
+1. **Attempt 1 (initial workspace):** passed all **7/7** documented blocks and the ordinary
+   parallel-session scenario, then failed its post-route stock OMP `C2` subagent proof because the
+   model emitted malformed `task` tool arguments (`5` `task` calls rejected for a missing `context`
+   argument; server logs also recorded `1` checkpoint `payload_write` failure with Windows error
+   `112`, `ERROR_DISK_FULL`). Independent restoration passed (`graceful` `Stop`, `0` refused
+   sessions, **370 W** restored, unchanged canonical cross-lane census).
+2. **Attempt 2 (corrected workspace):** ran while the host's system drive was full (**`0.39 GiB`** free when measured afterwards).
+   It passed all **7/7** documented blocks, sequential fleet, `C2` fanout, and both subagent and
+   parallel-session proofs, then logged **`27`** checkpoint `payload_write` failures with Windows
+   error `112` (`ERROR_DISK_FULL`); durable saves were refused for `capacity`, and after `2`
+   completed HTTP `200` requests the compaction session received `4` HTTP `503`
+   `request_queue_timeout` (`deferred by a pending checkpoint save`) responses and `1` HTTP `499`
+   cancellation at the **900 s** probe timeout (`1,618.414 s` failed window). Managed `Stop`
+   reported `complete: false` (saved **0**, skipped **1**, refused **9**); maintainer
+   empty-session `Control-Release.ps1 -Action Start` then `-Action Stop` recovery restored the
+   canonical stopped lane (`graceful`, `0` refused sessions, no runtime record, GPU-owner lease,
+   server or listener, **370 W** restored, unchanged cross-lane census).
+3. **Attempt 3 (third execution, fresh workspaces, free-space floor enforced):** after reclaiming
+   host disk space under retirement authority, the founder authorized one third execution in fresh
+   workspaces with at least **60 GiB** of system-drive free space enforced before census and
+   acceptance (`63.08` GiB free before acceptance). Because the frozen candidate
+   driver (`scripts/hosts/accept-rtx4090-route.py`) validates `--attempt` as `1|2` (`1` initial, `2`
+   corrected rerun) and modifying it would invalidate the candidate commit, attempt 3 ran in fresh
+   workspaces under `--attempt 2`. It passed every phase with zero disk-full errors: all **7/7**
+   documented blocks, sequential fleet, `C2` fanout, parallel-session and subagent proofs,
+   automatic compaction (**`2`** committed handoffs across
+   **`16`** turns in **`747.00` s**, zero HTTP
+   `503` responses with **`0`** recorded, projection SHA-256
+   `cfa896288add3c14479367e4374db291db93928a5de6c51348fc8a14e2f647f9`), structured-outage fail-closed check, anonymous
+   public-URL package install (`acceptance/rtx3090-public-install.json`
+   `6b1ccac0d1d9cd6cd04d63940e8c9f46bc4c4ddf1393c4e403c2303ee6a4865e`), and independent wrapper restoration
+   (`complete: true`, saved **`0`**, refused **0**, **370 W** restored,
+   unchanged canonical cross-lane census).
 
 | Documented route or client-platform check | Observed candidate-bound result |
 | --- | --- |
@@ -573,12 +580,11 @@ not reached. C2 long-session compaction remains a
 | Native Windows x64 against RTX 5090 (`rtx5090-windows-client`, `5` blocks + `acceptance/windows-x64-18.18.7.json`) | 5/5 blocks passed; the route passed; Windows x64 client acceptance passed; 1 typed read-tool call; the continuation nonce matched; 1 linked tool result; runtime identity was bound; the unavailable-route request exited 1; no model response was returned; only the selected local provider was observed |
 | Linux x64 under WSL2 against RTX 5090 (client-platform check `acceptance/linux-x64-18.18.7.json`, not a sixth route) | Linux x64 under WSL2 client acceptance passed; 1 typed read-tool call; the continuation nonce matched; 1 linked tool result; runtime identity was bound; the unavailable-route request exited 1; no model response was returned; only the selected local provider was observed |
 | Native RTX 4090 (`rtx4090-native`, `7` blocks + `C1` campaign + public install + restoration) | 7/7 blocks passed; the route passed; the native campaign passed; the public install passed |
-| Native RTX 3090 (`rtx3090-native`, `7` blocks passed in both attempts; corrected subagent/session proofs passed; later compaction failed and was founder-waived; lead recovery only) | 7/7 blocks passed; the route passed; the native campaign failed; the original failure was in native probes; the failure remains recorded under founder waiver SHA-256 13bcf02764501f17b1a251e82ee6ef1750f2e0fbc4ddd0637def0c018cf8722b; recorded responses were 2 HTTP 200, 1 HTTP 499, 4 HTTP 503; the post-route compaction proof failed and was founder-waived; native behavior completion, wrapper restoration and anonymous public-install acceptance are not claimed |
+| Native RTX 3090 (`rtx3090-native`, `7` blocks + `C2` fanout/parallel/compaction campaign + public install + restoration) | 7/7 blocks passed; the route passed; the native campaign passed; the public install passed |
 
-`acceptance/documented-routes.json` (`5c51cb958837c7e47d23f02593039ebfc7192ca3c02a493edb651af510ad5fc6`) and
+`acceptance/documented-routes.json` (`9eefb58d2980dd8cf4c1b49deb36add412e5cf2c1594347525d465b9e328f046`) and
 [composed external-installation acceptance](acceptance/composed-external-installation.json) bind
-the five passed documented-block run receipts, with the separate
-[RTX 3090 post-route compaction campaign waiver](qualification/rtx3090-route-waiver.json), under
+the five accepted route run receipts under
 `docs/measurements/2026-11-12-v0180-{rtx5090-container-host,rtx5090-macos-client,rtx5090-windows-client,rtx4090-native,rtx3090-native}-run.json`:
 
 | Lane | Run receipt SHA-256 |
@@ -587,15 +593,14 @@ the five passed documented-block run receipts, with the separate
 | `rtx5090-macos-client` | `349ef03d40661cca3aff818ca7e7f51f6c6d6c33157b30fee8fbe4d2285f5532` |
 | `rtx5090-windows-client` | `f38fbddaa16934008654e49557b03e5e1d1802803b119b38eae0e51fa50da640` |
 | `rtx4090-native` | `0c8aa931237814b87c78aed57cd6fca440866cfa9bd93802ba3f11d26ce838fe` |
-| `rtx3090-native` | `26bce024e3166f6950f44621aedef665fe4d472464cece66035527017e389558` |
+| `rtx3090-native` | `10968f45d68e26b4335956ad7a0604fa638ec49147d340004937e49485bf13fc` |
 
 Measured hold and campaign durations: RTX 5090 production hold `406.876` s;
 RTX 4090 campaign `509.857` s (`acceptance/rtx4090-public-install.json`
-`dd5642d5be81b90c5946a6b8e35399ef5e7645614dff72470a20a81cc2ac5dff`); RTX 3090 corrected failed window
-`1,618.414` s, not a completed campaign. The restoration receipt
-`docs/measurements/2026-11-12-v0180-acceptance-restoration.json` distinguishes
-passed RTX 5090/RTX 4090 restoration from RTX 3090 lead recovery under the exact founder waiver
-(`b5ccb28bd16536fb03ef92b557488e668461130700b20ca7619b2b02db978198`): Restoration passed with a founder waiver; the accepted RTX 5090 production hold lasted 406.876 s; the original runtime was healthy; the original image was retained; the restart policy was unless-stopped; the route container was removed; the original checkout, documented route key and documented directories were restored; WSL and Windows production health passed; the window hold was removed; RTX 3090 was restored by lead recovery, the canonical cross-lane census was unchanged; native behavior completion, wrapper restoration audit and anonymous public-install acceptance are not claimed; RTX 4090 restoration passed, the canonical cross-lane census was unchanged, and the public-install state was restored; composition records the incumbent restored.
+`dc6bb12e675141a1134a0bd80f1986926e83b866923e31f66ccdedb9900d9b40`); RTX 3090 campaign `1,439.367` s
+(`acceptance/rtx3090-public-install.json` `6b1ccac0d1d9cd6cd04d63940e8c9f46bc4c4ddf1393c4e403c2303ee6a4865e`).
+Independent restoration receipt `docs/measurements/2026-11-12-v0180-acceptance-restoration.json`
+(`eeb00906bad0dfd8a6ff4be1a0486f2a2f83c6bf8b3e01a06698fc6a8d7a6aac`): Restoration passed; the accepted RTX 5090 production hold lasted 406.876 s; the original runtime was healthy; the original image was retained; the restart policy was unless-stopped; the route container was removed; the original checkout, documented route key and documented directories were restored; WSL and Windows production health passed; the window hold was removed; RTX 3090 restoration passed, the canonical cross-lane census was unchanged, and the public-install state was restored; RTX 4090 restoration passed, the canonical cross-lane census was unchanged, and the public-install state was restored; composition records the incumbent restored.
 
 ## Exact-subject review and publication boundary
 

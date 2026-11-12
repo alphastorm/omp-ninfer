@@ -86,19 +86,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   RTX 3090 `native-v0.8.0-beta.3-tc-rtx3090` and RTX 4090
   `native-v0.8.0-beta.3-rtx4090`; the RTX 5090 deployment profile is
   `qwen38-5090-v0.13.0`. Fresh candidate `2a735da0367214b35a325f61865fb47f0ce872c7` passed **31/31**
-  documented blocks across five routes. RTX 4090 campaign, public install and restoration passed.
-  RTX 3090 attempt 1 failed its post-route stock OMP subagent proof: five task calls were rejected
-  for a missing `context` argument; the lane was restored. The founder-authorized corrected
-  attempt passed the seven documented blocks again and its subagent/session proofs, then automatic
-  compaction timed out after **900 s** with HTTP `503` admission timeouts while a checkpoint save
-  was outstanding. The request-level HTTP `503` half of
-  [fork #89](https://github.com/alphastorm/ninfer/issues/89) reproduced on this `beta.3` RTX 3090 C2
-  lane; C2 long-session compaction remains a known limitation. Managed Stop refused **9** sessions;
-  the lead restored the canonical lane with an unchanged cross-lane census. The founder
-  [waived only this attempt-2 RTX 3090 post-route compaction campaign failure](releases/v0.18.0/qualification/rtx3090-route-waiver.json);
-  original failed verdicts remain failed. RTX 3090 native behavior completion, wrapper restoration
-  audit and anonymous public-install acceptance are not claimed. Results and limitations are
-  recorded in the [release notes](releases/v0.18.0/NINFER_RELEASE_NOTES.md).
+  documented blocks across five routes; RTX 4090 passed on its initial window and RTX 3090 passed
+  every phase on its third execution without a route-campaign waiver. On RTX 3090, attempt 1
+  passed the seven documented blocks, failed its post-route stock OMP subagent check on malformed
+  `task` tool arguments (five calls rejected for missing `context`), and restored; attempt 2 ran
+  while the host's system drive was full (`0.39 GiB` free when measured afterwards; `27` checkpoint writes failed with
+  Windows disk-full error `112`, checkpoint saves were refused for `capacity`, admission waited
+  behind an unsettled checkpoint save across `4` HTTP `503` `deferred by a pending checkpoint save`
+  queue timeouts before a **900 s** compaction timeout, `Control-Release.ps1 -Action Stop` refused
+  **9** sessions, and empty-session `Start`/`Stop` recovery restored the installed lane); a
+  founder-authorized third execution in fresh workspaces with an enforced **60 GiB** free-space
+  floor (`63.08` GiB free, recorded in `accept-rtx4090-route.py`'s single
+  `--attempt 2` rerun slot because the frozen candidate driver accepts only `--attempt 1|2`) passed
+  every phase (`2` committed compactions in
+  `747.00` s, zero HTTP `503` responses, compaction receipt `cfa89628`, public install
+  `6b1ccac0`, `1,439.367` s window). The
+  request-level HTTP `503` half of [fork #89](https://github.com/alphastorm/ninfer/issues/89)
+  reproduced in acceptance only under disk exhaustion, while its pressure-save admission-deferral
+  residual remains tracked; full evidence is in the
+  [release notes](releases/v0.18.0/NINFER_RELEASE_NOTES.md).
 - Pin stock OMP 18.18.7 without changing the reviewed model/config fragments. The Windows bash
   tool description changes request content; the existing typed-read acceptance harness does not
   exercise that description or the changed shell behavior.

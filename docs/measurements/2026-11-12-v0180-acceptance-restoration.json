@@ -3,7 +3,7 @@
   "schema_version": 1,
   "release": "v0.18.0",
   "as_of": "2026-11-12",
-  "status": "passed-with-founder-waiver",
+  "status": "passed",
   "candidate_commit": "2a735da0367214b35a325f61865fb47f0ce872c7",
   "rtx5090": {
     "original_runtime_healthy": true,
@@ -22,7 +22,7 @@
     ],
     "original_image_digest": "sha256:7a19576b334b54f8bfca0e022626969bd47ca376ac600a93eb6117dcafd89233"
   },
-  "capture_sha256": "193f6722531aaf64e0b1a95c93ce470d696543b5c24dc77ee58c1a4f9bc72461",
+  "capture_sha256": "b5b55de80999914a172c3442b45cf25344062965520221eca6f8072ab3624ef3",
   "rtx4090": {
     "status": "passed",
     "public_install_restored": true,
@@ -74,19 +74,54 @@
     "power_limit_w": 450
   },
   "rtx3090": {
-    "status": "restored-by-lead",
-    "outcome": "graceful",
-    "runtime_record_absent": true,
-    "gpu_owner_lease_absent": true,
-    "all_native_tasks_ready": true,
-    "sessions_refused": 0,
-    "server_processes": 0,
-    "port_18082_listeners": 0,
-    "power_limit_w": 370,
-    "founder_waiver": {
-      "repository_path": "releases/v0.18.0/qualification/rtx3090-route-waiver.json",
-      "sha256": "13bcf02764501f17b1a251e82ee6ef1750f2e0fbc4ddd0637def0c018cf8722b"
-    }
+    "status": "passed",
+    "public_install_restored": true,
+    "canonical_cross_lane_census_identical": true,
+    "holds_and_client_files_unchanged": true,
+    "documented_directory_presence_restored": true,
+    "documented_stage_restored": true,
+    "restoration_checks": {
+      "state_bytes_identical": true,
+      "state_acl_identical": true,
+      "root_acl_identical": true,
+      "task_xml_identical": true,
+      "task_ready": true,
+      "no_process": true,
+      "no_listener": true,
+      "no_lease": true,
+      "power_identical": true,
+      "pointers_identical": true,
+      "holds_identical": true,
+      "client_files_identical": true,
+      "support_identical": true,
+      "support_inventory_identical": true,
+      "directory_acls_identical": true,
+      "directory_presence_identical": true,
+      "pending_preserved_moves": true,
+      "documented_stage_identical": true
+    },
+    "final_audit_checks": {
+      "state_bytes_identical": true,
+      "state_acl_identical": true,
+      "root_acl_identical": true,
+      "task_xml_identical": true,
+      "task_ready": true,
+      "no_process": true,
+      "no_listener": true,
+      "no_lease": true,
+      "power_identical": true,
+      "pointers_identical": true,
+      "holds_identical": true,
+      "client_files_identical": true,
+      "support_identical": true,
+      "support_inventory_identical": true,
+      "directory_acls_identical": true,
+      "directory_presence_identical": true,
+      "pending_preserved_moves": true,
+      "documented_stage_identical": true
+    },
+    "window_hold_seconds": 1439.3671429157257,
+    "power_limit_w": 370
   },
   "production_upgrade_activated": false,
   "raw_private_paths_credentials_or_outputs_included": false
