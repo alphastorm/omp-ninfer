@@ -3270,6 +3270,14 @@ def validate_public_text(root: Path, errors: list[str]) -> None:
                                            if isinstance(node, ast.Constant) and isinstance(node.value, str))
             except SyntaxError:
                 errors.append(f"{document.relative_to(root).as_posix()} must contain valid Python")
+        if document.suffix in (".json", ".jsonl"):
+            try:
+                values = ([json.loads(source)] if document.suffix == ".json" else
+                          [json.loads(line) for line in source.splitlines() if line.strip()])
+                # JSON escaping must not hide a private path from the raw-text policy.
+                source += "\n" + "\n".join(text for value in values for text in walk_strings(value))
+            except json.JSONDecodeError:
+                pass  # Parsing belongs to the document's consumer; keep the raw scan.
         if document.suffix == ".cast":
             try:
                 source += "\n" + "\n".join(text for line in source.splitlines() if line.strip()

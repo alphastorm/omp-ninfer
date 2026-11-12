@@ -917,6 +917,43 @@ class ReleaseContractTest(unittest.TestCase):
                 self.assertTrue(any("docs/media/fixture.cast contains private marker" in error
                                     for error in errors), "public cast text must be scanned")
 
+    def test_public_text_scan_decodes_json_and_jsonl_values(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            release = root / "releases/v0.18.0"
+            release.mkdir(parents=True)
+            for suffix in (".json", ".jsonl"):
+                path = release / ("fixture" + suffix)
+                for value, private in ((r"C:\Users\name", True), (r"C:\public\model", False)):
+                    with self.subTest(suffix=suffix, value=value):
+                        source = json.dumps({"nested": [{"path": value}]}) + "\n"
+                        if suffix == ".jsonl":
+                            source = json.dumps({"status": "passed"}) + "\n" + source
+                        path.write_text(source, encoding="utf-8")
+                        errors = []
+                        VERIFY_RELEASE.validate_public_text(root, errors)
+                        self.assertEqual(errors, [
+                            f"releases/v0.18.0/fixture{suffix} contains private marker 'C:\\\\Users\\\\'"
+                        ] if private else [])
+                path.unlink()
+
+    def test_public_text_scan_keeps_raw_fallback_for_invalid_json(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            release = root / "releases/v0.18.0"
+            release.mkdir(parents=True)
+            for suffix in (".json", ".jsonl"):
+                path = release / ("fixture" + suffix)
+                for source, private in (("not JSON", False), (r"not JSON: C:\Users\name", True)):
+                    with self.subTest(suffix=suffix, source=source):
+                        path.write_text(source, encoding="utf-8")
+                        errors = []
+                        VERIFY_RELEASE.validate_public_text(root, errors)
+                        self.assertEqual(errors, [
+                            f"releases/v0.18.0/fixture{suffix} contains private marker 'C:\\\\Users\\\\'"
+                        ] if private else [])
+                path.unlink()
+
     def test_public_text_scan_includes_python_host_helper_literals(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
