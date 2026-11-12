@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "kind": "omp-ninfer-platform-acceptance-receipt",
+  "receipt_id": "darwin-remote-ssh-e325ffc7-0cecaac781-v0.18.0",
+  "product_release": "v0.18.0",
+  "candidate_commit": "2a735da0367214b35a325f61865fb47f0ce872c7",
+  "profile": "darwin-remote-ssh",
+  "status": "passed",
+  "as_of": "2026-11-12",
+  "source": {
+    "repository": "https://github.com/can1357/oh-my-pi",
+    "tag": "v18.18.7",
+    "commit": "e325ffc73ab86e03bdd20a91b77d8e2b3964c906",
+    "tree": "9ba2abe1f1dd7c64b8d3f99dc0e41d689d96886c"
+  },
+  "client": {
+    "distribution_kind": "upstream-release",
+    "upstream_repository": "https://github.com/can1357/oh-my-pi",
+    "upstream_tag": "v18.18.7",
+    "upstream_commit": "e325ffc73ab86e03bdd20a91b77d8e2b3964c906",
+    "os": "macOS 27",
+    "architecture": "arm64",
+    "published": true,
+    "asset_name": "omp-darwin-arm64",
+    "asset_bytes": 221982864,
+    "asset_sha256": "0cecaac781d3c37f32ff7ecf3b6ba94842e7f058358e4748d5071d772f0aa4df",
+    "binary_sha256": "0cecaac781d3c37f32ff7ecf3b6ba94842e7f058358e4748d5071d772f0aa4df",
+    "release_id": 440868478,
+    "asset_id": 732828892,
+    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.18.7/omp-darwin-arm64"
+  },
+  "live_acceptance": {
+    "tool_result_marker": true,
+    "exact_visible_final_answer": true,
+    "agent_end": true,
+    "continuation_exact_nonce": true,
+    "runtime_identity_bound": true,
+    "typed_read_tool_calls": 1,
+    "linked_tool_results": 1,
+    "omp_version": "omp/18.18.7",
+    "event_counts": {
+      "session": 1,
+      "agent_start": 1,
+      "turn_start": 2,
+      "message_start": 4,
+      "message_end": 4,
+      "message_update": 16,
+      "tool_execution_start": 1,
+      "tool_execution_end": 1,
+      "turn_end": 2,
+      "agent_end": 1
+    },
+    "raw_transcript_included": false,
+    "runtime_image_digest": "sha256:496195ecd6cf1f50fcd9dc62cf7b51787f599cc2b196e194baf050c4b149e119",
+    "runtime_server_binary_sha256": "804ef8ac6d062dc8da8784ba3f52e5cece2178a5f5bc46cb2c7bc1d3e8937fe3",
+    "runtime_configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "model_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "fail_closed": {
+      "exit_code": 1,
+      "no_model_response": true,
+      "only_selected_local_provider_observed": true,
+      "errors": [
+        {
+          "kind": "client-error",
+          "sha256": "8be2d4a909302a94aa8ddcd698df1629c37649a94a0e8d94294700852f0c1347"
+        }
+      ]
+    },
+    "documented_server_restart_nonce_returned": true,
+    "capture_sha256": "a302bae171d19cddc440e11f93b3cc608b65ef351feaf15cd2ffbb457761b964"
+  },
+  "checks": {
+    "new_client_asset_and_binary_identity": "passed",
+    "new_client_clean_install": "passed",
+    "new_client_version": "passed",
+    "live_authenticated_tool_and_continuation": "passed",
+    "fail_closed_route_configuration": "passed"
+  },
+  "safety": {
+    "cloud_fallback_observed": false,
+    "production_omp_activation_performed": false,
+    "runtime_incumbent_restored": true,
+    "private_fleet_projection_included": false
+  },
+  "limitations": [
+    "Owner-operated tester-equivalent acceptance; no new runtime performance guarantee.",
+    "macOS manual SSH preview."
+  ]
+}

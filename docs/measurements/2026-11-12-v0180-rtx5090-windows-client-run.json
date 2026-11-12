@@ -1,0 +1,81 @@
+{
+  "artifact_type": "omp_ninfer_documented_route_run",
+  "schema_version": 1,
+  "lane": "rtx5090-windows-client",
+  "document": "docs/QUICKSTART.md",
+  "document_sha256": "e22b1a4d915a34059ed851e2207d57469743ecd949ffe01d06aba0e2f3223636",
+  "started_utc": "2026-11-12T16:51:30.8454877Z",
+  "host_os": "Microsoft Windows 11 Pro",
+  "powershell": "5.1.26100.9818",
+  "elevated": true,
+  "clone_commit": "2a735da0367214b35a325f61865fb47f0ce872c7",
+  "steps": [
+    {
+      "position": 1,
+      "slug": "clone-and-verify",
+      "heading": "Clone and verify the exact product release",
+      "index": 0,
+      "block_sha256": "50c14914a66e724d31017961e39e3cd19715182186af384baaf8753a7de7781d",
+      "executed_sha256": "50c14914a66e724d31017961e39e3cd19715182186af384baaf8753a7de7781d",
+      "started_utc": "2026-11-12T16:51:30.9960664Z",
+      "status": "substituted",
+      "elapsed_seconds": 13.638,
+      "error": null,
+      "substitution": "cloned commit 2a735da0367214b35a325f61865fb47f0ce872c7 in place of the tag this run's acceptance creates; verified as installable, not ready"
+    },
+    {
+      "position": 2,
+      "slug": "client-install",
+      "heading": "Install the exact native Windows client",
+      "index": 0,
+      "block_sha256": "8f51224847d884ca3bd717d18787e60d652817c0c46eb395b3d3cb80745b8902",
+      "executed_sha256": "8f51224847d884ca3bd717d18787e60d652817c0c46eb395b3d3cb80745b8902",
+      "started_utc": "2026-11-12T16:51:44.6562913Z",
+      "status": "passed",
+      "elapsed_seconds": 2.9,
+      "error": null,
+      "substitution": null
+    },
+    {
+      "position": 3,
+      "slug": "provider",
+      "heading": "Native Windows OMP",
+      "index": 0,
+      "block_sha256": "6a97e3c6169a66a4183dbab07e0734a637c2d9e146d6d19245efabfda8d80cff",
+      "executed_sha256": "6a97e3c6169a66a4183dbab07e0734a637c2d9e146d6d19245efabfda8d80cff",
+      "started_utc": "2026-11-12T16:51:47.5652507Z",
+      "status": "passed",
+      "elapsed_seconds": 0.095,
+      "error": null,
+      "substitution": null
+    },
+    {
+      "position": 4,
+      "slug": "acceptance",
+      "heading": "Native Windows command forms",
+      "index": 0,
+      "block_sha256": "499018df9d1336d7d48ea2ac88966f42e6eeb15ac0db9a48e70dd4495601792a",
+      "executed_sha256": "499018df9d1336d7d48ea2ac88966f42e6eeb15ac0db9a48e70dd4495601792a",
+      "started_utc": "2026-11-12T16:51:47.6619425Z",
+      "status": "passed",
+      "elapsed_seconds": 11.793,
+      "error": null,
+      "substitution": null
+    },
+    {
+      "position": 5,
+      "slug": "fail-closed",
+      "heading": "Native Windows command forms",
+      "index": 1,
+      "block_sha256": "1968150b182268490f8f4024a3aad3ce1a11c6ea76108b9d5dd60a552b912cc9",
+      "executed_sha256": "1968150b182268490f8f4024a3aad3ce1a11c6ea76108b9d5dd60a552b912cc9",
+      "started_utc": "2026-11-12T16:51:59.4538066Z",
+      "status": "passed",
+      "elapsed_seconds": 36.748,
+      "error": null,
+      "substitution": null
+    }
+  ],
+  "status": "passed",
+  "completed_utc": "2026-11-12T16:52:36.2247319Z"
+}

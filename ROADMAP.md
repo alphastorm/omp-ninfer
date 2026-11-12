@@ -113,7 +113,7 @@ Full release authority: [`releases/v0.17.0/NINFER_RELEASE_NOTES.md`](releases/v0
 
 ## Prepared next — v0.18.0 unified runtime re-cut and stock OMP 18.18.7
 
-**Prepared next: v0.18.0 / stock OMP 18.18.7.** Stage from published `v0.17.0`
+**Component-qualified next: v0.18.0 / stock OMP 18.18.7.** Composed from published `v0.17.0`
 (`2026-11-10`, tag `97dea2f00bce385e7fb80c4fddeb38a8f5897385`). Frozen fork engine commit `F4`
 (`48c8ac4644322f024b5c3bd5b657af5874567251` in `alphastorm/ninfer`, stacked on fork `main` `b871996a` / `F3`
 `e0971faf` on upstream `Neroued/ninfer` master `64d10fbf`) supplies all three GPU runtime
@@ -129,7 +129,7 @@ Windows RTX 4090 `v0.8.0-qwen38-4090-beta.3` (package `ac41700ac2bb9fb171188f35e
 `674d52609e22de54a5db20001e25fdd97cd600d498551ecfe48efa53964fc3ac`, build profile `native-v0.8.0-beta.3-tc-rtx3090`), with
 shared published container version 3 model `81f924d4` (`20,437,521,664` bytes).
 
-Re-cutting both native lanes from `F4` brings `v0.17.0`'s `F3` bounded resume/fresh admission,
+The native re-cuts from `F4` bring `v0.17.0`'s `F3` bounded resume/fresh admission,
 pressure-work waits, serving robustness, and host-NFC changes to RTX 4090 and RTX 3090 alongside
 `F4`'s fork changes: Device-staged durable checkpoint export when the Host arena is full
 ([fork #89](https://github.com/alphastorm/ninfer/issues/89), folding
@@ -157,7 +157,7 @@ vectors ([PR #106](https://github.com/alphastorm/ninfer/pull/106) `92209112`), a
 [#149](https://github.com/alphastorm/omp-ninfer/issues/149) verifier, composer, staging, hold, and
 profile-variant items.
 
-**Variant-dependent paragraphs (release stage keeps only the selected option per axis):**
+**Bound release selections:**
 
 - `F4` includes the default-`OFF` `sm_86`/`sm_89` small-T tensor-core verify kernel
 
@@ -190,15 +190,27 @@ The selected client is upstream `v18.18.7` (commit `e325ffc73ab86e03bdd20a91b77d
 [18.18.6→18.18.7 review](docs/measurements/2026-11-11-omp-18187-client-upgrade-review.json)), which
 changes the Windows `bash` tool description sent to the model when `bash` is advertised (not
 separately probed by `scripts/hosts/omp-client-probe.py`'s `--tools read` `omp` invocation beyond
-the `31`-block route acceptance). The request-level HTTP `503` half of `#89` did not reproduce on
-the proxy host (`3` fixtures) and is settled only by the RTX 3090 acceptance run (**pending**;
-[release notes](releases/v0.18.0/NINFER_RELEASE_NOTES.md)); the
+the `31`-block route acceptance). The request-level HTTP `503` half of
+[fork #89](https://github.com/alphastorm/ninfer/issues/89) reproduced on the selected `beta.3`
+RTX 3090 C2 lane in the corrected automatic-compaction proof, while admission was deferred by an
+outstanding checkpoint save. C2 long-session compaction remains a known limitation; the
 [Neroued/ninfer#434](https://github.com/Neroued/ninfer/issues/434) per-rotation fresh-window
-consumption when a pressure save is pending (`checkpoints_.pending()`) or no lane is free remains
-recorded in [fork #103](https://github.com/alphastorm/ninfer/issues/103). Component cuts, hardware
-qualification, five-route (`31`-block) and three-client-platform acceptance, review councils,
-immutable pins, and founder-owned publication remain pending (staged notes path
-`releases/v0.18.0/NINFER_RELEASE_NOTES.md`). No new `Shipped` row is recorded before publication.
+consumption while a pressure save is outstanding or no lane is free remains
+recorded in [fork #103](https://github.com/alphastorm/ninfer/issues/103). Component cuts and
+hardware qualification passed, and runtime/product councils closed by disposition. Candidate
+`2a735da0` passed all five documented block sets (**31/31**) and three stock-client platform checks.
+RTX 4090 campaign, public install and restoration passed. RTX 3090 attempt 1 failed its post-route
+stock OMP subagent proof: five task calls were rejected for a missing `context` argument; the lane
+was restored. The founder-authorized corrected attempt passed the seven documented blocks again
+and its subagent/session proofs, then automatic compaction timed out after **900 s** with HTTP
+`503` admission timeouts while a checkpoint save was outstanding. Managed Stop refused **9**
+sessions; the lead restored the canonical lane with an unchanged cross-lane census. The founder
+[waived only this attempt-2 RTX 3090 post-route compaction campaign failure](releases/v0.18.0/qualification/rtx3090-route-waiver.json);
+original failed verdicts remain failed. RTX 3090 native behavior completion, wrapper restoration
+audit and anonymous public-install acceptance are not claimed. The lead owns composition, audit
+reconciliation and immutable pins; product publication is founder-owned. The
+[release notes](releases/v0.18.0/NINFER_RELEASE_NOTES.md) retain the failure and exact waiver.
+No new `Shipped` row is recorded before publication.
 
 ## Remaining work
 
@@ -879,7 +891,7 @@ so future work does not repeat closed experiments:
   **3/3** informational `C2`) and council-remediated `F2` (`bdc665a3`, binary `92f0f636...`: **3/3**
   `C1` gating, runtime-source-identical to shipped source `F3` `e0971faf` in
   [`alphastorm/ninfer#101`](https://github.com/alphastorm/ninfer/pull/101), which fixed council
-  `CR-20261110T083627Z-a3fa0550`'s confirmed severity-`P1` defect where a resident pause hitting a `Pending` durable
+  `CR-20261110T083627Z-a3fa0550`'s confirmed severity-`P1` defect where a resident pause hitting an outstanding durable
   pressure save caused `pause_reclaim_victim`/`reserve_resident_units` to fail the `Engine` with
   `progress owner cannot obtain its legal unit` and severity-`P2` defect where a failed fresh window did not consume
   its rotation in `take_fresh_window()`, passing `EngineCore` `35/35`, `1,311/1,311` Ninja steps, and

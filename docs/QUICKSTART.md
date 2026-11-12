@@ -1,10 +1,12 @@
 # Quickstart
 
-> **Prepared guide: v0.18.0 · stock Oh My Pi 18.18.7 · fresh acceptance pending**
+> **Prepared guide: v0.18.0 · stock Oh My Pi 18.18.7 · 31 documented blocks passed · RTX 3090 compaction founder-waived**
 >
 > Published release remains **v0.17.0**. Until v0.18.0 is published, use the
 > [immutable v0.17.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.17.0/docs/QUICKSTART.md).
-> These prepared instructions await fresh candidate acceptance and publication.
+> These instructions bind the executed documented blocks; see the
+> [founder-waived RTX 3090 compaction failure](../releases/v0.18.0/qualification/rtx3090-route-waiver.json) below.
+> Product publication is a separate founder-owned action.
 
 OMP NInfer is the qualified local inference appliance and release layer connecting the
 [Oh My Pi](https://github.com/can1357/oh-my-pi) (OMP) coding-agent client over authenticated
@@ -12,12 +14,12 @@ loopback to the NInfer inference engine serving Qwen3.8 27B on your GPU.
 
 ## Choose your lane
 
-| GPU and host | Prepared client route for v0.18.0 | Start here |
+| GPU and host | Accepted client route for v0.18.0 | Start here |
 | --- | --- | --- |
 | RTX 5090 container on Windows 11 + Docker Desktop / WSL2 | Native Windows x64 client over local loopback `127.0.0.1:18089` | [RTX 5090 Windows route](#ready-route-native-windows-and-docker-desktop-wsl2) |
 | RTX 5090 container on Windows 11 / WSL2 or Linux | macOS arm64 client over a manual SSH tunnel (preview) | [macOS manual SSH route (preview)](#macos-client-over-a-manual-ssh-tunnel-preview) |
-| RTX 4090 native Windows 11 (alone or beside RTX 3090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; `v0.8.0-qwen38-4090-beta.3`, DFlash2 K=7, one request at a time (`C1`); new package and route acceptance pending | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) |
-| RTX 3090 native Windows 11 (alone or beside RTX 4090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; `v0.8.0-qwen38-3090-beta.3`, DFlash2 K=7, two requests in flight (`C2`) over one shared 131,072-token pool; new package and route acceptance pending | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
+| RTX 4090 native Windows 11 (alone or beside RTX 3090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; `v0.8.0-qwen38-4090-beta.3`, DFlash2 K=7, one request at a time (`C1`); component qualification, seven documented blocks, campaign, public install and restoration passed | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) |
+| RTX 3090 native Windows 11 (alone or beside RTX 4090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; `v0.8.0-qwen38-3090-beta.3`, DFlash2 K=7, two requests in flight (`C2`) over one shared 131,072-token pool; component qualification and seven documented blocks passed in both attempts; corrected subagent/session proofs passed; later compaction failed and was [founder-waived](../releases/v0.18.0/qualification/rtx3090-route-waiver.json); C2 long-session compaction remains a [known limitation (#89)](https://github.com/alphastorm/ninfer/issues/89), not a native behavior, wrapper restoration audit or anonymous public-install acceptance pass | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
 | RTX 5090 container with Linux x64 client under WSL2 only | WSL2 shell client over local loopback `127.0.0.1:18089` (no native Linux OS qualification) | [WSL2 Linux client](#wsl2-linux-client-over-local-loopback) |
 | Other GPU, non-WSL Linux client, or concurrent native serving | Unsupported | [Compatibility boundary](COMPATIBILITY.md) |
 
@@ -25,8 +27,9 @@ loopback to the NInfer inference engine serving Qwen3.8 27B on your GPU.
 
 - **Clone the tag and run the ready gate:** after publication, start from a clean clone of `v0.18.0` and verify
   `python3 scripts/verify_release.py --require-ready` (`py -3 scripts\verify_release.py --require-ready`
-  on Windows). The commands below describe that published route, not permission to install this
-  draft. Never install from a moving branch, an untagged archive, or a draft/candidate manifest.
+  on Windows). The commands below describe the route to use after publication, not permission
+  to install this composition before its tag exists. Never install from a moving branch, an
+  untagged archive, or a manifest that has not passed the ready gate.
 - **Keep one release authority end to end:** stock OMP has no `omp appliance` commands, and
   `examples/manual-tunnel/fail-closed.yml` pins `update.auto=false`, `startup.checkUpdate=false`
   and `startup.setupWizard=false`. Do not run `omp update`: an explicit operator command can
@@ -95,7 +98,7 @@ changing a running host.
 
 ## OMP 18.18.7 client
 
-Prepared release `v0.18.0` selects unmodified upstream
+The accepted `v0.18.0` composition selects unmodified upstream
 [Oh My Pi v18.18.7](https://github.com/can1357/oh-my-pi/releases/tag/v18.18.7), source
 `e325ffc73ab86e03bdd20a91b77d8e2b3964c906`, tree
 `9ba2abe1f1dd7c64b8d3f99dc0e41d689d96886c`, release `440868478`.
@@ -155,10 +158,25 @@ covers source behavior and independent public-download integrity, not client exe
 
 ## Acceptance evidence
 
-Fresh v0.18.0 acceptance is **pending**. The five routes below contain RTX 5090 host **2**,
-macOS **10**, Windows **5**, RTX 4090 **7** and RTX 3090 **7** executable blocks (**31 total**).
-Those are the steps to execute, not passing results. Both new native packages need their own
-qualification, public-install checks, stock-client probes and restoration evidence before release.
+On 2026-11-12, v0.18.0 candidate `2a735da0367214b35a325f61865fb47f0ce872c7` passed the documented
+blocks on all five routes: RTX 5090 host **2/2**, macOS **10/10**, Windows **5/5**, RTX 4090
+**7/7** and RTX 3090 **7/7** (**31/31 executable blocks**). All three stock OMP 18.18.7 client
+platform checks passed. The RTX 5090 incumbent was restored after a **406.876 s** hold.
+RTX 4090 campaign, public install and independent restoration passed.
+
+**RTX 3090 acceptance boundary (founder-waived compaction campaign):** attempt 1 failed its
+post-route stock OMP subagent proof: five task calls were rejected for a missing `context`
+argument; the lane was restored. The founder-authorized corrected attempt passed all seven
+documented blocks again and the subagent/session proofs, then automatic compaction timed out
+after **900 s** with HTTP `503` admission timeouts while admission was deferred by an outstanding
+checkpoint save. The request-level HTTP `503` half of
+[#89](https://github.com/alphastorm/ninfer/issues/89) reproduced on the `beta.3` RTX 3090 C2 lane.
+Managed Stop refused **9** sessions; the lead restored the canonical lane with an unchanged
+cross-lane census. The founder
+[waived only this attempt-2 RTX 3090 post-route compaction campaign failure](../releases/v0.18.0/qualification/rtx3090-route-waiver.json);
+original failed verdicts remain failed. RTX 3090 native behavior completion, wrapper restoration
+audit and anonymous public-install acceptance are not claimed. C2 long-session compaction
+remains a known limitation; the documented-block pass is not a completed campaign.
 No prior native campaign failure is relabeled as a pass, and no predecessor waiver is renewed.
 
 macOS stays preview; Linux is WSL2-only; image input covers macOS/Windows against RTX 5090 only.
@@ -179,10 +197,10 @@ The following identities bind the selected component bytes; the ready gate remai
 
 The RTX 5090 image is
 `ghcr.io/alphastorm/ninfer-runtime@sha256:496195ecd6cf1f50fcd9dc62cf7b51787f599cc2b196e194baf050c4b149e119`.
-The [manifest](../releases/v0.18.0/manifest.json) must bind all three rebuilt components to one
+The [manifest](../releases/v0.18.0/manifest.json) binds all three rebuilt components to one
 exact engine source and the published v3 model. Use its selected configuration and packaged
-launcher without adding experimental flags. New source bytes do not imply a performance gain,
-checkpoint compatibility or completed acceptance.
+launcher without adding experimental flags. New source bytes alone do not imply a performance
+gain or checkpoint compatibility; acceptance applies only to the exact bound bytes and routes.
 
 - **Sequential native ownership:** both native lanes are UUID/PCI-bound on a two-GPU Windows host
   and share port 18082. Stop the other lane first; C2 means two requests within the one active
@@ -252,7 +270,7 @@ Requires Windows 11 x64, one RTX 4090 (sm_89), a supported NVIDIA driver, Git, P
 (`py` launcher), and 40 GiB free disk. The installer binds the unique RTX 4090 UUID and PCI address
 even beside an RTX 3090 (use `-GpuUuid` if multiple RTX 4090 cards exist; never hide a card). Stop
 the other native lane on port `18082` first. The v0.18.0 route selects
-`v0.8.0-qwen38-4090-beta.3`, with DFlash2 K=7, INT8 KV and C1; fresh qualification is pending.
+`v0.8.0-qwen38-4090-beta.3`, with DFlash2 K=7, INT8 KV and C1; fresh component qualification passed.
 The installer preserves the actual prior install for rollback. Keep prior native release roots
 and staging untouched for historical recovery; never import MTP3 checkpoints into the DFlash2
 runtime. If a stopped beta.2 incumbent refuses shutdown, follow the
@@ -467,8 +485,12 @@ Requires Windows 11 x64, one RTX 3090 (sm_86), a supported NVIDIA driver, Git, P
 beside an RTX 4090 (use `-GpuUuid` if multiple RTX 3090 cards exist). Stop the other native lane on
 port `18082` first. The v0.18.0 route selects `v0.8.0-qwen38-3090-beta.3`, with DFlash2 K=7
 and C2 sharing one 131,072-token INT8 KV pool, OMP provider limit `2` and a 180 s pending
-timeout; fresh qualification is pending. C2 is not simultaneous
-native-lane serving. The installer stops a running incumbent with that incumbent's own controller
+timeout; fresh component qualification passed. C2 long-session compaction remains a
+[known limitation (#89)](https://github.com/alphastorm/ninfer/issues/89); the
+[exact founder waiver](../releases/v0.18.0/qualification/rtx3090-route-waiver.json) retains the failed
+compaction campaign, not a native behavior, wrapper restoration audit or anonymous public-install
+acceptance pass. C2 is not simultaneous native-lane serving.
+The installer stops a running incumbent with that incumbent's own controller
 and power policy, so the historical stop-first workaround ([#94](https://github.com/alphastorm/omp-ninfer/issues/94))
 is no longer required. Keep all predecessor roots, staging, and checkpoints for rollback; MTP3
 checkpoints do not transfer into DFlash2. If a stopped beta.2 incumbent refuses shutdown, follow
@@ -803,8 +825,8 @@ release failure. Restart NInfer with section 4 only after observing the failure.
 ## macOS client over a manual SSH tunnel (preview)
 
 The macOS arm64 client is a preview platform (stock upstream binary over a manual OpenSSH loopback
-tunnel, without a managed macOS installer or appliance service). Its 10 executable blocks need
-fresh v0.18.0 acceptance against the `v0.7.0-qwen38-5090-beta.7` RTX 5090 container lane. Sections 3 and 4 also serve as
+tunnel, without a managed macOS installer or appliance service). Its **10/10** executable blocks
+passed fresh v0.18.0 acceptance against the `v0.7.0-qwen38-5090-beta.7` RTX 5090 container lane. Sections 3 and 4 also serve as
 the inference-host setup for the Windows and WSL2 Linux client routes.
 
 ### Prerequisites
@@ -903,9 +925,9 @@ read-write into `v0.18.0` or import their
 generations. Retained profile/mount names do not establish cross-binary checkpoint compatibility.
 Resume earlier sessions by replaying the authoritative client transcript for a fresh prefill.
 New exact-runtime checkpoints accelerate later continuations. The retained serving contract includes
-JSON-schema structured output and 128-character Chat/Responses tool names. New v0.18.0 lane
-receipts and fresh five-route acceptance must prove that contract for the selected bytes.
-See the [v0.18.0 compatibility matrix](../releases/v0.18.0/COMPATIBILITY.md) after staging.
+JSON-schema structured output and 128-character Chat/Responses tool names. Current v0.18.0 lane
+receipts qualify the selected bytes; fresh documented-route acceptance is recorded above.
+See the [v0.18.0 compatibility matrix](../releases/v0.18.0/COMPATIBILITY.md).
 
 ## 4. Start NInfer on the inference host
 

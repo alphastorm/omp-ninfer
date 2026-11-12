@@ -1,0 +1,602 @@
+{
+  "artifact_type": "omp_ninfer_documented_route_acceptance",
+  "schema_version": 1,
+  "release": "v0.18.0",
+  "as_of": "2026-11-12",
+  "status": "passed",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "Fresh v0.18.0 acceptance on 2a735da0367214b35a325f61865fb47f0ce872c7; failed RTX 3090 native campaign preserved beside its founder waiver.",
+  "document_sha256": "e22b1a4d915a34059ed851e2207d57469743ecd949ffe01d06aba0e2f3223636",
+  "current_document_sha256": "37ad538962cf7238be014d79e3ed20367cf26ccb3681172d3cc89958b21cb51d",
+  "executed_blocks_match_current": true,
+  "document_change": "Only later non-executable release-state prose may change; composer must independently require every executed block to remain byte-identical.",
+  "candidate_commit": "2a735da0367214b35a325f61865fb47f0ce872c7",
+  "routes": {
+    "rtx5090-container-host": {
+      "status": "passed",
+      "steps": [
+        "prepare",
+        "start"
+      ],
+      "elapsed_s": 50.562,
+      "receipt": "docs/measurements/2026-11-12-v0180-rtx5090-container-host-run.json",
+      "sha256": "20a3d4c29532bdca3d1af9e19d1c4a6a6a5445550595539e6b4d974624985194"
+    },
+    "rtx5090-macos-client": {
+      "status": "passed",
+      "steps": [
+        "client-install",
+        "tunnel",
+        "key",
+        "provider",
+        "fail-closed-config",
+        "tool",
+        "vision",
+        "resume",
+        "survives-restart",
+        "fail-closed"
+      ],
+      "elapsed_s": 118.708,
+      "receipt": "docs/measurements/2026-11-12-v0180-rtx5090-macos-client-run.json",
+      "sha256": "349ef03d40661cca3aff818ca7e7f51f6c6d6c33157b30fee8fbe4d2285f5532"
+    },
+    "rtx5090-windows-client": {
+      "status": "passed",
+      "steps": [
+        "clone-and-verify",
+        "client-install",
+        "provider",
+        "acceptance",
+        "fail-closed"
+      ],
+      "elapsed_s": 65.174,
+      "receipt": "docs/measurements/2026-11-12-v0180-rtx5090-windows-client-run.json",
+      "sha256": "f38fbddaa16934008654e49557b03e5e1d1802803b119b38eae0e51fa50da640"
+    },
+    "rtx4090-native": {
+      "status": "passed",
+      "steps": [
+        "client-install",
+        "clone-and-verify",
+        "variant",
+        "stage-and-install",
+        "operate",
+        "provider",
+        "acceptance"
+      ],
+      "elapsed_s": 331.446,
+      "receipt": "docs/measurements/2026-11-12-v0180-rtx4090-native-run.json",
+      "sha256": "0c8aa931237814b87c78aed57cd6fca440866cfa9bd93802ba3f11d26ce838fe",
+      "candidate_commit": "2a735da0367214b35a325f61865fb47f0ce872c7",
+      "release": "v0.18.0",
+      "client": {
+        "version": "omp/18.18.7",
+        "binary_sha256": "4a6e39ea34633e03d07a1543ba30842362311f920341378433aa31b6c1404491"
+      },
+      "installed": {
+        "source_commit": "48c8ac4644322f024b5c3bd5b657af5874567251",
+        "package_sha256": "ac41700ac2bb9fb171188f35e73481cfd9f1140c5781320b1e6304ee760d7166",
+        "binary_sha256": "a5266ae676305cc56086df6d3b8dc8968be110b3cf0eb7b18147adafc2f66d22",
+        "config_sha256": "b71a2cff25d671703106474d86fe6a808dc803db28703b6fd7740013fcfee278"
+      }
+    },
+    "rtx3090-native": {
+      "status": "passed",
+      "steps": [
+        "client-install",
+        "clone-and-verify",
+        "variant",
+        "stage-and-install",
+        "operate",
+        "provider",
+        "acceptance"
+      ],
+      "elapsed_s": 360.153,
+      "receipt": "docs/measurements/2026-11-12-v0180-rtx3090-native-run.json",
+      "sha256": "26bce024e3166f6950f44621aedef665fe4d472464cece66035527017e389558",
+      "candidate_commit": "2a735da0367214b35a325f61865fb47f0ce872c7",
+      "release": "v0.18.0",
+      "client": {
+        "version": "omp/18.18.7",
+        "binary_sha256": "4a6e39ea34633e03d07a1543ba30842362311f920341378433aa31b6c1404491"
+      },
+      "installed": {
+        "source_commit": "48c8ac4644322f024b5c3bd5b657af5874567251",
+        "package_sha256": "bf1ceaa9eb522a8c8d9372bec475d6e4e4666e6a995302cd20035e80ae3e5edd",
+        "binary_sha256": "e571328699be41d90eff8743d94da26e8f587e48bc32f618013625af7ad0bfe0",
+        "config_sha256": "674d52609e22de54a5db20001e25fdd97cd600d498551ecfe48efa53964fc3ac"
+      }
+    }
+  },
+  "native_campaigns": {
+    "rtx4090-native": {
+      "status": "passed",
+      "candidate_commit": "2a735da0367214b35a325f61865fb47f0ce872c7",
+      "release": "v0.18.0",
+      "client": {
+        "version": "omp/18.18.7",
+        "binary_sha256": "4a6e39ea34633e03d07a1543ba30842362311f920341378433aa31b6c1404491"
+      },
+      "installed": {
+        "source_commit": "48c8ac4644322f024b5c3bd5b657af5874567251",
+        "package_sha256": "ac41700ac2bb9fb171188f35e73481cfd9f1140c5781320b1e6304ee760d7166",
+        "binary_sha256": "a5266ae676305cc56086df6d3b8dc8968be110b3cf0eb7b18147adafc2f66d22",
+        "config_sha256": "b71a2cff25d671703106474d86fe6a808dc803db28703b6fd7740013fcfee278"
+      }
+    },
+    "rtx3090-native": {
+      "status": "failed",
+      "candidate_commit": "2a735da0367214b35a325f61865fb47f0ce872c7",
+      "release": "v0.18.0",
+      "client": {
+        "version": "omp/18.18.7",
+        "binary_sha256": "4a6e39ea34633e03d07a1543ba30842362311f920341378433aa31b6c1404491"
+      },
+      "installed": {
+        "source_commit": "48c8ac4644322f024b5c3bd5b657af5874567251",
+        "package_sha256": "bf1ceaa9eb522a8c8d9372bec475d6e4e4666e6a995302cd20035e80ae3e5edd",
+        "binary_sha256": "e571328699be41d90eff8743d94da26e8f587e48bc32f618013625af7ad0bfe0",
+        "config_sha256": "674d52609e22de54a5db20001e25fdd97cd600d498551ecfe48efa53964fc3ac"
+      },
+      "failed_phase": "native-probes",
+      "founder_waiver": {
+        "repository_path": "releases/v0.18.0/qualification/rtx3090-route-waiver.json",
+        "sha256": "13bcf02764501f17b1a251e82ee6ef1750f2e0fbc4ddd0637def0c018cf8722b"
+      },
+      "window_failure": {
+        "projection_schema": 1,
+        "sha256": "6cebf89cc109c2fedfafb8c06701f41fdc641ab677aea43a15fb415ce70222a2",
+        "boundary": "native-probes",
+        "observed_summary": {
+          "probe": "compaction",
+          "error": {
+            "kind": "probe-error",
+            "sha256": "b9278890f0cb01439cdb08637c99e6665f265d00d85c055a4acbdf5dd06d769c"
+          },
+          "timeout_seconds": 900,
+          "http_status_counts": {
+            "200": 2,
+            "503": 4,
+            "499": 1
+          },
+          "managed_stop": {
+            "action": "Control-Release.ps1 -Action Stop",
+            "outcome": "graceful_incomplete_shutdown",
+            "sessions_refused": 9,
+            "shutdown_complete": false
+          }
+        },
+        "capture_sha256": "1ca0459f7da7f800261e8db0044ba57097604be533a4a3ca6b262c2462e55291"
+      },
+      "stopped_owner_census": {
+        "sha256": "8d3cebe0e5b7babaa5ac6ec8eb77d1b81dd3c890c1d86c6915edb5f9c4737c15",
+        "lane": "rtx3090",
+        "power_limit_w": 370
+      },
+      "runtime_configuration": {
+        "max_context": 131072,
+        "kv_capacity": 131072,
+        "kv_dtype": "int8",
+        "concurrency": 2,
+        "pending_timeout_ms": 180000,
+        "prefill_chunk": 1024,
+        "device_state_slots": 2,
+        "admission_headroom_mib": 768,
+        "host_context_mib": "20867.734375",
+        "host_context_bytes": 21881405440,
+        "speculative_backend": "dflash2",
+        "speculative_draft_tokens": 7,
+        "public_model_id": "q38-ninfer"
+      },
+      "probe_acceptance": {
+        "fleet": {
+          "sha256": "94c2fc0270c68351153fca4c65240e7900a3d5280e0776142f4f0e73a0b71f72",
+          "artifact_type": "omp_ninfer_fleet_fanout_probe",
+          "identity": {
+            "binary_sha256": "e571328699be41d90eff8743d94da26e8f587e48bc32f618013625af7ad0bfe0",
+            "config_sha256": "674d52609e22de54a5db20001e25fdd97cd600d498551ecfe48efa53964fc3ac",
+            "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+            "model_id": "q38-ninfer",
+            "source_dirty": false,
+            "build_profile": "native-v0.8.0-beta.3-tc-rtx3090"
+          },
+          "branches": 4,
+          "transient_retries": 0,
+          "steps": [
+            "base_prefill",
+            "warm_edit",
+            "checkpoint_save",
+            "branch_0",
+            "branch_1",
+            "branch_2",
+            "branch_3",
+            "session_delete"
+          ]
+        },
+        "fanout": {
+          "sha256": "0a4effbeba0ab86c22866791a15fc32209e86913bc22c21762edaa87670bb2e5",
+          "artifact_type": "omp_ninfer_concurrency_probe",
+          "ok": true,
+          "arguments": {
+            "arm": "rtx3090-C2-acceptance",
+            "scenario": [
+              "fanout"
+            ],
+            "fanout_concurrency": 4,
+            "branches": 4,
+            "model": "q38-ninfer"
+          },
+          "statuses": {
+            "server_before": {
+              "artifact_type": "ninfer_server_status",
+              "schema_version": 2,
+              "status": "ok",
+              "identity": {
+                "binary_sha256": "e571328699be41d90eff8743d94da26e8f587e48bc32f618013625af7ad0bfe0",
+                "config_sha256": "674d52609e22de54a5db20001e25fdd97cd600d498551ecfe48efa53964fc3ac",
+                "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+                "source_dirty": false,
+                "build_profile": "native-v0.8.0-beta.3-tc-rtx3090"
+              },
+              "runtime": {
+                "max_context": 131072
+              },
+              "scheduler": {
+                "max_concurrency": 2
+              }
+            },
+            "server_after": {
+              "artifact_type": "ninfer_server_status",
+              "schema_version": 2,
+              "status": "ok",
+              "identity": {
+                "binary_sha256": "e571328699be41d90eff8743d94da26e8f587e48bc32f618013625af7ad0bfe0",
+                "config_sha256": "674d52609e22de54a5db20001e25fdd97cd600d498551ecfe48efa53964fc3ac",
+                "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+                "source_dirty": false,
+                "build_profile": "native-v0.8.0-beta.3-tc-rtx3090"
+              },
+              "runtime": {
+                "max_context": 131072
+              },
+              "scheduler": {
+                "max_concurrency": 2
+              }
+            }
+          },
+          "scenarios": [
+            {
+              "name": "fanout",
+              "ok": true,
+              "requests": [
+                {
+                  "label": "fanout-base",
+                  "ok": true,
+                  "http_status": 200,
+                  "submitted_monotonic_s": 124665.2834491,
+                  "completed_monotonic_s": 124687.8707475
+                },
+                {
+                  "label": "branch-0",
+                  "ok": true,
+                  "http_status": 200,
+                  "submitted_monotonic_s": 124687.8744357,
+                  "completed_monotonic_s": 124691.2811151
+                },
+                {
+                  "label": "branch-1",
+                  "ok": true,
+                  "http_status": 200,
+                  "submitted_monotonic_s": 124687.8745638,
+                  "completed_monotonic_s": 124689.6180416
+                },
+                {
+                  "label": "branch-2",
+                  "ok": true,
+                  "http_status": 200,
+                  "submitted_monotonic_s": 124687.8747273,
+                  "completed_monotonic_s": 124689.9808474
+                },
+                {
+                  "label": "branch-3",
+                  "ok": true,
+                  "http_status": 200,
+                  "submitted_monotonic_s": 124687.8742054,
+                  "completed_monotonic_s": 124691.1661314
+                }
+              ]
+            }
+          ]
+        },
+        "parallel": {
+          "sha256": "68b885c40bc9258d8ede9d35278e12ea37a7c8a8e8637fb5f41271d4b387d9a5",
+          "passed": true,
+          "model": "ninfer-native-3090/q38-ninfer",
+          "omp": {
+            "sha256": "4a6e39ea34633e03d07a1543ba30842362311f920341378433aa31b6c1404491",
+            "version": "omp/18.18.7"
+          },
+          "checks": null,
+          "artifact_type": "omp_ninfer_parallel_proof",
+          "max_in_flight": 2,
+          "scenarios": [
+            {
+              "scenario": "subagents",
+              "passed": true,
+              "max_in_flight": 2,
+              "overlap_seconds": 19.161,
+              "checks": {
+                "logged_requests": true,
+                "all_logged_requests_completed": true,
+                "single_server_instance": true,
+                "provider_limit_respected": true,
+                "concurrency_expected": true
+              }
+            },
+            {
+              "scenario": "sessions",
+              "passed": true,
+              "max_in_flight": 2,
+              "overlap_seconds": 17.097,
+              "checks": {
+                "logged_requests": true,
+                "all_logged_requests_completed": true,
+                "single_server_instance": true,
+                "provider_limit_respected": true,
+                "concurrency_expected": true
+              }
+            }
+          ]
+        },
+        "compaction": {
+          "sha256": "3785284d60efd9b09a33e02ee4c63dd672d22604c42fd679de308fbac635aa44",
+          "passed": false,
+          "model": "ninfer-native-3090/q38-ninfer",
+          "omp": {
+            "sha256": "4a6e39ea34633e03d07a1543ba30842362311f920341378433aa31b6c1404491",
+            "version": "omp/18.18.7"
+          },
+          "checks": {},
+          "artifact_type": "omp_ninfer_long_session_proof",
+          "committed": 0,
+          "parameters": {
+            "compactions": 2,
+            "seed": 20260928,
+            "filler_bytes": 40000,
+            "plant_after": 1,
+            "restart": false,
+            "expect_method": null
+          }
+        },
+        "capture_sha256": "2200d67ba6a65cfb011fdcdce6706105c92d9af2e1b4d583a2eeef88b951cb0e"
+      }
+    }
+  },
+  "steps": [
+    {
+      "lane": "rtx5090-container-host",
+      "status": "passed"
+    },
+    {
+      "lane": "rtx5090-macos-client",
+      "status": "passed"
+    },
+    {
+      "lane": "rtx5090-windows-client",
+      "status": "passed"
+    },
+    {
+      "lane": "rtx4090-native",
+      "status": "passed"
+    },
+    {
+      "lane": "rtx3090-native",
+      "status": "passed"
+    }
+  ],
+  "current_block_addresses": {
+    "rtx5090-container-host": [
+      {
+        "slug": "prepare",
+        "heading": "3. Prepare the model and key on the inference host",
+        "index": 0,
+        "sha256": "9fb8213beb54bcef229b0b346db360fae7dff54fe7d67ef911e18375c052348a"
+      },
+      {
+        "slug": "start",
+        "heading": "4. Start NInfer on the inference host",
+        "index": 0,
+        "sha256": "d0b5ed3dc4110d35ca4ff098509b5ece7561e07954e4e16c99463c54d591bc87"
+      }
+    ],
+    "rtx5090-macos-client": [
+      {
+        "slug": "client-install",
+        "heading": "2. Install the OMP beta on the Mac",
+        "index": 0,
+        "sha256": "fde1ae19e2e003948864a874a7ad6ce91acf7744ec84d00e1814770d3489dbaa"
+      },
+      {
+        "slug": "tunnel",
+        "heading": "5. Open the tunnel from the Mac",
+        "index": 0,
+        "sha256": "89d723de4acbbcd41e2a2430b615c6c15517c9f37f2db504ec925c17ee33e9b8"
+      },
+      {
+        "slug": "key",
+        "heading": "6. Install the same key on the Mac",
+        "index": 0,
+        "sha256": "fdce8eb3b1d54c06d12540867b593015a3b1a3006424c4a4bf1e9d1c9ae59f68"
+      },
+      {
+        "slug": "provider",
+        "heading": "7. Add the OMP provider",
+        "index": 0,
+        "sha256": "e4630b6ec67f50d9cfedf245103fbd0bcbd1b88d67a9676f9946f1927d84c3b5"
+      },
+      {
+        "slug": "fail-closed-config",
+        "heading": "7. Add the OMP provider",
+        "index": 2,
+        "sha256": "3fa8f46a307f5c1b68a5a1d7f320bb37cc276330ead79343ff35216f96016fcc"
+      },
+      {
+        "slug": "tool",
+        "heading": "Text and tool turn",
+        "index": 0,
+        "sha256": "20be720027ed8cf9cd4297ded3a923adac01873fff27e59ef27bb0f510d973c9"
+      },
+      {
+        "slug": "vision",
+        "heading": "Image input",
+        "index": 0,
+        "sha256": "a0e9a99e7f7b2304053cb956a9ef5a30240ffb10efd0f1651a73685ee370300e"
+      },
+      {
+        "slug": "resume",
+        "heading": "Stateful follow-up and OMP resume",
+        "index": 0,
+        "sha256": "cd1befb5daadbb1bbb5df28179b3e9e23a897cc12a921f52e3f2f9b3e88a9d3c"
+      },
+      {
+        "slug": "survives-restart",
+        "heading": "Session survives the server process",
+        "index": 0,
+        "sha256": "5ea55d391650c75a128a0429da7e422608201a592d9e5771f6a9da9607a7f4dd"
+      },
+      {
+        "slug": "fail-closed",
+        "heading": "Fail closed",
+        "index": 0,
+        "sha256": "73341e46e74e37137db0be4318e851b90f9533c43e413731ddad91837772bb61"
+      }
+    ],
+    "rtx5090-windows-client": [
+      {
+        "slug": "clone-and-verify",
+        "heading": "Clone and verify the exact product release",
+        "index": 0,
+        "sha256": "50c14914a66e724d31017961e39e3cd19715182186af384baaf8753a7de7781d"
+      },
+      {
+        "slug": "client-install",
+        "heading": "Install the exact native Windows client",
+        "index": 0,
+        "sha256": "8f51224847d884ca3bd717d18787e60d652817c0c46eb395b3d3cb80745b8902"
+      },
+      {
+        "slug": "provider",
+        "heading": "Native Windows OMP",
+        "index": 0,
+        "sha256": "6a97e3c6169a66a4183dbab07e0734a637c2d9e146d6d19245efabfda8d80cff"
+      },
+      {
+        "slug": "acceptance",
+        "heading": "Native Windows command forms",
+        "index": 0,
+        "sha256": "499018df9d1336d7d48ea2ac88966f42e6eeb15ac0db9a48e70dd4495601792a"
+      },
+      {
+        "slug": "fail-closed",
+        "heading": "Native Windows command forms",
+        "index": 1,
+        "sha256": "1968150b182268490f8f4024a3aad3ce1a11c6ea76108b9d5dd60a552b912cc9"
+      }
+    ],
+    "rtx4090-native": [
+      {
+        "slug": "client-install",
+        "heading": "Install the exact native Windows client",
+        "index": 0,
+        "sha256": "8f51224847d884ca3bd717d18787e60d652817c0c46eb395b3d3cb80745b8902"
+      },
+      {
+        "slug": "clone-and-verify",
+        "heading": "Native Windows RTX 4090 release lane",
+        "index": 0,
+        "sha256": "50c14914a66e724d31017961e39e3cd19715182186af384baaf8753a7de7781d"
+      },
+      {
+        "slug": "variant",
+        "heading": "Native Windows RTX 4090 release lane",
+        "index": 1,
+        "sha256": "59aedbb7de8c043d2b7165296d8081ac734814d58551efadf711f346d916ca5c"
+      },
+      {
+        "slug": "stage-and-install",
+        "heading": "Native Windows RTX 4090 release lane",
+        "index": 2,
+        "sha256": "c6fd61b5911b39dee47143d363fb083588859055b074768ffd3e119eb89f723a"
+      },
+      {
+        "slug": "operate",
+        "heading": "Operate the native lane",
+        "index": 0,
+        "sha256": "4ea38c9b7614db973c4e89b38ed8347f33d2e714c7c69348e1a7c59113b8e9fa"
+      },
+      {
+        "slug": "provider",
+        "heading": "Point OMP at the native lane",
+        "index": 0,
+        "sha256": "c756befd69d1e5d02556306a9995b6923340709146b21afd22e33a98b8a6aa82"
+      },
+      {
+        "slug": "acceptance",
+        "heading": "Native lane acceptance",
+        "index": 0,
+        "sha256": "97ad0206b73f22c205d7f7ebc399863d397919f011729b660e4d06cd149a79cb"
+      }
+    ],
+    "rtx3090-native": [
+      {
+        "slug": "client-install",
+        "heading": "Install the exact native Windows client",
+        "index": 0,
+        "sha256": "8f51224847d884ca3bd717d18787e60d652817c0c46eb395b3d3cb80745b8902"
+      },
+      {
+        "slug": "clone-and-verify",
+        "heading": "Native Windows RTX 3090 release lane",
+        "index": 0,
+        "sha256": "50c14914a66e724d31017961e39e3cd19715182186af384baaf8753a7de7781d"
+      },
+      {
+        "slug": "variant",
+        "heading": "Native Windows RTX 3090 release lane",
+        "index": 1,
+        "sha256": "a7f599d12c0ad7efa6d52de222d0efd457f754baf8bf49132d4bfc28c5c9e17b"
+      },
+      {
+        "slug": "stage-and-install",
+        "heading": "Native Windows RTX 3090 release lane",
+        "index": 2,
+        "sha256": "c81a0f6233a8fdba376ed0d2841c221816179b769b2d5d79deeb2f5d80e425b7"
+      },
+      {
+        "slug": "operate",
+        "heading": "Operate the RTX 3090 native lane",
+        "index": 0,
+        "sha256": "4ea38c9b7614db973c4e89b38ed8347f33d2e714c7c69348e1a7c59113b8e9fa"
+      },
+      {
+        "slug": "provider",
+        "heading": "Point OMP at the RTX 3090 native lane",
+        "index": 0,
+        "sha256": "037537d047d1e122734863c55715c02ae1c501a7ecaafb7da425300954c8ecd0"
+      },
+      {
+        "slug": "acceptance",
+        "heading": "RTX 3090 native lane acceptance",
+        "index": 0,
+        "sha256": "03da726c01277e2d5e98be96b3d877aaa7a05347b9fe4f18f70f5f74a78e6795"
+      }
+    ]
+  },
+  "restoration_receipt": {
+    "repository_path": "docs/measurements/2026-11-12-v0180-acceptance-restoration.json",
+    "sha256": "b5ccb28bd16536fb03ef92b557488e668461130700b20ca7619b2b02db978198"
+  },
+  "deferred_routes": {},
+  "raw_prompts_outputs_or_secrets_included": false,
+  "qualification_environment": "One Windows/WSL2 RTX 5090 container host with macOS arm64 and native Windows x64 clients, plus a WSL2 Linux x64 client; one two-GPU Windows host served the native lanes sequentially. Owner-operated tester-equivalent, not independent external-user acceptance."
+}

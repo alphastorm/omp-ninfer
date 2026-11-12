@@ -146,7 +146,7 @@ Native owners staying on `v0.10.0` keep the
 
 ### Next on main — prepared v0.18.0
 
-**Prepared next: v0.18.0 / stock OMP 18.18.7.** Re-cuts all three GPU runtime
+**Component-qualified next: v0.18.0 / stock OMP 18.18.7.** Re-cuts all three GPU runtime
 lanes from one frozen fork engine commit `F4` (`48c8ac4644322f024b5c3bd5b657af5874567251` in `alphastorm/ninfer` on
 upstream `64d10fbf`): RTX 5090 `v0.7.0-qwen38-5090-beta.7` (image
 `ghcr.io/alphastorm/ninfer-runtime@sha256:496195ecd6cf1f50fcd9dc62cf7b51787f599cc2b196e194baf050c4b149e119`, server
@@ -178,7 +178,7 @@ profile `native-v0.8.0-beta.3-tc-rtx3090`), with unmodified upstream
   regression vectors ([PR #106](https://github.com/alphastorm/ninfer/pull/106) `92209112`), and the
   `Group64` `A8` build-profile configure guard and Apache-2.0 kernel attribution
   ([PR #112](https://github.com/alphastorm/ninfer/pull/112) `fd95455df`).
-- **Variant-dependent selections (release stage keeps only the selected option per axis):**
+- **Bound release selections:**
   - Native `sm_86`/`sm_89` small-T tensor-core verify ([PR #104](https://github.com/alphastorm/ninfer/pull/104),
     `T=8/16`) is in `F4`, enabled only by the RTX 3090 `tc` profile
     ([release notes](releases/v0.18.0/NINFER_RELEASE_NOTES.md)).
@@ -199,14 +199,27 @@ profile `native-v0.8.0-beta.3-tc-rtx3090`), with unmodified upstream
   is advertised; `scripts/hosts/omp-client-probe.py` invokes `omp` with `--tools read` and does not
   separately probe `bash` or `edit` beyond the `31`-block route acceptance
   ([18.18.7 review](docs/measurements/2026-11-11-omp-18187-client-upgrade-review.json)). The
-  request-level HTTP `503` half of `#89` did not reproduce on the proxy host (`3` fixtures) and is
-  settled only by the RTX 3090 acceptance run (**pending**; [release notes](releases/v0.18.0/NINFER_RELEASE_NOTES.md));
+  request-level HTTP `503` half of [fork #89](https://github.com/alphastorm/ninfer/issues/89)
+  reproduced on the selected `beta.3` RTX 3090 C2 lane in the corrected automatic-compaction
+  proof, while admission was deferred by an outstanding checkpoint save. C2 long-session
+  compaction remains a known limitation;
   the [Neroued/ninfer#434](https://github.com/Neroued/ninfer/issues/434) per-rotation fresh-window
-  consumption when a pressure save is pending (`checkpoints_.pending()`) or no lane is free remains
-  tracked in [fork #103](https://github.com/alphastorm/ninfer/issues/103). Component cuts,
-  qualification receipts, five-route (`31`-block) and three-client-platform acceptance, review
-  councils, immutable pins, and founder-owned publication are pending (staged notes path
-  `releases/v0.18.0/NINFER_RELEASE_NOTES.md`).
+  consumption while a pressure save is outstanding or no lane is free remains
+  tracked in [fork #103](https://github.com/alphastorm/ninfer/issues/103). Component cuts and
+  qualification receipts passed; runtime and product councils closed by disposition. Candidate
+  `2a735da0` passed all five documented block sets (**31/31**) and three client-platform checks.
+  RTX 4090 campaign, public install and restoration passed. RTX 3090 attempt 1 failed its
+  post-route stock OMP subagent proof: five task calls were rejected for a missing `context`
+  argument; the lane was restored. The founder-authorized corrected attempt passed the seven
+  documented blocks again and its subagent/session proofs, then automatic compaction timed out
+  after **900 s** with HTTP `503` admission timeouts while a checkpoint save was outstanding.
+  Managed Stop refused **9** sessions; the lead restored the canonical lane with an unchanged
+  cross-lane census. The founder
+  [waived only this attempt-2 RTX 3090 post-route compaction campaign failure](releases/v0.18.0/qualification/rtx3090-route-waiver.json);
+  original failed verdicts remain failed. RTX 3090 native behavior completion, wrapper
+  restoration audit and anonymous public-install acceptance are not claimed.
+  The lead owns final composition, audit reconciliation and immutable pins; product publication
+  stays founder-owned. The [release notes](releases/v0.18.0/NINFER_RELEASE_NOTES.md) retain that scope.
   Published install authority stays `v0.17.0`
   ([immutable v0.17.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.17.0/docs/QUICKSTART.md)).
 

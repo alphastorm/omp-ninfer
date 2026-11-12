@@ -50,7 +50,7 @@ See the [decision guide](DECISION_GUIDE.md) for the side-by-side comparison.
 
 ## Prepared next — v0.18.0 / unified engine native re-cut and OMP 18.18.7
 
-**Prepared next: v0.18.0 / stock OMP 18.18.7.** This successor to published
+**Component-qualified next: v0.18.0 / stock OMP 18.18.7.** This successor to published
 `v0.17.0` re-cuts all three GPU runtime lanes from one frozen fork engine commit `F4`
 (`48c8ac4644322f024b5c3bd5b657af5874567251` in `alphastorm/ninfer`, stacked on fork `main` `b871996a` / `F3`
 `e0971faf` on upstream `Neroued/ninfer` master `64d10fbf`): RTX 5090 `v0.7.0-qwen38-5090-beta.7`
@@ -103,7 +103,7 @@ vectors ([PR #106](https://github.com/alphastorm/ninfer/pull/106) `92209112`, `1
 ([PR #112](https://github.com/alphastorm/ninfer/pull/112) `fd95455df`, `13/13` configure cases,
 `650` TUs token-identical).
 
-**Variant-dependent paragraphs (release stage keeps only the selected option per axis):**
+**Bound release selections:**
 
 - `F4` includes the default-`OFF` `sm_86`/`sm_89` small-T tensor-core verify kernel
 
@@ -131,11 +131,12 @@ at `1,024`-token pass width, below the `1.00×` kill bar); restricted tool-argum
 (`+5.2439%` to `+7.6563%` for `Mode A` and `+4.7949%` to `+7.3278%` for `Mode B` at `m = 4.631`
 baseline committed tokens per neural round; `+6.6167%` to `+9.6008%` and `+6.4980%` to `+10.1177%`
 at rebased `m = 3.875` across `2,998` retained turns, below the `+15%` session-decode bar) is not
-shipped. The request-level HTTP `503` half of `#89` did not reproduce on the proxy host (`3`
-fixtures) and is settled only by the RTX 3090 acceptance run (**pending**;
-[release notes](../releases/v0.18.0/NINFER_RELEASE_NOTES.md)); the
+shipped. The request-level HTTP `503` half of
+[fork #89](https://github.com/alphastorm/ninfer/issues/89) reproduced on the selected `beta.3`
+RTX 3090 C2 lane in the corrected automatic-compaction proof, while admission was deferred by an
+outstanding checkpoint save. C2 long-session compaction remains a known limitation; the
 [Neroued/ninfer#434](https://github.com/Neroued/ninfer/issues/434) per-rotation fresh-window
-consumption when a pressure save is pending (`checkpoints_.pending()`) or no lane is free remains
+consumption while a pressure save is outstanding or no lane is free remains
 recorded in [fork #103](https://github.com/alphastorm/ninfer/issues/103).
 
 Selected client: unmodified upstream `v18.18.7` (release `440868478`, `2026-11-10T20:23:32Z`,
@@ -151,10 +152,20 @@ source `e325ffc73ab86e03bdd20a91b77d8e2b3964c906`, tree `9ba2abe1f1dd7c64b8d3f99
 On Windows (`process.platform === "win32"`), `18.18.7` changes the rendered `bash` tool description
 sent to the model whenever `bash` is advertised and updates `cmd`/MSYS path dispatch;
 `scripts/hosts/omp-client-probe.py` invokes `omp` with `--tools read` and does not separately probe
-`bash` or `edit` beyond the `31`-block route acceptance. Component cuts, lane/speed/quality
-receipts, five-route (`31`-block) and three-client-platform acceptance, review councils, immutable
-pins, and founder-owned publication remain pending (staged notes path
-`releases/v0.18.0/NINFER_RELEASE_NOTES.md`).
+`bash` or `edit` beyond the `31`-block route acceptance. Component cuts and lane/speed/quality
+receipts passed, and runtime/product councils closed by disposition. Candidate `2a735da0` passed
+all five documented block sets (**31/31**) and three stock-client platform checks. RTX 4090
+campaign, public install and restoration passed. RTX 3090 attempt 1 failed its post-route stock
+OMP subagent proof: five task calls were rejected for a missing `context` argument; the lane was
+restored. The founder-authorized corrected attempt passed the seven documented blocks again and
+its subagent/session proofs, then automatic compaction timed out after **900 s** with HTTP `503`
+admission timeouts while a checkpoint save was outstanding. Managed Stop refused **9** sessions;
+the lead restored the canonical lane with an unchanged cross-lane census. The founder
+[waived only this attempt-2 RTX 3090 post-route compaction campaign failure](../releases/v0.18.0/qualification/rtx3090-route-waiver.json);
+original failed verdicts remain failed. RTX 3090 native behavior completion, wrapper restoration
+audit and anonymous public-install acceptance are not claimed.
+The lead completes composition, audit reconciliation and immutable pins; product publication is
+founder-owned. See the [release notes](../releases/v0.18.0/NINFER_RELEASE_NOTES.md).
 Published install authority stays `v0.17.0`
 ([immutable v0.17.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.17.0/docs/QUICKSTART.md)).
 

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.18.0",
-  "status": "candidate",
+  "status": "ready",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -15,7 +15,7 @@
     "omp": {
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
       "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/a3bd757bce4bc1aa80e479903fcdf59396a3e01d/compatibility.json",
-      "compatibility_sha256": "20735ab6bd52a45a50faaf28ddc1645a61bdfdb4325b83aa79bcdb82a31812b2",
+      "compatibility_sha256": "68cbae4bfd1fd1939772f8b31b944d9ec7f99599baa86652d2ad4b2573317699",
       "distribution_kind": "upstream-release",
       "upstream_repository": "https://github.com/can1357/oh-my-pi",
       "upstream_tag": "v18.18.7",
@@ -219,10 +219,10 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "d84e68f883e6dc68e0f3293d0f73524b9b3b9c6133b209a10b9edf3087ad34e9",
+    "summary_sha256": "8856867d4d11cb2ec0770cd6076f23a5536b5acc2e7b2bcdf5a635d9fa980b15",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/a3bd757bce4bc1aa80e479903fcdf59396a3e01d/releases/v0.18.0/qualification.json",
     "runtime_release_eligible": true,
-    "external_installation_passed": false
+    "external_installation_passed": true
   },
   "installation": {
     "mode": "native-windows-docker-local",
@@ -236,7 +236,7 @@
     "Retained RTX 5090 qwen38-5090-v0.13.0 configuration 751d22dc, 131072 context, BF16 auto KV, DFlash2 K7, C2 and 180-second pending timeout; optional pacing stays off. No fairness or general performance guarantee.",
     "Successor host checkpoints-v018 is isolated from predecessor checkpoints-v017 and checkpoints-v013; retained container mount/profile names do not establish cross-binary checkpoint compatibility. Preserve old stores and replay authoritative OMP transcripts.",
     "Selected native beta.3 package identities, packaged snapshots, current lane/screen/fit/speed observations and published bytes are bound. No predecessor review approval transfers and production promotion is not authorized.",
-    "No predecessor waiver, live-client acceptance, product review approval or public installation result grants this candidate a pass. Fresh five-route acceptance, restoration, composition and exact-subject reviews remain separate gates.",
+    "Fresh candidate 2a735da0367214b35a325f61865fb47f0ce872c7 passed all five documented routes' 31/31 blocks and three stock-client platform checks. RTX 4090 campaign, public install and restoration passed. RTX 3090 attempt 1 failed its post-route stock OMP subagent proof: five task calls were rejected for a missing context argument; the lane was restored. The founder-authorized corrected attempt passed the seven documented blocks again and its subagent/session proofs, then automatic compaction timed out after 900 s with HTTP 503 admission timeouts while a checkpoint save was outstanding, reproducing the request-level HTTP 503 half of https://github.com/alphastorm/ninfer/issues/89 on the beta.3 RTX 3090 C2 lane. Managed Stop refused 9 sessions; the lead restored the canonical lane with an unchanged cross-lane census. The founder waived only this attempt-2 RTX 3090 post-route compaction campaign failure (releases/v0.18.0/qualification/rtx3090-route-waiver.json); original failed verdicts remain failed. RTX 3090 native behavior completion, wrapper restoration audit and anonymous public-install acceptance are not claimed. C2 long-session compaction remains a known limitation. Exact-subject runtime/product reviews closed; the waiver authorizes neither another gate nor publication.",
     "macOS remains manual-SSH preview; Linux client evidence is WSL2-scoped. Image input is RTX 5090 macOS/Windows only. Publication and production promotion remain founder-owned."
   ],
   "publication": {
@@ -248,10 +248,7 @@
       "NInfer native v0.8.0-qwen38-4090-beta.3; package sha256:ac41700ac2bb9fb171188f35e73481cfd9f1140c5781320b1e6304ee760d7166",
       "OMP client: unmodified upstream Oh My Pi v18.18.7; no client published here"
     ],
-    "blockers": [
-      "external-installation acceptance has not been rerun against the published v0.7.0-qwen38-5090-beta.7 component and runtime image 496195ec; the composed acceptance receipt is absent until it is",
-      "current product council, receipt audit reconciliation and immutable evidence pins remain pending"
-    ],
-    "external_installation_qualified": false
+    "blockers": [],
+    "external_installation_qualified": true
   }
 }

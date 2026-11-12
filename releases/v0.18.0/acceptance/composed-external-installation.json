@@ -1,0 +1,419 @@
+{
+  "artifact_type": "omp_ninfer_composed_external_installation",
+  "schema_version": 1,
+  "release": "v0.18.0",
+  "as_of": "2026-11-12",
+  "status": "waived-by-founder",
+  "operator_class": "owner-operated tester-equivalent",
+  "mode": "Fresh v0.18.0 acceptance on 2a735da0367214b35a325f61865fb47f0ce872c7; failed RTX 3090 native campaign preserved beside its founder waiver.",
+  "client": {
+    "distribution_kind": "upstream-release",
+    "component_release_tag": "v18.18.7",
+    "upstream_repository": "https://github.com/can1357/oh-my-pi",
+    "upstream_commit": "e325ffc73ab86e03bdd20a91b77d8e2b3964c906",
+    "upstream_tree": "9ba2abe1f1dd7c64b8d3f99dc0e41d689d96886c",
+    "note": "Every stock OMP 18.18.7 client was freshly downloaded and accepted against the candidate-bound selected runtime identities; all three runtime components were rebuilt from one F4 source."
+  },
+  "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+  "compatibility_sha256": "68cbae4bfd1fd1939772f8b31b944d9ec7f99599baa86652d2ad4b2573317699",
+  "windows_asset_sha256": "4a6e39ea34633e03d07a1543ba30842362311f920341378433aa31b6c1404491",
+  "windows_binary_sha256": "4a6e39ea34633e03d07a1543ba30842362311f920341378433aa31b6c1404491",
+  "platform_receipts": [
+    {
+      "profile": "darwin-remote-ssh",
+      "sha256": "570009a2ced1ea4668b9176aeca8851d01b1d575654ce9a601edbd7d29781f52"
+    },
+    {
+      "profile": "windows-docker-local",
+      "sha256": "1a74599d355405dd8b25f6f7596711e98cb3e28bc866b803cecbcb1b769e13ea"
+    },
+    {
+      "profile": "linux-docker-local",
+      "sha256": "0e092283e98d820d1c129fb3b135dae66f23e672e37f4163d4747af8231602f5"
+    }
+  ],
+  "steps": {
+    "public_client_downloads": {
+      "status": "passed",
+      "anonymous": true,
+      "assets": 3,
+      "downloads": [
+        {
+          "profile": "darwin-remote-ssh",
+          "url": "https://github.com/can1357/oh-my-pi/releases/download/v18.18.7/omp-darwin-arm64",
+          "sha256": "0cecaac781d3c37f32ff7ecf3b6ba94842e7f058358e4748d5071d772f0aa4df"
+        },
+        {
+          "profile": "windows-docker-local",
+          "url": "https://github.com/can1357/oh-my-pi/releases/download/v18.18.7/omp-windows-x64.exe",
+          "sha256": "4a6e39ea34633e03d07a1543ba30842362311f920341378433aa31b6c1404491"
+        },
+        {
+          "profile": "linux-docker-local",
+          "url": "https://github.com/can1357/oh-my-pi/releases/download/v18.18.7/omp-linux-x64",
+          "sha256": "ea6c216feb260a3766a591760aad06bdc608efd5c632912603f5ccb41b0a4bb1"
+        }
+      ]
+    },
+    "rtx5090-container-host": {
+      "status": "passed",
+      "blocks": 2
+    },
+    "rtx5090-macos-client": {
+      "status": "passed",
+      "blocks": 10
+    },
+    "rtx5090-windows-client": {
+      "status": "passed",
+      "blocks": 5
+    },
+    "rtx4090-native": {
+      "status": "passed",
+      "candidate_commit": "2a735da0367214b35a325f61865fb47f0ce872c7",
+      "release": "v0.18.0",
+      "client": {
+        "version": "omp/18.18.7",
+        "binary_sha256": "4a6e39ea34633e03d07a1543ba30842362311f920341378433aa31b6c1404491"
+      },
+      "installed": {
+        "source_commit": "48c8ac4644322f024b5c3bd5b657af5874567251",
+        "package_sha256": "ac41700ac2bb9fb171188f35e73481cfd9f1140c5781320b1e6304ee760d7166",
+        "binary_sha256": "a5266ae676305cc56086df6d3b8dc8968be110b3cf0eb7b18147adafc2f66d22",
+        "config_sha256": "b71a2cff25d671703106474d86fe6a808dc803db28703b6fd7740013fcfee278"
+      },
+      "blocks": 7
+    },
+    "rtx3090-native": {
+      "status": "failed",
+      "candidate_commit": "2a735da0367214b35a325f61865fb47f0ce872c7",
+      "release": "v0.18.0",
+      "client": {
+        "version": "omp/18.18.7",
+        "binary_sha256": "4a6e39ea34633e03d07a1543ba30842362311f920341378433aa31b6c1404491"
+      },
+      "installed": {
+        "source_commit": "48c8ac4644322f024b5c3bd5b657af5874567251",
+        "package_sha256": "bf1ceaa9eb522a8c8d9372bec475d6e4e4666e6a995302cd20035e80ae3e5edd",
+        "binary_sha256": "e571328699be41d90eff8743d94da26e8f587e48bc32f618013625af7ad0bfe0",
+        "config_sha256": "674d52609e22de54a5db20001e25fdd97cd600d498551ecfe48efa53964fc3ac"
+      },
+      "failed_phase": "native-probes",
+      "founder_waiver": {
+        "repository_path": "releases/v0.18.0/qualification/rtx3090-route-waiver.json",
+        "sha256": "13bcf02764501f17b1a251e82ee6ef1750f2e0fbc4ddd0637def0c018cf8722b"
+      },
+      "window_failure": {
+        "projection_schema": 1,
+        "sha256": "6cebf89cc109c2fedfafb8c06701f41fdc641ab677aea43a15fb415ce70222a2",
+        "boundary": "native-probes",
+        "observed_summary": {
+          "probe": "compaction",
+          "error": {
+            "kind": "probe-error",
+            "sha256": "b9278890f0cb01439cdb08637c99e6665f265d00d85c055a4acbdf5dd06d769c"
+          },
+          "timeout_seconds": 900,
+          "http_status_counts": {
+            "200": 2,
+            "503": 4,
+            "499": 1
+          },
+          "managed_stop": {
+            "action": "Control-Release.ps1 -Action Stop",
+            "outcome": "graceful_incomplete_shutdown",
+            "sessions_refused": 9,
+            "shutdown_complete": false
+          }
+        },
+        "capture_sha256": "1ca0459f7da7f800261e8db0044ba57097604be533a4a3ca6b262c2462e55291"
+      },
+      "stopped_owner_census": {
+        "sha256": "8d3cebe0e5b7babaa5ac6ec8eb77d1b81dd3c890c1d86c6915edb5f9c4737c15",
+        "lane": "rtx3090",
+        "power_limit_w": 370
+      },
+      "runtime_configuration": {
+        "max_context": 131072,
+        "kv_capacity": 131072,
+        "kv_dtype": "int8",
+        "concurrency": 2,
+        "pending_timeout_ms": 180000,
+        "prefill_chunk": 1024,
+        "device_state_slots": 2,
+        "admission_headroom_mib": 768,
+        "host_context_mib": "20867.734375",
+        "host_context_bytes": 21881405440,
+        "speculative_backend": "dflash2",
+        "speculative_draft_tokens": 7,
+        "public_model_id": "q38-ninfer"
+      },
+      "probe_acceptance": {
+        "fleet": {
+          "sha256": "94c2fc0270c68351153fca4c65240e7900a3d5280e0776142f4f0e73a0b71f72",
+          "artifact_type": "omp_ninfer_fleet_fanout_probe",
+          "identity": {
+            "binary_sha256": "e571328699be41d90eff8743d94da26e8f587e48bc32f618013625af7ad0bfe0",
+            "config_sha256": "674d52609e22de54a5db20001e25fdd97cd600d498551ecfe48efa53964fc3ac",
+            "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+            "model_id": "q38-ninfer",
+            "source_dirty": false,
+            "build_profile": "native-v0.8.0-beta.3-tc-rtx3090"
+          },
+          "branches": 4,
+          "transient_retries": 0,
+          "steps": [
+            "base_prefill",
+            "warm_edit",
+            "checkpoint_save",
+            "branch_0",
+            "branch_1",
+            "branch_2",
+            "branch_3",
+            "session_delete"
+          ]
+        },
+        "fanout": {
+          "sha256": "0a4effbeba0ab86c22866791a15fc32209e86913bc22c21762edaa87670bb2e5",
+          "artifact_type": "omp_ninfer_concurrency_probe",
+          "ok": true,
+          "arguments": {
+            "arm": "rtx3090-C2-acceptance",
+            "scenario": [
+              "fanout"
+            ],
+            "fanout_concurrency": 4,
+            "branches": 4,
+            "model": "q38-ninfer"
+          },
+          "statuses": {
+            "server_before": {
+              "artifact_type": "ninfer_server_status",
+              "schema_version": 2,
+              "status": "ok",
+              "identity": {
+                "binary_sha256": "e571328699be41d90eff8743d94da26e8f587e48bc32f618013625af7ad0bfe0",
+                "config_sha256": "674d52609e22de54a5db20001e25fdd97cd600d498551ecfe48efa53964fc3ac",
+                "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+                "source_dirty": false,
+                "build_profile": "native-v0.8.0-beta.3-tc-rtx3090"
+              },
+              "runtime": {
+                "max_context": 131072
+              },
+              "scheduler": {
+                "max_concurrency": 2
+              }
+            },
+            "server_after": {
+              "artifact_type": "ninfer_server_status",
+              "schema_version": 2,
+              "status": "ok",
+              "identity": {
+                "binary_sha256": "e571328699be41d90eff8743d94da26e8f587e48bc32f618013625af7ad0bfe0",
+                "config_sha256": "674d52609e22de54a5db20001e25fdd97cd600d498551ecfe48efa53964fc3ac",
+                "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+                "source_dirty": false,
+                "build_profile": "native-v0.8.0-beta.3-tc-rtx3090"
+              },
+              "runtime": {
+                "max_context": 131072
+              },
+              "scheduler": {
+                "max_concurrency": 2
+              }
+            }
+          },
+          "scenarios": [
+            {
+              "name": "fanout",
+              "ok": true,
+              "requests": [
+                {
+                  "label": "fanout-base",
+                  "ok": true,
+                  "http_status": 200,
+                  "submitted_monotonic_s": 124665.2834491,
+                  "completed_monotonic_s": 124687.8707475
+                },
+                {
+                  "label": "branch-0",
+                  "ok": true,
+                  "http_status": 200,
+                  "submitted_monotonic_s": 124687.8744357,
+                  "completed_monotonic_s": 124691.2811151
+                },
+                {
+                  "label": "branch-1",
+                  "ok": true,
+                  "http_status": 200,
+                  "submitted_monotonic_s": 124687.8745638,
+                  "completed_monotonic_s": 124689.6180416
+                },
+                {
+                  "label": "branch-2",
+                  "ok": true,
+                  "http_status": 200,
+                  "submitted_monotonic_s": 124687.8747273,
+                  "completed_monotonic_s": 124689.9808474
+                },
+                {
+                  "label": "branch-3",
+                  "ok": true,
+                  "http_status": 200,
+                  "submitted_monotonic_s": 124687.8742054,
+                  "completed_monotonic_s": 124691.1661314
+                }
+              ]
+            }
+          ]
+        },
+        "parallel": {
+          "sha256": "68b885c40bc9258d8ede9d35278e12ea37a7c8a8e8637fb5f41271d4b387d9a5",
+          "passed": true,
+          "model": "ninfer-native-3090/q38-ninfer",
+          "omp": {
+            "sha256": "4a6e39ea34633e03d07a1543ba30842362311f920341378433aa31b6c1404491",
+            "version": "omp/18.18.7"
+          },
+          "checks": null,
+          "artifact_type": "omp_ninfer_parallel_proof",
+          "max_in_flight": 2,
+          "scenarios": [
+            {
+              "scenario": "subagents",
+              "passed": true,
+              "max_in_flight": 2,
+              "overlap_seconds": 19.161,
+              "checks": {
+                "logged_requests": true,
+                "all_logged_requests_completed": true,
+                "single_server_instance": true,
+                "provider_limit_respected": true,
+                "concurrency_expected": true
+              }
+            },
+            {
+              "scenario": "sessions",
+              "passed": true,
+              "max_in_flight": 2,
+              "overlap_seconds": 17.097,
+              "checks": {
+                "logged_requests": true,
+                "all_logged_requests_completed": true,
+                "single_server_instance": true,
+                "provider_limit_respected": true,
+                "concurrency_expected": true
+              }
+            }
+          ]
+        },
+        "compaction": {
+          "sha256": "3785284d60efd9b09a33e02ee4c63dd672d22604c42fd679de308fbac635aa44",
+          "passed": false,
+          "model": "ninfer-native-3090/q38-ninfer",
+          "omp": {
+            "sha256": "4a6e39ea34633e03d07a1543ba30842362311f920341378433aa31b6c1404491",
+            "version": "omp/18.18.7"
+          },
+          "checks": {},
+          "artifact_type": "omp_ninfer_long_session_proof",
+          "committed": 0,
+          "parameters": {
+            "compactions": 2,
+            "seed": 20260928,
+            "filler_bytes": 40000,
+            "plant_after": 1,
+            "restart": false,
+            "expect_method": null
+          }
+        },
+        "capture_sha256": "2200d67ba6a65cfb011fdcdce6706105c92d9af2e1b4d583a2eeef88b951cb0e"
+      },
+      "blocks": 7
+    },
+    "linux_live_client": {
+      "status": "passed",
+      "omp_version": "omp/18.18.7",
+      "binary_sha256": "ea6c216feb260a3766a591760aad06bdc608efd5c632912603f5ccb41b0a4bb1",
+      "profile": "linux-docker-local",
+      "fail_closed": {
+        "exit_code": 1,
+        "no_model_response": true,
+        "only_selected_local_provider_observed": true,
+        "errors": [
+          {
+            "kind": "client-error",
+            "sha256": "8be2d4a909302a94aa8ddcd698df1629c37649a94a0e8d94294700852f0c1347"
+          }
+        ]
+      },
+      "capture_sha256": "1c9d1ac83ff20394644602a3035464999b8c1e5ea1b843e04198eb4bbfce5ff2"
+    }
+  },
+  "tools": true,
+  "vision": true,
+  "vision_scope": {
+    "darwin-remote-ssh": {
+      "status": "passed",
+      "input_image_records": 3,
+      "input_sha256": "8dc618562e82300e3b68ab9236ab520455a6b5b09f81c6403e9afbf4aad9f592"
+    },
+    "windows-docker-local": {
+      "status": "passed",
+      "input_image_records": 3,
+      "input_sha256": "8dc618562e82300e3b68ab9236ab520455a6b5b09f81c6403e9afbf4aad9f592"
+    },
+    "linux-docker-local": "Not exercised; no Linux vision claim.",
+    "rtx4090-native": "No native vision claim.",
+    "rtx3090-native": "No native vision claim."
+  },
+  "stateful_resume": true,
+  "fail_closed": true,
+  "runtime_incumbent_restored": true,
+  "runtime_qualification": {
+    "rtx5090-container": {
+      "status": "passed",
+      "repository_path": "releases/v0.18.0/qualification/rtx5090.json",
+      "scope": "Current exact-source published candidate component qualification; fresh acceptance additionally binds exact runtime identity."
+    },
+    "rtx3090-windows-native": {
+      "status": "passed",
+      "repository_path": "releases/v0.18.0/qualification/rtx3090.json",
+      "scope": "Current exact-source selected component qualification is separate from the failed, founder-waived post-route native campaign. No native public-install acceptance is claimed."
+    },
+    "rtx4090-windows-native": {
+      "status": "passed",
+      "repository_path": "releases/v0.18.0/qualification/rtx4090.json",
+      "scope": "Current exact-source published beta.3 component qualification; fresh OMP 18.18.7 route/public-install/probe acceptance and restored promoted canonical instance."
+    }
+  },
+  "evidence": {
+    "documented_routes": {
+      "repository_path": "releases/v0.18.0/acceptance/documented-routes.json",
+      "sha256": "5c51cb958837c7e47d23f02593039ebfc7192ca3c02a493edb651af510ad5fc6"
+    },
+    "rtx4090_public_install": {
+      "repository_path": "releases/v0.18.0/acceptance/rtx4090-public-install.json",
+      "sha256": "dd5642d5be81b90c5946a6b8e35399ef5e7645614dff72470a20a81cc2ac5dff"
+    },
+    "restoration": {
+      "repository_path": "docs/measurements/2026-11-12-v0180-acceptance-restoration.json",
+      "sha256": "b5ccb28bd16536fb03ef92b557488e668461130700b20ca7619b2b02db978198"
+    },
+    "published_client_components": {
+      "repository_path": "releases/v0.18.0/qualification/client-components.json",
+      "sha256": "8cb03061a2ac69967409f7964cae104600e23fad5ad7f76ebee84912f22b3952"
+    }
+  },
+  "limitations": [
+    "Owner-operated tester-equivalent, not independent external-user outcomes.",
+    "macOS arm64 manual SSH preview; Linux x64 evidence is WSL2-scoped.",
+    "Native first-release route acceptance does not claim running-lane upgrade/rollback; component qualification is separate.",
+    "Image input covers macOS and Windows against RTX 5090 only; no native or Linux vision claim.",
+    "Independent post-window observation verifies the same incumbent container and its restart policy; infrastructure controls remain private.",
+    "rtx3090-native: the initial native campaign's seven documented blocks passed, but its post-route stock OMP subagent proof failed because the model's five task calls were each rejected for a missing context argument; that window restored the canonical lane.",
+    "rtx3090-native: all seven documented blocks passed; the later native campaign failed at native-probes compaction and was waived by the founder. Behavior completion, wrapper restoration and anonymous public-install acceptance are not claimed; the documented controller lead recovery is separately bound.",
+    "rtx3090-native: documented blocks passed, but the post-route native-probes compaction probe failed and was waived by the founder. Native behavior completion, wrapper restoration audit and anonymous public-install acceptance are not claimed; lead recovery is bound by the waiver."
+  ],
+  "raw_prompts_outputs_or_secrets_included": false
+}

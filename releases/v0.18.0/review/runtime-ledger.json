@@ -1,0 +1,680 @@
+{
+ "artifact_type": "omp_ninfer_review_ledger",
+ "schema_version": 1,
+ "release": "v0.18.0",
+ "as_of": "2026-11-12",
+ "status": "closed-by-disposition",
+ "approval_granted": true,
+ "publication_authorized": false,
+ "public_route_acceptance_granted": false,
+ "scope": "Closed exact-source runtime full council CR-20261111T0913Z-48c8ac46 on F4 48c8ac4644322f024b5c3bd5b657af5874567251 without remediation, and closed product full council CR-20261112T115852Z-34adfb0d-product on 97dea2f0..34adfb0d with verified localized remediation 879c42d8..2a735da0, closed by lead verification in epoch CR-20261112T162440Z-2a735da0-product-r2. The route stage candidate is 2a735da0367214b35a325f61865fb47f0ce872c7; deferred product residuals are tracked in alphastorm/omp-ninfer#161. The missing runtime seat is recorded as missing, not approval. This is not approval of a later executable subject, publication, or independent public-user acceptance; no human waivers are recorded.",
+ "native_runtime": {
+  "review_id": "CR-20261111T0913Z-48c8ac46",
+  "review_sequence_id": "omp-ninfer-v0.18.0-engine",
+  "review_class": "full-council",
+  "status": "closed-without-remediation",
+  "source_commit": "48c8ac4644322f024b5c3bd5b657af5874567251",
+  "base_commit": "e0971faf221204047d5a4ed834e4e298740cee17",
+  "subject_digest": "77e8047cd8bab933218bcf82a74cbdbc8ddc0ef2b2eddd3b63e8d32909e687a7",
+  "resolver_subject_digest": "a580a0d90960fcfffa77f186ee951f8050cac168bfd92834fca4c093e7e4c607",
+  "resolver_assignments": [
+   {
+    "reviewer_id": "daybreak-blue",
+    "selectionClass": "strong",
+    "role": "strong_critic",
+    "independence_class": "cross_family",
+    "authority": "independent_evidence",
+    "model": "openai-codex/gpt-6-sol:max",
+    "model_family": "gpt"
+   },
+   {
+    "reviewer_id": "gemini-argon",
+    "selectionClass": "strong",
+    "role": "strong_critic",
+    "independence_class": "cross_family",
+    "authority": "independent_evidence",
+    "model": "google-antigravity/gemini-4-carbon:medium",
+    "model_family": "gemini"
+   },
+   {
+    "reviewer_id": "gpt-astra",
+    "selectionClass": "supplement",
+    "role": "supplement",
+    "independence_class": "cross_family",
+    "authority": "supplemental_evidence",
+    "model": "openai-codex/gpt-6-astra:max",
+    "model_family": "gpt"
+   },
+   {
+    "reviewer_id": "claude-mythos",
+    "selectionClass": "supplement",
+    "role": "lead_family_security",
+    "independence_class": "same_lineage_blind_sample",
+    "authority": "supplemental_evidence",
+    "model": "anthropic/claude-mythos-5-2:max",
+    "model_family": "claude"
+   }
+  ],
+  "receipt_digests": {
+   "close-report.md": "346a7839dd34c2d951074c0769f2106e29a1f179eecc6fb588ad529468360aac",
+   "ledger.md": "ba94314e907500722acc2403b3494e160bb24d0a17e7975be407778bb92d3eef",
+   "review-record.json": "9ec14edfdc18907bb89cda38db6cef1094bfaba6cd444ba5a9a2e762eb3c40bb",
+   "frozen-subject.json": "70a0fda39ce493c23619870fd380c702c407e9a7e566cbd247a5c93825d26f40",
+   "resolver-receipt.json": "03d75cb88eea9273610219146ff2e234bc2ac2307c7d41ad0f321819c12bab0d",
+   "panel-selection.json": "eb6b7034566e05a2a5e35494c4213f3c805ef69730b2fe3a9f21fedbf11f7418",
+   "daybreak-blue.json": "70179a72274e7b972227d790d14a3dc3dd0e3523fbe11c6f3b66bf6a48ad8edf",
+   "gpt-astra.json": "f928f08ed88611ba3ee6d11f0a1cef73f9b8380bea62362a4ddec7a8eecdc6b5",
+   "claude-mythos.json": "ab77e7ace3422849d4654f8e81f613ec4dc43cefa485e3ec158208ffa221ccb7",
+   "review-dispatch-envelope.attempt-1.json": "b5f35a9a64d0b96369a3966988f3285f734cceedb88a19e1d9dea48bcdf9e9b5",
+   "review-dispatch-envelope.attempt-2.json": "4acfaf5093cd01a124a1623ec0c795f1bb4f0c7ef72cbdb9a6b69add1bc10e60"
+  },
+  "reviewer_results": {
+   "daybreak-blue": {
+    "summary": "Source inspection found one operation-free prepare ordering race at the frozen commit. No runtime tests were executed; the finding needs the deterministic scheduling test described below.",
+    "evidence": [
+     "R1|P1|conf=0.94|claim=An off-worker export or import prepare queued after the turn's command drain can be overtaken by a newly started context operation, even when no operation was in flight at arrival|evidence=src/runtime/engine/engine_checkpoint.inl:540-547,596-647 places new commands in checkpoint_commands_ but the start guard checks only checkpoint_held_commands_; src/runtime/engine/engine_core.h:2798-2845,2887-2927 drains once before later operation-start sites|impact=The operation-free prepare invariant fails; an authenticated restore or save can wait behind a later long operation and a request can expire despite the held-command guard; sticky shutdown refusal does not prevent that delay|verify=Use a worker-command barrier after the batch swap with no context operation, queue an off-worker export and import, then release the worker and trace whether either prepare runs before the next binding or capture starts"
+    ],
+    "unresolved": []
+   },
+   "gemini-argon": {
+    "status": "missing",
+    "failure_kind": "transport_failure",
+    "error": "No model selected",
+    "attempts": 2,
+    "approval_granted": false
+   },
+   "gpt-astra": {
+    "summary": "Read-only review of 48c8ac4644322f024b5c3bd5b657af5874567251. Standing: lead_family=claude; selectionClass=supplement; role=supplement; independence_class=cross_family; authority=supplemental_evidence. Two source-level findings concern package provenance and prepare ordering. No commands or tests were run; verification proposals below are not executed results.",
+    "evidence": [
+     "R1|P2|conf=0.98|claim=TOCTOU: Linux packaging can publish replacement executable bytes under an earlier executable's validated build identity.|evidence=tools/release/package.py:333-349 validates executable --version results; :555-579 subsequently hashes the original paths and combines those hashes with the earlier identity; :407-419 checks archive bytes only against these later hashes. Unlike Windows :710-722, Linux does not stage and revalidate the executables.|impact=[INFERENCE] A build-output replacement between identity validation and hashing produces internally misattributed source/profile provenance despite passing archive checksum verification, violating the exact-package identity invariant.|verify=Extend tests/test_release_package.py with a deterministic replacement after validate_options returns but before Linux hashing, using a different build identity; require rejection or publication of the originally validated staged bytes.",
+     "R2|P2|conf=0.92|claim=Concurrency ordering: a prepare enqueued after the turn's command snapshot can miss the next operation-free boundary and wait behind another context operation.|evidence=src/runtime/engine/engine_checkpoint.inl:542-549 enqueues into checkpoint_commands_; :596-618 snapshots that queue only in run_checkpoint_commands and later drains only checkpoint_held_commands_; :646-647 excludes incoming commands from the boundary guard. src/runtime/engine/engine_core.h:2797-2845 performs the snapshot before completion polling, while :2931-2939 can complete an operation and immediately start priority admission or resident reclaim. tests/runtime/test_engine_core.cpp:3481-3483 instead waits 300ms before releasing its operation.|impact=[INFERENCE] An off-worker save/import arriving during that interval can wait for a second unrelated operation. Native preparation remains operation-free, but the next-boundary/one-in-flight-operation ordering promised in docs/durable/CONTRACTS.md:430-440 is not guaranteed from enqueue arrival.|verify=Add a synchronized fixture that enqueues a prepare after the queue snapshot while operation A remains in flight, then completes A with operation B ready to start; assert the prepare runs before B starts."
+    ],
+    "unresolved": []
+   },
+   "claude-mythos": {
+    "summary": "Supplemental same-lineage security review of 48c8ac46 over the 64 bound paths, reading head state only; I could not diff against the base or execute anything. ECTRL controller changes, profile binding, small-T kernel bounds, staged-export pins and the held-prepare runner match their contracts where traced. Three P2 findings: R1 managed Stop fails closed only on a parseable launch-bound report, so unreported, nonzero-exit and post-timeout-kill shutdowns return success and unblock Restart, Rollback, installer cleanup and Uninstall; R2 the installer's stale-lease gate prescribes a predecessor Stop that cannot retire the lease in the incomplete-shutdown state this release fixes; R3 build-profile variants share one instance identity, so the default build of the same source cannot replace an installed variant without Uninstall. Unresolved: whether a later launch may clear the sticky refusal (excluded managed hold), pin-awareness of zero-copy State image consumers outside the bound paths, and reparse resolution on the real hosts. One directory-scoped search surfaced a few lines of an unlisted engine header; they are not used. Supplemental evidence only.",
+    "evidence": [
+     "R1|P2|conf=0.85|claim=Observed: in stop-event mode Stop-ManagedProcess throws only when a parseable report bound to the launch says incomplete or refused. When the report is missing, unparseable, foreign or wrong-schema, when the server exits nonzero, when the stop signal cannot be delivered, or when the server is force-terminated after the graceful wait, the code only relabels the receipt (graceful_unreported, graceful_nonzero_exit, signal_failed, graceful_wait_expired), deletes runtime.json and returns success. Inference: this predates the delta, but it bounds the delta's sticky-refusal guarantee.|evidence=packaging/windows/Control-Release.ps1:946-965 a nonzero exit only sets a label; :968-971 signal failure only sets a label; :985-992 wait expiry relabels then calls Stop-LaunchNow; :1025-1028 an unreadable report becomes null; :1033-1043 the no-bound-report branch labels and does not throw; :1058-1059 runtime.json is removed; :1068-1080 Stop-ManagedRelease then restores the lease; :1554-1557 Rollback flips active_release after that return; :1418-1489 Uninstall deletes the root after it. packaging/windows/Install-Release.ps1:970-975 with :1050-1063 rollback and repair delete candidate release, secret and cache trees after the same Stop. packaging/windows/RELEASE_NOTES.md:389-391 states managed stop accepts only a launch-bound report with complete=true. Only the qualification harness reads the label (tools/qualification/qualify_native.py:2227-2229).|impact=Controller containment: restart, rollback and delete postconditions do not fail closed on the least-evidenced shutdowns. A crash, report I/O failure or timeout kill during final saves (graceful_stop_timeout_seconds is 900 in packaging/windows/lanes/rtx3090/release-spec.json) yields a successful Stop with no sticky refusal, so loss of acknowledged session state is signalled only by a receipt label that no lifecycle action consults.|verify=Reuse the fixture of test_incomplete_stop_restores_owner_once_and_keeps_rollback_refused (tests/test_windows_release.py:3719-3793) with shutdown.json absent, truncated, or carrying another launch_id, and with a child that outlives the graceful wait; run Stop then Rollback and assert whether either throws and whether runtime.json and active_release are unchanged.",
+     "R2|P2|conf=0.7|claim=Observed: for a non-running incumbent the installer refuses to proceed while gpu-owner-lease.json exists and directs the operator to the incumbent's own managed Stop; its only regression uses a killed-wrapper lease with no shutdown report. Inference from the notes that introduce lease restoration in this delta: a predecessor controller left after an incomplete final save rethrows on every Stop and never restores its lease, so the prescribed reconciliation cannot succeed on a host in exactly the state this release fixes.|evidence=packaging/windows/Install-Release.ps1:916-922 the gate, its comment that the original managed Stop can reconcile it first, and the throw text; packaging/windows/RELEASE_NOTES.md:136-137 gives the same instruction, :122-126 records that the predecessor Stop already fails stickily on an incomplete report, :29-33 records lease restoration after an incomplete final save as new; packaging/windows/Control-Release.ps1:1068-1080 is the new catch that performs it; tests/test_windows_release.py:3184-3229 exercises the gate only for a dead-wrapper lease that the predecessor Stop clears with no report present.|impact=Previous native installation: a host left stopped after an incomplete shutdown (lease held, card at its serving cap) cannot take this release by following the installer. The instructed Stop loops, and the remaining exits are undocumented (start the incumbent and upgrade while it runs, or run the successor controller's Stop, which the test comment rules out) or hand-deleting the lease, which discards the recorded prior owner state.|verify=Extend running_predecessor_3090 at PREDECESSOR_3090_BETA2 with runtime.json and a launch-bound shutdown.json carrying refused=1 with the task idle; run the predecessor Control-Release.ps1 -Action Stop twice and check whether gpu-owner-lease.json survives, then call Assert-GpuOwnerUpgradeReady with IncumbentRunning false and record the sanctioned way out.",
+     "R3|P2|conf=0.8|claim=Observed: the four allowlisted build profiles of one source share release_id, deployment profile, package filename and the installer instance id (release_id plus the first 12 characters of patch_stack_sha), and the installer refuses a package whose instance id is already recorded unless it is the active instance with identical package hash and build profile. Inference: a host that has installed one variant of the frozen source cannot install another, including the default build that the rollback contract names as the way to ship the options OFF, without Uninstall.|evidence=tools/release/package.py:669-673 rewrites only build_profile and :691-694 forms asset names without it; packaging/windows/RELEASE_NOTES.md:19-20 says release and deployment identities do not change between variants; packaging/windows/Install-Release.ps1:1307-1308 filename check, :1342-1348 instance id and the release, secret and cache roots, :1354-1355 an inactive recorded instance is refused, :1357-1367 an active instance with a different package_sha256 or build_profile is refused; packaging/windows/Control-Release.ps1:1418-1489 the only removal action deletes the whole state root; tests/test_windows_release.py:3625-3716 installs each variant only into a fresh root.|impact=Rollback and provenance: the declared fallback from a tc or a8 package to the default build of the same reviewed source is not installable in place. It needs a new source commit that changes release_id, or an Uninstall that deletes the previous installation, every per-release durable root and the stored key, which the rollback contract says to keep. Two different binaries also share one asset name and release id and differ only by hash.|verify=In one state root install the tc package from the variant fixture, then run Install-Release with the default package built from the same commit, once while tc is active and once after Rollback; expect the refusals at Install-Release.ps1:1367 and :1355, then decide whether instance identity must carry the profile."
+    ],
+    "unresolved": [
+     "U1|P2|conf=0.6|question=threat model omits whether an ordinary launch may retire an unreconciled incomplete-shutdown refusal: must the requirement that the runtime refusal stays sticky and rollback stays blocked survive a later Start, the installer rollback's restart of an incumbent whose Stop just refused, or the first launch of an upgrade, given that managed hold and reconciliation are excluded?|missing=A stated rule for which actions may clear the launch-bound refusal. At head, Start-ManagedRelease (packaging/windows/Control-Release.ps1:1082-1128) does not look at a retained runtime.json or report, Invoke-Run deletes the report (:1287) and overwrites runtime.json (:1349), Install-Release.ps1:959-960 with :1066-1067 restarts an incumbent after its refused Stop, and the v0.18.0 preparation regression (tests/test_windows_release.py:3719-3793) drives only Stop, Restart and Rollback while stubbing Start-ScheduledTask to throw.|verify=After the refused Stop in that fixture run Start through the wrapper's pre-spawn section, then Rollback and Install-Release -RepairInterruptedInstall; record whether the refusal survives and decide whether that belongs in scope.",
+     "U2|P2|conf=0.25|question=Does every caller of StateImageStore consume_checkpoint, make_mutable and Transfer publish(false) consult a pin-aware predicate, now that a Device-staged export holds a read lease on a Device-only immutable image across many worker turns with no context operation in flight?|missing=The Program bind, restore and demotion call sites, which lie outside the 64 bound paths. Bound evidence shows only that the staged reader is taken at src/models/qwen3_5/program/storage/checkpoint_api.cpp:539-544 and held through the off-lock write (src/runtime/engine/engine_checkpoint.inl:314-333), that those three operations throw std::logic_error on outstanding source pins (src/models/common/context/state_store.cpp:366-372, :377-383, :579-580), that a worker exception fails the Engine (src/runtime/engine/engine_core.h:3055-3059), and that tests/runtime/test_export_state.cpp:453-468 exercises only the non-throwing release and drop predicates.|verify=Inspect those call sites for a source_pins or can_release_after_checkpoint_references guard, and add a test that admits the same session's next turn, and a demotion once Host room returns, while a staged writer is blocked.",
+     "U3|P3|conf=0.3|question=On the two native hosts, does any ancestor of a recorded model_artifact path, or of a routinely running process image, carry a reparse point that exposes no single Target (volume mount point, cloud-files or dedup placeholder), so that the new resolver refuses the upgrade or Start, or blocks installer rollback and repair?|missing=Host inventory of the installed releases' model paths and their reparse attributes, and Windows PowerShell 5.1 behaviour of the Target property for those reparse classes. At head the resolver throws on such an entry (packaging/windows/Protect-StateRoot.ps1:71-81), every containment check uses it (packaging/windows/Install-Release.ps1:128-132), and the installer census applies it to every process image (packaging/windows/Install-Release.ps1:977-990).|verify=On each host dot-source the packaged Protect-StateRoot.ps1 and run Resolve-NInferFinalPath over the model_artifact values in state.json and over the ExecutablePath values from Get-CimInstance Win32_Process before the upgrade window."
+    ]
+   }
+  },
+  "dispositions": {
+   "daybreak-blue-R1": {
+    "severity": "P1",
+    "result": "confirmed",
+    "disposition": "defer",
+    "change": "none in F4; fork follow-up issue: make start sites see the incoming command queue, or restate the bound from first drain",
+    "rationale": "Lead verification at F4: engine_checkpoint.inl:542-549 appends off-worker commands to checkpoint_commands_; run_checkpoint_commands (:596-610) swaps that queue only at the top of a worker turn; operation_boundary_taken (:646-648) checks only checkpoints_.pending() and checkpoint_held_commands_. A prepare enqueued after the swap is invisible to start sites until the next turn and can then be held behind an operation that started after it was enqueued. Same root cause as gpt-astra-R2 (merged; both IDs kept). Lead residual re-rating P2 (reviewer P1 kept in this row): the extra wait is bounded by one context operation (binding, capture, demotion or pause: state transactions, not prefill or decode) plus one worker turn; no refusal, parking, data loss or integrity effect; ESAVE liveness and operation-free preparation hold. CONTRACTS.md:430-440 states the bound relative to the worker's command runner (a prepare that meets an operation is held; it waits for at most the operation in flight when it arrived); the enqueue-to-drain interval is not covered, so the text is ambiguous rather than a violated explicit invariant: design decision to tighten text or guard in the next release. Mitigating now changes frozen engine source and rebuilds every package (hours of exclusive fleet time) for a sub-second-to-seconds latency bound."
+   },
+   "claude-mythos-R1": {
+    "severity": "P2",
+    "result": "confirmed",
+    "disposition": "defer",
+    "change": "none in F4; fork follow-up issue: decide which unreported, nonzero-exit, signal-failure and timeout-kill shutdown classes must fail Stop closed; v0.18.0 guide discloses that only a launch-bound incomplete report blocks rollback",
+    "rationale": "Lead verification: Control-Release.ps1 Stop-ManagedProcess (946-1080) relabels and returns for missing, unparseable or foreign reports, nonzero exit, signal failure and wait expiry; this predates the F3..F4 delta (ECTRL added only the restore after a proven-stopped launch-bound incomplete report). Failing closed on unreported shutdowns would block the only recovery path after a crash (Stop must complete so the operator can restart or roll back): a controller design change outside this release's #89 scope. Residual: loss of unsaved sessions after a crash or timeout kill is signalled only by the receipt label; disclosed."
+   },
+   "claude-mythos-R2": {
+    "severity": "P2",
+    "result": "confirmed",
+    "disposition": "defer",
+    "change": "none in F4; product mitigation: the v0.18.0 guide's upgrade section documents the recovery for a beta.2 host whose managed Stop keeps failing with an incomplete shutdown, checked against the Windows release fixture before publication",
+    "rationale": "Lead verification: Install-Release.ps1:916-922 refuses a non-running incumbent that holds gpu-owner-lease.json and prescribes the incumbent's own Stop; the beta.2 controller (a87de361) throws before Restore-GpuOwnerLease on graceful_incomplete_shutdown and keeps runtime.json, so every later Stop throws again (observed on our RTX 3090 host in earlier trains). A beta.2 host in exactly the state this release fixes cannot follow the instruction. Our native host is canonical-clean (rebaselined census, exact native-lane restorations), so the release route windows are unaffected; public users need the documented way out. Product-docs mitigation avoids re-freezing F4."
+   },
+   "claude-mythos-R3": {
+    "severity": "P2",
+    "result": "confirmed",
+    "disposition": "defer",
+    "change": "none in F4; fork follow-up issue: carry build_profile in the installer instance identity; product: one package per native lane and tag, fallback is exact rollback to beta.2, no in-place profile swap advertised; Phase C promotes only the selected package",
+    "rationale": "Lead verification: Install-Release.ps1:1342-1367 forms instanceId from release_id plus patch_stack_sha[:12], identical for every build profile of F4, and refuses another profile of the same instance whether active (:1357-1367) or inactive (:1355). v0.18.0 publishes exactly one package per native lane and tag, so users never receive two profiles of one tag; the supported fallback is exact rollback to beta.2 (a different instance). The rollback text about the default build refers to the source-level option default, not an in-place install path. Residual: switching profiles of one source needs Uninstall; disclosed in the guide."
+   },
+   "claude-mythos-U1": {
+    "severity": "P2",
+    "result": "design decision",
+    "disposition": "accept",
+    "change": "none in F4; the guide states that an operator Start after an incomplete shutdown clears the refusal and that sessions not saved at that shutdown are lost",
+    "rationale": "Managed hold and reconciliation are outside this release's declared scope; the operator's explicit Start is the reconciliation act. Start-ManagedRelease does not consult the retained report and the installer's rollback restart behaves the same way; recording the rule in the guide removes the ambiguity without new controller state."
+   },
+   "claude-mythos-U2": {
+    "severity": "P2",
+    "result": "falsified (safe)",
+    "disposition": "reject",
+    "change": "none",
+    "rationale": "Lead verification (with a private verification trace; anchors read first-hand): an export takes a checkpoint lease per exported handle before reading states (checkpoint_api.cpp:393 out->checkpoints.push_back(p.checkpoints.lease(handle)); state read leases at :539). ExportLease::Impl declares checkpoints before states (:284-285), so state read leases are destroyed first and the checkpoint lease outlives them. Checkpoints::lease increments slot pins and erase refuses while pinned (checkpoint_store.h:138-153), so the ContextSnapshot that retained a checkpoint reference on the image (snapshot.h:27, released only in its destructor :85) survives the whole export: checkpoint_references stays >= 1, which excludes the CaptureOperation make_mutable path (context_operation.cpp:90-95 requires zero references). The consuming Move and Split bindings require zero source pins (binding.cpp:126-129; planning/source.cpp:103-120), demotion refuses pinned images and pause backup preserves pinned replicas (reclaim.cpp:769-806; pause.cpp:51-56). No reachable call throws on an outstanding staged-export pin. Residual: verdict rests on source reachability; no blocked-writer GPU test was run."
+   },
+   "gpt-astra-R1": {
+    "severity": "P2",
+    "result": "confirmed",
+    "disposition": "defer",
+    "change": "none in F4; fork follow-up issue: stage and revalidate Linux binaries as the Windows path does (package.py:705-724)",
+    "rationale": "Lead verification: package.py validates identities on the original paths (:333-349) and hashes them later through ReleaseFile.from_path (:555-579); the Windows path stages and revalidates (:705-724). Exploiting it needs a concurrent writer replacing build outputs during the packaging step; the RC batch packages inside a clean single-tenant build container with a verified mirror, and the RC binding step re-hashes the packaged ninfer-serve against the build receipt before any measurement. Lead residual P3 (reviewer P2 kept). A fix changes frozen tooling source; defer."
+   },
+   "gpt-astra-R2": {
+    "severity": "P2",
+    "result": "confirmed (duplicate)",
+    "disposition": "defer",
+    "change": "merged into daybreak-blue-R1",
+    "rationale": "Same root cause as daybreak-blue-R1; see that row. The reviewer's P2 matches the lead's residual rating."
+   },
+   "claude-mythos-U3": {
+    "severity": "P3",
+    "result": "falsified on the release hosts",
+    "disposition": "accept",
+    "change": "none",
+    "rationale": "Lead verification 10:18Z: the F4 Protect-StateRoot.ps1 Resolve-NInferFinalPath ran read-only on the native host (both lanes live there): both lanes' recorded model_artifact (one shared path) resolves without reparse ambiguity, and all 126 running process images resolve with zero failures. Probe script and copied resolver kept in private lead evidence (u3-reparse-probe.ps1); the host scratch directory was removed."
+   }
+  },
+  "closure": "Closed without remediation: all nine ledger rows dispositioned, no in-scope residual P0/P1, no targeted refuter and no second council. The prepare-ordering finding retains the reviewer P1 and the lead residual P2 rating; staged-export pin safety was verified by a source-lifetime trace, not a blocked-writer GPU test. The selected gemini-argon strong-critic seat failed with the provider error \"No model selected\" on the initial attempt and one retry; it is missing evidence, never approval. Product-side guide controls and deferred fork follow-ups remain recorded in the dispositions."
+ },
+ "product_tooling": {
+  "repository": "https://github.com/alphastorm/omp-ninfer",
+  "review_id": "CR-20261112T115852Z-34adfb0d-product",
+  "review_sequence_id": "omp-ninfer-v0.18.0-product",
+  "review_class": "full-council",
+  "base_commit": "97dea2f00bce385e7fb80c4fddeb38a8f5897385",
+  "stage_commit": "2a735da0367214b35a325f61865fb47f0ce872c7",
+  "reviewed_commit": "34adfb0d72ee5d1bd12b6988b50b3969f80d52a6",
+  "subject_digest": "e3ec046fa05243e56ba1834d85902aea8e0d781f450136275d6e2d760eab37a8",
+  "resolver_subject_digest": "e309ae2e853c8865f330d338c2ccb69d526a117c723fc345e63ae958e0d87a4c",
+  "status": "closed-with-remediation",
+  "resolver_assignments": [
+   {
+    "reviewer_id": "daybreak-blue",
+    "selectionClass": "strong",
+    "role": "strong_critic",
+    "independence_class": "cross_family",
+    "authority": "independent_evidence",
+    "model": "openai-codex/gpt-6-sol:max",
+    "model_family": "gpt"
+   },
+   {
+    "reviewer_id": "gemini-carbon",
+    "selectionClass": "strong",
+    "role": "strong_critic",
+    "independence_class": "cross_family",
+    "authority": "independent_evidence",
+    "model": "google-antigravity/gemini-4-carbon:medium",
+    "model_family": "gemini"
+   },
+   {
+    "reviewer_id": "gpt-astra",
+    "selectionClass": "supplement",
+    "role": "supplement",
+    "independence_class": "cross_family",
+    "authority": "supplemental_evidence",
+    "model": "openai-codex/gpt-6-astra:max",
+    "model_family": "gpt"
+   },
+   {
+    "reviewer_id": "claude-mythos",
+    "selectionClass": "supplement",
+    "role": "lead_family_security",
+    "independence_class": "same_lineage_blind_sample",
+    "authority": "supplemental_evidence",
+    "model": "anthropic/claude-mythos-5-2:max",
+    "model_family": "claude"
+   }
+  ],
+  "receipt_digests": {
+   "close-report.md": "0400d1701d04d03f432231078300814461a1ab715a190bdbb76ccdbaca7fcc13",
+   "ledger.md": "a6b445b8fd2c2ab71035495bba42029c693b477dae481babaff4270ddb0cfdc3",
+   "review-record.json": "7a04605757e82586ed6862de958e2d4b085ed7001e061d4d1cd885edf7cf50d3",
+   "frozen-subject.json": "cbff64d02fddd86f4a21e71252923466b2299f3af507a04a26351161f4ddf31b",
+   "resolver-receipt.json": "91a2515e5f58595c669f6f728ce14ee3adfef3785014e3646f6bdeaabd5267d6",
+   "panel-selection.json": "30c35ae8308062f0ef8a20c617e618863f351bba1b54a414abef1ecb09ff7f91",
+   "daybreak-blue.json": "d31652f630a22ebd5f3395a816ae0bf522b486a7691ea2725f765e99b02b3844",
+   "gemini-carbon.json": "5a7294be1a302672e7f8cf58cab74d09ddcc46bd055fae7ede7929a7bef6424d",
+   "gpt-astra.json": "afe93d6f7442db8e8d1c97e7383a08d06e2e1772792d17f90396eb4d5509f784",
+   "claude-mythos.json": "4ad8449501124f47285862d5d1ce4427880bb815c61407a475abed9d61c8a021"
+  },
+  "reviewer_results": {
+   "daybreak-blue": {
+    "summary": "Read-only review of the frozen candidate found four source-grounded admission and lifecycle weaknesses. No live acceptance or verification was run.",
+    "evidence": [
+     "R1|P1|conf=0.97|claim=Observation: composition publishes the original route receipt rather than an allowlisted projection; inference: an otherwise valid receipt can publish private fields outside the marker list|evidence=scripts/compose_route_acceptance.py:180-201,798-808 checks selected fields then stages raw receipt bytes; scripts/verify_release.py:72-83,3209-3254 screens only fixed private markers|impact=private host data or credentials can enter the public release despite receipt hashes and readiness gates|verify=add a non-marker private sentinel in an extra route-receipt field, compose in a scratch fixture, and inspect the staged receipt and public-text verdict",
+     "R2|P1|conf=0.95|claim=Observation: native restoration accepts any nonempty all-true audit map; inference: missing required audit checks can still yield a passed restoration receipt|evidence=scripts/compose_route_acceptance.py:349-353,506-514 defines named audit fields but checks only arbitrary map values; scripts/compose_route_acceptance.py:261-265,368-388 drops unknown keys on projection; scripts/verify_release.py:1404-1441 checks unwaived native restoration status but not audit fields|impact=checkpoint, lease, task or predecessor-state restoration can be marked passed without the required observations, despite hash-bound composition|verify=replace each native audit map with a single unrelated true field in a scratch receipt and inspect composed projection and ready-verifier result",
+     "R3|P2|conf=0.91|claim=Observation: public-install restoration does not check its controller Stop exit status; inference: a refused Stop followed by a stopped Status can produce a passed receipt|evidence=scripts/hosts/accept-native-public-install.ps1:35-51 invokes Stop without checking LASTEXITCODE and compares only subsequent status fields; scripts/hosts/accept-native-public-install.ps1:202-210 finishes passed absent a caught error; scripts/compose_route_acceptance.py:245-255 admits public-install status passed|impact=a failed shutdown and its unsaved-session refusal can be concealed by a restoration receipt even though later route controls rely on that passed evidence|verify=use a Windows PowerShell controller fixture whose Stop exits nonzero with an incomplete-shutdown report while Status returns the prior stopped state; require the receipt to fail",
+     "R4|P2|conf=0.93|claim=Observation: the documented beta.2 recovery block neither checks Start exit status nor confirms ready lifecycle JSON before invoking the beta.3 installer; inference: an unsuccessful Start still permits an upgrade attempt|evidence=docs/QUICKSTART.md:693-708 invokes Start then the installer consecutively although its prose requires a ready lane; tests/test_documented_route.py:970-977 documents that PowerShell native-command failures do not halt a pasted block without LASTEXITCODE checks|impact=the incumbent owner-running precondition is not established by the guide; installer refusal becomes the first effective guard and recovery can stall after an attempted cutover|verify=run the block with a fixture Start that exits nonzero or returns nonready status and assert the installer is never invoked"
+    ],
+    "unresolved": []
+   },
+   "gemini-carbon": {
+    "summary": "Read-only critical review of candidate 34adfb0d72ee5d1bd12b6988b50b3969f80d52a6 (148 bound paths) identified 7 root-cause defects (1 P0, 5 P1, 1 P2) and 2 unresolved verification checks:\n\n1. Public installability break (P0, R1): scripts/verify_release.py runs validate_frozen_native_pins (git show <stage_commit>:releases/v0.18.0/manifest.json) unconditionally whenever status is ready or --require-ready is passed, outside --check-pins. Once v0.18.0 is tagged ahead of stage_commit, every documented --depth 1 clone in docs/QUICKSTART.md and start-ninfer.sh (--require-installable) fails because ancestor stage_commit is absent from shallow history; pre-cut acceptance and fetch-depth:0 CI miss this.\n2. Native acceptance starting-state contradiction (P1, R2): rtx3090.json and rtx4090.json record untouched incumbents and scratch rollback not_applicable, causing compose_route_acceptance.py and accept-rtx4090-route.py to mandate FirstRelease (1 release, no predecessor) while accept-rtx4090-route.ps1 and accept-native-public-install.ps1 simultaneously require active_release in canonical StateRoot to already be beta.3 (unchecked in Preflight/DryRun). No canonical host state satisfies this without burning the window, failing composition, or destroying retained beta.2 rollback custody.\n3. Ready-gate & composer blind spots (P1, R3 & R4): compose_route_acceptance.py never checks linux_live_client pass/version/binary/fail-closed fields; verify_release.py never validates platform receipt contents, RTX 5090 incumbent restoration, non-native frozen pins, or speed/unwaived-parity/upgrade/native-publication verdicts.\n4. Guide recovery & public-truth gaps (P1/P2, R5–R7): docs/QUICKSTART.md's beta.2 incomplete-shutdown block omits $LASTEXITCODE/ready checks after Start; verify_release.py skips releases/v0.18.0/NINFER_RELEASE_NOTES.md (~35 __V0180_*__ tokens, [OPTION] blocks, and stale claims also in compatibility.json) while receipt-audit.json locks its hash; validate_public_text omits site/, llms.txt, a forward-slash Windows user-profile prefix, and GPU UUIDs.",
+    "evidence": [
+     "R1|P0|conf=0.99|claim=Observation: scripts/verify_release.py invokes validate_frozen_native_pins unconditionally whenever status is ready or --require-ready is passed, executing git show <stage_commit>:releases/v0.18.0/manifest.json and failing if the commit is absent locally; Inference: publishing tag v0.18.0 after acceptance and pin-dance commits breaks PT018-RECEIPT-ADMISSION and PT018-NAMESPACE-AND-PINS public installability on every documented --depth 1 clone and release tarball.|evidence=scripts/verify_release.py:1735-1752 runs git show <candidate>:releases/<release>/manifest.json without the shallow-clone guard in pinned_blob_sha256 (lines 524-547), and scripts/verify_release.py:3915-3947 calls it outside check_pins, while docs/QUICKSTART.md:175-180,206-211,395-400,474-476 clone --depth 1 and examples/manual-tunnel/start-ninfer.sh:66 runs verify_release.py --require-installable.|impact=Pre-cut route runners (substituted on candidate), full-history maintainer --check-pins, and .github/workflows/ci.yml:22,40,94,112 (fetch-depth: 0) all pass, yet every user following any documented --depth 1 v0.18.0 route fails verify_release.py --require-ready and start-ninfer.sh because ancestor stage_commit is absent from shallow history.|verify=Commit a ready manifest 1+ commits ahead of g4_review.product_tooling.stage_commit, git clone --depth 1 that tag, and run python3 scripts/verify_release.py --require-ready and --require-installable; observe failure requiring the frozen candidate manifest in local git history.",
+     "R2|P1|conf=0.97|claim=Observation: rtx3090.json and rtx4090.json record untouched incumbents plus scratch rollback status not_applicable, forcing FirstRelease in compose_route_acceptance.py while accept-rtx4090-route.ps1 and accept-native-public-install.ps1 require active_release in canonical StateRoot to already be candidate beta.3 with no predecessor; Inference: no canonical host state satisfies acceptance without violating PT018-HOLD-AND-PULL, PT018-GUIDE-RECOVERY, or rollback_contract.|evidence=releases/v0.18.0/qualification/rtx3090.json:255-264,282 and rtx4090.json:253-262,280 record incumbent_state untouched and rollback not_applicable; scripts/compose_route_acceptance.py:103-111,652-655 and scripts/hosts/accept-rtx4090-route.py:162-167 reject upgrade lineage_mode; scripts/hosts/accept-rtx4090-route.ps1:96-111,319-341 and scripts/hosts/accept-native-public-install.ps1:86-107 require 1 release with active_release package_sha256 equal to beta.3.|impact=Against the untouched v0.17.0 beta.2 host, Preflight and DryRun pass (AssertBaseline omits package_sha256), driver-window.json is spent (accept-rtx4090-route.py:296-300), and Accept throws at accept-rtx4090-route.ps1:321 outside try/finally; upgrading first retains beta.2 as previous_release (rejected by FirstRelease and check_native_first_release); wiping beta.2 destroys rollback custody and falsifies production_upgrade_activated False (compose_route_acceptance.py:861).|verify=Run accept-rtx4090-route.ps1 Preflight then Accept against a fixture StateRoot whose active_release is v0.17.0 beta.2 (and separately beta.3 with previous_release beta.2), then run compose_route_acceptance.py against v0.18.0 rtx3090.json/rtx4090.json.",
+     "R3|P1|conf=0.96|claim=Observation: compose_route_acceptance.py never checks linux_live_client pass/version/binary/fail_closed predicates, and verify_release.py --require-ready never validates platform acceptance receipt contents, RTX 5090 incumbent restoration fields, or non-native frozen candidate pins; Inference: PT018-RECEIPT-ADMISSION, PT018-HOLD-AND-PULL, and PT018-CLIENT-PUBLIC-TRUTH remain bypassable across composition and ready verification.|evidence=scripts/compose_route_acceptance.py:190-193,214,951-955 projects optional keys with STATUS allowing failed/not_exercised on linux_live_client; scripts/verify_release.py:1423-1462 skips missing restoration_receipt when unwaived and never checks restoration.rtx5090 or unwaived NATIVE_RESTORED/NATIVE_AUDITS; scripts/verify_release.py:1735-1763,1797-1805,1882-1889,3784-3803 never parses platform receipts or freezes 5090/model/macOS/Linux pins to stage_commit.|impact=After declared composer and verifier checks, a failed, empty, or v18.18.6 linux_live_client capture composes into a ready release, and post-stage drift in RTX 5090/macOS/Linux pins, platform acceptance receipts, or RTX 5090 incumbent restoration passes verify_release.py --require-ready --check-pins.|verify=Pass composed.linux_live_client with status failed or binary_sha256 from v18.18.6 into compose_route_acceptance.py, or mutate restoration.rtx5090.original_runtime_healthy to false in a ready fixture, and observe compose_route_acceptance.py and verify_release.py --require-ready --check-pins return 0.",
+     "R4|P1|conf=0.96|claim=Observation: verify_release.py checks only file existence and SHA-256 on observed_gates.{rtx3090,rtx4090}_speed, unwaived {rtx3090,rtx4090}_agent_parity, {rtx3090,rtx4090}_upgrade, and native_publication, while validate_ready_state_consistency forbids only draft/pending substrings; Inference: PT018-NATIVE-PROFILE-GATES is not enforced by the release verifier on speed, unwaived parity, upgrade, or native publication receipts.|evidence=scripts/verify_release.py:854-895,900-919,1046-1126,2780-2893 never opens rtx3090-speed.json, rtx4090-speed.json, rtx3090-upgrade.json, rtx4090-upgrade.json, native-publication.json, or unwaived rtx{3090,4090}-agent-parity.json, and allows status FAIL, DIAGNOSTIC, or failed and gate_passed false in ready mode.|impact=Offline producer checks do not prevent staging a failed/diagnostic speed verdict, a speed/parity/upgrade receipt bound to the default build_profile instead of tc, or a stale native-speed-decision digest and passing verify_release.py --require-installable and --require-ready --check-pins.|verify=In a ready v0.18.0 copy, set status to FAIL and gate_passed to false in releases/v0.18.0/qualification/rtx3090-speed.json (rehash qualification.json and manifest.json) and run python3 scripts/verify_release.py --require-ready; observe exit 0.",
+     "R5|P1|conf=0.95|claim=Observation: the Upgrading after a beta.2 incomplete shutdown fenced PowerShell block in docs/QUICKSTART.md invokes Control-Release.ps1 -Action Start and immediately invokes Install-Release.ps1 in the same paste without checking $LASTEXITCODE or ready JSON state; Inference: this violates PT018-GUIDE-RECOVERY (T9) when Start exits nonzero or reports non-ready JSON without throwing.|evidence=docs/QUICKSTART.md:569-586 omits if ($LASTEXITCODE -ne 0) and process_state/endpoint_state checks after & $Controller -Action Start (and after & $Installer at lines 299-302,487-490,574-578), unlike operate/acceptance in docs/QUICKSTART.md:312-321,503-512, while tests/test_documented_route.py:1066-1089 tests only LANES operate blocks.|impact=An operator pasting the documented recovery block onto an elevated PowerShell prompt when beta.2 Start fails via nonzero exit code (or non-ready status JSON) immediately runs beta.3 Install-Release.ps1 against the non-running incumbent despite the prose warning at line 584.|verify=Execute docs/QUICKSTART.md:569-578 in pwsh with a stub Control-Release.ps1 setting $global:LASTEXITCODE = 1 without throwing (as in tests/test_documented_route.py:1075) and observe Install-Release.ps1 is still called.",
+     "R6|P1|conf=0.98|claim=Observation: verify_release.py skips releases/*.md in validate_release_documentation and ignores __V0180_*__ tokens while receipt-audit.json pins NINFER_RELEASE_NOTES.md's current hash, and candidate 34adfb0d commits stale beta.2/pending/identity-first claims contradicting its bound beta.3 artifacts; Inference: PT018-CLIENT-PUBLIC-TRUTH and state fidelity fail both in candidate 34adfb0d and at ready verification.|evidence=scripts/verify_release.py:82,424-470,2934-2960,3825-3831 skips releases/v0.18.0/NINFER_RELEASE_NOTES.md; releases/v0.18.0/qualification/receipt-audit.json:19-25 pins staged_sha256 c2e1fe14...; compatibility.json:13-16 and docs/COMPATIBILITY.md:72 claim beta.2 rows are unbound placeholders beside bound beta.3 rows; NINFER_RELEASE_NOTES.md:4-13,216-233,289-378,420-465 leaves ~35 __V0180_*__ tokens and [OPTION A/B] blocks, calls bound tc package bf1ceaa9 unused/conditional, and claims 4090 identity-first despite powered screen 531c5ed1 and empty native-identity-decision.json:7,16.|impact=Leaving NINFER_RELEASE_NOTES.md unedited passes verify_release.py --require-ready --check-pins with raw __V0180_*__ placeholders and false claims published, whereas editing it later fails validate_receipt_audit unless receipt-audit.json is manually regenerated outside compose_route_acceptance.py and rebind_release.py.|verify=Inspect compatibility.json:14, releases/v0.18.0/NINFER_RELEASE_NOTES.md:216-378, and receipt-audit.json:19-25; run verify_release.py --require-ready on a ready copy retaining NINFER_RELEASE_NOTES.md unchanged and observe zero errors on __V0180_*__ tokens.",
+     "R7|P2|conf=0.94|claim=Observation: validate_public_text in scripts/verify_release.py excludes site/*.html, llms.txt, compatibility.json, upstream-watch.json, and non-primary profiles/*.json, and PRIVATE_MARKERS omits forward-slash a forward-slash Windows user-profile prefix paths and NVIDIA GPU UUID patterns; Inference: PT018-CLIENT-PUBLIC-TRUTH's private-path and GPU-UUID ban is only partially enforced by verify_release.py.|evidence=scripts/verify_release.py:67-77 defines PRIVATE_MARKERS with a Windows user-profile prefix but not a forward-slash Windows user-profile prefix or GPU-[0-9a-fA-F]{8}-..., scripts/verify_release.py:2963-2979 scans .html/.svg only under assets and omits .txt and root JSONs, and scripts/verify_release.py:3825-3831 scans only manifest, primary profile, and qualification.|impact=Although no private path, hostname, or GPU UUID was observed in the frozen 34adfb0d files, any a forward-slash Windows user-profile prefix path, GPU UUID, or hostname introduced into site/, llms.txt, compatibility.json, upstream-watch.json, profiles/qwen38-rtx5090-manual-tunnel.json, or acceptance receipts bypasses verify_release.py.|verify=Insert a synthetic GPU-identifier sentinel into releases/v0.18.0/qualification.json and a synthetic Windows user-profile path into site/index.html in a scratch copy and run python3 scripts/verify_release.py; observe exit 0."
+    ],
+    "unresolved": [
+     "U1|P1|conf=0.70|question=Does the canonical JSON digest of releases/v0.18.0/qualification/native-speed-decision.json still equal decision_sha256 d63e8de7efb70c6844e12e7d2e12ff36971a5b29dbaf00e028374dc87f82030e recorded in rtx3090-speed.json and rtx4090-speed.json after the subjects block was populated?|missing=Read-only review cannot execute scripts/speed_gate.py digest() over releases/v0.18.0/qualification/native-speed-decision.json:1-107, and scripts/verify_release.py does not cross-check rtx{3090,4090}-speed.json:2938,3992 against native-speed-decision.json.|verify=Run python3 -c 'import json, scripts.speed_gate as s; print(s.digest(json.load(open(\"releases/v0.18.0/qualification/native-speed-decision.json\"))))' and verify equality with d63e8de7efb70c6844e12e7d2e12ff36971a5b29dbaf00e028374dc87f82030e.",
+     "U2|P2|conf=0.65|question=Did all four GitHub Actions CI jobs pass on exact candidate commit 34adfb0d72ee5d1bd12b6988b50b3969f80d52a6 as required by PT018-COHORT?|missing=GitHub Actions check-run receipts for 34adfb0d72ee5d1bd12b6988b50b3969f80d52a6 are external to the 148 bound repository paths, and .github/workflows/ci.yml:3-7 push.branches omits this release program's preparation branch patterns (triggering only on main, pull_request, or older program branches).|verify=Inspect gh api commits/34adfb0d72ee5d1bd12b6988b50b3969f80d52a6/check-runs and verify release-contract, windows-contract, macos-contract, and acceptance-dry-run all concluded success on that exact SHA."
+    ]
+   },
+   "gpt-astra": {
+    "summary": "Reviewed frozen subject 34adfb0d72ee5d1bd12b6988b50b3969f80d52a6 with supplemental_evidence authority (lead_family=claude; selectionClass=supplement; role=supplement; independence_class=cross_family). Three source-supported findings concern documented installability, public-data projection, and restoration-evidence completeness. Static inspection only; no commands or tests executed. This is not release authorization.",
+    "evidence": [
+     "R1|P1|conf=0.99|claim=Installability mismatch: the documented depth-1 clone cannot satisfy the mandatory historical-candidate manifest lookup after finalization|evidence=docs/QUICKSTART.md:219-224,262-267,478-483,825-828 clones the release tag with --depth 1 and immediately runs --require-ready; scripts/verify_release.py:1614-1632 requires git show of the earlier product_tooling.stage_commit and errors when unavailable; scripts/verify_release.py:3935-3940 invokes this check unconditionally for ready releases, independently of --check-pins|impact=[INFERENCE] After acceptance and pin commits create the final release descendant, fresh documented installations fail before installation; candidate checks and full-history CI do not protect this PT018-CLIENT-PUBLIC-TRUTH installability boundary|verify=Create a ready descendant of a frozen candidate, clone its tag via file:// with --depth 1, and run the documented ready gate; require success without weakening frozen-candidate identity verification.",
+     "R2|P1|conf=0.98|claim=Privacy-boundary gap: composition bypasses its public field projection for raw route receipts and unrestricted nested evidence dictionaries|evidence=scripts/compose_route_acceptance.py:796-808 copies complete runner JSON bytes into docs/measurements; :943-950 copies qualification_environment verbatim while declaring raw_prompts_outputs_or_secrets_included=false; :1021 copies runtime_qualification verbatim; scripts/verify_release.py:72-83,3209-3255 screens public text using only fixed private-marker substrings|impact=[INFERENCE] Accidentally retained private host, GPU UUID, path, or credential metadata outside those literals can enter public artifacts despite the declared allowlist boundary; hashes authenticate those bytes but do not remove the PT018-CLIENT-PUBLIC-TRUTH disclosure consequence|verify=Extend the existing composition privacy fixture with harmless private-data sentinels in an extra route field and nested qualification_environment/runtime_qualification fields; require rejection or exclusion before any public writes, and ensure generic sentinels cannot pass the publication privacy check.",
+     "R3|P2|conf=0.98|claim=Incomplete-evidence admission: a native restoration audit containing only one true check is accepted as a complete passing audit|evidence=scripts/hosts/accept-rtx4090-route.ps1:240-264 produces explicit task, process, listener, lease, power, pointer, hold and filesystem checks; scripts/compose_route_acceptance.py:522-526 requires only a nonempty dictionary whose supplied values are true, not the required AUDIT_FIELDS from :349-354; scripts/verify_release.py:1446-1453 checks only the unwaived native restoration status|impact=[INFERENCE] A partially collected audit can support published restoration success without retaining the owner/task/power checks required by PT018-HOLD-AND-PULL; subsequent hash binding and ready verification preserve rather than detect the incomplete evidence|verify=In a valid composition fixture, reduce restoration_checks and final_audit_checks to state_bytes_identical=true while leaving other evidence unchanged; require refusal before writes, and require ready verification to reject the equivalently incomplete bound restoration receipt."
+    ],
+    "unresolved": []
+   },
+   "claude-mythos": {
+    "summary": "Supplemental same-lineage security pass over candidate 34adfb0d (bound paths only, no commands run). Release-blocking: v0.18+ ready verification needs the frozen candidate commit in local git history, yet every documented route clones the tag with --depth 1, so the published ready gate and launcher fail for every reader while CI, the pin dance and candidate-clone acceptance stay green (R1). P2: the public-text privacy gate cannot see JSON-escaped Windows paths in receipts and never scans site/** (R2); release notes still carry stage tokens and template wrappers no ready check inspects (R3); only guide blocks, four native pins and two client fields are bound to the frozen candidate while composition asserts no candidate change as a constant (R4). P3: reviewer seat identities in public docs, a trailing-slash symlink bypass of the checkpoint-store guard, an unguarded Start in the upgrade-recovery block, a restoration-completed message when no hold was acquired, and audit maps admitted without named checks. Hold reconciliation, pscp atomic pull and the composer projection allowlists held on inspection. Five unresolved items, one a threat-model omission.",
+    "evidence": [
+     "R1|P1|conf=0.88|claim=Observed: for v0.18+ every validation of a ready manifest (not only --check-pins) reads the frozen candidate manifest from local git history and errors when that commit object is absent, while every documented clone step is a --depth 1 tag clone followed by the ready gate. Inference: a published v0.18.0 clone does not contain the pre-acceptance candidate commit, so the ready gate and the launcher's verifier call fail for every reader.|evidence=scripts/verify_release.py:1614-1632 runs git show <stage_commit>:releases/<release>/manifest.json and appends 'native acceptance requires the frozen candidate manifest in local git history'; :3914-3939 calls it whenever status==ready; docs/QUICKSTART.md:219-224,262-267,478-483,825-828 clone with --branch v0.18.0 --depth 1 then run --require-ready; tests/test_documented_route.py:160-162 mandates --depth 1; tests/test_verify_release.py:206-212 asserts the error for a commit outside history; examples/manual-tunnel/start-ninfer.sh:73 runs the verifier before launch; .github/workflows/ci.yml:20-33 verifies tags with fetch-depth 0; acceptance substitutes the clone step and preflights with --require-installable (scripts/hosts/accept-rtx4090-route.ps1:323,421; scripts/hosts/accept-windows-client.ps1:175; scripts/hosts/accept-rtx5090-routes.py:362; scripts/compose_route_acceptance.py:191-198)|impact=Readiness and installability asset (PT018-RECEIPT-ADMISSION, guide requirement): after the unrecallable tag all five documented routes stop at 'ready gate failed' and start-ninfer.sh refuses, yet full-history CI, the pin dance and candidate-clone acceptance all pass, so no declared gate observes it; a post-acceptance fix changes executed blocks or verifier bytes and forces re-acceptance, and readers are pushed to bypass the gate.|verify=Extend the FrozenNativePinTests fixture with one commit after the stage_commit, git clone --depth 1 file://<fixture>, and call validate_frozen_native_pins (or run verify_release.py --release v0.18.0 --require-ready on a ready-shaped fixture); the frozen-candidate error must appear.",
+     "R2|P2|conf=0.8|claim=Observed: validate_public_text substring-matches PRIVATE_MARKERS against raw file text over a fixed file set; string decoding exists only for .py constants and .cast lines, and no site/** file is in the set. Inference: a JSON-encoded Windows home path (each separator is two backslashes in the file bytes) in a releases/**/*.json or docs/measurements/*.json receipt can never match the single-backslash marker, and the public site pages are never scanned.|evidence=scripts/verify_release.py:72-83 (marker list), :3210-3222 (scanned set: md/ps1/sh, scripts, assets html/svg, releases json/jsonl/SHA256SUMS, docs/measurements json, docs/media cast; no site path), :3224 raw read, :3225-3251 decode only for .py and .cast, :3252-3254 substring test; tests/test_verify_release.py:845-857 covers the JSON-escaped Windows form only for .cast and :1761-1771 plants only a POSIX path in release JSON; Windows-host receipts are PowerShell ConvertTo-Json output (scripts/hosts/accept-rtx4090-route.ps1:53,344; scripts/hosts/accept-native-public-install.ps1:30-33) and runner receipts plus operator prose are published without projection (scripts/compose_route_acceptance.py:807-808,602,918,948-950,1030)|impact=Public-privacy asset (PT018-CLIENT-PUBLIC-TRUTH): the decisive public-text gate cannot stop a Windows user-profile path (username) in native or Windows-client receipts, nor anything private in site/**; manual review is the only residual control. No such leak was found in the bound receipts or site pages at this candidate.|verify=Clone test_release_tree_text_rejects_private_markers but plant json.dumps of a C: Users path in releases/<release>/review/planted.json and a marker string in site/index.html; validate() currently reports no private-marker error for either.",
+     "R3|P2|conf=0.75|claim=Observed: releases/v0.18.0/NINFER_RELEASE_NOTES.md at the candidate still holds dozens of __V0180_*__ stage/composition tokens, unresolved bracketed OPTION A/B template wrappers and pending statements, several contradicting facts the candidate manifest and qualification already bind, and no bound verifier path inspects them. Inference: a ready v0.18.0 tag can ship template tokens and stale pending claims in its release notes with a green ready gate.|evidence=releases/v0.18.0/NINFER_RELEASE_NOTES.md:9-12 (token convention), :207-211 and :325-328 (RTX 3090 selection 'conditional', final row 'unbound', no passing powered screen claimed) versus releases/v0.18.0/manifest.json:67-80,132 (rtx3090 variant status qualified, package bf1ceaa9, build_profile native-v0.8.0-beta.3-tc-rtx3090) and releases/v0.18.0/qualification.json:144-167 (rtx3090 quality screen, fit, speed, lane and upgrade gates passed); further tokens and wrappers at :339-346,360-383,399-407,476,519-556,573-579; scripts/verify_release.py:84 PLACEHOLDER_RE matches only angle-bracket, TODO or TBD text and :3830-3835 applies it only to manifest, profile and qualification strings; :3180-3185 validate_release_documentation skips releases/; no bound script or test references the token form|impact=Truthful-readiness asset (PT018-CLIENT-PUBLIC-TRUTH: prepared text distinguishes measured from pending): the notes are immutable tag bytes; finalization is hand-edited with no mechanical stop, and the staged bytes are already hash-retained in qualification/receipt-audit.json, so a missed token or leftover 'pending' ships in an unrecallable release.|verify=On a ready-shaped fixture leave one __V0180_ token and one OPTION wrapper in the release notes and run verify_release.py --require-ready; it currently passes.",
+     "R4|P2|conf=0.6|claim=Observed: the only ready-time bindings to the frozen candidate are guide block hashes, four native-variant fields and two client fields, and composition writes evidence_commit_changes_candidate=False as a constant. Inference: bytes the accepted blocks execute or install (examples/manual-tunnel/*.sh, model fragments, fail-closed.yml, scripts/verify_release.py, RTX 5090 pins, native installer and controller pins) can differ between the frozen candidate and the ready tree without any gate noticing.|evidence=scripts/verify_release.py:1633-1644 compares only source_commit, package_sha256, server_binary_sha256, configuration_sha256 per native variant plus omp binary_sha256 and distribution_version with git show <candidate>; :1647-1716 re-derives only docs/QUICKSTART.md blocks and runner receipts; the other git lookups (:500-528, :595-616) run only under --check-pins for URL pins; scripts/compose_route_acceptance.py:1062-1066 hard-codes the public summary field, justified in its comment by block equality alone|impact=Provenance asset (PT018-RECEIPT-ADMISSION; requirement that later executable or config changes invalidate the old route surface): a fix-only or finalization commit touching a launcher, fragment or pin after the routes ran yields a ready release whose public receipts still assert candidate-bound acceptance and no candidate change; the rule is enforced by process only.|verify=In a ready-shaped fixture repo modify examples/manual-tunnel/start-ninfer.sh after the stage_commit and run verify_release.py --require-ready: no candidate-binding error; recomposition still writes the field as false.",
+     "R5|P3|conf=0.5|claim=Observed: public documents changed in this cohort name the four council seats, seat-prefixed finding ids and internal review-record digests. Inference: these are internal review identities (one equals an access-profile name in this packet's allowlist), which the packet says public projections must not contain, and no mechanical gate covers them.|evidence=docs/PERFORMANCE.md:2695-2705 (seats daybreak-blue, gemini-argon, gpt-astra, claude-mythos with packet, record, subject-digest and ledger hash prefixes; finding ids also at :582); docs/measurements/2026-11-10-p20-overnight.json:317-325 (council_id, packet_sha256, review_record_sha256, subject_digest, ledger_sha256) and :1310-1312 (gemini-argon-R1, daybreak-blue-R1 = gpt-astra-R1); scripts/verify_release.py:72-83 carries no reviewer-identity marker; by contrast releases/v0.18.0/NINFER_RELEASE_NOTES.md:560-565 reports reviewer counts without names|impact=Public-privacy asset (PT018-CLIENT-PUBLIC-TRUTH: no internal review identity): the reviewer roster and an access-profile name are on the public default branch and would be carried into the v0.18.0 tag; low direct harm, but it contradicts the stated invariant and the content-safe ledger projection rule.|verify=Lead check whether the published v0.17.0 ledger projection already names seats; if it does not, scrub both files and add the seat ids to the public-text scan or a test.",
+     "R6|P3|conf=0.6|claim=Observed: the launcher's predecessor-store guard tests basename and -L on the unresolved --checkpoint-dir and only afterwards resolves it with realpath, with no second check. Inference: an argument with a trailing slash whose last component is a symlink (checkpoints-v018/ pointing at checkpoints-v017) passes, because a trailing slash makes the symlink test follow the link, and the predecessor store is then bind-mounted read-write into the v0.18.0 runtime.|evidence=examples/manual-tunnel/start-ninfer.sh:83-93 (basename and -L on the raw argument, ownership check), :109-114 (mkdir -p, chmod 700, realpath, no re-validation), :348-367 (docker run --volume $CHECKPOINT_DIR:$CHECKPOINT_MOUNT_TARGET); profiles/qwen38-rtx5090-manual-tunnel.json server.checkpoint_host_directory checkpoints-v018 with mount target /checkpoints-v013; no bound test exercises a trailing-slash or symlinked store|impact=Predecessor checkpoint and rollback custody (PT018-NAMESPACE-AND-PINS: host checkpoints-v018 never writes or imports checkpoints-v017): the guide keeps the same bearer key across releases, so old generations still authenticate and the new runtime could load, quarantine or quota-evict them; reachable only after an operator has created such a symlink, hence P3.|verify=With stub docker, create a real checkpoints-v017 and a symlink checkpoints-v018 to it, pass --checkpoint-dir <dir>/checkpoints-v018/ and observe that the guard does not exit 1 and the mount source resolves to the v017 path.",
+     "R7|P3|conf=0.6|claim=Observed: the documented upgrade-recovery block runs the installed beta.2 Control-Release.ps1 -Action Start and then Install-Release.ps1 with no exit-status guard between them, unlike the other native lifecycle blocks. Inference: under the failure model the T9 tests use (a failed controller call sets LASTEXITCODE without throwing), a failed or not-ready Start does not stop the block and the beta.3 installer still runs.|evidence=docs/QUICKSTART.md:693-702 (ErrorActionPreference Stop only; nothing checks LASTEXITCODE after :696) while :704-707 says 'Do not proceed if Start throws or the lane is not ready'; guarded equivalents at :391-396,453-459,605-609,666-672; tests/test_documented_route.py:1025-1058 exercise only the LANES steps operate and acceptance; scripts/documented_route.py:62-82 defines no recovery step, so the block is outside the 31 tested addresses|impact=Guide-recovery invariant (PT018-GUIDE-RECOVERY: T9 stops each native lifecycle block at a failed command; owner lease kept until incumbent-controlled Stop): the only residual control is the installer's own refusal of a non-running lease-holding incumbent; a Start that launched the process but reported not-ready continues into install and incumbent Stop.|verify=Run the block under the WindowsNativeCommandTests harness with a fixture controller that sets LASTEXITCODE=7 for Start and a recording installer stub; the installer call is currently reached.",
+     "R8|P3|conf=0.85|claim=Observed: when the Windows Hold cannot be acquired or reconciled (absent, foreign or unreachable), held stays False and no restoration is invoked, yet the driver still raises an error whose text says restoration completed. Inference: the operator-facing failure record asserts a restoration that never ran.|evidence=scripts/hosts/accept-rtx5090-routes.py:110-120 (acquire_windows_hold re-raises unless HoldStatus is owned), :473-478 and :520-522 (restore only if held), :527-528 (RuntimeError(error + '; restoration completed before reporting failure') regardless of held); same shape at :419-434 ('Windows-only completion restored before reporting failure'); scripts/hosts/accept-windows-client.ps1:24-32 and :88-96 show an own marker can exist while HoldStatus answers foreign (hold file written at :93 before hold_created is persisted at :94-95); tests/test_windows_hold_reconciliation.py:27-33 checks only that Release is not called|impact=Hold and restoration identity (PT018-HOLD-AND-PULL: no fabricated restoration): the refusal itself is correct, but the message can lead an operator to treat the production host as restored while a pause marker from the lost Hold remains with no automated release path.|verify=Unit-test the window branch with win raising and HoldStatus returning foreign: assert host restore is not called and inspect the raised message.",
+     "R9|P3|conf=0.7|claim=Observed: composition accepts a native restoration audit when its checks map is any non-empty object whose values are all true, and uses the 18-name audit list only to filter the public projection. Inference: an audit missing named checks (for example no_lease or holds_identical) is admitted as passed and published with those checks silently absent.|evidence=scripts/compose_route_acceptance.py:522-526 (dict, non-empty, all values True), :349-355 (AUDIT_FIELDS), :385-386 with :261-265 (projection keeps only keys that are present); tests/test_compose_route_acceptance.py:628-630 rejects a false value and :864-868 shows unknown keys are accepted, with no fixture for a missing named check; scripts/verify_release.py:1423-1460 re-checks only status and candidate at ready|impact=Restoration custody (state transition: every displaced incumbent observed back in place): hand-assembled or stale evidence from a different harness revision can satisfy the gate without the lease, hold or documented-stage observations while the public receipt still says passed.|verify=Delete no_lease from final_audit_checks in the composer fixture evidence and run the composer; it currently succeeds."
+    ],
+    "unresolved": [
+     "U1|P2|conf=0.5|question=threat model omits a non-elevated same-account process racing the documented elevated native staging block: is it in scope, given the guide itself claims that protection (docs/QUICKSTART.md:288-290) while the stage directory is created with the inherited ProgramData ACL at :293, protected only at :304, verified only at directory level at :305-311, and preceded by an elevated Remove-Item -Recurse -Force on a user-creatable path at :292?|missing=A lead scope decision, plus a scratch-VM observation of whether a file created in the new stage directory between New-Item and Set-Acl keeps its creator as owner and can be rewritten after the hash check, and how Windows PowerShell 5.1 treats a pre-planted junction at the stage path|verify=On a disposable Windows 11 VM run the stage-and-install block elevated while a medium-integrity watcher pre-creates Install-Release.ps1 in the stage directory; inspect owner and ACL after Set-Acl and attempt a rewrite before execution; repeat with the stage path pre-created as a junction.",
+     "U2|P2|conf=0.35|question=Will product_tooling.stage_commit 34adfb0d remain an ancestor of the v0.18.0 tag, so that even a full clone can satisfy the frozen-candidate lookup behind R1?|missing=The release merge and tag topology; scripts/verify_release.py:1622-1632 only needs the object to exist locally, and merge-base --is-ancestor is applied solely to URL pins under --check-pins (:595-616)|verify=Run git merge-base --is-ancestor 34adfb0d72ee5d1bd12b6988b50b3969f80d52a6 <tag commit> at the manifest pin and add a fixture whose stage_commit is a non-ancestor object.",
+     "U3|P2|conf=0.3|question=Does the tagged tree keep docs/QUICKSTART.md and docs/measurements/*-run.json byte-exact on a Git-for-Windows default checkout, now that v0.18+ ready verification hashes their raw bytes while the CRLF diagnostic inspects only releases/<release>/**/*.json?|missing=.gitattributes is outside the bound paths; scripts/verify_release.py:1665-1667 and :1682-1685 hash the guide and runner receipts, and the diagnostic at :3270-3293 covers release JSON only|verify=Clone the candidate on Windows with core.autocrlf=true and compare sha256 of docs/QUICKSTART.md with git cat-file blob output; run a ready-shaped fixture there.",
+     "U4|P2|conf=0.3|question=Do the documented-route runner receipts that composition publishes byte for byte under docs/measurements contain host, user or path fields beyond the few that are validated?|missing=scripts/hosts/run-documented-route.sh and .ps1 are outside the bound paths and no v0.18.0 run receipt exists yet; scripts/compose_route_acceptance.py:180-204 and :803-808 validate a handful of fields and copy the rest unprojected; the bound fixture shows the PowerShell runner reads OS and Windows-identity facts (tests/test_documented_route.py:1068-1078)|verify=Produce a rehearsal receipt from each runner, diff its keys and values against an explicit public allowlist, and run it through the public-text scan with a planted Windows path.",
+     "U5|P1|conf=0.15|question=Are the five releases/v0.17.0 paths in the bound list (manifest.json, qualification.json, acceptance/documented-routes.json, profiles/rtx3090/release-spec.json, profiles/rtx4090/release-spec.json) supporting contracts only, byte-identical to published tag 97dea2f0?|missing=The bound inventory does not label changed versus supporting files and this review could not run git against the tag|verify=git diff --quiet 97dea2f00bce385e7fb80c4fddeb38a8f5897385 34adfb0d72ee5d1bd12b6988b50b3969f80d52a6 -- releases/v0.17.0"
+    ]
+   }
+  },
+  "dispositions": {
+   "gemini-carbon-R1": {
+    "severity": "P0",
+    "result": "confirmed",
+    "disposition": "mitigate",
+    "change": "Fix 1 in remediation batch r1 (release/v0.18.0 on 34adfb0d): absent frozen commit in a shallow repository is not an error; non-shallow absence still errors; full-history --check-pins final gate and CI keep the binding. Regression: shallow file:// depth-1 clone fixture.",
+    "rationale": "In-scope residual P0 after controls: every documented public install of v0.18.0 would fail its ready gate. Requires a new candidate and fresh route acceptance (verifier bytes change)."
+   },
+   "claude-mythos-R1": {
+    "severity": "P1",
+    "result": "confirmed",
+    "disposition": "mitigate",
+    "change": "Fix 1 in remediation batch r1 (release/v0.18.0 on 34adfb0d): absent frozen commit in a shallow repository is not an error; non-shallow absence still errors; full-history --check-pins final gate and CI keep the binding. Regression: shallow file:// depth-1 clone fixture.",
+    "rationale": "In-scope residual P0 after controls: every documented public install of v0.18.0 would fail its ready gate. Requires a new candidate and fresh route acceptance (verifier bytes change)."
+   },
+   "claude-mythos-U5": {
+    "severity": "P1",
+    "result": "falsified",
+    "disposition": "reject",
+    "change": "none",
+    "rationale": "Supporting contracts only, unchanged."
+   },
+   "daybreak-blue-R1": {
+    "severity": "P1",
+    "result": "confirmed",
+    "disposition": "mitigate",
+    "change": "Fix 3 in remediation batch r1 (release/v0.18.0 on 34adfb0d): public-text scan also checks decoded JSON/JSONL strings (JSON-escaped home paths now caught). Plus lead screening of every composed receipt before commit (STAGE-PLAN §6). Allowlisted projection redesign deferred to a follow-up issue.",
+    "rationale": "Residual after the decoded scan and lead screening: unknown non-marker private fields only, bounded by the lead screen; a projection redesign is disproportionate inside this release window."
+   },
+   "daybreak-blue-R2": {
+    "severity": "P1",
+    "result": "confirmed",
+    "disposition": "mitigate",
+    "change": "Fix 4 in remediation batch r1 (release/v0.18.0 on 34adfb0d): every AUDIT_FIELDS key must be present and true. Regression: audit missing no_lease refused.",
+    "rationale": "Admission incompleteness; residual for this release nil (real audits complete), but the fix is a one-line class closure with a regression test."
+   },
+   "gemini-carbon-R2": {
+    "severity": "P1",
+    "result": "falsified",
+    "disposition": "reject",
+    "change": "none",
+    "rationale": "Canonical promotion supplies exactly the state the drivers require; composition consistency is re-checked with real receipts at §6."
+   },
+   "gemini-carbon-R3": {
+    "severity": "P1",
+    "result": "confirmed",
+    "disposition": "defer",
+    "change": "Follow-up issue: verifier content predicates for speed/upgrade/parity/publication/platform receipts and wider frozen-candidate bindings.",
+    "rationale": "Residual for this release is nil after direct lead verification of every bound receipt; the general verifier hardening is disproportionate inside the window and not required to keep this release truthful."
+   },
+   "gemini-carbon-R4": {
+    "severity": "P1",
+    "result": "confirmed",
+    "disposition": "defer",
+    "change": "Follow-up issue: verifier content predicates for speed/upgrade/parity/publication/platform receipts and wider frozen-candidate bindings.",
+    "rationale": "Residual for this release is nil after direct lead verification of every bound receipt; the general verifier hardening is disproportionate inside the window and not required to keep this release truthful."
+   },
+   "gemini-carbon-R5": {
+    "severity": "P1",
+    "result": "confirmed",
+    "disposition": "mitigate",
+    "change": "Fix 7 in remediation batch r1 (release/v0.18.0 on 34adfb0d): block stops on failed Start, non-ready lifecycle JSON, or failed installer, using the T9 convention. Published component release notes carry the same block: follow-up edit after publication.",
+    "rationale": "Small obvious correction in the guide; the route re-acceptance needed for the P0 re-executes the changed guide anyway."
+   },
+   "gemini-carbon-R6": {
+    "severity": "P1",
+    "result": "confirmed",
+    "disposition": "mitigate",
+    "change": "Fixes 2 and 8 in remediation batch r1 (release/v0.18.0 on 34adfb0d): ready gate refuses __V####_…__ tokens in releases/<release>/*.md; stale native-unbound blocker removed from both compatibility authorities and re-rendered. Release-note prose itself is rewritten by the lead finalization patch before publication.",
+    "rationale": "Public truth: the compatibility authority contradicted bound beta.3 rows; a token gate closes the class mechanically at small cost. Note tokens at the candidate are the expected pre-finalization state, not a defect of the frozen route bytes."
+   },
+   "gemini-carbon-U1": {
+    "severity": "P1",
+    "result": "falsified",
+    "disposition": "reject",
+    "change": "none",
+    "rationale": "Digest binding holds."
+   },
+   "gpt-astra-R1": {
+    "severity": "P1",
+    "result": "confirmed",
+    "disposition": "mitigate",
+    "change": "Fix 1 in remediation batch r1 (release/v0.18.0 on 34adfb0d): absent frozen commit in a shallow repository is not an error; non-shallow absence still errors; full-history --check-pins final gate and CI keep the binding. Regression: shallow file:// depth-1 clone fixture.",
+    "rationale": "In-scope residual P0 after controls: every documented public install of v0.18.0 would fail its ready gate. Requires a new candidate and fresh route acceptance (verifier bytes change)."
+   },
+   "gpt-astra-R2": {
+    "severity": "P1",
+    "result": "confirmed",
+    "disposition": "mitigate",
+    "change": "Fix 3 in remediation batch r1 (release/v0.18.0 on 34adfb0d): public-text scan also checks decoded JSON/JSONL strings (JSON-escaped home paths now caught). Plus lead screening of every composed receipt before commit (STAGE-PLAN §6). Allowlisted projection redesign deferred to a follow-up issue.",
+    "rationale": "Residual after the decoded scan and lead screening: unknown non-marker private fields only, bounded by the lead screen; a projection redesign is disproportionate inside this release window."
+   },
+   "claude-mythos-R2": {
+    "severity": "P2",
+    "result": "confirmed",
+    "disposition": "mitigate",
+    "change": "Fix 3 in remediation batch r1 (release/v0.18.0 on 34adfb0d).",
+    "rationale": "JSON escaping hid backslash markers; closed by scanning decoded strings."
+   },
+   "claude-mythos-R3": {
+    "severity": "P2",
+    "result": "confirmed",
+    "disposition": "mitigate",
+    "change": "Fixes 2 and 8 in remediation batch r1 (release/v0.18.0 on 34adfb0d): ready gate refuses __V####_…__ tokens in releases/<release>/*.md; stale native-unbound blocker removed from both compatibility authorities and re-rendered. Release-note prose itself is rewritten by the lead finalization patch before publication.",
+    "rationale": "Public truth: the compatibility authority contradicted bound beta.3 rows; a token gate closes the class mechanically at small cost. Note tokens at the candidate are the expected pre-finalization state, not a defect of the frozen route bytes."
+   },
+   "claude-mythos-R4": {
+    "severity": "P2",
+    "result": "confirmed",
+    "disposition": "defer",
+    "change": "Follow-up issue: verifier content predicates for speed/upgrade/parity/publication/platform receipts and wider frozen-candidate bindings.",
+    "rationale": "Residual for this release is nil after direct lead verification of every bound receipt; the general verifier hardening is disproportionate inside the window and not required to keep this release truthful."
+   },
+   "claude-mythos-U1": {
+    "severity": "P2",
+    "result": "design decision",
+    "disposition": "defer",
+    "change": "Follow-up issue: decide whether same-account non-elevated racing of the elevated staging block is in scope.",
+    "rationale": "Outside the declared adversary for this review; P2 question for the threat model."
+   },
+   "claude-mythos-U2": {
+    "severity": "P2",
+    "result": "falsified",
+    "disposition": "reject",
+    "change": "none",
+    "rationale": "Full clones hold the candidate; shallow clones handled by fix 1."
+   },
+   "claude-mythos-U3": {
+    "severity": "P2",
+    "result": "falsified",
+    "disposition": "reject",
+    "change": "none",
+    "rationale": "Byte-exact checkouts on Git for Windows."
+   },
+   "claude-mythos-U4": {
+    "severity": "P2",
+    "result": "unresolved",
+    "disposition": "accept",
+    "change": "Lead screening step recorded at composition.",
+    "rationale": "Answered at composition with the real receipts."
+   },
+   "daybreak-blue-R3": {
+    "severity": "P2",
+    "result": "confirmed",
+    "disposition": "mitigate",
+    "change": "Fix 6 in remediation batch r1 (release/v0.18.0 on 34adfb0d): throw when the Stop exit status is non-zero.",
+    "rationale": "One-line fail-closed correction; the native window re-executes it."
+   },
+   "daybreak-blue-R4": {
+    "severity": "P2",
+    "result": "confirmed",
+    "disposition": "mitigate",
+    "change": "Fix 7 in remediation batch r1 (release/v0.18.0 on 34adfb0d): block stops on failed Start, non-ready lifecycle JSON, or failed installer, using the T9 convention. Published component release notes carry the same block: follow-up edit after publication.",
+    "rationale": "Small obvious correction in the guide; the route re-acceptance needed for the P0 re-executes the changed guide anyway."
+   },
+   "gemini-carbon-R7": {
+    "severity": "P2",
+    "result": "confirmed",
+    "disposition": "mitigate",
+    "change": "Fix 3 in remediation batch r1 (release/v0.18.0 on 34adfb0d) (decoded JSON strings). No GPU-UUID marker; site/llms coverage deferred to a follow-up issue.",
+    "rationale": "Partial: the realistic leak path (JSON-escaped Windows paths in receipts) is closed; a UUID marker would break immutable historical releases."
+   },
+   "gemini-carbon-U2": {
+    "severity": "P2",
+    "result": "falsified",
+    "disposition": "reject",
+    "change": "none",
+    "rationale": "CI was green at the exact candidate."
+   },
+   "gpt-astra-R3": {
+    "severity": "P2",
+    "result": "confirmed",
+    "disposition": "mitigate",
+    "change": "Fix 4 in remediation batch r1 (release/v0.18.0 on 34adfb0d): every AUDIT_FIELDS key must be present and true. Regression: audit missing no_lease refused.",
+    "rationale": "Admission incompleteness; residual for this release nil (real audits complete), but the fix is a one-line class closure with a regression test."
+   },
+   "claude-mythos-R5": {
+    "severity": "P3",
+    "result": "confirmed",
+    "disposition": "defer",
+    "change": "Follow-up issue: scrub internal council seat/finding/digest identifiers from published docs.",
+    "rationale": "Already public on main; not introduced by the release bytes; P3."
+   },
+   "claude-mythos-R6": {
+    "severity": "P3",
+    "result": "confirmed",
+    "disposition": "defer",
+    "change": "Follow-up issue: re-validate the resolved checkpoint directory after realpath.",
+    "rationale": "P3; requires a deliberate operator-supplied symlink with trailing slash; launcher change would need its own focused proof."
+   },
+   "claude-mythos-R7": {
+    "severity": "P3",
+    "result": "confirmed",
+    "disposition": "mitigate",
+    "change": "Fix 7 in remediation batch r1 (release/v0.18.0 on 34adfb0d): block stops on failed Start, non-ready lifecycle JSON, or failed installer, using the T9 convention. Published component release notes carry the same block: follow-up edit after publication.",
+    "rationale": "Small obvious correction in the guide; the route re-acceptance needed for the P0 re-executes the changed guide anyway."
+   },
+   "claude-mythos-R8": {
+    "severity": "P3",
+    "result": "confirmed",
+    "disposition": "defer",
+    "change": "Follow-up issue: error text must not claim restoration when the hold was never acquired.",
+    "rationale": "Operator-facing message only; P3."
+   },
+   "claude-mythos-R9": {
+    "severity": "P3",
+    "result": "confirmed",
+    "disposition": "mitigate",
+    "change": "Fix 4 in remediation batch r1 (release/v0.18.0 on 34adfb0d): every AUDIT_FIELDS key must be present and true. Regression: audit missing no_lease refused.",
+    "rationale": "Admission incompleteness; residual for this release nil (real audits complete), but the fix is a one-line class closure with a regression test."
+   },
+   "lead-A1": {
+    "severity": "P1",
+    "result": "confirmed",
+    "disposition": "mitigate",
+    "change": "Fix 5 (98cbe457): preflight calls windows_environment before any effect and records windows_interop_started_process",
+    "rationale": "Production-affecting restoration gap found in acceptance; nearest fix is a fail-closed preflight probe on the same code path."
+   }
+  },
+  "epochs": [
+   {
+    "epoch": 1,
+    "review_id": "CR-20261112T115852Z-34adfb0d-product",
+    "review_mode": "initial",
+    "review_class": "full-council",
+    "reviewed_commit": "34adfb0d72ee5d1bd12b6988b50b3969f80d52a6",
+    "status": "closed-by-disposition",
+    "receipt_digests": {
+     "review-record.json": "7a04605757e82586ed6862de958e2d4b085ed7001e061d4d1cd885edf7cf50d3"
+    }
+   },
+   {
+    "epoch": 2,
+    "review_id": "CR-20261112T162440Z-2a735da0-product-r2",
+    "review_mode": "remediation",
+    "review_class": "lead-close",
+    "parent_review_id": "CR-20261112T115852Z-34adfb0d-product",
+    "reviewed_commit": "2a735da0367214b35a325f61865fb47f0ce872c7",
+    "status": "closed-by-lead-verification",
+    "triage_status": "lead-close",
+    "projected_action": "none",
+    "remediation_commits": [
+     "879c42d80cc45c1b3aa2192a6a24380826153bd2",
+     "f7429782f8f0799706c46908d64b093cd4cebb25",
+     "b34d64852176514c75822107b889c966045fe36b",
+     "24207631e1ae1f1889cd3c3455cc8b19d61d69fc",
+     "98cbe457961b7b95fc964a97787f3cc44cc02ce4",
+     "751118b17a5e2f49df1fd1c160c298003278d7f3",
+     "7c6935e938d5d2f955d00c2e02d55926fb90ffab",
+     "2a735da0367214b35a325f61865fb47f0ce872c7"
+    ],
+    "receipt_digests": {
+     "review-record.json": "e2ac2487d1989101e98fe299c2e103260c857a572582fae517af63618c95d37f"
+    },
+    "remediated_finding_ids": [
+     "gemini-carbon-R1",
+     "claude-mythos-R1",
+     "gpt-astra-R1",
+     "gemini-carbon-R6",
+     "claude-mythos-R3",
+     "daybreak-blue-R2",
+     "gpt-astra-R3",
+     "claude-mythos-R9",
+     "daybreak-blue-R1",
+     "gpt-astra-R2",
+     "claude-mythos-R2",
+     "gemini-carbon-R7",
+     "gemini-carbon-R5",
+     "daybreak-blue-R4",
+     "claude-mythos-R7",
+     "daybreak-blue-R3",
+     "lead-A1"
+    ],
+    "resolved_finding_ids": [
+     "gemini-carbon-R1",
+     "claude-mythos-R1",
+     "gpt-astra-R1",
+     "gemini-carbon-R6",
+     "claude-mythos-R3",
+     "daybreak-blue-R2",
+     "gpt-astra-R3",
+     "claude-mythos-R9",
+     "daybreak-blue-R1",
+     "gpt-astra-R2",
+     "claude-mythos-R2",
+     "gemini-carbon-R7",
+     "gemini-carbon-R5",
+     "daybreak-blue-R4",
+     "claude-mythos-R7",
+     "daybreak-blue-R3",
+     "lead-A1"
+    ],
+    "lead_verification": [
+     {
+      "finding_id": "gemini-carbon-R1",
+      "result": "resolved",
+      "evidence": "commit 879c42d8: FrozenNativePinTests: depth-1 file:// clone of a two-commit fixture with the frozen candidate absent now validates without error (red at 34adfb0d: \"native acceptance requires the frozen candidate manifest in local git history\"); non-shallow unknown candidate still errors. Full suites at 2a735da0: Python 3.13 and 3.15 897 tests OK (2 skipped); verify_release valid; --require-installable valid; prepared-guide check 31 blocks; private remediation report."
+     },
+     {
+      "finding_id": "claude-mythos-R1",
+      "result": "resolved",
+      "evidence": "commit 879c42d8: FrozenNativePinTests: depth-1 file:// clone of a two-commit fixture with the frozen candidate absent now validates without error (red at 34adfb0d: \"native acceptance requires the frozen candidate manifest in local git history\"); non-shallow unknown candidate still errors. Full suites at 2a735da0: Python 3.13 and 3.15 897 tests OK (2 skipped); verify_release valid; --require-installable valid; prepared-guide check 31 blocks; private remediation report."
+     },
+     {
+      "finding_id": "gpt-astra-R1",
+      "result": "resolved",
+      "evidence": "commit 879c42d8: FrozenNativePinTests: depth-1 file:// clone of a two-commit fixture with the frozen candidate absent now validates without error (red at 34adfb0d: \"native acceptance requires the frozen candidate manifest in local git history\"); non-shallow unknown candidate still errors. Full suites at 2a735da0: Python 3.13 and 3.15 897 tests OK (2 skipped); verify_release valid; --require-installable valid; prepared-guide check 31 blocks; private remediation report."
+     },
+     {
+      "finding_id": "gemini-carbon-R6",
+      "result": "resolved",
+      "evidence": "commit f7429782 + 2a735da0: ready-token helper refuses __V####_…__ in releases/<release>/*.md (red→green); stale native-unbound blocker removed from both compatibility authorities with a regression; authorities byte-identical. Full suites at 2a735da0: Python 3.13 and 3.15 897 tests OK (2 skipped); verify_release valid; --require-installable valid; prepared-guide check 31 blocks; private remediation report."
+     },
+     {
+      "finding_id": "claude-mythos-R3",
+      "result": "resolved",
+      "evidence": "commit f7429782 + 2a735da0: ready-token helper refuses __V####_…__ in releases/<release>/*.md (red→green); stale native-unbound blocker removed from both compatibility authorities with a regression; authorities byte-identical. Full suites at 2a735da0: Python 3.13 and 3.15 897 tests OK (2 skipped); verify_release valid; --require-installable valid; prepared-guide check 31 blocks; private remediation report."
+     },
+     {
+      "finding_id": "daybreak-blue-R2",
+      "result": "resolved",
+      "evidence": "commit 24207631: compose refuses a native audit missing one AUDIT_FIELDS key (red→green); the real 34adfb0d native receipts carry all 18 checks. Full suites at 2a735da0: Python 3.13 and 3.15 897 tests OK (2 skipped); verify_release valid; --require-installable valid; prepared-guide check 31 blocks; private remediation report."
+     },
+     {
+      "finding_id": "gpt-astra-R3",
+      "result": "resolved",
+      "evidence": "commit 24207631: compose refuses a native audit missing one AUDIT_FIELDS key (red→green); the real 34adfb0d native receipts carry all 18 checks. Full suites at 2a735da0: Python 3.13 and 3.15 897 tests OK (2 skipped); verify_release valid; --require-installable valid; prepared-guide check 31 blocks; private remediation report."
+     },
+     {
+      "finding_id": "claude-mythos-R9",
+      "result": "resolved",
+      "evidence": "commit 24207631: compose refuses a native audit missing one AUDIT_FIELDS key (red→green); the real 34adfb0d native receipts carry all 18 checks. Full suites at 2a735da0: Python 3.13 and 3.15 897 tests OK (2 skipped); verify_release valid; --require-installable valid; prepared-guide check 31 blocks; private remediation report."
+     },
+     {
+      "finding_id": "daybreak-blue-R1",
+      "result": "resolved",
+      "evidence": "commit b34d6485: public-text scan of decoded JSON/JSONL strings refuses an escaped a Windows user-profile prefix path (red→green); no new hits across the repository. Full suites at 2a735da0: Python 3.13 and 3.15 897 tests OK (2 skipped); verify_release valid; --require-installable valid; prepared-guide check 31 blocks; private remediation report."
+     },
+     {
+      "finding_id": "gpt-astra-R2",
+      "result": "resolved",
+      "evidence": "commit b34d6485: public-text scan of decoded JSON/JSONL strings refuses an escaped a Windows user-profile prefix path (red→green); no new hits across the repository. Full suites at 2a735da0: Python 3.13 and 3.15 897 tests OK (2 skipped); verify_release valid; --require-installable valid; prepared-guide check 31 blocks; private remediation report."
+     },
+     {
+      "finding_id": "claude-mythos-R2",
+      "result": "resolved",
+      "evidence": "commit b34d6485: public-text scan of decoded JSON/JSONL strings refuses an escaped a Windows user-profile prefix path (red→green); no new hits across the repository. Full suites at 2a735da0: Python 3.13 and 3.15 897 tests OK (2 skipped); verify_release valid; --require-installable valid; prepared-guide check 31 blocks; private remediation report."
+     },
+     {
+      "finding_id": "gemini-carbon-R7",
+      "result": "resolved",
+      "evidence": "commit b34d6485: public-text scan of decoded JSON/JSONL strings refuses an escaped a Windows user-profile prefix path (red→green); no new hits across the repository. Full suites at 2a735da0: Python 3.13 and 3.15 897 tests OK (2 skipped); verify_release valid; --require-installable valid; prepared-guide check 31 blocks; private remediation report."
+     },
+     {
+      "finding_id": "gemini-carbon-R5",
+      "result": "resolved",
+      "evidence": "commit 7c6935e9: recovery block stops on failed Start, non-ready lifecycle JSON, or failed installer; documented-route lifecycle harness covers it (red→green); bundle still 31 blocks. Full suites at 2a735da0: Python 3.13 and 3.15 897 tests OK (2 skipped); verify_release valid; --require-installable valid; prepared-guide check 31 blocks; private remediation report."
+     },
+     {
+      "finding_id": "daybreak-blue-R4",
+      "result": "resolved",
+      "evidence": "commit 7c6935e9: recovery block stops on failed Start, non-ready lifecycle JSON, or failed installer; documented-route lifecycle harness covers it (red→green); bundle still 31 blocks. Full suites at 2a735da0: Python 3.13 and 3.15 897 tests OK (2 skipped); verify_release valid; --require-installable valid; prepared-guide check 31 blocks; private remediation report."
+     },
+     {
+      "finding_id": "claude-mythos-R7",
+      "result": "resolved",
+      "evidence": "commit 7c6935e9: recovery block stops on failed Start, non-ready lifecycle JSON, or failed installer; documented-route lifecycle harness covers it (red→green); bundle still 31 blocks. Full suites at 2a735da0: Python 3.13 and 3.15 897 tests OK (2 skipped); verify_release valid; --require-installable valid; prepared-guide check 31 blocks; private remediation report."
+     },
+     {
+      "finding_id": "daybreak-blue-R3",
+      "result": "resolved",
+      "evidence": "commit 751118b1: NativePublicInstallRestorationTests: a Stop that sets LASTEXITCODE nonzero without throwing now fails the public install (red→green). Full suites at 2a735da0: Python 3.13 and 3.15 897 tests OK (2 skipped); verify_release valid; --require-installable valid; prepared-guide check 31 blocks; private remediation report."
+     },
+     {
+      "finding_id": "lead-A1",
+      "result": "resolved",
+      "evidence": "commit 98cbe457: WindowsInteropRelayTests: preflight calls windows_environment before any effect and fails closed when no relay starts a Windows process (red→green). Full suites at 2a735da0: Python 3.13 and 3.15 897 tests OK (2 skipped); verify_release valid; --require-installable valid; prepared-guide check 31 blocks; private remediation report."
+     }
+    ],
+    "general_review_pass_count": 1,
+    "targeted_refutation_used": false,
+    "closure": "Remediation epoch closed by direct lead verification at 2a735da0367214b35a325f61865fb47f0ce872c7: triage lead-close, projected action none and no disputed P0/P1. One initial full-council pass and one lead-closed remediation epoch; no second council or targeted refutation. The original 31 dispositions (17 mitigate, 7 defer, 6 reject, 1 accept) retain partial mitigations, lead composition controls and deferred residuals; no human waivers. This closure is not publication or public-route acceptance approval."
+   }
+  ],
+  "follow_up": "https://github.com/alphastorm/omp-ninfer/issues/161"
+ }
+}

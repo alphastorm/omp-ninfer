@@ -103,24 +103,116 @@
       "sha256": "c37f4a2fdfeccac661d625e2052d40e14dd05bacb03ed20064f82c30127ca6d5"
     },
     "external_installation_acceptance": {
-      "status": "pending",
-      "note": "rerun against the published v0.7.0-qwen38-5090-beta.7 component (image 496195ec) before the cut; the receipt lands at releases/v0.18.0/acceptance/composed-external-installation.json"
+      "status": "waived-by-founder",
+      "repository_path": "releases/v0.18.0/acceptance/composed-external-installation.json",
+      "sha256": "aa9f38557943f1f945d02288c7c1f1ef553807fd03b23ba87db1b63c0f035b5b",
+      "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/2a735da0367214b35a325f61865fb47f0ce872c7/releases/v0.18.0/acceptance/composed-external-installation.json",
+      "as_of": "2026-11-12",
+      "release": "v0.18.0",
+      "component_release_tag": "v18.18.7",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "4a6e39ea34633e03d07a1543ba30842362311f920341378433aa31b6c1404491",
+      "windows_binary_sha256": "4a6e39ea34633e03d07a1543ba30842362311f920341378433aa31b6c1404491",
+      "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+      "compatibility_sha256": "68cbae4bfd1fd1939772f8b31b944d9ec7f99599baa86652d2ad4b2573317699",
+      "platform_receipts": [
+        {
+          "profile": "darwin-remote-ssh",
+          "sha256": "570009a2ced1ea4668b9176aeca8851d01b1d575654ce9a601edbd7d29781f52"
+        },
+        {
+          "profile": "windows-docker-local",
+          "sha256": "1a74599d355405dd8b25f6f7596711e98cb3e28bc866b803cecbcb1b769e13ea"
+        },
+        {
+          "profile": "linux-docker-local",
+          "sha256": "0e092283e98d820d1c129fb3b135dae66f23e672e37f4163d4747af8231602f5"
+        }
+      ],
+      "note": "Five documented routes, three stock clients and RTX 4090 native acceptance passed. rtx3090-native: the initial native campaign's seven documented blocks passed, but its post-route stock OMP subagent proof failed because the model's five task calls were each rejected for a missing context argument; that window restored the canonical lane. rtx3090-native: all seven documented blocks passed; the later native campaign failed at native-probes compaction and was waived by the founder. Behavior completion, wrapper restoration and anonymous public-install acceptance are not claimed; the documented controller lead recovery is separately bound. rtx3090-native: documented blocks passed, but the post-route native-probes compaction probe failed and was waived by the founder. Native behavior completion, wrapper restoration audit and anonymous public-install acceptance are not claimed; lead recovery is bound by the waiver."
     },
     "review": {
-      "status": "pending",
-      "scope": "The predecessor review ledger is not retained as successor approval; the current product council and combined ledger remain unbound."
+      "status": "closed-by-disposition",
+      "scope": "Exact-source runtime full council closed without remediation; product full council closed with verified localized remediation through route candidate 2a735da0367214b35a325f61865fb47f0ce872c7. The combined ledger records the missing runtime reviewer as missing evidence and tracks deferred product residuals in https://github.com/alphastorm/omp-ninfer/issues/161. Review approval authorizes neither product publication nor production promotion."
+    },
+    "documented_route_acceptance": {
+      "status": "passed",
+      "repository_path": "releases/v0.18.0/acceptance/documented-routes.json",
+      "sha256": "5c51cb958837c7e47d23f02593039ebfc7192ca3c02a493edb651af510ad5fc6"
     }
   },
   "as_of": "2026-11-12",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
-  "scope": "F4 RTX 5090 beta.7 and v0.8.0-qwen38-3090-beta.3, v0.8.0-qwen38-4090-beta.3 exact current component qualification; stock OMP 18.18.7 identities retained. No product-route or client-platform execution is inferred.",
+  "external_installation_qualified": true,
+  "scope": "F4 RTX 5090 beta.7 and v0.8.0-qwen38-3090-beta.3, v0.8.0-qwen38-4090-beta.3 exact current component qualification with stock OMP 18.18.7. Candidate 2a735da0367214b35a325f61865fb47f0ce872c7 passed all five documented routes' 31/31 blocks and three stock-client platform checks. RTX 4090 campaign, public install and restoration passed. RTX 3090 attempt 1 failed its post-route stock OMP subagent proof: five task calls were rejected for a missing context argument; the lane was restored. The founder-authorized corrected attempt passed the seven documented blocks again and its subagent/session proofs, then automatic compaction timed out after 900 s with HTTP 503 admission timeouts while a checkpoint save was outstanding, reproducing the request-level HTTP 503 half of https://github.com/alphastorm/ninfer/issues/89 on the beta.3 RTX 3090 C2 lane. Managed Stop refused 9 sessions; the lead restored the canonical lane with an unchanged cross-lane census. The founder waived only this attempt-2 RTX 3090 post-route compaction campaign failure (releases/v0.18.0/qualification/rtx3090-route-waiver.json); original failed verdicts remain failed. RTX 3090 native behavior completion, wrapper restoration audit and anonymous public-install acceptance are not claimed. C2 long-session compaction remains a known limitation.",
   "interpretation": "Runtime/client bytes and decision edges are retained. Current raw parity values, including any exact founder-waived failure, are not rewritten into a pass.",
   "documented_route_acceptance": {
-    "status": "pending"
+    "status": "passed",
+    "scope": "All five candidate-bound documented routes and three stock OMP 18.18.7 clients passed. RTX 4090 native public-install and candidate-profile probes passed. rtx3090-native: all seven documented blocks passed; the later native campaign failed at native-probes compaction and was waived by the founder. Behavior completion, wrapper restoration and anonymous public-install acceptance are not claimed; the documented controller lead recovery is separately bound. rtx3090-native: documented blocks passed, but the post-route native-probes compaction probe failed and was waived by the founder. Native behavior completion, wrapper restoration audit and anonymous public-install acceptance are not claimed; lead recovery is bound by the waiver.",
+    "candidate_commit": "2a735da0367214b35a325f61865fb47f0ce872c7",
+    "evidence_commit_changes_candidate": false,
+    "evidence_path": "releases/v0.18.0/acceptance/documented-routes.json",
+    "evidence_sha256": "5c51cb958837c7e47d23f02593039ebfc7192ca3c02a493edb651af510ad5fc6",
+    "document_change": "Only later non-executable release-state prose may change; composer must independently require every executed block to remain byte-identical.",
+    "documented_route_steps": {
+      "rtx5090-container-host": "2/2",
+      "rtx5090-macos-client": "10/10",
+      "rtx5090-windows-client": "5/5",
+      "rtx4090-native": "7/7",
+      "rtx3090-native": "7/7"
+    },
+    "platform_receipts": [
+      "releases/v0.18.0/acceptance/darwin-arm64-18.18.7.json",
+      "releases/v0.18.0/acceptance/windows-x64-18.18.7.json",
+      "releases/v0.18.0/acceptance/linux-x64-18.18.7.json"
+    ],
+    "fresh_product_acceptance": true,
+    "restoration": {
+      "path": "docs/measurements/2026-11-12-v0180-acceptance-restoration.json",
+      "status": "passed-with-founder-waiver",
+      "driver_hold_s": 406.876,
+      "production_upgrade_activated": false,
+      "documented_directory_presence_restored": true,
+      "native_documented_stage_restored": true,
+      "native_driver_window_s": {
+        "rtx4090": 509.8569450378418
+      },
+      "waived_native_campaigns": {
+        "rtx3090-native": {
+          "status": "restored-by-lead",
+          "outcome": "graceful",
+          "runtime_record_absent": true,
+          "gpu_owner_lease_absent": true,
+          "all_native_tasks_ready": true,
+          "sessions_refused": 0,
+          "server_processes": 0,
+          "port_18082_listeners": 0,
+          "power_limit_w": 370,
+          "founder_waiver": {
+            "repository_path": "releases/v0.18.0/qualification/rtx3090-route-waiver.json",
+            "sha256": "13bcf02764501f17b1a251e82ee6ef1750f2e0fbc4ddd0637def0c018cf8722b"
+          }
+        }
+      }
+    },
+    "composition_run": true
   },
   "observed_gates": {
+    "g4_review": {
+      "status": "passed",
+      "repository_path": "releases/v0.18.0/review/runtime-ledger.json",
+      "sha256": "05c6b207d7c244684eeea6f535bcee7b8bef2996a7d30df125ee4f75f32979fb",
+      "ledger_status": "closed-by-disposition",
+      "approval_granted": true,
+      "publication_authorized": false,
+      "public_route_acceptance_granted": false,
+      "scope": "Closed exact-source runtime full council without remediation and product full council with verified localized remediation. The missing runtime reviewer is not counted as approval. Review approval does not authorize publication or grant public-route acceptance."
+    },
     "runtime_rc": {
       "repository_path": "releases/v0.18.0/qualification/runtime-rc.json",
       "sha256": "ca17283887cfad131374fefe6c27488bfcfc171de2a114d17aa97e8b30b8567d"
@@ -234,13 +326,10 @@
       "sha256": "0a2bcdefbe10adfcb1f37fa27d8f177b54ba9676ce57d3cb739e978dbde5987d"
     }
   },
-  "remaining_release_gates": [
-    "Prepare the five-route guide and run fresh candidate-bound external-install acceptance, three stock-client platforms, native campaigns/public installs and independent restoration.",
-    "Bind the current product council/combined review ledger; reconcile the receipt audit and immutable evidence pins before publication admission."
-  ],
+  "remaining_release_gates": [],
   "receipt_audit": {
     "repository_path": "releases/v0.18.0/qualification/receipt-audit.json",
-    "sha256": "c1fc95953faaae9a7d835f332fa871376ae791cc5f7fccb4d9d701f91cef4ef7"
+    "sha256": "fc34a9f3e7007c83fb3aaf30baca2d03482fc44277ea0115cba2d7b9faf48d22"
   },
-  "eligibility_scope": "Current component lanes only; external-install acceptance, native public installs/campaigns, product review, audit reconciliation and immutable pins remain binding."
+  "eligibility_scope": "Current component qualification and closed runtime/product reviews are bound. The exact founder waiver at releases/v0.18.0/qualification/rtx3090-route-waiver.json covers only the corrected attempt-2 RTX 3090 post-route compaction campaign failure; it does not change the failed verdicts or waive another gate. RTX 3090 native behavior completion, wrapper restoration audit and anonymous public-install acceptance are not claimed. C2 long-session compaction remains a known limitation (https://github.com/alphastorm/ninfer/issues/89). Final composition, audit reconciliation and immutable pins are lead-owned steps; product publication and production promotion are separate founder-owned actions."
 }
