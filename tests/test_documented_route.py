@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import documented_route  # noqa: E402
+from stage_release import checkpoint_host_directory  # noqa: E402
 
 RUNNER = ROOT / "scripts" / "hosts" / "run-documented-route.sh"
 
@@ -170,7 +171,7 @@ class ExtractionTests(unittest.TestCase):
                          [release] * 5)
         preparation = documented_route.extract(
             documented_route.DEFAULT_DOC, "3. Prepare the model and key on the inference host").text
-        self.assertIn('CHECKPOINTS="$ROOT/checkpoints-v017"', preparation)
+        self.assertIn(f'CHECKPOINTS="$ROOT/{checkpoint_host_directory(release)}"', preparation)
         self.assertIn(f"releases/{release}/manifest.json", preparation)
         self.assertIn('MODEL="$ROOT/qwen3_8_27b-v3.ninfer"', preparation)
         for lane in ("rtx4090-native", "rtx3090-native"):
@@ -698,17 +699,23 @@ class HostPreparationTests(unittest.TestCase):
             self.assertRegex(self.prepare(home).decode(), r"\A[0-9a-f]{64}\n\Z")
 
     def test_successor_preparation_leaves_predecessor_checkpoint_stores_intact(self) -> None:
+        block = documented_route.extract(
+            documented_route.DEFAULT_DOC, "3. Prepare the model and key on the inference host").text
+        store = checkpoint_host_directory(
+            re.search(r"releases/(v[0-9.]+)/manifest\.json", block).group(1))
+        predecessors = ("checkpoints", "checkpoints-v013", "checkpoints-v017")
+        self.assertNotIn(store, predecessors)
         with tempfile.TemporaryDirectory() as temporary:
             home = Path(temporary)
             root = home / ".local/share/omp-ninfer"
-            for name in ("checkpoints", "checkpoints-v013"):
-                store = root / name
-                store.mkdir(parents=True)
-                (store / "generation").write_bytes(b"predecessor checkpoint")
+            for name in predecessors:
+                store_root = root / name
+                store_root.mkdir(parents=True)
+                (store_root / "generation").write_bytes(b"predecessor checkpoint")
             self.prepare(home)
-            self.assertTrue((root / "checkpoints-v017").is_dir())
-            self.assertEqual(list((root / "checkpoints-v017").iterdir()), [])
-            for name in ("checkpoints", "checkpoints-v013"):
+            self.assertTrue((root / store).is_dir())
+            self.assertEqual(list((root / store).iterdir()), [])
+            for name in predecessors:
                 self.assertEqual((root / name / "generation").read_bytes(), b"predecessor checkpoint")
 
 
@@ -1029,6 +1036,26 @@ class WindowsNativeCommandTests(unittest.TestCase):
                     "}\n")
                 with self.subTest(lane=lane, failed_action=action):
                     self.assertEqual(self.run_block(tail, {"omp"}, prelude), (expected_calls, reached))
+
+    def test_native_operate_stops_at_each_failed_lifecycle_command(self) -> None:
+        actions = ["Status", "Stop", "Start", "Status"]
+        for lane in ("rtx4090-native", "rtx3090-native"):
+            block = self.steps(lane)["operate"]
+            for failed_call in range(5):
+                prelude = (
+                    "$StateRoot = 'fixture'\n$script:ControllerCall = 0\n"
+                    "function Join-Path { 'Fixture-Controller' }\n"
+                    "function Fixture-Controller { param($Action, $StateRoot)\n"
+                    "  $script:ControllerCall++\n"
+                    "  Add-Content (\"$PSScriptRoot/calls.txt\") \"controller-$Action\"\n"
+                    f"  $global:LASTEXITCODE = if ($script:ControllerCall -eq {failed_call}) "
+                    "{ 7 } else { 0 }\n"
+                    "}\n")
+                expected = actions[:failed_call] if failed_call else actions
+                with self.subTest(lane=lane, failed_call=failed_call):
+                    self.assertEqual(
+                        self.run_block(block, set(), prelude),
+                        (["controller-" + action for action in expected], failed_call == 0))
 
 
 @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed to execute the Windows host scripts")
