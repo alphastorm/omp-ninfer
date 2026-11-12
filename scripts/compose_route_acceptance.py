@@ -478,7 +478,7 @@ def predecessor_image_digest(release: str) -> str:
 
 def check_restoration(restoration: Any, lanes: tuple[str, ...], candidate: str,
                       predecessor_digest: str, waived: dict[str, dict] | None = None) -> None:
-    """Restoration counts only when it observed every incumbent the windows displaced back in place."""
+    """Restoration requires every displaced incumbent back in place and every named native audit."""
     require(isinstance(restoration, dict) and bool(restoration), "restoration evidence is empty")
     overridden = sorted(set(restoration).intersection(RESTORATION_RECEIPT_FIELDS))
     require(not overridden, f"restoration evidence cannot set the receipt's own fields {overridden}")
@@ -521,7 +521,8 @@ def check_restoration(restoration: Any, lanes: tuple[str, ...], candidate: str,
             require(native.get(key) is True, f"{gpu} restoration did not observe {key}")
         for key in NATIVE_AUDITS:
             checks = native.get(key)
-            require(isinstance(checks, dict) and bool(checks)
+            require(isinstance(checks, dict)
+                    and all(checks.get(field) is True for field in AUDIT_FIELDS)
                     and all(value is True for value in checks.values()),
                     f"{gpu} restoration {key} did not all pass")
         require(positive_seconds(native.get("window_hold_seconds")),

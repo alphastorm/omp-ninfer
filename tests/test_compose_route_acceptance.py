@@ -237,6 +237,35 @@ class RouteReceiptTests(unittest.TestCase):
         self.assertIn("not candidate", refused(MODULE.check_route, "rtx4090-native", receipt, CANDIDATE))
 
 
+class RestorationAuditTests(unittest.TestCase):
+    def check(self, restoration: dict) -> None:
+        MODULE.check_restoration(
+            restoration, MODULE.NATIVE_LANES, CANDIDATE,
+            RESTORATION["rtx5090"]["original_image"].rsplit("@", 1)[1])
+
+    def test_every_native_audit_requires_every_named_check(self) -> None:
+        for lane in MODULE.NATIVE_LANES:
+            gpu = lane.removesuffix("-native")
+            for audit in MODULE.NATIVE_AUDITS:
+                for field in MODULE.AUDIT_FIELDS:
+                    with self.subTest(lane=lane, audit=audit, missing=field):
+                        restoration = deepcopy(RESTORATION)
+                        restoration[gpu][audit].pop(field)
+                        with self.assertRaisesRegex(SystemExit, f"{gpu} restoration {audit}"):
+                            self.check(restoration)
+
+    def test_complete_audits_allow_only_true_extra_checks(self) -> None:
+        for lane in MODULE.NATIVE_LANES:
+            gpu = lane.removesuffix("-native")
+            for audit in MODULE.NATIVE_AUDITS:
+                restoration = deepcopy(RESTORATION)
+                restoration[gpu][audit]["extra_check"] = True
+                self.check(restoration)
+                restoration[gpu][audit]["extra_check"] = False
+                with self.assertRaisesRegex(SystemExit, f"{gpu} restoration {audit}"):
+                    self.check(restoration)
+
+
 class LiveEvidenceTests(unittest.TestCase):
     def test_complete_live_evidence_against_the_manifest_runtime_is_accepted(self) -> None:
         MODULE.check_live("darwin-remote-ssh", deepcopy(LIVE), MANIFEST)
