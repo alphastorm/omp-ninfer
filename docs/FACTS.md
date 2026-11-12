@@ -1,14 +1,14 @@
 # OMP NInfer — canonical facts
 
-Updated: 2026-11-11 · Published release: v0.17.0 (2026-11-10) · stock Oh My Pi 18.18.6
+Updated: 2026-11-12 · Published release: v0.18.0 (2026-11-12) · stock Oh My Pi 18.18.7
 
 Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release layer) → NInfer
 (inference engine) → Qwen3.8 27B (served model).
 
 **Qualified on RTX 5090 · 4090 · 3090**, bound to the exact profiles in
-[`releases/v0.17.0/manifest.json`](../releases/v0.17.0/manifest.json).
+[`releases/v0.18.0/manifest.json`](../releases/v0.18.0/manifest.json).
 [Get started](QUICKSTART.md) ·
-[Download v0.17.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.17.0)
+[Download v0.18.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.18.0)
 
 ## What it is
 
@@ -48,295 +48,196 @@ All of these should be materially true:
 
 See the [decision guide](DECISION_GUIDE.md) for the side-by-side comparison.
 
-## Prepared next — v0.18.0 / unified engine native re-cut and OMP 18.18.7
-
-**Component-qualified next: v0.18.0 / stock OMP 18.18.7.** This successor to published
-`v0.17.0` re-cuts all three GPU runtime lanes from one frozen fork engine commit `F4`
-(`48c8ac4644322f024b5c3bd5b657af5874567251` in `alphastorm/ninfer`, stacked on fork `main` `b871996a` / `F3`
-`e0971faf` on upstream `Neroued/ninfer` master `64d10fbf`): RTX 5090 `v0.7.0-qwen38-5090-beta.7`
-(tag commit `48c8ac4644322f024b5c3bd5b657af5874567251`, OCI image
-`ghcr.io/alphastorm/ninfer-runtime@sha256:496195ecd6cf1f50fcd9dc62cf7b51787f599cc2b196e194baf050c4b149e119` on base
-`ghcr.io/alphastorm/ninfer@sha256:28857182859a8f4993090521899b11a3f8676cb174c59adc626485e9f01472a3`, server `804ef8ac6d062dc8da8784ba3f52e5cece2178a5f5bc46cb2c7bc1d3e8937fe3`, archive
-`823d9357f90051564068a8504695a0ec57eb4016681bfd83097f453fcf9eb6ae` / `580,020,196` B, SPDX
-`1f935ae2ad4ad9ca139b6d50f9ea6db6d186e80921f96c6be5808500e2011e25`, source archive `runtime-source-48c8ac46.tar.gz` on
-tag `v0.7.0-qwen38-5090-source.7` `7ced9ab1d163e7ac7220752790cc09a53e6863ecbb2fdaf81e4f1d422a67b33d` /
-`12,877,499` B, profile `qwen38-5090-v0.13.0`, config
-`751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47`, isolated host directory `checkpoints-v018` mounted at container
-path `/checkpoints-v013` to match the container server's `--session-checkpoint-dir` flag), native
-Windows RTX 4090 `v0.8.0-qwen38-4090-beta.3` (tag commit `48c8ac4644322f024b5c3bd5b657af5874567251`, package
-`ac41700ac2bb9fb171188f35e73481cfd9f1140c5781320b1e6304ee760d7166` / `992,131,123` B, server
-`a5266ae676305cc56086df6d3b8dc8968be110b3cf0eb7b18147adafc2f66d22`, SPDX `4ad1f5e8fcd610f2a7246e8284b8eb7870c4ec62a587f938d9bdfb564ae49a70`, CycloneDX
-`60a1d35df6d328a9699a223d7bb8e19a3067967e80f6965f5e4278f72486df85`, build profile `native-v0.8.0-beta.3-rtx4090`, public
-config `b71a2cff25d671703106474d86fe6a808dc803db28703b6fd7740013fcfee278`), and native Windows RTX 3090
-`v0.8.0-qwen38-3090-beta.3` (tag commit `48c8ac4644322f024b5c3bd5b657af5874567251`, package
-`bf1ceaa9eb522a8c8d9372bec475d6e4e4666e6a995302cd20035e80ae3e5edd` / `1,011,087,765` B, server
-`e571328699be41d90eff8743d94da26e8f587e48bc32f618013625af7ad0bfe0`, SPDX `8ac165c5a492406f9c2943f1ed7ed3c22da818c8aee75803d4eca341227f628c`, CycloneDX
-`269941ecea0ddcfa5d6fa9d3c0ce3b186428c476e2eda4d25d0fb9c7f6d41f21`, build profile `native-v0.8.0-beta.3-tc-rtx3090`, public
-config `674d52609e22de54a5db20001e25fdd97cd600d498551ecfe48efa53964fc3ac`). The shared published model container version 3
-`81f924d4` (`20,437,521,664` bytes, revision `1cbd84e7`) is unchanged.
-
-`F4` adds Device-staged durable checkpoint export when the Host arena is full
-([fork #89](https://github.com/alphastorm/ninfer/issues/89), folding
-[#84](https://github.com/alphastorm/ninfer/issues/84);
-[PR #109](https://github.com/alphastorm/ninfer/pull/109) `3213508fe`: `11/11` CPU suites, `6/6`
-greedy parity, and proxy `rtxpro6000-win-a` paired deleted-occupant `Stop` going from `1` refused
-to `0` refused / `1` saved with `2` Device-staged `StateImage` recurrent state snapshots, `1,332 ms`
-staging-gate hold, matching `State` digests `5ed1d134…`, `8bd4f2b8…`, `fc493f91…`, and `0`
-`transaction_busy` receipts), off-worker export/import prepares held to an operation-free boundary
-with budget-free `>= 100 ms`-spaced pressure-busy retries
-([PR #111](https://github.com/alphastorm/ninfer/pull/111) `33088ad2c`: `10/10` CPU suites,
-`EngineCore` `45/45`, bounded to at most the single operation in flight when the prepare arrived),
-bounded `K = 4` fresh-admission priority at context-operation boundaries
-([fork #102](https://github.com/alphastorm/ninfer/issues/102);
-[PR #108](https://github.com/alphastorm/ninfer/pull/108) `6ec05f211`: `EngineCore` `56/56` + `10`
-suites; proxy engineering oracle across `3/3` warm-history pairs cutting arrival source wait from
-`44.576 / 45.030 / 44.999 s` to `0.000 s` and client TTFT from `44.970 / 45.219 / 45.190 s` to
-`0.131 / 0.133 / 0.288 s` with `111/111` reuse, `0` HTTP `503`, and `1.0251× / 1.0211× / 1.0261×`
-long-prefill wall ratios), native controller GPU-owner lease restoration on a refused `Stop`,
-removal postconditions, junction containment, exact-byte package archiving, and the four-key
-`beta.3` variant allowlist ([PR #107](https://github.com/alphastorm/ninfer/pull/107) `2454c0629`,
-[#91](https://github.com/alphastorm/ninfer/pull/91),
-[#87](https://github.com/alphastorm/ninfer/issues/87),
-[#90](https://github.com/alphastorm/ninfer/issues/90)), upstream malformed tool-history regression
-vectors ([PR #106](https://github.com/alphastorm/ninfer/pull/106) `92209112`, `10/10` proxy HTTP
-`200`), and the `Group64` `A8` build-profile configure guard and Apache-2.0 attribution
-([PR #112](https://github.com/alphastorm/ninfer/pull/112) `fd95455df`, `13/13` configure cases,
-`650` TUs token-identical).
-
-**Bound release selections:**
-
-- `F4` includes the default-`OFF` `sm_86`/`sm_89` small-T tensor-core verify kernel
-
-  ([PR #104](https://github.com/alphastorm/ninfer/pull/104) `03b477c33` / preview `d534923c`,
-
-  `T=8/16`), guarded by `-tc` in `NINFER_BUILD_PROFILE` and attributed to `ashalliants/ninfer-3090`
-
-  `4a178c4b1fd78555b5efd9b07d10d5b1946ca3ad`. Only the RTX 3090 `tc` profile enables it
-
-  ([release notes](../releases/v0.18.0/NINFER_RELEASE_NOTES.md)).
-- Selected native profiles `native-v0.8.0-beta.3-tc-rtx3090` (RTX 3090,
-  `powered`, `466586d9ad2ae334b4430e5e55569d0b05af2d6207134af21d558530146350c9`) and
-  `native-v0.8.0-beta.3-rtx4090` (RTX 4090, `powered`,
-  `531c5ed1c67bef4e88f266ae991cd358b2c5740e373238fcfc9fd1f358320d28`) ship under the bound selection decision
-  ([release notes](../releases/v0.18.0/NINFER_RELEASE_NOTES.md)).
-- RTX 5090 cadence-only prefill pacing remains default-off (`--prefill-stall-budget-ms 0
-  --decode-rounds-per-prefill 0`) in `qwen38-5090-v0.13.0` (configuration SHA-256 `751d22dc`)
-  after failing 3 of 6 preregistered bars
-  ([release notes](../releases/v0.18.0/NINFER_RELEASE_NOTES.md)).
-
-**Excluded candidates and disclosed residuals:** `sm_120` `Group64` `A8` prefill
-([PR #105](https://github.com/alphastorm/ninfer/pull/105) `93348eb9`, closed unmerged) was killed
-at the `K1` cold-L2 prefill-speed prescreen (`0.784860×` at `512`-token pass width and `0.983623×`
-at `1,024`-token pass width, below the `1.00×` kill bar); restricted tool-argument copy drafting
-(`+5.2439%` to `+7.6563%` for `Mode A` and `+4.7949%` to `+7.3278%` for `Mode B` at `m = 4.631`
-baseline committed tokens per neural round; `+6.6167%` to `+9.6008%` and `+6.4980%` to `+10.1177%`
-at rebased `m = 3.875` across `2,998` retained turns, below the `+15%` session-decode bar) is not
-shipped. The request-level HTTP `503` half of
-[fork #89](https://github.com/alphastorm/ninfer/issues/89) did not reproduce on the proxy GPU (`3`
-fixtures) or the pre-cut default RTX 3090 probe; on the selected `beta.3` RTX 3090 `C2` `tc` lane,
-it reproduced in acceptance only under host system-drive exhaustion in attempt 2 and did not
-reproduce with free space in attempt 3 (`2` committed
-compactions in `747.00` s, zero HTTP `503` responses, compaction receipt
-`cfa89628`), while its pressure-save deferral
-residual and the [Neroued/ninfer#434](https://github.com/Neroued/ninfer/issues/434) per-rotation
-fresh-window consumption while a pressure save is outstanding or no lane is free remain recorded in
-[fork #89](https://github.com/alphastorm/ninfer/issues/89) and
-[fork #103](https://github.com/alphastorm/ninfer/issues/103).
-
-Selected client: unmodified upstream `v18.18.7` (release `440868478`, `2026-11-10T20:23:32Z`,
-source `e325ffc73ab86e03bdd20a91b77d8e2b3964c906`, tree `9ba2abe1f1dd7c64b8d3f99dc0e41d689d96886c`;
-[18.18.6→18.18.7 review](measurements/2026-11-11-omp-18187-client-upgrade-review.json)):
-
-| Client platform | Raw asset / ID | Bytes | Asset = binary SHA-256 |
-| --- | --- | ---: | --- |
-| macOS arm64 | `omp-darwin-arm64` / `732828892` | 221,982,864 | `0cecaac781d3c37f32ff7ecf3b6ba94842e7f058358e4748d5071d772f0aa4df` |
-| Windows x64 | `omp-windows-x64.exe` / `732828893` | 250,108,928 | `4a6e39ea34633e03d07a1543ba30842362311f920341378433aa31b6c1404491` |
-| Linux x64 under WSL2 | `omp-linux-x64` / `732828896` | 286,136,496 | `ea6c216feb260a3766a591760aad06bdc608efd5c632912603f5ccb41b0a4bb1` |
-
-On Windows (`process.platform === "win32"`), `18.18.7` changes the rendered `bash` tool description
-sent to the model whenever `bash` is advertised and updates `cmd`/MSYS path dispatch;
-`scripts/hosts/omp-client-probe.py` invokes `omp` with `--tools read` and does not separately probe
-`bash` or `edit` beyond the `31`-block route acceptance. Component cuts and lane/speed/quality
-receipts passed, and runtime/product councils closed by disposition. Candidate `2a735da0` passed
-all five documented block sets (**31/31**), three stock-client platform checks, RTX 4090
-campaign/public install/restoration on its initial window, and RTX 3090 campaign/public
-install/restoration on its third execution without a waiver: on RTX 3090, attempt 1 failed its
-post-route stock OMP subagent check on malformed `task` tool arguments (five calls rejected for
-missing `context`) and restored; attempt 2 ran while the host's system drive was full (`0.39 GiB`
-free when measured afterwards; `27` checkpoint writes failed with OS disk-full error `112`, checkpoint saves were refused
-for `capacity`, admission waited behind an unsettled checkpoint save across `4` HTTP `503`
-`deferred by a pending checkpoint save` timeouts before a **900 s** compaction timeout,
-`Control-Release.ps1 -Action Stop` refused **9** sessions, and empty-session `Start`/`Stop`
-recovery restored the installed lane); the founder-authorized third execution in fresh workspaces
-with an enforced **60 GiB** free-space floor (`63.08` GiB free, recorded in
-`accept-rtx4090-route.py`'s single `--attempt 2` rerun slot) passed every phase
-(`1,439.367` s window).
-The lead completes composition, audit reconciliation and immutable pins; product publication is
-founder-owned. See the [release notes](../releases/v0.18.0/NINFER_RELEASE_NOTES.md).
-Published install authority stays `v0.17.0`
-([immutable v0.17.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.17.0/docs/QUICKSTART.md)).
-
 ## Current release
 
-Published release **v0.17.0** (2026-11-10, GitHub `Latest`; superseding `v0.16.2`, 2026-11-04) pins
-unmodified upstream Oh My Pi **18.18.6** (`9058ab9d229663e229e2867824ba6df6f21e9e59`, tree
-`fd379b65368a20c7648d97f2c2b99cc03e019254`, release `439766193`;
-[18.15.0→18.18.6 review](measurements/2026-11-10-omp-18186-client-upgrade-review.json)) and shared
+Published release **v0.18.0** (2026-11-12, GitHub `Latest`; superseding `v0.17.0`, 2026-11-10) pins
+unmodified upstream Oh My Pi **18.18.7** (`e325ffc73ab86e03bdd20a91b77d8e2b3964c906`, tree
+`9ba2abe1f1dd7c64b8d3f99dc0e41d689d96886c`, release `440868478`;
+[18.18.6→18.18.7 review](measurements/2026-11-11-omp-18187-client-upgrade-review.json)) and shared
 published model container version 3 `81f924d4` (`qwen3_8_27b-v3.ninfer`, 20,437,521,664 bytes,
-revision `1cbd84e7`), rebuilds the RTX 5090 container runtime to `v0.7.0-qwen38-5090-beta.6` from
-frozen engine source `e0971faf` (`e0971faf221204047d5a4ed834e4e298740cee17` on upstream
-`Neroued/ninfer` master `64d10fbf`, [fork PR #101](https://github.com/alphastorm/ninfer/pull/101),
-image `7a19576b` on reused base `28857182`, server `dc86e101`, archive `d7f1ca4f` / 580,026,014 B,
-SPDX `d9ea727c`, source archive `73749f93` / 12,820,073 B, kept strict-origin profile
-`qwen38-5090-v0.13.0`, config `751d22dc`, isolated host checkpoint directory `checkpoints-v017`
-mounted at `/checkpoints-v013`; bit-identical 664-artifact / 3-package same-path double build), and
-carries the `v0.16.2` published native Windows RTX 4090 (`v0.8.0-qwen38-4090-beta.2`, package
-`d9b10b47` / 991,981,865 B, server `ffee91bf`, SPDX `e4be92e4`, CycloneDX `a341bb61`, profile
-`qwen38-4090-native-v0.8.0-beta.2`, public config `ae27dc44`, DFlash2 `K=7`, INT8 KV, `C1`,
+revision `1cbd84e7`), and rebuilds all three GPU runtime lanes from one frozen fork engine source
+`F4` (`48c8ac4644322f024b5c3bd5b657af5874567251` in `alphastorm/ninfer`, stacked on fork `main`
+`b871996a` / `F3` `e0971faf` on upstream `Neroued/ninfer` master `64d10fbf`): RTX 5090 container
+runtime `v0.7.0-qwen38-5090-beta.7` (image `496195ec` on reused base `28857182`, server `804ef8ac`,
+archive `823d9357` / 580,020,196 B, SPDX `1f935ae2`, source archive `7ced9ab1` / 12,877,499 B on
+`v0.7.0-qwen38-5090-source.7`, image receipt `v0.7.0-qwen38-5090-runtime-beta.7` `851157cb`, kept
+strict-origin profile `qwen38-5090-v0.13.0`, config `751d22dc`, isolated host checkpoint directory
+`checkpoints-v018` mounted at `/checkpoints-v013`), native Windows RTX 4090
+`v0.8.0-qwen38-4090-beta.3` (package `ac41700a` / 992,131,123 B, server `a5266ae6`, SPDX `4ad1f5e8`,
+CycloneDX `60a1d35d`, build profile `native-v0.8.0-beta.3-rtx4090`, profile
+`qwen38-4090-native-v0.8.0-beta.3`, public config `b71a2cff`, DFlash2 `K=7`, INT8 KV, `C1`,
 `1,024`-token prefill chunk, `15,747.734375 MiB` / `16,512,696,320` B shared Host budget, `640 MiB`
-headroom, 450 W owner baseline) and RTX 3090 (`v0.8.0-qwen38-3090-beta.2`, package `97a8e634` /
-1,008,989,809 B, server `15a4db46`, SPDX `051a81e2`, CycloneDX `255874bf`, profile
-`qwen38-3090-native-v0.8.0-beta.2`, public config `238ccad7`, DFlash2 `K=7`, INT8 KV, `C2` over one
-shared 131,072-token pool, `180 s` pending timeout, `1,024`-token prefill chunk, `20,867.734375 MiB`
-/ `21,881,405,440` B shared Host budget, `768 MiB` headroom, 350 W serving cap / 370 W restored)
-packages unchanged at engine source `a87de361` (`a87de3613c17bced777b446fb545f872d8395ec1` on
-`64d10fbf`). Release authority:
-[`releases/v0.17.0/manifest.json`](../releases/v0.17.0/manifest.json) ·
-[`releases/v0.17.0/NINFER_RELEASE_NOTES.md`](../releases/v0.17.0/NINFER_RELEASE_NOTES.md) ·
+headroom, 450 W owner baseline), and native Windows RTX 3090 `v0.8.0-qwen38-3090-beta.3` (package
+`bf1ceaa9` / 1,011,087,765 B, server `e5713286`, SPDX `8ac165c5`, CycloneDX `269941ec`, selected
+build profile `native-v0.8.0-beta.3-tc-rtx3090` enabling `sm_86` small-T tensor-core verify at
+`T=8/16`, profile `qwen38-3090-native-v0.8.0-beta.3`, public config `674d5260`, DFlash2 `K=7`, INT8
+KV, `C2` over one shared 131,072-token pool, `180 s` pending timeout, `1,024`-token prefill chunk,
+`20,867.734375 MiB` / `21,881,405,440` B shared Host budget, `768 MiB` headroom, 350 W serving cap /
+370 W restored). Release authority:
+[`releases/v0.18.0/manifest.json`](../releases/v0.18.0/manifest.json) ·
+[`releases/v0.18.0/NINFER_RELEASE_NOTES.md`](../releases/v0.18.0/NINFER_RELEASE_NOTES.md) ·
 [`COMPATIBILITY.md`](COMPATIBILITY.md). Native `rk4v4` 4-bit KV (`262,144`-token context) remains
-deferred to a follow-up release on the true-cold restore oracle (`EXP-107`).
+deferred ([`EXP-107`](PERFORMANCE.md#experiment-ledger), [`EXP-116`](PERFORMANCE.md#experiment-ledger)).
 
-The tagged [`releases/v0.17.0/NINFER_RELEASE_NOTES.md`](../releases/v0.17.0/NINFER_RELEASE_NOTES.md)
+The tagged [`releases/v0.18.0/NINFER_RELEASE_NOTES.md`](../releases/v0.18.0/NINFER_RELEASE_NOTES.md)
 header and the `publication` block of
-[`releases/v0.17.0/manifest.json`](../releases/v0.17.0/manifest.json) record the composition's
-freeze-time state (qualified successor, fresh acceptance passed across all five documented routes
-with RTX 3090's post-route native compaction campaign waived, product publication a separate gate)
-and are immutable after the freeze, and the publication record is this section,
+[`releases/v0.18.0/manifest.json`](../releases/v0.18.0/manifest.json) record the composition's
+freeze-time state (qualified successor, fresh acceptance passed across all five documented routes,
+three stock clients, and both native post-route campaigns and public installs without a waiver,
+product publication a separate gate) and are immutable after the freeze, and the publication record is this section,
 [`docs/RELEASES.md`](RELEASES.md), and the
-[GitHub release](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.17.0).
+[GitHub release](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.18.0).
 
 | Component or lane | Form and transport | Release tag and source | Image or package | Serving profile | Context | Requests in flight | Speculative backend | Modalities |
 | --- | --- | --- | --- | --- | ---: | ---: | --- | --- |
-| Oh My Pi client | Unmodified upstream release binaries: macOS arm64 (preview), Windows x64, Linux x64 (WSL2 live evidence) | `v18.18.6`, source `9058ab9d`, tree `fd379b65`, release `439766193` | `omp-darwin-arm64` (`ed2e63eb`, 221,867,152 B), `omp-windows-x64.exe` (`dfb15c27`, 249,985,024 B), `omp-linux-x64` (`a8059b95`, 286,021,808 B) in [`client-components.json`](../releases/v0.17.0/qualification/client-components.json) | Per-model `compat.statefulResponses: true`, explicit `tokenizer: qwen3` on opaque `q38-ninfer`, fail-closed config | 131,072 | `2` on RTX 5090 and native RTX 3090 (`C2` shared 131,072-token pool); `1` on native RTX 4090 (`C1`) | Target lane | Coding agent, typed tools, branches, compaction |
-| RTX 5090 | Windows 11 + Docker Desktop/WSL2 container on loopback `127.0.0.1:18089`; local Windows client or macOS client over manual SSH tunnel (preview) | `v0.7.0-qwen38-5090-beta.6`, source `e0971faf` on `64d10fbf` | OCI image `7a19576b` (base `28857182`), server `dc86e101`, archive `d7f1ca4f` (580,026,014 B), SPDX `d9ea727c`, model `81f924d4` | `qwen38-5090-v0.13.0`, config `751d22dc`: BF16 KV (146,368 automatic KV tokens), shared Host budget 20,867.734375 MiB (21,881,405,440 B), 28,672 MiB host floor, 1,024-token prefill chunk, 60,000 ms keep-warm, mandatory `--session-checkpoint-require-origin-auth`, host `checkpoints-v017` mounted at `/checkpoints-v013` (schema 3); bit-identical 664-artifact / 3-package same-path double build | 131,072 | 2 (plus 2 extra device-state slots, 180 s pending timeout) | DFlash2 draft window 7 (`--lm-head-draft`) | Vision, text, typed tools, JSON-schema output, preserved thinking |
-| RTX 4090 native Windows 11 | Native Windows package on loopback `127.0.0.1:18082`, UUID-bound GPU on a two-GPU host | Carried `v0.8.0-qwen38-4090-beta.2`, source `a87de361` on `64d10fbf` | Package `d9b10b47` (991,981,865 B), server `ffee91bf`, SPDX `e4be92e4`, CycloneDX `a341bb61`, model `81f924d4` | `qwen38-4090-native-v0.8.0-beta.2`, public config `ae27dc44`: INT8 KV, `Q4_G64_FP16` draft MLP + host-mapped token embedding, `Group64` A8 and FP32 head logits off, shared Host budget 15,747.734375 MiB (16,512,696,320 B), 640 MiB admission headroom, 32,768 MiB host floor, 1,024-token prefill chunk, 60,000 ms keep-warm, 450 W owner baseline, mandatory `--session-checkpoint-require-origin-auth`, `session-checkpoints-v3` (schema 3) | 131,072 | 1 (plus 2 extra device-state slots, 30 s pending timeout) | DFlash2 draft window 7 (`artifact-default` proposal) | Text, typed tools, JSON-schema output, preserved thinking (no vision) |
-| RTX 3090 native Windows 11 | Native Windows package on loopback `127.0.0.1:18082`, UUID-bound GPU on the same two-GPU host | Carried `v0.8.0-qwen38-3090-beta.2`, source `a87de361` on `64d10fbf` | Package `97a8e634` (1,008,989,809 B), server `15a4db46`, SPDX `051a81e2`, CycloneDX `255874bf`, model `81f924d4` | `qwen38-3090-native-v0.8.0-beta.2`, public config `238ccad7`: INT8 KV, `Q4_G64_FP16` draft MLP + host-mapped token embedding, `Group64` A8 and FP32 head logits off, shared Host budget 20,867.734375 MiB (21,881,405,440 B), 768 MiB admission headroom, 1,024-token prefill chunk, 350 W serving power cap (370 W restored on stop), keep-warm off, mandatory `--session-checkpoint-require-origin-auth`, `session-checkpoints-v3` (schema 3) | 131,072 | 2 over one shared 131,072-token pool (plus 2 extra device-state slots, 180 s pending timeout) | DFlash2 draft window 7 (`artifact-default` proposal) | Text, typed tools, JSON-schema output, preserved thinking (no vision) |
+| Oh My Pi client | Unmodified upstream release binaries: macOS arm64 (preview), Windows x64, Linux x64 (WSL2 live evidence) | `v18.18.7`, source `e325ffc7`, tree `9ba2abe1`, release `440868478` | `omp-darwin-arm64` (`0cecaac7`, 221,982,864 B), `omp-windows-x64.exe` (`4a6e39ea`, 250,108,928 B), `omp-linux-x64` (`ea6c216f`, 286,136,496 B) in [`client-components.json`](../releases/v0.18.0/qualification/client-components.json) | Per-model `compat.statefulResponses: true`, explicit `tokenizer: qwen3` on opaque `q38-ninfer`, fail-closed config | 131,072 | `2` on RTX 5090 and native RTX 3090 (`C2` shared 131,072-token pool); `1` on native RTX 4090 (`C1`) | Target lane | Coding agent, typed tools, branches, compaction |
+| RTX 5090 | Windows 11 + Docker Desktop/WSL2 container on loopback `127.0.0.1:18089`; local Windows client or macOS client over manual SSH tunnel (preview) | `v0.7.0-qwen38-5090-beta.7`, source `48c8ac46` on `64d10fbf` | OCI image `496195ec` (base `28857182`), server `804ef8ac`, archive `823d9357` (580,020,196 B), SPDX `1f935ae2`, model `81f924d4` | `qwen38-5090-v0.13.0`, config `751d22dc`: BF16 KV (146,368 automatic KV tokens), shared Host budget 20,867.734375 MiB (21,881,405,440 B), 28,672 MiB host floor, 1,024-token prefill chunk, 60,000 ms keep-warm, mandatory `--session-checkpoint-require-origin-auth`, host `checkpoints-v018` mounted at `/checkpoints-v013` (schema 3); single tested `RC2` binary (`664`-artifact / `3`-package RDC double build separate; [ninfer#120](https://github.com/alphastorm/ninfer/issues/120)) | 131,072 | 2 (plus 2 extra device-state slots, 180 s pending timeout) | DFlash2 draft window 7 (`--lm-head-draft`) | Vision, text, typed tools, JSON-schema output, preserved thinking |
+| RTX 4090 native Windows 11 | Native Windows package on loopback `127.0.0.1:18082`, UUID-bound GPU on a two-GPU host | `v0.8.0-qwen38-4090-beta.3`, source `48c8ac46` on `64d10fbf` | Package `ac41700a` (992,131,123 B), server `a5266ae6`, SPDX `4ad1f5e8`, CycloneDX `60a1d35d`, model `81f924d4` | `qwen38-4090-native-v0.8.0-beta.3`, build profile `native-v0.8.0-beta.3-rtx4090`, public config `b71a2cff`: INT8 KV, `Q4_G64_FP16` draft MLP + host-mapped token embedding, small-T tensor-core verify off, `Group64` A8 off, FP32 head logits off, shared Host budget 15,747.734375 MiB (16,512,696,320 B), 640 MiB admission headroom, 32,768 MiB host floor, 1,024-token prefill chunk, 60,000 ms keep-warm, 450 W owner baseline, mandatory `--session-checkpoint-require-origin-auth`, `session-checkpoints-v3` (schema 3) | 131,072 | 1 (plus 2 extra device-state slots, 30 s pending timeout) | DFlash2 draft window 7 (`artifact-default` proposal) | Text, typed tools, JSON-schema output, preserved thinking (no vision) |
+| RTX 3090 native Windows 11 | Native Windows package on loopback `127.0.0.1:18082`, UUID-bound GPU on the same two-GPU host | `v0.8.0-qwen38-3090-beta.3`, source `48c8ac46` on `64d10fbf` | Package `bf1ceaa9` (1,011,087,765 B), server `e5713286`, SPDX `8ac165c5`, CycloneDX `269941ec`, model `81f924d4` | `qwen38-3090-native-v0.8.0-beta.3`, build profile `native-v0.8.0-beta.3-tc-rtx3090`, public config `674d5260`: INT8 KV, `Q4_G64_FP16` draft MLP + host-mapped token embedding, `sm_86` small-T tensor-core verify at `T=8/16`, `Group64` A8 and FP32 head logits off, shared Host budget 20,867.734375 MiB (21,881,405,440 B), 768 MiB admission headroom, 1,024-token prefill chunk, 350 W serving power cap (370 W restored on stop), keep-warm off, mandatory `--session-checkpoint-require-origin-auth`, `session-checkpoints-v3` (schema 3) | 131,072 | 2 over one shared 131,072-token pool (plus 2 extra device-state slots, 180 s pending timeout) | DFlash2 draft window 7 (`artifact-default` proposal) | Text, typed tools, JSON-schema output, preserved thinking (no vision) |
 
 - **Sequential native topology on one two-GPU host:** Both native Windows lanes install on the same
   two-GPU Windows 11 host (RTX 4090 at index 0, RTX 3090 at index 1), each bound to its own GPU
   UUID and PCI address. Only one native lane runs at a time on loopback port `127.0.0.1:18082`; within the
   active RTX 3090 lane, up to two requests run concurrently (`C2`) sharing one 131,072-token INT8
   KV pool. This is not multi-GPU inference and not simultaneous RTX 4090 and RTX 3090 serving.
-- **Native upgrade, rollback to `v0.8.0-beta.1`, and checkpoint boundary:** With
-  `Install-Release.ps1` in `v0.8.0-qwen38-{4090,3090}-beta.2` (including unreadable repair-census
-  executable image refusal in `58a5b258`, [#63](https://github.com/alphastorm/ninfer/pull/63), and
-  prior paused owner power restoration before uninstall in `f25ea97b`,
-  [#65](https://github.com/alphastorm/ninfer/pull/65)), a running incumbent lane stops through its
-  own controller across power-cap transitions and remains preserved as `previous_release` for
+- **Native upgrade, rollback to `v0.8.0-beta.2`, and incomplete-shutdown recovery:** With
+  `Install-Release.ps1` and `Control-Release.ps1` in `v0.8.0-qwen38-{4090,3090}-beta.3`
+  ([PR #107](https://github.com/alphastorm/ninfer/pull/107) `2454c0629`, cherry-picking
+  [#91](https://github.com/alphastorm/ninfer/pull/91) and addressing
+  [#87](https://github.com/alphastorm/ninfer/issues/87) items 1 and 3 and
+  [#90](https://github.com/alphastorm/ninfer/issues/90)), a running `beta.2` incumbent stops through
+  its own controller across power-cap transitions and stays preserved as `previous_release` for
   `Control-Release.ps1 -Action Rollback` (**PASS 3/3 scenarios on both native lanes** from
-  published `v0.8.0-qwen38-{4090,3090}-beta.1`: running-lane upgrade, forced first-`Start`
-  rollback, and interrupted-install repair; RTX 3090 used the unmodified source harness while RTX
-  4090 used a founder-approved private `Invoke-UpgradeRehearsal.ps1` copy changing only
-  uncapped-power assertions `outer.qualified_power_limit_w == 0` and `Power() == owner_power_limit_w`,
-  [`rtx4090-rehearsal-harness-decision.json`](../releases/v0.17.0/qualification/rtx4090-rehearsal-harness-decision.json)
-  `f1fcd1bb`; GE-R1 binds each lane's distinct running/rollback/repair evidence-archive digest
-  beside the lane-agnostic scenario summaries; each package's isolated 15-phase scratch
-  qualification runs in a fresh scratch root with no predecessor and records
-  `rollback: not_applicable`, `0` directions). Keep prior checkpoint roots untouched; replay
-  authoritative OMP transcripts for a fresh prefill.
-- **Admission, bounded resume/fresh rotation, durable pressure-work waits, and serving robustness:**
+  published `v0.8.0-qwen38-{3090,4090}-beta.2` in
+  [`rtx3090-upgrade.json`](../releases/v0.18.0/qualification/rtx3090-upgrade.json) `483a8395` and
+  [`rtx4090-upgrade.json`](../releases/v0.18.0/qualification/rtx4090-upgrade.json) `a97ae3fa`:
+  running upgrade, forced-start rollback, and interrupted-install repair), while `Stop-ManagedRelease`
+  attempts guarded GPU-owner lease restoration on every thrown `Stop` error and verifies removal
+  postconditions and junction containment (`Resolve-NInferFinalPath`). If a stopped `beta.2` lane is
+  stuck after an incomplete shutdown, run explicit `Start` on the installed `beta.2` controller (which
+  starts a new launch and accepts losing unsaved sessions from that shutdown) and then run the
+  `beta.3` installer while `beta.2` is running; post-install fallback is exact `Rollback` to retained
+  `beta.2`, never an in-place profile swap to the preserved F4 default package. Keep prior checkpoint
+  roots untouched; replay authoritative OMP transcripts for a fresh prefill.
+- **Admission, Device-staged checkpoint saves, operation-free prepare holding, and serving robustness:**
   Two requests run together on the RTX 5090 (`146,368`-token automatic BF16 KV pool) and on the
   native RTX 3090 (`131,072`-token shared INT8 KV pool) only while both prompts plus output
   reservations fit inside the shared pool; excess requests wait up to 180 s (`30 s` on `C1` RTX
   4090). Native RTX 4090 and RTX 3090 profiles set `--admission-headroom-mib` to 640 MiB and 768 MiB
-  respectively. On RTX 5090 `beta.6` (`e0971faf`,
-  [fork PR #101](https://github.com/alphastorm/ninfer/pull/101)), bounded resume/fresh admission
-  rotates service across active sessions under context pressure and limits fresh-request admission
-  windows to one attempt per complete rotation so resumed long sessions are not starved
-  (upstream [#434](https://github.com/Neroued/ninfer/issues/434)); resident eviction and unit
-  reservation wait for in-flight checkpoint saves and exports rather than skipping the youngest
-  eviction candidate, pausing an older resident session, or failing the engine; malformed tool
-  arguments no longer throw, enabled effort tiers normalize to the model artifact's chat template,
-  contradictory thinking/effort fields are handled, numerical failures are isolated to the failing
-  request, and graceful shutdown drains cancellation and final-save work before stopping the service
-  (upstream
-  [#440](https://github.com/Neroued/ninfer/issues/440)/[#441](https://github.com/Neroued/ninfer/issues/441)/[#446](https://github.com/Neroued/ninfer/issues/446));
-  and optional prefill pacing remains default off. Both RTX 5090 (`e0971faf`) and carried native
-  `beta.2` (`a87de361`) include byte-proven durable-generation Host reclaim before export refusal
-  ([fork #78](https://github.com/alphastorm/ninfer/issues/78),
-  [#82](https://github.com/alphastorm/ninfer/pull/82) `aa9023f5`) and export-retirement reservation
-  ([#68](https://github.com/alphastorm/ninfer/pull/68) `aaf6c2d0`) on top of `v0.16.0`'s counted
-  Host `StateImage` materialization (`EXP-105`) and export-wait admission (`EXP-106`).
+  respectively. Re-cutting all three lanes from `F4` (`48c8ac46`) brings `v0.17.0`'s `F3`
+  (`e0971faf`) bounded resume/fresh admission ([#434](https://github.com/Neroued/ninfer/issues/434)),
+  durable pressure-work waits, serving robustness
+  ([#440](https://github.com/Neroued/ninfer/issues/440)/[#441](https://github.com/Neroued/ninfer/issues/441)/[#446](https://github.com/Neroued/ninfer/issues/446)),
+  and host-side Unicode NFC rendering to both native lanes and adds: Device-staged durable `StateImage`
+  checkpoint saves when the Host arena is full
+  ([fork #89](https://github.com/alphastorm/ninfer/issues/89), folding
+  [#84](https://github.com/alphastorm/ninfer/issues/84);
+  [PR #109](https://github.com/alphastorm/ninfer/pull/109) `3213508fe`), off-worker export/import
+  prepares held to an operation-free boundary with budget-free `>= 100 ms`-spaced pressure-busy
+  retries ([PR #111](https://github.com/alphastorm/ninfer/pull/111) `33088ad2c`; bounded single-op
+  residual in [#115](https://github.com/alphastorm/ninfer/issues/115)), bounded `K = 4`
+  fresh-admission priority at context-operation boundaries
+  ([fork #102](https://github.com/alphastorm/ninfer/issues/102);
+  [PR #108](https://github.com/alphastorm/ninfer/pull/108) `6ec05f211`; fresh-window accounting
+  residual in [#103](https://github.com/alphastorm/ninfer/issues/103)), inverted upstream malformed
+  tool-history regression vectors ([PR #106](https://github.com/alphastorm/ninfer/pull/106)
+  `92209112`), the `Group64` `A8` configure guard and Apache-2.0 attribution
+  ([PR #112](https://github.com/alphastorm/ninfer/pull/112) `fd95455df`), and `sm_86`/`sm_89` small-T
+  tensor-core verify at `T=8/16` ([PR #104](https://github.com/alphastorm/ninfer/pull/104)
+  `03b477c33`, attributed to `ashalliants/ninfer-3090` `4a178c4b`, enabled only on RTX 3090 `tc`
+  under [`rtx3090-profile-selection.json`](../releases/v0.18.0/qualification/rtx3090-profile-selection.json)
+  `f7611ba5`). RTX 5090 cadence-only prefill pacing stays default-off after failing 3 of 6
+  preregistered bars; `sm_120` `Group64` `A8` prefill ([PR #105](https://github.com/alphastorm/ninfer/pull/105)
+  `93348eb9`, `0.784860×` / `0.983623×` at `512`/`1,024` tokens) and restricted tool-argument copy
+  drafting (`+5.24%` to `+10.12%` vs `+15%` bar) are excluded.
 - **Schema 3 checkpoint stores and Windows durability:** All three lanes use schema 3
   checkpoints (fingerprint schema 2, status schema 2, request-log schema 30) with mandatory
   `--session-checkpoint-require-origin-auth` (requiring a configured checkpoint root and at least a
-  32-byte API key; the documented generated key is 64 characters). In `v0.17.0`, the RTX 5090
-  container mounts isolated host directory `checkpoints-v017` at `/checkpoints-v013` with
-  non-blocking export, leaving predecessor `checkpoints-v013` and older `checkpoints` stores
-  untouched for rollback; native lanes use
+  32-byte API key; the documented generated key is 64 characters). In `v0.18.0`, the RTX 5090
+  container mounts isolated host directory `checkpoints-v018` at `/checkpoints-v013` with
+  non-blocking export, leaving `v0.17.0`'s `checkpoints-v017`, `v0.16.2`'s `checkpoints-v013`, and
+  older `checkpoints` stores untouched for rollback; native lanes use
   `cache/<release-instance-id>/session-checkpoints-v3` under each immutable component release's
-  own cache root (for example, `qwen38-4090-native-v0.8.0-beta.2-a87de3613c17` or
-  `qwen38-3090-native-v0.8.0-beta.2-a87de3613c17`) with handle-anchored replacement, extended-length
+  own cache root (such as `qwen38-4090-native-v0.8.0-beta.3-48c8ac464432` and
+  `qwen38-3090-native-v0.8.0-beta.3-48c8ac464432`) with handle-anchored replacement, extended-length
   roots, and a current-parent publication fence (Windows `ntfs-write-through` is not POSIX `fsync`
   or a power-loss guarantee). Keep prior checkpoint roots untouched; prior sessions resume by
   replaying authoritative OMP transcripts for a fresh prefill.
-- **Dual native SBOMs and deterministic RTX 5090 RDC build:** Each native outer asset set (10
-  hashed entries plus `SHA256SUMS`, 11 files) ships both its SPDX 2.3 file inventory
+- **Dual native SBOMs and build reproducibility boundary:** Each native outer asset set (10 hashed
+  entries plus `SHA256SUMS`, 11 files) ships both its SPDX 2.3 file inventory
   (`<package-stem>.spdx.json`) and a separate canonical CycloneDX 1.5 dependency inventory
-  (`<package-stem>.cdx.json`). On RTX 5090 `beta.6` (`e0971faf`), a separate same-path double build
-  matched **664 build artifacts and all 3 package outputs** bit for bit (`661` artifacts and `3`
-  packages on `v0.16.2` `a87de361`, [#69](https://github.com/alphastorm/ninfer/pull/69)).
-- **Fresh RTX 5090 qualification, carried native `beta.2` evidence, route acceptance, waiver, and G4 reviews:**
-  On `e0971faf`, the exact-source RC ([`runtime-rc.json`](../releases/v0.17.0/qualification/runtime-rc.json)
-  `bed3a245`) passed all `12/12` phases (`66` historical host, `54` current host including `35/35`
-  EngineCore and Scheduler regressions, `11` dense real-model tests, `1` overlap test, restart,
-  product-shape, exact-profile, and PRODUCT protocol phases), and the published-image lane receipt
-  ([`rtx5090.json`](../releases/v0.17.0/qualification/rtx5090.json) `11fde294`) passed at **181.92
-  tok/s** server / **180.40 tok/s** wall decode, **56.63 s** wall / **56.53 s** server cold exact
-  130,048-token retrieval (**2,296.5 tok/s** wall), `agent_protocol` passed across Docker restart,
-  `30,398 MiB` idle/final VRAM, and `0` transient retries. Both carried native `beta.2` components
-  retain their `a87de361` 15-phase qualification receipts
-  ([RTX 4090](../releases/v0.17.0/qualification/rtx4090.json) `254167f2`,
-  [RTX 3090](../releases/v0.17.0/qualification/rtx3090.json) `b742870e`), zero-difference
-  1,120-prompt powered quality screens (`20332928` / `f6e5a913`), fit proofs (`c1c3d0aa` /
-  `b22956aa`), and no-regression ABBA speed receipts against published `beta.1`
-  ([`native-speed-decision.json`](../releases/v0.17.0/qualification/native-speed-decision.json)
-  `5c09de6a`: RTX 3090 weighted **1.0003** / min **0.9988**, **84/84** identical in
-  [`rtx3090-speed.json`](../releases/v0.17.0/qualification/rtx3090-speed.json) `852e13ca`; RTX 4090
-  weighted **0.9996** / min **0.9989**, **115/115** identical in
-  [`rtx4090-speed.json`](../releases/v0.17.0/qualification/rtx4090-speed.json) `e48aba81`)
-  byte-for-byte in [`receipt-audit.json`](../releases/v0.17.0/qualification/receipt-audit.json)
-  (`c137388a`). On **2026-11-10**, frozen candidate `076bbe4f5abd68c8a0a1ba2efa0d08e881970e11`
-  passed all five documented routes (host `2/2`, macOS `10/10`, Windows `5/5`, native `7/7` each;
-  **31/31 blocks**), all three stock `18.18.6` clients, and RTX 4090 native public-install
-  (`already_installed`, exact bytes, unchanged pointers), `C1` fleet probe, and independent
-  restoration (**408.213 s** RTX 5090 accepted and all-attempt hold, **508.420 s** RTX 4090
-  campaign; [documented routes](../releases/v0.17.0/acceptance/documented-routes.json),
-  [composed acceptance](../releases/v0.17.0/acceptance/composed-external-installation.json),
-  [RTX 4090 public install](../releases/v0.17.0/acceptance/rtx4090-public-install.json),
-  [restoration](measurements/2026-11-10-v0170-acceptance-restoration.json)). On RTX 3090, after all
-  seven documented route blocks, four-way `C2` fleet/fanout, and parallel stock OMP overlap at limit
-  2 passed, the subsequent post-route `native-probes` automatic-compaction campaign failed
-  (**1,727.696 s** elapsed; `compaction` probe timed out after `900 s` with `8` HTTP `503`
-  `request_queue_timeout` responses, `2` HTTP `499` cancellations, `0` resident work; subsequent
-  managed Stop `graceful_incomplete_shutdown` saved `2` / skipped `5` / refused `3`, reason
-  `capacity`) and was waived by the founder with disclosure
-  ([route waiver](../releases/v0.17.0/qualification/rtx3090-route-waiver.json) `19f2c0ef`); native
-  behavior completion, structured-outage acceptance, a passing wrapper restoration audit, and
-  anonymous public-install acceptance are not claimed, lead recovery via empty-session `Start` to
-  ready then `Stop` (`graceful`, `0` refused, `370 W` restored, tasks `Ready`, `0` listeners,
-  identical canonical cross-lane census `db1634a7`; evidence `fabb50de`) is bound separately, and
-  RTX 3090 users should keep `v0.16.2` or restart the lane after long sessions until a native re-cut
-  is qualified. The pre-release runtime, product-tooling, and waiver-support code reviews closed by
-  disposition in [`review/runtime-ledger.json`](../releases/v0.17.0/review/runtime-ledger.json)
-  (`5f8d6e4a`); deferred tooling items are tracked in
-  [#149](https://github.com/alphastorm/omp-ninfer/issues/149).
+  (`<package-stem>.cdx.json`), and two native build rounds matched `34/34` tracked artifacts for each
+  package (`New-Package.ps1` archives the exact hashed bytes,
+  [#91](https://github.com/alphastorm/ninfer/pull/91)). On RTX 5090 `beta.7`, a separate same-path
+  RDC double build matched **664 graph artifacts and all 3 package outputs** byte for byte, while two
+  RC-recipe builds (`RC1` `d4b8442d` vs published `RC2` `804ef8ac`, both `327,065,128` B) differed
+  with `RC1` unretained; `RC2` is the single tested runtime binary and run-to-run RC-recipe
+  reproducibility is tracked in [fork #120](https://github.com/alphastorm/ninfer/issues/120).
+- **Fresh three-lane qualification, speed/quality admission, route acceptance, and release-review receipts:**
+  On `48c8ac46`, the exact-source RTX 5090 `RC2` batch
+  ([`runtime-rc.json`](../releases/v0.18.0/qualification/runtime-rc.json) `ca172838`) passed all
+  `12/12` phases in `723.968 s` (`66` historical host, `54` current host, `11` dense real-model, `1`
+  overlap), passed its `1,120`-prompt quality screen and `80`-prompt determinism against sealed
+  `beta.6` (zero primary deltas, leak ratio `1.0`, zero mismatches), and passed the published-image
+  lane receipt ([`rtx5090.json`](../releases/v0.18.0/qualification/rtx5090.json) `763178cb`:
+  **181.52 tok/s** server / **180.01 tok/s** wall decode, **56.90 s** / `56.896 s` wall and **56.80
+  s** / `56.796 s` server cold exact 130,048-token retrieval at **2,285.7 tok/s** wall,
+  `agent_protocol` passed across Docker restart, `30,398 MiB` idle/final VRAM, `0` retries). Both
+  rebuilt `beta.3` native packages passed 15-phase hardware chains
+  ([RTX 4090](../releases/v0.18.0/qualification/rtx4090.json) `165999b9`: **253.71 tok/s** `C1`
+  decode, **83.45 s** / `83.451 s` retrieval;
+  [RTX 3090](../releases/v0.18.0/qualification/rtx3090.json) `e7ac3ab7`: **227.17 tok/s** `C1`
+  decode, **189.12 s** / `189.119 s` retrieval), `83/83` raw agent-parity positions without waiver
+  (`0a2bcdef` / `76a0706b`), fit proofs (`cf77a595` / `9bd9fd74`), powered `1,120`-prompt
+  [`EXP-085`](PERFORMANCE.md#experiment-ledger) quality screens (`531c5ed1` / `466586d9`, `80/80` determinism per arm), and paired A/B/B/A (`ABBA`) speed gates
+  against published `beta.2` under
+  [`native-speed-decision.json`](../releases/v0.18.0/qualification/native-speed-decision.json)
+  (`26ce10a3`: RTX 3090 `tc` weighted **1.5373** / `1.537×`, min **1.3503** / `1.350×`, `84/84`
+  within-engine and `35/84` cross-engine identical in
+  [`rtx3090-speed.json`](../releases/v0.18.0/qualification/rtx3090-speed.json) `a7bf3903`; RTX 4090
+  weighted **1.0000** / `1.000×`, min **0.9992** / `0.999×`, `115/115` identical in
+  [`rtx4090-speed.json`](../releases/v0.18.0/qualification/rtx4090-speed.json) `fb8b62ad`), audited
+  in [`receipt-audit.json`](../releases/v0.18.0/qualification/receipt-audit.json)
+  (`46cf2997`). On **2026-11-12**, frozen candidate
+  `2a735da0367214b35a325f61865fb47f0ce872c7` passed all five documented routes (`31/31` blocks),
+  all three stock `18.18.7` clients, the **406.876 s** RTX 5090 hold, initial-window RTX 4090
+  (**509.857 s** campaign, public-install `dc6bb12e`), and
+  third-execution RTX 3090 (**`1,439.367` s** campaign,
+  [`rtx3090-public-install.json`](../releases/v0.18.0/acceptance/rtx3090-public-install.json)
+  `6b1ccac0`) native campaigns, public installs, and independent
+  restoration checks without a waiver ([documented routes](../releases/v0.18.0/acceptance/documented-routes.json)
+  `9eefb58d`,
+  [composed acceptance](../releases/v0.18.0/acceptance/composed-external-installation.json)
+  `f90cb329`,
+  [restoration](measurements/2026-11-12-v0180-acceptance-restoration.json)
+  `eeb00906`). On RTX 3090, attempt 1 passed all seven documented
+  blocks, failed its post-route stock OMP subagent check on malformed `task` tool arguments (five
+  calls rejected for missing `context`), and restored; attempt 2 ran while the host's system drive
+  was full (`0.39 GiB` free when measured afterwards; `27` checkpoint writes failed with Windows error `112`, checkpoint
+  saves were refused for `capacity`, and admission waited behind an unsettled checkpoint save across
+  `2` HTTP `200`, `4` HTTP `503` `request_queue_timeout` `deferred by a pending checkpoint save`,
+  and `1` HTTP `499` before a **900 s** compaction timeout across a `1,618.414 s` failed window;
+  `Control-Release.ps1 -Action Stop` refused `9` sessions before empty-session `Start`/`Stop`
+  recovery); the founder-authorized third execution in fresh workspaces with an enforced **60 GiB**
+  free-space floor (`63.08` GiB free, recorded in shared native driver `accept-rtx4090-route.py`'s
+  single `--attempt 2` rerun slot because the frozen driver accepts only `--attempt 1|2`) passed every phase with zero disk-full errors
+  (`2` committed compactions in `747.00` s,
+  zero HTTP `503` responses, compaction receipt
+  `cfa89628`; the request-level HTTP `503` half of
+  [ninfer#89](https://github.com/alphastorm/ninfer/issues/89) reproduced in acceptance only under
+  disk exhaustion, while its pressure-save deferral residual remains tracked). Runtime and product
+  councils closed by disposition in
+  [`review/runtime-ledger.json`](../releases/v0.18.0/review/runtime-ledger.json) (`05c6b207`;
+  deferred items in [#161](https://github.com/alphastorm/omp-ninfer/issues/161) and
+  `alphastorm/ninfer` [#115](https://github.com/alphastorm/ninfer/issues/115)–[#118](https://github.com/alphastorm/ninfer/issues/118),
+  [#120](https://github.com/alphastorm/ninfer/issues/120),
+  [#121](https://github.com/alphastorm/ninfer/issues/121)).
 
 ## Models
 
-v0.17.0 pins one shared registered NInfer conversion artifact (`qwen3_8_27b.ninfer`) from
+v0.18.0 pins one shared registered NInfer conversion artifact (`qwen3_8_27b.ninfer`) from
 [`neroued/Qwen3.8-27B-NInfer`](https://huggingface.co/neroued/Qwen3.8-27B-NInfer) across all three
-lanes in [`releases/v0.17.0/manifest.json`](../releases/v0.17.0/manifest.json) (retaining the single
+lanes in [`releases/v0.18.0/manifest.json`](../releases/v0.18.0/manifest.json) (retaining the single
 `components.model` binding introduced in v0.13.1):
 
 | Lane scope | Hugging Face revision | Bytes | SHA-256 | Notes |
@@ -368,7 +269,9 @@ All routes download the published container version 3 artifact `81f924d4` direct
   three lanes. Vision inputs (including image tool results and `snapcompact` image archives) are
   qualified on the RTX 5090 container lane only; native RTX 4090 and RTX 3090 lanes refuse image
   inputs with `vision_disabled`.
-- **Oh My Pi client contract:** Stock Oh My Pi 18.18.6 has no `omp appliance` commands. Model
+- **Oh My Pi client contract:** Stock Oh My Pi 18.18.7 has no `omp appliance` commands (on Windows,
+  `18.18.7` updates the rendered `bash` tool description and `cmd`/MSYS path resolution while keeping
+  JSON tool schemas and the OpenAI Responses serializer byte-identical to `18.18.6`). Model
   fragments set `compat.statefulResponses: true`, `compat.includeEncryptedReasoning: false`, and
   `compat.supportsReasoningSummary: false` per model (upstream
   [#13686](https://github.com/can1357/oh-my-pi/pull/13686); obsolete operator
@@ -454,21 +357,58 @@ replicas into a local checkpoint root (`python3 scripts/checkpoint_sync.py --hel
 - **Fail-closed client and pinned bytes:** Oh My Pi disables retries and model fallback so an
   unreachable or mismatched local runtime fails closed instead of falling back to cloud APIs.
   Every client binary, image digest, native package, model artifact, and configuration is SHA-256
-  pinned in [`releases/v0.17.0/manifest.json`](../releases/v0.17.0/manifest.json).
+  pinned in [`releases/v0.18.0/manifest.json`](../releases/v0.18.0/manifest.json).
 - **Single trusted owner:** Designed for one trusted operator on owner-controlled hardware, not
   multi-tenant isolation. Full threat model: [`SECURITY.md`](SECURITY.md).
 
 ## Measured proof
 
-Per-lane runtime qualification receipts in v0.17.0 (never transfer one lane's numbers or
+Per-lane runtime qualification receipts in v0.18.0 (never transfer one lane's numbers or
 capabilities to another):
 
 | Lane | Long-context retrieval (130,048 tokens) | Decode measurement | Speculative acceptance | Receipt |
 | --- | --- | --- | --- | --- |
-| RTX 5090 (`v0.7.0-qwen38-5090-beta.6`, DFlash2 K=7, BF16 KV, `C2`) | Exact in **56.63 s** cold (**2,296.5 tok/s** wall; **56.53 s** / `56.529 s` server) | **181.92 tok/s** server-side (**180.40 tok/s** wall) over 2,048 tokens | **0.244** DFlash2 acceptance, **2.71** tokens/round | [`rtx5090.json`](../releases/v0.17.0/qualification/rtx5090.json) (2026-11-10) |
-| RTX 4090 native (`v0.8.0-qwen38-4090-beta.2`, DFlash2 K=7, INT8 KV, `C1`) | Exact in **83.54 s** (83.538 s) | **254.59 tok/s** C1 decode (4,541 prompt / 1,024 completion tokens); prefill **2,133.04 tok/s** | **83.88%** DFlash2 acceptance | [`rtx4090.json`](../releases/v0.17.0/qualification/rtx4090.json) (2026-11-03) |
-| RTX 3090 native (`v0.8.0-qwen38-3090-beta.2`, DFlash2 K=7, INT8 KV, `C2` shared pool, 350 W cap) | Exact in **188.94 s** (188.941 s) | **148.70 tok/s** C1 decode (4,541 prompt / 1,024 completion tokens); prefill **978.72 tok/s** | **83.88%** DFlash2 acceptance | [`rtx3090.json`](../releases/v0.17.0/qualification/rtx3090.json) (2026-11-04) |
+| RTX 5090 (`v0.7.0-qwen38-5090-beta.7`, DFlash2 K=7, BF16 KV, `C2`) | Exact in **56.90 s** cold (`56.896 s`, **2,285.7 tok/s** wall; **56.80 s** / `56.796 s` server) | **181.52 tok/s** server-side (**180.01 tok/s** wall) over 2,048 tokens | **0.244** DFlash2 acceptance, **2.71** tokens/round | [`rtx5090.json`](../releases/v0.18.0/qualification/rtx5090.json) (2026-11-11) |
+| RTX 4090 native (`v0.8.0-qwen38-4090-beta.3`, DFlash2 K=7, INT8 KV, `C1`) | Exact in **83.45 s** (83.451 s) | **253.71 tok/s** C1 decode (4,541 prompt / 1,024 completion tokens); prefill **2,129.62 tok/s** | **83.88%** DFlash2 acceptance | [`rtx4090.json`](../releases/v0.18.0/qualification/rtx4090.json) (2026-11-12) |
+| RTX 3090 native (`v0.8.0-qwen38-3090-beta.3` `tc`, DFlash2 K=7, small-T tensor-core verify, INT8 KV, `C2` shared pool, 350 W cap) | Exact in **189.12 s** (189.119 s) | **227.17 tok/s** C1 decode (4,541 prompt / 1,024 completion tokens); prefill **974.85 tok/s** | **84.04%** DFlash2 acceptance | [`rtx3090.json`](../releases/v0.18.0/qualification/rtx3090.json) (2026-11-12) |
 
+- **v0.18.0 (`48c8ac46` across RTX 5090 `beta.7` and native `beta.3` `tc`/default) unified engine re-cut, RTX 3090 small-T tensor-core verify, and stock OMP 18.18.7 route acceptance:**
+  On frozen source `F4` `48c8ac46` and shared model `81f924d4`, RTX 5090
+  (`v0.7.0-qwen38-5090-beta.7`, server `804ef8ac`, image `496195ec`) passed `12/12` exact-source
+  `RC2` phases in `723.968 s`
+  ([`runtime-rc.json`](../releases/v0.18.0/qualification/runtime-rc.json) `ca172838`), passed its
+  `1,120`-prompt quality screen and `80`-prompt determinism against sealed `beta.6` (zero primary
+  deltas, leak ratio `1.0`, zero mismatches; separate same-path RDC double build matched `664`
+  artifacts and `3` packages byte-for-byte while `RC1`/`RC2` digest divergence is disclosed in
+  [ninfer#120](https://github.com/alphastorm/ninfer/issues/120)), and passed the published-image
+  lane receipt ([`rtx5090.json`](../releases/v0.18.0/qualification/rtx5090.json) `763178cb`:
+  **181.52 tok/s** server / **180.01 tok/s** wall decode, **56.90 s** / `56.896 s` cold retrieval at
+  **2,285.7 tok/s** wall, `agent_protocol` passed across Docker restart, `30,398 MiB` idle/final
+  VRAM, `0` retries). Rebuilt native RTX 4090 (`ac41700a`, server `a5266ae6`,
+  `native-v0.8.0-beta.3-rtx4090`) and RTX 3090 (`bf1ceaa9`, server `e5713286`,
+  `native-v0.8.0-beta.3-tc-rtx3090`) matched `34/34` tracked build artifacts across two rounds,
+  passed 15-phase chains ([`rtx4090.json`](../releases/v0.18.0/qualification/rtx4090.json)
+  `165999b9`: **253.71 tok/s** `C1` decode, **2,129.62 tok/s** prefill, **83.45 s** retrieval,
+  **1,647 / 1,650** cached tokens across **42.65 s** restart;
+  [`rtx3090.json`](../releases/v0.18.0/qualification/rtx3090.json) `e7ac3ab7`: **227.17 tok/s** `C1`
+  decode, **974.85 tok/s** prefill, **189.12 s** retrieval, **1,647 / 1,650** cached tokens across
+  **46.57 s** restart), `83/83` raw agent-parity positions per lane without waiver, fit proofs
+  (`cf77a595` / `9bd9fd74`), `3/3` `beta.2` upgrade/rollback/repair rehearsals per lane (`a97ae3fa`
+  / `483a8395`), powered `1,120`-prompt [`EXP-085`](PERFORMANCE.md#experiment-ledger) quality screens (`531c5ed1` / `466586d9`, `80/80`
+  determinism per arm), and paired A/B/B/A (`ABBA`) speed gates vs published `beta.2` under
+  [`native-speed-decision.json`](../releases/v0.18.0/qualification/native-speed-decision.json)
+  (`26ce10a3`: RTX 3090 `tc` weighted **1.5373** / min **1.3503**, `84/84` within-engine and `35/84`
+  cross-engine identical in [`rtx3090-speed.json`](../releases/v0.18.0/qualification/rtx3090-speed.json)
+  `a7bf3903`; RTX 4090 weighted **1.0000** / min **0.9992**, `115/115` identical in
+  [`rtx4090-speed.json`](../releases/v0.18.0/qualification/rtx4090-speed.json) `fb8b62ad`), while
+  fresh `2026-11-12` acceptance on `2a735da0` passed all five documented routes (`31/31` blocks),
+  all three stock `18.18.7` clients, the **406.876 s** RTX 5090 hold, and both RTX 4090
+  (**509.857 s**) and RTX 3090 (**`1,439.367` s**, third execution with an enforced
+  `60 GiB` free-space floor after attempt-1 malformed subagent tool arguments and attempt-2
+  system-drive exhaustion: `2` committed compactions in
+  `747.00` s, zero HTTP `503` responses, compaction receipt `cfa89628`) native campaigns,
+  public-installs, and independent
+  restorations without a waiver.
 - **v0.17.0 (`e0971faf` on RTX 5090 `beta.6`, carried `a87de361` native `beta.2`) bounded resume/fresh admission, serving robustness, and stock OMP 18.18.6 route acceptance:**
   On frozen engine source `e0971faf` and shared model `81f924d4`, RTX 5090
   (`v0.7.0-qwen38-5090-beta.6`, server `dc86e101`, image `7a19576b`) matched **664 build artifacts
@@ -636,9 +576,9 @@ capabilities to another):
 ## Non-claims
 
 - **No SLA, stable/v1.0 support, or upgrade commitment:** The `0.x` series supports only the
-  latest published release (`v0.17.0`) and its exact manifest and profiles.
+  latest published release (`v0.18.0`) and its exact manifest and profiles.
 - **No other GPUs or profiles:** Support does not extend outside the exact RTX 5090, RTX 4090, and
-  RTX 3090 profiles bound by [`releases/v0.17.0/manifest.json`](../releases/v0.17.0/manifest.json).
+  RTX 3090 profiles bound by [`releases/v0.18.0/manifest.json`](../releases/v0.18.0/manifest.json).
 - **Client platform limits:** macOS (`darwin-arm64`) is preview without managed client installation
   or appliance lifecycle; Linux (`linux-x64`) live evidence is under WSL2 only, not a separately
   qualified native Linux OS.
@@ -667,10 +607,10 @@ capabilities to another):
 
 - **`DFlash2`:** Speculative decoding backend (`--spec dflash2`) that uses the five-layer block
   drafter bundled in the version 3 model artifact to propose seven candidate tokens (`K=7`) in one
-  masked-block pass for target verification. In `v0.16.0`–`v0.17.0`, `DFlash2` (`K=7`) is the qualified
+  masked-block pass for target verification. In `v0.16.0`–`v0.18.0`, `DFlash2` (`K=7`) is the qualified
   speculative backend across all three lanes (`qwen38-5090-v0.13.0` on the RTX 5090 container lane
-  with `--lm-head-draft`, and `qwen38-4090-native-v0.8.0-beta.2` and
-  `qwen38-3090-native-v0.8.0-beta.2` on the 24 GB native Windows lanes using `proposal:
+  with `--lm-head-draft`, and `qwen38-4090-native-v0.8.0-beta.3` and
+  `qwen38-3090-native-v0.8.0-beta.3` on the 24 GB native Windows lanes using `proposal:
   "artifact-default"`, `Q4_G64_FP16` draft MLP `gate`/`up` weights, and host-mapped
   `token_embedding`).
 - **`MTP3`:** Multi-token prediction speculative decoding backend (`--spec mtp --draft-tokens 3`
@@ -681,16 +621,24 @@ capabilities to another):
   `v0.16.0`).
 - **`Group64 A8` (`A8 off`):** Native prefill 8-bit group-64 integer-activation route
   (`-DNINFER_NATIVE_PREFILL_GROUP64_A8`, `group64_a8`) for the quantized model body on the native
-  Windows lanes. All `v0.14.0`–`v0.17.0` native Windows packages compile it off (`A8 off`) after the
-  RTX 4090 failed its preregistered 200-pair new-leak behavioral screen (five one-way changes) and
-  the founder selected off conservatively across both cards.
+  Windows lanes. All `v0.14.0`–`v0.18.0` native Windows packages compile it off (`A8 off`, guarded
+  by `-a8` in `NINFER_BUILD_PROFILE` in `v0.18.0`) after the RTX 4090 failed its preregistered
+  200-pair new-leak behavioral screen (five one-way changes) and the founder selected off
+  conservatively across both cards.
+- **`tc` (`small-T tensor-core verify`):** Native build-profile component (`NINFER_BUILD_PROFILE`
+  containing hyphen-delimited `tc`, such as `native-v0.8.0-beta.3-tc-rtx3090`) that enables the
+  `sm_86`/`sm_89` tensor-core verification kernel for `T=8` and `T=16` verify passes across `Q5`
+  linear-add, `n7168` split, `SwiGLU`, and `GDN` record projections
+  ([`alphastorm/ninfer#104`](https://github.com/alphastorm/ninfer/pull/104)). Enabled in `v0.18.0`
+  on the RTX 3090 native Windows lane and left default-off on the RTX 4090 native Windows lane
+  (`native-v0.8.0-beta.3-rtx4090`).
 - **`C1`:** Single-request (`concurrency: 1`) serving posture on the native Windows RTX 4090 lane
-  (`qwen38-4090-native-v0.8.0-beta.2`), in contrast to two-request (`C2`) serving on the RTX 5090
+  (`qwen38-4090-native-v0.8.0-beta.3`), in contrast to two-request (`C2`) serving on the RTX 5090
   container lane (`qwen38-5090-v0.13.0`) and the native Windows RTX 3090 lane
-  (`qwen38-3090-native-v0.8.0-beta.2`). As the serial `benchmark_c1` qualification gate (and
+  (`qwen38-3090-native-v0.8.0-beta.3`). As the serial `benchmark_c1` qualification gate (and
   matched strict `C1` / role-corpus speed-gate posture on both native lanes), it generates 1,024
   completion tokens after 4,541 computed prompt tokens with no prefix-cache hit (`seed 57004`,
-  temperature `0` in strict ABBA comparisons), recording prefill throughput, decode throughput,
+  temperature `0` in strict paired A/B/B/A (`ABBA`) comparisons), recording prefill throughput, decode throughput,
   speculative acceptance, peak VRAM, and peak board power.
 - **`T1`:** Pre-cut output-parity and serial decode gate over 84 frozen role-corpus cases (`336`
   role requests across four `ABBA` arms with a fixed 131,072-token KV pool and persistence
@@ -706,8 +654,8 @@ capabilities to another):
   relative to BF16) to hold the full 131,072-token context ceiling on 24 GB cards (`rk4v4` 4-bit KV
   remains unshipped and off).
 - **`strict-origin profile`:** A deployment profile and runtime configuration (`qwen38-5090-v0.13.0`
-  config `751d22dc`, `qwen38-4090-native-v0.8.0-beta.2` config `ae27dc44`, and
-  `qwen38-3090-native-v0.8.0-beta.2` config `238ccad7`) that enforces mandatory checkpoint origin
+  config `751d22dc`, `qwen38-4090-native-v0.8.0-beta.3` config `b71a2cff`, and
+  `qwen38-3090-native-v0.8.0-beta.3` config `674d5260`) that enforces mandatory checkpoint origin
   authentication (`--session-checkpoint-require-origin-auth` / `require_origin_auth: true`). It
   requires a configured checkpoint root and a bearer API key of at least 32 bytes (64 characters as
   documented), keys each published checkpoint generation's `manifest.mac` HMAC from material
@@ -716,12 +664,12 @@ capabilities to another):
 - **`draft window`:** The number of candidate tokens (`K`, configured via `--draft-tokens` /
   `draft_tokens` and recorded in receipts as `speculative_draft_window` or `draft_window`) that the
   speculative drafter proposes in each decode round for the target model to verify in a single pass.
-  In `v0.16.0`–`v0.17.0`, all three qualified lanes use a draft window of `7` under DFlash2 (`K=7`; native
+  In `v0.16.0`–`v0.18.0`, all three qualified lanes use a draft window of `7` under DFlash2 (`K=7`; native
   profiles used `3` under MTP3 through `v0.15.0`).
 - **`schema 3 checkpoints`:** The current on-disk session-checkpoint format
   (`checkpoint_schema_version: 3`, paired with fingerprint schema 2, status schema 2, and
-  request-log schema 30) stored under `/checkpoints-v013` (`checkpoints-v017` on the host in
-  `v0.17.0`, `checkpoints-v013` in `v0.13.0`–`v0.16.2`) on the RTX 5090 container lane and
+  request-log schema 30) stored under `/checkpoints-v013` (`checkpoints-v018` on the host in
+  `v0.18.0`, `checkpoints-v017` in `v0.17.0`, `checkpoints-v013` in `v0.13.0`–`v0.16.2`) on the RTX 5090 container lane and
   `cache/<release-instance-id>/session-checkpoints-v3` on the native Windows lanes. Each generation
   is atomically published to local NVMe with SHA-256 file digests and a bearer-key-derived
   `manifest.mac` HMAC (`--session-checkpoint-require-origin-auth`), and restores only when the
@@ -747,7 +695,7 @@ capabilities to another):
 - [`CHANGELOG.md`](../CHANGELOG.md) — chronological product changes across releases.
 - [`RELEASES.md`](RELEASES.md) — per-version component identities, acceptance summaries, and
   release cut procedures.
-- [`releases/v0.17.0/NINFER_RELEASE_NOTES.md`](../releases/v0.17.0/NINFER_RELEASE_NOTES.md) (and
+- [`releases/v0.18.0/NINFER_RELEASE_NOTES.md`](../releases/v0.18.0/NINFER_RELEASE_NOTES.md) (and
   prior `releases/<tag>/NINFER_RELEASE_NOTES.md`) — immutable per-release notes and limitations.
 - Immutable tagged guides (`https://github.com/alphastorm/omp-ninfer/blob/<tag>/docs/QUICKSTART.md`,
   such as [`v0.10.0`](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md) and

@@ -25,9 +25,9 @@
  "name": "OMP NInfer",
  "applicationCategory": "DeveloperApplication",
  "operatingSystem": "Windows 11 — RTX 5090 via Docker Desktop/WSL2, RTX 4090 and RTX 3090 native; clients macOS preview, Windows, Linux under WSL2",
- "description": "Durable local inference for coding agents. Qualified on RTX 5090, RTX 4090, and RTX 3090 in v0.17.0 (published 2026-11-10) with stock Oh My Pi 18.18.6 and Qwen3.8 27B via NInfer.",
- "softwareVersion": "0.17.0",
- "datePublished": "2026-11-10",
+ "description": "Durable local inference for coding agents. Qualified on RTX 5090, RTX 4090, and RTX 3090 in v0.18.0 (published 2026-11-12) with stock Oh My Pi 18.18.7 and Qwen3.8 27B via NInfer.",
+ "softwareVersion": "0.18.0",
+ "datePublished": "2026-11-12",
  "url": "https://alphastorm.github.io/omp-ninfer/",
  "codeRepository": "https://github.com/alphastorm/omp-ninfer",
  "license": "https://github.com/alphastorm/omp-ninfer/blob/main/LICENSE"}
@@ -43,7 +43,7 @@
       <a href="../compare/">Compare</a>
       <a href="../security/">Security</a>
       <a href="../status/">Status</a>
-      <a class="ext" href="https://github.com/alphastorm/omp-ninfer/blob/v0.17.0/docs/QUICKSTART.md">Quickstart</a>
+      <a class="ext" href="https://github.com/alphastorm/omp-ninfer/blob/v0.18.0/docs/QUICKSTART.md">Quickstart</a>
       <a class="ext" href="https://github.com/alphastorm/omp-ninfer">GitHub</a>
     </nav>
   </div>
@@ -58,9 +58,9 @@ release layer) to NInfer (inference engine) serving Qwen3.8&nbsp;27B (served mod
 below names its release, hardware lane, and measurement boundary: runtime qualification and
 public-route acceptance are distinct, and warm/cold figures compare retained state against a fresh
 cold start, never an ordinary in-process cached follow-up.</p>
-<p class="verified">v0.17.0 (stock Oh My Pi 18.18.6, published 2026-11-10) binds fresh RTX 5090
-container (source <code>e0971faf</code>) and carried native Windows RTX 4090 and RTX 3090 (source
-<code>a87de361</code>) runtime qualifications on
+<p class="verified">v0.18.0 (stock Oh My Pi 18.18.7, published 2026-11-12) binds fresh RTX 5090
+container and rebuilt native Windows RTX 4090 and RTX 3090 (<code>tc</code> tensor-core draft-verification build profile) runtime qualifications from common engine
+source <code>48c8ac46</code> on
 <a href="https://github.com/Neroued/ninfer">Neroued/ninfer</a> master <code>64d10fbf</code> (shared model <code>81f924d4</code>). Method, charts, pre-cut T1/C1/retrieval
 comparisons, EXP-097 provider comparison (342.150 vs 338.448&nbsp;tok/s median role-corpus decode, 101.09% of v0.12.2's
 <code>1302d639</code> at <code>c2dbcbae</code> on RTX 5090, with attributed structured-output p95 and 64K
@@ -73,24 +73,24 @@ continuation caveats), and the community table:
 <tr><th>Lane</th><th>Runtime &amp; profile</th><th>130,048-token retrieval</th><th>Decode</th><th>Receipt</th></tr>
 <tr>
 <td>RTX 5090 container (Windows 11 + Docker Desktop/WSL2)</td>
-<td data-label="Runtime & profile"><code>v0.7.0-qwen38-5090-beta.6</code> · <code>qwen38-5090-v0.13.0</code> (source <code>e0971faf</code> on <code>64d10fbf</code>, image <code>7a19576b</code>, server <code>dc86e101</code>, config <code>751d22dc</code>, model <code>81f924d4</code> · 20.4&nbsp;GB; DFlash2 draft window 7, BF16 KV, 146,368 automatic KV tokens, two requests in flight)</td>
-<td data-label="130,048-token retrieval"><strong>56.63&nbsp;s</strong> cold (2,296.5&nbsp;tok/s wall, 56.53&nbsp;s server; exact retrieval against 131,072-token ceiling)</td>
-<td data-label="Decode"><strong>181.92&nbsp;tok/s</strong> server (<strong>180.40&nbsp;tok/s</strong> wall over 2,048 tokens; 0.244 DFlash2 acceptance, 2.71 tokens/round)</td>
-<td data-label="Receipt"><a href="https://github.com/alphastorm/omp-ninfer/blob/v0.17.0/releases/v0.17.0/qualification/rtx5090.json">rtx5090.json</a> (2026-11-10)</td>
+<td data-label="Runtime & profile"><code>v0.7.0-qwen38-5090-beta.7</code> · <code>qwen38-5090-v0.13.0</code> (source <code>48c8ac46</code> on <code>64d10fbf</code>, image <code>496195ec</code>, server <code>804ef8ac</code>, config <code>751d22dc</code>, model <code>81f924d4</code> · 20.4&nbsp;GB; DFlash2 draft window 7, BF16 KV, 146,368 automatic KV tokens, two requests in flight)</td>
+<td data-label="130,048-token retrieval"><strong>56.90&nbsp;s</strong> cold (56.896&nbsp;s wall, 2,285.7&nbsp;tok/s wall, 56.80&nbsp;s server; exact retrieval against 131,072-token ceiling)</td>
+<td data-label="Decode"><strong>181.52&nbsp;tok/s</strong> server (<strong>180.01&nbsp;tok/s</strong> wall over 2,048 tokens; 0.244 DFlash2 acceptance, 2.71 tokens/round)</td>
+<td data-label="Receipt"><a href="https://github.com/alphastorm/omp-ninfer/blob/v0.18.0/releases/v0.18.0/qualification/rtx5090.json">rtx5090.json</a> (2026-11-11)</td>
 </tr>
 <tr>
 <td>RTX 4090 native Windows 11</td>
-<td data-label="Runtime & profile"><code>v0.8.0-qwen38-4090-beta.2</code> · <code>qwen38-4090-native-v0.8.0-beta.2</code> (source <code>a87de361</code> on <code>64d10fbf</code>, package <code>d9b10b47</code>, server <code>ffee91bf</code>, config <code>ae27dc44</code>, model <code>81f924d4</code> · 20.4&nbsp;GB; DFlash2 draft window 7, INT8 KV, <code>Group64</code> A8 and FP32 head logits off, 15,747.734375&nbsp;MiB shared Host budget, 640&nbsp;MiB admission headroom, one request at a time)</td>
-<td data-label="130,048-token retrieval"><strong>83.54&nbsp;s</strong> (83.538&nbsp;s; exact retrieval against 131,072-token ceiling)</td>
-<td data-label="Decode"><strong>254.59&nbsp;tok/s</strong> C1 decode (1,024 tokens, 83.88% DFlash2 acceptance; 2,133.04&nbsp;tok/s prefill)</td>
-<td data-label="Receipt"><a href="https://github.com/alphastorm/omp-ninfer/blob/v0.17.0/releases/v0.17.0/qualification/rtx4090.json">rtx4090.json</a> (2026-11-03)</td>
+<td data-label="Runtime & profile"><code>v0.8.0-qwen38-4090-beta.3</code> · <code>qwen38-4090-native-v0.8.0-beta.3</code> (source <code>48c8ac46</code> on <code>64d10fbf</code>, build profile <code>native-v0.8.0-beta.3-rtx4090</code>, package <code>ac41700a</code>, server <code>a5266ae6</code>, config <code>b71a2cff</code>, model <code>81f924d4</code> · 20.4&nbsp;GB; DFlash2 draft window 7, INT8 KV, <code>Group64</code> A8 and FP32 head logits off, 15,747.734375&nbsp;MiB shared Host budget, 640&nbsp;MiB admission headroom, one request at a time)</td>
+<td data-label="130,048-token retrieval"><strong>83.45&nbsp;s</strong> (83.451&nbsp;s; exact retrieval against 131,072-token ceiling)</td>
+<td data-label="Decode"><strong>253.71&nbsp;tok/s</strong> C1 decode (1,024 tokens, 83.88% DFlash2 acceptance; 2,129.62&nbsp;tok/s prefill)</td>
+<td data-label="Receipt"><a href="https://github.com/alphastorm/omp-ninfer/blob/v0.18.0/releases/v0.18.0/qualification/rtx4090.json">rtx4090.json</a> (2026-11-12)</td>
 </tr>
 <tr>
 <td>RTX 3090 native Windows 11</td>
-<td data-label="Runtime & profile"><code>v0.8.0-qwen38-3090-beta.2</code> · <code>qwen38-3090-native-v0.8.0-beta.2</code> (source <code>a87de361</code> on <code>64d10fbf</code>, package <code>97a8e634</code>, server <code>15a4db46</code>, config <code>238ccad7</code>, model <code>81f924d4</code> · 20.4&nbsp;GB; DFlash2 draft window 7, INT8 KV, <code>Group64</code> A8 and FP32 head logits off, two requests in flight over one shared 131,072-token pool, 20,867.734375&nbsp;MiB shared Host budget, 768&nbsp;MiB admission headroom, 350&nbsp;W serving cap)</td>
-<td data-label="130,048-token retrieval"><strong>188.94&nbsp;s</strong> (188.941&nbsp;s; exact retrieval against 131,072-token ceiling)</td>
-<td data-label="Decode"><strong>148.70&nbsp;tok/s</strong> C1 decode (1,024 tokens, 83.88% DFlash2 acceptance; 978.72&nbsp;tok/s prefill)</td>
-<td data-label="Receipt"><a href="https://github.com/alphastorm/omp-ninfer/blob/v0.17.0/releases/v0.17.0/qualification/rtx3090.json">rtx3090.json</a> (2026-11-04)</td>
+<td data-label="Runtime & profile"><code>v0.8.0-qwen38-3090-beta.3</code> · <code>qwen38-3090-native-v0.8.0-beta.3</code> (source <code>48c8ac46</code> on <code>64d10fbf</code>, build profile <code>native-v0.8.0-beta.3-tc-rtx3090</code>, package <code>bf1ceaa9</code>, server <code>e5713286</code>, config <code>674d5260</code>, model <code>81f924d4</code> · 20.4&nbsp;GB; DFlash2 draft window 7, small-T tensor-core verify at T=8/16, INT8 KV, <code>Group64</code> A8 and FP32 head logits off, two requests in flight over one shared 131,072-token pool, 20,867.734375&nbsp;MiB shared Host budget, 768&nbsp;MiB admission headroom, 350&nbsp;W serving cap)</td>
+<td data-label="130,048-token retrieval"><strong>189.12&nbsp;s</strong> (189.119&nbsp;s; exact retrieval against 131,072-token ceiling)</td>
+<td data-label="Decode"><strong>227.17&nbsp;tok/s</strong> C1 decode (1,024 tokens, 84.04% DFlash2 acceptance; 974.85&nbsp;tok/s prefill)</td>
+<td data-label="Receipt"><a href="https://github.com/alphastorm/omp-ninfer/blob/v0.18.0/releases/v0.18.0/qualification/rtx3090.json">rtx3090.json</a> (2026-11-12)</td>
 </tr>
 </table>
 </div>
@@ -99,7 +99,7 @@ continuation caveats), and the community table:
 4090 and RTX 3090). Never transfer one lane's numbers or capabilities to another, and do not read
 single-sample qualification gates as a cross-GPU ranking or a head-to-head comparison against vLLM
 or llama.cpp.
-<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.17.0/releases/v0.17.0/acceptance/documented-routes.json">documented-route acceptance</a> ·
+<a href="https://github.com/alphastorm/omp-ninfer/blob/v0.18.0/releases/v0.18.0/acceptance/documented-routes.json">documented-route acceptance</a> ·
 <a href="../status/">release status and lane scope</a>.</p>
 
 <h2>Historical restart measurements: v0.4.0 (2026-08-30, one RTX 5090)</h2>
@@ -118,7 +118,7 @@ or a restart speedup ratio.</p>
 <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/BENCHMARKS.md">docs/BENCHMARKS.md</a> ·
 experiment ledger: <a href="https://github.com/alphastorm/omp-ninfer/blob/main/docs/PERFORMANCE.md">docs/PERFORMANCE.md</a> ·
 raw receipts: <a href="https://github.com/alphastorm/omp-ninfer/tree/main/docs/measurements">docs/measurements/</a></p>
-<p class="verified">All qualification and acceptance receipts are owner-operated measurements on retained hardware at engine sources <code>e0971faf</code> (RTX 5090) and <code>a87de361</code> (native Windows); candidate rehearsal and historical series are labelled separately and never transfer across releases.</p>
+<p class="verified">All qualification and acceptance receipts are owner-operated measurements on retained hardware at common engine source <code>48c8ac46</code>; candidate rehearsal and historical series are labelled separately and never transfer across releases.</p>
 </div>
 </section>
 </main>

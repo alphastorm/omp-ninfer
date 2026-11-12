@@ -6,16 +6,16 @@
 keeps your session's continuation state resident on your GPU. **OMP NInfer** is the qualified release
 that binds them with one hash-pinned Qwen3.8 27B model on an RTX 5090, 4090, or 3090 you own.
 
-Every install route in the guide was run end to end on **v0.17.0** with unmodified
-[Oh My Pi 18.18.6](https://github.com/can1357/oh-my-pi/releases/tag/v18.18.6) — 31 steps,
+Every install route in the guide was run end to end on **v0.18.0** with unmodified
+[Oh My Pi 18.18.7](https://github.com/can1357/oh-my-pi/releases/tag/v18.18.7) — 31 steps,
 three client platforms, both native lanes
-([receipt](releases/v0.17.0/acceptance/composed-external-installation.json)).
+([receipt](releases/v0.18.0/acceptance/composed-external-installation.json)).
 
 ### [Get started →](docs/QUICKSTART.md)
 
 [![CI][ci-badge]][ci] [![Release][release-badge]][releases] [![RTX 5090 decode][decode-badge]][benchmarks] [![Context][context-badge]][benchmarks] [![License][license-badge]][license]
 
-[Download v0.17.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.17.0) · [Lanes](docs/QUICKSTART.md#choose-your-lane) ·
+[Download v0.18.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.18.0) · [Lanes](docs/QUICKSTART.md#choose-your-lane) ·
 [Facts](docs/FACTS.md) · [Compare](docs/DECISION_GUIDE.md) · [Benchmarks](docs/BENCHMARKS.md) ·
 [Architecture](docs/ARCHITECTURE.md) · [Security](docs/SECURITY.md) · [Troubleshooting](docs/TROUBLESHOOTING.md) ·
 [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)
@@ -27,7 +27,7 @@ three client platforms, both native lanes
 [releases]: https://github.com/alphastorm/omp-ninfer/releases
 [release-badge]: https://img.shields.io/github/v/release/alphastorm/omp-ninfer?filter=v*&label=release&color=8E7BE8&labelColor=0B0E11
 [benchmarks]: docs/BENCHMARKS.md
-[decode-badge]: https://img.shields.io/badge/RTX%205090%20decode-181.92%20tok%2Fs-8E7BE8?labelColor=0B0E11
+[decode-badge]: https://img.shields.io/badge/RTX%205090%20decode-181.52%20tok%2Fs-8E7BE8?labelColor=0B0E11
 [context-badge]: https://img.shields.io/badge/context-130%2C048%20tokens%20exact-1C232B?labelColor=0B0E11
 [license]: LICENSE
 [license-badge]: https://img.shields.io/github/license/alphastorm/omp-ninfer?color=1C232B&labelColor=0B0E11
@@ -78,9 +78,9 @@ JSON-schema output, and the same 20.4 GB Qwen3.8 27B artifact (`81f924d4`).
 
 | Lane | Runs as | Serves | Decode | Exact&nbsp;retrieval, 130,048&nbsp;tokens |
 | --- | --- | --- | --- | --- |
-| **RTX&nbsp;5090** | Docker Desktop/WSL2 container on Windows 11; clients: Windows (local), macOS over a manual SSH tunnel (preview), Linux under WSL2 | Two requests in flight; vision, tools, and preserved thinking | [181.92&nbsp;tok/s](releases/v0.17.0/qualification/rtx5090.json) | [56.63&nbsp;s](releases/v0.17.0/qualification/rtx5090.json) |
-| **RTX&nbsp;4090** | Native Windows 11 package; Windows client (local) | One request at a time; text and tools | [254.59&nbsp;tok/s](releases/v0.17.0/qualification/rtx4090.json) | [83.54&nbsp;s](releases/v0.17.0/qualification/rtx4090.json) |
-| **RTX&nbsp;3090** | Native Windows 11 package; Windows client (local) | Two requests in flight over one shared 131,072-token pool, under a 350 W serving cap; text and tools | [148.70&nbsp;tok/s](releases/v0.17.0/qualification/rtx3090.json) | [188.94&nbsp;s](releases/v0.17.0/qualification/rtx3090.json) |
+| **RTX&nbsp;5090** | Docker Desktop/WSL2 container on Windows 11; clients: Windows (local), macOS over a manual SSH tunnel (preview), Linux under WSL2 | Two requests in flight; vision, tools, and preserved thinking | [181.52&nbsp;tok/s](releases/v0.18.0/qualification/rtx5090.json) | [56.90&nbsp;s](releases/v0.18.0/qualification/rtx5090.json) |
+| **RTX&nbsp;4090** | Native Windows 11 package; Windows client (local) | One request at a time; text and tools | [253.71&nbsp;tok/s](releases/v0.18.0/qualification/rtx4090.json) | [83.45&nbsp;s](releases/v0.18.0/qualification/rtx4090.json) |
+| **RTX&nbsp;3090** | Native Windows 11 package; Windows client (local) | Two requests in flight over one shared 131,072-token pool, under a 350 W serving cap; text and tools | [227.17&nbsp;tok/s](releases/v0.18.0/qualification/rtx3090.json) | [189.12&nbsp;s](releases/v0.18.0/qualification/rtx3090.json) |
 
 Each number links to its qualification receipt. RTX 5090 retrieval is from a cold start; native
 decode is measured with one request at a time (`C1`).
@@ -88,144 +88,83 @@ decode is measured with one request at a time (`C1`).
 Both native lanes install on one two-GPU host, each bound to its GPU UUID, and run one at a time on
 port 18082. Checkpoints are best effort and restore only on the same runtime, model, profile, and
 credentials. Exact component, source, and model identities: [facts](docs/FACTS.md#current-release) ·
-[glossary](docs/FACTS.md#glossary) · [manifest](releases/v0.17.0/manifest.json).
+[glossary](docs/FACTS.md#glossary) · [manifest](releases/v0.18.0/manifest.json).
 
-<a id="rtx-3090-known-limitation"></a>
-
-> [!WARNING]
-> **RTX 3090 known limitation.** Every documented install step passed on `v0.17.0`, but the
-> automatic-compaction campaign that follows them failed under retained-context pressure and
-> was waived by the project founder with disclosure. If you run long sessions on an RTX 3090,
-> stay on `v0.16.2` or restart the lane after long sessions until a native re-cut is
-> qualified. Details: [release notes](releases/v0.17.0/NINFER_RELEASE_NOTES.md) ·
-> [route waiver](releases/v0.17.0/qualification/rtx3090-route-waiver.json) ·
-> [#149](https://github.com/alphastorm/omp-ninfer/issues/149).
+**RTX 3090 acceptance history.** Every documented install and verification step passed on all five
+routes, RTX 4090 passed its post-route acceptance campaign on its initial run, and RTX 3090 passed
+its post-route campaign, anonymous public-URL install, and host restoration on its third acceptance
+run without a waiver. On RTX 3090, run 1 failed its post-route Oh My Pi subagent check on malformed
+`task` tool arguments and restored the host to its pre-test state; run 2 ran while the host's
+system drive was full (`0.39 GiB` free when measured afterwards; `27` checkpoint writes failed with the OS disk-full error,
+checkpoint saves were refused for capacity, and admission waited behind an unsettled checkpoint
+save across 4 HTTP `503` `deferred by a pending checkpoint save` timeouts before a 900 s compaction
+timeout and empty-session `Start`/`Stop` recovery); a founder-authorized third run in fresh
+workspaces with an enforced 60 GiB test-host free-space floor (`63.08` GiB free,
+recorded in the shared native acceptance runner's single `--attempt 2` rerun slot because the frozen
+runner accepts only `--attempt 1` or `--attempt 2`; keep at least 40 GiB free on the
+install/checkpoint volume) passed every phase — install/verification blocks, sequential
+multi-branch, two-request fanout, parallel/subagent checks, automatic compaction
+(`2` committed compactions in `747.00` s, zero HTTP `503` responses, compaction receipt
+`cfa89628`), anonymous [public install](releases/v0.18.0/acceptance/rtx3090-public-install.json),
+and host restoration (`1,439.367` s acceptance window). Details:
+[release notes](releases/v0.18.0/NINFER_RELEASE_NOTES.md).
 
 ## Get started
 
 1. **[Choose your lane](docs/QUICKSTART.md#choose-your-lane)** and check its prerequisites.
-2. **Clone tag `v0.17.0`** and run `python3 scripts/verify_release.py --require-ready`.
-3. **[Install the stock Oh My Pi 18.18.6 client](docs/QUICKSTART.md#omp-18186-client)** with the
+2. **Clone tag `v0.18.0`** and run `python3 scripts/verify_release.py --require-ready`.
+3. **[Install the stock Oh My Pi 18.18.7 client](docs/QUICKSTART.md#omp-18187-client)** with the
    fail-closed config and per-model fragment.
 4. **Run the acceptance checks** at the end of your lane's route: tool turn, continuation, restart
    survival, fail closed.
 
-### Upgrading from v0.16.2
+### Upgrading from v0.17.0
 
-`v0.17.0` updates the client to Oh My Pi 18.18.6 and rebuilds the RTX 5090 container runtime. The
-native packages and the model are unchanged.
+`v0.18.0` updates the client to Oh My Pi 18.18.7 and rebuilds all three GPU runtimes from one
+frozen fork engine commit (`48c8ac46`). The Qwen3.8 27B model artifact (`81f924d4`) and the
+reviewed model and config fragments are unchanged.
 
-- **Client.** [Install the stock Oh My Pi 18.18.6 client](docs/QUICKSTART.md#omp-18186-client) with
-  this release's fail-closed config and per-model fragment
-  ([18.18.6 review](docs/measurements/2026-11-10-omp-18186-client-upgrade-review.json)). The
-  fragments pin `tokenizer: qwen3` on the `q38-ninfer` model alias in each `models.fragment.yml`,
-  and [`examples/manual-tunnel/fail-closed.yml`](examples/manual-tunnel/fail-closed.yml) disables
-  automatic updates and the setup wizard explicitly.
-- **RTX 5090.** Stop an existing `v0.16.2` RTX 5090 container with
-  `examples/manual-tunnel/stop-ninfer.sh` from your `v0.16.2` checkout before starting the rebuilt
-  `v0.7.0-qwen38-5090-beta.6` container runtime. The new runtime writes checkpoints to its own host
-  directory, `checkpoints-v017`; keep the prior `checkpoints-v013` untouched for rollback.
-- **RTX 4090 and RTX 3090.** The native Windows packages (`v0.8.0-qwen38-4090-beta.2` and
-  `v0.8.0-qwen38-3090-beta.2`) are carried unchanged from `v0.16.2`; keep native checkpoint roots
-  untouched for rollback. RTX 3090 owners: read the
-  [known limitation](#rtx-3090-known-limitation) first.
+- **Client.** [Install the stock Oh My Pi 18.18.7 client](docs/QUICKSTART.md#omp-18187-client) with
+  this release's unchanged fail-closed config and per-model fragment
+  ([18.18.7 review](docs/measurements/2026-11-11-omp-18187-client-upgrade-review.json)).
+- **RTX 5090.** Stop an existing `v0.17.0` RTX 5090 container with
+  `examples/manual-tunnel/stop-ninfer.sh` from your `v0.17.0` checkout before starting the rebuilt
+  `v0.7.0-qwen38-5090-beta.7` container runtime. The new runtime writes checkpoints to its own host
+  directory, `checkpoints-v018`; keep the prior `checkpoints-v017` and `checkpoints-v013` stores
+  untouched for rollback.
+- **RTX 4090 and RTX 3090.** Follow the
+  [RTX 4090](docs/QUICKSTART.md#native-windows-rtx-4090-release-lane) or
+  [RTX 3090](docs/QUICKSTART.md#native-windows-rtx-3090-release-lane) route to stage and run
+  `Install-Release.ps1` for `v0.8.0-qwen38-4090-beta.3` (build profile
+  `native-v0.8.0-beta.3-rtx4090`) or `v0.8.0-qwen38-3090-beta.3` (build profile
+  `native-v0.8.0-beta.3-tc-rtx3090`, which enables small-batch tensor-core draft verification).
+  `Install-Release.ps1` stops a running `beta.2` lane through that lane's `Control-Release.ps1`
+  and keeps it for `Control-Release.ps1 -Action Rollback`; if a stopped `beta.2` lane refuses
+  shutdown after an incomplete stop, follow the
+  [Start-then-install recovery](docs/QUICKSTART.md#upgrading-after-a-beta2-incomplete-shutdown)
+  instead of deleting lease or state files; keep at least 40 GiB free on the checkpoint drive so
+  durable saves are not refused for disk capacity.
 - **Sessions.** After the upgrade, Oh My Pi replays its authoritative transcripts for a fresh
   prefill.
 
-What the rebuilt RTX 5090 runtime changes: bounded resume/fresh admission, so resumed long sessions
-are not starved under context pressure (addressing upstream
-[#434](https://github.com/Neroued/ninfer/issues/434)), and serving robustness for malformed tool
-arguments, effort normalization, request-local numerical failures, and stop/drain final-save
-ordering (addressing upstream
-[#440](https://github.com/Neroued/ninfer/issues/440)/[#441](https://github.com/Neroued/ninfer/issues/441)/[#446](https://github.com/Neroued/ninfer/issues/446)).
-Everything else: [release notes](releases/v0.17.0/NINFER_RELEASE_NOTES.md) ·
-[changelog](CHANGELOG.md).
+What the rebuilt runtimes change: both native Windows lanes gain `v0.17.0`'s bounded admission
+and serving-robustness fixes (which shipped on RTX 5090 only in `v0.17.0`: upstream
+[#434](https://github.com/Neroued/ninfer/issues/434),
+[#440](https://github.com/Neroued/ninfer/issues/440),
+[#441](https://github.com/Neroued/ninfer/issues/441),
+[#446](https://github.com/Neroued/ninfer/issues/446)), and all three lanes add GPU-staged
+checkpoint saves when host RAM cache is full
+([ninfer#89](https://github.com/alphastorm/ninfer/issues/89)), earlier checkpoint-prepare and
+warm-request scheduling during long prefills
+([ninfer#111](https://github.com/alphastorm/ninfer/pull/111),
+[ninfer#102](https://github.com/alphastorm/ninfer/issues/102)), GPU-lease restoration when a
+native `Stop` is refused ([ninfer#107](https://github.com/alphastorm/ninfer/pull/107)), and faster
+tensor-core draft verification on the RTX 3090
+([ninfer#104](https://github.com/alphastorm/ninfer/pull/104)). Everything else:
+[release notes](releases/v0.18.0/NINFER_RELEASE_NOTES.md) · [changelog](CHANGELOG.md).
 
 Native owners staying on `v0.10.0` keep the
 [v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md).
-
-### Next on main — prepared v0.18.0
-
-**Component-qualified next: v0.18.0 / stock OMP 18.18.7.** Re-cuts all three GPU runtime
-lanes from one frozen fork engine commit `F4` (`48c8ac4644322f024b5c3bd5b657af5874567251` in `alphastorm/ninfer` on
-upstream `64d10fbf`): RTX 5090 `v0.7.0-qwen38-5090-beta.7` (image
-`ghcr.io/alphastorm/ninfer-runtime@sha256:496195ecd6cf1f50fcd9dc62cf7b51787f599cc2b196e194baf050c4b149e119`, server
-`804ef8ac6d062dc8da8784ba3f52e5cece2178a5f5bc46cb2c7bc1d3e8937fe3`, isolated host checkpoint directory `checkpoints-v018` mounted at
-container path `/checkpoints-v013`), native Windows RTX 4090 `v0.8.0-qwen38-4090-beta.3` (package
-`ac41700ac2bb9fb171188f35e73481cfd9f1140c5781320b1e6304ee760d7166`, server `a5266ae676305cc56086df6d3b8dc8968be110b3cf0eb7b18147adafc2f66d22`, build profile
-`native-v0.8.0-beta.3-rtx4090`), and native Windows RTX 3090 `v0.8.0-qwen38-3090-beta.3`
-(package `bf1ceaa9eb522a8c8d9372bec475d6e4e4666e6a995302cd20035e80ae3e5edd`, server `e571328699be41d90eff8743d94da26e8f587e48bc32f618013625af7ad0bfe0`, build
-profile `native-v0.8.0-beta.3-tc-rtx3090`), with unmodified upstream
-[Oh My Pi v18.18.7](https://github.com/can1357/oh-my-pi/releases/tag/v18.18.7)
-(`e325ffc73ab86e03bdd20a91b77d8e2b3964c906`, release `440868478`) and the unchanged
-`20,437,521,664`-byte Qwen3.8 27B container version 3 model (`81f924d4`).
-
-- **Engine changes (`F4`):** Device-staged durable checkpoint saves when the Host arena is full
-  ([fork #89](https://github.com/alphastorm/ninfer/issues/89), folding
-  [#84](https://github.com/alphastorm/ninfer/issues/84);
-  [PR #109](https://github.com/alphastorm/ninfer/pull/109) `3213508fe`), off-worker export/import
-  prepares held to an operation-free boundary with budget-free `>= 100 ms`-spaced pressure-busy
-  retries ([PR #111](https://github.com/alphastorm/ninfer/pull/111) `33088ad2c`), bounded `K = 4`
-  fresh-admission priority at context-operation boundaries
-  ([fork #102](https://github.com/alphastorm/ninfer/issues/102);
-  [PR #108](https://github.com/alphastorm/ninfer/pull/108) `6ec05f211`), native controller
-  GPU-owner lease restoration on a refused `Stop`, removal postconditions, junction containment,
-  exact-byte package archiving, and the four-key `beta.3` variant allowlist
-  ([PR #107](https://github.com/alphastorm/ninfer/pull/107) `2454c0629`,
-  [#91](https://github.com/alphastorm/ninfer/pull/91),
-  [#87](https://github.com/alphastorm/ninfer/issues/87),
-  [#90](https://github.com/alphastorm/ninfer/issues/90)), upstream malformed tool-history
-  regression vectors ([PR #106](https://github.com/alphastorm/ninfer/pull/106) `92209112`), and the
-  `Group64` `A8` build-profile configure guard and Apache-2.0 kernel attribution
-  ([PR #112](https://github.com/alphastorm/ninfer/pull/112) `fd95455df`).
-- **Bound release selections:**
-  - Native `sm_86`/`sm_89` small-T tensor-core verify ([PR #104](https://github.com/alphastorm/ninfer/pull/104),
-    `T=8/16`) is in `F4`, enabled only by the RTX 3090 `tc` profile
-    ([release notes](releases/v0.18.0/NINFER_RELEASE_NOTES.md)).
-  - Selected native profiles `native-v0.8.0-beta.3-tc-rtx3090` (RTX 3090) and
-    `native-v0.8.0-beta.3-rtx4090` (RTX 4090) ship under the bound selection decision and a
-    passing `1,120`-prompt `EXP-085` quality screen
-    ([release notes](releases/v0.18.0/NINFER_RELEASE_NOTES.md)).
-  - RTX 5090 cadence-only prefill pacing stays default-off (`--prefill-stall-budget-ms 0
-    --decode-rounds-per-prefill 0`) in `qwen38-5090-v0.13.0` (configuration SHA-256 `751d22dc`)
-    after failing 3 of 6 preregistered bars
-    ([release notes](releases/v0.18.0/NINFER_RELEASE_NOTES.md)).
-- **Excluded candidates and disclosed residuals:** `sm_120` `Group64` `A8` prefill
-  ([PR #105](https://github.com/alphastorm/ninfer/pull/105) `93348eb9`, closed unmerged) was killed
-  at the `K1` cold-L2 prefill-speed prescreen (`0.784860×` at `512`-token pass width and `0.983623×`
-  at `1,024`-token pass width, below the `1.00×` kill bar); restricted tool-argument copy drafting
-  (`+5.24%` to `+10.12%` across `2,998` turns, below the `+15%` session-decode bar) is not shipped.
-  On Windows, stock OMP `18.18.7` changes the `bash` tool description sent to the model when `bash`
-  is advertised; `scripts/hosts/omp-client-probe.py` invokes `omp` with `--tools read` and does not
-  separately probe `bash` or `edit` beyond the `31`-block route acceptance
-  ([18.18.7 review](docs/measurements/2026-11-11-omp-18187-client-upgrade-review.json)). The
-  request-level HTTP `503` half of [fork #89](https://github.com/alphastorm/ninfer/issues/89) did
-  not reproduce on the proxy GPU (`3` fixtures) or the pre-cut default RTX 3090 probe; in product
-  acceptance on the selected `beta.3` RTX 3090 `C2` `tc` lane, it reproduced only under host
-  system-drive exhaustion in attempt 2 (`0.39 GiB` free when measured afterwards, `27` checkpoint writes failing with OS
-  disk-full error `112` and `capacity` save refusals) and did not reproduce with free disk space in
-  attempt 3 (`63.08` GiB free, `2` committed
-  compactions in `747.00` s, zero HTTP `503` responses, compaction receipt
-  `cfa89628`), while its pressure-save deferral
-  path remains tracked alongside
-  the [Neroued/ninfer#434](https://github.com/Neroued/ninfer/issues/434) per-rotation fresh-window
-  consumption while a pressure save is outstanding or no lane is free in
-  [fork #103](https://github.com/alphastorm/ninfer/issues/103). Component cuts and
-  qualification receipts passed; runtime and product councils closed by disposition. Candidate
-  `2a735da0` passed all five documented block sets (**31/31**) and three client-platform checks,
-  plus RTX 4090 acceptance on its initial window and RTX 3090 acceptance on its third execution
-  without a waiver: on RTX 3090, attempt 1 failed its post-route subagent check on malformed `task`
-  tool arguments (five calls rejected for missing `context`) and restored; attempt 2 ran on a full
-  system drive (admission waited behind an unsettled checkpoint save across `4` HTTP `503`
-  `deferred by a pending checkpoint save` timeouts before a **900 s** compaction timeout, **9**
-  sessions refused at `Stop`, installed lane restored by empty-session `Start`/`Stop` recovery);
-  the founder-authorized third execution in fresh workspaces with a **60 GiB** free-space floor
-  (recorded in `accept-rtx4090-route.py`'s single `--attempt 2` rerun slot) passed every phase,
-  including public install and independent restoration (`1,439.367` s window).
-  The lead owns final composition, audit reconciliation and immutable pins; product publication
-  stays founder-owned. The [release notes](releases/v0.18.0/NINFER_RELEASE_NOTES.md) retain that scope.
-  Published install authority stays `v0.17.0`
-  ([immutable v0.17.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.17.0/docs/QUICKSTART.md)).
 
 ## How it works
 
@@ -239,7 +178,7 @@ Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release l
 - **NInfer owns inference and retained state.** The C++/CUDA engine from
   [Neroued/ninfer](https://github.com/Neroued/ninfer) and its GPU ports, plus this project's
   explicit Responses state and checkpoints. Retained state accelerates; it is never the source of truth.
-- **The manifest owns identity.** [`releases/v0.17.0/manifest.json`](releases/v0.17.0/manifest.json)
+- **The manifest owns identity.** [`releases/v0.18.0/manifest.json`](releases/v0.18.0/manifest.json)
   binds client, runtime, model, profile, and receipts; `ready` requires composed external acceptance.
 
 [Architecture](docs/ARCHITECTURE.md) · [Security model](docs/SECURITY.md) ·
@@ -247,7 +186,7 @@ Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release l
 
 ## Measured, not estimated
 
-![Qualification receipts for v0.17.0, each lane on its own gate, not a ranking. RTX 5090: 181.92 tok/s decode and exact 130,048-token retrieval in 56.63 s from a cold start. RTX 4090: 254.59 tok/s decode and exact retrieval in 83.54 s. RTX 3090: 148.70 tok/s decode and exact retrieval in 188.94 s.](assets/benchmarks.png)
+![Qualification receipts for v0.18.0, each lane on its own gate, not a ranking. RTX 5090: 181.52 tok/s decode and exact 130,048-token retrieval in 56.90 s from a cold start. RTX 4090: 253.71 tok/s decode and exact retrieval in 83.45 s. RTX 3090: 227.17 tok/s decode and exact retrieval in 189.12 s.](assets/benchmarks.png)
 
 Each lane is measured on its own gate, machine, and profile; the figure is not a ranking. Method,
 per-lane charts, the warm-versus-cold boundary rules, model quality, and the community table:
@@ -302,7 +241,7 @@ Lifecycle and cut rules: [releases](docs/RELEASES.md).
   which run in rehearsal/offline mode; rehearsal receipts never qualify a release.
 
 Routing rules: [CONTRIBUTING.md](CONTRIBUTING.md). Strip keys, hostnames, prompts, outputs, and raw
-logs before filing. Support covers `v0.17.0` and its exact profiles for a single local owner; no SLA.
+logs before filing. Support covers `v0.18.0` and its exact profiles for a single local owner; no SLA.
 Vulnerabilities: [private reporting](SECURITY.md), never a public issue.
 
 ## Credits
