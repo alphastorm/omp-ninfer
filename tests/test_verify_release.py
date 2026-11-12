@@ -1062,6 +1062,14 @@ class ReleaseContractTest(unittest.TestCase):
                     allow_pending=manifest["status"] == "draft")
                 self.assertEqual(errors, [])
 
+    def test_bound_native_packages_do_not_retain_the_predecessor_placeholder_blocker(self) -> None:
+        blocker = ("Native beta.2 identity rows are unbound predecessor placeholders; "
+                   "beta.3 packages and current proofs remain pending.")
+        for path in (ROOT / "compatibility.json", ROOT / "releases/v0.18.0/compatibility.json"):
+            with self.subTest(authority=path.relative_to(ROOT).as_posix()):
+                authority = self.load(path)
+                self.assertNotIn(blocker, authority["composition"]["blockers"])
+
     def test_native_manifest_must_bind_observed_quality_and_fit_receipts(self) -> None:
         temporary, root = self.public_draft_copy()
         self.addCleanup(temporary.cleanup)

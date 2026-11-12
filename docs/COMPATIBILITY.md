@@ -75,5 +75,4 @@ Blockers:
 
 ## Composition blockers
 
-- Native beta.2 identity rows are unbound predecessor placeholders; beta.3 packages and current proofs remain pending.
 - Fresh routes, stock-client platform acceptance and current product review remain pending.

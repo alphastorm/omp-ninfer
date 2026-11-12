@@ -10,7 +10,6 @@
     "ninfer_lifecycle_source_commit": "a87de3613c17bced777b446fb545f872d8395ec1",
     "request_compatibility_source_commit": "e325ffc73ab86e03bdd20a91b77d8e2b3964c906",
     "blockers": [
-      "Native beta.2 identity rows are unbound predecessor placeholders; beta.3 packages and current proofs remain pending.",
       "Fresh routes, stock-client platform acceptance and current product review remain pending."
     ],
     "composed_source_commit": "e325ffc73ab86e03bdd20a91b77d8e2b3964c906"
