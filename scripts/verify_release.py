@@ -82,6 +82,7 @@ PRIVATE_MARKERS = (
     "ALPHA-OLD",
 )
 PLACEHOLDER_RE = re.compile(r"(?:<[^>]+>|\bTODO\b|\bTBD\b)", re.IGNORECASE)
+RELEASE_TOKEN_RE = re.compile(r"__V[0-9]{4}_[A-Z0-9_]+__")
 PENDING_RELEASE_PROSE_RE = re.compile(
     r"\b(?:unreleased|publication (?:pending|remains)|ready candidate)\b", re.IGNORECASE
 )
@@ -3223,6 +3224,15 @@ def validate_release_documentation(root: Path, release: str, errors: list[str]) 
         errors.extend(stale[number] for number in sorted(stale))
 
 
+def validate_release_markdown_tokens(root: Path, release: str, errors: list[str]) -> None:
+    """Ready release Markdown must not publish unfilled release-result tokens."""
+    for document in sorted((root / "releases" / release).glob("*.md")):
+        token = RELEASE_TOKEN_RE.search(document.read_text(encoding="utf-8"))
+        if token is not None:
+            errors.append(f"{document.relative_to(root).as_posix()} contains unresolved release token "
+                          f"{token.group()}")
+
+
 def validate_public_text(root: Path, errors: list[str]) -> None:
     documents = set(repository_files(root, (".md", ".ps1", ".sh")))
     # Every shipped script counts, including extensionless helpers and non-host Python tools.
@@ -3947,6 +3957,7 @@ def validate(
         require(blocker_items == [], "ready release must have no publication blockers", errors)
 
         if ga_release(release):
+            validate_release_markdown_tokens(root, release, errors)
             validate_exact_lane_set(manifest, compatibility, qualification, errors)
             validate_ready_state_consistency(
                 manifest, compatibility, qualification, errors

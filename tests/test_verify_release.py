@@ -250,6 +250,29 @@ class FrozenNativePinTests(unittest.TestCase):
                 "native acceptance requires the frozen candidate manifest in local git history"])
 
 
+class ReleaseMarkdownTokenTests(unittest.TestCase):
+    def test_each_markdown_file_reports_only_its_first_release_token(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            release = root / "releases/v0.18.0"
+            release.mkdir(parents=True)
+            first = "__V0180_RTX4090_DEFAULT_SPEED_RESULT__"
+            second = "__V0180_RTX3090_DEFAULT_SPEED_RESULT__"
+            (release / "NOTES.md").write_text(f"{first}\n{second}\n", encoding="utf-8")
+            (release / "RESULTS.md").write_text(second, encoding="utf-8")
+            errors = []
+            VERIFY_RELEASE.validate_release_markdown_tokens(root, "v0.18.0", errors)
+            self.assertEqual(errors, [
+                f"releases/v0.18.0/NOTES.md contains unresolved release token {first}",
+                f"releases/v0.18.0/RESULTS.md contains unresolved release token {second}",
+            ])
+            for path in release.glob("*.md"):
+                path.write_text("Qualified release results.\n", encoding="utf-8")
+            errors = []
+            VERIFY_RELEASE.validate_release_markdown_tokens(root, "v0.18.0", errors)
+            self.assertEqual(errors, [])
+
+
 class DependencySbomContractTests(unittest.TestCase):
     def setUp(self) -> None:
         self.release = ROOT / "releases" / PUBLIC_RELEASE
@@ -1807,6 +1830,20 @@ class ReleaseContractTest(unittest.TestCase):
             any("private marker" in error and "planted.json" in error for error in errors),
             errors,
         )
+
+    def test_ready_rejects_unresolved_release_markdown_tokens(self) -> None:
+        temporary, root = self.public_draft_copy()
+        self.addCleanup(temporary.cleanup)
+        token = "__V0180_RTX4090_DEFAULT_SPEED_RESULT__"
+        path = root / "releases" / PUBLIC_RELEASE / "RESULTS.md"
+        path.write_text(token, encoding="utf-8")
+        for require_ready in (False, True):
+            with self.subTest(require_ready=require_ready):
+                _, errors = VERIFY_RELEASE.validate(root, require_ready=require_ready)
+                self.assertIn(
+                    f"releases/{PUBLIC_RELEASE}/RESULTS.md contains unresolved release token {token}",
+                    errors,
+                )
 
     def test_ready_rejects_pending_work_in_any_phrasing(self) -> None:
         """How staged releases state unfinished work; v0.12.0 and v0.11.0 shipped the first two
