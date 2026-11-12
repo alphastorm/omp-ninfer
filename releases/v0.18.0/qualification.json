@@ -329,7 +329,7 @@
   "remaining_release_gates": [],
   "receipt_audit": {
     "repository_path": "releases/v0.18.0/qualification/receipt-audit.json",
-    "sha256": "fc34a9f3e7007c83fb3aaf30baca2d03482fc44277ea0115cba2d7b9faf48d22"
+    "sha256": "4bf96c4fe617f679e19e669a7b19bafd024679826f9d48f51640eb1494e14a2d"
   },
   "eligibility_scope": "Current component qualification and closed runtime/product reviews are bound. The exact founder waiver at releases/v0.18.0/qualification/rtx3090-route-waiver.json covers only the corrected attempt-2 RTX 3090 post-route compaction campaign failure; it does not change the failed verdicts or waive another gate. RTX 3090 native behavior completion, wrapper restoration audit and anonymous public-install acceptance are not claimed. C2 long-session compaction remains a known limitation (https://github.com/alphastorm/ninfer/issues/89). Final composition, audit reconciliation and immutable pins are lead-owned steps; product publication and production promotion are separate founder-owned actions."
 }
