@@ -442,6 +442,91 @@ class WindowsInteropRelayTests(unittest.TestCase):
         self.assertIn(own, str(refused.exception))
         self.assertIn(root, str(refused.exception))
 
+    def preflight_argv(self, workspace: Path) -> list[str]:
+        return ["accept-rtx5090-host.py", "--action", "preflight", "--workspace", str(workspace),
+                "--release", "v0.18.0", "--candidate", "2" * 40, "--windows-workspace", "C:/fixture",
+                "--production-image", "fixture-image", "--window-dir", "/fixture/window",
+                "--model-id", "qwen3.8-27b"]
+
+    def test_preflight_refuses_dead_interop_before_any_effect(self) -> None:
+        workspace = self.runtime.parent / "preflight"
+        message = "no WSL interop relay starts a Windows process"
+        with unittest.mock.patch.object(sys, "argv", self.preflight_argv(workspace)), \
+             unittest.mock.patch.object(self.host, "windows_environment",
+                                        side_effect=RuntimeError(message)) as probe, \
+             unittest.mock.patch.object(self.host.Path, "mkdir",
+                                        side_effect=AssertionError("filesystem effect before interop")) as mkdir, \
+             unittest.mock.patch.object(self.host.subprocess, "run",
+                                        side_effect=AssertionError("host command before interop")) as command:
+            environment = dict(os.environ)
+            with self.assertRaisesRegex(RuntimeError, message):
+                self.host.main()
+            probe.assert_called_once_with("/mnt/c/Windows/System32/cmd.exe")
+            mkdir.assert_not_called()
+            command.assert_not_called()
+            self.assertEqual(dict(os.environ), environment)
+        self.assertFalse(workspace.exists())
+
+    def test_preflight_records_a_windows_process_started_by_interop(self) -> None:
+        workspace = self.runtime.parent / "preflight"
+        clone = workspace / "candidate"
+        clone.mkdir(parents=True)
+        (workspace / "host-bundle").mkdir()
+        home = self.runtime.parent / "home"
+        key = home / ".config/omp-ninfer/api-key"
+        key.parent.mkdir(parents=True)
+        key.write_text("synthetic-key")
+        model = home / ".local/share/omp-ninfer/qwen3_8_27b-v3.ninfer"
+        model.parent.mkdir(parents=True)
+        model.write_bytes(b"fixture-model")
+        asset = workspace / "omp-linux-x64"
+        asset.write_bytes(b"fixture-client")
+        distribution = {"distribution_kind": "upstream-release",
+                        "asset_url": "https://example.invalid/omp-linux-x64",
+                        "asset_sha256": self.host.digest(asset), "binary_sha256": self.host.digest(asset)}
+        runtime = {"image_reference": "fixture-image", "model_bytes": model.stat().st_size,
+                   "model_sha256": self.host.digest(model)}
+        (clone / "compatibility.json").write_text(json.dumps({"profiles": [{
+            "id": "linux-docker-local", "runtime": runtime, "client_distribution": distribution}]}))
+        image = {"Config": {"Image": "fixture-image"}, "Image": "fixture-image-id",
+                 "State": {"Running": True}, "HostConfig": {"RestartPolicy": {"Name": "unless-stopped"}},
+                 "Mounts": [], "RepoDigests": ["fixture-image@sha256:" + "a" * 64]}
+        events = []
+        def probe(path):
+            self.assertEqual(path, "/mnt/c/Windows/System32/cmd.exe")
+            events.append("interop")
+            return {}
+        def command(argv, **kwargs):
+            self.assertTrue(events and events[0] == "interop",
+                            "a host command preceded the Windows probe")
+            argv = [str(value) for value in argv]
+            events.append(argv)
+            code, output = 0, ""
+            if argv[0] == "git":
+                if "rev-parse" in argv:
+                    output = "main" if "--abbrev-ref" in argv else "2" * 40
+            elif argv[:2] == ["docker", "inspect"]:
+                if "--format" in argv:
+                    output = json.dumps(image)
+                else:
+                    code = 1
+            elif argv[:2] != ["docker", "pull"] and argv[0] != sys.executable:
+                self.fail("unexpected external command: " + repr(argv))
+            return subprocess.CompletedProcess(argv, code, output, "")
+        def health(*args, **kwargs):
+            response = io.BytesIO(b'{"status":"ok"}')
+            response.status = 200
+            return response
+        with unittest.mock.patch.object(sys, "argv", self.preflight_argv(workspace)), \
+             unittest.mock.patch.object(self.host.Path, "home", return_value=home), \
+             unittest.mock.patch.object(self.host, "windows_environment", side_effect=probe), \
+             unittest.mock.patch.object(self.host.subprocess, "run", side_effect=command), \
+             unittest.mock.patch.object(self.host.urllib.request, "urlopen", side_effect=health), \
+             unittest.mock.patch("builtins.print"):
+            self.host.main()
+        receipt = json.loads((workspace / "host-preflight.json").read_text())
+        self.assertEqual(receipt["status"], "passed")
+        self.assertIs(receipt["windows_interop_started_process"], True)
 
 
 @unittest.skipIf(os.name == "nt", "host directory preservation uses POSIX modes")

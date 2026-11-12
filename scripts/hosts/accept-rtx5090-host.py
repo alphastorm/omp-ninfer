@@ -114,6 +114,9 @@ def main():
                                              'fenced_block': False, 'launcher': '$HOME/.local/bin/omp', 'mode': '0755'},
                           'restoration': ['remove beta', 'window.sh restore', 'WSL and Windows health', 'original key and checkout', 'own hold only']}))
         return
+    if a.action == 'preflight':
+        # Restoration must be able to release the Windows hold before any host preparation.
+        windows_environment('/mnt/c/Windows/System32/cmd.exe')
     root = Path(a.workspace).expanduser().resolve()
     home = Path.home()
     clone = root / 'candidate'
@@ -299,7 +302,7 @@ def main():
         launcher = linuxhome / '.local/bin/omp'
         installation = install_linux_client(dist, asset, linuxhome)
         logged('linux-preflight.log', [sys.executable, root / 'omp-client-probe.py', '--release', a.release, '--candidate', a.candidate, '--phase', 'preflight', '--output', root / 'linux-structured', '--binary', launcher, '--clone', clone, '--platform', 'linux-x64-wsl2', '--profile', 'linux-docker-local', *probe_selector(a.model_id)], 90, clientenv)
-        save('host-preflight.json', {'status': 'passed', 'completed_utc': now(), 'baseline': baseline(), 'runtime_image': runtime['image_reference'], 'runtime_repo_digests': image['RepoDigests'], 'model_sha256': digest(model), 'client_install': installation, 'client_asset_sha256': installation['asset_sha256'], 'client_binary_sha256': installation['binary_sha256'], 'wsl_environment_preserved': True})
+        save('host-preflight.json', {'status': 'passed', 'completed_utc': now(), 'baseline': baseline(), 'runtime_image': runtime['image_reference'], 'runtime_repo_digests': image['RepoDigests'], 'model_sha256': digest(model), 'client_install': installation, 'client_asset_sha256': installation['asset_sha256'], 'client_binary_sha256': installation['binary_sha256'], 'wsl_environment_preserved': True, 'windows_interop_started_process': True})
     elif a.action == 'begin':
         # Baseline, watchdog and every host change, through stopped production, under the lock.
         with restore_lock():
