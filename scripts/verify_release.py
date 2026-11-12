@@ -1613,12 +1613,29 @@ def validate_native_acceptance_subject(receipt: Any, release: str, candidate: st
 
 def validate_frozen_native_pins(root: Path, release: str, manifest: dict, qualification: dict,
                                 errors: list[str]) -> None:
-    """A rehashed current manifest cannot silently change what the executed candidate pinned."""
+    """A rehashed current manifest cannot silently change what the executed candidate pinned.
+
+    Full-history gates (--check-pins, which fails closed on missing history, and CI's full
+    checkout) verify this binding. A documented shallow tag clone cannot retain the pre-tag
+    candidate, so it may omit only that unavailable commit's comparison.
+    """
     if (product_version(release) or (0, 0, 0)) < (0, 18, 0):
         return
     candidate = frozen_product_candidate(root, release, qualification, errors)
     if candidate is None:
         return
+    if (root / ".git").exists():
+        probe = subprocess.run(
+            ["git", "-C", str(root), "cat-file", "-e", f"{candidate}^{{commit}}"],
+            capture_output=True,
+        )
+        if probe.returncode != 0:
+            shallow = subprocess.run(
+                ["git", "-C", str(root), "rev-parse", "--is-shallow-repository"],
+                capture_output=True,
+            )
+            if shallow.returncode == 0 and shallow.stdout.strip() == b"true":
+                return
     shown = subprocess.run(
         ["git", "-C", str(root), "show", f"{candidate}:releases/{release}/manifest.json"],
         capture_output=True,

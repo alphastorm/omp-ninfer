@@ -158,6 +158,44 @@ class RuntimeContractLabelTests(unittest.TestCase):
 
 
 class FrozenNativePinTests(unittest.TestCase):
+    def test_shallow_tag_clone_without_the_pre_tag_candidate_is_accepted(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "origin"
+            root.mkdir()
+            release = "v0.18.0"
+            manifest = {"release": release, "components": {
+                "omp": {"binary_sha256": "a" * 64, "distribution_version": "18.18.7"},
+                "ninfer_variants": []}}
+            path = root / "releases" / release / "manifest.json"
+            path.parent.mkdir(parents=True)
+            path.write_text(json.dumps(manifest), encoding="utf-8")
+            for command in (["init", "-q"], ["add", "."],
+                            ["-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid",
+                             "commit", "-qm", "test: freeze native candidate"]):
+                subprocess.run(["git", "-C", str(root), *command], check=True, capture_output=True)
+            candidate = subprocess.check_output(
+                ["git", "-C", str(root), "rev-parse", "HEAD"], text=True, encoding="utf-8").strip()
+            ledger = path.parent / "review/runtime-ledger.json"
+            ledger.parent.mkdir()
+            ledger.write_text(json.dumps({"artifact_type": "omp_ninfer_review_ledger", "release": release,
+                                           "product_tooling": {"stage_commit": candidate}}), encoding="utf-8")
+            qualification = {"observed_gates": {"g4_review": {
+                "repository_path": ledger.relative_to(root).as_posix(),
+                "sha256": VERIFY_RELEASE.sha256_file(ledger)}}}
+            for command in (["add", "."],
+                            ["-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid",
+                             "commit", "-qm", "test: bind frozen candidate"], ["tag", release]):
+                subprocess.run(["git", "-C", str(root), *command], check=True, capture_output=True)
+            clone = Path(temporary) / "tag-clone"
+            subprocess.run(["git", "clone", "--branch", release, "--depth", "1", root.as_uri(),
+                            str(clone)], check=True, capture_output=True)
+            probe = subprocess.run(["git", "-C", str(clone), "cat-file", "-e",
+                                    f"{candidate}^{{commit}}"], capture_output=True)
+            self.assertNotEqual(probe.returncode, 0)
+            errors = []
+            VERIFY_RELEASE.validate_frozen_native_pins(clone, release, manifest, qualification, errors)
+            self.assertEqual(errors, [])
+
     def test_native_pins_are_authenticated_against_the_executed_git_commit(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
