@@ -313,7 +313,7 @@
   "remaining_release_gates": [],
   "receipt_audit": {
     "repository_path": "releases/v0.18.0/qualification/receipt-audit.json",
-    "sha256": "6f5fb07de763f9f492e62c01b7b781391fe7ed20b5d5e17e8ee11e1204251f4d"
+    "sha256": "46cf29972374b25681249cb598f91a627a28ae2f29a66c3f040b9abc6100629c"
   },
   "eligibility_scope": "Current component qualification, five-route and both native campaign/public-install/restoration acceptances without a route-campaign waiver, and closed runtime/product reviews are bound. Request-level pressure-save deferral remains tracked in https://github.com/alphastorm/ninfer/issues/89 (reproduced in acceptance only under attempt-2 host system-drive exhaustion, not in attempt 3 with at least 60 GiB free space). Final composition, audit reconciliation and immutable pins are lead-owned steps; product publication and production promotion are separate founder-owned actions."
 }
