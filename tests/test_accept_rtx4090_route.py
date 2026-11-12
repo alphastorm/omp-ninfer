@@ -926,6 +926,9 @@ if($Action -eq 'Stop'){
     if($state.case -ne 'stop-returns-running'){$state.running=$false}
 }
 [IO.File]::WriteAllText($path,($state|ConvertTo-Json))
+if($Action -eq 'Stop') {
+    $global:LASTEXITCODE=if($state.case -eq 'stop-native-exit'){7}else{0}
+}
 if($Action -eq 'Status') {
     @{process_state=$(if($state.running){'running'}else{'stopped'});endpoint_state=$(if($state.running){'ready'}else{'unavailable'});release_id='candidate'}|ConvertTo-Json -Compress
 }
@@ -962,7 +965,7 @@ if($Case -eq 'stale-native-exit'){$global:LASTEXITCODE=7}
 & ([scriptblock]::Create($definitions+"try {`n"+$smoke))
 '''
         self.assertIn("# 5. Smoke", source)
-        for case in ("failed-stop", "stop-returns-running", "throw-after-start",
+        for case in ("failed-stop", "stop-returns-running", "stop-native-exit", "throw-after-start",
                      "running-smoke-failure", "passed", "stale-native-exit"):
             with self.subTest(case=case), tempfile.TemporaryDirectory() as directory:
                 root = Path(directory)
@@ -980,12 +983,17 @@ if($Case -eq 'stale-native-exit'){$global:LASTEXITCODE=7}
                     self.assertTrue(receipt["restoration"]["prior_state_restored"])
                     if case == "stale-native-exit":
                         self.assertNotIn("Stop", state["calls"])
-                elif case in ("failed-stop", "stop-returns-running"):
+                elif case in ("failed-stop", "stop-returns-running", "stop-native-exit"):
                     self.assertNotEqual(result.returncode, 0)
                     self.assertEqual(receipt["status"], "failed")
                     self.assertFalse(receipt["restoration"]["prior_state_restored"])
-                    self.assertIn("injected Stop failure" if case == "failed-stop" else
-                                  "baseline was not restored", receipt["restoration_error"])
+                    message = {"failed-stop": "injected Stop failure",
+                               "stop-returns-running": "baseline was not restored",
+                               "stop-native-exit": "public-install controller Stop failed"}[case]
+                    self.assertIn(message, receipt["restoration_error"])
+                    if case == "stop-native-exit":
+                        self.assertFalse(state["running"])
+                        self.assertEqual(state["calls"][-1], "Stop")
                 else:
                     self.assertNotEqual(result.returncode, 0)
                     self.assertEqual(receipt["status"], "failed")

@@ -39,6 +39,7 @@ function Restore-PublicInstallState {
     $receipt.restoration = [ordered]@{ prior_state_restored=$false }
     if ($startOwned) {
         & $controller -Action Stop -StateRoot $StateRoot | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw 'public-install controller Stop failed' }
     }
     $after = ((@(& $controller -Action Status -StateRoot $StateRoot) -join "`n") | ConvertFrom-Json)
     $restored = ([string]$after.process_state -ceq [string]$before.process_state) -and
