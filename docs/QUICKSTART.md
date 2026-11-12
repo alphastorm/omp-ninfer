@@ -693,19 +693,29 @@ elevated PowerShell session:
 ```powershell
 $ErrorActionPreference = 'Stop'
 $Controller = Join-Path $StateRoot 'Control-Release.ps1'
-& $Controller -Action Start -StateRoot $StateRoot
+$StartResult = @(& $Controller -Action Start -StateRoot $StateRoot)
+if ($LASTEXITCODE -ne 0) { throw 'native start failed' }
+$Lifecycle = (($StartResult -join "`n") | ConvertFrom-Json)
+if ([string]$Lifecycle.process_state -cne 'running' -or
+    [string]$Lifecycle.task_state -cne 'Running' -or
+    [string]$Lifecycle.endpoint_state -cne 'ready') {
+  throw 'native start did not report a ready release'
+}
 
 $Installer = Join-Path $Stage 'Install-Release.ps1'
 & $Installer -PackagePath $Package -PackageSha256 $Variant[0].package_sha256 `
   -ModelArtifactPath $Model -ApiKeyFile $ApiKeyFile -StateRoot $StateRoot `
   -GpuOwnerControllerPath (Join-Path $Stage 'Control-GpuOwner.ps1')
+if ($LASTEXITCODE -ne 0) { throw 'native install failed' }
 ```
 
-Start should return lifecycle JSON with `process_state: "running"`, `task_state: "Running"` and
+The block requires Start to succeed and return lifecycle JSON with
+`process_state: "running"`, `task_state: "Running"` and
 `endpoint_state: "ready"`. The installer stops beta.2 with its own controller, preserves it as
 the previous release, and returns an install receipt with `status: "passed"` and the new
-release ready. Do not proceed if Start throws or the lane is not ready. If the next shutdown
-also refuses, stop and inspect that new refusal; do not bypass it by editing ownership files.
+release ready. The block stops if Start fails, the lane is not ready, or the installer fails.
+If the next shutdown also refuses, stop and inspect that new refusal; do not bypass it by
+editing ownership files.
 Keep all predecessor release, key and checkpoint directories for exact rollback.
 
 ## Shared native operation and fallback

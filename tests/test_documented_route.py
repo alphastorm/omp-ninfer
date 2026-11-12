@@ -1057,6 +1057,42 @@ class WindowsNativeCommandTests(unittest.TestCase):
                         self.run_block(block, set(), prelude),
                         (["controller-" + action for action in expected], failed_call == 0))
 
+    def test_beta2_recovery_requires_successful_ready_start_and_install(self) -> None:
+        block = documented_route.extract(
+            documented_route.DEFAULT_DOC, "Upgrading after a beta.2 incomplete shutdown").text
+        ready = {"process_state": "running", "task_state": "Running", "endpoint_state": "ready"}
+        cases = [
+            ("passed", 0, ready, 0, ["controller-Start", "installer"], True),
+            ("failed Start", 7, ready, 0, ["controller-Start"], False),
+            ("failed installer", 0, ready, 7, ["controller-Start", "installer"], False),
+        ]
+        for field, wrong in (("process_state", "stopped"), ("task_state", "Ready"),
+                             ("endpoint_state", "unavailable")):
+            cases.append((field, 0, {**ready, field: wrong}, 0, ["controller-Start"], False))
+            cases.append((f"missing {field}", 0, {key: value for key, value in ready.items()
+                                                if key != field}, 0, ["controller-Start"], False))
+        for case, start_exit, lifecycle, install_exit, expected, reached in cases:
+            prelude = (
+                "$StateRoot = 'fixture'\n$Stage = 'fixture'\n$Package = 'fixture'\n"
+                "$Model = 'fixture'\n$ApiKeyFile = 'fixture'\n"
+                "$Variant = @([pscustomobject]@{package_sha256='fixture'})\n"
+                "function Join-Path { param($Path, $ChildPath)\n"
+                "  if ($ChildPath -ceq 'Control-Release.ps1') { 'Fixture-Controller' }\n"
+                "  elseif ($ChildPath -ceq 'Install-Release.ps1') { 'Fixture-Installer' }\n"
+                "  else { 'Fixture-GpuOwner' }\n}\n"
+                "function Fixture-Controller { param($Action, $StateRoot)\n"
+                "  Add-Content (\"$PSScriptRoot/calls.txt\") \"controller-$Action\"\n"
+                f"  $global:LASTEXITCODE = {start_exit}\n"
+                f"  '{json.dumps(lifecycle)}'\n"
+                "}\n"
+                "function Fixture-Installer { param($PackagePath, $PackageSha256, $ModelArtifactPath, "
+                "$ApiKeyFile, $StateRoot, $GpuOwnerControllerPath)\n"
+                "  Add-Content (\"$PSScriptRoot/calls.txt\") 'installer'\n"
+                f"  $global:LASTEXITCODE = {install_exit}\n"
+                "}\n")
+            with self.subTest(case=case):
+                self.assertEqual(self.run_block(block, set(), prelude), (expected, reached))
+
 
 @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed to execute the Windows host scripts")
 @unittest.skipIf(os.name == "nt", "the native command stubs are POSIX shell scripts")
