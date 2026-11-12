@@ -9,10 +9,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Close the release verifier and composer gaps in [#149](https://github.com/alphastorm/omp-ninfer/issues/149)
+  ([#157](https://github.com/alphastorm/omp-ninfer/pull/157)): in `scripts/verify_release.py`,
+  `v0.18.0+` `--require-ready` checks reconcile the product-council review commit
+  (`g4_review.product_tooling.stage_commit`) and every route runner clone against the frozen
+  candidate commit, re-derive the `docs/QUICKSTART.md` guide hash and executable block addresses,
+  authenticate native observed client/package records against the candidate manifest, and reject
+  stale runtime-contract lane labels. Historical published receipts retain their original
+  verification contract. `scripts/compose_route_acceptance.py` validates and serializes every
+  public artifact before its first write, and projects captured observations, preparation,
+  restoration, and native failures through explicit public-field allowlists.
+- Admit decision-authorized native byte-identity proofs in `scripts/verify_release.py` and
+  `scripts/bind_native_variant.py --identity-proof`
+  ([#156](https://github.com/alphastorm/omp-ninfer/pull/156),
+  [#157](https://github.com/alphastorm/omp-ninfer/pull/157)): authenticate the packaged native
+  profile and retained ABBA outputs plus the sealed 80-prompt determinism suite
+  (`scripts/speed_gate.py identity-proof`). Restrict identity-first admission to default,
+  non-output-changing profiles, retain mandatory DFlash2 fit evidence, and refuse mismatched
+  output bytes. Decision-scoped speed admission still requires within-engine identity;
+  cross-engine output differences require a bound passing powered screen. Keep the weighted
+  `0.98` and every-case `0.95` no-regression floors.
+- Scan all shipped scripts, including PowerShell, shell, and extensionless helpers, for private
+  markers in `scripts/verify_release.py`, and replace private usage-example literals with public
+  labels and operator examples ([#157](https://github.com/alphastorm/omp-ninfer/pull/157)).
+  `scripts/hosts/run_variant_campaign_5090.ps1` now requires explicit operator `-CampaignRoot`,
+  `-GroupwiseIntModel`, `-Nvfp4Model`, and `-ApiKeyFile` paths (no defaults).
+  `scripts/hosts/run_variant_campaign_3090.ps1` and `scripts/hosts/run_variant_campaign_4090.ps1`
+  likewise require an existing `-GroupwiseIntModel` file path instead of an operator-home default,
+  and `run_variant_campaign_4090.ps1` resolves its documented model ID from the checkout before
+  host work ([#156](https://github.com/alphastorm/omp-ninfer/pull/156)).
+  `scripts/hosts/accept-native-public-install.ps1` requires `-CandidateClone` and `-ClientBinary`
+  to record observed checkout and client provenance.
+- Stamp all existing release-local profile snapshots with the successor runtime, stock client and
+  release-isolated checkpoint store in `scripts/stage_release.py`, including staging without
+  replacement templates; leave root profiles unchanged until lane promotion, then mirror the
+  snapshots byte-for-byte in `scripts/rebind_release.py`. Reconcile Windows client holds with
+  `HoldStatus` and guarded `Release` (`scripts/hosts/accept-windows-client.ps1`,
+  `scripts/hosts/accept-rtx5090-routes.py`) against the same candidate, release, workspace and
+  exclusive ownership token; refuse foreign holds. Receive `scripts/hosts/pscp.py` pulls into a
+  unique verified sibling temporary file and replace the local replica only after every transfer
+  and hash check succeeds
+  ([#156](https://github.com/alphastorm/omp-ninfer/pull/156)).
+- Check `Status`, `Stop`, `Start`, and final `Status` individually in both native `Operate` blocks
+  of `docs/QUICKSTART.md` (`rtx4090-native/operate` and `rtx3090-native/operate`) so a refused
+  `Stop` cannot be masked by a later `Status`
+  ([#155](https://github.com/alphastorm/omp-ninfer/pull/155)).
 - Accept native build-profile variants only when their package receipt and packaged release spec
   select the same profile from the lane allowlist committed at the source revision. Specs without
   an allowlist retain exact profile equality; selected profiles remain visible in native
-  qualification, manifest and compatibility records instead of being replaced by a default.
+  qualification, manifest and compatibility records instead of being replaced by a default
+  ([#158](https://github.com/alphastorm/omp-ninfer/pull/158)).
 - Compare native speed-admission build profiles when both evidence records carry one, while
   always checking both binary and configuration digests. Profile-bearing variants can use their
   bound passing screen; default-profile byte-identity proofs remain admissible, but output-changing
@@ -33,6 +79,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Stage `v0.18.0` from one frozen fork engine commit `F4` (`48c8ac4644322f024b5c3bd5b657af5874567251` in
+  `alphastorm/ninfer` on upstream `64d10fbf`): RTX 5090 `v0.7.0-qwen38-5090-beta.7` (image
+  `ghcr.io/alphastorm/ninfer-runtime@sha256:496195ecd6cf1f50fcd9dc62cf7b51787f599cc2b196e194baf050c4b149e119`, server
+  `804ef8ac6d062dc8da8784ba3f52e5cece2178a5f5bc46cb2c7bc1d3e8937fe3`, isolated host store `checkpoints-v018` mounted at
+  `/checkpoints-v013`), rebuilt native Windows RTX 4090 `v0.8.0-qwen38-4090-beta.3` (package
+  `ac41700ac2bb9fb171188f35e73481cfd9f1140c5781320b1e6304ee760d7166`, server `a5266ae676305cc56086df6d3b8dc8968be110b3cf0eb7b18147adafc2f66d22`, build profile
+  `native-v0.8.0-beta.3-rtx4090`), rebuilt native Windows RTX 3090
+  `v0.8.0-qwen38-3090-beta.3` (package `bf1ceaa9eb522a8c8d9372bec475d6e4e4666e6a995302cd20035e80ae3e5edd`, server
+  `e571328699be41d90eff8743d94da26e8f587e48bc32f618013625af7ad0bfe0`, build profile `native-v0.8.0-beta.3-tc-rtx3090`), and
+  unmodified upstream Oh My Pi **18.18.7** (`e325ffc73ab86e03bdd20a91b77d8e2b3964c906`, tree
+  `9ba2abe1f1dd7c64b8d3f99dc0e41d689d96886c`, release `440868478`) with unchanged container version
+  3 model `81f924d4` (`20,437,521,664` bytes). `F4` adds Device-staged durable checkpoint saves
+  without Host-arena room ([fork #89](https://github.com/alphastorm/ninfer/issues/89), folding
+  [#84](https://github.com/alphastorm/ninfer/issues/84);
+  [PR #109](https://github.com/alphastorm/ninfer/pull/109) `3213508fe`), off-worker export/import
+  prepares held to an operation-free boundary with budget-free `>= 100 ms`-spaced pressure-busy
+  retries ([PR #111](https://github.com/alphastorm/ninfer/pull/111) `33088ad2c`), bounded `K = 4`
+  fresh-admission priority at context-operation boundaries
+  ([fork #102](https://github.com/alphastorm/ninfer/issues/102);
+  [PR #108](https://github.com/alphastorm/ninfer/pull/108) `6ec05f211`), native controller
+  GPU-owner lease restoration on a refused `Stop`, removal postconditions, junction containment,
+  exact-byte package archiving, and the four-key `beta.3` variant allowlist
+  ([PR #107](https://github.com/alphastorm/ninfer/pull/107) `2454c0629`,
+  [#91](https://github.com/alphastorm/ninfer/pull/91),
+  [#87](https://github.com/alphastorm/ninfer/issues/87),
+  [#90](https://github.com/alphastorm/ninfer/issues/90)), upstream malformed tool-history vectors
+  ([PR #106](https://github.com/alphastorm/ninfer/pull/106) `92209112`), and the `Group64` `A8`
+  build-profile configure guard and Apache-2.0 attribution
+  ([PR #112](https://github.com/alphastorm/ninfer/pull/112) `fd95455df`). Variant-dependent
+  dispositions (keep one option per axis at staging):
+  tensor-core verify is in F4, enabled only by the RTX 3090 tc profile;
+  selected native profiles are bound by the release selection decision;
+  pacing stays default-off after failing 3 of 6 preregistered bars.
+  See the [release notes](releases/v0.18.0/NINFER_RELEASE_NOTES.md) for evidence and dispositions.
+  `sm_120` `Group64` `A8` prefill ([PR #105](https://github.com/alphastorm/ninfer/pull/105)
+  `93348eb9`, `K1` prefill-speed prescreen kill at `0.784860×` / `0.983623×`) and restricted copy
+  drafting (`+5.24%` to `+10.12%`, below the `+15%` session-decode bar) are excluded. Stock OMP
+  `18.18.7` changes the Windows `bash` tool description sent to the model when `bash` is advertised
+  (not separately probed by `scripts/hosts/omp-client-probe.py`'s `--tools read` `omp` invocation
+  beyond the `31`-block route acceptance), the request-level HTTP `503` half of `#89` did not
+  reproduce on the proxy host and awaits the RTX 3090 acceptance run
+  (candidate-bound result in the [release notes](releases/v0.18.0/NINFER_RELEASE_NOTES.md)), and the
+  [Neroued/ninfer#434](https://github.com/Neroued/ninfer/issues/434) per-rotation fresh-window
+  consumption when a pressure save is pending (`checkpoints_.pending()`) or no lane is free remains
+  recorded in [fork #103](https://github.com/alphastorm/ninfer/issues/103). Component cuts,
+  hardware qualification, five-route (`31`-block) and three-client-platform acceptance, review
+  councils, immutable pins, and founder-owned publication remain pending (staged notes path
+  `releases/v0.18.0/NINFER_RELEASE_NOTES.md`).
 - Mark v0.17.0 as the published release across the README, quickstart banner, facts, roadmap,
   release history, upstream watch, reference docs, site, and brand assets; front-door install links
   return to the guide on `main`.
@@ -51,6 +145,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Documentation
 
+- Review stock Oh My Pi `18.18.6 → 18.18.7` (`e325ffc73ab86e03bdd20a91b77d8e2b3964c906`, `64`
+  commits / `145` changed paths, release `440868478`) and verify all three raw platform binaries and
+  `SHA256SUMS.txt` (`9a33908b`) in
+  [`docs/measurements/2026-11-11-omp-18187-client-upgrade-review.json`](docs/measurements/2026-11-11-omp-18187-client-upgrade-review.json)
+  ([#154](https://github.com/alphastorm/omp-ninfer/pull/154)).
+- Record the 2026-11-11 upstream `Neroued/ninfer` `77c2e5e2..13ebb92f6` (`33` commits), community
+  fork (`iamwavecut/ninfer-all` `8412e774..64bd1115`, `ashalliants/ninfer-3090` branches), stock OMP
+  `v18.18.7` (`e325ffc7`), model census, and external-research watch in
+  [`docs/UPSTREAM.md`](docs/UPSTREAM.md), [`ROADMAP.md`](ROADMAP.md), and
+  [`upstream-watch.json`](upstream-watch.json)
+  ([#159](https://github.com/alphastorm/omp-ninfer/pull/159)).
+  This research does not change the pinned runtime source.
 - Record the 2026-11-10 overnight measurement campaign (`EXP-110`–`EXP-121` and council
   [`CR-20261110T083627Z-a3fa0550`](releases/v0.17.0/review/runtime-ledger.json) localized remediation) in
   [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md), [`ROADMAP.md`](ROADMAP.md), and

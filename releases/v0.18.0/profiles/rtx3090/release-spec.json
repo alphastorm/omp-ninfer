@@ -1,0 +1,143 @@
+{
+  "artifact_type": "ninfer_windows_release_spec",
+  "schema_version": 5,
+  "lane": "rtx3090",
+  "release_id": "qwen38-3090-native-v0.8.0-beta.3",
+  "release_version": "0.8.0-beta.3",
+  "deployment_profile": "qwen38-3090-native-v0.8.0-beta.3",
+  "build_profile": "native-v0.8.0-beta.3-tc-rtx3090",
+  "build_profiles": {
+    "default": "native-v0.8.0-beta.3-rtx3090",
+    "a8": "native-v0.8.0-beta.3-a8-rtx3090",
+    "tc": "native-v0.8.0-beta.3-tc-rtx3090",
+    "tc-a8": "native-v0.8.0-beta.3-tc-a8-rtx3090"
+  },
+  "platform": "windows-x86_64-cuda13.3-rtx3090",
+  "product_prefix": "ninfer-rtx3090-native",
+  "runtime_shape": {
+    "max_concurrency": 2,
+    "speculative_backend": "dflash2",
+    "draft_tokens": {
+      "min": 7,
+      "max": 7
+    },
+    "proposal": "artifact-default",
+    "fit": {
+      "device_state_slots": 2,
+      "admission_headroom_mib": 768,
+      "draft_mlp_device_format": "Q4_G64_FP16",
+      "token_embedding_residency": "host-mapped"
+    }
+  },
+  "gpu": {
+    "name": "NVIDIA GeForce RTX 3090",
+    "class": "rtx-3090",
+    "cuda_architecture": "sm_86",
+    "cmake_cuda_architecture": "86",
+    "compute_capability": "8.6",
+    "minimum_driver_major": 570
+  },
+  "source": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "upstream_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "lineage_base_sha": "752dd887be6a9cdb2da6217f3b664b3c03ed33ae",
+    "release_head_binding": "exact-descendant-supplied-at-package-build"
+  },
+  "model": {
+    "repository": "neroued/Qwen3.8-27B-NInfer",
+    "revision": "1cbd84e7221e51186bd7f093a149912d2489625b",
+    "filename": "qwen3_8_27b.ninfer",
+    "sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "bytes": 20437521664,
+    "format_version": 3
+  },
+  "host_context_translation": {
+    "predecessor_host_kv_mib": 16384,
+    "predecessor_host_state_slots": 24,
+    "native_state_image_bytes": 195897344,
+    "host_context_bytes": 21881405440
+  },
+  "package_identity": {
+    "binding": "supplied-by-New-Package.ps1",
+    "required_receipt_fields": [
+      "package.filename",
+      "package.sha256",
+      "package.bytes",
+      "checksums.filename",
+      "checksums.sha256"
+    ]
+  },
+  "network": {
+    "allowed_listen_host_classes": [
+      "loopback",
+      "tailscale-ipv4"
+    ],
+    "authentication": "required-api-key-file",
+    "cors": false
+  },
+  "lifecycle": {
+    "task_name": "NInfer-Qwen38-3090-Native",
+    "state_root_name": "qwen38-3090-native",
+    "listen_port": 18082,
+    "installation_scope": "isolated-version-root",
+    "candidate_root_directories": [
+      "bin",
+      "config",
+      "logs",
+      "receipts"
+    ],
+    "model_artifact_ownership": "external-pinned-read-only",
+    "cache_ownership": "state-root-per-release",
+    "interrupted_install_reentry": "repair-required",
+    "task_start_mode": "explicit-on-demand",
+    "managed_stop": "stop-event",
+    "graceful_stop_timeout_seconds": 900,
+    "state_pointers": [
+      "prepared_release",
+      "active_release",
+      "previous_release"
+    ],
+    "gpu_owner_controller_protocol": {
+      "required_on_first_install": true,
+      "bundled_default": "Control-GpuOwner.ps1",
+      "state_protection_helper": "Protect-StateRoot.ps1",
+      "qualified_power_limit_w": 350,
+      "owner_power_limit_w": 370,
+      "prior_power_limit_range_w": [
+        100,
+        390
+      ],
+      "managed_power_envelope_w": 351,
+      "interactive_gpu_memory_threshold_bytes": 1073741824,
+      "inherited_on_upgrade": true,
+      "actions": [
+        "status",
+        "stop",
+        "start"
+      ],
+      "status_paused_field": "paused",
+      "installation": "managed-copy-with-sha256"
+    },
+    "production_route_mutation": false,
+    "container_runtime_mutation": false,
+    "gaming_process_mutation": false
+  },
+  "qualification": {
+    "status": "hardware-pending",
+    "status_authority": "immutable-pre-hardware-package-build",
+    "summary_artifact_type": "ninfer_native_qualification_summary",
+    "required_gates": [
+      "neutral-deterministic-build",
+      "private-marker-scan",
+      "deterministic-package",
+      "clean-and-managed-install",
+      "authenticated-real-client-protocol",
+      "advertised-context-retrieval",
+      "process-restart-session-continuation",
+      "state-security",
+      "omp-client-end-to-end",
+      "bounded-gpu-performance-at-qualified-cap",
+      "owner-state-restoration"
+    ]
+  }
+}

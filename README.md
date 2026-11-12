@@ -144,6 +144,72 @@ Everything else: [release notes](releases/v0.17.0/NINFER_RELEASE_NOTES.md) ·
 Native owners staying on `v0.10.0` keep the
 [v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md).
 
+### Next on main — prepared v0.18.0
+
+**Prepared next: v0.18.0 / stock OMP 18.18.7.** Re-cuts all three GPU runtime
+lanes from one frozen fork engine commit `F4` (`48c8ac4644322f024b5c3bd5b657af5874567251` in `alphastorm/ninfer` on
+upstream `64d10fbf`): RTX 5090 `v0.7.0-qwen38-5090-beta.7` (image
+`ghcr.io/alphastorm/ninfer-runtime@sha256:496195ecd6cf1f50fcd9dc62cf7b51787f599cc2b196e194baf050c4b149e119`, server
+`804ef8ac6d062dc8da8784ba3f52e5cece2178a5f5bc46cb2c7bc1d3e8937fe3`, isolated host checkpoint directory `checkpoints-v018` mounted at
+container path `/checkpoints-v013`), native Windows RTX 4090 `v0.8.0-qwen38-4090-beta.3` (package
+`ac41700ac2bb9fb171188f35e73481cfd9f1140c5781320b1e6304ee760d7166`, server `a5266ae676305cc56086df6d3b8dc8968be110b3cf0eb7b18147adafc2f66d22`, build profile
+`native-v0.8.0-beta.3-rtx4090`), and native Windows RTX 3090 `v0.8.0-qwen38-3090-beta.3`
+(package `bf1ceaa9eb522a8c8d9372bec475d6e4e4666e6a995302cd20035e80ae3e5edd`, server `e571328699be41d90eff8743d94da26e8f587e48bc32f618013625af7ad0bfe0`, build
+profile `native-v0.8.0-beta.3-tc-rtx3090`), with unmodified upstream
+[Oh My Pi v18.18.7](https://github.com/can1357/oh-my-pi/releases/tag/v18.18.7)
+(`e325ffc73ab86e03bdd20a91b77d8e2b3964c906`, release `440868478`) and the unchanged
+`20,437,521,664`-byte Qwen3.8 27B container version 3 model (`81f924d4`).
+
+- **Engine changes (`F4`):** Device-staged durable checkpoint saves when the Host arena is full
+  ([fork #89](https://github.com/alphastorm/ninfer/issues/89), folding
+  [#84](https://github.com/alphastorm/ninfer/issues/84);
+  [PR #109](https://github.com/alphastorm/ninfer/pull/109) `3213508fe`), off-worker export/import
+  prepares held to an operation-free boundary with budget-free `>= 100 ms`-spaced pressure-busy
+  retries ([PR #111](https://github.com/alphastorm/ninfer/pull/111) `33088ad2c`), bounded `K = 4`
+  fresh-admission priority at context-operation boundaries
+  ([fork #102](https://github.com/alphastorm/ninfer/issues/102);
+  [PR #108](https://github.com/alphastorm/ninfer/pull/108) `6ec05f211`), native controller
+  GPU-owner lease restoration on a refused `Stop`, removal postconditions, junction containment,
+  exact-byte package archiving, and the four-key `beta.3` variant allowlist
+  ([PR #107](https://github.com/alphastorm/ninfer/pull/107) `2454c0629`,
+  [#91](https://github.com/alphastorm/ninfer/pull/91),
+  [#87](https://github.com/alphastorm/ninfer/issues/87),
+  [#90](https://github.com/alphastorm/ninfer/issues/90)), upstream malformed tool-history
+  regression vectors ([PR #106](https://github.com/alphastorm/ninfer/pull/106) `92209112`), and the
+  `Group64` `A8` build-profile configure guard and Apache-2.0 kernel attribution
+  ([PR #112](https://github.com/alphastorm/ninfer/pull/112) `fd95455df`).
+- **Variant-dependent selections (release stage keeps only the selected option per axis):**
+  - Native `sm_86`/`sm_89` small-T tensor-core verify ([PR #104](https://github.com/alphastorm/ninfer/pull/104),
+    `T=8/16`) is in `F4`, enabled only by the RTX 3090 `tc` profile
+    ([release notes](releases/v0.18.0/NINFER_RELEASE_NOTES.md)).
+  - Selected native profiles `native-v0.8.0-beta.3-tc-rtx3090` (RTX 3090) and
+    `native-v0.8.0-beta.3-rtx4090` (RTX 4090) ship under the bound selection decision and a
+    passing `1,120`-prompt `EXP-085` quality screen
+    ([release notes](releases/v0.18.0/NINFER_RELEASE_NOTES.md)).
+  - RTX 5090 cadence-only prefill pacing stays default-off (`--prefill-stall-budget-ms 0
+    --decode-rounds-per-prefill 0`) in `qwen38-5090-v0.13.0` (configuration SHA-256 `751d22dc`)
+    after failing 3 of 6 preregistered bars
+    ([release notes](releases/v0.18.0/NINFER_RELEASE_NOTES.md)).
+- **Excluded candidates and disclosed residuals:** `sm_120` `Group64` `A8` prefill
+  ([PR #105](https://github.com/alphastorm/ninfer/pull/105) `93348eb9`, closed unmerged) was killed
+  at the `K1` cold-L2 prefill-speed prescreen (`0.784860×` at `512`-token pass width and `0.983623×`
+  at `1,024`-token pass width, below the `1.00×` kill bar); restricted tool-argument copy drafting
+  (`+5.24%` to `+10.12%` across `2,998` turns, below the `+15%` session-decode bar) is not shipped.
+  On Windows, stock OMP `18.18.7` changes the `bash` tool description sent to the model when `bash`
+  is advertised; `scripts/hosts/omp-client-probe.py` invokes `omp` with `--tools read` and does not
+  separately probe `bash` or `edit` beyond the `31`-block route acceptance
+  ([18.18.7 review](docs/measurements/2026-11-11-omp-18187-client-upgrade-review.json)). The
+  request-level HTTP `503` half of `#89` did not reproduce on the proxy host (`3` fixtures) and is
+  settled only by the RTX 3090 acceptance run (**pending**; [release notes](releases/v0.18.0/NINFER_RELEASE_NOTES.md));
+  the [Neroued/ninfer#434](https://github.com/Neroued/ninfer/issues/434) per-rotation fresh-window
+  consumption when a pressure save is pending (`checkpoints_.pending()`) or no lane is free remains
+  tracked in [fork #103](https://github.com/alphastorm/ninfer/issues/103). Component cuts,
+  qualification receipts, five-route (`31`-block) and three-client-platform acceptance, review
+  councils, immutable pins, and founder-owned publication are pending (staged notes path
+  `releases/v0.18.0/NINFER_RELEASE_NOTES.md`).
+  Published install authority stays `v0.17.0`
+  ([immutable v0.17.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.17.0/docs/QUICKSTART.md)).
+
 ## How it works
 
 ![How OMP NInfer works. Oh My Pi, the coding-agent client, owns the truth: transcript, tools, branches, and replay, written to disk before provider state advances. An authenticated loopback route (127.0.0.1, bearer token) connects it to NInfer, the inference engine on your GPU, which owns the continuation: Qwen3.8 27B and the session's Responses state stay resident, checkpointed to local disk. OMP NInfer is the qualified release: one manifest pins client, runtime, model, and profile. When the server restarts, the session resumes from its checkpoint (best effort; same runtime, model, profile, and credentials). With no usable checkpoint, Oh My Pi replays the transcript: a fresh prefill, never a broken session. When the GPU is unreachable, the turn fails and is never answered by a cloud model.](assets/architecture.png)

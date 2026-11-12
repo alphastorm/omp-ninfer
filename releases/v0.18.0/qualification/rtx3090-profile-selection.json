@@ -1,0 +1,24 @@
+{
+  "record": "P21 RTX 3090 native variant decision (lead)",
+  "recorded_utc": "2026-11-11T12:30:00Z",
+  "rule": "PLAN.md \u00a713a (preregistered 05:16Z, before native preview data): tensor-core eligible = six FP64 oracles + role-84 prescreen weighted decode >= 1.15 + the two-request check; tc-a8 only with a running A8 estimate whose leak-ratio bound is <= 1.05, else tc; the formal 1,120-prompt arm runs the 504 binding prompts first and stops on a failed secret-leak ratio or redaction bound, falling back to the default package.",
+  "decision": "tc",
+  "lane": "rtx3090",
+  "source_commit": "48c8ac4644322f024b5c3bd5b657af5874567251",
+  "build_profile": "native-v0.8.0-beta.3-tc-rtx3090",
+  "candidate": {
+    "package_sha256": "bf1ceaa9eb522a8c8d9372bec475d6e4e4666e6a995302cd20035e80ae3e5edd",
+    "server_binary_sha256": "e571328699be41d90eff8743d94da26e8f587e48bc32f618013625af7ad0bfe0",
+    "configuration_sha256": "674d52609e22de54a5db20001e25fdd97cd600d498551ecfe48efa53964fc3ac",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+  },
+  "evidence": {
+    "fp64_oracles": "lanes/SFN/queue-results/tc-86-d534923c-stats-r2-fp64-oracles/verdict.json: 6/6 PASS, 4,351 reduction rows, worst rel-L2/limit 0.964, gross/limit 0.935 (tensor-core preview d534923c; kernel source unchanged in F4)",
+    "prescreen": "lanes/SFN/queue-results/tc-86-d534923c-stats-r2-tc-prescreen/verdict.json: weighted decode 1.5365362118x (100.92 -> 155.07 tok/s), minimum case 1.3496x, within-engine repeats identical 84/84 + 84/84, cross-engine outputs differ 49/84 (disclosed)",
+    "two_request_check": "lanes/SFN/queue-results/tc-86-48c8ac46-c2/verdict.json: PASS on the shipping F4 tc package, aggregate ratio 1.6533x, 16 verify columns, 134.24 vs 81.20 tok/s for the request pair; first installer-path proof for the shipping package. The earlier preview C2 attempt failed at installer profile validation (preview metadata defect), not on the measurement.",
+    "a8": "no running A8 estimate exists (the advisory A8 Stage 1 never ran), so tc-a8 cannot be chosen under \u00a713a; the corrected A8 confirm stays deferred",
+    "default_fallback": "lanes/SFN/queue-results/default-86-48c8ac46-identity-probe/verdict.json: F4 default package byte-identical to sealed beta.2 on 84/84 speed cases + 80/80 determinism prompts; it remains the fallback through the identity-first path"
+  },
+  "next": "RTX 4090 RC identity, then the formal arm on the tc package per lanes/SFN/FINAL-GATES-REGISTRATION.md; at the 504-control checkpoint the lead reads the secret-leak ratio upper bound (< 1.10) and redaction-difference lower bound (> -0.05): both pass -> continue to the full EXP-085 verdict; either fails -> stop and ship the default package (branch B of lanes/SFN/POST-DECISION-SCHEDULE.md).",
+  "schedule_consequence": "branch A native pre-cut gates end about E+16h34m (about 04:30Z 12 Nov, planning 05:32Z) versus about 21:30Z for the default branch; accepted by the lead under the founder's train `max` (tc decode 1.54x role-84, 1.65x at two requests)."
+}

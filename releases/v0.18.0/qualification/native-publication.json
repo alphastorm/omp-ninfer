@@ -1,0 +1,173 @@
+{
+  "artifact_type": "omp_ninfer_native_component_publication",
+  "schema_version": 1,
+  "release": "v0.18.0",
+  "as_of": "2026-11-12",
+  "status": "passed",
+  "identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "source_commit": "48c8ac4644322f024b5c3bd5b657af5874567251",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+  },
+  "lanes": [
+    {
+      "lane": "rtx3090",
+      "component_tag": "v0.8.0-qwen38-3090-beta.3",
+      "tag_commit": "48c8ac4644322f024b5c3bd5b657af5874567251",
+      "source_commit": "48c8ac4644322f024b5c3bd5b657af5874567251",
+      "build_profile": "native-v0.8.0-beta.3-tc-rtx3090",
+      "published": true,
+      "published_at": "2026-11-12T04:40:48Z",
+      "authenticated_at_utc": "2026-11-12T04:40:58Z",
+      "publication_evidence_class": "anonymous-public-byte-downloads-and-matching-github-asset-digests",
+      "release_url": "https://github.com/alphastorm/ninfer/releases/tag/v0.8.0-qwen38-3090-beta.3",
+      "outer_checksums_sha256": "74d33ed824008e5279b9ad2709a56e95e92d99b700c1c39b06026b90ef9c29e9",
+      "outer_hashed_entries": 10,
+      "total_distribution_files": 11,
+      "assets": [
+        {
+          "name": "Control-GpuOwner.ps1",
+          "sha256": "432f06a8e97743e46b1b7d9285e68d4bc361a93d5f25badeaa7c713f147f3334",
+          "bytes": 17391
+        },
+        {
+          "name": "Control-Release.ps1",
+          "sha256": "159fba12c85adf4963d271a80c4fb7d3527e2b9043e64e74c43d4981336b1ce3",
+          "bytes": 77843
+        },
+        {
+          "name": "Install-Release.ps1",
+          "sha256": "2eedd45d9eab069a755d969ddba0c7f2b309470ec55d41859f4e76b09bb74e4d",
+          "bytes": 88913
+        },
+        {
+          "name": "Protect-StateRoot.ps1",
+          "sha256": "baaea4e29cf48ab80ed2fd08935e3e75ec4be119fa77058a03c8b2f739a1c5b8",
+          "bytes": 16952
+        },
+        {
+          "name": "ninfer-rtx3090-native-v0.8.0-beta.3-source.tar.gz",
+          "sha256": "eac24f8ea03cf0a309ec2a879eed7333569d027d78a577680a915459cfe73986",
+          "bytes": 12577750
+        },
+        {
+          "name": "ninfer-rtx3090-native-v0.8.0-beta.3-windows-x86_64-cuda13.3-rtx3090.SHA256SUMS",
+          "sha256": "75a5f6b781271c2c76a036d09e667140c062f307304cfea5c1a4418813668a44",
+          "bytes": 404
+        },
+        {
+          "name": "ninfer-rtx3090-native-v0.8.0-beta.3-windows-x86_64-cuda13.3-rtx3090.cdx.json",
+          "sha256": "269941ecea0ddcfa5d6fa9d3c0ce3b186428c476e2eda4d25d0fb9c7f6d41f21",
+          "bytes": 31203
+        },
+        {
+          "name": "ninfer-rtx3090-native-v0.8.0-beta.3-windows-x86_64-cuda13.3-rtx3090.spdx.json",
+          "sha256": "8ac165c5a492406f9c2943f1ed7ed3c22da818c8aee75803d4eca341227f628c",
+          "bytes": 34269
+        },
+        {
+          "name": "ninfer-rtx3090-native-v0.8.0-beta.3-windows-x86_64-cuda13.3-rtx3090.tar.gz",
+          "sha256": "bf1ceaa9eb522a8c8d9372bec475d6e4e4666e6a995302cd20035e80ae3e5edd",
+          "bytes": 1011087765
+        },
+        {
+          "name": "package-build-receipt.json",
+          "sha256": "181a6166a775e8111278e47eb72073fb02c31dd6a05d2b34d592ae2df62a528c",
+          "bytes": 4508
+        }
+      ],
+      "checksums_asset": {
+        "name": "SHA256SUMS",
+        "sha256": "74d33ed824008e5279b9ad2709a56e95e92d99b700c1c39b06026b90ef9c29e9",
+        "bytes": 1129
+      },
+      "actual_hardware_qualification": {
+        "repository_path": "releases/v0.18.0/qualification/rtx3090.json",
+        "sha256": "e7ac3ab730664a07529572070d4aba1c8ba2c080d04ffe9b2b0d9c7925f2170d"
+      },
+      "public_package_executed_during_qualification": false,
+      "scope": "Authenticates published selected component bytes and the separately bound pre-cut hardware receipt; no product-route acceptance or publication authority."
+    },
+    {
+      "lane": "rtx4090",
+      "component_tag": "v0.8.0-qwen38-4090-beta.3",
+      "tag_commit": "48c8ac4644322f024b5c3bd5b657af5874567251",
+      "source_commit": "48c8ac4644322f024b5c3bd5b657af5874567251",
+      "build_profile": "native-v0.8.0-beta.3-rtx4090",
+      "published": true,
+      "published_at": "2026-11-12T10:56:05Z",
+      "authenticated_at_utc": "2026-11-12T10:56:19Z",
+      "publication_evidence_class": "anonymous-public-byte-downloads-and-matching-github-asset-digests",
+      "release_url": "https://github.com/alphastorm/ninfer/releases/tag/v0.8.0-qwen38-4090-beta.3",
+      "outer_checksums_sha256": "8d18d8facc27ef3dc69236efd410d003adf1953716cc4b797381baa706c425b4",
+      "outer_hashed_entries": 10,
+      "total_distribution_files": 11,
+      "assets": [
+        {
+          "name": "Control-GpuOwner.ps1",
+          "sha256": "432f06a8e97743e46b1b7d9285e68d4bc361a93d5f25badeaa7c713f147f3334",
+          "bytes": 17391
+        },
+        {
+          "name": "Control-Release.ps1",
+          "sha256": "159fba12c85adf4963d271a80c4fb7d3527e2b9043e64e74c43d4981336b1ce3",
+          "bytes": 77843
+        },
+        {
+          "name": "Install-Release.ps1",
+          "sha256": "2eedd45d9eab069a755d969ddba0c7f2b309470ec55d41859f4e76b09bb74e4d",
+          "bytes": 88913
+        },
+        {
+          "name": "Protect-StateRoot.ps1",
+          "sha256": "baaea4e29cf48ab80ed2fd08935e3e75ec4be119fa77058a03c8b2f739a1c5b8",
+          "bytes": 16952
+        },
+        {
+          "name": "ninfer-rtx4090-native-v0.8.0-beta.3-source.tar.gz",
+          "sha256": "21cf306d1781c31a7b660a8ecc8c845b85176cc80c1a04a4fb9b9820fdb831a7",
+          "bytes": 12577731
+        },
+        {
+          "name": "ninfer-rtx4090-native-v0.8.0-beta.3-windows-x86_64-cuda13.3-rtx4090.SHA256SUMS",
+          "sha256": "6b641aedd22e7ce5ff5df156e562295b714814bd58bb4c73a96e70783bb2114d",
+          "bytes": 404
+        },
+        {
+          "name": "ninfer-rtx4090-native-v0.8.0-beta.3-windows-x86_64-cuda13.3-rtx4090.cdx.json",
+          "sha256": "60a1d35df6d328a9699a223d7bb8e19a3067967e80f6965f5e4278f72486df85",
+          "bytes": 31203
+        },
+        {
+          "name": "ninfer-rtx4090-native-v0.8.0-beta.3-windows-x86_64-cuda13.3-rtx4090.spdx.json",
+          "sha256": "4ad1f5e8fcd610f2a7246e8284b8eb7870c4ec62a587f938d9bdfb564ae49a70",
+          "bytes": 34269
+        },
+        {
+          "name": "ninfer-rtx4090-native-v0.8.0-beta.3-windows-x86_64-cuda13.3-rtx4090.tar.gz",
+          "sha256": "ac41700ac2bb9fb171188f35e73481cfd9f1140c5781320b1e6304ee760d7166",
+          "bytes": 992131123
+        },
+        {
+          "name": "package-build-receipt.json",
+          "sha256": "1d72da4ee7d93dae00449798e48abefc18a2f27a9ad603c5c3a3c51ff1765ebc",
+          "bytes": 4504
+        }
+      ],
+      "checksums_asset": {
+        "name": "SHA256SUMS",
+        "sha256": "8d18d8facc27ef3dc69236efd410d003adf1953716cc4b797381baa706c425b4",
+        "bytes": 1129
+      },
+      "actual_hardware_qualification": {
+        "repository_path": "releases/v0.18.0/qualification/rtx4090.json",
+        "sha256": "165999b96f2f8cb1245b043f1c5256dfab94b65d224fa6ac866edbd5c2fff2d7"
+      },
+      "public_package_executed_during_qualification": false,
+      "scope": "Authenticates published selected component bytes and the separately bound pre-cut hardware receipt; no product-route acceptance or publication authority."
+    }
+  ],
+  "publication_authorized_by_this_receipt": false,
+  "product_publication_authorized": false
+}

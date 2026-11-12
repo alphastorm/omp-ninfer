@@ -1,0 +1,76 @@
+{
+  "artifact_type": "omp_ninfer_native_upgrade_projection",
+  "schema_version": 1,
+  "release": "v0.18.0",
+  "lane": "rtx4090",
+  "status": "passed",
+  "subject": {
+    "source_commit": "48c8ac4644322f024b5c3bd5b657af5874567251",
+    "component_tag": "v0.8.0-qwen38-4090-beta.3",
+    "build_profile": "native-v0.8.0-beta.3-rtx4090",
+    "package_sha256": "ac41700ac2bb9fb171188f35e73481cfd9f1140c5781320b1e6304ee760d7166",
+    "server_binary_sha256": "a5266ae676305cc56086df6d3b8dc8968be110b3cf0eb7b18147adafc2f66d22",
+    "configuration_sha256": "b71a2cff25d671703106474d86fe6a808dc803db28703b6fd7740013fcfee278",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+  },
+  "incumbent": {
+    "source_commit": "a87de3613c17bced777b446fb545f872d8395ec1",
+    "component_tag": "v0.8.0-qwen38-4090-beta.2",
+    "build_profile": "incumbent",
+    "package_sha256": "d9b10b47f1e7fad8413dc95347dbdd11d91636aec11552c29c1dc94246ca6d5b",
+    "server_binary_sha256": "ffee91bf17c261ae9b85791fc52528f7f1ef5c985c4d55feb7ee65174c96c73d",
+    "configuration_sha256": "ae27dc446634048cec913fd42efc5971fb0ad950eed154ecce6aaa981eec4c9b",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+  },
+  "scenarios": {
+    "running": {
+      "status": "passed",
+      "restored": true,
+      "canonical_state_unchanged": true,
+      "restored_power_w": 450.0,
+      "owned_process_count": 0,
+      "forced_containment": false,
+      "cleanup_errors": [],
+      "supervisor_sha256": "96758db597e56e56aa621ee11566e5267245448e373f6f866ad4a09a9c38aadf",
+      "archive_sha256": "f2817e2f3406006a5c29a6be8d03ab8faf382fe505529850dc4725869e8439ae",
+      "archive_seal_sha256": "7c41c9d23e34e0d9f8ca577005522b6310eb502ac7feedca8e50d2d4af1def39"
+    },
+    "rollback": {
+      "status": "passed",
+      "restored": true,
+      "canonical_state_unchanged": true,
+      "restored_power_w": 450.0,
+      "owned_process_count": 0,
+      "forced_containment": false,
+      "cleanup_errors": [],
+      "supervisor_sha256": "2e4de798b0e9c5d798a7787c7df1ce89f26f0b7a91fb6cb6f1941ebdcd033d0f",
+      "archive_sha256": "d235039ec17c85b4bbb7eacb68ef1a4ba807780445056208254017f72ad41dff",
+      "archive_seal_sha256": "42f03cdec48be548df5dbb3e4adeb093c6a5ab6c8cc3f78a8b98398c759e64b6"
+    },
+    "repair": {
+      "status": "passed",
+      "restored": true,
+      "canonical_state_unchanged": true,
+      "restored_power_w": 450.0,
+      "owned_process_count": 0,
+      "forced_containment": false,
+      "cleanup_errors": [],
+      "supervisor_sha256": "9ac825a7c2f5c7d2796ae92b2997d0a42a47807a3a6d08aa597b60488b7deba2",
+      "archive_sha256": "914fd45b8c71eab667b64e2fa2b0a46df8682e07bdd68753e4d62ada2d09c0ce",
+      "archive_seal_sha256": "94589c0a8336d9fc05b925b5d61745134a8fb12a5f9199b019865293d8344f56"
+    }
+  },
+  "provenance": {
+    "evidence_name": "tail-upgrades-terminal.json",
+    "evidence_sha256": "0ffa889b52afc19555f1bfe1d220c802434a8ddef82cf5fa93e1743e76dfa6fa",
+    "source_commit": "48c8ac4644322f024b5c3bd5b657af5874567251",
+    "evidence_archive_sha256": {
+      "running": "f2817e2f3406006a5c29a6be8d03ab8faf382fe505529850dc4725869e8439ae",
+      "rollback": "d235039ec17c85b4bbb7eacb68ef1a4ba807780445056208254017f72ad41dff",
+      "repair": "914fd45b8c71eab667b64e2fa2b0a46df8682e07bdd68753e4d62ada2d09c0ce"
+    }
+  },
+  "scope": "v0.8.0-qwen38-4090-beta.3 against the published beta.2 predecessor; running upgrade, forced-start rollback and interrupted-install repair. Not product-route acceptance.",
+  "publication_authorized": false,
+  "external_installation_qualified": false
+}
