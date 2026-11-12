@@ -2,16 +2,16 @@
 # Compatibility matrix
 
 Authority: `omp-ninfer-v0.7.3-qualified-1`
-Product release: `v0.17.0`
-Composition: **qualified**
+Product release: `v0.18.0`
+Composition: **v0.18.0 upstream OMP v18.18.7 client acceptance pending**
 
 Client status is independent from each GPU runtime qualification. `preview` is not a support claim.
 
 | Profile | Client | Runtime | Transport | Adapter | Status | Installable | Acceptance |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `darwin-remote-ssh` | macOS 27 arm64 — upstream `v18.18.6` [`omp-darwin-arm64`](https://github.com/can1357/oh-my-pi/releases/download/v18.18.6/omp-darwin-arm64) (sha256 `ed2e63eb4388`) | `qwen38-5090-v0.13.0` | `ssh-loopback` | `darwin-remote-ssh` | **preview** | no | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/45eccbb0b0b02849d9920e2f0f21301a27e38d2b/releases/v0.17.0/acceptance/darwin-arm64-18.18.6.json) |
-| `windows-docker-local` | Windows 11 x64 — upstream `v18.18.6` [`omp-windows-x64.exe`](https://github.com/can1357/oh-my-pi/releases/download/v18.18.6/omp-windows-x64.exe) (sha256 `dfb15c27cb2e`) | `qwen38-5090-v0.13.0` | `local-loopback` | `windows-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/45eccbb0b0b02849d9920e2f0f21301a27e38d2b/releases/v0.17.0/acceptance/windows-x64-18.18.6.json) |
-| `linux-docker-local` | Linux under WSL2 x64 — upstream `v18.18.6` [`omp-linux-x64`](https://github.com/can1357/oh-my-pi/releases/download/v18.18.6/omp-linux-x64) (sha256 `a8059b95de5e`) | `qwen38-5090-v0.13.0` | `local-loopback` | `linux-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/45eccbb0b0b02849d9920e2f0f21301a27e38d2b/releases/v0.17.0/acceptance/linux-x64-18.18.6.json) |
+| `darwin-remote-ssh` | macOS 27 arm64 — upstream `v18.18.7` [`omp-darwin-arm64`](https://github.com/can1357/oh-my-pi/releases/download/v18.18.7/omp-darwin-arm64) (sha256 `0cecaac781d3`) | `qwen38-5090-v0.13.0` | `ssh-loopback` | `darwin-remote-ssh` | **preview** | no | pending |
+| `windows-docker-local` | Windows 11 x64 — upstream `v18.18.7` [`omp-windows-x64.exe`](https://github.com/can1357/oh-my-pi/releases/download/v18.18.7/omp-windows-x64.exe) (sha256 `4a6e39ea3463`) | `qwen38-5090-v0.13.0` | `local-loopback` | `windows-docker-local` | **preview** | no | pending |
+| `linux-docker-local` | Linux under WSL2 x64 — upstream `v18.18.7` [`omp-linux-x64`](https://github.com/can1357/oh-my-pi/releases/download/v18.18.7/omp-linux-x64) (sha256 `ea6c216feb26`) | `qwen38-5090-v0.13.0` | `local-loopback` | `linux-docker-local` | **preview** | no | pending |
 
 ## Native runtime variants
 
@@ -19,13 +19,13 @@ These variants use the same OMP clients but own separate native runtime packages
 
 | Variant | Platform | GPU | CUDA | Context | Status | Installable | Installation | Qualification |
 | --- | --- | --- | --- | ---: | --- | --- | --- | --- |
-| rtx3090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 3090 | sm_86 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/9a365dc5da1ed3cb9f1e11f62bd520ff29fa79a7/releases/v0.17.0/qualification/rtx3090.json) |
-| rtx4090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 4090 | sm_89 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/9a365dc5da1ed3cb9f1e11f62bd520ff29fa79a7/releases/v0.17.0/qualification/rtx4090.json) |
+| rtx3090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 3090 | sm_86 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/0a7c8fc07008bf621f3308f436e923498916c1b7/releases/v0.18.0/qualification/rtx3090.json) |
+| rtx4090-windows-native | Windows 11 x64 | NVIDIA GeForce RTX 4090 | sm_89 | 131,072 | **qualified** | yes | native-windows-package | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/0a7c8fc07008bf621f3308f436e923498916c1b7/releases/v0.18.0/qualification/rtx4090.json) |
 
 Package bindings:
 
-- `rtx3090-windows-native`: component `v0.8.0-qwen38-3090-beta.2`; package [`ninfer-rtx3090-native-v0.8.0-beta.2-windows-x86_64-cuda13.3-rtx3090.tar.gz`](https://github.com/alphastorm/ninfer/releases/download/v0.8.0-qwen38-3090-beta.2/ninfer-rtx3090-native-v0.8.0-beta.2-windows-x86_64-cuda13.3-rtx3090.tar.gz); SHA-256 `97a8e6340397d6a925cbabc6ffbb6f219a4b00f19b2f5d8e4be6cd14d41f3ed9`; 1,008,989,809 bytes.
-- `rtx4090-windows-native`: component `v0.8.0-qwen38-4090-beta.2`; package [`ninfer-rtx4090-native-v0.8.0-beta.2-windows-x86_64-cuda13.3-rtx4090.tar.gz`](https://github.com/alphastorm/ninfer/releases/download/v0.8.0-qwen38-4090-beta.2/ninfer-rtx4090-native-v0.8.0-beta.2-windows-x86_64-cuda13.3-rtx4090.tar.gz); SHA-256 `d9b10b47f1e7fad8413dc95347dbdd11d91636aec11552c29c1dc94246ca6d5b`; 991,981,865 bytes.
+- `rtx3090-windows-native`: component `v0.8.0-qwen38-3090-beta.3`; package [`ninfer-rtx3090-native-v0.8.0-beta.3-windows-x86_64-cuda13.3-rtx3090.tar.gz`](https://github.com/alphastorm/ninfer/releases/download/v0.8.0-qwen38-3090-beta.3/ninfer-rtx3090-native-v0.8.0-beta.3-windows-x86_64-cuda13.3-rtx3090.tar.gz); SHA-256 `bf1ceaa9eb522a8c8d9372bec475d6e4e4666e6a995302cd20035e80ae3e5edd`; 1,011,087,765 bytes.
+- `rtx4090-windows-native`: component `v0.8.0-qwen38-4090-beta.3`; package [`ninfer-rtx4090-native-v0.8.0-beta.3-windows-x86_64-cuda13.3-rtx4090.tar.gz`](https://github.com/alphastorm/ninfer/releases/download/v0.8.0-qwen38-4090-beta.3/ninfer-rtx4090-native-v0.8.0-beta.3-windows-x86_64-cuda13.3-rtx4090.tar.gz); SHA-256 `ac41700ac2bb9fb171188f35e73481cfd9f1140c5781320b1e6304ee760d7166`; 992,131,123 bytes.
 - `rtx3090-windows-native` model: [artifact](https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/1cbd84e7221e51186bd7f093a149912d2489625b/qwen3_8_27b.ninfer); SHA-256 `81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da`; 20,437,521,664 bytes.
 - `rtx4090-windows-native` model: [artifact](https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/1cbd84e7221e51186bd7f093a149912d2489625b/qwen3_8_27b.ninfer); SHA-256 `81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da`; 20,437,521,664 bytes.
 
@@ -35,9 +35,9 @@ A candidate implementation is not a qualification claim; JSON-schema support fli
 
 | Lane | JSON-schema structured output | Tool-name limit | Status schema | Request-log schema |
 | --- | --- | ---: | ---: | ---: |
-| RTX 5090 beta.6 container | Bound by the current exact-source lane product-protocol receipt; candidate-bound external-install acceptance is separate. | 128 | 2 | 30 |
-| RTX 4090 native Windows v0.8.0-beta.2 | Bound by the current exact-source lane product-protocol receipt; candidate-bound external-install acceptance is separate. | 128 | 2 | 30 |
-| RTX 3090 native Windows v0.8.0-beta.2 | Bound by the current exact-source lane product-protocol receipt; candidate-bound external-install acceptance is separate. | 128 | 2 | 30 |
+| RTX 5090 beta.7 container | Bound by the current exact-source lane product-protocol receipt; candidate-bound external-install acceptance is separate. | 128 | 2 | 30 |
+| RTX 4090 native Windows v0.8.0-beta.3 | Bound by the current exact-source lane product-protocol receipt; candidate-bound external-install acceptance is separate. | 128 | 2 | 30 |
+| RTX 3090 native Windows v0.8.0-beta.3 | Bound by the current exact-source lane product-protocol receipt; candidate-bound external-install acceptance is separate. | 128 | 2 | 30 |
 
 ## Profile boundaries
 
@@ -46,29 +46,34 @@ A candidate implementation is not a qualification claim; JSON-schema support fli
 Commands: `doctor`, `plan`, `install`, `status`, `benchmark`, `checkpoint`, `rollback`, `support-bundle`
 
 Limitations:
-- Fresh stock OMP 18.18.6 platform and candidate-bound documented-route acceptance is required; no predecessor client execution is carried.
+- Fresh stock OMP 18.18.7 platform and candidate-bound documented-route acceptance is required; no predecessor client execution is carried.
 - macOS manual SSH preview.
 
 Blockers:
+- upstream OMP v18.18.7 client acceptance is pending
 
 ### `windows-docker-local`
 
 Commands: `doctor`, `plan`, `install`, `status`, `benchmark`, `checkpoint`, `rollback`, `support-bundle`
 
 Limitations:
-- Fresh stock OMP 18.18.6 platform and candidate-bound documented-route acceptance is required; no predecessor client execution is carried.
+- Fresh stock OMP 18.18.7 platform and candidate-bound documented-route acceptance is required; no predecessor client execution is carried.
 
 Blockers:
+- upstream OMP v18.18.7 client acceptance is pending
 
 ### `linux-docker-local`
 
 Commands: `doctor`, `plan`, `install`, `status`, `benchmark`, `checkpoint`, `rollback`, `support-bundle`
 
 Limitations:
-- Fresh stock OMP 18.18.6 platform and candidate-bound documented-route acceptance is required; no predecessor client execution is carried.
+- Fresh stock OMP 18.18.7 platform and candidate-bound documented-route acceptance is required; no predecessor client execution is carried.
 - Linux x64 under WSL2 only; no separate native Linux OS or Linux vision claim.
 
 Blockers:
+- upstream OMP v18.18.7 client acceptance is pending
 
 ## Composition blockers
 
+- Native beta.2 identity rows are unbound predecessor placeholders; beta.3 packages and current proofs remain pending.
+- Fresh routes, stock-client platform acceptance and current product review remain pending.
