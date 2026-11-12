@@ -15,7 +15,7 @@
     "note": "Every stock OMP 18.18.7 client was freshly downloaded and accepted against the candidate-bound selected runtime identities; all three runtime components were rebuilt from one F4 source."
   },
   "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
-  "compatibility_sha256": "68cbae4bfd1fd1939772f8b31b944d9ec7f99599baa86652d2ad4b2573317699",
+  "compatibility_sha256": "393d116c215b5a91844b100487a3a8a851afa11cab48d4f48af215b6ef59cca3",
   "windows_asset_sha256": "4a6e39ea34633e03d07a1543ba30842362311f920341378433aa31b6c1404491",
   "windows_binary_sha256": "4a6e39ea34633e03d07a1543ba30842362311f920341378433aa31b6c1404491",
   "platform_receipts": [
