@@ -20,10 +20,27 @@ import subprocess
 import sys
 import time
 import urllib.request
+import uuid
 
 
 def now():
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+def write_atomic(path, text):
+    """Restoration parses these records back: write the whole text beside ``path``, then swap it
+    in, so a failed or interrupted write leaves the previous file and no temporary."""
+    path = Path(path)
+    temporary = path.with_name(path.name + '.' + uuid.uuid4().hex + '.partial')
+    try:
+        with temporary.open('x') as handle:
+            handle.write(text)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    except BaseException:
+        temporary.unlink(missing_ok=True)
+        raise
 
 
 def free_space_record(path, minimum_free_gib):
@@ -143,7 +160,7 @@ def main():
     model = home / '.local/share/omp-ninfer' / model_name
     os.environ['PATH'] = '/usr/bin:/bin:/usr/local/bin:/usr/lib/wsl/lib:' + os.environ.get('PATH', '')
     def save(name, value):
-        (root / name).write_text(json.dumps(value, indent=2) + '\n')
+        write_atomic(root / name, json.dumps(value, indent=2) + '\n')
     def run(argv, timeout=60, env=None):
         # Children never read this script's stdin: run over ssh, it is the operator's terminal,
         # which never ends, and a client that inherits it waits for it before it starts.

@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
+import errno
 import hashlib
 import importlib.util
 import io
@@ -19,6 +21,25 @@ import unittest.mock
 
 ROOT = Path(__file__).resolve().parents[1]
 PROBE = ROOT / "scripts" / "hosts" / "omp-client-probe.py"
+
+
+@contextlib.contextmanager
+def interrupted_writes(name: str):
+    """Every text write to ``name``, or to a temporary named after it, puts half its bytes on disk
+    and then fails like a full volume."""
+    real = io.open
+    def opener(file, mode="r", *args, **kwargs):
+        handle = real(file, mode, *args, **kwargs)
+        if ("w" in mode or "x" in mode) and Path(file).name.startswith(name):
+            write = handle.write
+            def partial(data):
+                write(data[:len(data) // 2])
+                handle.flush()
+                raise OSError(errno.ENOSPC, "injected full volume")
+            handle.write = partial
+        return handle
+    with unittest.mock.patch.object(io, "open", opener):
+        yield
 
 
 class ProofEnvironmentTests(unittest.TestCase):
@@ -770,6 +791,26 @@ class HostDirectoryRestorationTests(unittest.TestCase):
         self.action("restore")
         self.assert_window_actions_refused("already restored")
         self.assertEqual(self.key.read_text(), "original private fixture key\n")
+
+    def test_an_interrupted_baseline_write_leaves_restoration_a_readable_workspace(self) -> None:
+        # The baseline is written before any host change, so restoration must find it whole or absent.
+        with interrupted_writes("baseline.json"), self.assertRaisesRegex(OSError, "injected full volume"):
+            self.action("begin")
+        self.assertFalse((self.workspace / "baseline.json").exists())
+        self.assertEqual(sorted(self.workspace.glob("*.partial")), [])
+        self.action("restore")
+        proof = json.loads((self.workspace / "restoration.json").read_text())
+        self.assertTrue(proof["production_untouched"] and proof["own_hold_released"])
+        self.assertEqual(self.key.read_text(), "original private fixture key\n")
+        self.assertEqual((self.sha, self.branch), ("1" * 40, "main"))
+
+    def test_window_records_keep_their_bytes_and_leave_no_temporary_files(self) -> None:
+        self.action("begin")
+        self.action("restore")
+        for name in ("baseline.json", "restoration.json"):
+            text = (self.workspace / name).read_text()
+            self.assertEqual(text, json.dumps(json.loads(text), indent=2) + "\n")
+        self.assertEqual(sorted(self.workspace.glob("*.partial")), [])
 
 
 class WindowsHoldDirectoryTests(unittest.TestCase):
