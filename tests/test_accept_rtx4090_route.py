@@ -1240,6 +1240,180 @@ SaveServerLogs @{release_root=(Join-Path $Scratch 'candidate')}
                 self.assertEqual((root / "evidence" / destination).read_bytes(), (logs / source).read_bytes())
 
 
+class RetirementTests(unittest.TestCase):
+    @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed for checkpoint retirement")
+    def test_retire_requires_passed_collected_audited_baseline_and_contains_deletion(self):
+        self.retirement_cases(("none", "failed", "boundary", "uncollected", "audit", "baseline", "public", "link"))
+
+    @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed for drifted checkpoint layouts")
+    def test_retire_refuses_uninventoried_files_before_receipt_or_deletion(self):
+        self.retirement_cases(("drift-root", "drift-session", "drift-generations",
+                               "drift-layout", "drift-pointer", "drift-current"))
+
+    def retirement_cases(self, faults):
+        proof = r'''
+param($Source,$Scratch,$Fault)
+$ErrorActionPreference='Stop'
+$tokens=$null;$errors=$null
+$ast=[Management.Automation.Language.Parser]::ParseFile($Source,[ref]$tokens,[ref]$errors)
+if($errors.Count){throw ($errors|Out-String)}
+foreach($name in @('Hash','ReadJson','SaveJson','Retire')){
+    $node=$ast.Find({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq $name},$true)
+    if(-not $node){throw "missing retirement function: $name"}
+    Invoke-Expression $node.Extent.Text
+}
+$utf8=[Text.UTF8Encoding]::new($false)
+$Workspace=Join-Path $Scratch 'window';$baseline='unused';$journal=Join-Path $Workspace 'preparation.json'
+$PublicInstallReceipt=Join-Path $Scratch 'public-install/receipt.json'
+$Release='v0.18.1';$Candidate='1'*40;$Lane='rtx3090';$StateRoot=Join-Path $Scratch 'canonical'
+function ValidateSnapshot($path){@{observable=@{active_release='instance'}}}
+function Probe {@{}}
+function AssertBaseline($value){if($Fault -eq 'baseline'){throw 'baseline differs'}}
+$script:reads=0
+function FreeBytes($path){$script:reads++;1000+$script:reads}
+function Remove-Item {
+    param($LiteralPath,[switch]$Recurse,[switch]$Force)
+    $receipt=Join-Path $Workspace 'retirement.json'
+    if(-not (Test-Path -LiteralPath $receipt)){throw 'deletion preceded the inventory'}
+    $record=ReadJson $receipt
+    if($record.status -cne 'recorded' -or @($record.generations).Count -ne 1 -or
+       -not $record.generations[0].manifest_json -or -not $record.generations[0].checksums_json){
+        throw 'deletion preceded generation metadata'
+    }
+    if(-not $LiteralPath.EndsWith('session-checkpoints-v3')){throw 'deletion escaped the checkpoint store'}
+    Microsoft.PowerShell.Management\Remove-Item -LiteralPath $LiteralPath -Recurse:$Recurse -Force:$Force
+}
+try {
+    Retire
+    if($Fault -ne 'none'){throw 'unsafe retirement accepted'}
+    'RETIRED'
+} catch {
+    if($Fault -eq 'none'){throw}
+    if($_.Exception.Message -ceq 'unsafe retirement accepted'){throw}
+    'REFUSED'
+}
+'''
+        for first in (True, False):
+            for fault in faults:
+                with self.subTest(first=first, fault=fault), tempfile.TemporaryDirectory() as directory:
+                    root = Path(directory)
+                    w = root / "window"
+                    store = w / ("qualified-artifacts/lineage-root/cache/instance/session-checkpoints-v3"
+                                 if first else "qualified-artifacts/cache/session-checkpoints-v3")
+                    generation = store / "sessions" / ("a" * 64) / "generations/123456-1"
+                    write_json(generation / "manifest.json", {"schema_version": 3, "synthetic": True})
+                    write_json(generation / "checksums.json", {"engine/state/0.bin": "b" * 64})
+                    (generation / "engine/state").mkdir(parents=True)
+                    (generation / "engine/state/0.bin").write_bytes(b"synthetic checkpoint payload")
+                    session = generation.parent.parent
+                    (session / "current").write_text(generation.name, encoding="utf-8")
+                    drift = {"drift-root": store / "untracked.bin",
+                             "drift-session": session / "untracked.bin",
+                             "drift-generations": generation.parent / "untracked.bin",
+                             "drift-layout": store / "replacement-layout/payload.bin",
+                             "drift-pointer": store / "sessions/not-a-digest/current",
+                             "drift-current": store / "current"}.get(fault)
+                    if fault == "drift-layout":
+                        shutil.rmtree(store / "sessions")
+                    if drift:
+                        drift.parent.mkdir(parents=True, exist_ok=True)
+                        drift.write_bytes(b"uninventoried checkpoint bytes")
+                    before = {path.relative_to(store): path.read_bytes()
+                              for path in store.rglob("*") if path.is_file()}
+                    protected = root / "canonical/cache/instance/session-checkpoints-v3/untouched.bin"
+                    protected.parent.mkdir(parents=True)
+                    protected.write_bytes(b"canonical bytes")
+                    unrelated = w / "qualified-artifacts/other/untouched.bin"
+                    unrelated.parent.mkdir(parents=True)
+                    unrelated.write_bytes(b"unrelated bytes")
+                    write_json(w / "preparation.json", {"status": "restored", "lineage_mode": "first_release" if first else "upgrade"})
+                    write_json(w / "window.json", {"status": "failed" if fault == "failed" else "passed_and_restored",
+                               "first_failing_boundary": "native-probes" if fault == "boundary" else None,
+                               "release": "v0.18.1", "candidate": "1" * 40, "restoration_status": "passed"})
+                    write_json(w / "restoration.json", {"status": "passed"})
+                    write_json(w / "final-audit.json", {"status": "failed" if fault == "audit" else "passed",
+                               "checks": {"all_restored": fault != "audit"}})
+                    if fault != "uncollected":
+                        write_json(w / "collection.json", {"status": "collected", "release": "v0.18.1",
+                                   "candidate": "1" * 40, "archive_sha256": "f" * 64,
+                                   **{key + "_sha256": hashlib.sha256((w / name).read_bytes()).hexdigest()
+                                      for key, name in (("window", "window.json"), ("final_audit", "final-audit.json"),
+                                                        ("restoration", "restoration.json"))}})
+                    write_json(root / "public-install/receipt.json", {
+                        "artifact_type": "omp_ninfer_native_public_install_acceptance",
+                        "status": "failed" if fault == "public" else "passed", "lane": "rtx3090",
+                        "source": {"product_release": "v0.18.1", "candidate_commit": "1" * 40}})
+                    if fault == "link":
+                        (generation / "outside").symlink_to(protected.parent, target_is_directory=True)
+                    script = root / "retire.ps1"
+                    script.write_text(proof, encoding="utf-8")
+                    result = subprocess.run([shutil.which("pwsh"), "-NoProfile", "-File", str(script),
+                                             str(ROOT / "scripts/hosts/accept-rtx4090-route.ps1"), directory, fault],
+                                            capture_output=True, text=True, encoding="utf-8", timeout=30)
+                    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                    self.assertEqual(protected.read_bytes(), b"canonical bytes")
+                    self.assertEqual(unrelated.read_bytes(), b"unrelated bytes")
+                    self.assertEqual(store.exists(), fault != "none")
+                    receipt = w / "retirement.json"
+                    if fault == "none":
+                        record = json.loads(receipt.read_text(encoding="utf-8"))
+                        self.assertEqual(record["status"], "retired")
+                        self.assertEqual(record["free_bytes_before"], 1001)
+                        self.assertEqual(record["free_bytes_after"], 1002)
+                        self.assertEqual(len(record["generations"]), 1)
+                        observed = record["generations"][0]
+                        self.assertEqual(json.loads(observed["manifest_json"])["schema_version"], 3)
+                        self.assertIn("engine/state/0.bin", json.loads(observed["checksums_json"]))
+                        self.assertGreater(observed["bytes"], 0)
+                        self.assertTrue(observed["path"].endswith("/generations/123456-1"))
+                    else:
+                        self.assertFalse(receipt.exists())
+                        self.assertEqual({path.relative_to(store): path.read_bytes()
+                                          for path in store.rglob("*") if path.is_file()}, before)
+
+    def test_retire_cli_requires_collected_passed_window_before_host_contact(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            command = ["accept-rtx4090-route.py", "--release", "v0.18.1", "--candidate", "1" * 40,
+                       "--host", "fixture-host", "--workspace", directory, "--remote-workspace", "C:/acceptance",
+                       "--expected-state-sha256", "2" * 64, "--first-release", "--mode", "retire",
+                       "--public-install-receipt", "C:/public-install/receipt.json"]
+            for status in ("failed", "passed_and_restored"):
+                write_json(root / "driver-window.json", {"status": status})
+                with mock.patch.object(sys, "argv", command), mock.patch.object(DRIVER, "ssh") as ssh:
+                    with self.assertRaisesRegex(RuntimeError, "retire|collection"):
+                        DRIVER.main()
+                ssh.assert_not_called()
+
+    def test_retire_cli_forwards_separate_public_install_receipt_and_collects_inventory(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            evidence = root / "evidence"
+            write_json(evidence / "window.json", {"status": "passed_and_restored"})
+            write_json(evidence / "final-audit.json", {"status": "passed", "checks": {"restored": True}})
+            write_json(evidence / "restoration.json", {"status": "passed"})
+            write_json(evidence / "behavior-evidence.json", {"status": "passed", "checks": {"server_health_passed": True}})
+            write_json(root / "driver-window.json", {"status": "passed_and_restored", "behavior_status": "passed",
+                       "accept_exit": 0, "restoration_exit": 0, "audit_exit": 0})
+            (root / "evidence.tar.gz").write_bytes(b"synthetic collected archive")
+            write_json(root / "driver-collection.json", {"status": "collected", "release": "v0.18.1",
+                       "candidate": "1" * 40, "archive_sha256": DRIVER.sha(root / "evidence.tar.gz"),
+                       **{key + "_sha256": DRIVER.sha(evidence / name) for key, name in
+                          (("window", "window.json"), ("final_audit", "final-audit.json"),
+                           ("restoration", "restoration.json"))}})
+            command = ["accept-rtx4090-route.py", "--release", "v0.18.1", "--candidate", "1" * 40,
+                       "--host", "fixture-host", "--workspace", directory, "--remote-workspace", "C:/acceptance",
+                       "--expected-state-sha256", "2" * 64, "--first-release", "--mode", "retire",
+                       "--public-install-receipt", "C:/public-install/receipt.json"]
+            result = subprocess.CompletedProcess([], 0, "", "")
+            with mock.patch.object(sys, "argv", command), mock.patch.object(DRIVER, "ssh", return_value=result) as ssh, \
+                    mock.patch.object(DRIVER, "run", return_value=result), contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(DRIVER.main(), 0)
+            self.assertIn("-Mode 'Retire'", ssh.call_args_list[0].args[1])
+            self.assertIn("-PublicInstallReceipt 'C:/public-install/receipt.json'", ssh.call_args_list[0].args[1])
+            self.assertEqual(len(ssh.call_args_list), 3)  # retire, collect, collection acknowledgement
+
+
 class DocumentedModelTests(unittest.TestCase):
     """The route asks for the model its candidate's documented provider step configures, which is the
     model that candidate's native server serves. It keeps no lane table of its own (omp-ninfer#98):

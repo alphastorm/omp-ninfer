@@ -19,7 +19,8 @@ param(
     [Parameter(Mandatory=$true)][string]$ExpectedStateSha256,
     [string]$TemporaryPrevious='',
     [switch]$FirstRelease,
-    [ValidateSet('DryRun','Preflight','Accept','Restore','Audit','Route','Live','Offline','NativeProbes')][string]$Mode='DryRun',
+    [ValidateSet('DryRun','Preflight','Accept','Restore','Audit','Retire','Route','Live','Offline','NativeProbes')][string]$Mode='DryRun',
+    [string]$PublicInstallReceipt='',
     [string]$StateRoot='',
     [string]$TaskName='',
     [string]$Stage='',
@@ -357,6 +358,87 @@ function Restore {
     AssertFreeSpace 'restored' -ObserveOnly
     return $result
 }
+function Retire {
+    $window=ReadJson (Join-Path $Workspace 'window.json')
+    if($window.status -cne 'passed_and_restored' -or $window.first_failing_boundary -or
+       $window.restoration_status -cne 'passed' -or $window.release -cne $Release -or
+       $window.candidate -cne $Candidate){throw 'retire requires a passed and restored window without a failing boundary'}
+    $collectionPath=Join-Path $Workspace 'collection.json'
+    if(-not (Test-Path -LiteralPath $collectionPath -PathType Leaf)){throw 'retire requires collected evidence'}
+    $collection=ReadJson $collectionPath
+    if($collection.status -cne 'collected' -or $collection.release -cne $Release -or
+       $collection.candidate -cne $Candidate -or $collection.archive_sha256 -cnotmatch '^[0-9a-f]{64}$' -or
+       $collection.window_sha256 -cne (Hash (Join-Path $Workspace 'window.json')) -or
+       $collection.final_audit_sha256 -cne (Hash (Join-Path $Workspace 'final-audit.json')) -or
+       $collection.restoration_sha256 -cne (Hash (Join-Path $Workspace 'restoration.json'))){throw 'retire collection binding differs'}
+    $audit=ReadJson (Join-Path $Workspace 'final-audit.json')
+    if($audit.status -cne 'passed' -or @($audit.checks.PSObject.Properties).Count -eq 0 -or
+       @($audit.checks.PSObject.Properties|Where-Object {$_.Value -cne $true}).Count){throw 'retire requires a passed final audit'}
+    if(-not $PublicInstallReceipt){throw 'retire requires the separate public-install receipt'}
+    $public=ReadJson $PublicInstallReceipt
+    if($public.artifact_type -cne 'omp_ninfer_native_public_install_acceptance' -or
+       $public.status -cne 'passed' -or $public.lane -cne $Lane -or
+       $public.source.product_release -cne $Release -or $public.source.candidate_commit -cne $Candidate){throw 'retire requires a passed public-install check for this candidate and lane'}
+    $b=ValidateSnapshot $baseline;AssertBaseline (Probe)
+    $prep=ReadJson $journal
+    if($prep.status -cne 'restored'){throw 'retire requires completed restoration'}
+    $instance=[string]$b.observable.active_release
+    if($instance -cnotmatch '^[A-Za-z0-9][A-Za-z0-9._-]*$'){throw 'invalid checkpoint instance'}
+    $relative=if($prep.lineage_mode -ceq 'first_release'){
+        "qualified-artifacts\lineage-root\cache\$instance\session-checkpoints-v3"
+    }elseif($prep.lineage_mode -ceq 'upgrade'){'qualified-artifacts\cache\session-checkpoints-v3'}
+    else{throw 'unknown retirement lineage'}
+    $root=(Get-Item -LiteralPath $Workspace -Force).FullName
+    $store=Join-Path $root $relative
+    if(-not (Test-Path -LiteralPath $store -PathType Container)){throw 'window checkpoint store missing'}
+    # Reject junctions/symlinks in the entire deletion boundary, including ancestors.
+    $path=$root
+    foreach($part in @('')+@($relative -split '\\')) {
+        if($part){$path=Join-Path $path $part}
+        if((Get-Item -LiteralPath $path -Force).Attributes -band [IO.FileAttributes]::ReparsePoint){throw 'retire refuses checkpoint reparse points'}
+    }
+    $entries=@(Get-ChildItem -LiteralPath $store -Recurse -Force)
+    if(@($entries|Where-Object {$_.Attributes -band [IO.FileAttributes]::ReparsePoint}).Count){throw 'retire refuses checkpoint reparse points'}
+    $generations=@();$generationRoots=@()
+    $sessions=Join-Path $store 'sessions'
+    if(Test-Path -LiteralPath $sessions -PathType Container) {
+        foreach($session in @(Get-ChildItem -LiteralPath $sessions -Directory -Force)) {
+            $directory=Join-Path $session.FullName 'generations'
+            if(-not (Test-Path -LiteralPath $directory -PathType Container)){continue}
+            foreach($generation in @(Get-ChildItem -LiteralPath $directory -Directory -Force)) {
+                $manifest=Join-Path $generation.FullName 'manifest.json';$checksums=Join-Path $generation.FullName 'checksums.json'
+                if(-not (Test-Path -LiteralPath $manifest -PathType Leaf) -or
+                   -not (Test-Path -LiteralPath $checksums -PathType Leaf)){throw 'generation metadata missing; retain the window'}
+                $bytes=[int64]((Get-ChildItem -LiteralPath $generation.FullName -Recurse -File -Force|Measure-Object Length -Sum).Sum)
+                $generations+=@{path=$generation.FullName.Substring($root.Length).TrimStart([char[]]'\/').Replace('\','/');
+                    bytes=$bytes;manifest_json=[IO.File]::ReadAllText($manifest);checksums_json=[IO.File]::ReadAllText($checksums);
+                    manifest_sha256=(Hash $manifest);checksums_sha256=(Hash $checksums)}
+                $generationRoots+=($generation.FullName+[IO.Path]::DirectorySeparatorChar)
+            }
+        }
+    }
+    foreach($file in @($entries|Where-Object {-not $_.PSIsContainer})) {
+        $relativeFile=$file.FullName.Substring($store.Length).TrimStart([char[]]'\/').Replace('\','/')
+        if($relativeFile -cmatch '^sessions/[0-9a-f]{64}/current$'){continue}
+        $inventoried=$false
+        foreach($prefix in $generationRoots) {
+            if($file.FullName.StartsWith($prefix,[StringComparison]::Ordinal)){$inventoried=$true;break}
+        }
+        if(-not $inventoried){throw 'checkpoint layout contains uninventoried files; retain the window'}
+    }
+    $receipt=Join-Path $Workspace 'retirement.json'
+    if(Test-Path -LiteralPath $receipt){throw 'retirement already recorded; never repeat deletion'}
+    $record=[ordered]@{status='recorded';release=$Release;candidate=$Candidate;lane=$Lane;started_utc=[DateTime]::UtcNow.ToString('o');
+        store=$relative.Replace('\','/');bytes=[int64](($entries|Where-Object {-not $_.PSIsContainer}|Measure-Object Length -Sum).Sum);
+        generations=$generations;free_bytes_before=[int64](FreeBytes $StateRoot);free_bytes_after=$null}
+    # Inventory and original generation metadata must be durable before any deletion.
+    SaveJson $receipt $record
+    Remove-Item -LiteralPath $store -Recurse -Force
+    if(Test-Path -LiteralPath $store){throw 'checkpoint retirement incomplete'}
+    $record.status='retired';$record.free_bytes_after=[int64](FreeBytes $StateRoot)
+    $record.completed_utc=[DateTime]::UtcNow.ToString('o')
+    SaveJson $receipt $record
+}
 # Child isolation happens before any OMP invocation; none of these modes write real client pointers.
 if($Mode -eq 'Route') {
     SetIsolation 'route';$work=Join-Path $Workspace 'route-work'
@@ -506,6 +588,7 @@ if($Mode -eq 'Preflight') {
 }
 if($Mode -eq 'Restore'){$r=Restore;$r|ConvertTo-Json -Depth 10;if($r.status -ne 'passed'){exit 1};return}
 if($Mode -eq 'Audit'){$r=Audit (ValidateSnapshot $baseline);SaveJson "$Workspace\final-audit.json" $r;$r|ConvertTo-Json -Depth 10;if($r.status -ne 'passed'){exit 1};return}
+if($Mode -eq 'Retire'){Retire;Write-Output 'CHECKPOINTS_RETIRED';return}
 # One window per workspace. Retain the original failure and always restore before returning it.
 if((ReadJson "$Workspace\preflight.json").status -cne 'passed'){throw 'successful preflight required'}
 if(Test-Path $journal){throw 'attempt already spent; never repeat acceptance in this workspace'}
