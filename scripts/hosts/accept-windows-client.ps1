@@ -20,7 +20,18 @@ $Clone=Join-Path $Workspace 'candidate'
 $Bundle=Join-Path $Workspace 'windows-bundle'
 $Hold=Join-Path $ControlRoot 'state\lane-container-paused'
 $HoldDirectory=Split-Path $Hold -Parent
-function Save-Json($Name,$Value) { [IO.File]::WriteAllText((Join-Path $Workspace $Name),($Value|ConvertTo-Json -Depth 20),[Text.UTF8Encoding]::new($false)) }
+function Save-Json($Name,$Value) {
+    # Hold release reads the ownership receipt and baseline back. Write the whole record beside
+    # the target, then swap it in, so a failed or interrupted write leaves the previous bytes.
+    $path=Join-Path $Workspace $Name;$temp="$path.$([Guid]::NewGuid().ToString('N')).partial"
+    try {
+        [IO.File]::WriteAllText($temp,($Value|ConvertTo-Json -Depth 20),[Text.UTF8Encoding]::new($false))
+        if([IO.File]::Exists($path)){[IO.File]::Replace($temp,$path,[NullString]::Value)}else{[IO.File]::Move($temp,$path)}
+    } catch {
+        Remove-Item -LiteralPath $temp -Force -ErrorAction SilentlyContinue
+        throw
+    }
+}
 function Own-Hold {
     $receipt=Join-Path $Workspace 'own-hold.json'
     if(!(Test-Path -LiteralPath $receipt) -or !(Test-Path -LiteralPath $Hold -PathType Leaf)){return $false}
