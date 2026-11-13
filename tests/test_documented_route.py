@@ -703,7 +703,18 @@ class HostPreparationTests(unittest.TestCase):
             documented_route.DEFAULT_DOC, "3. Prepare the model and key on the inference host").text
         store = checkpoint_host_directory(
             re.search(r"releases/(v[0-9.]+)/manifest\.json", block).group(1))
-        predecessors = ("checkpoints", "checkpoints-v013", "checkpoints-v017")
+        root = documented_route.DEFAULT_DOC.resolve().parents[1]
+        current = tuple(map(int, re.search(r"releases/(v[0-9.]+)/manifest\.json", block).group(1)[1:].split('.')))
+        predecessors = {"checkpoints"}
+        for path in (root / "releases").glob("*/manifest.json"):
+            manifest = json.loads(path.read_text(encoding="utf-8"))
+            version = tuple(map(int, re.match(r"v(\d+)\.(\d+)\.(\d+)", manifest["release"]).groups()))
+            if manifest["status"] != "ready" or version >= current:
+                continue
+            for profile in (path.parent / "profiles").glob("*.json"):
+                name = json.loads(profile.read_text(encoding="utf-8")).get("server", {}).get("checkpoint_host_directory")
+                if name:
+                    predecessors.add(name)
         self.assertNotIn(store, predecessors)
         with tempfile.TemporaryDirectory() as temporary:
             home = Path(temporary)
