@@ -22,10 +22,15 @@ class NativeIdentityAdmissionTests(unittest.TestCase):
         patch = mock.patch.object(SPEED, "ROOT", self.root)
         patch.start()
         self.addCleanup(patch.stop)
-        gate, captures, runs, spec, variant, predecessor, _ = identity_fixture(self.root)
+        self.prepare()
+
+    def prepare(self, lane="rtx4090", profile_variant=""):
+        gate, captures, runs, identity_spec, variant, predecessor, _ = identity_fixture(
+            self.root, lane=lane, profile_variant=profile_variant)
         self.release = gate["release"]
-        spec, config, configuration = candidate_profile("rtx4090")
-        spec["build_profile"] = "native-v0.9.0-beta.1-rtx4090"
+        self.lane = lane
+        spec, config, configuration = candidate_profile(lane)
+        spec["build_profile"] = identity_spec["build_profile"]
         variant["configuration_sha256"] = hashlib.sha256(json.dumps(config).encode()).hexdigest()
         for index in (1, 2):
             captures[index]["identity"] = {
@@ -35,15 +40,16 @@ class NativeIdentityAdmissionTests(unittest.TestCase):
         arm = json.loads(arm_path.read_text(encoding="utf-8"))
         arm["configuration_sha256"] = variant["configuration_sha256"]
         arm_path.write_text(json.dumps(arm), encoding="utf-8")
-        plan = SPEED.prescreen(gate, captures[1]["identity"], root=self.root)
-        proof = SPEED.create_identity_proof(gate, captures, plan, *runs, spec, root=self.root)
         variant.update(runtime_shape=spec["runtime_shape"], maximum_context_tokens=131072, qualification={})
         self.variant = variant
         previous = {"id": variant["id"], **predecessor, "runtime_shape": spec["runtime_shape"]}
         path = self.root / "releases/v0.98.0/manifest.json"
-        path.parent.mkdir(parents=True)
+        path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps({"status": "ready", "components": {"ninfer_variants": [previous]}}),
                         encoding="utf-8")
+        self.previous_path = path
+        plan = SPEED.prescreen(gate, captures[1]["identity"], root=self.root)
+        proof = SPEED.create_identity_proof(gate, captures, plan, *runs, spec, root=self.root)
         self.spec_path = self.evidence("release_spec", spec, profile=True)
         self.evidence("server_config", config, profile=True)
         self.proof_path = self.evidence("identity_proof", proof)
@@ -51,13 +57,14 @@ class NativeIdentityAdmissionTests(unittest.TestCase):
             "artifact_type": "omp-ninfer.native-fit", "schema_version": 1, "status": "passed",
             "identity": {key: variant[key] for key in SPEED.NATIVE_IDENTITY_FIELDS},
             "runtime_shape": spec["runtime_shape"], "maximum_context_tokens": 131072,
-            "configuration": configuration, "measured_admission_headroom_mib": 640,
+            "configuration": configuration,
+            "measured_admission_headroom_mib": configuration["admission_headroom_mib"],
             "effective_weights": {"converted_device_bytes": 1024, "host_mapped_bytes": 2048},
             "raw_prompts_outputs_or_secrets_included": False,
         })
 
     def evidence(self, field, value, profile=False):
-        directory = self.root / "releases" / self.release / ("profiles/rtx4090" if profile else "qualification")
+        directory = self.root / "releases" / self.release / (f"profiles/{self.lane}" if profile else "qualification")
         directory.mkdir(parents=True, exist_ok=True)
         path = directory / (field.replace("_", "-") + ".json")
         path.write_text(json.dumps(value), encoding="utf-8")
@@ -72,6 +79,38 @@ class NativeIdentityAdmissionTests(unittest.TestCase):
         self.variant["qualification"].pop("fit")
         verifier.validate_native_quality(self.root, self.release, self.variant, errors)
         self.assertTrue(any("fit" in error for error in errors))
+
+    def test_same_profile_tensor_core_dflash2_is_admitted_without_waiving_fit(self):
+        self.prepare("rtx3090", "tc")
+        errors = []
+        verifier.validate_native_quality(self.root, self.release, self.variant, errors)
+        self.assertEqual(errors, [])
+        self.variant["qualification"].pop("fit")
+        verifier.validate_native_quality(self.root, self.release, self.variant, errors)
+        self.assertTrue(any("fit" in error for error in errors), errors)
+
+    def test_same_profile_tensor_core_proof_cannot_substitute_a_default_published_incumbent(self):
+        self.prepare("rtx3090", "tc")
+        previous = json.loads(self.previous_path.read_text())
+        previous["components"]["ninfer_variants"][0]["build_profile"] = "native-v0.8.0-beta.3-rtx3090"
+        self.previous_path.write_text(json.dumps(previous), encoding="utf-8")
+        errors = []
+        verifier.validate_native_quality(self.root, self.release, self.variant, errors)
+        self.assertTrue(any("identity_proof" in error for error in errors), errors)
+
+    def test_same_profile_tensor_core_proof_refuses_a_differing_output_or_missing_speed_declaration(self):
+        for mutation in ("output", "declaration"):
+            with self.subTest(mutation=mutation):
+                self.prepare("rtx3090", "tc")
+                proof = json.loads(self.proof_path.read_text())
+                if mutation == "output":
+                    proof["determinism"]["outputs"][0]["candidate_sha256"] = "f" * 64
+                else:
+                    proof["speed_abba"].pop("declaration")
+                self.evidence("identity_proof", proof)
+                errors = []
+                verifier.validate_native_quality(self.root, self.release, self.variant, errors)
+                self.assertTrue(any("identity_proof" in error for error in errors), errors)
 
     def test_output_changing_build_or_one_changed_determinism_output_cannot_skip_screen(self):
         spec = json.loads(self.spec_path.read_text(encoding="utf-8"))

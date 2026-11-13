@@ -7,6 +7,10 @@ must pass. Output bytes must match across all arms unless the decision selects
 within-engine identity and binds this lane/candidate's passing EXP-085 screen.
 Identity comparisons always bind both digests and compare build profiles when both records
 carry them; an absent historical profile is not replaced by a lane default.
+Non-default identity-first builds require the hash-bound decision's
+rule.build_variant = "default-or-same-profile-published-incumbent". Its sealed
+incumbent component/build_profile must match the latest ready product manifest,
+and candidate/incumbent profiles must have the same lane and variant token.
 Neither a digest-only capture nor a waiver supplies a pass.
 No host is contacted and normalized output text is never copied into the result.
 """
@@ -27,6 +31,7 @@ OUTPUT_RULE = "required for every case (A0/A3, B1/B2, A0/B1)"
 SCREEN_OUTPUT_RULE = ("required within each engine (A0/A3, B1/B2); "
                       "cross-engine differences require a bound passing EXP-085 verdict")
 IDENTITY_RULE = "speed-ABBA byte identity and 80/80 sealed incumbent determinism byte identity"
+SAME_PROFILE_BUILD_RULE = "default-or-same-profile-published-incumbent"
 NATIVE_IDENTITY_FIELDS = ("package_sha256", "server_binary_sha256",
                           "configuration_sha256", "model_artifact_sha256")
 ROOT = Path(__file__).resolve().parents[1]
@@ -406,13 +411,38 @@ def identity_decision(root: Path, release: str, lane: str) -> tuple[dict[str, An
     return decision, binding["sha256"]
 
 
-def default_native_build(spec: dict[str, Any], lane: str) -> str:
+def _identity_build_profile(spec: dict[str, Any], lane: str, decision: dict[str, Any],
+                            root: Path, release: str, predecessor: dict[str, Any]) -> str:
+    """Keep default admission unchanged; authorize variants only against their published family."""
     profile = spec.get("build_profile")
     if (lane not in ("rtx3090", "rtx4090") or spec.get("lane") != lane
-            or not isinstance(profile, str)
-            or re.fullmatch(r"native-v[0-9]+\.[0-9]+\.[0-9]+(?:-beta\.[0-9]+)?-" + lane, profile) is None):
-        raise SpeedGateError("identity-first requires the default native build profile; "
-                             "output-changing build variants require a powered screen")
+            or not isinstance(profile, str)):
+        raise SpeedGateError("identity-first requires an authenticated native build profile")
+    pattern = r"native-v[0-9]+\.[0-9]+\.[0-9]+(?:-beta\.[0-9]+)?(?:-(a8|tc|tc-a8))?-" + lane
+    selected = re.fullmatch(pattern, profile)
+    if selected is None:
+        raise SpeedGateError("identity-first requires a recognized native build profile")
+    if selected[1] is None:
+        return profile
+    if decision["rule"].get("build_variant") != SAME_PROFILE_BUILD_RULE:
+        raise SpeedGateError("non-default identity-first requires the same-profile published-incumbent decision")
+
+    from verify_release import predecessor_native_variant
+
+    published = predecessor_native_variant(root, release, lane + "-windows-native")
+    previous_profile = (published or {}).get("build_profile")
+    previous = re.fullmatch(pattern, previous_profile) if isinstance(previous_profile, str) else None
+    seals = decision.get("sealed_incumbent_determinism")
+    seal = seals.get(lane) if isinstance(seals, dict) else None
+    if (published is None or previous is None or previous[1] != selected[1]
+            or not isinstance(seal, dict)
+            or not isinstance(published.get("release_tag"), str) or not published["release_tag"]
+            or seal.get("component") != published["release_tag"]
+            or seal.get("build_profile") != previous_profile
+            or seal.get("identity") != native_identity(published)
+            or native_identity(predecessor) != native_identity(published)):
+        raise SpeedGateError("non-default identity-first requires the sealed published incumbent "
+                             "of the same lane and build profile variant")
     return profile
 
 
@@ -457,7 +487,7 @@ def create_identity_proof(gate: dict[str, Any], captures: Sequence[dict[str, Any
 
     root = root if root is not None else ROOT
     lane = spec.get("lane")
-    profile = default_native_build(spec, lane)
+    profile = spec.get("build_profile")
     _, decision_sha = identity_decision(root, gate["release"], lane)
     result = reduce(gate, captures, plan, root=root)
     if not result["gate_passed"] or not result["normalized_outputs_identical"]:
@@ -482,8 +512,9 @@ def create_identity_proof(gate: dict[str, Any], captures: Sequence[dict[str, Any
         "comparison_method": "retained-output-bytes",
         "raw_prompts_outputs_or_secrets_included": False,
     }
-    validate_identity_proof(value, root, gate["release"], {"id": lane + "-windows-native", **current},
-                            previous, spec)
+    validate_identity_proof(
+        value, root, gate["release"],
+        {"id": lane + "-windows-native", **current, "build_profile": profile}, previous, spec)
     return value
 
 
@@ -493,10 +524,10 @@ def validate_identity_proof(value: Any, root: Path, release: str, variant: dict[
     from quality_screen import FROZEN_DETERMINISM_MEMBERSHIP, FROZEN_SCREEN_IDS
 
     lane = variant["id"].split("-")[0]
-    profile = default_native_build(spec, lane)
-    if "build_profile" in variant and variant["build_profile"] != profile:
-        raise SpeedGateError("identity-first requires the default native build profile")
     decision, decision_sha = identity_decision(root, release, lane)
+    profile = _identity_build_profile(spec, lane, decision, root, release, predecessor)
+    if "build_profile" in variant and variant["build_profile"] != profile:
+        raise SpeedGateError("identity-first build profile must match the authenticated candidate")
     fields = {"artifact_type", "schema_version", "status", "release", "lane", "decision_sha256",
               "candidate", "predecessor", "build_profile", "speed_abba", "determinism",
               "comparison_method", "raw_prompts_outputs_or_secrets_included"}

@@ -2806,15 +2806,19 @@ def validate_native_identity_proof(root: Path, release: str, variant: dict[str, 
                                   predecessor: dict[str, Any] | None, errors: list[str],
                                   incoming: Path | None = None,
                                   incoming_profile: dict[str, bytes] | None = None) -> None:
+    """Bind identity admission to packaged policy and the latest ready product's incumbent."""
     value = native_evidence(root, release, variant, "identity_proof", errors, incoming)
     if value is None or native_profile(root, release, variant, errors, incoming_profile) is None:
+        return
+    if predecessor is None:
+        errors.append(f"{variant['id']}.qualification.identity_proof requires a published predecessor")
         return
     reference = variant["qualification"]["release_spec"]
     data = (incoming_profile["release-spec.json"] if incoming_profile is not None
             else (root / reference["path"]).read_bytes())
     from speed_gate import validate_identity_proof
     try:
-        validate_identity_proof(value, root, release, variant, predecessor or {}, json.loads(data))
+        validate_identity_proof(value, root, release, variant, predecessor, json.loads(data))
     except (OSError, ValueError) as error:
         errors.append(f"{variant['id']}.qualification.identity_proof: {error}")
 
