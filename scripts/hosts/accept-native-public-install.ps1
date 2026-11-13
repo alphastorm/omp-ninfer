@@ -40,8 +40,18 @@ $receipt = [ordered]@{ artifact_type='omp_ninfer_native_public_install_acceptanc
 function Finish([string]$Status) {
     $receipt.status = $Status; $receipt.completed_utc = (Utc)
     $json = $receipt | ConvertTo-Json -Depth 8
-    [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName([IO.Path]::GetFullPath($ReceiptPath))) | Out-Null
-    [IO.File]::WriteAllText($ReceiptPath, $json, [Text.UTF8Encoding]::new($false))
+    $path = [IO.Path]::GetFullPath($ReceiptPath)
+    [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($path)) | Out-Null
+    # Retire reads this receipt back. Write the whole receipt beside the target, then swap it
+    # in, so a failed or interrupted write leaves the previous bytes in place.
+    $temp = "$path.$([Guid]::NewGuid().ToString('N')).partial"
+    try {
+        [IO.File]::WriteAllText($temp, $json, [Text.UTF8Encoding]::new($false))
+        if ([IO.File]::Exists($path)) { [IO.File]::Replace($temp, $path, [NullString]::Value) } else { [IO.File]::Move($temp, $path) }
+    } catch {
+        Remove-Item -LiteralPath $temp -Force -ErrorAction SilentlyContinue
+        throw
+    }
 }
 $baselineObserved = $false
 $startOwned = $false
