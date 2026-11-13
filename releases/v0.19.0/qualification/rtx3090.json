@@ -3,17 +3,25 @@
   "benchmark_c1": {
     "completion_tokens": 1024,
     "computed_prefill_tokens": 4541,
-    "decode_tokens_per_second": 227.16876791491404,
+    "decode_tokens_per_second": 227.19182649005214,
+    "max_enforced_power_limit_w": 350.0,
     "max_gpu_utilization_percent": 100,
     "max_memory_used_mib": 22584,
-    "max_power_w": 350.52,
-    "max_temperature_c": 55.84,
+    "max_power_limit_w": 350.0,
+    "max_power_w": 350.68,
+    "max_temperature_c": 54.88,
+    "min_enforced_power_limit_w": 350.0,
+    "min_power_limit_w": 350.0,
     "mtp_acceptance_percent": 84.03846153846153,
-    "power_envelope_w": 351.0,
-    "prefill_tokens_per_second": 974.8529374985305,
+    "power_envelope_w": 355.0,
+    "power_limit_mismatched_samples": 0,
+    "power_samples": 56,
+    "power_samples_over_envelope": 0,
+    "prefill_tokens_per_second": 978.1882123301302,
     "prompt_tokens": 4541,
+    "qualified_power_limit_w": 350,
     "status": "passed",
-    "wall_seconds": 9.257941999996547
+    "wall_seconds": 9.244805299997097
   },
   "beta_qualified": true,
   "configuration": {
@@ -48,8 +56,8 @@
   "golden_equivalent": {
     "artifact_type": "ninfer_omp_golden_equivalent_receipt",
     "omp": {
-      "client_version": "omp/18.18.7",
-      "events": 38,
+      "client_version": "omp/18.20.0",
+      "events": 50,
       "tool_results": 1,
       "typed_tool_name": "read"
     },
@@ -63,26 +71,26 @@
     "status": "passed"
   },
   "identity": {
-    "binary_sha256": "e571328699be41d90eff8743d94da26e8f587e48bc32f618013625af7ad0bfe0",
-    "build_profile": "native-v0.8.0-beta.3-tc-rtx3090",
+    "binary_sha256": "2c25588ec5772562ecfe95d25d9221097f85ab67ee51f2a57c70790a55f6f180",
+    "build_profile": "native-v0.8.0-beta.4-tc-rtx3090",
     "build_type": "Release",
-    "config_sha256": "674d52609e22de54a5db20001e25fdd97cd600d498551ecfe48efa53964fc3ac",
+    "config_sha256": "6e4c6fc23946aa1bcbcb165779744853376a44c31406f4b994f96ace7ab62930",
     "configuration_binding": "public-package-with-port-only-scratch-equivalence",
-    "configuration_sha256": "674d52609e22de54a5db20001e25fdd97cd600d498551ecfe48efa53964fc3ac",
+    "configuration_sha256": "6e4c6fc23946aa1bcbcb165779744853376a44c31406f4b994f96ace7ab62930",
     "cuda_architecture": "86",
     "cuda_compiler": "NVIDIA-13.3.73",
     "cuda_toolkit": "13.3.73",
     "cxx_compiler": "MSVC-19.44.35229.0",
-    "deployment_profile": "qwen38-3090-native-v0.8.0-beta.3",
+    "deployment_profile": "qwen38-3090-native-v0.8.0-beta.4",
     "gpu_index": 1,
     "gpu_name": "NVIDIA GeForce RTX 3090",
     "lineage_base_sha": "752dd887be6a9cdb2da6217f3b664b3c03ed33ae",
     "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
     "model_id": "q38-ninfer",
-    "patch_stack_sha": "48c8ac4644322f024b5c3bd5b657af5874567251",
-    "qualified_configuration_sha256": "0fc301e5b75b8bf1fd934f21e9fb977206b883a46e52a485cc5c8fcc9ae7e172",
-    "server_binary_sha256": "e571328699be41d90eff8743d94da26e8f587e48bc32f618013625af7ad0bfe0",
-    "source_commit": "48c8ac4644322f024b5c3bd5b657af5874567251",
+    "patch_stack_sha": "15c3e3959c0a6167f799e9383482ec4e03db9cad",
+    "qualified_configuration_sha256": "daaeca035ca7510340c140d985d49fca224c500969bdc331adf5ae9861a0f2f8",
+    "server_binary_sha256": "2c25588ec5772562ecfe95d25d9221097f85ab67ee51f2a57c70790a55f6f180",
+    "source_commit": "15c3e3959c0a6167f799e9383482ec4e03db9cad",
     "source_dirty": false,
     "target": "Qwen3_5ForCausalLM",
     "upstream_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
@@ -95,7 +103,7 @@
   ],
   "long_session": {
     "completion_tokens": 17,
-    "elapsed_seconds": 189.11851339999703,
+    "elapsed_seconds": 188.45347629999742,
     "exact_output": "ORCHID=493817; COLOR=COBALT",
     "fixture_sha256": "8dcece5215805293490baa0d8204d59a899d8bc3f9d010b0c142ed6624260a9a",
     "prompt_tokens": 130048,
@@ -103,27 +111,27 @@
   },
   "orchestration_evidence": {
     "benchmark_c1": {
-      "receipt_sha256": "afc5b1166c6ae1e360ef7968f3bdd578473757cde95b2db57321f7c54ea8f57b",
+      "receipt_sha256": "85e9f5b328d9b62b50901d2318aae4aff07dc14444dd5afbd781d03db49e5bf7",
       "status": "passed"
     },
     "context_128k": {
-      "receipt_sha256": "cb340b16b5b44f46e14a0ebd597fab5f8cfb5d066948f2cd0c770e82239fb1b2",
+      "receipt_sha256": "7acf99a1be14d410e0db6fbf29a7bccfadd287e3ecaf9c53fa963e7600c16ec5",
       "status": "passed"
     },
     "neutral_build": {
-      "receipt_sha256": "88c6b1690a1fe91a96e45a5d7bef6ea6290f9830d894c22845ad87eeb4c475d3",
+      "receipt_sha256": "f31f14d288697b1b66b1d6ac0f749edc6f886b2d193e42f071084ef31636d631",
       "status": "passed"
     },
     "omp": {
-      "receipt_sha256": "4670172cad1d3fe401cdf3b8979dec623fdc30e190a43403ad201078e0986602",
+      "receipt_sha256": "79051d912d6cfe876a31dfb5dad4889f81da882851cc988049209c70ae478685",
       "status": "passed"
     },
     "package": {
-      "receipt_sha256": "a9a4bd74fb7dfdcacda99e614de9a7d42800b23b8012610eaa5bfce2cb067c9e",
+      "receipt_sha256": "aead1c416d0dcd8cfb9a042692d4753c0d978fe197d0f08646018b158e7daa85",
       "status": "passed"
     },
     "preflight": {
-      "receipt_sha256": "da1ec35194d7d9dc5c6bc4b3bf013d1cf3efeae7369bfa6459b21b64b1915552",
+      "receipt_sha256": "3a42724c4c0c3cb011ed3e80f5732c2b723ae1a015eb2b92f2622308d7f5da9f",
       "status": "passed"
     },
     "pressure_protocol": {
@@ -131,19 +139,19 @@
       "status": "passed"
     },
     "private_path_scan": {
-      "receipt_sha256": "8bc962cd33c33c6e0ed5f2ceaf42fe194049875a01e4ee908e4db87f5362724a",
+      "receipt_sha256": "0a4bdc7d7f923fbf456204b614e548fa0d66e1db0315a57e1b484531bb248828",
       "status": "passed"
     },
     "protocol": {
-      "receipt_sha256": "1cafee8d89069315b207367ca4f319d99a5034ee51fc0bb2453052a405e5f43a",
+      "receipt_sha256": "22f4710c28ff6db77cddb38b8c3f3d48e06a6b88781993757312b1b555c8a848",
       "status": "passed"
     },
     "receipt": {
-      "receipt_sha256": "8fb10b1e9cd8160edf26d8a4f97d003748a5d9ef8fea70d2a6fd26b72f60912c",
+      "receipt_sha256": "138ee999c217df0809804a177c60d0e0e06191d9d9a6e220a341d01ad8c9e65b",
       "status": "passed"
     },
     "restart": {
-      "receipt_sha256": "1d8ffe19bcd53bc90a6045847bd9052cbb4da0f75428c2d91da3106c8e4e6a58",
+      "receipt_sha256": "99e3cadde032659ab30cf1aee0762ec6252c14bc14e2ebf3b44d2897438e25e2",
       "status": "passed"
     },
     "restore": {
@@ -151,28 +159,28 @@
       "status": "passed"
     },
     "rollback": {
-      "receipt_sha256": "f2157c21cbe6bda36082e8908cacb770533c21e9bef950b37b63a23403901fd2",
+      "receipt_sha256": "1dea50d1792e668975b6a9c3aa2b51f6b6d789d9e707fff2c47135836ab4d838",
       "status": "passed"
     },
     "security": {
-      "receipt_sha256": "5126aa4cda757dad4e97057f1e106f4771aca08a1c80e9303ba6f7c0bd54aef6",
+      "receipt_sha256": "bdf0746c4d530a8b570ba20733c72fae7dc7d8055a3d0db5fa5f5d0730322d8b",
       "status": "passed"
     },
     "transfer_install": {
-      "receipt_sha256": "4a7a897b687aaa599e36d682aacf96525e66dd72ff70848ccc0b7fbb2d8ce47e",
+      "receipt_sha256": "5fa0faab017f0837a9de79bbdc417d4741416f923143a8e464a896b110ccee65",
       "status": "passed"
     }
   },
   "package": {
-    "bytes": 1011087765,
+    "bytes": 1011088657,
     "controller_sha256": "159fba12c85adf4963d271a80c4fb7d3527e2b9043e64e74c43d4981336b1ce3",
-    "dependency_sbom_sha256": "269941ecea0ddcfa5d6fa9d3c0ce3b186428c476e2eda4d25d0fb9c7f6d41f21",
-    "filename": "ninfer-rtx3090-native-v0.8.0-beta.3-windows-x86_64-cuda13.3-rtx3090.tar.gz",
+    "dependency_sbom_sha256": "dbce8372c4a34c85a6ca6ba073021cc30c2bf1a55eb80de99ad965078facecaf",
+    "filename": "ninfer-rtx3090-native-v0.8.0-beta.4-windows-x86_64-cuda13.3-rtx3090.tar.gz",
     "gpu_owner_controller_sha256": "432f06a8e97743e46b1b7d9285e68d4bc361a93d5f25badeaa7c713f147f3334",
     "installer_sha256": "2eedd45d9eab069a755d969ddba0c7f2b309470ec55d41859f4e76b09bb74e4d",
-    "outer_checksums_sha256": "74d33ed824008e5279b9ad2709a56e95e92d99b700c1c39b06026b90ef9c29e9",
-    "sbom_sha256": "8ac165c5a492406f9c2943f1ed7ed3c22da818c8aee75803d4eca341227f628c",
-    "sha256": "bf1ceaa9eb522a8c8d9372bec475d6e4e4666e6a995302cd20035e80ae3e5edd",
+    "outer_checksums_sha256": "d1bce21e6d22fb38b1530937f4fa7ea76c706243ea339058f7c46b84885aec22",
+    "sbom_sha256": "2c01ec37eb7d59427cca329537db5f29039015f33f96e46ced91d77299f31a69",
+    "sha256": "62b9effd87c63e22af76b46171ea34d8b45ed55eed113b2f1be8fd24aab7a785",
     "state_protection_sha256": "baaea4e29cf48ab80ed2fd08935e3e75ec4be119fa77058a03c8b2f739a1c5b8"
   },
   "persistence": {
@@ -199,7 +207,7 @@
       "save_bytes": 643966448
     },
     "managed_stop": {
-      "elapsed_seconds": 7.336,
+      "elapsed_seconds": 7.499,
       "exit_code": null,
       "forced": false,
       "graceful_wait_seconds": 900,
@@ -215,7 +223,7 @@
     },
     "process_replaced": true,
     "restart_counters_reset": true,
-    "restart_seconds": 46.565042899994296,
+    "restart_seconds": 46.953485600010026,
     "secure_erasure_claimed": false,
     "status": "passed",
     "status_schema_version": 2
@@ -223,18 +231,18 @@
   "profile": "DFlash2-K7",
   "protocol": {
     "identity": {
-      "binary_sha256": "e571328699be41d90eff8743d94da26e8f587e48bc32f618013625af7ad0bfe0",
-      "build_profile": "native-v0.8.0-beta.3-tc-rtx3090",
+      "binary_sha256": "2c25588ec5772562ecfe95d25d9221097f85ab67ee51f2a57c70790a55f6f180",
+      "build_profile": "native-v0.8.0-beta.4-tc-rtx3090",
       "build_type": "Release",
-      "config_sha256": "0fc301e5b75b8bf1fd934f21e9fb977206b883a46e52a485cc5c8fcc9ae7e172",
+      "config_sha256": "daaeca035ca7510340c140d985d49fca224c500969bdc331adf5ae9861a0f2f8",
       "cuda_architecture": "86",
       "cuda_compiler": "NVIDIA-13.3.73",
       "cuda_toolkit": "13.3.73",
       "cxx_compiler": "MSVC-19.44.35229.0",
-      "deployment_profile": "qwen38-3090-native-v0.8.0-beta.3",
+      "deployment_profile": "qwen38-3090-native-v0.8.0-beta.4",
       "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
       "model_id": "q38-ninfer",
-      "patch_stack_sha": "48c8ac4644322f024b5c3bd5b657af5874567251",
+      "patch_stack_sha": "15c3e3959c0a6167f799e9383482ec4e03db9cad",
       "source_dirty": false,
       "target": "Qwen3_5ForCausalLM",
       "upstream_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
@@ -325,8 +333,8 @@
     "sha256": "da61aa092bf334cb392cefbc8ca956f71111e24fbdafd55967ff04e3a565f89f",
     "status": "passed"
   },
-  "qualified_utc": "2026-11-12T02:56:13Z",
-  "release_id": "qwen38-3090-native-v0.8.0-beta.3",
+  "qualified_utc": "2026-11-13T17:09:07Z",
+  "release_id": "qwen38-3090-native-v0.8.0-beta.4",
   "restoration": {
     "gpu_lease_active": false,
     "incumbent_state": "untouched",
@@ -336,7 +344,7 @@
     "task_state": "Ready"
   },
   "rollback": {
-    "active_release": "qwen38-3090-native-v0.8.0-beta.3-48c8ac464432",
+    "active_release": "qwen38-3090-native-v0.8.0-beta.4-15c3e3959c0a",
     "directions": 0,
     "reason": "first release of the lineage",
     "status": "not_applicable"
@@ -364,9 +372,9 @@
       "scratch": 18211
     },
     "identical_binaries": {
-      "benchmark_sha256": "a0de1e1f82e5e07ee9cb7d7147b7b792c53baf5ca002a93a15d8f872c62dfb78",
-      "ninfer_sha256": "952d20b5a4976c4181ebb28e85c3107496eb30f106d779209ebcd46f87c927d8",
-      "server_sha256": "e571328699be41d90eff8743d94da26e8f587e48bc32f618013625af7ad0bfe0"
+      "benchmark_sha256": "3166adbfa0ce375b61042b3860a3ae38314fdb3c3c774fdd759bf95c1493e5c0",
+      "ninfer_sha256": "656d7094fdc39ad65e70199f0077d19980c559cc18ab3c418b05e59ae8e17e49",
+      "server_sha256": "2c25588ec5772562ecfe95d25d9221097f85ab67ee51f2a57c70790a55f6f180"
     },
     "identical_support_assets": {
       "controller_sha256": "159fba12c85adf4963d271a80c4fb7d3527e2b9043e64e74c43d4981336b1ce3",
@@ -375,29 +383,29 @@
       "state_protection_sha256": "baaea4e29cf48ab80ed2fd08935e3e75ec4be119fa77058a03c8b2f739a1c5b8"
     },
     "observed_identity": {
-      "binary_sha256": "e571328699be41d90eff8743d94da26e8f587e48bc32f618013625af7ad0bfe0",
-      "build_profile": "native-v0.8.0-beta.3-tc-rtx3090",
+      "binary_sha256": "2c25588ec5772562ecfe95d25d9221097f85ab67ee51f2a57c70790a55f6f180",
+      "build_profile": "native-v0.8.0-beta.4-tc-rtx3090",
       "build_type": "Release",
-      "config_sha256": "0fc301e5b75b8bf1fd934f21e9fb977206b883a46e52a485cc5c8fcc9ae7e172",
+      "config_sha256": "daaeca035ca7510340c140d985d49fca224c500969bdc331adf5ae9861a0f2f8",
       "cuda_architecture": "86",
       "cuda_compiler": "NVIDIA-13.3.73",
       "cuda_toolkit": "13.3.73",
       "cxx_compiler": "MSVC-19.44.35229.0",
-      "deployment_profile": "qwen38-3090-native-v0.8.0-beta.3",
+      "deployment_profile": "qwen38-3090-native-v0.8.0-beta.4",
       "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
       "model_id": "q38-ninfer",
-      "patch_stack_sha": "48c8ac4644322f024b5c3bd5b657af5874567251",
+      "patch_stack_sha": "15c3e3959c0a6167f799e9383482ec4e03db9cad",
       "source_dirty": false,
       "target": "Qwen3_5ForCausalLM",
       "upstream_base_sha": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
       "weights_id": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
     },
     "production_route_activation_performed": false,
-    "public_configuration_sha256": "674d52609e22de54a5db20001e25fdd97cd600d498551ecfe48efa53964fc3ac",
+    "public_configuration_sha256": "6e4c6fc23946aa1bcbcb165779744853376a44c31406f4b994f96ace7ab62930",
     "public_package_executed": false,
-    "public_package_sha256": "bf1ceaa9eb522a8c8d9372bec475d6e4e4666e6a995302cd20035e80ae3e5edd",
-    "scratch_configuration_sha256": "0fc301e5b75b8bf1fd934f21e9fb977206b883a46e52a485cc5c8fcc9ae7e172",
-    "scratch_package_sha256": "275d7c78f9e45691388c8e10084dc7b3726e16ecc7d9e1d34470c7c2139c09b4",
+    "public_package_sha256": "62b9effd87c63e22af76b46171ea34d8b45ed55eed113b2f1be8fd24aab7a785",
+    "scratch_configuration_sha256": "daaeca035ca7510340c140d985d49fca224c500969bdc331adf5ae9861a0f2f8",
+    "scratch_package_sha256": "f00705a515ad3e83673c1e5f432d8553d815f982b6e7c77d3bed8e3daedf8e7c",
     "startup_attestation": {
       "gpu_index": 1,
       "gpu_name": "NVIDIA GeForce RTX 3090",
@@ -426,7 +434,7 @@
     "managed_request_log_acl_state_assertions": 1,
     "managed_rollback_directions": 0,
     "null_dacl_rejections": 1,
-    "populated_root_status_milliseconds": 802,
+    "populated_root_status_milliseconds": 871,
     "precreated_root_rejections": 1,
     "prepared_lease_restore_assertions": 0,
     "preplanted_gpu_owner_rejections": 1,

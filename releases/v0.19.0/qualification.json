@@ -25,7 +25,22 @@
   },
   "native_runtime_identity": {
     "repository": "https://github.com/alphastorm/ninfer",
-    "source_commit": "48c8ac4644322f024b5c3bd5b657af5874567251",
+    "source_commit": "15c3e3959c0a6167f799e9383482ec4e03db9cad",
+    "runtime_source_commit": "41f89b310b443481db5917a01a2b45e49f85e723",
+    "source_delta": [
+      "packaging/windows/RELEASE_NOTES.md",
+      "packaging/windows/lanes/rtx3090/release-spec.json",
+      "tests/test_windows_release.py",
+      "tools/qualification/qualify_native.py"
+    ],
+    "serve_inputs_identical": true,
+    "carried_variants": {
+      "rtx4090-windows-native": {
+        "release_tag": "v0.8.0-qwen38-4090-beta.3",
+        "source_commit": "48c8ac4644322f024b5c3bd5b657af5874567251",
+        "carried_from": "v0.18.0"
+      }
+    },
     "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
     "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
   },
@@ -72,15 +87,15 @@
         "beta_qualified": true,
         "installable": true,
         "repository_path": "releases/v0.19.0/qualification/rtx3090.json",
-        "sha256": "e7ac3ab730664a07529572070d4aba1c8ba2c080d04ffe9b2b0d9c7925f2170d",
-        "source_commit": "48c8ac4644322f024b5c3bd5b657af5874567251",
-        "release_tag": "v0.8.0-qwen38-3090-beta.3",
-        "package_sha256": "bf1ceaa9eb522a8c8d9372bec475d6e4e4666e6a995302cd20035e80ae3e5edd",
-        "configuration_sha256": "674d52609e22de54a5db20001e25fdd97cd600d498551ecfe48efa53964fc3ac",
+        "sha256": "9bddbdfd78c5ed5bc0503bd38c0d6d8d57c6a5ad121ca8b2bb6298166dd31b66",
+        "source_commit": "15c3e3959c0a6167f799e9383482ec4e03db9cad",
+        "release_tag": "v0.8.0-qwen38-3090-beta.4",
+        "package_sha256": "62b9effd87c63e22af76b46171ea34d8b45ed55eed113b2f1be8fd24aab7a785",
+        "configuration_sha256": "6e4c6fc23946aa1bcbcb165779744853376a44c31406f4b994f96ace7ab62930",
         "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
         "public_package_executed": false,
-        "scope": "Current selected beta.3 pre-cut 15-phase lane qualification; published-byte authentication and product-route acceptance are separate.",
-        "build_profile": "native-v0.8.0-beta.3-tc-rtx3090"
+        "scope": "Current selected beta.4 pre-cut 15-phase lane qualification; published-byte authentication and product-route acceptance are separate.",
+        "build_profile": "native-v0.8.0-beta.4-tc-rtx3090"
       },
       "rtx4090-windows-native": {
         "status": "passed",
@@ -94,13 +109,13 @@
         "configuration_sha256": "b71a2cff25d671703106474d86fe6a808dc803db28703b6fd7740013fcfee278",
         "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
         "public_package_executed": false,
-        "scope": "Current selected beta.3 pre-cut 15-phase lane qualification; published-byte authentication and product-route acceptance are separate.",
+        "scope": "Carried byte-identical published v0.8.0-qwen38-4090-beta.3 component qualification from source 48c8ac46 (v0.18.0); not fresh hardware qualification, bounded pressure saves or new-client/product-route acceptance.",
         "build_profile": "native-v0.8.0-beta.3-rtx4090"
       }
     },
     "native_publication": {
-      "repository_path": "releases/v0.18.0/qualification/native-publication.json",
-      "sha256": "c37f4a2fdfeccac661d625e2052d40e14dd05bacb03ed20064f82c30127ca6d5"
+      "repository_path": "releases/v0.19.0/qualification/native-publication.json",
+      "sha256": "ac4e523715455fff53dade0ebdacce1673e62ae5f9ffbb14ab33309642a620ad"
     },
     "external_installation_acceptance": {
       "status": "pending",
@@ -112,11 +127,11 @@
     }
   },
   "as_of": "2026-11-13",
-  "status": "runtime-only-stage",
+  "status": "runtime-release-eligible",
   "publication_authorized": false,
   "external_installation_qualified": false,
-  "scope": "Runtime-first draft with the authenticated published RTX 5090 beta.8 component and image, its unchanged qwen38-5090-v0.13.0 configuration and stock OMP 18.20.0 identities. Native beta.4 components, five-route acceptance and three client-platform executions are not yet bound; the carried native rows are v0.18.0 beta.3 placeholders.",
-  "interpretation": "The RTX 5090 release-candidate batch, packaged build identity, published-image lane gate and anonymous asset authentication are current beta.8 receipts. No predecessor native proof, acceptance, waiver or review approval transfers to this stage.",
+  "scope": "RTX 5090 beta.8 (source 41f89b31) and v0.8.0-qwen38-3090-beta.4 (source 15c3e395) exact current component qualification; v0.8.0-qwen38-4090-beta.3 (source 48c8ac46) carried unchanged from v0.18.0 with its byte-identical qualification; stock OMP 18.20.0 identities retained. No product-route or client-platform execution is inferred.",
+  "interpretation": "Runtime/client bytes and decision edges are retained. Current raw parity values, including any exact founder-waived failure, are not rewritten into a pass.",
   "documented_route_acceptance": {
     "status": "pending"
   },
@@ -128,17 +143,73 @@
     "runtime_build_identity": {
       "repository_path": "releases/v0.19.0/qualification/runtime-build-identity.json",
       "sha256": "6f9fc509a698849d78bf3d72846e8cf6b1eaa9e391656b04fac77ef21e71b1c1"
+    },
+    "native_speed_decision": {
+      "repository_path": "releases/v0.19.0/qualification/native-speed-decision.json",
+      "sha256": "bba32162000fe53c4e17d06d8510a082a9bdfc99f4320860a3a6732926f62d18"
+    },
+    "native_identity_decision": {
+      "repository_path": "releases/v0.19.0/qualification/native-identity-decision.json",
+      "sha256": "856ac8d2fd557075a7129a06064eb4dc7f98ee34047ed50bd3be1863525cf19c"
+    },
+    "slow_first_request_parity_decision": {
+      "repository_path": "releases/v0.19.0/qualification/slow-first-request-parity-waiver-class.json",
+      "sha256": "2c418e0de09d3b4bcc8c9c5b543fdcb1abaf76d34e9d67d0bd6379677711f0a5"
+    },
+    "rtx3090_identity_proof": {
+      "status": "passed",
+      "repository_path": "releases/v0.19.0/qualification/rtx3090-windows-native.identity-proof.json",
+      "sha256": "a0e9086ba08c0046b2d34b9ef087ccab07d96985c13222603875e98368f894ff"
+    },
+    "rtx3090_fit": {
+      "status": "passed",
+      "repository_path": "releases/v0.19.0/qualification/rtx3090-windows-native.fit.json",
+      "sha256": "af95eadbadec1c9e3551e1e552a5b369fa96717fd96e886062649eb28e8e60b7"
+    },
+    "rtx3090_speed": {
+      "status": "PASS",
+      "gate_passed": true,
+      "repository_path": "releases/v0.19.0/qualification/rtx3090-speed.json",
+      "sha256": "a9df66a1e666e68c44bbadfb54ff5691dc15e84780a35fa01e2a7bda7e27db03"
+    },
+    "rtx3090_lane": {
+      "status": "passed",
+      "repository_path": "releases/v0.19.0/qualification/rtx3090.json",
+      "sha256": "9bddbdfd78c5ed5bc0503bd38c0d6d8d57c6a5ad121ca8b2bb6298166dd31b66"
+    },
+    "rtx3090_upgrade": {
+      "status": "passed",
+      "scope": "v0.8.0-qwen38-3090-beta.4 against the published beta.3 predecessor; running upgrade, forced-start rollback and interrupted-install repair. Not product-route acceptance.",
+      "provenance": {
+        "evidence_name": "tail-upgrades-terminal.json",
+        "evidence_sha256": "b48f72d43fe328b7b20d31fde586d6975f0bd0c1b4c6705a7ea28e3857e54aca",
+        "source_commit": "15c3e3959c0a6167f799e9383482ec4e03db9cad",
+        "evidence_archive_sha256": {
+          "running": "09ae1f74f35a1293a6252d7920dc6c39dce1c9e50dfab00561b154c14fcb79af",
+          "rollback": "9acc1662249e8471d5df9038167f6958987264f18ec01bc25fff3c927fdd24ec",
+          "repair": "22cabb795c2398f72893bcc3d1e7295a9fe74ffdfcd4f90c943d80e1feb37b01"
+        }
+      },
+      "repository_path": "releases/v0.19.0/qualification/rtx3090-upgrade.json",
+      "sha256": "400236013ae91bd70ba4c8dd9ecdb099f0e5a00b7b7f5ceecd66e97488564b1f"
+    },
+    "rtx3090_agent_parity": {
+      "status": "passed",
+      "raw_passed": true,
+      "accepted_under_exact_waiver": false,
+      "passed_positions": 83,
+      "positions": 83,
+      "repository_path": "releases/v0.19.0/qualification/rtx3090-agent-parity.json",
+      "sha256": "a0e0806f8bead05fb78280e16355be92afe4ba3d052d649e559f6e5dd1d291f8"
     }
   },
   "remaining_release_gates": [
-    "Bind both native beta.4 packages and current selected-profile quality or identity, speed, fit and lane evidence.",
-    "Fresh external-installation acceptance against the published beta.8 runtime and image and the beta.4 native components.",
-    "Fresh stock Oh My Pi 18.20.0 platform and documented-route acceptance, including the changed Windows wire behavior.",
-    "Both native beta.4 post-route campaigns, public installs, restoration and audited retirement.",
-    "Bind the runtime and product review ledger, the final receipt audit and the ordered immutable evidence pins before publication admission."
+    "Prepare the five-route guide and run fresh candidate-bound external-install acceptance, three stock-client platforms, native campaigns/public installs and independent restoration.",
+    "Bind the current product council/combined review ledger; reconcile the receipt audit and immutable evidence pins before publication admission."
   ],
   "receipt_audit": {
     "repository_path": "releases/v0.19.0/qualification/receipt-audit.json",
-    "sha256": "58aa7a6da850ec561f2c95be4c083887c33e1bdf628d22440a489f82729ecbda"
-  }
+    "sha256": "bf02ac2d9ce18f7692aea7e01402ca12d5204ec51ae08f3740368cc0d4191cd7"
+  },
+  "eligibility_scope": "Current component lanes only; external-install acceptance, native public installs/campaigns, product review, audit reconciliation and immutable pins remain binding."
 }

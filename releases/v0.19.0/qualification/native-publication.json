@@ -1,0 +1,95 @@
+{
+  "artifact_type": "omp_ninfer_native_component_publication",
+  "schema_version": 1,
+  "release": "v0.19.0",
+  "as_of": "2026-11-13",
+  "status": "passed",
+  "identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "source_commit": "15c3e3959c0a6167f799e9383482ec4e03db9cad",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+  },
+  "lanes": [
+    {
+      "lane": "rtx3090",
+      "component_tag": "v0.8.0-qwen38-3090-beta.4",
+      "tag_commit": "15c3e3959c0a6167f799e9383482ec4e03db9cad",
+      "source_commit": "15c3e3959c0a6167f799e9383482ec4e03db9cad",
+      "build_profile": "native-v0.8.0-beta.4-tc-rtx3090",
+      "published": true,
+      "published_at": "2026-11-13T18:42:26Z",
+      "authenticated_at_utc": "2026-11-13T18:42:32Z",
+      "publication_evidence_class": "anonymous-public-byte-downloads-and-matching-github-asset-digests",
+      "release_url": "https://github.com/alphastorm/ninfer/releases/tag/v0.8.0-qwen38-3090-beta.4",
+      "outer_checksums_sha256": "d1bce21e6d22fb38b1530937f4fa7ea76c706243ea339058f7c46b84885aec22",
+      "outer_hashed_entries": 10,
+      "total_distribution_files": 11,
+      "assets": [
+        {
+          "name": "Control-GpuOwner.ps1",
+          "sha256": "432f06a8e97743e46b1b7d9285e68d4bc361a93d5f25badeaa7c713f147f3334",
+          "bytes": 17391
+        },
+        {
+          "name": "Control-Release.ps1",
+          "sha256": "159fba12c85adf4963d271a80c4fb7d3527e2b9043e64e74c43d4981336b1ce3",
+          "bytes": 77843
+        },
+        {
+          "name": "Install-Release.ps1",
+          "sha256": "2eedd45d9eab069a755d969ddba0c7f2b309470ec55d41859f4e76b09bb74e4d",
+          "bytes": 88913
+        },
+        {
+          "name": "Protect-StateRoot.ps1",
+          "sha256": "baaea4e29cf48ab80ed2fd08935e3e75ec4be119fa77058a03c8b2f739a1c5b8",
+          "bytes": 16952
+        },
+        {
+          "name": "ninfer-rtx3090-native-v0.8.0-beta.4-source.tar.gz",
+          "sha256": "b48e2aa70a210f75d6c71d5b2412f78f8894d8231c78910d8ca1f89e1a7ad1cd",
+          "bytes": 12594044
+        },
+        {
+          "name": "ninfer-rtx3090-native-v0.8.0-beta.4-windows-x86_64-cuda13.3-rtx3090.SHA256SUMS",
+          "sha256": "39ca23b3a15754d39aa315d687b931f8cf20456d5380f8412debcdad9ff2088a",
+          "bytes": 404
+        },
+        {
+          "name": "ninfer-rtx3090-native-v0.8.0-beta.4-windows-x86_64-cuda13.3-rtx3090.cdx.json",
+          "sha256": "dbce8372c4a34c85a6ca6ba073021cc30c2bf1a55eb80de99ad965078facecaf",
+          "bytes": 31203
+        },
+        {
+          "name": "ninfer-rtx3090-native-v0.8.0-beta.4-windows-x86_64-cuda13.3-rtx3090.spdx.json",
+          "sha256": "2c01ec37eb7d59427cca329537db5f29039015f33f96e46ced91d77299f31a69",
+          "bytes": 34269
+        },
+        {
+          "name": "ninfer-rtx3090-native-v0.8.0-beta.4-windows-x86_64-cuda13.3-rtx3090.tar.gz",
+          "sha256": "62b9effd87c63e22af76b46171ea34d8b45ed55eed113b2f1be8fd24aab7a785",
+          "bytes": 1011088657
+        },
+        {
+          "name": "package-build-receipt.json",
+          "sha256": "1f8e72ba27383647c6e457b6424768c9d3dbba5186a0092ab52e8b0b3a2d9f5f",
+          "bytes": 4508
+        }
+      ],
+      "checksums_asset": {
+        "name": "SHA256SUMS",
+        "sha256": "d1bce21e6d22fb38b1530937f4fa7ea76c706243ea339058f7c46b84885aec22",
+        "bytes": 1129
+      },
+      "actual_hardware_qualification": {
+        "repository_path": "releases/v0.19.0/qualification/rtx3090.json",
+        "sha256": "9bddbdfd78c5ed5bc0503bd38c0d6d8d57c6a5ad121ca8b2bb6298166dd31b66"
+      },
+      "public_package_executed_during_qualification": false,
+      "scope": "Authenticates published selected component bytes and the separately bound pre-cut hardware receipt; no product-route acceptance or publication authority."
+    }
+  ],
+  "publication_authorized_by_this_receipt": false,
+  "product_publication_authorized": false
+}

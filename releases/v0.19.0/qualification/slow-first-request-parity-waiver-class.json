@@ -1,0 +1,85 @@
+{
+  "artifact_type": "omp_ninfer_founder_gate_waiver",
+  "schema_version": 1,
+  "recorded_utc": "2026-11-13T06:25:00Z",
+  "release": "v0.19.0",
+  "decision": "Slow-first-request parity misses (known two-mode restore class) are waived with disclosure; any new failure class goes back to the founder.",
+  "waived": [
+    {
+      "failure_class": "slow-first-request parity miss",
+      "scope": "known two-mode restore class only"
+    }
+  ],
+  "application_rule": "Only the v0.19.0 RTX 3090 native lane; the carried RTX 4090 beta.3 is not re-measured and takes no application. This is a class decision, not a fabricated passing probe or an application to an unspecified failure. Each actual application must bind the exact release, candidate commit, lane component/source/package/server identities, original probe job, failed positions and rules, measured values and failed raw-verdict evidence SHA-256. Preserve raw_passed=false. A genuinely new failure class is not admitted and returns to the founder. No speed, output-identity, fit, durability or other release gate is waived.",
+  "disclosure_required": "Release notes must disclose every waived slow-first-request parity miss, its exact probe job, positions, rules, measured values and the known two-mode restore classification.",
+  "provenance": {
+    "source_sha256": "ffb302ff3e923088fed85ebcf662328e4cb2387c18e290c30b7bf3a490fe0736",
+    "founder_rule": "parity_waiver",
+    "founder_records": [
+      {
+        "release": "v0.18.0",
+        "kind": "founder plan confirmation selecting the parity_waiver rule",
+        "recorded_utc": "2026-11-11T03:43:31Z",
+        "sha256": "ffb302ff3e923088fed85ebcf662328e4cb2387c18e290c30b7bf3a490fe0736"
+      },
+      {
+        "release": "v0.19.0",
+        "kind": "founder authority to cut, qualify and publish the release",
+        "recorded_utc": "2026-11-13T05:46:00Z",
+        "sha256": "00f0e13e8254d60749910ceffd7ecfb1f9b42eb049daf600b2647c65663a4307"
+      },
+      {
+        "release": "v0.19.0",
+        "kind": "founder scope decision: re-cut every engine lane; existing rules kept apart from the same-profile identity-first extension",
+        "recorded_utc": "2026-11-13T06:25:00Z",
+        "sha256": "0997290cebb74306be17a235785a8f80ec60f910f8507d6843d720b0672a8636"
+      },
+      {
+        "release": "v0.19.0",
+        "kind": "founder decision: new native source freeze and full re-qualification of both native lanes; no rule change",
+        "recorded_utc": "2026-11-13T11:58:00Z",
+        "sha256": "4c924f9cd6aefce220e955bc81da82a82efa874993854c529881d15943b6737d"
+      },
+      {
+        "release": "v0.19.0",
+        "kind": "founder decision: carry the RTX 4090 native component unchanged at its published beta.3; only the RTX 3090 native lane is re-cut and bound; no rule change",
+        "recorded_utc": "2026-11-13T17:12:00Z",
+        "sha256": "1309f9e224ac89069a3c15dfac4ccdd355fc563dcc0ac3a596a9586f66742ca8"
+      }
+    ],
+    "projection": "Founder rule retained; release lead binds exact authenticated subjects. This decision is not a measured verdict."
+  },
+  "subjects": {
+    "native": {
+      "rtx3090": {
+        "source_commit": "15c3e3959c0a6167f799e9383482ec4e03db9cad",
+        "candidate_component": "v0.8.0-qwen38-3090-beta.4",
+        "build_profile": "native-v0.8.0-beta.4-tc-rtx3090",
+        "candidate": {
+          "package_sha256": "62b9effd87c63e22af76b46171ea34d8b45ed55eed113b2f1be8fd24aab7a785",
+          "server_binary_sha256": "2c25588ec5772562ecfe95d25d9221097f85ab67ee51f2a57c70790a55f6f180",
+          "configuration_sha256": "6e4c6fc23946aa1bcbcb165779744853376a44c31406f4b994f96ace7ab62930",
+          "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+        },
+        "incumbent_component": "v0.8.0-qwen38-3090-beta.3",
+        "incumbent_build_profile": "native-v0.8.0-beta.3-tc-rtx3090",
+        "incumbent": {
+          "package_sha256": "bf1ceaa9eb522a8c8d9372bec475d6e4e4666e6a995302cd20035e80ae3e5edd",
+          "server_binary_sha256": "e571328699be41d90eff8743d94da26e8f587e48bc32f618013625af7ad0bfe0",
+          "configuration_sha256": "674d52609e22de54a5db20001e25fdd97cd600d498551ecfe48efa53964fc3ac",
+          "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+        }
+      }
+    },
+    "runtime": {
+      "source_commit": "41f89b310b443481db5917a01a2b45e49f85e723",
+      "component": "v0.7.0-qwen38-5090-beta.8",
+      "image_digest": "sha256:c3ec151b992b4989c850a856aebaa463b5bf5728a60aa084906888ce40db6b71",
+      "server_binary_sha256": "147da36b05c2795fb50bb0a38f9756f782f0b05ae08e4fed34a3f58b56c2eec0",
+      "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+      "archive_sha256": "1cff1d73a3d77e0affb53524f75b9be537d955217fff0e4cb0a5577edf9d3378",
+      "build_profile": "rtx5090",
+      "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+    }
+  }
+}

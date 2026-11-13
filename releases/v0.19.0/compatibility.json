@@ -320,17 +320,17 @@
       "installation_mode": "native-windows-package",
       "installable": true,
       "silent_cloud_fallback": false,
-      "release_tag": "v0.8.0-qwen38-3090-beta.3",
-      "source_commit": "48c8ac4644322f024b5c3bd5b657af5874567251",
-      "package_name": "ninfer-rtx3090-native-v0.8.0-beta.3-windows-x86_64-cuda13.3-rtx3090.tar.gz",
-      "package_url": "https://github.com/alphastorm/ninfer/releases/download/v0.8.0-qwen38-3090-beta.3/ninfer-rtx3090-native-v0.8.0-beta.3-windows-x86_64-cuda13.3-rtx3090.tar.gz",
-      "package_sha256": "bf1ceaa9eb522a8c8d9372bec475d6e4e4666e6a995302cd20035e80ae3e5edd",
-      "package_bytes": 1011087765,
+      "release_tag": "v0.8.0-qwen38-3090-beta.4",
+      "source_commit": "15c3e3959c0a6167f799e9383482ec4e03db9cad",
+      "package_name": "ninfer-rtx3090-native-v0.8.0-beta.4-windows-x86_64-cuda13.3-rtx3090.tar.gz",
+      "package_url": "https://github.com/alphastorm/ninfer/releases/download/v0.8.0-qwen38-3090-beta.4/ninfer-rtx3090-native-v0.8.0-beta.4-windows-x86_64-cuda13.3-rtx3090.tar.gz",
+      "package_sha256": "62b9effd87c63e22af76b46171ea34d8b45ed55eed113b2f1be8fd24aab7a785",
+      "package_bytes": 1011088657,
       "maximum_context_tokens": 131072,
       "qualification_receipt": {
         "path": "releases/v0.19.0/qualification/rtx3090.json",
         "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/0a7c8fc07008bf621f3308f436e923498916c1b7/releases/v0.19.0/qualification/rtx3090.json",
-        "sha256": "e7ac3ab730664a07529572070d4aba1c8ba2c080d04ffe9b2b0d9c7925f2170d"
+        "sha256": "9bddbdfd78c5ed5bc0503bd38c0d6d8d57c6a5ad121ca8b2bb6298166dd31b66"
       },
       "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/1cbd84e7221e51186bd7f093a149912d2489625b/qwen3_8_27b.ninfer",
       "model_bytes": 20437521664,
@@ -350,7 +350,7 @@
           "token_embedding_residency": "host-mapped"
         }
       },
-      "build_profile": "native-v0.8.0-beta.3-tc-rtx3090"
+      "build_profile": "native-v0.8.0-beta.4-tc-rtx3090"
     },
     {
       "id": "rtx4090-windows-native",

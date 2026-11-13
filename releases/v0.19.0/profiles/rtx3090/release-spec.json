@@ -2,15 +2,15 @@
   "artifact_type": "ninfer_windows_release_spec",
   "schema_version": 5,
   "lane": "rtx3090",
-  "release_id": "qwen38-3090-native-v0.8.0-beta.3",
-  "release_version": "0.8.0-beta.3",
-  "deployment_profile": "qwen38-3090-native-v0.8.0-beta.3",
-  "build_profile": "native-v0.8.0-beta.3-tc-rtx3090",
+  "release_id": "qwen38-3090-native-v0.8.0-beta.4",
+  "release_version": "0.8.0-beta.4",
+  "deployment_profile": "qwen38-3090-native-v0.8.0-beta.4",
+  "build_profile": "native-v0.8.0-beta.4-tc-rtx3090",
   "build_profiles": {
-    "default": "native-v0.8.0-beta.3-rtx3090",
-    "a8": "native-v0.8.0-beta.3-a8-rtx3090",
-    "tc": "native-v0.8.0-beta.3-tc-rtx3090",
-    "tc-a8": "native-v0.8.0-beta.3-tc-a8-rtx3090"
+    "default": "native-v0.8.0-beta.4-rtx3090",
+    "a8": "native-v0.8.0-beta.4-a8-rtx3090",
+    "tc": "native-v0.8.0-beta.4-tc-rtx3090",
+    "tc-a8": "native-v0.8.0-beta.4-tc-a8-rtx3090"
   },
   "platform": "windows-x86_64-cuda13.3-rtx3090",
   "product_prefix": "ninfer-rtx3090-native",
@@ -107,7 +107,7 @@
         100,
         390
       ],
-      "managed_power_envelope_w": 351,
+      "managed_power_envelope_w": 355,
       "interactive_gpu_memory_threshold_bytes": 1073741824,
       "inherited_on_upgrade": true,
       "actions": [

@@ -1,13 +1,13 @@
 # OMP NInfer — canonical facts
 
-Updated: 2026-11-12 · Published release: v0.18.0 (2026-11-12) · stock Oh My Pi 18.18.7
+Updated: 2026-11-13 · Candidate: v0.19.0 (acceptance pending) · latest published: v0.18.0
 
 Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release layer) → NInfer
 (inference engine) → Qwen3.8 27B (served model).
 
 **Qualified on RTX 5090 · 4090 · 3090**, bound to the exact profiles in
 [`releases/v0.18.0/manifest.json`](../releases/v0.18.0/manifest.json).
-[Get started](QUICKSTART.md) ·
+[Published guide](https://github.com/alphastorm/omp-ninfer/blob/v0.18.0/docs/QUICKSTART.md) ·
 [Download v0.18.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.18.0)
 
 ## What it is
@@ -48,7 +48,25 @@ All of these should be materially true:
 
 See the [decision guide](DECISION_GUIDE.md) for the side-by-side comparison.
 
-## Current release
+## Current candidate: v0.19.0
+
+Prepared, not published or externally accepted. RTX 5090 `v0.7.0-qwen38-5090-beta.8` /
+`source.8` / `runtime-beta.8` binds source `41f89b310b443481db5917a01a2b45e49f85e723`. Native
+RTX 3090 `v0.8.0-qwen38-3090-beta.4` (`native-v0.8.0-beta.4-tc-rtx3090`) binds its descendant
+`15c3e3959c0a6167f799e9383482ec4e03db9cad`, which adds only a qualification check fix and notes; serve sources are identical.
+Native RTX 4090 `v0.8.0-qwen38-4090-beta.3` (default profile, source `48c8ac46`) is carried unchanged from v0.18.0 without
+bounded pressure saves; it re-cuts with the next engine freeze. Stock Oh My Pi is **18.20.0** (source `c308970263ae13744ea15ab67302e3dac840e266`). The model is unchanged.
+
+The RTX 5090 and RTX 3090 engines bound persistently refused pressure saves to six retries or 10 seconds (fork #122).
+Same-profile native identity-first admission needs sealed 80/80 output identity and complete
+speed ABBA; any output difference falls back to the powered arm. Acceptance tools enforce
+space floors, server/Stop failure reporting and audited per-window retirement (#163–#165),
+with #161 follow-up fixes for restoration, log evidence and launcher/route boundaries.
+The RTX 3090 beta.4 component is cut, published and bound; client, route, public-install, restoration, review and final-pin gates remain.
+Use the [published v0.18.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.18.0/docs/QUICKSTART.md)
+until publication; the [prepared guide](QUICKSTART.md) is not install authority.
+
+## Latest published release: v0.18.0
 
 Published release **v0.18.0** (2026-11-12, GitHub `Latest`; superseding `v0.17.0`, 2026-11-10) pins
 unmodified upstream Oh My Pi **18.18.7** (`e325ffc73ab86e03bdd20a91b77d8e2b3964c906`, tree

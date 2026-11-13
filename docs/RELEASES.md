@@ -5,12 +5,28 @@ to NInfer (inference engine) serving Qwen3.8 27B (served model). OMP NInfer vers
 product; component repositories keep their own versions and tags, and the product manifest binds
 the exact combination.
 
-**Navigation:** [Current release (v0.18.0)](#v0180--unified-engine-native-re-cut-and-stock-omp-18187) · [Previous v0.17.0](#v0170--bounded-resume-admission-serving-robustness-and-stock-omp-18186) ·
+**Navigation:** [Candidate v0.19.0](#v0190--prepared-bounded-pressure-save-release-and-stock-omp-18200) · [Latest published (v0.18.0)](#v0180--unified-engine-native-re-cut-and-stock-omp-18187) · [Previous v0.17.0](#v0170--bounded-resume-admission-serving-robustness-and-stock-omp-18186) ·
 [Channels](#channels) · [Version identities](#version-identities) ·
 [Release state transition](#release-state-transition) · [Candidate freeze](#candidate-freeze) ·
 [Next native release sequencing](#next-native-release-sequencing) ·
 [External-install acceptance](#external-install-acceptance) · [Cut procedure](#cut-procedure) ·
 [Release notes](#release-notes)
+
+## v0.19.0 — prepared bounded-pressure-save release and stock OMP 18.20.0
+
+**Candidate; acceptance and publication pending.** Re-cuts RTX 5090 beta.8 from source
+`41f89b310b443481db5917a01a2b45e49f85e723` and the RTX 3090 tc native beta.4 from its descendant `15c3e3959c0a6167f799e9383482ec4e03db9cad` (identical serve sources), retaining the
+published v3 model and authenticated runtime base. The RTX 4090 default native `v0.8.0-qwen38-4090-beta.3` is carried
+unchanged from v0.18.0 (no bounded pressure saves; it re-cuts with the next engine freeze). Fork #122 bounds pressure-save refusal; product acceptance
+adds #163–#165 space/failure/retirement controls and #161 restoration/tooling follow-ups.
+
+Stock OMP 18.20.0 changes rendered system/tool descriptions and Windows shell dispatch;
+source intake is not live acceptance. Native same-profile identity-first admission requires
+sealed byte identity and full speed ABBA, with powered fallback for any output difference.
+No predecessor route, campaign, public-install or review result carries into this candidate.
+All five routes, three clients, both native campaigns/public installs, restoration, councils,
+immutable pins and strict ready checks must close before publication. Latest published stays
+[v0.18.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.18.0).
 
 ## v0.18.0 — unified engine native re-cut and stock OMP 18.18.7
 
