@@ -7,13 +7,13 @@ body:
   - type: markdown
     attributes:
       value: |
-        Use this form only for a fresh install of one qualified lane in the public release from the tagged quickstart. Report content-safe facts, elapsed time, and manual steps—not a raw support bundle. Do not include API keys, usernames, hostnames, IP addresses, private paths, prompts, model output, raw logs, session files, Docker inspection dumps, or source code unless you deliberately choose to publish content you own after redaction.
+        Use this form only for a fresh install of one qualified lane in the public release, following the [quickstart](https://github.com/alphastorm/omp-ninfer/blob/main/docs/QUICKSTART.md) at that release's tag. Report content-safe facts, elapsed time, and manual steps—not a raw support bundle. Do not include API keys, usernames, hostnames, IP addresses, private paths, prompts, model output, raw logs, session files, Docker inspection dumps, or source code unless you deliberately choose to publish content you own after redaction.
   - type: input
     id: release
     attributes:
       label: OMP NInfer release
       description: Exact product tag; `python3 scripts/verify_release.py --require-ready` must pass first.
-      placeholder: v0.3.1
+      placeholder: vX.Y.Z
     validations:
       required: true
   - type: dropdown
@@ -37,7 +37,7 @@ body:
     id: client
     attributes:
       label: Client OS, architecture, and OMP version
-      placeholder: Windows 11 x64, omp/18.0.9
+      placeholder: Windows 11 x64, the version `omp --version` prints
     validations:
       required: true
   - type: input

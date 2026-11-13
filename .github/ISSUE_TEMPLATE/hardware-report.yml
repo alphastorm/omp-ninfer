@@ -12,7 +12,7 @@ body:
     id: release
     attributes:
       label: OMP NInfer release
-      description: Exact product tag, for example v0.3.1.
+      description: Exact product tag (the tag you cloned).
     validations:
       required: true
   - type: input
@@ -82,7 +82,7 @@ body:
         - label: Stateful same-session follow-up passed
         - label: OMP exit/resume passed while NInfer stayed alive
         - label: Disconnected tunnel failed closed without a cloud answer
-        - label: NInfer process-restart continuation passed (qualified native lane only)
+        - label: NInfer process-restart continuation passed
   - type: textarea
     id: notes
     attributes:

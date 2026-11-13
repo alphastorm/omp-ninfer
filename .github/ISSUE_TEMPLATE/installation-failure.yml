@@ -7,7 +7,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Stop at the first failed step. Do not retry unchanged input. Never include API keys, usernames, hostnames, IP addresses, private paths, prompts, model output, raw logs, session files, Docker inspection dumps, or source code unless you deliberately choose to publish content you own after redaction. Security issues belong in private vulnerability reporting.
+        Check [troubleshooting](https://github.com/alphastorm/omp-ninfer/blob/main/docs/TROUBLESHOOTING.md) first. Stop at the first failed step. Do not retry unchanged input. Never include API keys, usernames, hostnames, IP addresses, private paths, prompts, model output, raw logs, session files, Docker inspection dumps, or source code unless you deliberately choose to publish content you own after redaction. Security issues belong in [private vulnerability reporting](https://github.com/alphastorm/omp-ninfer/security/advisories/new).
   - type: input
     id: release
     attributes:
@@ -32,6 +32,8 @@ body:
         - Docker or NVIDIA prerequisite
         - NInfer image or binary verification
         - NInfer startup or authenticated identity
+        - Native Windows package install (Install-Release.ps1)
+        - Native Windows lane start, stop or rollback (Control-Release.ps1)
         - SSH tunnel
         - OMP provider configuration
         - Text or tool turn
@@ -44,7 +46,7 @@ body:
   - type: input
     id: macos
     attributes:
-      label: Mac OS, architecture, and OMP version
+      label: Client OS, architecture, and OMP version
     validations:
       required: true
   - type: input
@@ -61,6 +63,7 @@ body:
         - Fresh install; no NInfer container or provider
         - Existing stopped NInfer container
         - Existing running NInfer container
+        - Existing native Windows install
         - Existing OMP provider configuration
         - Resumed interrupted model download
     validations:
