@@ -420,7 +420,7 @@ def main():
         host('space')
         (prior / 'windows-completion-attempt.json').write_text(json.dumps({'workspace': str(root), 'started_utc': now()}) + '\n')
         save('window-attempt.json', {'attempt': 'explicitly-authorized Windows first-live completion', 'started_utc': now(), 'no_documented_route_runner': True})
-        held, error = False, None
+        held, restored, error = False, False, None
         try:
             acquire_windows_hold(win); held = True
             host('begin', 300)
@@ -435,9 +435,12 @@ def main():
         finally:
             if held:
                 host('restore', 700)
+                restored = True
         collect(narrow=True)
         if error:
-            raise RuntimeError(error + '; Windows-only completion restored before reporting failure')
+            suffix = ('; Windows-only completion restored before reporting failure' if restored else
+                      '; Windows-only completion did not restore: the window hold was not acquired')
+            raise RuntimeError(error + suffix)
         client = json.loads((root / 'windows-structured/receipt.json').read_text(encoding="utf-8"))
         assert client['status'] == 'passed'
         restored = json.loads((root / 'restoration.json').read_text(encoding="utf-8"))
@@ -478,6 +481,7 @@ def main():
             (prior / 'corrected-attempt.json').write_text(json.dumps({'workspace': str(root), 'started_utc': now()}) + '\n')
         save('window-attempt.json', {'started_utc': now(), 'attempt': a.attempt, 'prior_workspace': a.prior_workspace})
         held = False
+        restored = False
         started = False
         tunnel = None
         error = None
@@ -527,12 +531,15 @@ def main():
             if held:
                 try:
                     host('restore', 700)
+                    restored = True
                 except BaseException as restore_error:
                     save('restoration-error.json', {'error': str(restore_error), 'timestamp': now()})
                     raise
         collect()
         if error:
-            raise RuntimeError(error + '; restoration completed before reporting failure')
+            suffix = ('; restoration completed before reporting failure' if restored else
+                      '; host restoration did not run because the window hold was not acquired')
+            raise RuntimeError(error + suffix)
         # Normalize combined phase status, never infer acceptance from process exit alone.
         path = root / 'windows-structured/receipt.json'
         receipt = json.loads(path.read_text(encoding="utf-8"))
