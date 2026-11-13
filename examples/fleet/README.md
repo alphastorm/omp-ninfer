@@ -7,26 +7,27 @@ local forwards (the managed route), never by exposing a listener.
 | Role | Lane | OMP model | Notes |
 | --- | --- | --- | --- |
 | `main` | RTX 5090 container | `ninfer-main/q38-ninfer` | 131,072-token ceiling; durable checkpoints as of v0.4.0 |
-| `heavy` | RTX 4090 native Windows | `ninfer-heavy/qwen3.8-27b` | DFlash2 K=7 profile (v0.16.0–v0.18.0; MTP3 in v0.3.1–v0.15.0); durable DirectStorage checkpoints |
+| `heavy` | RTX 4090 native Windows | `ninfer-heavy/qwen3.8-27b` | DFlash2 K=7 profile (v0.16.0–v0.19.0; MTP3 in v0.3.1–v0.15.0); durable DirectStorage checkpoints |
 
 The RTX 3090 scout role stays deferred: v0.12.0 targets the RTX 3090 as a standalone native
 lane, not as an unattended fleet role, so no scout fragment ships here. Its three-lane form and
 the legacy OMP 18.0.9 instructions for that lane stay at the immutable v0.7.2 tag.
 
-The current fragments target **v0.18.0 / OMP 18.18.7**.
-The RTX 5090 profile uses `v0.7.0-qwen38-5090-beta.7` (source `48c8ac46` on `64d10fbf`, image
-`496195ec`, server `804ef8ac`), profile `qwen38-5090-v0.13.0` (`751d22dc`), model container version
-3 `81f924d4`, and host directory `checkpoints-v018` mounted at `/checkpoints-v013` with mandatory
-`--session-checkpoint-require-origin-auth`; prior server sessions replay from OMP transcripts, never
-from an older checkpoint root. Native RTX 4090 uses `v0.8.0-qwen38-4090-beta.3` (source `48c8ac46` on
+The current fragments target **v0.19.0 / OMP 18.20.0**.
+The RTX 5090 profile uses `v0.7.0-qwen38-5090-beta.8` (source `41f89b31` on `64d10fbf`, image
+`c3ec151b`, server `147da36b`), profile `qwen38-5090-v0.13.0` (`751d22dc`), model container version
+3 `81f924d4`, and host directory `checkpoints-v019` mounted at `/checkpoints-v013` with mandatory
+`--session-checkpoint-require-origin-auth` and a 6-retry / 10 s cap on retryable memory-pressure
+checkpoint-save refusals ([ninfer#122](https://github.com/alphastorm/ninfer/pull/122)); prior server sessions replay from OMP transcripts, never
+from an older checkpoint root. Native RTX 4090 carries `v0.8.0-qwen38-4090-beta.3` unchanged from `v0.18.0` (source `48c8ac46` on
 `64d10fbf`, profile `qwen38-4090-native-v0.8.0-beta.3`, build profile `native-v0.8.0-beta.3-rtx4090`,
-public config `b71a2cff`, package `ac41700a`, server `a5266ae6`), the same published model container
+public config `b71a2cff`, package `ac41700a`, server `a5266ae6`, without bounded pressure-save retries until rebuilt at the next engine freeze), the same published model container
 version 3 `81f924d4` (`qwen3_8_27b-v3.ninfer`), and release-isolated schema 3 checkpoint directory
 `cache/<release-instance-id>/session-checkpoints-v3` (where `<release-instance-id>` is the installed
 release ID such as `qwen38-4090-native-v0.8.0-beta.3-48c8ac464432`) with mandatory
 `--session-checkpoint-require-origin-auth`. Enforced JSON-schema output and 128-character
 Chat/Responses tool names are qualified on both the RTX 5090 container and native lanes. No
-multi-machine fleet completed-work qualification is claimed for v0.18.0; per-lane installation
+multi-machine fleet completed-work qualification is claimed for v0.19.0; per-lane installation
 eligibility follows the exact manifest ready gate. The release uses the
 checksummed binary from the [quickstart](../../docs/QUICKSTART.md). Merge the installed lanes from `models.fragment.yml` into
 `~/.omp/agent/models.yml`; it uses the exact server model ids, per-lane forwards, and key files.

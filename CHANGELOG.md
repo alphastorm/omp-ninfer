@@ -7,40 +7,124 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Mark v0.19.0 as the published release across the README, facts, roadmap, release history,
+  upstream watch, reference docs, site, and brand assets; front-door install links point to
+  `v0.19.0` and `docs/QUICKSTART.md` on `main`.
+
+## [0.19.0] - 2026-11-13
+
 ### Fixed
 
+- Write each native acceptance record that recovery reads back (`preparation.json`,
+  `window.json`, `restoration.json`, `public-install.json`, and Windows client hold records) to a
+  sibling temporary file first and swap it in atomically with `File.Replace` or `File.Move`,
+  leaving the prior bytes and no leftover temporary file on an interrupted write
+  ([#174](https://github.com/alphastorm/omp-ninfer/pull/174),
+  [#161](https://github.com/alphastorm/omp-ninfer/issues/161)).
+- Keep native acceptance restoration running when evidence or free-space writes fail in
+  `scripts/hosts/accept-rtx4090-route.ps1`, copy candidate server logs through `.partial` files
+  without overwriting retained stop logs, and mark `preparation.json` restored only after
+  `restoration.json` is written ([#170](https://github.com/alphastorm/omp-ninfer/pull/170),
+  [#161](https://github.com/alphastorm/omp-ninfer/issues/161)).
+- Report RTX 5090 host restoration in `scripts/hosts/accept-rtx5090-routes.py` failure messages
+  only when the window hold was acquired and `host restore` ran
+  ([#169](https://github.com/alphastorm/omp-ninfer/pull/169),
+  [#161](https://github.com/alphastorm/omp-ninfer/issues/161)).
+- Revalidate `--checkpoint-dir` after `realpath` resolution in
+  `examples/manual-tunnel/start-ninfer.sh` before `chmod 700` so a symlinked parent or trailing
+  slash cannot redirect the release's isolated checkpoint store
+  ([#168](https://github.com/alphastorm/omp-ninfer/pull/168),
+  [#161](https://github.com/alphastorm/omp-ninfer/issues/161)).
 - Derive the read-only upstream watch's incorporated OMP and engine identities from the
   current composition manifest instead of stale watch pins. Separate receipt observations
   from adoption, retain stable evidence identities for unchanged runs, keep full commit/tag
   identities, and report truncated or unfollowed API comparisons as unknown. Title/path
-  labels are triage only; unmapped research baselines remain explicitly declared, not derived.
+  labels are triage only; unmapped research baselines remain explicitly declared, not derived
+  ([#166](https://github.com/alphastorm/omp-ninfer/pull/166)).
 - Refuse native Windows acceptance below a configurable 60 GiB free-space floor before
   spending a window; record preflight, dry-run, acceptance and restored free bytes.
   Apply the same 60 GiB floor to the container acceptance host's WSL workspace, checkpoint
   and Docker filesystems. Use a separate 10 GiB floor for the smaller post-window native
   public-install downloads and smoke so that check can pass before checkpoint retirement.
   Recheck container-host space read-only before every attempt marker or Windows hold, and
-  preserve failed public-install receipts even when their parent workspace does not exist.
+  preserve failed public-install receipts even when their parent workspace does not exist
+  ([#163](https://github.com/alphastorm/omp-ninfer/pull/163)).
 
 ### Added
 
+- Admit decision-authorized native byte-identity proofs for non-default build profiles (tensor-core
+  and Group64 A8 variants: `-tc`, `-a8`, `-tc-a8`) in `scripts/speed_gate.py`,
+  `scripts/bind_native_variant.py`, and `scripts/verify_release.py` only when the hash-bound
+  decision sets `rule.build_variant = "default-or-same-profile-published-incumbent"` and seals the
+  latest ready release's published incumbent of the same lane and build-profile variant; complete
+  paired A/B/B/A (`ABBA`) speed-gate and 80/80 sealed determinism byte identity remain mandatory,
+  and any output difference or profile change requires a 1,120-prompt powered
+  [`EXP-085`](docs/PERFORMANCE.md#experiment-ledger) quality screen
+  ([#171](https://github.com/alphastorm/omp-ninfer/pull/171)).
 - Add explicit native acceptance retirement after the separate public-install check.
   Require a passed/restored, collected, audited window and a stopped baseline; inventory
   each checkpoint generation and its original metadata before deleting only that window's
   session-checkpoint store. Reject failed windows and junction/symlink deletion boundaries.
-  Refuse files outside inventoried generations, except the session digest's current pointer.
+  Refuse files outside inventoried generations, except the session digest's current pointer
+  ([#165](https://github.com/alphastorm/omp-ninfer/pull/165)).
 - Archive native server request, retained stderr and shutdown records after managed Stop;
   fail both host and collected acceptance windows on HTTP 503 rejections, checkpoint
   write errors or incomplete/refused shutdown saves. Record counts without private paths;
   capacity/stale save receipts and client cancellations remain observations, not failures.
   Capture only candidate logs, once per file, with path-free copied/missing/failed names;
-  log or capture-receipt failures never interrupt canonical restoration.
+  log or capture-receipt failures never interrupt canonical restoration
+  ([#164](https://github.com/alphastorm/omp-ninfer/pull/164)).
 
 ### Changed
 
+- Compose v0.19.0 with RTX 5090 `v0.7.0-qwen38-5090-beta.8` (source
+  `41f89b310b443481db5917a01a2b45e49f85e723`, image `c3ec151b`, server `147da36b`, isolated host
+  checkpoint store `checkpoints-v019` on kept profile `qwen38-5090-v0.13.0`), re-cut native RTX
+  3090 `v0.8.0-qwen38-3090-beta.4` (descendant source
+  `15c3e3959c0a6167f799e9383482ec4e03db9cad` with identical serve source, selected build profile
+  `native-v0.8.0-beta.4-tc-rtx3090`, package `62b9effd`, server `2c25588e`, config `6e4c6fc2`,
+  admitted identity-first against published `beta.3` `tc` with `80/80` sealed determinism and
+  `84/84` ABBA output identity at weighted `0.9997` / min `0.9975`), carried native RTX 4090
+  `v0.8.0-qwen38-4090-beta.3` unchanged from `v0.18.0` (source `48c8ac46`, package `ac41700a`,
+  without bounded pressure saves; re-cuts with the next engine freeze), unchanged model container
+  v3 `81f924d4`, and unmodified stock OMP 18.20.0 (`c3089702`, release `443638329`). In the RTX
+  5090 and RTX 3090 runtimes, [fork #122](https://github.com/alphastorm/ninfer/pull/122) bounds
+  retryable pressure-save refusals (`capacity`, `io`, `stale_tag`) to six retries or 10 seconds
+  with one `pressure` / `abandoned` receipt before releasing the continuation, while store-quota
+  refusals (`quota`) remain immediate and terminal without a `pressure` / `abandoned` receipt
+  (deferred coordinator residuals in
+  [fork #123](https://github.com/alphastorm/ninfer/issues/123); native power-check harness
+  diagnostics in [fork #126](https://github.com/alphastorm/ninfer/pull/126) and
+  [fork #127](https://github.com/alphastorm/ninfer/issues/127); product follow-ups in
+  [#176](https://github.com/alphastorm/omp-ninfer/issues/176)). Frozen candidate
+  `6b22f219c7298db4b8fa5c2bc7bb33eb7a37799f` passed all five documented routes (`31/31` blocks),
+  all three stock 18.20.0 clients, both native post-route campaigns, anonymous public installs,
+  audited checkpoint-store retirement, and independent restorations on their first attempts without
+  a waiver (`402.128 s` RTX 5090 hold, `517.0 s` RTX 4090 window, `1,339.4 s` RTX 3090 window; on
+  RTX 3090: `0` HTTP `503` responses, `0` queue timeouts, `0` checkpoint write errors, complete
+  managed `Stop` with `0` refused sessions, `5/5` HTTP `200` on four-way concurrency-2 (`C2`)
+  fanout, and `2/2` committed compactions in proof `9759ea5f` inside
+  [`rtx3090-public-install.json`](releases/v0.19.0/acceptance/rtx3090-public-install.json)). Full
+  evidence is in the [release notes](releases/v0.19.0/NINFER_RELEASE_NOTES.md).
+- Pin stock OMP 18.20.0 without changing the reviewed `models.fragment.yml` or
+  `examples/manual-tunnel/fail-closed.yml` client configuration fragments. On Windows, 18.20.0
+  removes the Windows emulated-bash dialect guidance from the rendered `bash` tool description and
+  advertises runtime builtins ahead of `PATH`, while updating system, `read`, `task`, and `edit`
+  descriptions.
 - Mark v0.18.0 as the published release across the README, facts, roadmap, release history,
   upstream watch, reference docs, site, and brand assets; front-door install links point to
-  `v0.18.0` and `docs/QUICKSTART.md` on `main`.
+  `v0.18.0` and `docs/QUICKSTART.md` on `main`
+  ([#162](https://github.com/alphastorm/omp-ninfer/pull/162)).
+
+### Documentation
+
+- Review stock Oh My Pi `18.18.7 → 18.20.0` (`c308970263ae13744ea15ab67302e3dac840e266`, `1,140`
+  commits / `1,063` changed paths, release `443638329`) and verify all three raw platform binaries
+  and `SHA256SUMS.txt` (`eb25eb06`) in
+  [`docs/measurements/2026-11-13-omp-18200-client-upgrade-review.json`](docs/measurements/2026-11-13-omp-18200-client-upgrade-review.json)
+  ([#167](https://github.com/alphastorm/omp-ninfer/pull/167)).
 
 ## [0.18.0] - 2026-11-12
 
@@ -3189,7 +3273,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.18.0...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.19.0...HEAD
+[0.19.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.17.0...v0.18.0
 [0.17.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.16.2...v0.17.0
 [0.16.2]: https://github.com/alphastorm/omp-ninfer/compare/v0.16.0...v0.16.2
