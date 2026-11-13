@@ -130,10 +130,13 @@ def main():
     p.add_argument('--route-ssh-destination', required=True)
     p.add_argument('--window-dir', required=True, help='Private WSL directory containing window.sh')
     p.add_argument('--attempt', choices=('initial', 'corrected'), default='initial')
+    p.add_argument('--minimum-free-gib', type=int, default=60)
     p.add_argument('--prior-workspace', help='Restored initial evidence root; required for a corrected attempt')
     p.add_argument('--windows-evidence', help='Explicitly authorized Windows-only completion evidence root for final aggregation')
     p.add_argument('--dry-run', action='store_true')
     a = p.parse_args()
+    if not 1 <= a.minimum_free_gib <= 1048576:
+        p.error('--minimum-free-gib must be between 1 and 1048576')
     if not PureWindowsPath(a.windows_workspace).is_absolute():
         p.error('--windows-workspace must be absolute (use forward slashes to avoid shell escaping)')
     if a.dry_run:
@@ -175,7 +178,8 @@ def main():
     def host(action, timeout=120, dry=False, model_id=None):
         args = ['python3', wsl + '/accept-rtx5090-host.py', '--action', action, '--release', a.release, '--candidate', a.candidate,
                 '--workspace', wsl, '--windows-workspace', windows, '--production-image', a.production_image,
-                '--window-dir', a.window_dir, '--restore-after-seconds', str(watchdog_seconds)]
+                '--window-dir', a.window_dir, '--restore-after-seconds', str(watchdog_seconds),
+                '--minimum-free-gib', str(a.minimum_free_gib)]
         if model_id:
             args += ['--model-id', model_id]
         if dry:
@@ -223,7 +227,8 @@ def main():
                 run(argv, label, timeout)
             except RuntimeError as error:
                 missing.append(str(error))
-        host_files = ['host-preflight.json', 'baseline.json', 'restoration.json', 'runtime-observed.json', 'watchdog.json', 'production-restore.log']
+        host_files = ['host-preflight.json', 'baseline.json', 'restoration.json', 'runtime-observed.json', 'watchdog.json', 'production-restore.log',
+                      'free-space-preflight.json', 'free-space-begin.json']
         host_files += ['setup.json', 'beta-setup.log'] if narrow else ['host-route.json', 'host-route.log']
         for name in host_files:
             transfer(['scp', '-q', a.wsl_host + ':' + wsl + '/' + name, root / name], 'collect-' + name, 90)
@@ -412,6 +417,7 @@ def main():
         watchdog_seconds = int(3600 - spent - 600)
         assert watchdog_seconds > 0, 'insufficient remaining envelope including restoration reserve'
         assert not (prior / 'windows-completion-attempt.json').exists(), 'Windows-only completion already attempted'
+        host('space')
         (prior / 'windows-completion-attempt.json').write_text(json.dumps({'workspace': str(root), 'started_utc': now()}) + '\n')
         save('window-attempt.json', {'attempt': 'explicitly-authorized Windows first-live completion', 'started_utc': now(), 'no_documented_route_runner': True})
         held, error = False, None
@@ -456,6 +462,7 @@ def main():
         # Derived before any attempt is recorded or a host changes.
         documented = documented_models()
         freeport()
+        host('space')
         if a.attempt == 'corrected':
             assert a.prior_workspace, 'corrected attempt requires its restored initial evidence'
             prior = Path(a.prior_workspace)

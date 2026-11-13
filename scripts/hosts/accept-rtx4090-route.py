@@ -235,9 +235,13 @@ def main() -> int:
     lineage.add_argument("--first-release", action="store_true")
     p.add_argument("--attempt", type=int, choices=(1, 2), default=1)
     p.add_argument("--window-minutes", type=int, choices=range(15, 46), default=45)
+    p.add_argument("--minimum-free-gib", type=int, default=60,
+                   help="free-space floor on the native checkpoint volume (default: 60 GiB)")
     p.add_argument("--mode", choices=("dry-run", "preflight", "validate", "accept", "restore", "collect"), default="dry-run")
     p.add_argument("--dry-run", action="store_true")
     a = p.parse_args()
+    if not 1 <= a.minimum_free_gib <= 1048576:
+        p.error("minimum free GiB must be between 1 and 1048576")
     route_lane = f"{a.lane}-native"
     provider = f"ninfer-native-{a.lane.removeprefix('rtx')}"
     if not re.fullmatch(r"[0-9a-f]{40}", a.candidate):
@@ -259,7 +263,7 @@ def main() -> int:
     plan = {"release": a.release, "candidate": a.candidate, "mode": a.mode,
             "host": a.host, "workspace": str(w), "remote_workspace": remote,
             "clone": str(clone), "bundle": str(bundle), "attempt": a.attempt,
-            "window_minutes": a.window_minutes,
+            "window_minutes": a.window_minutes, "minimum_free_gib": a.minimum_free_gib,
             "required_hold_paths": a.require_hold,
             "lineage_mode": "first_release" if a.first_release else "upgrade",
             "client_install": {"lane": route_lane, "step": "client-install",
@@ -279,7 +283,8 @@ def main() -> int:
               "Lane": a.lane,
               "Bundle": remote + "\\bundle", "Clone": remote_clone,
               "ExpectedStateSha256": a.expected_state_sha256, "TemporaryPrevious": a.temporary_previous or "",
-              "Attempt": a.attempt, "WindowMinutes": a.window_minutes}
+              "Attempt": a.attempt, "WindowMinutes": a.window_minutes,
+              "MinimumFreeGiB": a.minimum_free_gib}
 
     def invoke(mode: str, name: str, timeout: int, check: bool = True) -> subprocess.CompletedProcess[str]:
         arguments = " ".join("-" + key + " " + quote(value) for key, value in {**params, "Mode": mode}.items())
@@ -363,6 +368,8 @@ $binary=Join-Path $env:LOCALAPPDATA 'OMP\omp.exe';if(-not (Test-Path $binary -Pa
             raise RuntimeError("preflighted script or candidate changed; stage and exercise preflight again before acceptance")
         if (w / "driver-window.json").exists():
             raise RuntimeError("acceptance attempt already spent; use a new workspace for one authorized correction")
+        # Refusal must not consume this workspace's single attempt or enter restoration.
+        invoke("DryRun", "acceptance-dry-run.json", 120)
         start = time.time()
         result: dict[str, object] = {"status": "running", "started_unix": start, "plan": plan}
         (w / "driver-window.json").write_text(json.dumps(result, indent=2) + "\n")

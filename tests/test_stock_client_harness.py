@@ -510,6 +510,9 @@ class WindowsInteropRelayTests(unittest.TestCase):
                     output = json.dumps(image)
                 else:
                     code = 1
+            elif argv == ["docker", "exec", "ninfer-5090-v070p", "df", "-Pk", "/"]:
+                output = "Filesystem 1024-blocks Used Available Capacity Mounted on\n" \
+                         "overlay 209715200 104857600 104857600 50% /\n"
             elif argv[:2] != ["docker", "pull"] and argv[0] != sys.executable:
                 self.fail("unexpected external command: " + repr(argv))
             return subprocess.CompletedProcess(argv, code, output, "")
@@ -520,6 +523,8 @@ class WindowsInteropRelayTests(unittest.TestCase):
         with unittest.mock.patch.object(sys, "argv", self.preflight_argv(workspace)), \
              unittest.mock.patch.object(self.host.Path, "home", return_value=home), \
              unittest.mock.patch.object(self.host, "windows_environment", side_effect=probe), \
+             unittest.mock.patch.object(self.host.shutil, "disk_usage", return_value=shutil._ntuple_diskusage(
+                 200 * 1024 ** 3, 100 * 1024 ** 3, 100 * 1024 ** 3)), \
              unittest.mock.patch.object(self.host.subprocess, "run", side_effect=command), \
              unittest.mock.patch.object(self.host.urllib.request, "urlopen", side_effect=health), \
              unittest.mock.patch("builtins.print"):
@@ -571,6 +576,9 @@ class HostDirectoryRestorationTests(unittest.TestCase):
                 output = json.dumps(self.image)
             else:
                 code = 1  # The beta container is absent throughout this filesystem fixture.
+        elif argv == ["docker", "exec", "ninfer-5090-v070p", "df", "-Pk", "/"]:
+            output = "Filesystem 1024-blocks Used Available Capacity Mounted on\n" \
+                     "overlay 209715200 104857600 104857600 50% /\n"
         elif argv[:2] == ["docker", "rm"]:
             pass
         elif argv[0] == "git":
@@ -598,6 +606,8 @@ class HostDirectoryRestorationTests(unittest.TestCase):
         with unittest.mock.patch.object(sys, "argv", argv), \
              unittest.mock.patch.dict(os.environ), \
              unittest.mock.patch.object(self.host.Path, "home", return_value=self.home), \
+             unittest.mock.patch.object(self.host.shutil, "disk_usage", return_value=shutil._ntuple_diskusage(
+                 200 * 1024 ** 3, 100 * 1024 ** 3, 100 * 1024 ** 3)), \
              unittest.mock.patch.object(self.host.subprocess, "run", side_effect=self.command), \
              unittest.mock.patch.object(self.host.subprocess, "Popen", return_value=types.SimpleNamespace(pid=123)), \
              unittest.mock.patch.object(self.host.urllib.request, "urlopen", side_effect=health), \
@@ -627,6 +637,12 @@ class HostDirectoryRestorationTests(unittest.TestCase):
                 self.action("restore")
             except BlockingIOError:
                 pass
+
+    def test_fixture_begin_and_restore_do_not_read_the_host_free_space(self) -> None:
+        with unittest.mock.patch.object(self.host.shutil, "disk_usage",
+                                        side_effect=AssertionError("fixture read the host free space")):
+            self.action("begin")
+            self.action("restore")
 
     def test_absent_logs_and_checkpoints_are_recorded_created_and_restored_absent(self) -> None:
         parent = self.logs.parent.parent
