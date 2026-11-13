@@ -274,6 +274,33 @@ function Audit($b) {
     $ok=@($checks.Values|Where-Object {$_ -ne $true}).Count -eq 0
     return @{status=$(if($ok){'passed'}else{'failed'});completed_utc=[DateTime]::UtcNow.ToString('o');checks=$checks;after=$after}
 }
+function SaveServerLogs($installed) {
+    $capture=[ordered]@{copied=@();missing=@();failed=@()}
+    foreach($pair in @(@('requests.jsonl','server-requests.jsonl'),@('stderr.log','server-stderr.log'),
+                       @('stderr.log.previous','server-stderr.previous.log'),@('shutdown.json','shutdown.json'))) {
+        try {
+            $destination=Join-Path $Workspace $pair[1]
+            # Copied names include evidence retained from an earlier Stop in this window.
+            if(Test-Path -LiteralPath $destination -PathType Leaf){$capture.copied+=$pair[1];continue}
+            $source=if($null -ne $installed){Join-Path (Join-Path $installed.release_root 'logs') $pair[0]}else{$null}
+            if($null -eq $source -or -not (Test-Path -LiteralPath $source -PathType Leaf)){
+                $capture.missing+=$pair[1];continue
+            }
+            Copy-Item -LiteralPath $source -Destination $destination -ErrorAction Stop
+            $capture.copied+=$pair[1]
+        } catch {$capture.failed+=$pair[1]}
+    }
+    # A full or unavailable evidence volume must not prevent either restoration leg.
+    try{SaveJson (Join-Path $Workspace 'server-log-capture.json') $capture}
+    catch{Write-Warning 'server log capture receipt could not be written' -WarningAction Continue}
+    # Three launches, but only two stderr files survive the server's own rotation:
+    # initial install launch covered by requests only.
+}
+function AssertServerHealth {
+    & py -3 (Join-Path $Workspace 'accept-rtx4090-route.py') server-health --evidence $Workspace |
+        Out-File -Encoding UTF8 (Join-Path $Workspace 'server-health.stdout.log')
+    if($LASTEXITCODE -ne 0){throw 'server health evidence failed'}
+}
 function Restore {
     $started=[DateTime]::UtcNow;$b=ValidateSnapshot $baseline;EnableExactAcl
     $prep=ReadJson $journal
@@ -282,7 +309,10 @@ function Restore {
     # controller rejects that state; skip Stop only for this mode, then prove quiescence.
     $current=if(Test-Path "$StateRoot\state.json"){ReadJson "$StateRoot\state.json"}else{$null}
     if($null -ne $current -and -not [string]::IsNullOrWhiteSpace([string]$current.active_release)) {
-        Control Stop 'restoration-stop.json'
+        # The baseline's active instance is the candidate; preparation may still have the
+        # incumbent active when the documented install fails before candidate activation.
+        $candidateRecord=$current.releases.PSObject.Properties[[string]$b.observable.active_release]
+        try{Control Stop 'restoration-stop.json'}finally{SaveServerLogs $(if($null -ne $candidateRecord){$candidateRecord.Value}else{$null})}
     } elseif(-not $FirstRelease){throw 'restoration requires an active lifecycle record'}
     $task=Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
     if(@(Get-CimInstance Win32_Process -Filter "Name='ninfer-serve.exe'").Count -ne 0 -or
@@ -531,7 +561,8 @@ try {
         if($remaining -lt 120){throw 'window reserve reached before native probes'}
         if((Child NativeProbes $remaining) -ne 0){throw 'native profile acceptance probes failed'}
     }
-    $boundary='structured-outage';Control Stop 'outage-stop.json'
+    $boundary='structured-outage'
+    try{Control Stop 'outage-stop.json'}finally{SaveServerLogs $installed}
     if((Child Offline 90) -ne 0){throw 'structured fail-closed probe failed'}
     $boundary='behavior-evidence';$logs=@(Get-ChildItem "$Workspace\route-home\.omp" -File -Recurse|Where-Object {$_.Name -like '*.log' -or $_.Name -like '*.jsonl'})
     New-Item -ItemType Directory -Force "$Workspace\client-logs"|Out-Null
@@ -541,6 +572,7 @@ try {
 finally {
     if($effect){$restored=Restore}
     else{$restored=Audit $b;SaveJson "$Workspace\restoration.json" $restored}
+    try{AssertServerHealth}catch{if(-not $failure){$failure=$_.Exception.Message;$boundary='server-health'}}
     SaveJson "$Workspace\window.json" @{status=$(if($failure -or $restored.status -ne 'passed'){'failed'}else{'passed_and_restored'});release=$Release;candidate=$Candidate;attempt=$Attempt;started_utc=$started.ToString('o');completed_utc=[DateTime]::UtcNow.ToString('o');elapsed_seconds=([DateTime]::UtcNow-$started).TotalSeconds;route_exit=$routeExit;first_failing_boundary=$(if($failure){$boundary}else{$null});error=$failure;restoration_status=$restored.status}
 }
 if($restored.status -ne 'passed'){throw 'restoration audit failed'}
