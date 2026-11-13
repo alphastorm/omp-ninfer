@@ -331,11 +331,16 @@ def main() -> int:
     p.add_argument("--window-minutes", type=int, choices=range(15, 46), default=45)
     p.add_argument("--minimum-free-gib", type=int, default=60,
                    help="free-space floor on the native checkpoint volume (default: 60 GiB)")
-    p.add_argument("--mode", choices=("dry-run", "preflight", "validate", "accept", "restore", "collect"), default="dry-run")
+    p.add_argument("--mode", choices=("dry-run", "preflight", "validate", "accept", "restore", "collect", "retire"), default="dry-run")
+    p.add_argument("--public-install-receipt",
+                   help="absolute on-host receipt for this candidate's separate public-install check; required to retire")
     p.add_argument("--dry-run", action="store_true")
     a = p.parse_args()
     if not 1 <= a.minimum_free_gib <= 1048576:
         p.error("minimum free GiB must be between 1 and 1048576")
+    if a.mode == "retire" and (not a.public_install_receipt or
+                              not re.match(r"^[A-Za-z]:[\\/]", a.public_install_receipt)):
+        p.error("retire requires --public-install-receipt as an absolute Windows path")
     route_lane = f"{a.lane}-native"
     provider = f"ninfer-native-{a.lane.removeprefix('rtx')}"
     if not re.fullmatch(r"[0-9a-f]{40}", a.candidate):
@@ -379,6 +384,8 @@ def main() -> int:
               "ExpectedStateSha256": a.expected_state_sha256, "TemporaryPrevious": a.temporary_previous or "",
               "Attempt": a.attempt, "WindowMinutes": a.window_minutes,
               "MinimumFreeGiB": a.minimum_free_gib}
+    if a.public_install_receipt:
+        params["PublicInstallReceipt"] = a.public_install_receipt
 
     def invoke(mode: str, name: str, timeout: int, check: bool = True) -> subprocess.CompletedProcess[str]:
         arguments = " ".join("-" + key + " " + quote(value) for key, value in {**params, "Mode": mode}.items())
@@ -404,6 +411,18 @@ foreach($name in @('baseline','preflight-snapshot')) {if(Test-Path (Join-Path $w
         destination = w / "evidence"
         destination.mkdir(exist_ok=True)
         run(["tar", "-xzf", str(w / "evidence.tar.gz"), "-C", str(destination)], timeout=60)
+        bound = {"window": "window.json", "final_audit": "final-audit.json", "restoration": "restoration.json"}
+        if all((destination / name).is_file() for name in bound.values()):
+            collection = {"status": "collected", "release": a.release, "candidate": a.candidate,
+                          "collected_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                          "archive_sha256": sha(w / "evidence.tar.gz"),
+                          **{key + "_sha256": sha(destination / name) for key, name in bound.items()}}
+            encoded = base64.b64encode(json.dumps(collection).encode("utf-8")).decode("ascii")
+            code = "$ErrorActionPreference='Stop';[IO.File]::WriteAllText(" + quote(remote + "\\collection.json") + \
+                ",[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String(" + quote(encoded) + \
+                ")),[Text.UTF8Encoding]::new($false))"
+            ssh(a.host, code, log=w / "collection-receipt.log", timeout=30)
+            (w / "driver-collection.json").write_text(json.dumps(collection, indent=2) + "\n", encoding="utf-8")
 
     def sync_window_failure() -> None:
         # The composer does not read behavior-evidence.json: retain its failed status
@@ -511,6 +530,29 @@ $binary=Join-Path $env:LOCALAPPDATA 'OMP\omp.exe';if(-not (Test-Path $binary -Pa
         result = invoke("Restore", "independent-restoration.log", 600, check=False)
         collect()
         return result.returncode
+    elif a.mode == "retire":
+        window = json.loads((w / "driver-window.json").read_text(encoding="utf-8"))
+        if (window.get("status") != "passed_and_restored" or window.get("behavior_status") != "passed"
+                or any(window.get(key) != 0 for key in ("accept_exit", "restoration_exit", "audit_exit"))
+                or window.get("transport_error") or window.get("behavior_error")):
+            raise RuntimeError("retire requires a passed driver window without a failing boundary")
+        marker = w / "driver-collection.json"
+        if not marker.is_file():
+            raise RuntimeError("retire requires completed evidence collection")
+        collection = json.loads(marker.read_text(encoding="utf-8"))
+        evidence = w / "evidence"
+        if (collection.get("status") != "collected" or collection.get("release") != a.release
+                or collection.get("candidate") != a.candidate
+                or collection.get("archive_sha256") != sha(w / "evidence.tar.gz")
+                or any(collection.get(key + "_sha256") != sha(evidence / name) for key, name in
+                       (("window", "window.json"), ("final_audit", "final-audit.json"), ("restoration", "restoration.json")))):
+            raise RuntimeError("retire collection binding differs")
+        behavior = json.loads((evidence / "behavior-evidence.json").read_text(encoding="utf-8"))
+        if behavior.get("status") != "passed" or not behavior.get("checks") or not all(
+                value is True for value in behavior["checks"].values()):
+            raise RuntimeError("retire requires passed collected behavior evidence")
+        invoke("Retire", "retirement-driver.log", 600)
+        collect()
     else:
         collect()
         if (w / "evidence" / "route.json").exists():

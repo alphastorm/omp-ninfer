@@ -19,6 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add explicit native acceptance retirement after the separate public-install check.
+  Require a passed/restored, collected, audited window and a stopped baseline; inventory
+  each checkpoint generation and its original metadata before deleting only that window's
+  session-checkpoint store. Reject failed windows and junction/symlink deletion boundaries.
+  Refuse files outside inventoried generations, except the session digest's current pointer.
 - Archive native server request, retained stderr and shutdown records after managed Stop;
   fail both host and collected acceptance windows on HTTP 503 rejections, checkpoint
   write errors or incomplete/refused shutdown saves. Record counts without private paths;
