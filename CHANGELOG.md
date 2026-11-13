@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Derive the read-only upstream watch's incorporated OMP and engine identities from the
+  current composition manifest instead of stale watch pins. Separate receipt observations
+  from adoption, retain stable evidence identities for unchanged runs, keep full commit/tag
+  identities, and report truncated or unfollowed API comparisons as unknown. Title/path
+  labels are triage only; unmapped research baselines remain explicitly declared, not derived.
 - Refuse native Windows acceptance below a configurable 60 GiB free-space floor before
   spending a window; record preflight, dry-run, acceptance and restored free bytes.
   Apply the same 60 GiB floor to the container acceptance host's WSL workspace, checkpoint
