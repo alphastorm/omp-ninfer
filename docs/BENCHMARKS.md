@@ -60,6 +60,181 @@ four-way `C2` fanout, and `2/2` committed compactions in one session in proof `9
 | RTX 3090 native Windows | `v0.8.0-qwen38-3090-beta.4` (source `15c3e395`, package `62b9effd`, server `2c25588e`, model `81f924d4`) | `benchmark_c1` (4,541 prompt / 1,024 completion tokens, DFlash2 K=7) | **227.19 tok/s** decode at **84.04%** DFlash2 acceptance; **978.19 tok/s** prefill; 9.245 s wall, 22,584 MiB peak, 350.68 W peak (`350.0 W` enforced cap across all `56` samples, `0` over `355.0 W` envelope) | [`releases/v0.19.0/qualification/rtx3090.json`](../releases/v0.19.0/qualification/rtx3090.json) |
 | RTX 3090 native Windows | `v0.8.0-qwen38-3090-beta.4` (source `15c3e395`, package `62b9effd`, server `2c25588e`, model `81f924d4`) | `persistence`, `protocol`, `state_security` | **passed** (1,647 cached tokens after explicit save and 1,650 after graceful `stop-event` flush across 46.953 s restart with replaced process and cold-baseline counter match; canonical schema 2 product protocol at full 20,867.734375 MiB and reduced 17,878.578125 MiB shared Host budgets without the historical `agent_protocol.py` override, including Chat/Responses JSON-schema output and 128-character tool names; `state_security` passed with `871 ms` populated-root status; isolated scratch-lineage rollback `not_applicable`, zero directions, with `3/3` `v0.8.0-beta.3` upgrade/rollback/repair rehearsals passed separately in [`rtx3090-upgrade.json`](../releases/v0.19.0/qualification/rtx3090-upgrade.json) `40023601`; 370 W restored on stop) | [`releases/v0.19.0/qualification/rtx3090.json`](../releases/v0.19.0/qualification/rtx3090.json) |
 
+## Method
+
+- **`prefill_curve` (RTX 5090 container) and `long_session` (native Windows):** Exact retrieval at
+  **130,048 prompt tokens** (17 completion tokens) from the same fixture against the 131,072-token
+  context ceiling. The gate verifies exact needle output (`ORCHID=493817; COLOR=COBALT`) rather than
+  perplexity. Only `prefill_curve` records the server's prefix-cache counters (zero hit tokens, so
+  its figure is a cold start); the native `long_session` receipts record wall time and the exact
+  output, not cache counters.
+- **`decode` (RTX 5090 container):** A 2,048-completion-token generation from a 118-token prompt on
+  the published deployment profile, recording server-side decode throughput
+  (`decode_tokens_per_second`), client-side wall throughput
+  (`completion_tokens_per_second_wall`), speculative draft acceptance rate, and tokens committed per
+  verify round.
+- **`benchmark_c1` (native Windows RTX 4090 and RTX 3090):** Single-request (`C1`) generation of
+  1,024 completion tokens after 4,541 computed prompt tokens with no prefix hit, recording prefill
+  throughput, decode throughput, speculative acceptance (DFlash2 K=7 in `v0.16.0`–`v0.19.0`; MTP3 in `v0.3.1`–`v0.15.0`), peak VRAM, and peak board power. C1 is
+  trajectory-sensitive: changes in prefill summation order or fixture length shift its acceptance
+  and decode rate, so results apply only to the exact package, machine, and profile.
+- **`durability` / `persistence` and `agent_protocol`:** Authenticated session identity, OpenAI
+  Responses continuation (`previous_response_id`), sibling forks, parent deletion (HTTP 404 before
+  and after a server restart with no resurrection while surviving descendants and live siblings
+  continue at HTTP 200), and checkpoint restoration across a server restart (including managed-stop
+  flush of unpublished sessions on the native lanes and save-before-evict / publication-barrier
+  checks on the RTX 5090 lane). Checkpoints remain best effort: a crash or an expired graceful wait
+  can lose unsaved work, and restoration requires the same runtime binary, model, profile, and
+  session credentials.
+- **`fanout` and warm arrival:** Multiple agent branches forking from a shared prefilled
+  `previous_response_id` base (57,853- and 67,681-token templates on the RTX 5090), verifying
+  whether sibling continuations stay on `private_long_anchor` both in-process and after a checkpoint
+  restore (`resume-first` and `fork-first` arrival orders).
+- **Warm-vs-cold caption rule:** Warm versus cold figures on this page always compare a continuation
+  served from **retained session state** (`previous_response_id`, attested by
+  `usage.input_tokens_details.cached_tokens`) against a **fresh-process cold start** (or a forced
+  full prefill of an equivalent-length prompt that cannot reuse any prefix), never against an
+  ordinary in-process cached follow-up. Checkpoint restore duration, model reload time, and
+  post-restoration server-side TTFT have distinct timing boundaries and are never combined into a
+  restart speedup ratio.
+
+## Charts
+
+![RTX 5090 prefill throughput (v0.3.0 runtime, historical) holding above 2,100 tokens per second from 3,193.77 tok/s at 7,680 prompt tokens to 2,199.41 tok/s at 130,048, with exact retrieval at every point](../assets/chart-prefill.png)
+
+*Historical v0.3.0 — RTX 5090 container lane (`sm_120a`, MTP3, BF16 KV, C1):* cold-process prefill
+throughput across the context window, from 3,193.77 tok/s at 7,680 prompt tokens to 2,199.41 tok/s
+at 130,048 prompt tokens, with exact needle retrieval verified at every point (the graphic footer
+also notes historical v0.4.0's 2,186.3 tok/s at 130,448 tokens). Current `v0.19.0` RTX 5090
+130,048-token retrieval is **56.67 s** (`56.668 s` wall, **2,294.9 tok/s** wall, **56.55 s** server prefill) on `v0.7.0-qwen38-5090-beta.8` in the table above (`56.90 s` / `2,285.7 tok/s` wall on `v0.18.0` `beta.7`; `56.63 s` / `2,296.5 tok/s` wall on `v0.17.0` `beta.6`; `56.49 s` / `2,302.3 tok/s` wall on `v0.16.2` `beta.5`; `56.62 s` / `2,297.0 tok/s` wall on `v0.16.0` `beta.4`; `57.00 s` / `2,281.5 tok/s` wall on `v0.14.0`–`v0.15.0` `beta.3`).
+
+![Decode throughput per qualified lane on its own shipped profile: RTX 5090 at 144.8 tok/s with MTP3 on v0.4.0 agent-shaped, RTX 3090 at 90.17 tok/s with MTP3 on v0.3.0, RTX 4090 at 97.69 tok/s peak with MTP3 on v0.3.1](../assets/chart-decode.png)
+
+*Historical v0.3.0 / v0.3.1 / v0.4.0 — single-request MTP3 decode per lane:* RTX 5090 container on
+historical v0.4.0 (144.8 tok/s agent-shaped MTP3, BF16 KV), RTX 3090 native Windows on historical
+v0.3.0 (90.17 tok/s C1 MTP3 at 93.43% acceptance under the 300 W cap), and RTX 4090 native Windows
+on historical v0.3.1 (97.69 tok/s peak MTP3, 107,851-token restored continuation). Current `v0.19.0`
+DFlash2 K=7 decode rates (RTX 5090 `v0.7.0-qwen38-5090-beta.8` at **181.71 tok/s** server / **180.20 tok/s** wall;
+carried RTX 4090 `v0.8.0-qwen38-4090-beta.3` `C1` at **253.71 tok/s**; RTX 3090 `v0.8.0-qwen38-3090-beta.4` (`tc`) `C1` benchmark at **227.19 tok/s**) are in the current results table above.
+
+![Historical v0.4.0 RTX 5090 retained-state vs fresh-process cold rebuild request wall time and separate Docker restart timing boundaries](../assets/chart-warm-cold.png)
+
+*Historical v0.4.0 — RTX 5090 container lane (2026-08-30, one RTX 5090, one sample per point):*
+retained session state versus fresh-process cold rebuild at 109,594 tokens (1.79 s warm request
+wall time vs 47.92 s cold request wall time,
+[`2026-08-30-warm-vs-cold-v04.json`](measurements/2026-08-30-warm-vs-cold-v04.json)), shown beside
+the separate Docker restart observation at 109,589 retained tokens (24.8 s end-to-end including
+first-touch restore of a 7.95 GB checkpoint, 56.6 s separately recorded model reload, and 0.778 s
+server TTFT after restoration,
+[`2026-08-30-rtx5090-durable-qualification.json`](measurements/2026-08-30-rtx5090-durable-qualification.json)).
+Different timing boundaries are not a restart speedup ratio.
+
+## Model quality at this quantization
+
+Published upstream by [Neroued/ninfer](https://github.com/Neroued/ninfer#evaluation) for its
+registered `Qwen3.8-27B` `groupwise-int` and `nvfp4` artifacts under MTP3 (EvalScope 1.9.0, 0-shot,
+one sample per problem, thinking enabled). The `groupwise-int` row evaluates the MTP3
+`groupwise-int` artifact family (the 18,210,531,328-byte `eec39564` artifact served on the native
+RTX 4090 and RTX 3090 MTP3 lanes through v0.13.0, and on the RTX 5090 lane prior to v0.10.0), not
+the separate 20,437,336,576-byte DFlash2-enabled `0634abb0` artifact served on the RTX 5090
+container lane in v0.10.0–v0.12.2 (whose 1,184 tensor payloads and six frontend resources match the
+v0.13.0–v0.19.0 container version 3 `81f924d4` artifact served across all three lanes in v0.13.1–v0.19.0):
+
+| Artifact profile | AIME 2025 | AIME 2026 | GPQA-Diamond | ERQA | RealWorldQA |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Qwen3.8-27B `groupwise-int` (MTP3 artifact `eec39564`) | 96.67% | 96.67% | 87.37% | 66.25% | 82.22% |
+| Qwen3.8-27B `nvfp4` (MTP3) | 96.67% | 96.67% | 90.40% | 66.25% | 83.53% |
+
+These are single-sample runs on small question sets (30 and 198 items) under one evaluation
+profile: a sanity signal that the quantization preserves capability, not a leaderboard claim. On
+the RTX 5090 lane, DFlash2 K=7 with BF16 KV and artifact `0634abb0` was evaluated separately against
+the shipped MTP3 baseline on the 1,120-prompt powered role-corpus quality screen in
+[EXP-085](measurements/2026-10-01-dflash2-powered-quality-screen-rtx5090.json) and
+[EXP-094](measurements/2026-10-03-q4-query-key-tensor-cores-rtx5090.json), and on the native
+Windows RTX 3090 and RTX 4090 lanes, DFlash2 K=7 with INT8 KV and artifact `81f924d4` (`Q4_G64_FP16`
+draft MLP and host-mapped `token_embedding`) is evaluated against the sealed `v0.14.0` MTP3
+production arms on the same 1,120-prompt powered screen and 80-prompt fresh-cache determinism set in
+`EXP-101` and `EXP-102` (see [`PERFORMANCE.md`](PERFORMANCE.md#experiment-ledger)).
+
+## Engine campaign highlights
+
+The NInfer engine's published performance campaign — measured and documented upstream by
+[Neroued/ninfer](https://github.com/Neroued/ninfer#performance) on one RTX 5090 with INT8 KV and
+different artifacts/settings than the shipped product profiles:
+
+| Published upstream measurement | Result |
+| --- | --- |
+| Qwen3.6-35B-A3B prefill at a 7,680-token prompt | 15,544 tok/s |
+| Qwen3.6-27B `nvfp4` prefill at a 7,680-token prompt | 11,191 tok/s (3.48× groupwise-int) |
+| Qwen3.6-35B-A3B saturated decode at concurrency 8 | 1,313.8 aggregate tok/s |
+| Qwen3.6-27B `nvfp4` saturated decode at concurrency 8 | 1,146.9 aggregate tok/s (5.67× C=1) |
+| Qwen3.8-27B `nvfp4` MTP3 structured output | 219.8 tok/s at 90.8% acceptance |
+
+Those results are not product claims: the shipped v0.19.0 profiles are `Qwen3.8-27B` `groupwise-int`
+(model container version 3 `81f924d4`) with DFlash2 K=7 across all three lanes — BF16 KV and two
+requests in flight on the RTX 5090 container lane, INT8 KV, `sm_86` small-T tensor-core verify, and
+two requests in flight over one shared 131,072-token pool on the native RTX 3090 Windows lane, and
+INT8 KV and one active request on the carried native RTX 4090 Windows lane — whose qualified numbers are in
+[Current qualified results — v0.19.0](#current-qualified-results--v0190). They show the headroom of
+the engine family this product rides on. Full methodology:
+[upstream performance document](https://github.com/Neroued/ninfer/blob/master/docs/performance.md).
+
+Measured on the product build on 2026-09-04 with the frozen agent corpus, the Qwen3.8-27B `nvfp4`
+artifact prefilled 6,089 tok/s against 2,740 tok/s for the pinned `groupwise-int` artifact on the
+RTX 5090 (2.22×, INT8 KV, MTP3) and decoded 3.5% slower; with the shipped BF16 KV it cannot hold
+131,072-token context on 32 GB. It is not adopted; the receipts and the quality screen are in
+[`PERFORMANCE.md`](PERFORMANCE.md#experiment-ledger) (EXP-008).
+
+## Community results
+
+Community leaderboard. One row per verified environment; newest first. Submit yours with the
+[performance result form](https://github.com/alphastorm/omp-ninfer/issues/new?template=benchmark-report.yml)
+after the documented acceptance checks pass.
+
+| Date | GPU | VRAM | Topology | Release | Decode tok/s | MTP accept | Long-context check | Source |
+| --- | --- | --- | --- | --- | ---: | ---: | --- | --- |
+| 2026-08 | RTX 5090 | 32 GiB | Windows 11 + Docker Desktop WSL2 | v0.3.0 | 240.30 | 99.87% | 130,048 tokens, exact | [qualification](../releases/v0.3.0/qualification/rtx5090.json) (maintainer) |
+| 2026-08 | RTX 5090 | 32 GiB | Windows 11 + Docker Desktop WSL2 | v0.2.0-beta.1 | 235.02 | 99.87% | 130,048 tokens, exact | [qualification](../releases/v0.2.0-beta.1/qualification.json) (maintainer) |
+| 2026-08 | RTX 4090 | 24 GiB | Native Windows 11 x64 | v0.2.0-beta.1 | 52.330 | — (MTP0 profile) | 102,075-token restored continuation after process restart | [qualification](../releases/v0.2.0-beta.1/qualification/rtx4090.json) (maintainer) |
+| 2026-08 | RTX 3090 | 24 GiB | Native Windows 11 x64 | v0.3.0 | 90.17 | 93.43% | 64,512 tokens, exact | [qualification](../releases/v0.3.0/qualification/rtx3090.json) (maintainer) |
+
+Submission rules:
+
+1. Run the exact ready release (`python3 scripts/verify_release.py --require-ready` passes) on the
+   documented topology.
+2. Report only content-safe values: hardware, driver, versions, throughput, acceptance, and check
+   results. No prompts, outputs, hostnames, or raw logs.
+3. State the measurement method and timing boundary (server-side harness or client-side wall time).
+   Stock OMP has no built-in appliance benchmark command; use the component qualification harnesses
+   and documented route scripts.
+4. Rows are added after a maintainer matches the report against the release identities.
+
+## Benchmarks we still want
+
+Planned measurements that would sharpen the picture; contributions welcome
+(see [`PERFORMANCE.md`](PERFORMANCE.md)):
+
+- **Warm vs cold turn latency sweep** on the product profile: the first 28K/89K pair is measured
+  above; the fuller sweep — 10K/37K/100K-token sessions with repetitions and client-side vantage —
+  remains open.
+- **End-to-end OMP turn latency distribution** on Golden-class agent tasks, client-measured.
+- **Matched MTP depth sweep (MTP0/3/5/7)** on one unchanged artifact and context profile,
+  measured on an agent-shaped corpus rather than a fixed decode fixture.
+- **Concurrency curves** for future 3090/4090 profiles only after exact memory-admission gates are
+  defined.
+
+Publishing rule: a new number enters this page only with its receipt, exact profile, and machine
+identity, and product claims change only through a new qualification binding
+(see [`RELEASES.md`](RELEASES.md)).
+
+## Records
+
+Everything below this heading is a dated record, preserved as published. Records are append-only:
+a new record is added and an old one is not edited. For what is true today, read the sections
+above and the [canonical facts](FACTS.md#current-release).
+
+## Historical measurements
+
 ### v0.19.0 RTX 3090 `beta.4` same-profile identity-first admission, carried RTX 4090 `beta.3`, and acceptance boundary
 
 In `v0.19.0`, RTX 5090 rebuilds from `41f89b31` (`v0.7.0-qwen38-5090-beta.8`), native RTX 3090
@@ -282,77 +457,6 @@ tails attributed rather than hidden. The
 explains the structured-output tail and was diagnostic-only and reverted in that measurement
 branch; integration later landed canonical sorted-key serialization `0abe7c8e5` with host byte pins,
 without repeating the full corpus comparison.
-
-## Method
-
-- **`prefill_curve` (RTX 5090 container) and `long_session` (native Windows):** Exact retrieval at
-  **130,048 prompt tokens** (17 completion tokens) from the same fixture against the 131,072-token
-  context ceiling. The gate verifies exact needle output (`ORCHID=493817; COLOR=COBALT`) rather than
-  perplexity. Only `prefill_curve` records the server's prefix-cache counters (zero hit tokens, so
-  its figure is a cold start); the native `long_session` receipts record wall time and the exact
-  output, not cache counters.
-- **`decode` (RTX 5090 container):** A 2,048-completion-token generation from a 118-token prompt on
-  the published deployment profile, recording server-side decode throughput
-  (`decode_tokens_per_second`), client-side wall throughput
-  (`completion_tokens_per_second_wall`), speculative draft acceptance rate, and tokens committed per
-  verify round.
-- **`benchmark_c1` (native Windows RTX 4090 and RTX 3090):** Single-request (`C1`) generation of
-  1,024 completion tokens after 4,541 computed prompt tokens with no prefix hit, recording prefill
-  throughput, decode throughput, speculative acceptance (DFlash2 K=7 in `v0.16.0`–`v0.19.0`; MTP3 in `v0.3.1`–`v0.15.0`), peak VRAM, and peak board power. C1 is
-  trajectory-sensitive: changes in prefill summation order or fixture length shift its acceptance
-  and decode rate, so results apply only to the exact package, machine, and profile.
-- **`durability` / `persistence` and `agent_protocol`:** Authenticated session identity, OpenAI
-  Responses continuation (`previous_response_id`), sibling forks, parent deletion (HTTP 404 before
-  and after a server restart with no resurrection while surviving descendants and live siblings
-  continue at HTTP 200), and checkpoint restoration across a server restart (including managed-stop
-  flush of unpublished sessions on the native lanes and save-before-evict / publication-barrier
-  checks on the RTX 5090 lane). Checkpoints remain best effort: a crash or an expired graceful wait
-  can lose unsaved work, and restoration requires the same runtime binary, model, profile, and
-  session credentials.
-- **`fanout` and warm arrival:** Multiple agent branches forking from a shared prefilled
-  `previous_response_id` base (57,853- and 67,681-token templates on the RTX 5090), verifying
-  whether sibling continuations stay on `private_long_anchor` both in-process and after a checkpoint
-  restore (`resume-first` and `fork-first` arrival orders).
-- **Warm-vs-cold caption rule:** Warm versus cold figures on this page always compare a continuation
-  served from **retained session state** (`previous_response_id`, attested by
-  `usage.input_tokens_details.cached_tokens`) against a **fresh-process cold start** (or a forced
-  full prefill of an equivalent-length prompt that cannot reuse any prefix), never against an
-  ordinary in-process cached follow-up. Checkpoint restore duration, model reload time, and
-  post-restoration server-side TTFT have distinct timing boundaries and are never combined into a
-  restart speedup ratio.
-
-## Charts
-
-![RTX 5090 prefill throughput (v0.3.0 runtime, historical) holding above 2,100 tokens per second from 3,193.77 tok/s at 7,680 prompt tokens to 2,199.41 tok/s at 130,048, with exact retrieval at every point](../assets/chart-prefill.png)
-
-*Historical v0.3.0 — RTX 5090 container lane (`sm_120a`, MTP3, BF16 KV, C1):* cold-process prefill
-throughput across the context window, from 3,193.77 tok/s at 7,680 prompt tokens to 2,199.41 tok/s
-at 130,048 prompt tokens, with exact needle retrieval verified at every point (the graphic footer
-also notes historical v0.4.0's 2,186.3 tok/s at 130,448 tokens). Current `v0.19.0` RTX 5090
-130,048-token retrieval is **56.67 s** (`56.668 s` wall, **2,294.9 tok/s** wall, **56.55 s** server prefill) on `v0.7.0-qwen38-5090-beta.8` in the table above (`56.90 s` / `2,285.7 tok/s` wall on `v0.18.0` `beta.7`; `56.63 s` / `2,296.5 tok/s` wall on `v0.17.0` `beta.6`; `56.49 s` / `2,302.3 tok/s` wall on `v0.16.2` `beta.5`; `56.62 s` / `2,297.0 tok/s` wall on `v0.16.0` `beta.4`; `57.00 s` / `2,281.5 tok/s` wall on `v0.14.0`–`v0.15.0` `beta.3`).
-
-![Decode throughput per qualified lane on its own shipped profile: RTX 5090 at 144.8 tok/s with MTP3 on v0.4.0 agent-shaped, RTX 3090 at 90.17 tok/s with MTP3 on v0.3.0, RTX 4090 at 97.69 tok/s peak with MTP3 on v0.3.1](../assets/chart-decode.png)
-
-*Historical v0.3.0 / v0.3.1 / v0.4.0 — single-request MTP3 decode per lane:* RTX 5090 container on
-historical v0.4.0 (144.8 tok/s agent-shaped MTP3, BF16 KV), RTX 3090 native Windows on historical
-v0.3.0 (90.17 tok/s C1 MTP3 at 93.43% acceptance under the 300 W cap), and RTX 4090 native Windows
-on historical v0.3.1 (97.69 tok/s peak MTP3, 107,851-token restored continuation). Current `v0.19.0`
-DFlash2 K=7 decode rates (RTX 5090 `v0.7.0-qwen38-5090-beta.8` at **181.71 tok/s** server / **180.20 tok/s** wall;
-carried RTX 4090 `v0.8.0-qwen38-4090-beta.3` `C1` at **253.71 tok/s**; RTX 3090 `v0.8.0-qwen38-3090-beta.4` (`tc`) `C1` benchmark at **227.19 tok/s**) are in the current results table above.
-
-![Historical v0.4.0 RTX 5090 retained-state vs fresh-process cold rebuild request wall time and separate Docker restart timing boundaries](../assets/chart-warm-cold.png)
-
-*Historical v0.4.0 — RTX 5090 container lane (2026-08-30, one RTX 5090, one sample per point):*
-retained session state versus fresh-process cold rebuild at 109,594 tokens (1.79 s warm request
-wall time vs 47.92 s cold request wall time,
-[`2026-08-30-warm-vs-cold-v04.json`](measurements/2026-08-30-warm-vs-cold-v04.json)), shown beside
-the separate Docker restart observation at 109,589 retained tokens (24.8 s end-to-end including
-first-touch restore of a 7.95 GB checkpoint, 56.6 s separately recorded model reload, and 0.778 s
-server TTFT after restoration,
-[`2026-08-30-rtx5090-durable-qualification.json`](measurements/2026-08-30-rtx5090-durable-qualification.json)).
-Different timing boundaries are not a restart speedup ratio.
-
-## Historical measurements
 
 ### RTX 5090 runtime qualification — v0.6.16 (1302d639), carried into v0.12.0 through v0.12.2
 
@@ -1480,101 +1584,3 @@ from retained state rather than recomputed prefill.
   through an in-process cache; this measurement does not compare against those implementations.
 - **Correctness does not depend on the cache.** OMP commits its transcript before advancing
   provider state; retained GPU state is an acceleration that can be discarded and replayed.
-
-## Model quality at this quantization
-
-Published upstream by [Neroued/ninfer](https://github.com/Neroued/ninfer#evaluation) for its
-registered `Qwen3.8-27B` `groupwise-int` and `nvfp4` artifacts under MTP3 (EvalScope 1.9.0, 0-shot,
-one sample per problem, thinking enabled). The `groupwise-int` row evaluates the MTP3
-`groupwise-int` artifact family (the 18,210,531,328-byte `eec39564` artifact served on the native
-RTX 4090 and RTX 3090 MTP3 lanes through v0.13.0, and on the RTX 5090 lane prior to v0.10.0), not
-the separate 20,437,336,576-byte DFlash2-enabled `0634abb0` artifact served on the RTX 5090
-container lane in v0.10.0–v0.12.2 (whose 1,184 tensor payloads and six frontend resources match the
-v0.13.0–v0.19.0 container version 3 `81f924d4` artifact served across all three lanes in v0.13.1–v0.19.0):
-
-| Artifact profile | AIME 2025 | AIME 2026 | GPQA-Diamond | ERQA | RealWorldQA |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Qwen3.8-27B `groupwise-int` (MTP3 artifact `eec39564`) | 96.67% | 96.67% | 87.37% | 66.25% | 82.22% |
-| Qwen3.8-27B `nvfp4` (MTP3) | 96.67% | 96.67% | 90.40% | 66.25% | 83.53% |
-
-These are single-sample runs on small question sets (30 and 198 items) under one evaluation
-profile: a sanity signal that the quantization preserves capability, not a leaderboard claim. On
-the RTX 5090 lane, DFlash2 K=7 with BF16 KV and artifact `0634abb0` was evaluated separately against
-the shipped MTP3 baseline on the 1,120-prompt powered role-corpus quality screen in
-[EXP-085](measurements/2026-10-01-dflash2-powered-quality-screen-rtx5090.json) and
-[EXP-094](measurements/2026-10-03-q4-query-key-tensor-cores-rtx5090.json), and on the native
-Windows RTX 3090 and RTX 4090 lanes, DFlash2 K=7 with INT8 KV and artifact `81f924d4` (`Q4_G64_FP16`
-draft MLP and host-mapped `token_embedding`) is evaluated against the sealed `v0.14.0` MTP3
-production arms on the same 1,120-prompt powered screen and 80-prompt fresh-cache determinism set in
-`EXP-101` and `EXP-102` (see [`PERFORMANCE.md`](PERFORMANCE.md#experiment-ledger)).
-
-## Engine campaign highlights
-
-The NInfer engine's published performance campaign — measured and documented upstream by
-[Neroued/ninfer](https://github.com/Neroued/ninfer#performance) on one RTX 5090 with INT8 KV and
-different artifacts/settings than the shipped product profiles:
-
-| Published upstream measurement | Result |
-| --- | --- |
-| Qwen3.6-35B-A3B prefill at a 7,680-token prompt | 15,544 tok/s |
-| Qwen3.6-27B `nvfp4` prefill at a 7,680-token prompt | 11,191 tok/s (3.48× groupwise-int) |
-| Qwen3.6-35B-A3B saturated decode at concurrency 8 | 1,313.8 aggregate tok/s |
-| Qwen3.6-27B `nvfp4` saturated decode at concurrency 8 | 1,146.9 aggregate tok/s (5.67× C=1) |
-| Qwen3.8-27B `nvfp4` MTP3 structured output | 219.8 tok/s at 90.8% acceptance |
-
-Those results are not product claims: the shipped v0.19.0 profiles are `Qwen3.8-27B` `groupwise-int`
-(model container version 3 `81f924d4`) with DFlash2 K=7 across all three lanes — BF16 KV and two
-requests in flight on the RTX 5090 container lane, INT8 KV, `sm_86` small-T tensor-core verify, and
-two requests in flight over one shared 131,072-token pool on the native RTX 3090 Windows lane, and
-INT8 KV and one active request on the carried native RTX 4090 Windows lane — whose qualified numbers are in
-[Current qualified results — v0.19.0](#current-qualified-results--v0190). They show the headroom of
-the engine family this product rides on. Full methodology:
-[upstream performance document](https://github.com/Neroued/ninfer/blob/master/docs/performance.md).
-
-Measured on the product build on 2026-09-04 with the frozen agent corpus, the Qwen3.8-27B `nvfp4`
-artifact prefilled 6,089 tok/s against 2,740 tok/s for the pinned `groupwise-int` artifact on the
-RTX 5090 (2.22×, INT8 KV, MTP3) and decoded 3.5% slower; with the shipped BF16 KV it cannot hold
-131,072-token context on 32 GB. It is not adopted; the receipts and the quality screen are in
-[`PERFORMANCE.md`](PERFORMANCE.md#experiment-ledger) (EXP-008).
-
-## Community results
-
-Community leaderboard. One row per verified environment; newest first. Submit yours with the
-[performance result form](https://github.com/alphastorm/omp-ninfer/issues/new?template=benchmark-report.yml)
-after the documented acceptance checks pass.
-
-| Date | GPU | VRAM | Topology | Release | Decode tok/s | MTP accept | Long-context check | Source |
-| --- | --- | --- | --- | --- | ---: | ---: | --- | --- |
-| 2026-08 | RTX 5090 | 32 GiB | Windows 11 + Docker Desktop WSL2 | v0.3.0 | 240.30 | 99.87% | 130,048 tokens, exact | [qualification](../releases/v0.3.0/qualification/rtx5090.json) (maintainer) |
-| 2026-08 | RTX 5090 | 32 GiB | Windows 11 + Docker Desktop WSL2 | v0.2.0-beta.1 | 235.02 | 99.87% | 130,048 tokens, exact | [qualification](../releases/v0.2.0-beta.1/qualification.json) (maintainer) |
-| 2026-08 | RTX 4090 | 24 GiB | Native Windows 11 x64 | v0.2.0-beta.1 | 52.330 | — (MTP0 profile) | 102,075-token restored continuation after process restart | [qualification](../releases/v0.2.0-beta.1/qualification/rtx4090.json) (maintainer) |
-| 2026-08 | RTX 3090 | 24 GiB | Native Windows 11 x64 | v0.3.0 | 90.17 | 93.43% | 64,512 tokens, exact | [qualification](../releases/v0.3.0/qualification/rtx3090.json) (maintainer) |
-
-Submission rules:
-
-1. Run the exact ready release (`python3 scripts/verify_release.py --require-ready` passes) on the
-   documented topology.
-2. Report only content-safe values: hardware, driver, versions, throughput, acceptance, and check
-   results. No prompts, outputs, hostnames, or raw logs.
-3. State the measurement method and timing boundary (server-side harness or client-side wall time).
-   Stock OMP has no built-in appliance benchmark command; use the component qualification harnesses
-   and documented route scripts.
-4. Rows are added after a maintainer matches the report against the release identities.
-
-## Benchmarks we still want
-
-Planned measurements that would sharpen the picture; contributions welcome
-(see [`PERFORMANCE.md`](PERFORMANCE.md)):
-
-- **Warm vs cold turn latency sweep** on the product profile: the first 28K/89K pair is measured
-  above; the fuller sweep — 10K/37K/100K-token sessions with repetitions and client-side vantage —
-  remains open.
-- **End-to-end OMP turn latency distribution** on Golden-class agent tasks, client-measured.
-- **Matched MTP depth sweep (MTP0/3/5/7)** on one unchanged artifact and context profile,
-  measured on an agent-shaped corpus rather than a fixed decode fixture.
-- **Concurrency curves** for future 3090/4090 profiles only after exact memory-admission gates are
-  defined.
-
-Publishing rule: a new number enters this page only with its receipt, exact profile, and machine
-identity, and product claims change only through a new qualification binding
-(see [`RELEASES.md`](RELEASES.md)).

@@ -37,6 +37,93 @@ unchanged at `e1874e94` (`204` commits), `sergiuszm/ninfer-4090` `rtx4090-port` 
 Recommendations are commit-subject/path heuristics, not a security assessment or a qualification
 result.
 
+## Running the watch
+
+```bash
+python3 scripts/upstream_watch.py --receipt docs/measurements/$(date +%F)-upstream-watch.json
+# per-commit overlap scoring (one extra API call per upstream commit):
+python3 scripts/upstream_watch.py --only ninfer-4090 --per-commit-files
+```
+
+Read-only: the tool only queries GitHub and writes the receipt you name. Schema 2 derives
+`incorporated` from the release selected by root `compatibility.json` and that release's
+`manifest.json`: stock OMP version/tag/commit, upstream engine base, and exact fork source and
+component tags for all runtime lanes. The inventory's `baseline_component` selects those pins;
+it does not duplicate them. Research/community entries without an incorporated-source manifest
+retain their declared comparison base with `status: declared-not-derived` and a report residual.
+Those entries do not establish adoption by the current product.
+
+`last_seen` records the upstream ref's full commit; the OMP client also records the latest
+published release tag peeled to its full commit. Neither observation advances `incorporated`.
+Reusing the same `--receipt` path reads its prior `last_seen` before replacing the receipt and
+labels each observation `initial`, `changed`, or `unchanged`. `evidence_identity` hashes the
+composition, inventory, comparison mode and observed evidence, excluding run time and the
+observation label. Identical observations therefore retain an identical identity even without
+a prior receipt; a caller can compare identities before repeating planning work. The weekly
+artifact-only workflow does not retrieve prior receipts or persist another state store.
+
+Verdicts are `up-to-date`, `delta-observed`, `unknown`, or `error`. Commit `title_triage`,
+`path_triage`, and `triage` labels only prioritize review; `applicability` is always `not-assessed`.
+A missing watched-path match is not proof that a fix applies, and a docs/chore/test title is not
+proof that a change is irrelevant.
+
+GitHub's unpaginated comparison is conservatively unknown at 250 commits or 300 changed files,
+when reported totals exceed listed commits, when required lists/counts are missing, or when a
+`Link` header advertises an unfollowed page. Per-commit file truncation is also unknown.
+`comparison.status`, `unknown_reasons`, `commits_truncated`, and `files_truncated` preserve those
+boundaries; a non-forward comparison is unknown too. An unchanged observation can still have an
+unknown comparison: a stable evidence identity is not a completeness or applicability claim.
+
+## Why the fork points are what they are
+
+- Since `v0.13.0`, the RTX 5090 container lane builds from upstream `Neroued/ninfer` master
+  `64d10fbf` (selected source `41f89b31` in `v0.19.0`; `48c8ac46` in `v0.18.0`; `e0971faf` in `v0.17.0`; `a87de361` in `v0.16.2`; `26fa28d0` in `v0.16.0`; `2c6f423b` in `v0.14.0`–`v0.15.0`; `6d4d0a05` in `v0.13.0`–`v0.13.1`). From
+  v0.6.2 through v0.12.2, it built from the mainline runtime whose upstream base was `6e8b2e2a`
+  (selected source `1302d639` in v0.11.0–v0.12.2). The retired container mirror point `4eef14a7`
+  was the lineage's base before v0.6.2 and made the delta read 17 commits larger than it was.
+- The RTX 4090 and RTX 3090 native Windows lanes originally vendored their upstreams at the
+  recorded commits (`11aae2d6` and `ef6ecc3c`). In `v0.19.0`, RTX 3090 builds `v0.8.0-qwen38-3090-beta.4`
+  `tc` from descendant source `15c3e395` (identical serve source to RTX 5090 `41f89b31` on upstream
+  `Neroued/ninfer` master `64d10fbf`), while RTX 4090 carries `v0.8.0-qwen38-4090-beta.3` default
+  unchanged from `v0.18.0` at `48c8ac46` without bounded pressure saves until the next engine freeze,
+  after both shared `48c8ac46` in `v0.18.0` (`v0.8.0-qwen38-4090-beta.3` default and
+  `v0.8.0-qwen38-3090-beta.3` `tc`), built from
+  `a87de361` in `v0.16.2`–`v0.17.0` (`v0.8.0-qwen38-4090-beta.2` and `v0.8.0-qwen38-3090-beta.2`,
+  carried unchanged in `v0.17.0` while RTX 5090 advanced to `e0971faf`), shared `26fa28d0`
+  (`v0.8.0-qwen38-4090-beta.1` and `v0.8.0-qwen38-3090-beta.1`) in `v0.16.0`, `2c6f423b`
+  (`v0.7.0-qwen38-4090-beta.3` and `v0.7.0-qwen38-3090-beta.3`) in `v0.14.0`–`v0.15.0`, and initial
+  `64d10fbf` rebases at `7a25cd72` (`v0.7.0-qwen38-4090-beta.2` and `v0.7.0-qwen38-3090-beta.2`) in `v0.13.1`. From
+  v0.12.0 through v0.13.0 they shipped from the mainline fork runtime (`cad19767` on `6e8b2e2a`,
+  adding explicit `--gpu-uuid` device selection on the two-GPU Windows host; earlier v0.9.1 retained
+  RTX 4090 source `cba7eb93`, RTX 5090 child `e20060b6`, and RTX 3090 `f08309da`). The
+  durable-checkpoint, security, and packaging work remains downstream.
+- Through v0.7.4, the client fork point was the upstream tag commit onto which downstream patches
+  rebased. Since v0.8.0 (and in v0.19.0 with stock OMP 18.20.0 at `c3089702`; v0.18.0 with stock OMP 18.18.7 at `e325ffc7`; v0.17.0 with stock OMP 18.18.6 at `9058ab9d`; v0.16.2 with stock OMP 18.15.0 at `3fedf8d5`; v0.15.0–v0.16.0 with stock OMP 18.14.0 at `31147f9d`), this
+  repository does not build or publish an OMP client; it binds the unmodified upstream release
+  binary instead.
+
+## Qualification log readers
+
+The [ablation reducer](../scripts/run_mtp_ablation.py) and
+[variant campaign](../scripts/run_variant_campaign.py) distinguish the request-log schema from
+the status endpoint's schema 2. Startup configuration classification supports the historical fork
+schema 17, upstream schemas 27–29 and the provenance-bearing schema 30. Known upstream artifact
+and context fields and `gpu_keep_warm_ms` participate in comparison; unknown fields are rejected.
+Template-inherited thinking/preservation defaults stay `null`, not a fabricated `false`.
+
+Historical startup records without an identity block can be classified without inventing
+attestation. They cannot satisfy the campaign's existing binary, source and model identity checks.
+For schema 30, `identity.weights_id` is the verified artifact SHA-256, not the campaign manifest's
+logical weights label; both the artifact digest and architecture remain bound. Status schema 2
+is not accepted as a substitute startup record. The checked-in schema fixtures use synthetic
+values and source-grounded field sets, not claimed live inference receipts.
+
+## Records
+
+Everything below this heading is a dated record, preserved as published. Records are append-only:
+a new record is added and an old one is not edited. For what is true today, read the sections
+above and the [canonical facts](FACTS.md#current-release).
+
 ## v0.19.0 runtime and client binding
 
 Published release **v0.19.0** (2026-11-13, [release notes](../releases/v0.19.0/NINFER_RELEASE_NOTES.md),
@@ -966,21 +1053,9 @@ lane gates (179.86 tok/s server decode, 56.994 s exact 130,048-token retrieval) 
 ([`qualification.json`](../releases/v0.13.0/qualification.json)). Powered quality/leak and
 historical OMP parallel/fanout workloads were not re-measured for v0.13.0.
 
-### Qualification log readers
+## Client binding records
 
-The [ablation reducer](../scripts/run_mtp_ablation.py) and
-[variant campaign](../scripts/run_variant_campaign.py) distinguish the request-log schema from
-the status endpoint's schema 2. Startup configuration classification supports the historical fork
-schema 17, upstream schemas 27–29 and the provenance-bearing schema 30. Known upstream artifact
-and context fields and `gpu_keep_warm_ms` participate in comparison; unknown fields are rejected.
-Template-inherited thinking/preservation defaults stay `null`, not a fabricated `false`.
-
-Historical startup records without an identity block can be classified without inventing
-attestation. They cannot satisfy the campaign's existing binary, source and model identity checks.
-For schema 30, `identity.weights_id` is the verified artifact SHA-256, not the campaign manifest's
-logical weights label; both the artifact digest and architecture remain bound. Status schema 2
-is not accepted as a substitute startup record. The checked-in schema fixtures use synthetic
-values and source-grounded field sets, not claimed live inference receipts.
+Which Oh My Pi release each product release pinned and how it was reviewed, newest first.
 
 ### v0.19.0 client binding — OMP 18.20.0
 
@@ -1161,43 +1236,6 @@ Two evidence records stay separate:
   ([documented routes](../releases/v0.12.1/acceptance/documented-routes.json),
   [composed acceptance](../releases/v0.12.1/acceptance/composed-external-installation.json)).
 
-## Running the watch
-
-```bash
-python3 scripts/upstream_watch.py --receipt docs/measurements/$(date +%F)-upstream-watch.json
-# per-commit overlap scoring (one extra API call per upstream commit):
-python3 scripts/upstream_watch.py --only ninfer-4090 --per-commit-files
-```
-
-Read-only: the tool only queries GitHub and writes the receipt you name. Schema 2 derives
-`incorporated` from the release selected by root `compatibility.json` and that release's
-`manifest.json`: stock OMP version/tag/commit, upstream engine base, and exact fork source and
-component tags for all runtime lanes. The inventory's `baseline_component` selects those pins;
-it does not duplicate them. Research/community entries without an incorporated-source manifest
-retain their declared comparison base with `status: declared-not-derived` and a report residual.
-Those entries do not establish adoption by the current product.
-
-`last_seen` records the upstream ref's full commit; the OMP client also records the latest
-published release tag peeled to its full commit. Neither observation advances `incorporated`.
-Reusing the same `--receipt` path reads its prior `last_seen` before replacing the receipt and
-labels each observation `initial`, `changed`, or `unchanged`. `evidence_identity` hashes the
-composition, inventory, comparison mode and observed evidence, excluding run time and the
-observation label. Identical observations therefore retain an identical identity even without
-a prior receipt; a caller can compare identities before repeating planning work. The weekly
-artifact-only workflow does not retrieve prior receipts or persist another state store.
-
-Verdicts are `up-to-date`, `delta-observed`, `unknown`, or `error`. Commit `title_triage`,
-`path_triage`, and `triage` labels only prioritize review; `applicability` is always `not-assessed`.
-A missing watched-path match is not proof that a fix applies, and a docs/chore/test title is not
-proof that a change is irrelevant.
-
-GitHub's unpaginated comparison is conservatively unknown at 250 commits or 300 changed files,
-when reported totals exceed listed commits, when required lists/counts are missing, or when a
-`Link` header advertises an unfollowed page. Per-commit file truncation is also unknown.
-`comparison.status`, `unknown_reasons`, `commits_truncated`, and `files_truncated` preserve those
-boundaries; a non-forward comparison is unknown too. An unchanged observation can still have an
-unknown comparison: a stable evidence identity is not a completeness or applicability claim.
-
 ## Historical engine watch — 2026-10-10
 
 The [read-only watch receipt](measurements/2026-10-10-upstream-watch.json) records the
@@ -1331,34 +1369,6 @@ family is separate; the alternating-session finding is already attributed to hos
 ([EXP-039](measurements/2026-09-13-hostkv-capacity-multisession.json)), not proof that this
 product needs that planner rebase.
 
-## Why the fork points are what they are
-
-- Since `v0.13.0`, the RTX 5090 container lane builds from upstream `Neroued/ninfer` master
-  `64d10fbf` (selected source `41f89b31` in `v0.19.0`; `48c8ac46` in `v0.18.0`; `e0971faf` in `v0.17.0`; `a87de361` in `v0.16.2`; `26fa28d0` in `v0.16.0`; `2c6f423b` in `v0.14.0`–`v0.15.0`; `6d4d0a05` in `v0.13.0`–`v0.13.1`). From
-  v0.6.2 through v0.12.2, it built from the mainline runtime whose upstream base was `6e8b2e2a`
-  (selected source `1302d639` in v0.11.0–v0.12.2). The retired container mirror point `4eef14a7`
-  was the lineage's base before v0.6.2 and made the delta read 17 commits larger than it was.
-- The RTX 4090 and RTX 3090 native Windows lanes originally vendored their upstreams at the
-  recorded commits (`11aae2d6` and `ef6ecc3c`). In `v0.19.0`, RTX 3090 builds `v0.8.0-qwen38-3090-beta.4`
-  `tc` from descendant source `15c3e395` (identical serve source to RTX 5090 `41f89b31` on upstream
-  `Neroued/ninfer` master `64d10fbf`), while RTX 4090 carries `v0.8.0-qwen38-4090-beta.3` default
-  unchanged from `v0.18.0` at `48c8ac46` without bounded pressure saves until the next engine freeze,
-  after both shared `48c8ac46` in `v0.18.0` (`v0.8.0-qwen38-4090-beta.3` default and
-  `v0.8.0-qwen38-3090-beta.3` `tc`), built from
-  `a87de361` in `v0.16.2`–`v0.17.0` (`v0.8.0-qwen38-4090-beta.2` and `v0.8.0-qwen38-3090-beta.2`,
-  carried unchanged in `v0.17.0` while RTX 5090 advanced to `e0971faf`), shared `26fa28d0`
-  (`v0.8.0-qwen38-4090-beta.1` and `v0.8.0-qwen38-3090-beta.1`) in `v0.16.0`, `2c6f423b`
-  (`v0.7.0-qwen38-4090-beta.3` and `v0.7.0-qwen38-3090-beta.3`) in `v0.14.0`–`v0.15.0`, and initial
-  `64d10fbf` rebases at `7a25cd72` (`v0.7.0-qwen38-4090-beta.2` and `v0.7.0-qwen38-3090-beta.2`) in `v0.13.1`. From
-  v0.12.0 through v0.13.0 they shipped from the mainline fork runtime (`cad19767` on `6e8b2e2a`,
-  adding explicit `--gpu-uuid` device selection on the two-GPU Windows host; earlier v0.9.1 retained
-  RTX 4090 source `cba7eb93`, RTX 5090 child `e20060b6`, and RTX 3090 `f08309da`). The
-  durable-checkpoint, security, and packaging work remains downstream.
-- Through v0.7.4, the client fork point was the upstream tag commit onto which downstream patches
-  rebased. Since v0.8.0 (and in v0.19.0 with stock OMP 18.20.0 at `c3089702`; v0.18.0 with stock OMP 18.18.7 at `e325ffc7`; v0.17.0 with stock OMP 18.18.6 at `9058ab9d`; v0.16.2 with stock OMP 18.15.0 at `3fedf8d5`; v0.15.0–v0.16.0 with stock OMP 18.14.0 at `31147f9d`), this
-  repository does not build or publish an OMP client; it binds the unmodified upstream release
-  binary instead.
-
 ## History
 
 ### Published baseline client — OMP 18.8.7
@@ -1432,7 +1442,7 @@ acceptance. The [2026-10-10 source review and receipts](measurements/2026-10-10-
 bind the observed image, three binary hashes and pass/fail checks. Shared proof environment
 selection also retains the per-model contract after a profile is qualified, while the
 historical 18.4.x driver behavior is unchanged.
-See the [prepared client guide](QUICKSTART.md#omp-18126-client).
+See the [prepared client guide](https://github.com/alphastorm/omp-ninfer/blob/v0.13.0/docs/QUICKSTART.md#omp-18126-client).
 
 The v0.11.0 release bound this upstream client to published runtime source `1302d639` and image
 `6a02feba`, with the retained client and route proofs accepted. EXP-095 above compares the
@@ -2070,4 +2080,3 @@ serving settings and floors are unchanged.
 [EXP-054](measurements/2026-09-25-decode-roofline-attribution.json) ·
 [Release notes](../releases/v0.8.1/NINFER_RELEASE_NOTES.md) ·
 [Documented routes](../releases/v0.8.1/acceptance/documented-routes.json).
-

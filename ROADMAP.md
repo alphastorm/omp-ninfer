@@ -339,6 +339,52 @@ unmet:
    Q4/Q5 GEMV/MMA epilogue fusion (EXP-056), and warm-turn template fragment consolidation
    (EXP-059) remain open in [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md#ideas-backlog).
 
+## Path to v1.0
+
+A public release does not imply a v1.0 or SLA commitment. v1.0 means the durability contract —
+save is atomic and verified, restore is verified-or-refused, sessions survive process death, and
+private state never crosses sessions — holds under independent eyes, not just owner receipts.
+Before a v1.0 decision:
+
+- gather clean-install, recovery, and (where supported by the topology) rollback evidence from
+  multiple independent owners for each claimed GPU profile;
+- sign the first-party Windows runtime packages or retain the explicit unsigned and stock-client
+  provenance boundary;
+- close the highest-signal public-release installation and compatibility failures;
+- publish supported upgrade and security-fix windows, rollback ownership, and response-time
+  expectations without implying an SLA;
+- run the fixed multi-machine workload before making any fleet completed-work claim; and
+- cut a new release candidate if any executable component, model, configuration, or support
+  boundary changes.
+
+Explicitly not on this path (a new product decision, not a milestone): multi-tenant serving,
+priority or preemptive scheduling, universal hardware claims, and silent cloud fallback.
+
+## How to help
+
+- **Run OMP with subagents against a lane?** That fanout path is what shared-anchor continuation
+  serves — file a
+  [hardware report](https://github.com/alphastorm/omp-ninfer/issues/new?template=hardware-report.yml)
+  with what you observe, pass or fail.
+- **Measured something?** Submit the
+  [performance result form](https://github.com/alphastorm/omp-ninfer/issues/new?template=benchmark-report.yml)
+  for the [community results table](docs/BENCHMARKS.md#community-results).
+- **CUDA or kernel work?** Claim an idea from the
+  [performance backlog](docs/PERFORMANCE.md#ideas-backlog) and see
+  [`CONTRIBUTING.md`](CONTRIBUTING.md).
+- **RTX 3090, RTX 4090, or RTX 5090 owner?**
+  [Get started](docs/QUICKSTART.md) with the matching published lane, then file a content-safe
+  [hardware report](https://github.com/alphastorm/omp-ninfer/issues/new?template=hardware-report.yml)
+  or [clean-install report](https://github.com/alphastorm/omp-ninfer/issues/new?template=clean-install-report.yml).
+  Pass and fail reports both improve the observed matrix; one lane never authorizes package
+  substitution in another.
+
+## Records
+
+Everything below this heading is a dated record, preserved as published. Records are append-only:
+a new record is added and an old one is not edited. For what is true today, read the sections
+above and the [canonical facts](docs/FACTS.md#current-release).
+
 ## Deferred and rejected decisions
 
 Negative and deferred results stay visible in [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md#experiment-ledger)
@@ -982,27 +1028,6 @@ so future work does not repeat closed experiments:
      [`alphastorm/omp-ninfer#28`](https://github.com/alphastorm/omp-ninfer/issues/28) (closed as not
      planned), and RTX 5080.
 
-## Path to v1.0
-
-A public release does not imply a v1.0 or SLA commitment. v1.0 means the durability contract —
-save is atomic and verified, restore is verified-or-refused, sessions survive process death, and
-private state never crosses sessions — holds under independent eyes, not just owner receipts.
-Before a v1.0 decision:
-
-- gather clean-install, recovery, and (where supported by the topology) rollback evidence from
-  multiple independent owners for each claimed GPU profile;
-- sign the first-party Windows runtime packages or retain the explicit unsigned and stock-client
-  provenance boundary;
-- close the highest-signal public-release installation and compatibility failures;
-- publish supported upgrade and security-fix windows, rollback ownership, and response-time
-  expectations without implying an SLA;
-- run the fixed multi-machine workload before making any fleet completed-work claim; and
-- cut a new release candidate if any executable component, model, configuration, or support
-  boundary changes.
-
-Explicitly not on this path (a new product decision, not a milestone): multi-tenant serving,
-priority or preemptive scheduling, universal hardware claims, and silent cloud fallback.
-
 ## Shipped
 
 Every release keeps its immutable manifest, qualification receipts, and release notes; full
@@ -1068,21 +1093,126 @@ per-version history lives in [`CHANGELOG.md`](CHANGELOG.md) and [`docs/RELEASES.
 | `v0.2.0-beta.1` | 2026-08-29 | Add native Windows RTX 4090 beta and RTX 3090 preview lanes, durable native checkpoints, and cross-platform OMP 18.0.9 fork archives | [notes](releases/v0.2.0-beta.1/NINFER_RELEASE_NOTES.md) |
 | `v0.1.0-beta.1` | 2026-08-28 | Initial restricted RTX 5090 beta with exact manifest pinning and clean install from public URLs | [notes](releases/v0.1.0-beta.1/NINFER_RELEASE_NOTES.md) |
 
-## How to help
+## Resolved residuals through v0.19.0
 
-- **Run OMP with subagents against a lane?** That fanout path is what shared-anchor continuation
-  serves — file a
-  [hardware report](https://github.com/alphastorm/omp-ninfer/issues/new?template=hardware-report.yml)
-  with what you observe, pass or fail.
-- **Measured something?** Submit the
-  [performance result form](https://github.com/alphastorm/omp-ninfer/issues/new?template=benchmark-report.yml)
-  for the [community results table](docs/BENCHMARKS.md#community-results).
-- **CUDA or kernel work?** Claim an idea from the
-  [performance backlog](docs/PERFORMANCE.md#ideas-backlog) and see
-  [`CONTRIBUTING.md`](CONTRIBUTING.md).
-- **RTX 3090, RTX 4090, or RTX 5090 owner?**
-  [Get started](docs/QUICKSTART.md) with the matching published lane, then file a content-safe
-  [hardware report](https://github.com/alphastorm/omp-ninfer/issues/new?template=hardware-report.yml)
-  or [clean-install report](https://github.com/alphastorm/omp-ninfer/issues/new?template=clean-install-report.yml).
-  Pass and fail reports both improve the observed matrix; one lane never authorizes package
-  substitution in another.
+The body of the "deferred runtime, installer, and release-tooling residuals" item as it stood in
+[Remaining work](#remaining-work) when `v0.19.0` was published. The open trackers are listed there.
+
+1. **Deferred runtime, installer, and release-tooling residuals, as published with `v0.19.0`.**
+   In `v0.16.2`, `alphastorm/ninfer` `#51`–`#55`, `#62`, `#63`, `#65`, `#67`–`#70`, `#73`, `#78`–`#80`,
+   and `#82` were resolved across the `a87de361` runtime components, and subsequent tooling and CI
+   merges closed [#138](https://github.com/alphastorm/omp-ninfer/issues/138) items 1–8
+   ([#143](https://github.com/alphastorm/omp-ninfer/pull/143) `71b9b84f`, plus `checkpoints-v017`
+   isolation and atomic macOS bearer-key transfer in `v0.17.0`),
+   [#128](https://github.com/alphastorm/omp-ninfer/issues/128) rows `P5`, `P6`, `P8`–`P12`, `P14`,
+   and Python `P7` ([#141](https://github.com/alphastorm/omp-ninfer/pull/141) `59452c73`), and
+   [#109](https://github.com/alphastorm/omp-ninfer/issues/109)'s CI rows
+   ([`alphastorm/ninfer#92`](https://github.com/alphastorm/ninfer/pull/92) `020655f1`). On the
+   `a87de361` engine, EXP-109
+   ([`docs/measurements/2026-11-05-p19-flash-next-and-starvation.json`](docs/measurements/2026-11-05-p19-flash-next-and-starvation.json),
+   [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md#experiment-ledger)) reproduced upstream
+   [`Neroued/ninfer#434`](https://github.com/Neroued/ninfer/issues/434) request starvation under
+   context pressure (preregistered red: an admitted request with no token progress `>= 120 s` while
+   others progress) on both `C2` lanes — on the native RTX 3090 `C2` lane (`rtx3090-win-a`,
+   `v0.8.0-qwen38-3090-beta.2`), a `79,989`-token request paused `440.94 s` after `62,464` input
+   tokens with zero output/restores while the prime request generated `16,150` tokens and `45` fresh
+   requests completed, and on the RTX 5090 production image (`rtx5090-win-a`, image `a0cbb8a5`,
+   production serving arguments except a `2 GiB` scratch checkpoint store), an admitted
+   `79,989`-token request produced its first token `~398.8 s` after admission while the other long
+   request streamed and `48` fresh `247`-token requests completed every `~10 s`, running only after
+   the other request finished — while upstream
+   [`Neroued/ninfer#378`](https://github.com/Neroued/ninfer/issues/378) Host placement was not
+   reproduced on the native RTX 3090 lane (both Host-fill arms, fill `4` and fill `5`, preserved the
+   conversation, at up to `99.995%` peak Host occupancy; the oldest conversation was evicted
+   instead), was **inconclusive** on the RTX 5090 (`rtx5090-win-a`, production image `a0cbb8a5`: the
+   client's adaptive fill did not converge within its `3,600 s` budget across `12` conversations of
+   `~120K` tokens with fill steps lengthening to `~10 min`, so no preservation probe ran), and did
+   **not** reproduce on either build on the RTX PRO 6000 proxy (`rtxpro6000-win-a`, `sm_120`,
+   `NINFER_VRAM_BUDGET_MIB=31000`, `C2` / `BF16` / `131,072`-token KV, `20.4 GiB` Host, preregistered
+   fixed fill `5`: peak Host occupancy `99.842%` baseline / `99.861%` candidate, with the preserved
+   conversation keeping `119,985` of `119,992` / `119,981` of `119,988` cached tokens).
+   [`alphastorm/ninfer#93`](https://github.com/alphastorm/ninfer/pull/93) (head `e6ac7b70`, CI green
+   on all `8/8` jobs) ported the initial fix candidate (the `a754fcf3` failure-diagnostics subset,
+   the `452c3f5f` recovery-loss formula, `#378` Host placement re-expressed from Saylek-ai
+   `fix/378-host-placement`, and the `#434` scheduler pressure owner + bounded service rotation +
+   deferred fresh admission, including a fix and regression test for a refusal-retry liveness defect
+   on a queued fresh-admission notification found in the first scheduler port): on the
+   `rtxpro6000-win-a` RTX PRO 6000 proxy (`a87de361` vs `e6ac7b70`), baseline `a87de361` was **RED**
+   (an admitted request paused `362.3 s` without progress while `38` fresh requests completed),
+   whereas `e6ac7b70` eliminated admitted-request starvation (maximum pause `1.28 s`, both long
+   requests completed) and passed no-pressure parity (`3/3` greedy prompts byte-identical), **but**
+   two fresh requests were refused with HTTP `503` queue timeouts (`180 s` pending timeout) while
+   admission was deferred under sustained pressure. In `P20` (`EXP-112`, `EXP-121`), `E1`'s bounded
+   fresh-admission rotation window
+   ([`alphastorm/ninfer#97`](https://github.com/alphastorm/ninfer/pull/97)) removed those `503`s
+   under pressure (RTX 5090: `0/51` fresh HTTP `503` at `E1` `375bb848` and `0/54` at `F2`
+   `bdc665a3`, with max fully-paused intervals `3.0 s` and `2.59 s`), and `#93` (`e6ac7b70`) was
+   marked merged on 2026-11-10 when fork `main` gained the `F3` merge `b871996a`. In `v0.17.0`, the
+   RTX 5090 `v0.7.0-qwen38-5090-beta.6` component (`e0971faf`,
+   [fork PR #101](https://github.com/alphastorm/ninfer/pull/101)) ships those bounded resume/fresh
+   admission fixes with per-rotation fresh-window accounting for upstream
+   [`Neroued/ninfer#434`](https://github.com/Neroued/ninfer/issues/434), durable
+   pressure-work waits (`pause_reclaim_victim`, `reserve_resident_units`, pending save/export,
+   guarded capture/source, and reclaim boundaries), serving robustness for malformed tool arguments,
+   template-aware effort normalization, request-local numerical failures, and stop/drain final-save
+   ordering (upstream
+   [#440](https://github.com/Neroued/ninfer/issues/440)/[#441](https://github.com/Neroued/ninfer/issues/441)/[#446](https://github.com/Neroued/ninfer/issues/446)),
+   and host-side NFC/frontend rendering, while the native Windows RTX 4090 and RTX 3090 packages stay
+   carried at `v0.8.0-qwen38-{4090,3090}-beta.2` (`a87de361`) and do not yet receive the F3 runtime
+   fixes. The `v0.17.0` runtime full council (`CR-20261110T083627Z-a3fa0550` remediated at F3
+   `e0971faf`), product full council (`CR-20261110T121737Z-c4afc44f-product` on `c4afc44f` with route
+   stage `076bbe4f`), and focused waiver-support review (`CR-20261110T144437Z-f85af622-waiver`
+   remediated at `bf2a63a0`, [#150](https://github.com/alphastorm/omp-ninfer/pull/150)) closed by
+   disposition in [`releases/v0.17.0/review/runtime-ledger.json`](releases/v0.17.0/review/runtime-ledger.json)
+   (`5f8d6e4a0d698f227237b1cf420a8da87182a7c0197ce05e3744fc2f485bce5f`). In `v0.18.0`, frozen fork
+   source `F4` (`48c8ac46`) re-cut all three GPU lanes (`v0.7.0-qwen38-5090-beta.7` and
+   `v0.8.0-qwen38-{4090,3090}-beta.3`), shipping `F3` across both native lanes alongside
+   Device-staged durable `StateImage` export when Host is full
+   ([`alphastorm/ninfer#109`](https://github.com/alphastorm/ninfer/pull/109) for `#89`/`#84`),
+   operation-free checkpoint prepare holding
+   ([`alphastorm/ninfer#111`](https://github.com/alphastorm/ninfer/pull/111)), bounded `K = 4`
+   fresh-admission priority
+   ([`alphastorm/ninfer#108`](https://github.com/alphastorm/ninfer/pull/108) for `#102`), and native
+   controller GPU-owner lease restoration on refused `Stop`, removal postconditions, junction
+   containment, and exact-byte package archiving
+   ([`alphastorm/ninfer#107`](https://github.com/alphastorm/ninfer/pull/107) and `#91`, addressing
+   `#87` items 1 and 3 and `#90`), while product PRs `#155`–`#158` closed the `#149` verifier,
+   composer, staging, hold, and profile-variant items and the `v0.18.0` runtime and product councils
+   closed by disposition in
+   [`releases/v0.18.0/review/runtime-ledger.json`](releases/v0.18.0/review/runtime-ledger.json)
+   (`05c6b207`). In `v0.19.0`, [`alphastorm/ninfer#122`](https://github.com/alphastorm/ninfer/pull/122)
+   shipped bounded retryable pressure-save refusals (`capacity`, `io`, `stale_tag` bounded to six
+   retries or 10 seconds with one `pressure` / `abandoned` receipt; store-quota refusals remain
+   immediate and terminal) on RTX 5090 `v0.7.0-qwen38-5090-beta.8` (`41f89b31`) and native RTX 3090
+   `v0.8.0-qwen38-3090-beta.4` (`15c3e395`, which also landed the managed-`C1` power-check fix in
+   [`alphastorm/ninfer#126`](https://github.com/alphastorm/ninfer/pull/126)), product PRs
+   [`#163`](https://github.com/alphastorm/omp-ninfer/pull/163)–[`#171`](https://github.com/alphastorm/omp-ninfer/pull/171)
+   and [`#174`](https://github.com/alphastorm/omp-ninfer/pull/174) added free-space floors, server/Stop
+   failure gates, audited checkpoint retirement, same-profile native identity-first admission, and the
+   [`#161`](https://github.com/alphastorm/omp-ninfer/issues/161) restoration/launcher/journal
+   follow-ups, RTX 3090 `C2` passed first-attempt acceptance with `0` HTTP `503` responses, `0` queue
+   timeouts, `0` checkpoint write errors, `0` refused `Stop` sessions, and `2/2` committed
+   compactions in proof `9759ea5f` inside [`rtx3090-public-install.json`](releases/v0.19.0/acceptance/rtx3090-public-install.json)), and the `v0.19.0` runtime council, focused native delta review, and
+   product council closed in
+   [`releases/v0.19.0/review/runtime-ledger.json`](releases/v0.19.0/review/runtime-ledger.json)
+   (`2b43fc7a`). Remaining open items are re-cutting carried native RTX 4090 `beta.3` (`48c8ac46`)
+   with bounded pressure saves at the next engine freeze, narrow pressure-save coordinator residuals
+   ([`alphastorm/ninfer#123`](https://github.com/alphastorm/ninfer/issues/123)), broader load shapes
+   under [`alphastorm/ninfer#89`](https://github.com/alphastorm/ninfer/issues/89), native
+   qualification harness diagnostic gaps
+   ([`alphastorm/ninfer#127`](https://github.com/alphastorm/ninfer/issues/127)), per-rotation
+   fresh-window consumption under pending pressure saves
+   ([`alphastorm/ninfer#103`](https://github.com/alphastorm/ninfer/issues/103)), single-op
+   prepare-ordering bounds ([`alphastorm/ninfer#115`](https://github.com/alphastorm/ninfer/issues/115)),
+   unreported-shutdown Stop policy ([#116](https://github.com/alphastorm/ninfer/issues/116)), native
+   instance identity omitting build profile ([#117](https://github.com/alphastorm/ninfer/issues/117)),
+   Linux packaging stage-and-revalidate ([#118](https://github.com/alphastorm/ninfer/issues/118)), a
+   deterministic RTX 5090 release-candidate (`RC`) recipe or publishing the CUDA relocatable device-code (`RDC`) recipe binary
+   ([#120](https://github.com/alphastorm/ninfer/issues/120)), preserving the initiating installer
+   error when rollback is incomplete ([#121](https://github.com/alphastorm/ninfer/issues/121)), the
+   full shutdown-hold state machine ([#50](https://github.com/alphastorm/ninfer/issues/50)), deferred
+   product follow-ups in [#176](https://github.com/alphastorm/omp-ninfer/issues/176) (plus retained
+   [#88](https://github.com/alphastorm/omp-ninfer/issues/88)–[#90](https://github.com/alphastorm/omp-ninfer/issues/90),
+   [#109](https://github.com/alphastorm/omp-ninfer/issues/109), and
+   [#128](https://github.com/alphastorm/omp-ninfer/issues/128)), and a corrected repeated native
+   `Group64` A8 screen.
