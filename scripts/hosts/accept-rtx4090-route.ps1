@@ -52,7 +52,18 @@ $runner=Join-Path $Workspace 'run-documented-route.ps1'
 $baseline=Join-Path $Workspace 'baseline'
 $journal=Join-Path $Workspace 'preparation.json'
 $realClient=Join-Path $RealHome 'AppData\Local\OMP'
-function SaveJson($path,$value) { [IO.File]::WriteAllText($path,($value|ConvertTo-Json -Depth 50)+"`n",$utf8) }
+function SaveJson($path,$value) {
+    # Restore and Retire parse these records back. Write the whole record beside the target,
+    # then swap it in, so a failed or interrupted write leaves the previous bytes in place.
+    $temp="$path.$([Guid]::NewGuid().ToString('N')).partial"
+    try {
+        [IO.File]::WriteAllText($temp,($value|ConvertTo-Json -Depth 50)+"`n",$utf8)
+        if([IO.File]::Exists($path)){[IO.File]::Replace($temp,$path,[NullString]::Value)}else{[IO.File]::Move($temp,$path)}
+    } catch {
+        Remove-Item -LiteralPath $temp -Force -ErrorAction SilentlyContinue
+        throw
+    }
+}
 function BestEffortWrite($label,[scriptblock]$write) {
     try {$null=& $write}
     catch {
