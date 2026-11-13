@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import base64
 import contextlib
+import gc
 import hashlib
 import importlib.util
 import io
@@ -173,6 +174,9 @@ if($ModelId){$parameters.ModelId=$ModelId}
         self.assertEqual(sorted(receipt.parent.glob("*.partial")), [])
 
     def test_an_interrupted_receipt_rewrite_keeps_the_probe_receipt(self) -> None:
+        # The failed window leaves its structured tunnel log to the garbage collector (through the
+        # recorded fake Popen call); release it before the workspace is removed, as Windows requires.
+        self.addCleanup(gc.collect)
         receipt = self.root / "mac-structured/receipt.json"
         self.run_window(interrupt="receipt.json")
         # The window failed at the rewrite, restored the host, and still parses the probe's receipt.
