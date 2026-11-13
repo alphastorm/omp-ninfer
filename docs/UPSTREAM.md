@@ -1109,18 +1109,34 @@ python3 scripts/upstream_watch.py --receipt docs/measurements/$(date +%F)-upstre
 python3 scripts/upstream_watch.py --only ninfer-4090 --per-commit-files
 ```
 
-Read-only: the tool only queries the GitHub API and writes the report file you name. Verdicts
-are `up-to-date`, `upgrade-available`, or `error`; every upstream commit gets a class
-(`fix`/`perf`/`feature`/`security`/`docs`/`test`/`chore`) and a recommendation
-(`pull-candidate`, `next-release`, `review-now`, `ignore`). Recommendations are triage, not
-decisions - a human owns every pull.
+Read-only: the tool only queries GitHub and writes the receipt you name. Schema 2 derives
+`incorporated` from the release selected by root `compatibility.json` and that release's
+`manifest.json`: stock OMP version/tag/commit, upstream engine base, and exact fork source and
+component tags for all runtime lanes. The inventory's `baseline_component` selects those pins;
+it does not duplicate them. Research/community entries without an incorporated-source manifest
+retain their declared comparison base with `status: declared-not-derived` and a report residual.
+Those entries do not establish adoption by the current product.
 
-GitHub's compare endpoint lists at most 250 commits and 300 changed files and cuts a larger delta
-without an error. The report records `commits_truncated` and `files_truncated`, and a cut file
-list scores overlap as `unknown-truncated` rather than `no-direct-path-overlap` - before
-2026-09-24 a cut list read as no overlap and marked every commit of a 1,387-file engine delta a
-`pull-candidate`. For a delta that large, measure applicability against the fork itself (a
-scratch cherry-pick or trial merge) instead of reading the overlap score.
+`last_seen` records the upstream ref's full commit; the OMP client also records the latest
+published release tag peeled to its full commit. Neither observation advances `incorporated`.
+Reusing the same `--receipt` path reads its prior `last_seen` before replacing the receipt and
+labels each observation `initial`, `changed`, or `unchanged`. `evidence_identity` hashes the
+composition, inventory, comparison mode and observed evidence, excluding run time and the
+observation label. Identical observations therefore retain an identical identity even without
+a prior receipt; a caller can compare identities before repeating planning work. The weekly
+artifact-only workflow does not retrieve prior receipts or persist another state store.
+
+Verdicts are `up-to-date`, `delta-observed`, `unknown`, or `error`. Commit `title_triage`,
+`path_triage`, and `triage` labels only prioritize review; `applicability` is always `not-assessed`.
+A missing watched-path match is not proof that a fix applies, and a docs/chore/test title is not
+proof that a change is irrelevant.
+
+GitHub's unpaginated comparison is conservatively unknown at 250 commits or 300 changed files,
+when reported totals exceed listed commits, when required lists/counts are missing, or when a
+`Link` header advertises an unfollowed page. Per-commit file truncation is also unknown.
+`comparison.status`, `unknown_reasons`, `commits_truncated`, and `files_truncated` preserve those
+boundaries; a non-forward comparison is unknown too. An unchanged observation can still have an
+unknown comparison: a stable evidence identity is not a completeness or applicability claim.
 
 ## Historical engine watch — 2026-10-10
 

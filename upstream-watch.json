@@ -1,14 +1,13 @@
 {
-  "schema_version": 1,
-  "description": "Upstream fork-watch manifest. Each entry names one upstream this product tracks, the exact fork point our lineage last incorporated, and the downstream path classes that make an upstream commit conflict-relevant. scripts/upstream_watch.py turns this into a classified delta report.",
+  "schema_version": 2,
+  "description": "Read-only upstream/fork inventory and title/path triage configuration. baseline_component derives incorporated pins from the release manifest selected by compatibility.json; entries without one retain a declared comparison base, not a current adoption claim. Last-seen observations live in receipts, never in incorporated pins.",
   "upstreams": [
     {
       "id": "ninfer-5090",
       "upstream": "Neroued/ninfer",
       "upstream_ref": "master",
       "fork_repo": "alphastorm/ninfer",
-      "fork_point": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
-      "fork_point_meaning": "upstream master base of source 2c6f423b, shipped by all three v0.14.0 runtime lanes. The historical 6e8b2e2a base applied through v0.12.2, not to the shipped lineage.",
+      "baseline_component": "ninfer",
       "overlap_paths": [
         "src/artifact/",
         "src/serve/",
@@ -27,9 +26,7 @@
       "upstream_ref": "feat/qwen4-27b-ops",
       "fork_repo": "alphastorm/ninfer",
       "fork_point": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
-      "fork_point_meaning": "research comparison against the upstream base of the shipped v0.14.0 lineage; this feature branch is watched, not adopted",
-      "last_observed_head": "e1874e940d5be18fd5edd2cff2c259cb11142e54",
-      "last_observed_date": "2026-11-11",
+      "fork_point_meaning": "declared research comparison base; this feature branch is watched, not adopted",
       "overlap_paths": [
         "src/artifact/",
         "src/runtime/",
@@ -66,7 +63,7 @@
       "upstream_ref": "master",
       "fork_repo": "alphastorm/ninfer",
       "fork_point": "ef6ecc3c139b43fc4d3e1b92df474305e8429544",
-      "fork_point_meaning": "vendored base of the native Windows 3090 lane (port/omp-v0.2 lineage)",
+      "fork_point_meaning": "declared historical native Windows 3090 vendored base (port/omp-v0.2 lineage); current incorporation from this watch is not established",
       "community_adoption_head": "d8c29253",
       "community_adoption_date": "2026-10-16",
       "community_adoption_note": "Don-Chad PR #30 adopted the ashalliants-derived community line; independent of the shipped product source",
@@ -92,8 +89,8 @@
       "upstream": "can1357/oh-my-pi",
       "upstream_ref": "main",
       "fork_repo": "alphastorm/oh-my-pi",
-      "fork_point": "45c35e40c46166dc726ccc52f5d27f40f2449f99",
-      "fork_point_meaning": "unmodified upstream v18.12.6 shipped by product v0.14.0; newer client releases are watch candidates, not adopted pins",
+      "baseline_component": "omp",
+      "observe_latest_release": true,
       "overlap_paths": [
         "packages/ai/",
         "packages/core/"
