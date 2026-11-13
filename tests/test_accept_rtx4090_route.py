@@ -982,6 +982,8 @@ foreach($name in @('SaveJson','ReadJson','Hash','Describe','BestEffortWrite','Sa
     if($null -eq $node -and $name -eq 'BestEffortWrite'){continue}
     Invoke-Expression $node.Extent.Text
 }
+$production=$ast.Find({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -ceq 'SaveJson'},$true).Extent.Text
+Invoke-Expression ('function ProductionSaveJson'+$production.Substring('function SaveJson'.Length))
 $utf8=[Text.UTF8Encoding]::new($false)
 $Workspace=Join-Path $Scratch 'evidence';$StateRoot=Join-Path $Scratch 'state'
 $baseline=Join-Path $Scratch 'baseline';$Stage=Join-Path $Scratch 'stage'
@@ -989,6 +991,7 @@ $journal=Join-Path $Workspace 'preparation.json';$TaskName='fixture-task';$First
 New-Item -ItemType Directory -Force $Workspace,$StateRoot,$Stage,"$Workspace/preserved","$Workspace/qualified-artifacts","$baseline/files"|Out-Null
 $script:armed=$false
 function SaveJson($path,$value){
+    if($Case -eq 'journal-interrupted' -and $path -ceq $journal){$script:journalValue=$value;ProductionSaveJson $path $value;return}
     if($Case -eq 'receipt-failure' -and $path.EndsWith('server-log-capture.json')){throw 'injected receipt failure'}
     if($script:armed -and
        (($Case -eq 'restoration-receipt-failure' -and $path.EndsWith('restoration.json')) -or
@@ -1034,7 +1037,7 @@ function ValidateSnapshot($path){$script:snapshot}
 Move-Item $Stage "$Workspace/preserved/stage"
 New-Item -ItemType Directory $Stage|Out-Null
 [IO.File]::WriteAllText((Join-Path $Stage 'window.txt'),'window stage')
-SaveJson $journal @{status='prepared';moves=@(@{kind='documented-stage';path=$Stage;preserved="$Workspace/preserved/stage";exists=$true})}
+SaveJson $journal @{status=$(if($Case -eq 'journal-interrupted'){'preparing'}else{'prepared'});moves=@(@{kind='documented-stage';path=$Stage;preserved="$Workspace/preserved/stage";exists=$true})}
 if($Case -eq 'incumbent'){
     SaveJson "$StateRoot/state.json" @{active_release='incumbent';previous_release='older';prepared_release=$null;releases=@{incumbent=$incumbent}}
 }else{
@@ -1099,18 +1102,39 @@ if($Case -in @('captured-outage','outage-copy-failure')){
     Invoke-Expression $outage.Extent.Text
     $outageContinued=$true
 }
+$interruption=$null
+if($Case -eq 'journal-interrupted'){
+    # Accept's rewrite after the lineage moves fails once the journal is open, like a full volume:
+    # a strict encoder refuses an unpaired surrogate.
+    $previous=[Convert]::ToBase64String([IO.File]::ReadAllBytes($journal))
+    $prep=ReadJson $journal;$prep.status='prepared'
+    $prep|Add-Member -NotePropertyName temporary_state_sha256 -NotePropertyValue ([string][char]0xD800)
+    $utf8=[Text.UTF8Encoding]::new($false,$true);$interruption=[ordered]@{thrown=$false}
+    try{SaveJson $journal $prep}catch{$interruption.thrown=$true}
+    $utf8=[Text.UTF8Encoding]::new($false)
+    $interruption.journal_unchanged=([Convert]::ToBase64String([IO.File]::ReadAllBytes($journal)) -ceq $previous)
+    $interruption.partials=@(Get-ChildItem $Workspace -Filter '*.partial' -Force).Count
+}
 $script:armed=$true
 $result=Restore
 if($result.status -cne 'passed'){throw 'production restoration audit failed'}
 if((Get-Content (Join-Path $Stage 'original.txt')) -cne 'original stage'){throw 'stage not restored'}
 if((Get-Content "$Workspace/qualified-artifacts/documented-stage/window.txt") -cne 'window stage'){throw 'window evidence lost'}
+if($Case -eq 'journal-interrupted'){
+    # Restore's own rewrite to 'restored' must be byte-identical to the former in-place write.
+    $today=Join-Path $Scratch 'today.json'
+    [IO.File]::WriteAllText($today,($script:journalValue|ConvertTo-Json -Depth 50)+"`n",$utf8)
+    $interruption.rewrite_matches_today=([Convert]::ToBase64String([IO.File]::ReadAllBytes($journal)) -ceq
+        [Convert]::ToBase64String([IO.File]::ReadAllBytes($today)))
+    $interruption.partials_after_restore=@(Get-ChildItem $Workspace -Filter '*.partial' -Force).Count
+}
 $strictRejected=$false
 if($Case -eq 'stop-receipt-failure'){
     if(-not (Test-Path (Join-Path $StateRoot 'stop-ran'))){throw 'managed Stop did not run'}
     try{Control Status 'recovery-status.json'}catch{$strictRejected=$true}
 }
 @{restoration=$result;copy_names=@($script:copyNames);outage_continued=$outageContinued;stops=$script:stops
-  journal_status=(ReadJson $journal).status;space_observed=$script:spaceObserved
+  journal_status=(ReadJson $journal).status;space_observed=$script:spaceObserved;interruption=$interruption
   restoration_receipt_exists=(Test-Path "$Workspace/restoration.json");strict_rejected=$strictRejected}|ConvertTo-Json -Depth 20 -Compress
 '''
 
@@ -1216,6 +1240,17 @@ if($Case -eq 'stop-receipt-failure'){
                 if case == "stop-receipt-failure":
                     self.assertTrue(value["strict_rejected"])
                     self.assertEqual(len(value["capture"]["copied"]), 4)
+
+    @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed for the interrupted journal rewrite")
+    def test_interrupted_journal_rewrite_keeps_the_previous_journal_for_restoration(self):
+        value = self.restored_log_capture("journal-interrupted")
+        interruption = value["interruption"]
+        self.assertTrue(interruption["thrown"])
+        self.assertTrue(interruption["journal_unchanged"])
+        self.assertEqual(interruption["partials"], 0)
+        # restored_log_capture already proved the stage, the audit and the 'restored' journal.
+        self.assertTrue(interruption["rewrite_matches_today"])
+        self.assertEqual(interruption["partials_after_restore"], 0)
 
     def test_health_failures_fail_behavior_and_the_collected_window(self):
         for fault in ("queue", "write", "incomplete", "refused", "missing"):
@@ -1393,6 +1428,82 @@ SaveServerLogs $installed
         self.assertEqual(value["second"]["copied"], ["server-stderr.log"])
         self.assertEqual(value["bytes"], "complete log bytes")
         self.assertEqual(value["partial_count"], 0)
+
+
+class AtomicRecordWriteTests(unittest.TestCase):
+    """Native records read back during recovery are swapped in whole, never truncated in place."""
+
+    WRITERS = r'''
+param($Root,$Scratch)
+$ErrorActionPreference='Stop'
+Set-StrictMode -Version Latest
+function Bytes($path){[Convert]::ToBase64String([IO.File]::ReadAllBytes($path))}
+function Load($file,$name){
+    $tokens=$null;$errors=$null
+    $ast=[Management.Automation.Language.Parser]::ParseFile((Join-Path $Root $file),[ref]$tokens,[ref]$errors)
+    if($errors.Count){throw ($errors|Out-String)}
+    $text=$ast.Find({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -ceq $name},$true).Extent.Text
+    # Route each writer's encoder through $utf8, so a strict encoder can fail it mid-write.
+    $inline='[Text.UTF8Encoding]::new($false)'
+    if($file -cne 'accept-rtx4090-route.ps1' -and ([regex]::Matches($text,[regex]::Escape($inline))).Count -ne 1){throw "$name must construct its encoder once"}
+    $text.Replace($inline,'$utf8')
+}
+Invoke-Expression (Load 'accept-rtx4090-route.ps1' 'SaveJson')
+Invoke-Expression (Load 'accept-windows-client.ps1' 'Save-Json')
+Invoke-Expression (Load 'accept-native-public-install.ps1' 'Finish')
+function Utc {'2026-11-13T00:00:00.0000000Z'}
+$normal=[Text.UTF8Encoding]::new($false);$strict=[Text.UTF8Encoding]::new($false,$true)
+# Each writer, and the bytes its former in-place write produced for the value it was given.
+$writers=[ordered]@{
+    journal=@{write={param($path,$value) SaveJson $path $value};today={param($value) ($value|ConvertTo-Json -Depth 50)+"`n"}}
+    hold=@{write={param($path,$value) $Workspace=Split-Path $path -Parent;Save-Json (Split-Path $path -Leaf) $value}
+        today={param($value) $value|ConvertTo-Json -Depth 20}}
+    public=@{write={param($path,$value) $ReceiptPath=$path;$receipt=$value;Finish 'passed'};today={param($value) $value|ConvertTo-Json -Depth 8}}
+}
+$rows=[ordered]@{}
+foreach($name in $writers.Keys){
+    $w=$writers[$name];$directory=Join-Path $Scratch $name;$null=New-Item -ItemType Directory $directory
+    $path=Join-Path $directory 'record.json';$today=Join-Path $Scratch "$name-today.json";$row=[ordered]@{}
+    $utf8=$normal
+    foreach($step in @('created','rewritten')){
+        $value=[ordered]@{status=$step;path='C:\fixture';note=('na'+[char]0xEF+'ve')}
+        & $w.write $path $value
+        [IO.File]::WriteAllText($today,(& $w.today $value),$normal)
+        $row["${step}_matches_today"]=((Bytes $path) -ceq (Bytes $today))
+    }
+    # A strict encoder refuses an unpaired surrogate once the file is open, like a full volume.
+    $previous=Bytes $path;$utf8=$strict
+    $value=[ordered]@{status='interrupted';path='C:\fixture';note=[string][char]0xD800}
+    try{& $w.write $path $value;$row.rewrite_thrown=$false}catch{$row.rewrite_thrown=$true}
+    $row.rewrite_kept_previous=((Bytes $path) -ceq $previous)
+    $fresh=Join-Path $directory 'fresh.json'
+    try{& $w.write $fresh $value;$row.create_thrown=$false}catch{$row.create_thrown=$true}
+    $row.create_left_nothing=-not (Test-Path -LiteralPath $fresh)
+    $utf8=$normal
+    $row.partials=@(Get-ChildItem -LiteralPath $directory -Force|Where-Object Name -like '*.partial').Count
+    $rows[$name]=$row
+}
+$rows|ConvertTo-Json -Compress
+'''
+
+    @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed for native record writers")
+    def test_interrupted_writes_keep_previous_records_and_writes_keep_their_bytes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            script = Path(directory) / "writers.ps1"
+            script.write_text(self.WRITERS, encoding="utf-8")
+            scratch = Path(directory) / "scratch"
+            scratch.mkdir()
+            result = subprocess.run([shutil.which("pwsh"), "-NoProfile", "-File", str(script),
+                                     str(ROOT / "scripts/hosts"), str(scratch)],
+                                    capture_output=True, text=True, encoding="utf-8", timeout=60)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            rows = json.loads(result.stdout.splitlines()[-1])
+        self.assertEqual(list(rows), ["journal", "hold", "public"])
+        for name, row in rows.items():
+            with self.subTest(writer=name):
+                self.assertEqual(row, {"created_matches_today": True, "rewritten_matches_today": True,
+                                       "rewrite_thrown": True, "rewrite_kept_previous": True,
+                                       "create_thrown": True, "create_left_nothing": True, "partials": 0})
 
 
 class RetirementTests(unittest.TestCase):
@@ -1873,7 +1984,7 @@ function Invoke-WebRequest {
 }
 $text=[IO.File]::ReadAllText($Source)
 $start=$text.IndexOf('function Sha(')
-$end=$text.IndexOf("try {`n",$start)
+$end=$text.IndexOf("`ntry {`n",$start)+1
 $definitions=$text.Substring($start,$end-$start)
 $smoke=$text.Substring($text.IndexOf('    # 5. Smoke'))
 Remove-Variable LASTEXITCODE -Scope Global -ErrorAction SilentlyContinue
