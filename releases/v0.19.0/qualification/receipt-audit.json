@@ -755,7 +755,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "9aa9d626a303141d878d3eaf052876aeb965cbe2735eff93a14a950af357dd84",
-      "staged_value_sha256": "e772477b4919e5610aac4ac4570fd54c8e82927c702f83002ce236653f5d68f4"
+      "staged_value_sha256": "303b7c50769bc172307eb0fb517c7b2aed9e52071a60b99efe4ab7beef5648f9"
     },
     {
       "file": "manifest.json",
@@ -1161,7 +1161,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "5d55a70ef65b2941e2258f1b148b66fa7b17865ac74a903b54f656a0dd27d47a",
-      "staged_value_sha256": "1e9872f0a9ba78827434b2b917853c5c01e22caec21c8cf96f13bee9226567c7"
+      "staged_value_sha256": "33da73f1d3098baf13a9a8503d29d8dfa13bdea6ee50f6ddb7a8dcae23a33ffd"
     },
     {
       "file": "manifest.json",
@@ -1489,7 +1489,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "77d67f750451bf06742503ab7b930833d8dc6f94f16f67c5d5c6ad97e8ead376",
-      "staged_value_sha256": "3880581e9ae5974197a9d796950436036bfc99abd9152087ec0d63f2c25aa665"
+      "staged_value_sha256": "bf3cb8ff9156dd5b056641af16f7b6efccfae76a92a215659250381ae19f933a"
     },
     {
       "file": "manifest.json",
@@ -1760,7 +1760,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "65410b5b7c6a9ce423a8b6ba790f43b1298367598c875818ad01479052aa71f9",
-      "staged_value_sha256": "b4d954e485c2b94aee096bcca62f44792256049560984effea7d5a47c33c40c5"
+      "staged_value_sha256": "38ac4e235f664290ed6d5d65deb51988bc554874379964a19d2bceb55dad7c45"
     },
     {
       "file": "manifest.json",
@@ -1784,7 +1784,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "7413c539542b8caf5f9f20404d82a2695ebb2a50ae7c3c4624da50ebd30ac679",
-      "staged_value_sha256": "166c0060c67aa36026dc415ff1f31a9fd04144e9dd037580efbf4adc7173d04e"
+      "staged_value_sha256": "08fc6703394900ea2bed6c9e0b0144b983ab643041601ca6daae1abc96ac733a"
     },
     {
       "file": "manifest.json",

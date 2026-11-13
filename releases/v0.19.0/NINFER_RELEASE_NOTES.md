@@ -1,8 +1,10 @@
-# OMP NInfer v0.19.0 — prepared release notes
+# OMP NInfer v0.19.0 — bounded pressure saves, RTX 3090 beta.4, and stock OMP 18.20.0
 
-**Accepted candidate `6b22f219`: 31 documented blocks, three stock clients, both native campaigns and public installs, restoration and reviews passed. This is not publication authority.**
-Until `v0.19.0` is published, install from the
-[immutable published v0.18.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.18.0/docs/QUICKSTART.md).
+> The RTX 5090 runtime beta.8 and the RTX 3090 native beta.4 carry the bounded pressure-save change
+> ([fork #122](https://github.com/alphastorm/ninfer/pull/122)); the RTX 4090 native beta.3 is carried unchanged from
+> v0.18.0; the client is stock Oh My Pi **18.20.0**. Component cuts, current hardware qualification, all **31/31**
+> documented blocks, three stock-client platform checks, both native campaigns and public installs, independent
+> restoration and the release reviews passed on candidate `6b22f219`.
 
 ## Selected identities
 
@@ -45,7 +47,7 @@ Known residuals, deferred to the next engine change in [fork #123](https://githu
 
 Neither residual affects the bounded-settlement path that fork #122 proved. Each needs a narrow interleaving or load shape, and neither fabricates a durable acknowledgement. Fork #123 also tracks a pre-existing matching-tag overwrite in `enqueue` and two evidence gaps.
 
-The pressure-save HTTP 503 failure tracked in [fork #89](https://github.com/alphastorm/ninfer/issues/89) needs fresh exact-lane acceptance on the native lanes; these notes do not claim it is closed. RTX 3090 acceptance-class evidence from the `15c3e395` native chain: GREEN; 2 committed handoffs, 0 HTTP 503 events, 0 queue timeouts; restored 370 W, owner leases absent. The fixture-only fix, the qualification check fix and the identity bump do not waive release-candidate, native-chain or route gates.
+The pressure-save HTTP 503 failure tracked in [fork #89](https://github.com/alphastorm/ninfer/issues/89) passed exact-lane acceptance on the RTX 3090 in this release (see Acceptance); these notes do not claim it is closed for every load shape. RTX 3090 component-chain evidence from `15c3e395`: GREEN; 2 committed handoffs, 0 HTTP 503 events, 0 queue timeouts; restored 370 W, owner leases absent. The fixture-only fix, the qualification check fix and the identity bump do not waive release-candidate, native-chain or route gates.
 
 ## Stock OMP 18.20.0 client and Windows wire changes
 
@@ -57,14 +59,14 @@ The carried Responses serializer, tokenizer and local fragments do not establish
 
 ## Native same-profile identity rule
 
-[#171](https://github.com/alphastorm/omp-ninfer/pull/171) lets a non-default native profile use identity-first only against the **published incumbent of that same profile**: RTX 3090 tc beta.4 versus the published beta.3 tc package. The carried RTX 4090 beta.3 is not re-measured in this release, so no identity, speed or parity decision applies to it. The sealed 80-prompt determinism subset must have byte-identical outputs and the complete speed declaration/ABBA still runs. Any output difference requires the powered EXP-085 fallback; a matching source label or counts-only receipt is not identity evidence. No speed or quality pass is asserted in this draft.
+[#171](https://github.com/alphastorm/omp-ninfer/pull/171) lets a non-default native profile use identity-first only against the **published incumbent of that same profile**: RTX 3090 tc beta.4 versus the published beta.3 tc package. The carried RTX 4090 beta.3 is not re-measured in this release, so no identity, speed or parity decision applies to it. The sealed 80-prompt determinism subset must have byte-identical outputs and the complete speed declaration/ABBA still runs. Any output difference requires the powered EXP-085 fallback; a matching source label or counts-only receipt is not identity evidence. RTX 3090 tc beta.4 passed identity-first: all 80 sealed determinism outputs and all 84 complete-ABBA speed cases are byte-identical to the published beta.3 tc package, and the complete ABBA measured 1.000× role-weighted (minimum case 0.997×).
 
 ## Acceptance tooling and #161 follow-ups
 
 - [#163](https://github.com/alphastorm/omp-ninfer/pull/163): native and RTX 5090 window free-space floors before spending an attempt; native public-install checks retain their separate floor.
 - [#164](https://github.com/alphastorm/omp-ninfer/pull/164): native windows fail on HTTP 503, checkpoint I/O errors, or incomplete/refusing managed Stop; a wrapper exit alone cannot erase server evidence.
 - [#165](https://github.com/alphastorm/omp-ninfer/pull/165): only a collected passed native window with its candidate/lane-bound public-install receipt can retire that window's inventoried checkpoint generations. Preserve `retirement.json`; canonical and predecessor stores are not cleanup targets.
-- [#161](https://github.com/alphastorm/omp-ninfer/issues/161) follow-ups are merged. [#170](https://github.com/alphastorm/omp-ninfer/pull/170) keeps native restoration running when evidence writes fail and copies server logs atomically. [#168](https://github.com/alphastorm/omp-ninfer/pull/168) revalidates the resolved checkpoint directory in the launcher. [#169](https://github.com/alphastorm/omp-ninfer/pull/169) reports RTX 5090 restoration only when it ran. Live restoration under these changes is exercised only by the v0.19.0 windows.
+- [#161](https://github.com/alphastorm/omp-ninfer/issues/161) follow-ups are merged. [#170](https://github.com/alphastorm/omp-ninfer/pull/170) keeps native restoration running when evidence writes fail and copies server logs atomically. [#168](https://github.com/alphastorm/omp-ninfer/pull/168) revalidates the resolved checkpoint directory in the launcher. [#169](https://github.com/alphastorm/omp-ninfer/pull/169) reports RTX 5090 restoration only when it ran. [#174](https://github.com/alphastorm/omp-ninfer/pull/174) writes the native acceptance recovery records atomically. The v0.19.0 windows exercised live restoration under these changes and passed.
 - [#171](https://github.com/alphastorm/omp-ninfer/pull/171): the same-profile identity rule above.
 
 ## Acceptance
@@ -85,4 +87,4 @@ Owner-operated, tester-equivalent acceptance of frozen candidate `6b22f219c7298d
 - Carried RTX 4090: `v0.8.0-qwen38-4090-beta.3` (source `48c8ac46`, package `sha256:ac41700ac2bb9fb171188f35e73481cfd9f1140c5781320b1e6304ee760d7166`) is the published v0.18.0 component, unchanged. It does not include the bounded pressure-save change (fork #122) and keeps its v0.18.0 component qualification; it re-cuts with the next engine freeze. Its fresh v0.19.0 documented route and campaign ran on those exact bytes, and its anonymous public install passed.
 - Reviews: the runtime council on `41f89b31` and the focused review of the native delta to `15c3e395` closed as listed above. Product council CR-20261113T192727Z-6b22f219-product (closed-by-disposition) reviewed `6b22f219` and binds route candidate `6b22f219`. Deferred product residuals are tracked in https://github.com/alphastorm/omp-ninfer/issues/176. The combined content-safe ledger is [review/runtime-ledger.json](review/runtime-ledger.json).
 
-The final receipt audit, the platform → acceptance → manifest pins and the strict ready check bind these receipts. No predecessor acceptance receipt, waiver, transcript or review approval is renewed. macOS remains preview, Linux evidence stays WSL2-scoped, vision remains RTX 5090 container-only, and native lanes remain sequential on their shared port. Review approval and acceptance do not authorize publication; product publication and any production promotion are separate decisions.
+The final receipt audit, the platform → acceptance → manifest pins and the strict ready check bind these receipts. No predecessor acceptance receipt, waiver, transcript or review approval is renewed. macOS remains preview, Linux evidence stays WSL2-scoped, vision remains RTX 5090 container-only, and native lanes remain sequential on their shared port. Promoting an existing production deployment to these components is a separate operator decision.
