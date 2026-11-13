@@ -977,8 +977,9 @@ Set-StrictMode -Version Latest
 $tokens=$null;$errors=$null
 $ast=[Management.Automation.Language.Parser]::ParseFile($Source,[ref]$tokens,[ref]$errors)
 if($errors.Count){throw ($errors|Out-String)}
-foreach($name in @('SaveJson','ReadJson','Hash','Describe','SaveServerLogs','Restore','Audit')){
+foreach($name in @('SaveJson','ReadJson','Hash','Describe','BestEffortWrite','SaveServerLogs','Restore','Audit')){
     $node=$ast.Find({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -ceq $name},$true)
+    if($null -eq $node -and $name -eq 'BestEffortWrite'){continue}
     Invoke-Expression $node.Extent.Text
 }
 $utf8=[Text.UTF8Encoding]::new($false)
@@ -986,8 +987,14 @@ $Workspace=Join-Path $Scratch 'evidence';$StateRoot=Join-Path $Scratch 'state'
 $baseline=Join-Path $Scratch 'baseline';$Stage=Join-Path $Scratch 'stage'
 $journal=Join-Path $Workspace 'preparation.json';$TaskName='fixture-task';$FirstRelease=$false
 New-Item -ItemType Directory -Force $Workspace,$StateRoot,$Stage,"$Workspace/preserved","$Workspace/qualified-artifacts","$baseline/files"|Out-Null
+$script:armed=$false
 function SaveJson($path,$value){
     if($Case -eq 'receipt-failure' -and $path.EndsWith('server-log-capture.json')){throw 'injected receipt failure'}
+    if($script:armed -and
+       (($Case -eq 'restoration-receipt-failure' -and $path.EndsWith('restoration.json')) -or
+        ($Case -eq 'journal-failure' -and $path.EndsWith('preparation.json')))){
+        throw [Exception]::new('outer private path',[IO.IOException]::new('inner private path',-2147024784))
+    }
     [IO.File]::WriteAllText($path.Replace('\','/'),($value|ConvertTo-Json -Depth 50),$utf8)
 }
 function Get-Acl {param($Path,$LiteralPath) @{Sddl='fixture-acl'}}
@@ -1001,7 +1008,10 @@ function Resolve-NativeGpuUuid($root){'fixture-gpu'}
 function Get-NativeGpuPowerLimit($uuid){450}
 function SupportFiles {[pscustomobject]@{FullName="$StateRoot\state.json"}}
 function SupportDirectories {[pscustomobject]@{FullName=$StateRoot}}
-function AssertFreeSpace($phase,[switch]$ObserveOnly){$script:spaceObserved=$true}
+function AssertFreeSpace($phase,[switch]$ObserveOnly){
+    $script:spaceObserved=$true
+    if($script:armed -and $Case -eq 'space-receipt-failure'){throw 'injected free-space receipt failure'}
+}
 function Probe {
     $s=ReadJson "$StateRoot/state.json"
     @{state_sha256=(Hash "$StateRoot/state.json");state_sddl='fixture-acl';root_sddl='fixture-acl'
@@ -1031,13 +1041,45 @@ if($Case -eq 'incumbent'){
     $original.previous_release='older';SaveJson "$StateRoot/state.json" $original
 }
 $script:stops=0;$script:copyNames=@();$script:spaceObserved=$false
-function Control($action,$file){
+function Control($action,$file,[switch]$BestEffort){
     $script:stops++
     $s=ReadJson "$StateRoot/state.json";$root=$s.releases.([string]$s.active_release).release_root
     [IO.File]::WriteAllText((Join-Path $root 'logs/requests.jsonl'),"{`"event`":`"stop_$script:stops`"}")
     [IO.File]::WriteAllText((Join-Path $root 'logs/stderr.log'),"stop $script:stops")
     [IO.File]::WriteAllText((Join-Path $root 'logs/stderr.log.previous'),"previous $script:stops")
     SaveJson (Join-Path $root 'logs/shutdown.json') @{complete=$true;refused=0;saved=$script:stops;skipped=0}
+}
+if($Case -eq 'stop-receipt-failure'){
+    Remove-Item Function:\Control
+    $node=$ast.Find({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -ceq 'Control'},$true)
+    Invoke-Expression $node.Extent.Text
+    function Get-ExecutionPolicy {param($Scope) 'Unrestricted'}
+    function Set-ExecutionPolicy {param($Scope,$ExecutionPolicy,[switch]$Force)}
+    function Out-File {
+        [CmdletBinding()]
+        param([Parameter(Position=0)][string]$FilePath,
+              [Parameter(ValueFromPipeline=$true)]$InputObject,[string]$Encoding)
+        begin {
+            if($FilePath -match '(restoration-stop|recovery-status)\.json$'){
+                throw [IO.IOException]::new('private output path',-2147024784)
+            }
+        }
+        process {$InputObject|Microsoft.PowerShell.Utility\Out-File -FilePath $FilePath -Encoding $Encoding -Append}
+    }
+    $controller=Join-Path $Scratch 'controller.ps1'
+    [IO.File]::WriteAllText($controller,@'
+param($Action,$StateRoot)
+if($Action -eq 'Stop'){
+    [IO.File]::WriteAllText((Join-Path $StateRoot 'stop-ran'),'true')
+    $state=Get-Content (Join-Path $StateRoot 'state.json') -Raw|ConvertFrom-Json
+    $logs=Join-Path $state.releases.([string]$state.active_release).release_root 'logs'
+    [IO.File]::WriteAllText((Join-Path $logs 'requests.jsonl'),'{"event":"stop_1"}')
+    [IO.File]::WriteAllText((Join-Path $logs 'stderr.log'),'stop 1')
+    [IO.File]::WriteAllText((Join-Path $logs 'stderr.log.previous'),'previous 1')
+    [IO.File]::WriteAllText((Join-Path $logs 'shutdown.json'),'{"complete":true,"refused":0,"saved":1,"skipped":0}')
+}
+'{"status":"stopped"}'
+'@)
 }
 function Copy-Item {
     param($LiteralPath,$Path,$Destination,[switch]$Force,$ErrorAction)
@@ -1057,12 +1099,19 @@ if($Case -in @('captured-outage','outage-copy-failure')){
     Invoke-Expression $outage.Extent.Text
     $outageContinued=$true
 }
+$script:armed=$true
 $result=Restore
 if($result.status -cne 'passed'){throw 'production restoration audit failed'}
 if((Get-Content (Join-Path $Stage 'original.txt')) -cne 'original stage'){throw 'stage not restored'}
 if((Get-Content "$Workspace/qualified-artifacts/documented-stage/window.txt") -cne 'window stage'){throw 'window evidence lost'}
-if((ReadJson $journal).status -cne 'restored' -or -not $script:spaceObserved){throw 'restoration did not finish'}
-@{restoration=$result;copy_names=@($script:copyNames);outage_continued=$outageContinued;stops=$script:stops}|ConvertTo-Json -Depth 20 -Compress
+$strictRejected=$false
+if($Case -eq 'stop-receipt-failure'){
+    if(-not (Test-Path (Join-Path $StateRoot 'stop-ran'))){throw 'managed Stop did not run'}
+    try{Control Status 'recovery-status.json'}catch{$strictRejected=$true}
+}
+@{restoration=$result;copy_names=@($script:copyNames);outage_continued=$outageContinued;stops=$script:stops
+  journal_status=(ReadJson $journal).status;space_observed=$script:spaceObserved
+  restoration_receipt_exists=(Test-Path "$Workspace/restoration.json");strict_rejected=$strictRejected}|ConvertTo-Json -Depth 20 -Compress
 '''
 
     def restored_log_capture(self, case):
@@ -1086,6 +1135,10 @@ if((ReadJson $journal).status -cne 'restored' -or -not $script:spaceObserved){th
             value["health"] = DRIVER.assess_server_health(evidence)
             value["candidate_shutdown"] = json.loads((root / "candidate/logs/shutdown.json").read_text()) \
                 if (root / "candidate/logs/shutdown.json").exists() else None
+            if case not in ("stop-receipt-failure", "restoration-receipt-failure",
+                            "journal-failure", "space-receipt-failure"):
+                self.assertEqual(value["journal_status"], "restored")
+                self.assertTrue(value["space_observed"])
             return value
 
     @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed for capture failure restoration")
@@ -1098,8 +1151,12 @@ if((ReadJson $journal).status -cne 'restored' -or -not $script:spaceObserved){th
                 else:
                     self.assertEqual(value["capture"]["failed"], ["server-stderr.log"])
                     self.assertEqual(value["capture"]["missing"], [])
-                    self.assertEqual(set(value["capture"]["copied"]),
-                                     {"server-requests.jsonl", "server-stderr.previous.log", "shutdown.json"})
+                    names = {"server-requests.jsonl", "server-stderr.previous.log", "shutdown.json"}
+                    if case == "outage-copy-failure":
+                        self.assertEqual(value["capture"]["copied"], [])
+                        self.assertEqual(set(value["capture"]["retained"]), names)
+                    else:
+                        self.assertEqual(set(value["capture"]["copied"]), names)
                     self.assertEqual(value["health"]["status"], "failed")
                     self.assertFalse(value["health"]["checks"]["stderr_log_present"])
                 if case == "outage-copy-failure":
@@ -1129,6 +1186,36 @@ if((ReadJson $journal).status -cne 'restored' -or -not $script:spaceObserved){th
         self.assertEqual(value["candidate_shutdown"]["saved"], 2)
         self.assertEqual(value["capture"]["failed"], [])
         self.assertEqual(value["capture"]["missing"], [])
+        self.assertEqual(value["capture"]["copied"], [])
+        self.assertEqual(set(value["capture"]["retained"]), set(value["logs"]))
+
+    @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed for restoration write failures")
+    def test_restore_keeps_canonical_restoration_independent_of_evidence_writes(self):
+        cases = {
+            "stop-receipt-failure": ("restoration-stop.json", True, True),
+            "restoration-receipt-failure": ("restoration.json", False, False),
+            "journal-failure": ("preparation.json", True, False),
+            "space-receipt-failure": ("free-space-restored.json", True, True),
+        }
+        for case, (label, receipt_written, journal_restored) in cases.items():
+            with self.subTest(case=case):
+                value = self.restored_log_capture(case)
+                restored = value["restoration"]
+                self.assertEqual([row["write"] for row in restored["write_failures"]], [label])
+                self.assertEqual(restored["restoration_receipt_written"], receipt_written)
+                self.assertEqual(restored["journal_restored"], journal_restored)
+                self.assertEqual(value["restoration_receipt_exists"], receipt_written)
+                self.assertEqual(value["journal_status"], "restored" if journal_restored else "prepared")
+                self.assertTrue(value["space_observed"])
+                if case != "space-receipt-failure":
+                    failure = restored["write_failures"][0]
+                    self.assertEqual(failure["error_type"], "System.IO.IOException")
+                    self.assertEqual(failure["hresult"], "0x80070070")
+                    self.assertTrue(failure["utc"])
+                    self.assertNotIn("private", json.dumps(failure))
+                if case == "stop-receipt-failure":
+                    self.assertTrue(value["strict_rejected"])
+                    self.assertEqual(len(value["capture"]["copied"]), 4)
 
     def test_health_failures_fail_behavior_and_the_collected_window(self):
         for fault in ("queue", "write", "incomplete", "refused", "missing"):
@@ -1196,6 +1283,9 @@ if((ReadJson $journal).status -cne 'restored' -or -not $script:spaceObserved){th
         self.assertIn("AssertServerHealth", source)
         self.assertLess(source.rindex("AssertServerHealth"), source.index('SaveJson "$Workspace\\window.json"'))
         self.assertIn("initial install launch covered by requests only", source)
+        accept = source[source.index("$started=[DateTime]::UtcNow;$b=Snapshot $baseline"):]
+        self.assertLess(accept.index("EnableExactAcl"), accept.index("$effect=$true"))
+        self.assertIn("restoration_write_failures", accept[accept.index('SaveJson "$Workspace\\window.json"'):])
         driver = (ROOT / "scripts/hosts/accept-rtx4090-route.py").read_text(encoding="utf-8")
         self.assertIn('str(orchestrator.with_suffix(".py"))', driver)
         self.assertIn('sync_window_failure', driver)
@@ -1235,9 +1325,74 @@ SaveServerLogs @{release_root=(Join-Path $Scratch 'candidate')}
             self.assertEqual({p.name for p in (root / "evidence").iterdir()},
                              set(names.values()) | {"server-log-capture.json"})
             capture = json.loads((root / "evidence/server-log-capture.json").read_text())
-            self.assertEqual(capture, {"copied": list(names.values()), "missing": [], "failed": []})
+            self.assertEqual(capture, {"copied": list(names.values()), "retained": [], "missing": [], "failed": []})
             for source, destination in names.items():
                 self.assertEqual((root / "evidence" / destination).read_bytes(), (logs / source).read_bytes())
+
+    def log_capture_case(self, case):
+        proof = r'''
+param($Source,$Scratch,$Case)
+$ErrorActionPreference='Stop'
+$tokens=$null;$errors=$null
+$ast=[Management.Automation.Language.Parser]::ParseFile($Source,[ref]$tokens,[ref]$errors)
+if($errors.Count){throw ($errors|Out-String)}
+foreach($name in @('SaveJson','ReadJson','SaveServerLogs')){
+    $node=$ast.Find({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -ceq $name},$true)
+    Invoke-Expression $node.Extent.Text
+}
+$utf8=[Text.UTF8Encoding]::new($false)
+$Workspace=Join-Path $Scratch 'evidence';$installed=@{release_root=(Join-Path $Scratch 'candidate')}
+$destination=Join-Path $Workspace 'server-stderr.log'
+$script:interrupt=$Case -eq 'interrupted'
+function Copy-Item {
+    param($LiteralPath,$Destination,[switch]$Force,$ErrorAction)
+    if($script:interrupt){
+        $script:interrupt=$false
+        [IO.File]::WriteAllText($Destination,'truncated')
+        throw 'injected interrupted copy'
+    }
+    Microsoft.PowerShell.Management\Copy-Item -LiteralPath $LiteralPath -Destination $Destination -Force:$Force
+}
+SaveServerLogs $installed
+$first=@{capture=(ReadJson (Join-Path $Workspace 'server-log-capture.json'))
+    destination_exists=(Test-Path $destination);partial_count=@(Get-ChildItem $Workspace -Filter '*.partial').Count}
+SaveServerLogs $installed
+@{first=$first;second=(ReadJson (Join-Path $Workspace 'server-log-capture.json'))
+    bytes=[IO.File]::ReadAllText($destination);partial_count=@(Get-ChildItem $Workspace -Filter '*.partial').Count}|ConvertTo-Json -Depth 10 -Compress
+'''
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            logs = root / "candidate/logs"
+            logs.mkdir(parents=True)
+            (logs / "stderr.log").write_text("complete log bytes", encoding="utf-8")
+            (root / "evidence").mkdir()
+            if case == "retained":
+                (root / "evidence/server-stderr.log").write_text("earlier", encoding="utf-8")
+            script = root / "capture.ps1"
+            script.write_text(proof, encoding="utf-8")
+            result = subprocess.run([shutil.which("pwsh"), "-NoProfile", "-File", str(script),
+                                     str(ROOT / "scripts/hosts/accept-rtx4090-route.ps1"), directory, case],
+                                    capture_output=True, text=True, encoding="utf-8", timeout=30)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            return json.loads(result.stdout.splitlines()[-1])
+
+    @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed for retained log capture")
+    def test_existing_destination_is_retained_not_copied(self):
+        value = self.log_capture_case("retained")
+        self.assertEqual(value["first"]["capture"]["copied"], [])
+        self.assertEqual(value["first"]["capture"]["retained"], ["server-stderr.log"])
+        self.assertEqual(value["bytes"], "earlier")
+        self.assertEqual(value["partial_count"], 0)
+
+    @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed for atomic log capture")
+    def test_interrupted_copy_leaves_no_destination(self):
+        value = self.log_capture_case("interrupted")
+        self.assertFalse(value["first"]["destination_exists"])
+        self.assertEqual(value["first"]["partial_count"], 0)
+        self.assertEqual(value["first"]["capture"]["failed"], ["server-stderr.log"])
+        self.assertEqual(value["second"]["copied"], ["server-stderr.log"])
+        self.assertEqual(value["bytes"], "complete log bytes")
+        self.assertEqual(value["partial_count"], 0)
 
 
 class RetirementTests(unittest.TestCase):
