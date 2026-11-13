@@ -118,22 +118,88 @@
       "sha256": "ac4e523715455fff53dade0ebdacce1673e62ae5f9ffbb14ab33309642a620ad"
     },
     "external_installation_acceptance": {
-      "status": "pending",
-      "note": "rerun against the published v0.7.0-qwen38-5090-beta.8 component (image c3ec151b) before the cut; the receipt lands at releases/v0.19.0/acceptance/composed-external-installation.json"
+      "status": "passed",
+      "repository_path": "releases/v0.19.0/acceptance/composed-external-installation.json",
+      "sha256": "5c39d9a2e66ea7b8898b2ddbd84868051e9b4c3064af9ca03a67f891656e0c08",
+      "public_url": null,
+      "as_of": "2026-11-13",
+      "release": "v0.19.0",
+      "component_release_tag": "v18.20.0",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "1b6c7bda8241bc7d948495539f90ec47e6f30d1fec72b6ee097a67a1fc8d8e48",
+      "windows_binary_sha256": "1b6c7bda8241bc7d948495539f90ec47e6f30d1fec72b6ee097a67a1fc8d8e48",
+      "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+      "compatibility_sha256": "02417e47b7dbc51eea4af499595ff011475a6a2e1d22e34fd8cf5beef264f5dc",
+      "platform_receipts": [
+        {
+          "profile": "darwin-remote-ssh",
+          "sha256": "652e3cc2b1e29ac594d245affec89f40c942c7fb19ca7c3fdb7e4b8f6df20259"
+        },
+        {
+          "profile": "windows-docker-local",
+          "sha256": "45817227fe476b900bf0fd41ecc33cef0e7f6aed74337e494a5920fc3ab94bce"
+        },
+        {
+          "profile": "linux-docker-local",
+          "sha256": "ebd79d0698c1b538a3d43b857095e47d28e6a0fc65204b7f48c96b7a10350568"
+        }
+      ],
+      "note": "Fresh five-route execution and candidate-profile native probes passed, with independent restoration and final audits. Exact stock client and current runtime/configuration/model identities were observed. Council binding, final immutable pins, strict ready verification and publication remain separate gates."
     },
     "review": {
-      "status": "pending",
-      "scope": "The runtime source review of 41f89b310b443481db5917a01a2b45e49f85e723 closed with no confirmed P0 or P1 finding; its residuals are deferred to https://github.com/alphastorm/ninfer/issues/123. Its content-safe ledger section and the product review remain unbound. The predecessor review ledger is not retained as successor approval."
+      "status": "closed-by-disposition",
+      "scope": "Runtime full council CR-20261113T063918Z-41f89b31 on 41f89b310b443481db5917a01a2b45e49f85e723 closed with no confirmed in-scope P0 or P1 finding; its residuals are deferred to https://github.com/alphastorm/ninfer/issues/123. The focused review of the native power-check delta at 15c3e3959c0a6167f799e9383482ec4e03db9cad found no P0 or P1 finding; its two diagnostic-evidence gaps are deferred to https://github.com/alphastorm/ninfer/issues/127. Product full council CR-20261113T192727Z-6b22f219-product closed (closed-by-disposition) with route candidate 6b22f219c7298db4b8fa5c2bc7bb33eb7a37799f. Deferred product residuals are tracked in https://github.com/alphastorm/omp-ninfer/issues/176. The combined content-safe ledger is releases/v0.19.0/review/runtime-ledger.json. Review approval authorizes neither product publication nor production promotion."
+    },
+    "documented_route_acceptance": {
+      "status": "passed",
+      "repository_path": "releases/v0.19.0/acceptance/documented-routes.json",
+      "sha256": "20dd52309eae07acace7e0c791920e4572c6777dd453fb1091b8750b99c957fd"
     }
   },
   "as_of": "2026-11-13",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
+  "external_installation_qualified": true,
   "scope": "RTX 5090 beta.8 (source 41f89b31) and v0.8.0-qwen38-3090-beta.4 (source 15c3e395) exact current component qualification; v0.8.0-qwen38-4090-beta.3 (source 48c8ac46) carried unchanged from v0.18.0 with its byte-identical qualification; stock OMP 18.20.0 identities retained. No product-route or client-platform execution is inferred.",
   "interpretation": "Runtime/client bytes and decision edges are retained. Current raw parity values, including any exact founder-waived failure, are not rewritten into a pass.",
   "documented_route_acceptance": {
-    "status": "pending"
+    "status": "passed",
+    "scope": "All five fresh candidate-bound documented routes, three stock OMP 18.20.0 clients, both newly cut beta.4 native public installs, and candidate-profile native probes. Linux is WSL2-scoped; macOS remains preview. Native component qualification binds the current one-source N cuts; no prior product-route or client acceptance is carried.",
+    "candidate_commit": "6b22f219c7298db4b8fa5c2bc7bb33eb7a37799f",
+    "evidence_commit_changes_candidate": false,
+    "evidence_path": "releases/v0.19.0/acceptance/documented-routes.json",
+    "evidence_sha256": "20dd52309eae07acace7e0c791920e4572c6777dd453fb1091b8750b99c957fd",
+    "document_change": "Only later non-executable release-state prose may change; composer must independently require every executed block to remain byte-identical.",
+    "documented_route_steps": {
+      "rtx5090-container-host": "2/2",
+      "rtx5090-macos-client": "10/10",
+      "rtx5090-windows-client": "5/5",
+      "rtx4090-native": "7/7",
+      "rtx3090-native": "7/7"
+    },
+    "platform_receipts": [
+      "releases/v0.19.0/acceptance/darwin-arm64-18.20.0.json",
+      "releases/v0.19.0/acceptance/windows-x64-18.20.0.json",
+      "releases/v0.19.0/acceptance/linux-x64-18.20.0.json"
+    ],
+    "fresh_product_acceptance": true,
+    "restoration": {
+      "path": "docs/measurements/2026-11-13-v0190-n41f89b31-acceptance-restoration.json",
+      "status": "passed",
+      "driver_hold_s": 402.128,
+      "production_upgrade_activated": false,
+      "documented_directory_presence_restored": true,
+      "native_documented_stage_restored": true,
+      "native_driver_window_s": {
+        "rtx4090": 517.0223910808563,
+        "rtx3090": 1339.3889298439026
+      }
+    },
+    "composition_run": true
   },
   "observed_gates": {
     "runtime_rc": {
@@ -201,15 +267,22 @@
       "positions": 83,
       "repository_path": "releases/v0.19.0/qualification/rtx3090-agent-parity.json",
       "sha256": "a0e0806f8bead05fb78280e16355be92afe4ba3d052d649e559f6e5dd1d291f8"
+    },
+    "g4_review": {
+      "status": "passed",
+      "repository_path": "releases/v0.19.0/review/runtime-ledger.json",
+      "sha256": "2b43fc7a8dd05fe7cbd68f84d5d209b63d32775cc2864129cfee8f6cca6a996b",
+      "ledger_status": "closed-by-disposition",
+      "approval_granted": true,
+      "publication_authorized": false,
+      "public_route_acceptance_granted": false,
+      "scope": "Closed exact-source runtime full council CR-20261113T063918Z-41f89b31 on 41f89b310b443481db5917a01a2b45e49f85e723 (closed-without-remediation), the focused review of the native component delta to 15c3e3959c0a6167f799e9383482ec4e03db9cad (closed-without-remediation), and product full council CR-20261113T192727Z-6b22f219-product (closed-by-disposition) with route candidate 6b22f219c7298db4b8fa5c2bc7bb33eb7a37799f. Review approval does not authorize publication or grant public-route acceptance."
     }
   },
-  "remaining_release_gates": [
-    "Prepare the five-route guide and run fresh candidate-bound external-install acceptance, three stock-client platforms, native campaigns/public installs and independent restoration.",
-    "Bind the current product council/combined review ledger; reconcile the receipt audit and immutable evidence pins before publication admission."
-  ],
+  "remaining_release_gates": [],
   "receipt_audit": {
     "repository_path": "releases/v0.19.0/qualification/receipt-audit.json",
-    "sha256": "bf02ac2d9ce18f7692aea7e01402ca12d5204ec51ae08f3740368cc0d4191cd7"
+    "sha256": "b5d5cf3b8dc02f6e58d514a92ac8682e0f8a7e1de5ae2121bc35f535f919f683"
   },
   "eligibility_scope": "Current component lanes only; external-install acceptance, native public installs/campaigns, product review, audit reconciliation and immutable pins remain binding."
 }

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "release": "v0.19.0",
-  "status": "candidate",
+  "status": "ready",
   "channel": "public",
   "audience": "public",
   "product": {
@@ -15,7 +15,7 @@
     "omp": {
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
       "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/7f04605ac58591db03031b01a0546348c1ec6141/compatibility.json",
-      "compatibility_sha256": "ad69491ac49cc205eaff1afc468e6846e8c155eac695a91560480174bc0fb626",
+      "compatibility_sha256": "02417e47b7dbc51eea4af499595ff011475a6a2e1d22e34fd8cf5beef264f5dc",
       "distribution_kind": "upstream-release",
       "upstream_repository": "https://github.com/can1357/oh-my-pi",
       "upstream_tag": "v18.20.0",
@@ -219,10 +219,10 @@
   },
   "qualification": {
     "summary": "qualification.json",
-    "summary_sha256": "f6e932628ac188eb950d37a967dd10f9270be3350ed5ad9a591e1422f8fd4733",
+    "summary_sha256": "64876c3ceaef2ab47c7af862668796b8766d9e97fc35582f8e018a46e9569565",
     "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/9f70bef31e65898cd747c525bca8d1e4ce3a9cb0/releases/v0.19.0/qualification.json",
     "runtime_release_eligible": true,
-    "external_installation_passed": false
+    "external_installation_passed": true
   },
   "installation": {
     "mode": "native-windows-docker-local",
@@ -249,10 +249,7 @@
       "NInfer native v0.8.0-qwen38-4090-beta.3 (carried unchanged); package sha256:ac41700ac2bb9fb171188f35e73481cfd9f1140c5781320b1e6304ee760d7166",
       "OMP client: unmodified upstream Oh My Pi v18.20.0; no client published here"
     ],
-    "blockers": [
-      "external-installation acceptance has not been rerun against the published v0.7.0-qwen38-5090-beta.8 component and runtime image c3ec151b; the composed acceptance receipt is absent until it is",
-      "current product council, receipt audit reconciliation and immutable evidence pins remain pending"
-    ],
-    "external_installation_qualified": false
+    "blockers": [],
+    "external_installation_qualified": true
   }
 }

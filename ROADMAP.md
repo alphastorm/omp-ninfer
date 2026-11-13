@@ -33,7 +33,7 @@ Same-profile native identity-first admission needs sealed 80/80 output identity 
 speed ABBA; any output difference falls back to the powered arm. Acceptance tools enforce
 space floors, server/Stop failure reporting and audited per-window retirement (#163–#165),
 with #161 follow-up fixes for restoration, log evidence and launcher/route boundaries.
-The RTX 3090 beta.4 component is cut, published and bound; client, route, public-install, restoration, review and final-pin gates remain.
+The RTX 3090 beta.4 component is cut, published and bound; the client, route, public-install, restoration and review gates passed, and the final pins and strict ready check bind them.
 Use the [published v0.18.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.18.0/docs/QUICKSTART.md)
 until publication; the [prepared guide](docs/QUICKSTART.md) is not install authority.
 

@@ -3,7 +3,7 @@
   "authority_id": "omp-ninfer-v0.7.3-qualified-1",
   "product_release": "v0.19.0",
   "composition": {
-    "status": "v0.19.0 upstream OMP v18.20.0 client acceptance pending",
+    "status": "qualified",
     "lifecycle_repository": "https://github.com/can1357/oh-my-pi",
     "lifecycle_source_release": "https://github.com/can1357/oh-my-pi/releases/tag/v18.20.0",
     "lifecycle_source_commit": "c308970263ae13744ea15ab67302e3dac840e266",
@@ -41,10 +41,11 @@
         "Fresh stock OMP 18.20.0 platform and candidate-bound documented-route acceptance is required; no predecessor client execution is carried.",
         "macOS manual SSH preview."
       ],
-      "blockers": [
-        "upstream OMP v18.20.0 client acceptance is pending"
-      ],
-      "acceptance_receipt": null,
+      "blockers": [],
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/6b22f219c7298db4b8fa5c2bc7bb33eb7a37799f/releases/v0.19.0/acceptance/darwin-arm64-18.20.0.json",
+        "sha256": "652e3cc2b1e29ac594d245affec89f40c942c7fb19ca7c3fdb7e4b8f6df20259"
+      },
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
@@ -115,7 +116,7 @@
     {
       "id": "windows-docker-local",
       "adapter": "windows-docker-local",
-      "status": "preview",
+      "status": "qualified",
       "transport": "local-loopback",
       "commands": [
         "doctor",
@@ -128,7 +129,7 @@
         "support-bundle"
       ],
       "silent_cloud_fallback": false,
-      "installable": false,
+      "installable": true,
       "support_owner": "alphastorm/omp-ninfer",
       "product_release": "v0.19.0",
       "aliases": [
@@ -139,10 +140,11 @@
       "limitations": [
         "Fresh stock OMP 18.20.0 platform and candidate-bound documented-route acceptance is required; no predecessor client execution is carried."
       ],
-      "blockers": [
-        "upstream OMP v18.20.0 client acceptance is pending"
-      ],
-      "acceptance_receipt": null,
+      "blockers": [],
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/6b22f219c7298db4b8fa5c2bc7bb33eb7a37799f/releases/v0.19.0/acceptance/windows-x64-18.20.0.json",
+        "sha256": "45817227fe476b900bf0fd41ecc33cef0e7f6aed74337e494a5920fc3ab94bce"
+      },
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
@@ -213,7 +215,7 @@
     {
       "id": "linux-docker-local",
       "adapter": "linux-docker-local",
-      "status": "preview",
+      "status": "qualified",
       "transport": "local-loopback",
       "commands": [
         "doctor",
@@ -226,7 +228,7 @@
         "support-bundle"
       ],
       "silent_cloud_fallback": false,
-      "installable": false,
+      "installable": true,
       "support_owner": "alphastorm/omp-ninfer",
       "product_release": "v0.19.0",
       "aliases": [
@@ -238,10 +240,11 @@
         "Fresh stock OMP 18.20.0 platform and candidate-bound documented-route acceptance is required; no predecessor client execution is carried.",
         "Linux x64 under WSL2 only; no separate native Linux OS or Linux vision claim."
       ],
-      "blockers": [
-        "upstream OMP v18.20.0 client acceptance is pending"
-      ],
-      "acceptance_receipt": null,
+      "blockers": [],
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/6b22f219c7298db4b8fa5c2bc7bb33eb7a37799f/releases/v0.19.0/acceptance/linux-x64-18.20.0.json",
+        "sha256": "ebd79d0698c1b538a3d43b857095e47d28e6a0fc65204b7f48c96b7a10350568"
+      },
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
@@ -410,7 +413,7 @@
       "request_log_schema_version": 30
     },
     {
-      "lane": "RTX 3090 native Windows v0.8.0-beta.3",
+      "lane": "RTX 3090 native Windows v0.8.0-beta.4",
       "json_schema": "Bound by the current exact-source lane product-protocol receipt; candidate-bound external-install acceptance is separate.",
       "tool_name_max_characters": 128,
       "status_schema_version": 2,

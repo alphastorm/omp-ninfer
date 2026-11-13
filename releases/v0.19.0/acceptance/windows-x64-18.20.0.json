@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "kind": "omp-ninfer-platform-acceptance-receipt",
+  "receipt_id": "windows-docker-local-c3089702-1b6c7bda82-v0.19.0",
+  "product_release": "v0.19.0",
+  "candidate_commit": "6b22f219c7298db4b8fa5c2bc7bb33eb7a37799f",
+  "profile": "windows-docker-local",
+  "status": "passed",
+  "as_of": "2026-11-13",
+  "source": {
+    "repository": "https://github.com/can1357/oh-my-pi",
+    "tag": "v18.20.0",
+    "commit": "c308970263ae13744ea15ab67302e3dac840e266",
+    "tree": "ba890953dd69eb4bf73bb7233bbe50ccfacd6912"
+  },
+  "client": {
+    "distribution_kind": "upstream-release",
+    "upstream_repository": "https://github.com/can1357/oh-my-pi",
+    "upstream_tag": "v18.20.0",
+    "upstream_commit": "c308970263ae13744ea15ab67302e3dac840e266",
+    "os": "Windows 11",
+    "architecture": "x64",
+    "published": true,
+    "asset_name": "omp-windows-x64.exe",
+    "asset_bytes": 251502592,
+    "asset_sha256": "1b6c7bda8241bc7d948495539f90ec47e6f30d1fec72b6ee097a67a1fc8d8e48",
+    "binary_sha256": "1b6c7bda8241bc7d948495539f90ec47e6f30d1fec72b6ee097a67a1fc8d8e48",
+    "release_id": 443638329,
+    "asset_id": 741515221,
+    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.20.0/omp-windows-x64.exe"
+  },
+  "live_acceptance": {
+    "tool_result_marker": true,
+    "exact_visible_final_answer": true,
+    "agent_end": true,
+    "continuation_exact_nonce": true,
+    "runtime_identity_bound": true,
+    "typed_read_tool_calls": 1,
+    "linked_tool_results": 1,
+    "omp_version": "omp/18.20.0",
+    "event_counts": {
+      "session": 1,
+      "agent_start": 1,
+      "turn_start": 2,
+      "message_start": 4,
+      "message_end": 4,
+      "message_update": 24,
+      "tool_execution_start": 1,
+      "tool_execution_end": 1,
+      "turn_end": 2,
+      "agent_end": 1
+    },
+    "raw_transcript_included": false,
+    "runtime_image_digest": "sha256:c3ec151b992b4989c850a856aebaa463b5bf5728a60aa084906888ce40db6b71",
+    "runtime_server_binary_sha256": "147da36b05c2795fb50bb0a38f9756f782f0b05ae08e4fed34a3f58b56c2eec0",
+    "runtime_configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "model_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "fail_closed": {
+      "exit_code": 1,
+      "no_model_response": true,
+      "only_selected_local_provider_observed": true,
+      "errors": [
+        {
+          "kind": "client-error",
+          "sha256": "8be2d4a909302a94aa8ddcd698df1629c37649a94a0e8d94294700852f0c1347"
+        }
+      ]
+    },
+    "capture_sha256": "cec400155bc3cfa8ff918135cf29fc8ed96680e79435678574337b1f590c021c"
+  },
+  "checks": {
+    "new_client_asset_and_binary_identity": "passed",
+    "new_client_clean_install": "passed",
+    "new_client_version": "passed",
+    "live_authenticated_tool_and_continuation": "passed",
+    "fail_closed_route_configuration": "passed"
+  },
+  "safety": {
+    "cloud_fallback_observed": false,
+    "production_omp_activation_performed": false,
+    "runtime_incumbent_restored": true,
+    "private_fleet_projection_included": false
+  },
+  "limitations": [
+    "Owner-operated tester-equivalent acceptance; no new runtime performance guarantee."
+  ]
+}

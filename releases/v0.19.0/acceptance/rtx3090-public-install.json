@@ -1,0 +1,427 @@
+{
+  "artifact_type": "omp_ninfer_native_public_install_acceptance",
+  "schema_version": 1,
+  "release": "v0.19.0",
+  "lane": "rtx3090-windows-native",
+  "as_of": "2026-11-13",
+  "status": "passed",
+  "candidate_commit": "6b22f219c7298db4b8fa5c2bc7bb33eb7a37799f",
+  "client": {
+    "distribution_kind": "upstream-release",
+    "upstream_repository": "https://github.com/can1357/oh-my-pi",
+    "upstream_tag": "v18.20.0",
+    "upstream_commit": "c308970263ae13744ea15ab67302e3dac840e266",
+    "os": "Windows 11",
+    "architecture": "x64",
+    "published": true,
+    "asset_name": "omp-windows-x64.exe",
+    "asset_bytes": 251502592,
+    "asset_sha256": "1b6c7bda8241bc7d948495539f90ec47e6f30d1fec72b6ee097a67a1fc8d8e48",
+    "binary_sha256": "1b6c7bda8241bc7d948495539f90ec47e6f30d1fec72b6ee097a67a1fc8d8e48",
+    "release_id": 443638329,
+    "asset_id": 741515221,
+    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.20.0/omp-windows-x64.exe",
+    "version": "omp/18.20.0"
+  },
+  "installed": {
+    "source_commit": "15c3e3959c0a6167f799e9383482ec4e03db9cad",
+    "package_sha256": "62b9effd87c63e22af76b46171ea34d8b45ed55eed113b2f1be8fd24aab7a785",
+    "binary_sha256": "2c25588ec5772562ecfe95d25d9221097f85ab67ee51f2a57c70790a55f6f180",
+    "config_sha256": "6e4c6fc23946aa1bcbcb165779744853376a44c31406f4b994f96ace7ab62930"
+  },
+  "runtime": {
+    "tag": "v0.8.0-qwen38-3090-beta.4",
+    "source_commit": "15c3e3959c0a6167f799e9383482ec4e03db9cad",
+    "package_bytes": 1011088657,
+    "package_sha256": "62b9effd87c63e22af76b46171ea34d8b45ed55eed113b2f1be8fd24aab7a785",
+    "binary_sha256": "2c25588ec5772562ecfe95d25d9221097f85ab67ee51f2a57c70790a55f6f180",
+    "configuration_sha256": "6e4c6fc23946aa1bcbcb165779744853376a44c31406f4b994f96ace7ab62930",
+    "model_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "build_profile": "native-v0.8.0-beta.4-tc-rtx3090",
+    "configuration": {
+      "max_context": 131072,
+      "kv_capacity": 131072,
+      "kv_dtype": "int8",
+      "concurrency": 2,
+      "pending_timeout_ms": 180000,
+      "prefill_chunk": 1024,
+      "device_state_slots": 2,
+      "admission_headroom_mib": 768,
+      "host_context_mib": "20867.734375",
+      "host_context_bytes": 21881405440,
+      "speculative_backend": "dflash2",
+      "speculative_draft_tokens": 7,
+      "public_model_id": "q38-ninfer"
+    },
+    "runtime_shape": {
+      "max_concurrency": 2,
+      "speculative_backend": "dflash2",
+      "draft_tokens": {
+        "min": 7,
+        "max": 7
+      },
+      "proposal": "artifact-default",
+      "fit": {
+        "device_state_slots": 2,
+        "admission_headroom_mib": 768,
+        "draft_mlp_device_format": "Q4_G64_FP16",
+        "token_embedding_residency": "host-mapped"
+      }
+    }
+  },
+  "probe_acceptance": {
+    "fleet": {
+      "sha256": "434d0f65489c82499056db349aae8501760134aa87ed8c35f0838f56d1bcb1f8",
+      "artifact_type": "omp_ninfer_fleet_fanout_probe",
+      "identity": {
+        "binary_sha256": "2c25588ec5772562ecfe95d25d9221097f85ab67ee51f2a57c70790a55f6f180",
+        "config_sha256": "6e4c6fc23946aa1bcbcb165779744853376a44c31406f4b994f96ace7ab62930",
+        "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+        "model_id": "q38-ninfer",
+        "source_dirty": false,
+        "build_profile": "native-v0.8.0-beta.4-tc-rtx3090"
+      },
+      "branches": 4,
+      "transient_retries": 0,
+      "steps": [
+        "base_prefill",
+        "warm_edit",
+        "checkpoint_save",
+        "branch_0",
+        "branch_1",
+        "branch_2",
+        "branch_3",
+        "session_delete"
+      ]
+    },
+    "fanout": {
+      "sha256": "38fa13545e5fed29b92726121e6f187b46f780ee6ce093a62e2b0891ea8df3f4",
+      "artifact_type": "omp_ninfer_concurrency_probe",
+      "ok": true,
+      "arguments": {
+        "arm": "rtx3090-C2-acceptance",
+        "scenario": [
+          "fanout"
+        ],
+        "fanout_concurrency": 4,
+        "branches": 4,
+        "model": "q38-ninfer"
+      },
+      "statuses": {
+        "server_before": {
+          "artifact_type": "ninfer_server_status",
+          "schema_version": 2,
+          "status": "ok",
+          "identity": {
+            "binary_sha256": "2c25588ec5772562ecfe95d25d9221097f85ab67ee51f2a57c70790a55f6f180",
+            "config_sha256": "6e4c6fc23946aa1bcbcb165779744853376a44c31406f4b994f96ace7ab62930",
+            "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+            "source_dirty": false,
+            "build_profile": "native-v0.8.0-beta.4-tc-rtx3090"
+          },
+          "runtime": {
+            "max_context": 131072
+          },
+          "scheduler": {
+            "max_concurrency": 2
+          }
+        },
+        "server_after": {
+          "artifact_type": "ninfer_server_status",
+          "schema_version": 2,
+          "status": "ok",
+          "identity": {
+            "binary_sha256": "2c25588ec5772562ecfe95d25d9221097f85ab67ee51f2a57c70790a55f6f180",
+            "config_sha256": "6e4c6fc23946aa1bcbcb165779744853376a44c31406f4b994f96ace7ab62930",
+            "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+            "source_dirty": false,
+            "build_profile": "native-v0.8.0-beta.4-tc-rtx3090"
+          },
+          "runtime": {
+            "max_context": 131072
+          },
+          "scheduler": {
+            "max_concurrency": 2
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "name": "fanout",
+          "ok": true,
+          "requests": [
+            {
+              "label": "fanout-base",
+              "ok": true,
+              "http_status": 200,
+              "submitted_monotonic_s": 217672.0867714,
+              "completed_monotonic_s": 217694.6006588
+            },
+            {
+              "label": "branch-0",
+              "ok": true,
+              "http_status": 200,
+              "submitted_monotonic_s": 217694.6037671,
+              "completed_monotonic_s": 217696.4997068
+            },
+            {
+              "label": "branch-1",
+              "ok": true,
+              "http_status": 200,
+              "submitted_monotonic_s": 217694.6040793,
+              "completed_monotonic_s": 217697.6821838
+            },
+            {
+              "label": "branch-2",
+              "ok": true,
+              "http_status": 200,
+              "submitted_monotonic_s": 217694.603903,
+              "completed_monotonic_s": 217697.7978644
+            },
+            {
+              "label": "branch-3",
+              "ok": true,
+              "http_status": 200,
+              "submitted_monotonic_s": 217694.6035406,
+              "completed_monotonic_s": 217696.3021658
+            }
+          ]
+        }
+      ]
+    },
+    "parallel": {
+      "sha256": "71203bf98dab3af0a1cbb7abc7256e4c43363ed0d2b18b8913eb5327ebd8081b",
+      "passed": true,
+      "model": "ninfer-native-3090/q38-ninfer",
+      "omp": {
+        "sha256": "1b6c7bda8241bc7d948495539f90ec47e6f30d1fec72b6ee097a67a1fc8d8e48",
+        "version": "omp/18.20.0"
+      },
+      "checks": null,
+      "artifact_type": "omp_ninfer_parallel_proof",
+      "max_in_flight": 2,
+      "scenarios": [
+        {
+          "scenario": "subagents",
+          "passed": true,
+          "max_in_flight": 2,
+          "overlap_seconds": 18.666,
+          "checks": {
+            "logged_requests": true,
+            "all_logged_requests_completed": true,
+            "single_server_instance": true,
+            "provider_limit_respected": true,
+            "concurrency_expected": true
+          }
+        },
+        {
+          "scenario": "sessions",
+          "passed": true,
+          "max_in_flight": 2,
+          "overlap_seconds": 13.755,
+          "checks": {
+            "logged_requests": true,
+            "all_logged_requests_completed": true,
+            "single_server_instance": true,
+            "provider_limit_respected": true,
+            "concurrency_expected": true
+          }
+        }
+      ]
+    },
+    "compaction": {
+      "sha256": "9759ea5f941169f93ef096ffaa9f4dc3ff6de3a126e03633ead6b78222a0eaba",
+      "passed": true,
+      "model": "ninfer-native-3090/q38-ninfer",
+      "omp": {
+        "sha256": "1b6c7bda8241bc7d948495539f90ec47e6f30d1fec72b6ee097a67a1fc8d8e48",
+        "version": "omp/18.20.0"
+      },
+      "checks": {
+        "every_turn_completed": true,
+        "compactions_committed": true,
+        "no_failed_compaction": true,
+        "control_recalled_after_each_compaction": true,
+        "one_session": true
+      },
+      "artifact_type": "omp_ninfer_long_session_proof",
+      "committed": 2,
+      "parameters": {
+        "compactions": 2,
+        "seed": 20260928,
+        "filler_bytes": 40000,
+        "plant_after": 1,
+        "restart": false,
+        "expect_method": null
+      }
+    },
+    "capture_sha256": "3c1e69689ab19e52f5c3d1e22f26a11fcd99b51a349ea41888907aa9b2913123"
+  },
+  "preparation": {
+    "lineage_mode": "first_release",
+    "previous_release_present": false,
+    "qualification_installed_instance_preserved": true,
+    "documented_stage_preserved": true,
+    "two_gpu_host": true,
+    "one_native_lane_at_a_time": true,
+    "shared_port": 18082,
+    "capture_sha256": "d1614d044a0fcaaa310670d5e49dcf29ace495388871837f71b75d46ca78f134"
+  },
+  "observations": {
+    "exact_tool_marker": true,
+    "linked_tool_history": true,
+    "exact_continuation_nonce": true,
+    "offline_request_failed_without_model_response": true,
+    "recovery_health_and_bound_runtime_identity_passed": true,
+    "cloud_fallback_observed": false,
+    "documented_marker_bare_line": false,
+    "server_tool_calls": 1,
+    "local_reasoning_compatibility_retries": 0,
+    "continuation_reuse": "private_endpoint",
+    "structured_client": {
+      "tool_result_marker": true,
+      "exact_visible_final_answer": true,
+      "agent_end": true,
+      "continuation_exact_nonce": true,
+      "runtime_identity_bound": true,
+      "typed_read_tool_calls": 1,
+      "linked_tool_results": 1,
+      "omp_version": "omp/18.20.0",
+      "event_counts": {
+        "session": 1,
+        "agent_start": 1,
+        "turn_start": 2,
+        "message_start": 4,
+        "message_end": 4,
+        "message_update": 25,
+        "tool_execution_start": 1,
+        "tool_execution_end": 1,
+        "turn_end": 2,
+        "agent_end": 1
+      },
+      "raw_transcript_included": false,
+      "runtime_server_binary_sha256": "2c25588ec5772562ecfe95d25d9221097f85ab67ee51f2a57c70790a55f6f180",
+      "runtime_configuration_sha256": "6e4c6fc23946aa1bcbcb165779744853376a44c31406f4b994f96ace7ab62930",
+      "model_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+      "fail_closed": {
+        "exit_code": 1,
+        "no_model_response": true,
+        "only_selected_local_provider_observed": true,
+        "errors": [
+          {
+            "kind": "client-error",
+            "sha256": "8ef23e6515a43a9ef8e058d26b89cd232c29fa3f950988117ee360f7a77010bc"
+          }
+        ]
+      }
+    },
+    "rollback": {
+      "status": "not_applicable",
+      "directions": 0,
+      "reason": "first release of the lineage"
+    },
+    "public_install": {
+      "status": "passed",
+      "source": {
+        "product_release": "v0.19.0",
+        "candidate_commit": "6b22f219c7298db4b8fa5c2bc7bb33eb7a37799f"
+      },
+      "client": {
+        "version": "omp/18.20.0",
+        "binary_sha256": "1b6c7bda8241bc7d948495539f90ec47e6f30d1fec72b6ee097a67a1fc8d8e48"
+      },
+      "integrity": {
+        "checksum_set_sha256": "d1bce21e6d22fb38b1530937f4fa7ea76c706243ea339058f7c46b84885aec22",
+        "checksum_entries": 10,
+        "all_manifest_assets_downloaded_from_public_urls": true,
+        "all_manifest_asset_hashes_verified": true,
+        "assets": {
+          "package": {
+            "sha256": "62b9effd87c63e22af76b46171ea34d8b45ed55eed113b2f1be8fd24aab7a785",
+            "bytes": 1011088657,
+            "in_checksum_set": true
+          },
+          "sbom": {
+            "sha256": "2c01ec37eb7d59427cca329537db5f29039015f33f96e46ced91d77299f31a69",
+            "bytes": 34269,
+            "in_checksum_set": true
+          },
+          "source_archive": {
+            "sha256": "b48e2aa70a210f75d6c71d5b2412f78f8894d8231c78910d8ca1f89e1a7ad1cd",
+            "bytes": 12594044,
+            "in_checksum_set": true
+          },
+          "installer": {
+            "sha256": "2eedd45d9eab069a755d969ddba0c7f2b309470ec55d41859f4e76b09bb74e4d",
+            "bytes": 88913,
+            "in_checksum_set": true
+          },
+          "controller": {
+            "sha256": "159fba12c85adf4963d271a80c4fb7d3527e2b9043e64e74c43d4981336b1ce3",
+            "bytes": 77843,
+            "in_checksum_set": true
+          },
+          "gpu_owner_controller": {
+            "sha256": "432f06a8e97743e46b1b7d9285e68d4bc361a93d5f25badeaa7c713f147f3334",
+            "bytes": 17391,
+            "in_checksum_set": true
+          },
+          "state_protection": {
+            "sha256": "baaea4e29cf48ab80ed2fd08935e3e75ec4be119fa77058a03c8b2f739a1c5b8",
+            "bytes": 16952,
+            "in_checksum_set": true
+          }
+        }
+      },
+      "installed": {
+        "source_commit": "15c3e3959c0a6167f799e9383482ec4e03db9cad",
+        "package_sha256": "62b9effd87c63e22af76b46171ea34d8b45ed55eed113b2f1be8fd24aab7a785",
+        "binary_sha256": "2c25588ec5772562ecfe95d25d9221097f85ab67ee51f2a57c70790a55f6f180",
+        "config_sha256": "6e4c6fc23946aa1bcbcb165779744853376a44c31406f4b994f96ace7ab62930",
+        "server_binary_sha256": "2c25588ec5772562ecfe95d25d9221097f85ab67ee51f2a57c70790a55f6f180",
+        "configuration_sha256": "6e4c6fc23946aa1bcbcb165779744853376a44c31406f4b994f96ace7ab62930",
+        "matches_manifest": true
+      },
+      "install": {
+        "execution_source": "downloaded-public-url",
+        "outcome": "already_installed",
+        "package_sha256": "62b9effd87c63e22af76b46171ea34d8b45ed55eed113b2f1be8fd24aab7a785",
+        "exact_qualified_bytes_accepted": true,
+        "lifecycle_pointers_changed": false,
+        "runtime_start_requested": false
+      },
+      "smoke": {
+        "authenticated_status_http": 200,
+        "status_ms": 2.1,
+        "anonymous_status_http": 401,
+        "completion_http": 200,
+        "completion_ms": 371.8,
+        "completion_tokens": 3,
+        "served_identity_matches_installed": true,
+        "output_sha256": "25ab960d578e9fb9c7cb17ddbf211f8188564f13e24e64ad515b1a22cbf51f1c",
+        "output_contains_marker": true,
+        "speculative_backend": "dflash2"
+      },
+      "restoration": {
+        "process_state": "stopped",
+        "endpoint_state": "unavailable",
+        "prior_state_restored": true,
+        "power_limit_w": 370
+      }
+    },
+    "capture_sha256": "07be7a96b281082a49b32b8a6cbbac4bb58043b006ea46fe56928b88445ed88a"
+  },
+  "documented_route": {
+    "repository_path": "docs/measurements/2026-11-13-v0190-n41f89b31-rtx3090-native-run.json",
+    "sha256": "9b3f0cc4b50957ad07cc30b8fa8af5b3a2df8fd11b923b5f35482ab388621639"
+  },
+  "restoration": {
+    "repository_path": "docs/measurements/2026-11-13-v0190-n41f89b31-acceptance-restoration.json",
+    "sha256": "83d0c17f107fabc8998d8807271c40961247fee4177b29a73b32a137d88e6d9e"
+  },
+  "limitations": [
+    "One two-GPU Windows host, native serving sequential on shared port 18082.",
+    "First-lineage route acceptance has no predecessor; rollback not_applicable, zero directions. This is not running-lane upgrade/rollback qualification.",
+    "No native vision or additional runtime performance claim; exact-source component qualification remains separate."
+  ]
+}

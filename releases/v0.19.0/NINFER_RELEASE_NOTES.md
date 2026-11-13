@@ -1,6 +1,6 @@
 # OMP NInfer v0.19.0 — prepared release notes
 
-**Draft; client and product acceptance pending. This is not publication authority.**
+**Accepted candidate `6b22f219`: 31 documented blocks, three stock clients, both native campaigns and public installs, restoration and reviews passed. This is not publication authority.**
 Until `v0.19.0` is published, install from the
 [immutable published v0.18.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.18.0/docs/QUICKSTART.md).
 
@@ -67,10 +67,22 @@ The carried Responses serializer, tokenizer and local fragments do not establish
 - [#161](https://github.com/alphastorm/omp-ninfer/issues/161) follow-ups are merged. [#170](https://github.com/alphastorm/omp-ninfer/pull/170) keeps native restoration running when evidence writes fail and copies server logs atomically. [#168](https://github.com/alphastorm/omp-ninfer/pull/168) revalidates the resolved checkpoint directory in the launcher. [#169](https://github.com/alphastorm/omp-ninfer/pull/169) reports RTX 5090 restoration only when it ran. Live restoration under these changes is exercised only by the v0.19.0 windows.
 - [#171](https://github.com/alphastorm/omp-ninfer/pull/171): the same-profile identity rule above.
 
-## Pending release evidence
+## Acceptance
 
-- Five fresh documented routes (31 executable blocks), all three stock 18.20.0 clients and the supplementary Windows/common wire/tool observations.
-- Both native post-route campaigns (RTX 3090 beta.4 and the carried RTX 4090 beta.3), anonymous public installs, independent restoration and audited per-window retirement.
-- The product review bound to the exact candidate, the runtime and product review ledger, the final receipt audit, platform → acceptance → manifest pins, strict ready verification and release PR CI.
+Owner-operated, tester-equivalent acceptance of frozen candidate `6b22f219c7298db4b8fa5c2bc7bb33eb7a37799f` closed on 2026-11-13. It is not independent external-user acceptance.
 
-No predecessor acceptance receipt, waiver, transcript or review approval is renewed. macOS remains preview, Linux evidence stays WSL2-scoped, vision remains RTX 5090 container-only, and native lanes remain sequential on their shared port. Product publication and any production promotion are separate decisions.
+| Documented route | Executable blocks | Result |
+| --- | --- | --- |
+| RTX 5090 container host | 2 | passed |
+| macOS arm64 client over a manual SSH tunnel (preview) | 10 | passed |
+| Native Windows x64 client | 5 | passed |
+| RTX 4090 native, carried `v0.8.0-qwen38-4090-beta.3` | 7 | passed |
+| RTX 3090 native, `v0.8.0-qwen38-3090-beta.4` (`C2`) | 7 | passed |
+
+- Stock OMP 18.20.0 platform checks: macOS arm64 passed (preview), Windows x64 passed and WSL2 Linux x64 passed ([macOS](acceptance/darwin-arm64-18.20.0.json), [Windows](acceptance/windows-x64-18.20.0.json), [Linux](acceptance/linux-x64-18.20.0.json)).
+- The RTX 5090 window held the production lane for 402.128 s; the native windows held their lanes for 517.0 s (RTX 4090) and 1339.4 s (RTX 3090). Independent restoration passed: the incumbent RTX 5090 service and both native lanes were restored and their canonical state compared identical.
+- RTX 3090 `C2`, the [fork #89](https://github.com/alphastorm/ninfer/issues/89) acceptance class: on `native-v0.8.0-beta.4-tc-rtx3090` from source `15c3e395`, the post-route long-session probe committed 2 compactions in one session with every turn completed and no failed compaction, the fanout probe returned HTTP 200 for 5 of 5 requests, and the subagent and session proofs passed. The anonymous public install passed. This is exact-lane acceptance evidence for the bounded pressure-save build; it does not claim #89 closed for every load shape.
+- Carried RTX 4090: `v0.8.0-qwen38-4090-beta.3` (source `48c8ac46`, package `sha256:ac41700ac2bb9fb171188f35e73481cfd9f1140c5781320b1e6304ee760d7166`) is the published v0.18.0 component, unchanged. It does not include the bounded pressure-save change (fork #122) and keeps its v0.18.0 component qualification; it re-cuts with the next engine freeze. Its fresh v0.19.0 documented route and campaign ran on those exact bytes, and its anonymous public install passed.
+- Reviews: the runtime council on `41f89b31` and the focused review of the native delta to `15c3e395` closed as listed above. Product council CR-20261113T192727Z-6b22f219-product (closed-by-disposition) reviewed `6b22f219` and binds route candidate `6b22f219`. Deferred product residuals are tracked in https://github.com/alphastorm/omp-ninfer/issues/176. The combined content-safe ledger is [review/runtime-ledger.json](review/runtime-ledger.json).
+
+The final receipt audit, the platform → acceptance → manifest pins and the strict ready check bind these receipts. No predecessor acceptance receipt, waiver, transcript or review approval is renewed. macOS remains preview, Linux evidence stays WSL2-scoped, vision remains RTX 5090 container-only, and native lanes remain sequential on their shared port. Review approval and acceptance do not authorize publication; product publication and any production promotion are separate decisions.

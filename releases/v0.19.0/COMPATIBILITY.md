@@ -3,15 +3,15 @@
 
 Authority: `omp-ninfer-v0.7.3-qualified-1`
 Product release: `v0.19.0`
-Composition: **v0.19.0 upstream OMP v18.20.0 client acceptance pending**
+Composition: **qualified**
 
 Client status is independent from each GPU runtime qualification. `preview` is not a support claim.
 
 | Profile | Client | Runtime | Transport | Adapter | Status | Installable | Acceptance |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `darwin-remote-ssh` | macOS 27 arm64 — upstream `v18.20.0` [`omp-darwin-arm64`](https://github.com/can1357/oh-my-pi/releases/download/v18.20.0/omp-darwin-arm64) (sha256 `2b1309b06a74`) | `qwen38-5090-v0.13.0` | `ssh-loopback` | `darwin-remote-ssh` | **preview** | no | pending |
-| `windows-docker-local` | Windows 11 x64 — upstream `v18.20.0` [`omp-windows-x64.exe`](https://github.com/can1357/oh-my-pi/releases/download/v18.20.0/omp-windows-x64.exe) (sha256 `1b6c7bda8241`) | `qwen38-5090-v0.13.0` | `local-loopback` | `windows-docker-local` | **preview** | no | pending |
-| `linux-docker-local` | Linux under WSL2 x64 — upstream `v18.20.0` [`omp-linux-x64`](https://github.com/can1357/oh-my-pi/releases/download/v18.20.0/omp-linux-x64) (sha256 `c8694be8c6e6`) | `qwen38-5090-v0.13.0` | `local-loopback` | `linux-docker-local` | **preview** | no | pending |
+| `darwin-remote-ssh` | macOS 27 arm64 — upstream `v18.20.0` [`omp-darwin-arm64`](https://github.com/can1357/oh-my-pi/releases/download/v18.20.0/omp-darwin-arm64) (sha256 `2b1309b06a74`) | `qwen38-5090-v0.13.0` | `ssh-loopback` | `darwin-remote-ssh` | **preview** | no | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/6b22f219c7298db4b8fa5c2bc7bb33eb7a37799f/releases/v0.19.0/acceptance/darwin-arm64-18.20.0.json) |
+| `windows-docker-local` | Windows 11 x64 — upstream `v18.20.0` [`omp-windows-x64.exe`](https://github.com/can1357/oh-my-pi/releases/download/v18.20.0/omp-windows-x64.exe) (sha256 `1b6c7bda8241`) | `qwen38-5090-v0.13.0` | `local-loopback` | `windows-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/6b22f219c7298db4b8fa5c2bc7bb33eb7a37799f/releases/v0.19.0/acceptance/windows-x64-18.20.0.json) |
+| `linux-docker-local` | Linux under WSL2 x64 — upstream `v18.20.0` [`omp-linux-x64`](https://github.com/can1357/oh-my-pi/releases/download/v18.20.0/omp-linux-x64) (sha256 `c8694be8c6e6`) | `qwen38-5090-v0.13.0` | `local-loopback` | `linux-docker-local` | **qualified** | yes | [receipt](https://raw.githubusercontent.com/alphastorm/omp-ninfer/6b22f219c7298db4b8fa5c2bc7bb33eb7a37799f/releases/v0.19.0/acceptance/linux-x64-18.20.0.json) |
 
 ## Native runtime variants
 
@@ -37,7 +37,7 @@ A candidate implementation is not a qualification claim; JSON-schema support fli
 | --- | --- | ---: | ---: | ---: |
 | RTX 5090 beta.8 container | Bound by the current exact-source lane product-protocol receipt; candidate-bound external-install acceptance is separate. | 128 | 2 | 30 |
 | RTX 4090 native Windows v0.8.0-beta.3 | Bound by the current exact-source lane product-protocol receipt; candidate-bound external-install acceptance is separate. | 128 | 2 | 30 |
-| RTX 3090 native Windows v0.8.0-beta.3 | Bound by the current exact-source lane product-protocol receipt; candidate-bound external-install acceptance is separate. | 128 | 2 | 30 |
+| RTX 3090 native Windows v0.8.0-beta.4 | Bound by the current exact-source lane product-protocol receipt; candidate-bound external-install acceptance is separate. | 128 | 2 | 30 |
 
 ## Profile boundaries
 
@@ -50,7 +50,6 @@ Limitations:
 - macOS manual SSH preview.
 
 Blockers:
-- upstream OMP v18.20.0 client acceptance is pending
 
 ### `windows-docker-local`
 
@@ -60,7 +59,6 @@ Limitations:
 - Fresh stock OMP 18.20.0 platform and candidate-bound documented-route acceptance is required; no predecessor client execution is carried.
 
 Blockers:
-- upstream OMP v18.20.0 client acceptance is pending
 
 ### `linux-docker-local`
 
@@ -71,7 +69,6 @@ Limitations:
 - Linux x64 under WSL2 only; no separate native Linux OS or Linux vision claim.
 
 Blockers:
-- upstream OMP v18.20.0 client acceptance is pending
 
 ## Composition blockers
 

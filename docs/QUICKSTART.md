@@ -1,6 +1,6 @@
 # Quickstart
 
-> **Prepared guide: v0.19.0 · stock Oh My Pi 18.20.0 · acceptance pending**
+> **Prepared guide: v0.19.0 · stock Oh My Pi 18.20.0 · 31 documented blocks passed**
 >
 > Use the [immutable v0.18.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.18.0/docs/QUICKSTART.md) until v0.19.0 is published. This draft is not install or acceptance authority.
 
@@ -14,8 +14,8 @@ loopback to the NInfer inference engine serving Qwen3.8 27B on your GPU.
 | --- | --- | --- |
 | RTX 5090 container on Windows 11 + Docker Desktop / WSL2 | Native Windows x64 client over local loopback `127.0.0.1:18089` | [RTX 5090 Windows route](#ready-route-native-windows-and-docker-desktop-wsl2) |
 | RTX 5090 container on Windows 11 / WSL2 or Linux | macOS arm64 client over a manual SSH tunnel (preview) | [macOS manual SSH route (preview)](#macos-client-over-a-manual-ssh-tunnel-preview) |
-| RTX 4090 native Windows 11 (alone or beside RTX 3090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; `v0.8.0-qwen38-4090-beta.3` carried unchanged from v0.18.0, DFlash2 K=7, one request at a time (`C1`); v0.18.0 component qualification carried; fresh seven-block route/campaign/public-install/restoration acceptance pending | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) |
-| RTX 3090 native Windows 11 (alone or beside RTX 4090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; `v0.8.0-qwen38-3090-beta.4`, DFlash2 K=7, two requests in flight (`C2`) over one shared 131,072-token pool; selected `native-v0.8.0-beta.4-tc-rtx3090`; fresh component and seven-block route/C2 campaign/public-install/restoration acceptance pending | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
+| RTX 4090 native Windows 11 (alone or beside RTX 3090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; `v0.8.0-qwen38-4090-beta.3` carried unchanged from v0.18.0, DFlash2 K=7, one request at a time (`C1`); v0.18.0 component qualification carried; fresh seven documented blocks, campaign, public install and restoration passed | [RTX 4090 native lane](#native-windows-rtx-4090-release-lane) |
+| RTX 3090 native Windows 11 (alone or beside RTX 4090) | Native Windows x64 client over local loopback `127.0.0.1:18082`; UUID-bound; `v0.8.0-qwen38-3090-beta.4`, DFlash2 K=7, two requests in flight (`C2`) over one shared 131,072-token pool; selected `native-v0.8.0-beta.4-tc-rtx3090`; component qualification, seven documented blocks, `C2` campaign, public install and restoration passed | [RTX 3090 native lane](#native-windows-rtx-3090-release-lane) |
 | RTX 5090 container with Linux x64 client under WSL2 only | WSL2 shell client over local loopback `127.0.0.1:18089` (no native Linux OS qualification) | [WSL2 Linux client](#wsl2-linux-client-over-local-loopback) |
 | Other GPU, non-WSL Linux client, or concurrent native serving | Unsupported | [Compatibility boundary](COMPATIBILITY.md) |
 
@@ -156,7 +156,7 @@ covers source behavior and independent public-download integrity, not client exe
 
 ## Acceptance evidence
 
-Fresh v0.19.0 execution is pending on all five documented routes (host 2, macOS 10,
+Fresh v0.19.0 execution passed on all five documented routes (host 2, macOS 10,
 Windows 5, RTX 4090 native 7, RTX 3090 native 7), all three stock OMP 18.20.0 clients,
 both native post-route campaigns and anonymous public installs, and independent restoration.
 No predecessor route receipt, waiver, transcript or observed result qualifies this candidate; only the carried RTX 4090 beta.3 component qualification is retained from v0.18.0.
@@ -249,7 +249,7 @@ Requires Windows 11 x64, one RTX 4090 (sm_89), a supported NVIDIA driver, Git, P
 (`py` launcher), and 40 GiB free disk. The installer binds the unique RTX 4090 UUID and PCI address
 even beside an RTX 3090 (use `-GpuUuid` if multiple RTX 4090 cards exist; never hide a card). Stop
 the other native lane on port `18082` first. The v0.19.0 route keeps
-`v0.8.0-qwen38-4090-beta.3` carried unchanged from v0.18.0 (DFlash2 K=7, INT8 KV, C1; no bounded pressure saves); fresh route acceptance is pending.
+`v0.8.0-qwen38-4090-beta.3` carried unchanged from v0.18.0 (DFlash2 K=7, INT8 KV, C1; no bounded pressure saves); fresh route, campaign, public install and restoration passed for v0.19.0.
 The installer preserves the actual prior install for rollback. Keep prior native release roots
 and staging untouched for historical recovery; never import MTP3 checkpoints into the DFlash2
 runtime. If a stopped beta.2 incumbent refuses shutdown, follow the
@@ -464,7 +464,7 @@ Requires Windows 11 x64, one RTX 3090 (sm_86), a supported NVIDIA driver, Git, P
 beside an RTX 4090 (use `-GpuUuid` if multiple RTX 3090 cards exist). Stop the other native lane on
 port `18082` first. The v0.19.0 route selects `v0.8.0-qwen38-3090-beta.4`, with DFlash2 K=7
 and C2 sharing one 131,072-token INT8 KV pool, OMP provider limit `2` and a 180 s pending
-timeout; fresh component qualification, route, `C2` campaign, public install and restoration are pending
+timeout; component qualification, route, `C2` campaign, public install and restoration passed for v0.19.0
 (keep that `40 GiB` free-disk margin on the volume holding the install and checkpoint store so
 saves are not refused for disk capacity; pressure-save admission deferral remains tracked in
 [#89](https://github.com/alphastorm/ninfer/issues/89)). C2 is not simultaneous native-lane serving.
@@ -804,7 +804,7 @@ release failure. Restart NInfer with section 4 only after observing the failure.
 
 The macOS arm64 client is a preview platform (stock upstream binary over a manual OpenSSH loopback
 tunnel, without a managed macOS installer or appliance service). Fresh acceptance of its **10** executable blocks
-against the `v0.7.0-qwen38-5090-beta.8` RTX 5090 container lane is pending. Sections 3 and 4 also serve as
+against the `v0.7.0-qwen38-5090-beta.8` RTX 5090 container lane passed. Sections 3 and 4 also serve as
 the inference-host setup for the Windows and WSL2 Linux client routes.
 
 ### Prerequisites
@@ -901,7 +901,7 @@ Release `v0.19.0` uses the separate host directory `checkpoints-v019`, still mou
 `checkpoints-v013` and legacy `checkpoints` untouched for rollback; never mount them read-write
 into v0.19.0 or import their generations. Restore needs the exact binary, model, profile and bearer
 key; replay authoritative client transcripts for a fresh prefill across releases. The current
-component and documented-route evidence is pending, not inherited from the predecessor.
+component and documented-route evidence is fresh for v0.19.0, not inherited from the predecessor.
 See the [v0.19.0 compatibility matrix](../releases/v0.19.0/COMPATIBILITY.md).
 
 ## 4. Start NInfer on the inference host

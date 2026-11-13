@@ -1,0 +1,567 @@
+{
+  "artifact_type": "omp_ninfer_review_ledger",
+  "schema_version": 1,
+  "release": "v0.19.0",
+  "as_of": "2026-11-13",
+  "status": "closed-by-disposition",
+  "approval_granted": true,
+  "publication_authorized": false,
+  "public_route_acceptance_granted": false,
+  "scope": "Closed exact-source runtime full council CR-20261113T063918Z-41f89b31 on N 41f89b310b443481db5917a01a2b45e49f85e723 (closed-without-remediation), the focused review of the native component delta to N' 15c3e3959c0a6167f799e9383482ec4e03db9cad (closed-without-remediation), and product full council CR-20261113T192727Z-6b22f219-product (closed-by-disposition) with route stage candidate 6b22f219c7298db4b8fa5c2bc7bb33eb7a37799f. Product release-path residuals are tracked in https://github.com/alphastorm/omp-ninfer/issues/176. This is not approval of a later executable subject, publication, or independent public-user acceptance; no human waivers are recorded.",
+  "native_runtime": {
+    "review_id": "CR-20261113T063918Z-41f89b31",
+    "review_sequence_id": "omp-ninfer-v0.19.0-engine",
+    "review_class": "full-council",
+    "status": "closed-without-remediation",
+    "source_commit": "41f89b310b443481db5917a01a2b45e49f85e723",
+    "base_commit": "48c8ac4644322f024b5c3bd5b657af5874567251",
+    "subject_digest": "3395f61e4d9efdc9b961e137e85222dcc9027d762f868501b179d2d9af92b53c",
+    "resolver_subject_digest": "23a4d4f95df0ea3f6e2c0778807ce33235528852e4a8effb24e8e2510f705048",
+    "resolver_assignments": [
+      {
+        "reviewer_id": "daybreak-blue",
+        "selectionClass": "strong",
+        "role": "strong_critic",
+        "independence_class": "cross_family",
+        "authority": "independent_evidence",
+        "model": "openai-codex/gpt-6-sol:max",
+        "model_family": "gpt"
+      },
+      {
+        "reviewer_id": "gemini-carbon",
+        "selectionClass": "strong",
+        "role": "strong_critic",
+        "independence_class": "cross_family",
+        "authority": "independent_evidence",
+        "model": "google-antigravity/gemini-4-carbon:medium",
+        "model_family": "gemini"
+      },
+      {
+        "reviewer_id": "gpt-astra",
+        "selectionClass": "supplement",
+        "role": "supplement",
+        "independence_class": "cross_family",
+        "authority": "supplemental_evidence",
+        "model": "openai-codex/gpt-6-astra:max",
+        "model_family": "gpt"
+      },
+      {
+        "reviewer_id": "claude-mythos",
+        "selectionClass": "supplement",
+        "role": "lead_family_security",
+        "independence_class": "same_lineage_blind_sample",
+        "authority": "supplemental_evidence",
+        "model": "anthropic/claude-mythos-5-2:max",
+        "model_family": "claude"
+      }
+    ],
+    "receipt_digests": {
+      "close-report.md": "d3ad1402794bd8222e3f9cab7998fb81423a71e2a2e1a690a3021a9c190403c4",
+      "ledger.md": "96590dc82e95de200c32307c6651a1e14e78295876a333f70a67646e6d012e19",
+      "review-record.json": "59b59eb26bf0a8260be61d5d7e0e0ab170dc9c0ef4bf54c7f2368a80b8c3010a",
+      "frozen-subject.json": "62082397ed74c16a373328a01f3edd5ec4944f8e53cc20750a8e6d1e25e2560f",
+      "resolver-receipt.json": "72f6a3b6b6ef1a03bebb7726300a6b30812a4d9c9f6a3463d87e5093edc8b649",
+      "panel-selection.json": "8a73f44fc088ede6dae4ee3460adfb5a39a5811dcadfa29f32c9e4a7e8c7df8e",
+      "daybreak-blue.json": "fcca4a571e3d820c33af4e1b84b80d6c573bdc804897d329b7d1cf52f5a7c757",
+      "gemini-carbon.json": "393224ca4764e7addda17704b2a9f1b7eda2db807939da6e1559f962b5ebcd84",
+      "gpt-astra.json": "9e0010424f0c189a494a719847e27670fc425fc27696524b6a42a42384b79c69",
+      "claude-mythos.json": "333151dcf1754e77b337a8d062c30823b8fdef2b97552a986a4653cdb9dc1e79",
+      "review-dispatch-envelope.attempt-1.json": "5be7915caeb421aa4012eb076dda5e11817b72afe9d7335fbc8117a4552bbad0"
+    },
+    "reviewer_results": {
+      "daybreak-blue": {
+        "summary": "The bounded source review found one operator-facing receipt claim that disagrees with the quota refusal path. No authentication or native-proof bypass was substantiated in the bound files. Producer-to-frozen-source proof remains unverified because its primary comparison inventory is not in the permitted material.",
+        "evidence": [
+          "R1|P2|conf=0.99|claim=Release notes incorrectly promise a pressure/abandoned receipt after six retries or 10 seconds for store-quota refusals; quota is terminal and does not enter that abandonment path|evidence=packaging/windows/RELEASE_NOTES.md:5-10 includes store quota in the promise; src/serve/automatic_checkpoint_queue.cpp:264-267,281-319 limits retries and abandonment to retryable reasons, excluding quota; docs/durable/CONTRACTS.md:974-982 distinguishes filesystem Capacity from store quota|impact=Operators relying on the promised receipt to detect unsaved-turn loss can miss quota-triggered releases; a later refused Stop remains a separate control but does not supply that pressure receipt|verify=Force a store-quota refusal for a tagged pressure victim and inspect the save, pressure and Stop receipts"
+        ],
+        "unresolved": [
+          "U1|P2|conf=0.65|question=Does the retained producer GPU proof apply to every production and build input at the frozen subject commit?|missing=The packet asserts equality of 1,965 blob/mode inputs between producer 8b3f498f and N but provides no inspectable comparison inventory within the 17 permitted paths; exact-N CI is build evidence, not that equality comparison|verify=Have the accountable lead inspect the content-bound 1,965-input blob/mode inventory against both commits before carrying producer GPU results forward"
+        ]
+      },
+      "gemini-carbon": {
+        "summary": "Reviewed commit 41f89b310b443481db5917a01a2b45e49f85e723 across all 17 bound paths against the v0.19.0 assurance scope and K1-K7 contracts (standing: strong_critic, cross_family, independent_evidence). Origin authentication, native byte-proof requirements for Settled(None), identifier-free pressure/abandoned receipt schema, drain hiding of non-None answers for synchronous final_save, coherent native 0.8.0-beta.4 default/variant identities (hardware-pending preserved), and the terminal-only absolute-capacity restart fixture (#119) match stated contracts. Two concurrency defects remain in the pressure-save coordinator/service boundary: (R1, P1) AutomaticCheckpointQueue pops tasks without binding Entry::revision and rejects defer() when pending_ already holds a concurrent re-enqueue, causing Coordinator::run to misclassify an already-queued retry as DeferralRefused, prematurely abandon Busy/Publishing or first-attempt persistent pressure victims, and execute the duplicate queued task on the settled revision; (R2, P2) SessionCheckpointService::response_stored wakes Engine admission with the new tag before calling tag-blind Coordinator::enqueue, letting the same turn's enqueue clobber an already-registered or settled pressure entry for that tag.",
+        "evidence": [
+          "R1|P1|conf=0.92|claim=Observed queue-to-coordinator lock handoff without task revision binding causes AutomaticCheckpointQueue::defer to reject retries when a newer enqueue is already in pending_, which AutomaticCheckpointCoordinator::run [INFERENCE] misclassifies as DeferralRefused to prematurely abandon pressure victims (including Busy and Publishing waits) and re-run settled revisions|evidence=src/serve/automatic_checkpoint_queue.cpp:106-112 erases pending_ and releases queue_.mutex_ before AutomaticCheckpointCoordinator::run at src/serve/automatic_checkpoint_queue.cpp:239-243 locks mutex_ to copy attempt = found->second; concurrent enqueue (lines 162-164) or save_before_eviction (lines 204-208) increments revision and re-inserts session into queue_ and pending_; when save_ returns any retryable refusal, queue_.defer at lines 50-53 returns false because pending_.contains(session) is true, and lines 279-326,332-343 set limit = DeferralRefused, emit pressure/abandoned, and mark settled = true before the duplicate queued entry runs again on the same revision|impact=Violates the protected Busy/publication non-abandonment and bounded-retry invariants: a self-ending TransactionBusy, pinned-image Capacity, or awaiting_publication wait (or first persistent refusal) can emit a false deferral_refused abandonment receipt and settle early so Engine admission drops an unsaved live continuation while a retry is already queued, followed by a second run on the same revision that flips settled back to false (line 265) or emits a duplicate receipt (and drops non-pressure transient saves on attempt 1 at line 326)|verify=Add a deterministic unit test in tests/test_automatic_checkpoint_queue.cpp that interleaves a new-tag save_before_eviction (or enqueue) between queue pop and Coordinator::run mutex acquisition while save_ returns TransactionBusy or awaiting_publication=true, asserting Pending is preserved with zero abandonment receipts and single-revision execution",
+          "R2|P2|conf=0.88|claim=Observed publication-before-enqueue ordering in SessionCheckpointService::response_stored combined with tag-blind overwrite in AutomaticCheckpointCoordinator::enqueue [INFERENCE] allows the same turn's automatic enqueue check to clobber an active or settled pressure entry already created for that turn's tag|evidence=src/serve/session_checkpoint_service.cpp:458-473 calls Access::response_stored and publication_changed (lines 460-464, waking the Engine worker) before store_.may_hold and automatic_.enqueue(session, !worthwhile) (lines 467-471), while AutomaticCheckpointCoordinator::enqueue at src/serve/automatic_checkpoint_queue.cpp:150-167 ignores entries_[session].tag and overwrites entries_[session] with an untagged pressure=false entry whenever worthwhile is true or the entry is not yet both completed and settled|impact=Violates current-revision, Busy-spacing, and saved-peer answer lifetime invariants after declared controls: if save_before_eviction registers (session, *tag) first, the trailing enqueue for that same turn erases a settled None or terminal pressure answer when worthwhile is true (breaking saved-peer retention across replanning) or demotes an active pressure entry (including short !worthwhile turns) to untagged pressure=false so a Busy refusal spends the persistent retry budget without 100 ms spacing (lines 268-286) and an exception in save_ loses the tag across retries (line 248)|verify=Add a test in tests/test_automatic_checkpoint_queue.cpp or service tests where save_before_eviction({session, tag}) runs after Engine endpoint promotion but before that turn's enqueue call, asserting an existing entry matching tag preserves pressure=true, timing state, and any settled outcome"
+        ],
+        "unresolved": []
+      },
+      "gpt-astra": {
+        "summary": "Supplemental read-only review of 41f89b310b443481db5917a01a2b45e49f85e723. Receipt standing: lead_family=claude; selectionClass=supplement; role=supplement; independence_class=cross_family; authority=supplemental_evidence. Identified a deferred-retry starvation path and an inaccurate quota receipt claim. Findings are based on source inspection; no commands or tests were run.",
+        "evidence": [
+          "R1|P1|conf=0.88|claim=[INFERENCE] Repeated Busy retries can starve an already-deferred persistent refusal, defeating bounded pressure settlement even with an empty FIFO and promptly returning saves.|evidence=src/serve/automatic_checkpoint_queue.cpp:86-98 waits 25 ms and selects only the first ready map entry; :57 reinserts deferred work; :272-313 gives Busy entries budget-free 100 ms retries, while checking the persistent window only after another save completes. src/serve/automatic_checkpoint_queue.h:57 stores deferrals in an unordered_map. Four Busy entries preceding a persistent entry can occupy every selection while matching Engine progress continues.|impact=The persistent victim can remain Pending beyond its fallback and 10-second window, retaining its continuation and allowing admission timeouts. This requires neither table saturation, slow coordinator saves, nor circular Busy ownership.|verify=Add a multi-victim regression with four immediate Busy callbacks preceding one IoUnavailable deferral, continuously advancing Engine progress but not storage progress. Keep the FIFO empty and assert the persistent victim settles within the configured window while Busy peers remain pending; exercise the shipped STL implementations.",
+          "R2|P2|conf=0.99|claim=The beta.4 release notes incorrectly promise bounded retries and a pressure/abandoned receipt for the store's own quota refusal.|evidence=packaging/windows/RELEASE_NOTES.md:7-10 explicitly includes store quota in that promise. docs/durable/CONTRACTS.md:101-102 distinguishes store quota from filesystem Capacity. src/serve/checkpoint_policy.h:18-29 excludes quota from transient reasons; src/serve/automatic_checkpoint_queue.cpp:265-267 settles nonretryable reasons immediately, and :282-321 creates abandonment metadata only through retry handling.|impact=The truthful-loss documentation misidentifies the operator signal: quota can permit unsaved continuation release without pressure/abandoned. Existing save-refusal receipts and final-save accounting remain, but monitoring based on the release-note promise can miss this case.|verify=Exercise a pressure save returning quota: verify immediate non-None settlement and zero abandonment callbacks, then distinguish terminal quota refusal from bounded persistent refusal in the release notes."
+        ],
+        "unresolved": []
+      },
+      "claude-mythos": {
+        "summary": "Supplemental same-lineage security pass (additive evidence only) over the 17 bound paths at 41f89b31; nothing else was read and nothing was run. No P0/P1. By inspection the coordinator's lock order, revision-checked settlement, unlocked receipt before settlement, drain hiding of non-None answers, all-settled consumption of saved answers, the identifier-free committed=false receipt, the coherent beta.4 identities and the test-only #119 fixture match the packet. R1 (P2): a save refused by the store after a successful prepare re-arms on progress its own attempt produces, so the full-volume case settles after a sub-second burst, not fallback-paced retries, contradicting the contract's no-self-wake text. R2 (P3): the release note misdescribes store-quota refusals, which settle at once with no abandonment receipt. R3 (P3): retained real-process evidence cannot show Stop accounting of an abandoned turn. One unresolved: the busy capacity class depends on an Engine diagnostic outside the bound paths. Declared R1-R9 boundary behaviour was not reported.",
+        "evidence": [
+          "R1|P2|conf=0.6|claim=Observation: a pressure save refused by the store after a successful native prepare (the full-volume case) is re-armed by Engine progress that the attempt itself produces, so its six rearms run back-to-back and neither the 1 s fallback nor the 10 s window governs it. Inference: the source is the attempt's own export-lease retirement, which the contract defines as observed progress.|evidence=src/serve/automatic_checkpoint_queue.cpp:245 snapshots progress before save_ runs, and :298-310 re-arms a capacity or stale deferral on any Engine-counter change against that snapshot; docs/durable/CONTRACTS.md:438-441 says every prepared export's retirement advances observed Engine progress, while :491-494 justifies 'cannot wake itself' only for a refused prepare that holds no lease; tests/test_automatic_checkpoint_queue.cpp:719-745 exercises only the non-observed notify_progress(false); the packet's pressure-real-process evidence reports the full-volume continuation at 3.074 s with one abandonment against a 2.317 s roomy control, although src/serve/checkpoint_policy.h:37,44 would need six 1 s fallbacks (at least 6 s) on an engine whose only request was the blocked one.|impact=Bounded persistent-refusal settlement and truthful accepted loss: a volume full for well under a second is treated as persistent and the turn loses restart resumption; CONTRACTS.md:302, 491-494, 977-979 and 985-987 promise fallback-paced retries that notice reclaimed space, and the retained Settled(capacity) answer (CONTRACTS.md:988-989) then permits release of that turn for its lifetime without another attempt.|verify=Read limit, attempts and elapsed_ms of the pressure/abandoned entry in head3-full-receipt-json (budget, 7 and under 6000 confirms it); add a queue case whose save callback calls the observed notify_progress() before returning Capacity under kNoFallback and assert a single call.",
+          "R2|P3|conf=0.7|claim=The beta.4 release note says a pressure save refused for store quota settles after six retries or 10 seconds with one pressure/abandoned receipt. Observation: the store's own quota reason is not in the retryable set, so it settles on the first refusal and emits no abandonment receipt.|evidence=packaging/windows/RELEASE_NOTES.md:6-10 lists 'a full checkpoint volume or store quota' under the bounded policy; src/serve/automatic_checkpoint_queue.cpp:264-267 makes only the transient reasons, io_unavailable and capacity retryable and settles every other reason at once, and :282-322 can build an abandonment only inside the retryable branch; docs/durable/CONTRACTS.md:101-102 gives the store quota its own quota reason and :953-954 uses quota as the already-terminal comparison case.|impact=Truthful refusal and abandonment evidence: an operator or qualification harness that counts pressure/abandoned receipts or abandoned_total as the signal for turns released without a durable copy misses every store-quota release, which carries only an ordinary save/refused/quota receipt after a single attempt.|verify=Run a coordinator case that returns the quota reason for a pressure victim and observe one attempt, Settled with quota and zero abandonment callbacks; then correct the note or the classification.",
+          "R3|P3|conf=0.6|claim=The retained real-process proof does not show that an abandoned and released turn is reported at Stop: the green verdict only requires an incomplete Stop with at least one refusal, which the still-full volume produces for every unsaved session with or without abandonment.|evidence=tests/test_serve_shutdown_capacity_real.py:198-199 asserts only 'not complete and refused >= 1', and :389-392 makes the continuation the next turn of session B, so when B is the victim its abandoned turn is superseded before Stop; the packet lists the same sha256 9cdacc2b...6be1 (134 bytes) for base-full-shutdown-2-json and head3-full-shutdown-2-json, so the candidate Stop report is byte-identical to the predecessor's; docs/durable/CONTRACTS.md:979-980 and 996-998 claim Stop reports the abandoned session through session_not_indexed.|impact=Truthful Stop evidence for accepted loss rests on source reading alone (src/serve/session_checkpoint_service.cpp:555-571 counts any other refusal); a regression that skipped or miscounted a released, non-superseded turn after the volume recovers would pass the retained evidence, and that is the one case where Stop is the only later trace of the loss.|verify=Inspect receipts.stop in head3-full-receipt-json for a save/refused/session_not_indexed entry; add a run or unit case that frees the volume after the abandonment, sends no further turn for the victim, and asserts Stop refuses it."
+        ],
+        "unresolved": [
+          "U1|P2|conf=0.3|question=Does the unchanged Engine code report host_shortage Busy for every native capacity refusal caused by an in-flight pin, and for no refusal that cannot end by itself, now that this diagnostic alone selects the budget-free busy class?|missing=The Engine export and reclaim-summary code that populates DurableExportReclaim.host_shortage, which is outside the 17 bound paths. In-bound, src/serve/session_checkpoint_service.cpp:99-104 still calls the field an additive diagnostic while :515-516 uses it as retry policy, tests/test_automatic_checkpoint_queue.cpp:997-1010 covers only the pure mapping, and no retained real-process run exercises a pinned-image pressure refusal.|verify=Engine-level case where a pressure export meets another export's Device-staged pin after its Host route recorded a byte deficit; assert the service result is busy, and assert a store-origin capacity refusal never carries Busy."
+        ]
+      }
+    },
+    "dispositions": {
+      "gemini-carbon-R1": {
+        "severity": "P1",
+        "result": "confirmed (lead source verification at N; reproduction test not run)",
+        "disposition": "defer",
+        "change": "None in N. Tracked in alphastorm/ninfer#123 with the fix sketch (defer reports AlreadyQueued when the session is pending; the coordinator treats that as a live attempt: no abandonment, no settle) and the reviewer's interleaving test. v0.19.0 notes name the residual.",
+        "rationale": "Lead re-rated P1 to P2 residual. Verified at N: :104-112 erase pending_ before run(); :239-243 snapshot the current revision; :313-314 turn a refused defer into DeferralRefused. A second enqueue for the same session (automatic turn completion, or a pressure ask with a new non-empty tag) must land in the microsecond gap between queue pop and the coordinator lock. For an automatic entry pressure is false, so no abandonment occurs and only one transient retry is dropped. For a pressure entry the victim may settle early with a non-None reason and a deferral_refused receipt while the queued run still executes; no durable acknowledgement is fabricated. Shipped F4 left every exhausted persistent refusal Pending forever (reproduced HTTP 503 at 15 s); N settles that path in about 3 s. Fixing needs a new freeze, full native and RTX 5090 rebuild and a restarted multi-hour qualification chain, which is disproportionate to this residual."
+      },
+      "gpt-astra-R1": {
+        "severity": "P1",
+        "result": "confirmed (lead source verification at N; reproduction test not run)",
+        "disposition": "defer",
+        "change": "None in N. Tracked in alphastorm/ninfer#123 with the fix sketch (fair selection among ready deferrals, oldest-ready first or round-robin, or settle a spent persistent window at scan time) and the reviewer's multi-victim regression. v0.19.0 notes state that settlement is bounded for runnable persistent refusals and name this residual.",
+        "rationale": "Lead re-rated P1 to P2 residual. Verified: :86-98 select the first ready entry of an unordered_map; Busy entries re-arm after 100 ms on Engine progress (:289-310); :278-279 test the window only when the persistent entry itself runs. Starvation needs a persistent refusal concurrent with at least four continuously ready Busy pressure victims ahead of it in hash order. Busy needs a live pin or busy transaction, and the conditions that make a refusal persistent (full volume, storage outage) also end in-flight exports quickly. The same Busy spacing and first-ready scan existed at F4, where such a victim stayed Pending indefinitely in any case; N is strictly better. Native windows now fail on any HTTP 503 (#164), so a recurrence in acceptance is visible. Mitigation cost as for gemini-carbon-R1."
+      },
+      "claude-mythos-R1": {
+        "severity": "P2",
+        "result": "confirmed (retained receipt: budget, 7 attempts, 2937 ms)",
+        "disposition": "accept",
+        "change": "None in N. CONTRACTS.md pacing wording correction tracked in alphastorm/ninfer#123.",
+        "rationale": "Self-produced export retirement re-arms capacity retries, so a full-volume refusal spends its six retries in about 3 s rather than at fallback pace. This stays inside the founder's bounded policy (short bounded window, target 10 s or less); the loss is logged, counted and reported at Stop. The only effect is less time for a transient full volume to clear before the turn is released."
+      },
+      "claude-mythos-U1": {
+        "severity": "P2",
+        "result": "unresolved",
+        "disposition": "defer",
+        "change": "None in N. Engine-level pinned-image pressure case tracked in alphastorm/ninfer#123.",
+        "rationale": "The mapping is proven only as a pure function plus the P22 attempt-3 log shapes; the Engine population code is outside the subject. A non-self-ending refusal misreported as Busy would retry budget-free at 100 ms spacing and stay Pending until its cause clears; a pin-caused refusal misreported as plain capacity would spend the budget and settle early (accepted-loss class). P2 residual, tracked."
+      },
+      "daybreak-blue-R1": {
+        "severity": "P2",
+        "result": "confirmed",
+        "disposition": "mitigate",
+        "change": "Outside the frozen bytes: the v0.8.0-qwen38-{3090,4090}-beta.4 component release notes and the v0.19.0 product notes state that the store's own quota (--session-checkpoint-quota-mib, reason quota) settles at once with no pressure/abandoned receipt, while a filesystem quota (ENOSPC/EDQUOT, Win32 112/39/1295) is capacity and takes the bounded path. packaging/windows/RELEASE_NOTES.md is corrected on fork main after the cut; the copy packaged in beta.4 keeps the inaccurate sentence, disclosed in the notes.",
+        "rationale": "The lead wrote the sentence in the identity bump. Code and CONTRACTS.md:97-101 are correct. Changing the packaged file needs a new freeze and full re-qualification for one documentation sentence."
+      },
+      "daybreak-blue-U1": {
+        "severity": "P2",
+        "result": "falsified (lead verified)",
+        "disposition": "reject",
+        "change": "None.",
+        "rationale": "Lead ran git diff --name-only 8b3f498f..N in the clean subject: 8 paths, packaging/windows/RELEASE_NOTES.md, packaging/windows/lanes/rtx{3090,4090}/{release-spec,server-config}.json, tests/README.md, tests/models/qwen3_5/test_checkpoint_restart.cpp and tests/test_windows_release.py. None is a serve production, header, app or build input, so the producer's GPU proof binary (serve 61b6bc72 built at 8b3f498f) has every serve input identical to N."
+      },
+      "gemini-carbon-R2": {
+        "severity": "P2",
+        "result": "confirmed (pre-existing overwrite; present at F4)",
+        "disposition": "defer",
+        "change": "None in N. Tracked in alphastorm/ninfer#123 with the fix sketch (enqueue preserves a matching-tag pressure entry's pressure, tag and timing state) and the reviewer's test.",
+        "rationale": "The tag-blind overwrite predates #122: F4's enqueue also replaced entries_[session]; #122 changed only the only_if_pending predicate. Consequences are a lost Busy spacing or tag for that turn (budget spent earlier) or a re-ask after an erased settled None, all bounded by the new settlement path; no durable acknowledgement is fabricated. P2 residual."
+      },
+      "gpt-astra-R2": {
+        "severity": "P2",
+        "result": "confirmed (same root cause as daybreak-blue-R1)",
+        "disposition": "mitigate",
+        "change": "As daybreak-blue-R1.",
+        "rationale": "Duplicate of daybreak-blue-R1; same change."
+      },
+      "claude-mythos-R2": {
+        "severity": "P3",
+        "result": "confirmed (same root cause as daybreak-blue-R1)",
+        "disposition": "mitigate",
+        "change": "As daybreak-blue-R1.",
+        "rationale": "Duplicate of daybreak-blue-R1; reviewer severity P3 retained."
+      },
+      "claude-mythos-R3": {
+        "severity": "P3",
+        "result": "confirmed (evidence gap, not a behaviour defect)",
+        "disposition": "defer",
+        "change": "None in N. Real-process case (volume freed after abandonment, no later turn for the victim, Stop must refuse it) tracked in alphastorm/ninfer#123.",
+        "rationale": "session_checkpoint_service.cpp:555-571 counts any other refusal at Stop; the retained run supersedes the victim's turn before Stop, so Stop accounting for an abandoned, non-superseded turn rests on source reading. Test-evidence gap; native windows also fail on an incomplete Stop (#164)."
+      }
+    },
+    "closure": "Closed without remediation: all ten ledger rows dispositioned and no confirmed in-scope P0 or P1 remains after lead verification. Both reviewer P1 findings (an already-queued retry read as a refused deferral, and Busy retries starving a persistent deferral) are real source-level gaps that need a narrow interleaving or load shape; the lead re-rated them P2 residuals and deferred them with the remaining residuals to alphastorm/ninfer#123. The store-quota release-note finding is mitigated in the component and product notes. No remediation epoch, targeted refuter or second council."
+  },
+  "native_component_delta": {
+    "review_class": "focused",
+    "status": "closed-without-remediation",
+    "source_commit": "15c3e3959c0a6167f799e9383482ec4e03db9cad",
+    "base_commit": "41f89b310b443481db5917a01a2b45e49f85e723",
+    "subject_digest": "692324baad39db0c51fe4facee726c513e9713cc0addf79b4700be618783bb60",
+    "changed_paths": [
+      "packaging/windows/RELEASE_NOTES.md",
+      "packaging/windows/lanes/rtx3090/release-spec.json",
+      "tests/test_windows_release.py",
+      "tools/qualification/qualify_native.py"
+    ],
+    "resolver_assignments": [
+      {
+        "reviewer_id": "daybreak-blue",
+        "selectionClass": "focused",
+        "role": "strong_critic",
+        "independence_class": "cross_family",
+        "authority": "independent_evidence",
+        "model": "openai-codex/gpt-6-sol:max",
+        "model_family": "gpt"
+      },
+      {
+        "reviewer_id": "gemini-carbon",
+        "selectionClass": "focused",
+        "role": "strong_critic",
+        "independence_class": "cross_family",
+        "authority": "independent_evidence",
+        "model": "google-antigravity/gemini-4-carbon:medium",
+        "model_family": "gemini"
+      },
+      {
+        "reviewer_id": "gpt-astra",
+        "selectionClass": "supplement",
+        "role": "supplement",
+        "independence_class": "cross_family",
+        "authority": "supplemental_evidence",
+        "model": "openai-codex/gpt-6-astra:max",
+        "model_family": "gpt"
+      }
+    ],
+    "receipt_digests": {
+      "receipt.json": "08a8f0c0990e2a92a022a8d824ee3ed58627e7e8b21cf4a67f9a5092df8c7dfa",
+      "subject.json": "06b0cfa9aad4d1c8711a203a4602bc9a7a2153ce075f9c43b54943d28286d8b2",
+      "scope.md": "68f753410502af170bbbaa8f1d61af215fda816ac589ed790f62a956e5c42fff",
+      "dispositions.md": "c9d6711b09cdf8e2c346cf6116e04460586108d4a4742c3c19dfe62439e44dd9",
+      "daybreak-blue.json": "92647a749d75eafc231eaec9c48e446f00d80e1b2948f9ae11e662f18284bd67",
+      "gemini-carbon.json": "e1a1944e8974bb7ac21fde9f31dce45e318e44039e335962dbfa7b9b60efd7ea",
+      "gpt-astra.json": "c908c5e08467402a5ef848b7fb764560c1ebdf6a01c363e410b848294a90834b",
+      "envelope.attempt-1.json": "7d04bd4a59e6ca5533762686521934748079d62798aa7381d6c61f1889b15509"
+    },
+    "reviewer_results": {
+      "daybreak-blue": {
+        "summary": "Focused review of the frozen commit, limited to accidental controller and driver failures. The cap and draw checks cover well-formed samples, but two receipt-contract gaps remain. The weakest assumption at the harness-to-driver boundary is that telemetry stays readable until C1 finishes; a later query failure bypasses receipt persistence. No malicious adversary is in scope.",
+        "evidence": [
+          "R1|P2|conf=0.98|claim=An invalid telemetry query after a valid sample raises before the managed-C1 failure receipt is written|evidence=tools/qualification/qualify_native.py:2356-2366 rejects malformed rows; tools/qualification/qualify_native.py:2424-2466 raises on poll_errors before building and writing managed-c1.json|impact=The qualification gate still fails, but the required failure receipt loses its measured peak and limit history; an earlier receipt may remain in place|verify=During managed C1 return one valid six-field row followed by a missing-field row; inspect managed-c1.json for a newly written failed receipt and measured peak",
+          "R2|P3|conf=0.99|claim=A passing managed-C1 receipt lacks the required failures field|evidence=tools/qualification/qualify_native.py:2454-2465 adds receipt['failures'] only when failures is nonempty, then writes the receipt on both paths|impact=Passed qualification evidence does not meet the declared receipt shape, although status and zero mismatch counts remain available|verify=Run the capped passing fixture and inspect managed-c1.json for an explicit empty failures list"
+        ],
+        "unresolved": []
+      },
+      "gemini-carbon": {
+        "summary": "No defects found in the 4 bound files at commit 15c3e3959c0a6167f799e9383482ec4e03db9cad. Verified against the declared assurance scope and invariants: (1) Cap proof and uncapped-lane compatibility: Orchestrator.benchmark (tools/qualification/qualify_native.py:1896-1902) supplies --qualified-power-limit-w 350 and --power-envelope-w 355.0 for rtx3090 while passing neither for rtx4090; gpu_metrics (qualify_native.py:2352-2367) queries UUID-bound enforced.power.limit and power.limit alongside power.draw when power_limits=True and fails closed on row or field-count mismatch; c1_power_check (qualify_native.py:2370-2401) fails whenever enforced.power.limit or power.limit differs from qualified_w on any sample, while rtx4090 retains its 4-field query and existing receipt shape. (2) Gross draw bound: packaging/windows/lanes/rtx3090/release-spec.json:110 sets managed_power_envelope_w to 355, and c1_power_check fails any sample with power.draw > envelope_w. (3) Receipt durability and privacy: internal_benchmark (qualify_native.py:2423-2465) joins the 10 Hz sampler thread before reading samples, records status, max_power_w, enforced/configured limit min/max, sample/mismatch/over-envelope counts, and failures, and writes managed-c1.json via atomic_json before raising LaneError; new fields contain only numeric metrics and watt/count messages with no host names or paths, and stage_lane_qualification (qualify_native.py:720) continues to strip gpu_uuid. Checkpoint resume cannot reuse pre-change receipts across commit/tool advances because source_commit and target_root bind self.head and self.tool_head[:8] (qualify_native.py:882-884,915). (4) Argument pairing: internal_benchmark (qualify_native.py:2405-2406) refuses unpaired --qualified-power-limit-w / --power-envelope-w before reading state or starting Control-Release.ps1. (5) Tests and notes: tests/test_windows_release.py:710-723,2354-2541 exercises pass, limit drift, over-envelope failure with receipt retention, uncapped rtx4090 behavior, and unpaired-flag refusal without thread races. The #122 store-quota vs filesystem-quota runtime behavior noted in packaging/windows/RELEASE_NOTES.md:6-13 lives outside the 4 bound paths and is recorded in unresolved.",
+        "evidence": [],
+        "unresolved": [
+          "U1|P3|conf=0.50|question=Does the checkpoint runtime settle --session-checkpoint-quota-mib (reason quota) on the first refusal without emitting a pressure/abandoned receipt while retrying filesystem-quota/full-volume errors six times or 10 seconds as stated in packaging/windows/RELEASE_NOTES.md:6-13?|missing=Runtime checkpoint store and automatic pressure-save implementation/tests under src/ and tests/ from PR #122, which are outside the 4 bound review paths|verify=Inspect the session-checkpoint quota refusal and pressure-save retry paths and unit tests at 15c3e3959c0a6167f799e9383482ec4e03db9cad"
+        ]
+      },
+      "gpt-astra": {
+        "summary": "Supplemental review of 15c3e3959c0a6167f799e9383482ec4e03db9cad found one P2 failure-evidence gap. Static inspection only; no commands or tests run.",
+        "evidence": [
+          "R1|P2|conf=0.99|claim=Failure-evidence loss: malformed telemetry bypasses the required failed-run managed-c1.json receipt, even after valid power samples were collected.|evidence=tools/qualification/qualify_native.py:2359-2368 rejects missing or extra fields; :2423-2442 collects samples but raises on polling errors before aggregation and receipt publication at :2451-2464.|impact=[INFERENCE] A valid 355.5 W sample followed by a malformed row fails qualification without preserving the measured peak, limits or counts. The controller's startup cap check does not protect this diagnostic evidence; qualification remains fail-closed.|verify=Inject a valid 355.5 W sample followed by a row missing the limit fields, let the request complete, and assert that a failed managed-c1.json containing the available measurements and telemetry failure exists before LaneError propagates."
+        ],
+        "unresolved": []
+      }
+    },
+    "dispositions": {
+      "R1": {
+        "severity": "P2",
+        "result": "confirmed (qualify_native.py:2423-2466: poll_errors raise before aggregation and the receipt write)",
+        "disposition": "defer",
+        "rationale": "The qualification gate stays fail-closed: a malformed row still fails the run. Only diagnostic detail is lost, and only on a rare malformed nvidia-smi row after valid samples. Fixing it now changes the package bytes again (ReleaseHeadSha flows into package_source_sha), forcing another rebuild and more production downtime for diagnostic completeness. Tracked for fork main after the beta.4 cut, together with R2."
+      },
+      "R2": {
+        "severity": "P3",
+        "result": "confirmed (:2454-2465 adds failures only when non-empty)",
+        "disposition": "defer",
+        "rationale": "Cosmetic receipt shape. status and the zero mismatch/over-envelope counts carry the pass. Fixed with R1."
+      },
+      "U1": {
+        "severity": "P3",
+        "result": "resolved by the release runtime review (CR-20261113T063918Z-41f89b31): automatic_checkpoint_queue.cpp:264-267 at 41f89b31 settles non-retryable reasons (including quota) at once, and abandonment exists only on the retryable branch; docs/durable/CONTRACTS.md:97-101 classifies filesystem quota as capacity",
+        "disposition": "reject (answered)",
+        "rationale": "The note now matches the code; the runtime paths are unchanged at this head."
+      }
+    },
+    "closure": "One focused round on the native qualification power-check delta (fork #126) found no P0 or P1 finding. The telemetry poll error that drops the managed-C1 failure receipt (P2) and the passing receipt without an explicit empty failure list (P3) are deferred to alphastorm/ninfer#127; the gate stays fail-closed. The store-quota question was answered by the runtime council. No second round."
+  },
+  "product_tooling": {
+    "repository": "https://github.com/alphastorm/omp-ninfer",
+    "review_id": "CR-20261113T192727Z-6b22f219-product",
+    "review_sequence_id": "omp-ninfer-v0.19.0-product",
+    "review_class": "full-council",
+    "status": "closed-by-disposition",
+    "reviewed_commit": "6b22f219c7298db4b8fa5c2bc7bb33eb7a37799f",
+    "base_commit": "248953aa5764eaa3dbae6280a53a66a7a4f87c53",
+    "subject_digest": "0526af0e1b605b469e6d9b0e4b49a5f75c2bf589bd52905f6736f563524c20af",
+    "resolver_subject_digest": "9f1d39b09601b92f70d5b8d2cfe48f98f85b2437dd27b906e8f98b81f4a4ccec",
+    "resolver_assignments": [
+      {
+        "reviewer_id": "daybreak-blue",
+        "selectionClass": "strong",
+        "role": "strong_critic",
+        "independence_class": "cross_family",
+        "authority": "independent_evidence",
+        "model": "openai-codex/gpt-6-sol:max",
+        "model_family": "gpt"
+      },
+      {
+        "reviewer_id": "gemini-carbon",
+        "selectionClass": "strong",
+        "role": "strong_critic",
+        "independence_class": "cross_family",
+        "authority": "independent_evidence",
+        "model": "google-antigravity/gemini-4-carbon:medium",
+        "model_family": "gemini"
+      },
+      {
+        "reviewer_id": "gpt-astra",
+        "selectionClass": "supplement",
+        "role": "supplement",
+        "independence_class": "cross_family",
+        "authority": "supplemental_evidence",
+        "model": "openai-codex/gpt-6-astra:max",
+        "model_family": "gpt"
+      },
+      {
+        "reviewer_id": "claude-mythos",
+        "selectionClass": "supplement",
+        "role": "lead_family_security",
+        "independence_class": "same_lineage_blind_sample",
+        "authority": "supplemental_evidence",
+        "model": "anthropic/claude-mythos-5-2:max",
+        "model_family": "claude"
+      }
+    ],
+    "receipt_digests": {
+      "close-report.md": "9b734b5f942c499b12543f288e19b24d4fec45c83ccddee83acfaa4b998c0ccb",
+      "ledger.md": "b3bc632acd403365ea68fd9c0abc6af6a6a4eb01817ff3cdd9b91fec58ba2e0e",
+      "review-record.json": "dbd0ae1c9d160438e93040922d250ca95d9063a7b1e844eaafe042b3eaa13c11",
+      "frozen-subject.json": "a257f15c7bb95ea23b0001de8bd1a47442e7dd038ab30c3e01009a1a7707910a",
+      "resolver-receipt.json": "6f4c95528819ac48712305a718a84960b1f1c9ca76165827c29b3e2a013a459b",
+      "panel-selection.json": "f640e8d5b7e3f96e47c01b4e4ec09b55bafe093f975416cf157a317513f5b024",
+      "daybreak-blue.json": "a561e88065cc0c0cb16cabc786c1061393fe184f3be2f97e3ffa372331123fb1",
+      "gemini-carbon.json": "6c564177645a7fd19491c086fba7a64dc1383b17081d2df7d7c932aed17b79b7",
+      "gpt-astra.json": "6216a309e750145c869504f731032f2f581f63ee7eeac520f90842d01440c728",
+      "claude-mythos.json": "b0bba84547268ea77547ccc4211a60d3f0fab1c8955cbd111ee2b3a6be5d0cf6",
+      "review-dispatch-envelope.attempt-1.json": "2e1f2de4c8cd30b13b15f027f501cdd7ba335be749e74a17996341b5d43f76da"
+    },
+    "reviewer_results": {
+      "daybreak-blue": {
+        "summary": "Read-only review of the frozen v0.19.0 candidate found four release-path weaknesses: private evidence can enter public receipts, RTX 5090 runtime pins can drift from the reviewed candidate, an interrupted hold acquisition can strand the production hold, and a disk-full composition can corrupt the local release authority. Live acceptance and publication remain separate gates; none was performed here.",
+        "evidence": [
+          "R1|P1|conf=0.96|claim=The public composer copies private evidence fields without applying its projection allowlist|evidence=scripts/compose_route_acceptance.py:835-849 spreads the entire restoration record into a public receipt; scripts/compose_route_acceptance.py:961-976 copies raw route receipts byte for byte; scripts/verify_release.py:72-82,3240-3293 scans only fixed private markers|impact=The public-privacy invariant fails if an otherwise valid capture contains an unrecognized private path or credential value; hash binding and the marker scan preserve rather than remove the disclosure|verify=Compose a passed synthetic capture with a benign unrecognized canary in an extra restoration or route field and inspect the staged public receipt and verifier result",
+          "R2|P1|conf=0.86|claim=Ready verification does not bind the RTX 5090 runtime identity to the frozen product candidate|evidence=scripts/verify_release.py:1615-1663 compares the candidate manifest only for native variants and two OMP fields; scripts/compose_route_acceptance.py:173-191 binds route receipts to the candidate clone while scripts/compose_route_acceptance.py:209-235 checks live RTX 5090 identity against the mutable current manifest|impact=A coherent post-freeze runtime re-pin can combine candidate-bound route execution with later live runtime evidence under the old review identity; current hashes and ready checks establish internal consistency but not reviewed-runtime provenance|verify=In a scratch release, coherently re-pin the current RTX 5090 runtime and its current receipts without changing the frozen candidate, retain its route receipt, and check whether ready verification rejects the mismatch",
+          "R3|P2|conf=0.93|claim=An interrupted hold creation can leave a marker that same-owner recovery classifies as foreign|evidence=scripts/hosts/accept-windows-client.ps1:94-121 writes hold_created=false before creating the marker and only saves true afterward; scripts/hosts/accept-windows-client.ps1:35-43,85-91 requires true to recognize ownership; scripts/hosts/accept-rtx5090-routes.py:107-120 accepts a lost acknowledgement only when status is owned|impact=The exclusive production hold can remain asserted after a partial marker write or interruption, while the same-owner reconciliation refuses cleanup and the window driver cannot enter its held restoration path|verify=Interrupt marker creation before the true ownership-record swap, then invoke HoldStatus and same-owner Release and inspect marker and baseline restoration",
+          "R4|P2|conf=0.88|claim=Composition overwrites existing release authorities in place after preflight without an atomic publication or rollback boundary|evidence=scripts/compose_route_acceptance.py:999-1005 stages both release and root compatibility authorities; scripts/compose_route_acceptance.py:1092-1103 iterates pending writes with path.write_bytes, which truncates an existing target before a partial write can fail|impact=Under the scoped full-disk or interrupted-write condition, the root authority or manifest can become unreadable; ready verification fails closed but cannot preserve the last complete local authority or resume composition without repair|verify=Inject a write failure during the pending root-authority or manifest write in a scratch clone and compare original bytes, parseability, and subsequent composition behavior"
+        ],
+        "unresolved": [
+          "U1|P2|conf=0.57|question=Can a nonzero managed Stop with quiescent processes be missed when earlier complete shutdown evidence is retained?|missing=scripts/hosts/accept-rtx4090-route.ps1:263-274 does not inspect the controller exit status, while lines 301-325 retain earlier log destinations; the bound paths do not include the installed controller's failure behavior for this state|verify=Fault-inject the controller Stop result after a prior complete capture and require the native window to fail despite successful baseline restoration"
+        ]
+      },
+      "gemini-carbon": {
+        "summary": "Audited candidate 6b22f219c7298db4b8fa5c2bc7bb33eb7a37799f across the bound v0.18.0-to-v0.19.0 cohort (standing: claude lead, strong_critic, cross_family, independent_evidence). Three P1 defects, two P2 gaps, and one P3 anchor defect were verified:\n\n1. Stale native runtime_contracts identity (R1, P1): root and v0.19.0 compatibility.json and rendered COMPATIBILITY.md still list \"RTX 3090 native Windows v0.8.0-beta.3\" in runtime_contracts while manifest.json binds v0.8.0-qwen38-3090-beta.4. Neither bind_native_variant.py, rebind_release.py, nor compose_route_acceptance.py updates runtime_contracts, and verify_release.py checks validate_exact_lane_set only in ready mode\u2014leaving --require-installable green now but failing ready verification after live route composition.\n2. Stranded Windows production hold on begin baseline failure (R2, P1): accept-rtx5090-routes.py acquires the Windows lane-container-paused hold before host('begin'), and when begin fails inside baseline() before writing baseline.json, accept-rtx5090-host.py restore() re-runs the failing baseline() check ahead of ps('Release'), aborting before releasing the Windows hold.\n3. Non-idempotent native Restore rerun after #170 write failures (R3, P1): when Copy-Item and restoration.json writes fail on a full disk during Restore Run 1 after Move-Item has already restored the pre-window baseline release, preparation.json stays 'prepared'; Run 2 (invoked by accept-rtx4090-route.py's finally leg or operator rerun) executes Control Stop and SaveServerLogs against the restored baseline installation instead of qualified-artifacts, overwriting missing window logs with clean baseline logs.\n4. Secondary gaps: verify_release.py lacks ready-mode status/completeness/dropped-absence/bindings checks for receipt-audit.json (R4, P2); start-ninfer.sh misses ancestor symlinks in --checkpoint-dir (R5, P2); README.md#omp-18187-client links miss QUICKSTART.md's anchor (R6, P3).",
+        "evidence": [
+          "R1|P1|conf=0.98|claim=Observation: compatibility.json and releases/v0.19.0/compatibility.json retain \"RTX 3090 native Windows v0.8.0-beta.3\" in runtime_contracts[2] while releases/v0.19.0/manifest.json binds v0.8.0-qwen38-3090-beta.4, and neither bind_native_variant.py, rebind_release.py, nor compose_route_acceptance.py updates runtime_contracts. Inference: candidate 6b22f219 violates PT019-NATIVE-IDENTITY-RULE public-mirror agreement now and will fail verify_release.py --require-ready after live route composition.|evidence=releases/v0.19.0/manifest.json:64-70 pins release_tag v0.8.0-qwen38-3090-beta.4, whereas compatibility.json:314-320, releases/v0.19.0/compatibility.json:314-320, docs/COMPATIBILITY.md:39, and releases/v0.19.0/COMPATIBILITY.md:39 publish \"RTX 3090 native Windows v0.8.0-beta.3\" (marked kept in releases/v0.19.0/qualification/receipt-audit.json:5610-5616); scripts/bind_native_variant.py:295-315 and scripts/rebind_release.py:113-135 sync runtime_variants only, and scripts/verify_release.py:1775-1790,3954-3975 runs validate_exact_lane_set only in ready mode, leaving --require-installable green.|impact=Protected asset/invariant: PT019-NATIVE-IDENTITY-RULE per-lane manifest/compatibility identity agreement and PT019-RECEIPT-ADMISSION ready-gate composability; after declared candidate-installability controls pass and five live routes run, compose_route_acceptance.py:925-933 flips manifest.status to ready without updating runtime_contracts, causing verify_release.py and rebind_release.py --stage manifest to fail.|verify=Run validate_exact_lane_set from scripts/verify_release.py:1747-1790 against releases/v0.19.0/{manifest,compatibility,qualification}.json and observe the runtime_contracts lane mismatch error.",
+          "R2|P1|conf=0.94|claim=Observation: accept-rtx5090-host.py restore() executes baseline() assertions before ps('Release') when baseline.json is absent, while accept-rtx5090-routes.py acquires the Windows production hold before host('begin'). Inference: any baseline() precondition refusal during begin aborts the finally-block restore() at the same assertion before releasing the Windows hold.|evidence=scripts/hosts/accept-rtx5090-routes.py:317-327,372-409 acquires C:\\ProgramData\\OMP\\windows-hosts\\state\\lane-container-paused (held=True) before calling host('begin', 300); scripts/hosts/accept-rtx5090-host.py:169-185,309-316 runs baseline() (checking production container, port 18088, clean ~/omp-ninfer git status, and absent omp-ninfer-beta) before writing baseline.json; on failure, host('restore') enters scripts/hosts/accept-rtx5090-host.py:208-211 and calls baseline() on line 209 ahead of ps('Release') on line 210.|impact=Protected asset/invariant: PT019-ACCEPTANCE-SAFETY and rollback_contract exclusive production hold custody; even though accept-windows-client.ps1:96-98 Release independently checks Windows port-18088 health, a dirty WSL ~/omp-ninfer checkout or pre-existing beta container fails both begin and restore at line 209, stranding lane-container-paused on the Windows host.|verify=In tests/test_stock_client_harness.py HostDirectoryRestorationTests, inject non-empty git status --porcelain during begin after Windows hold acquisition, invoke action('restore'), and observe AssertionError raised before powershell.exe -Action Release runs.",
+          "R3|P1|conf=0.92|claim=Observation: in accept-rtx4090-route.ps1 Restore (#170), when restoration.json or preparation.json fails BestEffortWrite after Move-Item has already restored the preserved baseline installation, preparation.json stays at status='prepared' so a rerun re-enters full Restore. Inference: the subsequent independent SSH Restore leg (or operator rerun) executes Control Stop and SaveServerLogs against the restored pre-window baseline installation rather than the window's candidate artifacts.|evidence=scripts/hosts/accept-rtx4090-route.ps1:327-355 moves the window's $StateRoot\\releases\\$instance to $Workspace\\qualified-artifacts\\releases and restores $Workspace\\preserved\\releases to $StateRoot\\releases\\$instance before BestEffortWrite of restoration.json and preparation.json; if those writes fail (e.g. full disk) alongside SaveServerLogs Copy-Item failures (lines 266-288), status stays 'prepared', and the next Restore call (scripts/hosts/accept-rtx4090-route.py:490) re-runs lines 314-319 against the restored baseline state.json\u2014running Control Stop on the baseline release (excluded from SupportFiles at lines 155-160) and copying baseline logs into $Workspace; tests/test_accept_rtx4090_route.py:926-997 never invokes a second Restore.|impact=Protected asset/invariant: PT019-ACCEPTANCE-SAFETY server-health failure accounting and baseline installation custody; after Run 1 log-copy and receipt-write failures under disk exhaustion, Run 2 copies clean pre-window baseline logs from $StateRoot\\releases\\$instance\\logs instead of the failed window's logs in qualified-artifacts\\releases\\logs, which can mask window HTTP 503s, checkpoint write errors, or incomplete shutdown.json.|verify=Extend ServerHealthTests in tests/test_accept_rtx4090_route.py:926-997 with failing 503/incomplete-Stop candidate logs and clean preserved-baseline logs, fail Copy-Item and restoration.json on Restore call 1, re-enable writes on Restore call 2, and observe $Workspace/shutdown.json and server-requests.jsonl populated from the preserved baseline.",
+          "R4|P2|conf=0.95|claim=Observation: verify_release.py validate_receipt_audit allows qualification/receipt-audit.json to be absent, retain status='lane-stage', omit newly composed acceptance/* and review/* files, mark existing acceptance/* files as 'dropped', and carry stale bindings hashes in --require-ready mode. Inference: automated composition and final pin gates cannot detect an unreconciled or missing receipt-audit.json before publication.|evidence=releases/v0.19.0/qualification/receipt-audit.json:5,25-72,1885-1890 currently has status 'lane-stage', marks acceptance/* as 'dropped', and hashes '/status' as 'draft'; scripts/compose_route_acceptance.py:988-1055 clears manifest/qualification blockers without updating receipt-audit.json, while scripts/verify_release.py:380-430,840-885 returns early if the file is missing, excludes receipt-audit.json from validate_ready_state_consistency, skips 'dropped' rows without checking not target.exists(), checks no release-tree file completeness, and ignores audit['bindings'].|impact=Protected asset/invariant: PT019-RECEIPT-ADMISSION carry/replace/drop audit integrity; if manual reconciliation noted in releases/v0.19.0/manifest.json:233 is missed or incomplete, compose_route_acceptance.py, rebind_release.py --stage manifest, verify_release.py --require-ready --check-pins, and tag CI all pass with stale 'lane-stage' or absent audit metadata.|verify=Run scripts/verify_release.py --require-ready against a ready-composed fixture while keeping releases/v0.19.0/qualification/receipt-audit.json unchanged at status='lane-stage' (with acceptance/* present on disk but listed as 'dropped') and observe exit 0.",
+          "R5|P2|conf=0.93|claim=Observation: examples/manual-tunnel/start-ninfer.sh (#168) checks -L only on the leaf --checkpoint-dir path, runs mkdir -p before realpath, and canonicalizes both CHECKPOINT_DIR and REQUESTED_CHECKPOINT_PARENT with realpath. Inference: a checkpoint path traversing an ancestor symlink is not refused before or after mkdir/chmod, contradicting the full symlink guard stated in PT019-LAUNCHER-STORE-AND-PINS.|evidence=examples/manual-tunnel/start-ninfer.sh:81-94 tests -L \"$CHECKPOINT_DIR\" on the leaf only, lines 105-107 execute mkdir -p -- \"$directory\", and lines 108-118 compare realpath(\"$CHECKPOINT_DIR\") against realpath(dirname(\"$REQUESTED_CHECKPOINT_DIR\"))/basename, where any symlink in an ancestor directory resolves identically on both sides and passes before chmod 700 (lines 126-128).|impact=Protected asset/invariant: PT019-LAUNCHER-STORE-AND-PINS checkpoint store symlink containment prior to filesystem mutation; while leaf symlinks (including trailing slashes) are refused, an ancestor symlink (or a pre-mkdir leaf swap to a nonexistent subdirectory under another store) allows mkdir -p and chmod 700 across the symlink boundary.|verify=In tests/test_manual_tunnel_scripts.py, pass --checkpoint-dir \"$root/parent-link/checkpoints-v019\" where parent-link symlinks to \"$root/real-parent\", and observe start-ninfer.sh create, chmod 700, and mount \"$root/real-parent/checkpoints-v019\" without refusal.",
+          "R6|P3|conf=0.90|claim=Observation: README.md (#162) links twice to docs/QUICKSTART.md#omp-18187-client, whereas docs/QUICKSTART.md retains <a id=\"omp-18186-client\"></a> above ## OMP 18.20.0 client, and verify_release.py validate_markdown_links strips URL fragments without checking anchors. Inference: both client-install links in README.md point to a non-existent fragment on the candidate branch, and CI cannot catch heading-bump anchor drift across releases.|evidence=README.md:140,150 target docs/QUICKSTART.md#omp-18187-client; docs/QUICKSTART.md:93-95 defines only id=\"omp-18186-client\" and heading \"## OMP 18.20.0 client\" (#omp-18200-client); scripts/verify_release.py:2931-2949 splits off '#...' at line 2939 and verifies file existence only.|impact=Protected asset/invariant: PT019-CLIENT-PUBLIC-TRUTH and PT019-GUIDE-RECOVERY reader navigation accuracy after publication flips and guide client bumps; readers following README Get-started or Upgrade links land at the top of QUICKSTART.md instead of the pinned stock client section.|verify=Inspect README.md:140,150 against docs/QUICKSTART.md:93-95 and check that no id=\"omp-18187-client\" or matching heading slug exists in docs/QUICKSTART.md."
+        ],
+        "unresolved": [
+          "U1|P2|conf=0.70|question=Does [IO.File]::Replace($temp, $path, [NullString]::Value) in SaveJson, Save-Json, and Finish (#174), particularly on \"$StateRoot\\state.json\" (accept-rtx4090-route.ps1:586), preserve exact DACLs and succeed without sharing/attribute errors under Windows PowerShell 5.1 (powershell.exe) and the external Protect-StateRoot.ps1 / Control-Release.ps1 ACL descriptors?|missing=Sources of external alphastorm/ninfer scripts Protect-StateRoot.ps1 and Control-Release.ps1 and host helper windows-host-common.ps1 (outside the 108 bound repository paths), plus powershell.exe 5.1 test execution (.github/workflows/ci.yml:47-88 and tests/test_accept_rtx4090_route.py:1199 execute pwsh 7 only).|verify=Run AtomicRecordWriteTests and native DryRun/Preflight under C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe against a real Protect-StateRoot.ps1 ACL-protected directory before opening a live native acceptance window."
+        ]
+      },
+      "gpt-astra": {
+        "summary": "Read-only review of 6b22f219c7298db4b8fa5c2bc7bb33eb7a37799f. Standing: lead_family=claude, selectionClass=supplement, role=supplement, independence_class=cross_family, authority=supplemental_evidence. Found three P1 weaknesses and one P2 recovery defect. Findings are source-derived; no commands or tests were run.",
+        "evidence": [
+          "R1|P1|conf=0.97|claim=Lifecycle TOCTOU: the window-open guard releases its lock before host mutation; [INFERENCE] an in-flight launcher can recreate the candidate after watchdog restoration|evidence=scripts/hosts/accept-rtx5090-host.py:208-220 checks under restore_lock but returns before mutation and treats an existing restoration.json as terminal; :377-388 runs the documented route or launcher outside that lock|impact=PT019-ACCEPTANCE-SAFETY: candidate serving can resume against restored directories after the owner hold is released; subsequent restoration calls return without removing it|verify=Pause setup after its guard but before container creation, complete watchdog restoration, then resume setup; assert no candidate container or canonical-directory mutation survives and repeated restore reconciles actual state.",
+          "R2|P1|conf=0.99|claim=Recovery depends on evidence storage: production restoration opens its log before executing recovery; [INFERENCE] ENOSPC at that boundary prevents restoring the stopped incumbent|evidence=scripts/hosts/accept-rtx5090-host.py:155-158 opens the log before subprocess.run; :226-237 calls this helper for production-restore.log when production is stopped; directory, key and hold restoration follows at :250-287|impact=PT019-ACCEPTANCE-SAFETY: a disk exhausted during acceptance leaves production stopped and custody displaced; the watchdog uses the same failing path, so the initial free-space floor does not contain the outage|verify=After a simulated successful begin, inject ENOSPC when opening production-restore.log; verify the production restore command and subsequent custody restoration still execute, with evidence-write failure reported separately.",
+          "R3|P1|conf=0.99|claim=Public projection bypass: route receipts accept unknown fields and are copied verbatim; [INFERENCE] incidental private capture fields can enter published evidence|evidence=scripts/compose_route_acceptance.py:180-202 validates selected route fields without rejecting extras; :798-809 stages the original raw bytes and :1099-1102 writes them. scripts/verify_release.py:72-83,3240-3293 applies a fixed private-marker scan rather than a complete receipt allowlist|impact=PT019-CLIENT-PUBLIC-TRUTH: hashes and candidate checks authenticate the augmented receipt but do not remove private identifiers or credential-shaped values outside the marker list; publication makes that disclosure difficult to reverse|verify=Add a benign private_debug sentinel containing a synthetic GPU identifier to an otherwise valid unwaived route receipt; composition must reject it before any write rather than retain it in docs/measurements.",
+          "R4|P2|conf=0.98|claim=Interrupted ownership handoff: the hold marker is created before hold_created=true is persisted; [INFERENCE] interruption between these effects makes the same owner's hold unrecoverable through Hold or Release|evidence=scripts/hosts/accept-windows-client.ps1:99-107 persists hold_created=false, creates the token-bearing marker, then rewrites the receipt; :35-42 requires persisted hold_created=true even when the ownership token matches; :91-94 and :121-130 refuse reconciliation and release otherwise|impact=PT019-ACCEPTANCE-SAFETY: atomic replacement preserves a readable but stale ownership record, leaving the lane paused until manual intervention despite exact same-owner identity|verify=Terminate the hold process after marker creation but before the receipt replacement; invoke HoldStatus, Hold and Release with identical workspace/release/candidate and verify same-owner recovery while foreign tokens remain refused."
+        ],
+        "unresolved": []
+      },
+      "claude-mythos": {
+        "summary": "Supplemental same-lineage security review (authority=supplemental_evidence) of frozen subject 6b22f219, bound paths only, read-only; nothing executed. Two P2 root causes: R1, the compatibility authority still labels the RTX 3090 runtime-contract lane as predecessor beta.3 although the lane binds beta.4, and only the ready-only verifier checks it; R2, the RTX 5090 route driver takes the Windows production hold before learning the WSL workspace is already used, then the host restore no-ops, so the hold stays while the driver says restoration completed. Two P3 items: an unverifiable hold state reported as not acquired, and guide fallback claims without v0.19.0-bound proof. By inspection the launcher store guard, atomic record writers, Retire deletion boundary, same-profile identity admission and carried RTX 4090 bindings match their invariants; pattern scans of bound public files found no private host, path, GPU UUID or credential markers. Unresolved: shutdown-report launch binding, native host lineage versus the retained-predecessor claim, one threat-model omission, predecessor-byte equality.",
+        "evidence": [
+          "R1|P2|conf=0.90|claim=Observed: the frozen candidate's compatibility authority labels the RTX 3090 runtime-contract lane as the predecessor component v0.8.0-beta.3 while the same authority and the manifest bind v0.8.0-qwen38-3090-beta.4. Inferred: no stage, bind or rebind tool derives this label and only the ready-only verifier checks it, so the candidate cannot reach ready without a post-review authority edit.|evidence=compatibility.json:413 and releases/v0.19.0/compatibility.json:413 say lane RTX 3090 native Windows v0.8.0-beta.3 (rendered at docs/COMPATIBILITY.md:40 and releases/v0.19.0/COMPATIBILITY.md:40) while compatibility.json:323 binds release_tag v0.8.0-qwen38-3090-beta.4; scripts/verify_release.py:1776-1790 expects RTX 3090 native Windows v0.8.0-beta.4 but is called only at :3973 inside the ready branch :3953; scripts/stage_release.py:603-604 only copies prepared runtime_contracts and neither rebind_release.py nor bind_native_variant.py touches them; releases/v0.19.0/qualification/receipt-audit.json:5610-5614 records /runtime_contracts/2/lane as kept while /runtime_contracts/0/lane was replaced.|impact=PT019-NATIVE-IDENTITY-RULE and PT019-CLIENT-PUBLIC-TRUTH require per-lane public mirrors to agree: the candidate publicly attributes the RTX 3090 protocol boundary to the wrong component, candidate CI stays green, and the declared ready gate rejects it only after acceptance windows and pin commits, forcing an unreviewed root-authority edit, chain rebind and audit correction.|verify=Run python3 scripts/verify_release.py --release v0.19.0 --require-ready --json at the candidate and look for compatibility.runtime_contracts lanes must name exactly the manifest runtime components, or compare the three lane labels with the manifest release tags.",
+          "R2|P2|conf=0.80|claim=Observed: the RTX 5090 route driver acquires the Windows production hold before any check that the WSL workspace is unused, and the host restore action returns success without releasing a hold when that workspace already holds restoration.json. Inferred: a corrected attempt or Windows-only completion that reuses the earlier attempt's WSL workspace leaves its new hold in place while reporting that restoration completed.|evidence=scripts/hosts/accept-rtx5090-routes.py:420-426 and :467-490 run only host space before acquire_windows_hold and host begin, after writing the attempt marker (:421, :481); scripts/hosts/accept-rtx5090-host.py:342-346 makes begin refuse an already used workspace before the baseline (:350) or watchdog (:354) exists; restore at :215-220 returns success when restoration.json exists and never reaches Release (:223, :285); the driver then sets restored and appends restoration completed or completion restored (:436-442, :531-541). When begin instead refuses on a persistent baseline assertion (:172-175), restore re-asserts at :222 before Release, so the hold is also retained.|impact=PT019-ACCEPTANCE-SAFETY says the RTX 5090 driver claims restoration only when it ran and protects hold custody: the production lane hold stays set with no watchdog, the single corrected or completion attempt is spent, the driver's own restore action also no-ops, and same-owner HoldStatus reconciliation is never consulted.|verify=In a scratch WSL workspace containing baseline.json and restoration.json run the host driver with --action begin then --action restore against a stubbed Windows PowerShell and confirm restore exits 0 with no Release call; then drive accept-rtx5090-routes.py --action window --attempt corrected with stubbed ssh and confirm the message says restoration completed.",
+          "R3|P3|conf=0.60|claim=Observed: acquire_windows_hold treats a failed HoldStatus probe as proof that the hold was not acquired. Inferred: when SSH fails for both calls, or Hold times out locally and completes later, an own hold can exist while the driver skips restoration and states the hold was not acquired.|evidence=scripts/hosts/accept-rtx5090-routes.py:110-120 sets owned False on any HoldStatus exception and re-raises; :436-442 and :531-541 then skip host restore and append did not restore or did not run because the window hold was not acquired; scripts/hosts/accept-windows-client.ps1:104-106 creates the hold before recording hold_created true, so a status read in that gap reports foreign.|impact=PT019-ACCEPTANCE-SAFETY hold custody: a lost acknowledgement that cannot be reconciled is reported as a negative rather than unknown, so a production lane hold can stay set after a window that claims it never held it; recovery needs a manual restore action.|verify=Stub win so Hold raises after creating the hold file and HoldStatus raises; confirm the driver exits without host restore and with the not acquired message, then confirm a later HoldStatus returns owned.",
+          "R4|P3|conf=0.55|claim=Observed: the v0.19.0 guide asserts native fallback and recovery hops that no v0.19.0-bound evidence covers. Inferred: the carried RTX 4090 rollback claim rests on a predecessor proof the release's own audit disclaims, and the RTX 3090 beta.2 recovery now names an unexercised beta.2 to beta.4 hop.|evidence=docs/QUICKSTART.md:745-748 states exact rollback from the carried RTX 4090 beta.3 to retained beta.2 and :688-689 tells a beta.2 incumbent to run the current RTX 3090 beta.4 installer; releases/v0.19.0/qualification/receipt-audit.json:236-240 drops qualification/rtx4090-upgrade.json as not a current successor result; releases/v0.19.0/qualification.json has no RTX 4090 upgrade gate and :180-182 scopes rtx3090_upgrade to beta.4 against beta.3 only; releases/v0.19.0/qualification/rtx4090.json:337-342 and rtx3090.json:346-351 record rollback not_applicable with zero directions.|impact=PT019-GUIDE-RECOVERY and the rollback contract protect predecessor rollback custody: operators are told two recovery paths are exact while the release binds proof for neither, and a beta.2 to beta.4 upgrader's retained release is beta.2, not the beta.3 the fallback sentence names.|verify=Inspect whether any v0.19.0 qualification gate hash-binds an RTX 4090 beta.3 to beta.2 rollback proof or an RTX 3090 beta.2 to beta.4 upgrade proof; absent both, exercise the two hops on a scratch state root."
+        ],
+        "unresolved": [
+          "U1|P2|conf=0.35|question=Does the native server-health reducer bind shutdown.json to the window's final launch, or can a stale complete report from the documented operate or acceptance Stop satisfy shutdown_complete_without_refusals after a crashed or timeout-killed final Stop?|missing=the Control-Release.ps1 and server shutdown-report contract, which is outside the bound subject: whether shutdown.json is removed at Start or carries a launch identity, and whether Stop throws when no fresh report is written. scripts/hosts/accept-rtx4090-route.py:130-146 keeps only complete, saved, refused and skipped; accept-rtx4090-route.ps1:263-274 ignores the controller exit status and :301-326 copies whatever shutdown.json exists; docs/QUICKSTART.md:736-739 says reports are tied to a launch and may be missing after a killed shutdown.|verify=On a scratch lane run Stop, Start, kill ninfer-serve.exe, then the outage capture and the server-health reducer; a passed status proves the gap.",
+          "U2|P2|conf=0.40|question=Do the real RTX 3090 and RTX 4090 hosts satisfy the single-release baseline that the candidate tooling forces while still holding the retained beta.3 and beta.2 installations the packet names for rollback?|missing=a host lineage census (state.json active, previous and release count, and where the retained predecessor installation lives). scripts/hosts/accept-rtx4090-route.ps1:153-157 admits FirstRelease only with exactly one release and no predecessor; accept-rtx4090-route.py:273-278 and scripts/compose_route_acceptance.py:168-177 reject any other preparation because both lane receipts record first-lineage rollback (releases/v0.19.0/qualification/rtx3090.json:346-351, rtx4090.json:337-342); an upgrade-mode window passes AssertBaseline (:158-160) and is refused only after it is spent.|verify=Run DryRun with -FirstRelease on each lane, record the state.json pointers, and confirm the documented action that returns each host to its retained predecessor.",
+          "U3|P3|conf=0.35|question=threat model omits a same-account medium-integrity process on a native acceptance host that swaps the hash-verified installer before its elevated execution; should it be in scope given the guide defends its own stage directory against exactly that?|missing=whether the -Workspace passed to scripts/hosts/accept-native-public-install.ps1 is always an administrators-only directory: the script creates it without ACL protection (:85), downloads and hashes Install-Release.ps1 there (:107-109) and later executes it against the real state root (:140-143), unlike accept-rtx4090-route.ps1:565 and docs/QUICKSTART.md:285-287.|verify=Inspect the runbook workspace path and its ACL, or show that a non-elevated writer cannot replace the installer between the hash check and line 143.",
+          "U4|P3|conf=0.30|question=Are all published predecessor release-tree bytes outside releases/v0.19.0 identical to the v0.18.0 tag, as PT019-COHORT requires?|missing=the no-renames tag-to-candidate diff or the tag blobs; this read-only review could inspect only candidate bytes and ran no Git comparison.|verify=git diff --no-renames --stat 248953aa..6b22f219 over releases with releases/v0.19.0 excluded must be empty."
+        ]
+      }
+    },
+    "dispositions": {
+      "daybreak-blue-R1": {
+        "severity": "P1",
+        "result": "confirmed",
+        "disposition": "mitigate",
+        "change": "Lead audit of every composed public acceptance/review file for private patterns (home paths, users, hosts, addresses, UUIDs, credential shapes) before the pins; allowlist projection in omp-ninfer#176 item 1",
+        "rationale": "Source confirms the composer copies restoration and raw route receipts and the verifier scans fixed markers. Lead re-rating P1\u2192P2 for v0.19.0: the actual composed bytes are audited before publication, so the residual is the class gap, tracked."
+      },
+      "daybreak-blue-R2": {
+        "severity": "P1",
+        "result": "confirmed",
+        "disposition": "mitigate",
+        "change": "Lead verifies the final manifest's RTX 5090 runtime identity equals the candidate's before publication; verifier binding in omp-ninfer#176 item 2",
+        "rationale": "verify_release.py compares the candidate manifest only for natives and two client fields. v0.19.0 makes no runtime re-pin after the candidate, and the equality check closes it for this release; re-rated P2."
+      },
+      "gemini-carbon-R1": {
+        "severity": "P1",
+        "result": "confirmed",
+        "disposition": "mitigate",
+        "change": "Finalization sets compatibility.runtime_contracts[2].lane to 'RTX 3090 native Windows v0.8.0-beta.4' in both compatibility authorities; rebind re-renders COMPATIBILITY.md; derivation in omp-ninfer#176 item 3",
+        "rationale": "compatibility.json:413 still names beta.3 while the manifest binds beta.4; verify_release.py:1776-1790 requires the exact manifest-derived set, so the ready gate refuses until fixed. Metadata only, no route-executed bytes; re-rated P2. Same defect needed a manual fix last release, so derivation is tracked."
+      },
+      "gemini-carbon-R2": {
+        "severity": "P1",
+        "result": "confirmed",
+        "disposition": "defer",
+        "change": "none (omp-ninfer#176 item 6)",
+        "rationale": "Source confirms restore() calls baseline() before releasing the Windows hold when baseline.json is absent. Failure path of a future window; the v0.19.0 window passed, released its hold and revoked its key. Re-rated P2."
+      },
+      "gemini-carbon-R3": {
+        "severity": "P1",
+        "result": "confirmed",
+        "disposition": "defer",
+        "change": "none (omp-ninfer#176 item 11)",
+        "rationale": "Requires a best-effort write failure after the baseline move plus a rerun. Both v0.19.0 native windows wrote every receipt and restored with identical baselines. Re-rated P2."
+      },
+      "gpt-astra-R1": {
+        "severity": "P1",
+        "result": "confirmed",
+        "disposition": "defer",
+        "change": "none (omp-ninfer#176 item 7)",
+        "rationale": "Narrow interleaving: a watchdog restoration during setup followed by a resumed launcher. The v0.19.0 window finished in 7.5 min against a 50-min watchdog and restored. Future-window robustness; re-rated P2."
+      },
+      "gpt-astra-R2": {
+        "severity": "P1",
+        "result": "confirmed",
+        "disposition": "defer",
+        "change": "none (omp-ninfer#176 item 8)",
+        "rationale": "Log open precedes recovery. The pre-window free-space floor (#163) applies; the v0.19.0 window restored with health 200. Future-window robustness; re-rated P2."
+      },
+      "gpt-astra-R3": {
+        "severity": "P1",
+        "result": "confirmed",
+        "disposition": "mitigate",
+        "change": "Merged with daybreak-blue-R1: pre-pin public-file audit; class fix omp-ninfer#176 item 1",
+        "rationale": "Same root cause as daybreak-blue-R1 (independent cross-family agreement). Re-rated P2 for this release under the pre-publication audit."
+      },
+      "claude-mythos-R1": {
+        "severity": "P2",
+        "result": "confirmed",
+        "disposition": "mitigate",
+        "change": "Merged with gemini-carbon-R1 (finalization label fix)",
+        "rationale": "Same defect; mythos rated P2 with the same rationale."
+      },
+      "claude-mythos-R2": {
+        "severity": "P2",
+        "result": "confirmed",
+        "disposition": "defer",
+        "change": "none (omp-ninfer#176 item 10)",
+        "rationale": "Affects corrected attempts that reuse a workspace; v0.19.0 used one initial attempt."
+      },
+      "claude-mythos-U1": {
+        "severity": "P2",
+        "result": "unresolved",
+        "disposition": "defer",
+        "change": "Merged with daybreak-blue-U1 (omp-ninfer#176 item 13)",
+        "rationale": "Same question."
+      },
+      "claude-mythos-U2": {
+        "severity": "P2",
+        "result": "falsified",
+        "disposition": "reject",
+        "change": "none",
+        "rationale": "Empirically resolved: both native windows admitted single-release --first-release baselines and passed; the preserved predecessor lineages live outside the state root (promotion receipt preserved_lineage)."
+      },
+      "daybreak-blue-R3": {
+        "severity": "P2",
+        "result": "confirmed",
+        "disposition": "defer",
+        "change": "none (omp-ninfer#176 item 9)",
+        "rationale": "Hold-custody gap on an interrupted handoff; no effect on the completed v0.19.0 window."
+      },
+      "daybreak-blue-R4": {
+        "severity": "P2",
+        "result": "confirmed",
+        "disposition": "defer",
+        "change": "none (omp-ninfer#176 item 12)",
+        "rationale": "Local, recoverable from git; same atomic-write class as #174/#175."
+      },
+      "daybreak-blue-U1": {
+        "severity": "P2",
+        "result": "unresolved",
+        "disposition": "defer",
+        "change": "none (omp-ninfer#176 item 13)",
+        "rationale": "shutdown.json freshness and nonzero controller Stop. Both v0.19.0 windows recorded complete Stops with refused 0; freshness binding is tracked."
+      },
+      "gemini-carbon-R4": {
+        "severity": "P2",
+        "result": "confirmed",
+        "disposition": "mitigate",
+        "change": "Finalization runs refresh-receipt-audit --phase composed-final before the manifest pin and the lead checks its status; verifier requirement in omp-ninfer#176 item 4",
+        "rationale": "validate_receipt_audit tolerates lane-stage/absent audits; the release flow reconciles explicitly."
+      },
+      "gemini-carbon-R5": {
+        "severity": "P2",
+        "result": "confirmed",
+        "disposition": "defer",
+        "change": "none (omp-ninfer#176; extends omp-ninfer#173 item 1)",
+        "rationale": "Launcher ancestor-symlink gap; accidental-only scope."
+      },
+      "gemini-carbon-U1": {
+        "severity": "P2",
+        "result": "falsified",
+        "disposition": "reject",
+        "change": "none",
+        "rationale": "Empirically resolved: both native windows ran the #174 atomic writes under Windows PowerShell 5.1 on the native host and restored with identical state hashes, pointers and baselines; a direct 5.1 check showed identical bytes and that Restore's exact-ACL step restores the SDDL."
+      },
+      "gpt-astra-R4": {
+        "severity": "P2",
+        "result": "confirmed",
+        "disposition": "defer",
+        "change": "Merged with daybreak-blue-R3 (omp-ninfer#176 item 9)",
+        "rationale": "Same root cause."
+      },
+      "claude-mythos-R3": {
+        "severity": "P3",
+        "result": "confirmed",
+        "disposition": "defer",
+        "change": "Merged with the hold-custody class (omp-ninfer#176 item 9)",
+        "rationale": "Related failure-read of HoldStatus; P3."
+      },
+      "claude-mythos-R4": {
+        "severity": "P3",
+        "result": "confirmed",
+        "disposition": "defer",
+        "change": "none (omp-ninfer#176 item 14)",
+        "rationale": "Rollback/recovery hops rest on predecessor or adjacent evidence; same installer path that the v0.19.0 upgrade scenarios exercised. P3."
+      },
+      "claude-mythos-U3": {
+        "severity": "P3",
+        "result": "design decision",
+        "disposition": "reject",
+        "change": "none",
+        "rationale": "reject: outside declared adversary (accidental-only, single trusted owner); a same-account malicious process is not in scope."
+      },
+      "claude-mythos-U4": {
+        "severity": "P3",
+        "result": "falsified",
+        "disposition": "reject",
+        "change": "none",
+        "rationale": "Verified: git diff --no-renames --stat 248953aa..6b22f219 -- releases ':!releases/v0.19.0' is empty; predecessor release trees are byte-identical."
+      },
+      "gemini-carbon-R6": {
+        "severity": "P3",
+        "result": "confirmed",
+        "disposition": "defer",
+        "change": "none (README is updated in the post-publication docs flip; anchor validation omp-ninfer#176 item 5)",
+        "rationale": "Broken fragment link in README; documentation only. P3."
+      }
+    },
+    "closure": "The release review found no remaining P0 or P1 defect after verification. A stale runtime-contract label was corrected in the finalization, and the remaining findings are tracked as follow-ups.",
+    "stage_commit": "6b22f219c7298db4b8fa5c2bc7bb33eb7a37799f"
+  }
+}

@@ -14,7 +14,7 @@ the exact combination.
 
 ## v0.19.0 — prepared bounded-pressure-save release and stock OMP 18.20.0
 
-**Candidate; acceptance and publication pending.** Re-cuts RTX 5090 beta.8 from source
+**Candidate; documented acceptance passed 2026-11-13; publication is a separate decision.** Re-cuts RTX 5090 beta.8 from source
 `41f89b310b443481db5917a01a2b45e49f85e723` and the RTX 3090 tc native beta.4 from its descendant `15c3e3959c0a6167f799e9383482ec4e03db9cad` (identical serve sources), retaining the
 published v3 model and authenticated runtime base. The RTX 4090 default native `v0.8.0-qwen38-4090-beta.3` is carried
 unchanged from v0.18.0 (no bounded pressure saves; it re-cuts with the next engine freeze). Fork #122 bounds pressure-save refusal; product acceptance
