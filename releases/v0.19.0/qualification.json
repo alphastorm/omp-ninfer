@@ -1,0 +1,144 @@
+{
+  "artifact_type": "omp_ninfer_release_qualification",
+  "schema_version": 1,
+  "release": "v0.19.0",
+  "runtime_identity": {
+    "public_model_id": "q38-ninfer",
+    "deployment_profile": "qwen38-5090-v0.13.0",
+    "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "maximum_context_tokens": 131072,
+    "kv_dtype": "bf16",
+    "maximum_concurrency": 2,
+    "speculative_backend": "dflash2",
+    "draft_tokens": 7,
+    "vision": true,
+    "preserve_thinking": true,
+    "require_origin_auth": true,
+    "repository": "https://github.com/alphastorm/ninfer",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "behavioral_source_commit": "41f89b310b443481db5917a01a2b45e49f85e723",
+    "release_source_commit": "41f89b310b443481db5917a01a2b45e49f85e723",
+    "release_source_archive_sha256": "79ca0fbab6496c7a02010dee594a3bd3ee96065b4283df254a29e6c688c73674",
+    "release_server_binary_sha256": "147da36b05c2795fb50bb0a38f9756f782f0b05ae08e4fed34a3f58b56c2eec0",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "model_artifact_bytes": 20437521664
+  },
+  "native_runtime_identity": {
+    "repository": "https://github.com/alphastorm/ninfer",
+    "source_commit": "48c8ac4644322f024b5c3bd5b657af5874567251",
+    "upstream_commit": "64d10fbf9f8e6bfc79ab0570b94674c5b9997929",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+  },
+  "composition": {
+    "behavioral_qualification": {
+      "status": "passed",
+      "repository_path": "releases/v0.19.0/qualification/rtx5090.json",
+      "sha256": "4873087eded50a20fa4d5b50d4248e017a763eb1564650ab6047e808908ad87b",
+      "source_commit": "41f89b310b443481db5917a01a2b45e49f85e723",
+      "server_binary_sha256": "147da36b05c2795fb50bb0a38f9756f782f0b05ae08e4fed34a3f58b56c2eec0",
+      "scope": "Fresh exact-profile gate on the published beta.8 image (anonymous pull by digest, the unchanged v0.18.0 serving vector including origin authentication, fresh checkpoint store); not stock-client or documented-route acceptance."
+    },
+    "local_release_packaging": {
+      "status": "passed",
+      "published": true,
+      "release_source_commit": "41f89b310b443481db5917a01a2b45e49f85e723",
+      "release_server_binary_sha256": "147da36b05c2795fb50bb0a38f9756f782f0b05ae08e4fed34a3f58b56c2eec0",
+      "registry_reference": "ghcr.io/alphastorm/ninfer-runtime@sha256:c3ec151b992b4989c850a856aebaa463b5bf5728a60aa084906888ce40db6b71",
+      "oci_manifest_digest": "sha256:c3ec151b992b4989c850a856aebaa463b5bf5728a60aa084906888ce40db6b71",
+      "binary_package_sha256": "1cff1d73a3d77e0affb53524f75b9be537d955217fff0e4cb0a5577edf9d3378",
+      "binary_package_bytes": 580050352,
+      "sbom_url": "https://github.com/alphastorm/ninfer/releases/download/v0.7.0-qwen38-5090-beta.8/ninfer-qwen38-rtx5090-v0.7.0-linux-x86_64-cuda13.1.spdx.json",
+      "sbom_sha256": "afc94d21ca40bf8a5daa132b5a21c9792442c149f7062d74de38465cb79c2d25",
+      "runtime_base_reference": "ghcr.io/alphastorm/ninfer@sha256:28857182859a8f4993090521899b11a3f8676cb174c59adc626485e9f01472a3",
+      "runtime_base_receipt_release": "runtime-base-a87de361-20261103",
+      "runtime_base_receipt": {
+        "repository_path": "releases/v0.19.0/qualification/runtime-base.json",
+        "sha256": "cf0fe8e668920eb54f8c724d9607ef8b7b2861c778330be6a8d13887cc9268ca"
+      },
+      "publication_receipt": {
+        "repository_path": "releases/v0.19.0/qualification/runtime-publication.json",
+        "sha256": "ba41de505f28784841b03d130a1a4aed6971ba7efee455896dfdc9274c769051"
+      },
+      "component_release_url": "https://github.com/alphastorm/ninfer/releases/tag/v0.7.0-qwen38-5090-beta.8",
+      "checksums_verified": true,
+      "artifact_authentication": {
+        "repository_path": "releases/v0.19.0/qualification/runtime-artifacts.json",
+        "sha256": "70b3bcf65ab7979b32df8b660a664cc2a59de03459522fc3152c1690f10a999c"
+      }
+    },
+    "native_runtime_variants": {
+      "rtx3090-windows-native": {
+        "status": "passed",
+        "beta_qualified": true,
+        "installable": true,
+        "repository_path": "releases/v0.19.0/qualification/rtx3090.json",
+        "sha256": "e7ac3ab730664a07529572070d4aba1c8ba2c080d04ffe9b2b0d9c7925f2170d",
+        "source_commit": "48c8ac4644322f024b5c3bd5b657af5874567251",
+        "release_tag": "v0.8.0-qwen38-3090-beta.3",
+        "package_sha256": "bf1ceaa9eb522a8c8d9372bec475d6e4e4666e6a995302cd20035e80ae3e5edd",
+        "configuration_sha256": "674d52609e22de54a5db20001e25fdd97cd600d498551ecfe48efa53964fc3ac",
+        "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+        "public_package_executed": false,
+        "scope": "Current selected beta.3 pre-cut 15-phase lane qualification; published-byte authentication and product-route acceptance are separate.",
+        "build_profile": "native-v0.8.0-beta.3-tc-rtx3090"
+      },
+      "rtx4090-windows-native": {
+        "status": "passed",
+        "beta_qualified": true,
+        "installable": true,
+        "repository_path": "releases/v0.19.0/qualification/rtx4090.json",
+        "sha256": "165999b96f2f8cb1245b043f1c5256dfab94b65d224fa6ac866edbd5c2fff2d7",
+        "source_commit": "48c8ac4644322f024b5c3bd5b657af5874567251",
+        "release_tag": "v0.8.0-qwen38-4090-beta.3",
+        "package_sha256": "ac41700ac2bb9fb171188f35e73481cfd9f1140c5781320b1e6304ee760d7166",
+        "configuration_sha256": "b71a2cff25d671703106474d86fe6a808dc803db28703b6fd7740013fcfee278",
+        "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+        "public_package_executed": false,
+        "scope": "Current selected beta.3 pre-cut 15-phase lane qualification; published-byte authentication and product-route acceptance are separate.",
+        "build_profile": "native-v0.8.0-beta.3-rtx4090"
+      }
+    },
+    "native_publication": {
+      "repository_path": "releases/v0.18.0/qualification/native-publication.json",
+      "sha256": "c37f4a2fdfeccac661d625e2052d40e14dd05bacb03ed20064f82c30127ca6d5"
+    },
+    "external_installation_acceptance": {
+      "status": "pending",
+      "note": "rerun against the published v0.7.0-qwen38-5090-beta.8 component (image c3ec151b) before the cut; the receipt lands at releases/v0.19.0/acceptance/composed-external-installation.json"
+    },
+    "review": {
+      "status": "pending",
+      "scope": "The runtime source review of 41f89b310b443481db5917a01a2b45e49f85e723 closed with no confirmed P0 or P1 finding; its residuals are deferred to https://github.com/alphastorm/ninfer/issues/123. Its content-safe ledger section and the product review remain unbound. The predecessor review ledger is not retained as successor approval."
+    }
+  },
+  "as_of": "2026-11-13",
+  "status": "runtime-only-stage",
+  "publication_authorized": false,
+  "external_installation_qualified": false,
+  "scope": "Runtime-first draft with the authenticated published RTX 5090 beta.8 component and image, its unchanged qwen38-5090-v0.13.0 configuration and stock OMP 18.20.0 identities. Native beta.4 components, five-route acceptance and three client-platform executions are not yet bound; the carried native rows are v0.18.0 beta.3 placeholders.",
+  "interpretation": "The RTX 5090 release-candidate batch, packaged build identity, published-image lane gate and anonymous asset authentication are current beta.8 receipts. No predecessor native proof, acceptance, waiver or review approval transfers to this stage.",
+  "documented_route_acceptance": {
+    "status": "pending"
+  },
+  "observed_gates": {
+    "runtime_rc": {
+      "repository_path": "releases/v0.19.0/qualification/runtime-rc.json",
+      "sha256": "3007e8002aeebe2940ab3e431a0d78ba14bcf18abe039a5d383df37ac50b3e06"
+    },
+    "runtime_build_identity": {
+      "repository_path": "releases/v0.19.0/qualification/runtime-build-identity.json",
+      "sha256": "6f9fc509a698849d78bf3d72846e8cf6b1eaa9e391656b04fac77ef21e71b1c1"
+    }
+  },
+  "remaining_release_gates": [
+    "Bind both native beta.4 packages and current selected-profile quality or identity, speed, fit and lane evidence.",
+    "Fresh external-installation acceptance against the published beta.8 runtime and image and the beta.4 native components.",
+    "Fresh stock Oh My Pi 18.20.0 platform and documented-route acceptance, including the changed Windows wire behavior.",
+    "Both native beta.4 post-route campaigns, public installs, restoration and audited retirement.",
+    "Bind the runtime and product review ledger, the final receipt audit and the ordered immutable evidence pins before publication admission."
+  ],
+  "receipt_audit": {
+    "repository_path": "releases/v0.19.0/qualification/receipt-audit.json",
+    "sha256": "58aa7a6da850ec561f2c95be4c083887c33e1bdf628d22440a489f82729ecbda"
+  }
+}
