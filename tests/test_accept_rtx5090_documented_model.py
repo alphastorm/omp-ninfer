@@ -28,6 +28,7 @@ from unittest import mock
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import documented_route  # noqa: E402
+from test_stock_client_harness import interrupted_writes  # noqa: E402
 
 
 def load(name: str, path: Path):
@@ -142,9 +143,10 @@ if($ModelId){$parameters.ModelId=$ModelId}
         output = CANDIDATE if argv[0] == "git" and "rev-parse" in argv else ""
         return subprocess.CompletedProcess(argv, 0, output, "")
 
-    def run_window(self) -> None:
+    def run_window(self, interrupt: str | None = None) -> None:
         """Preflight, then the window up to its collection. The Mac's stock client is the file the
-        documented install step leaves in preflight's scratch HOME; the Mac probe passed both phases."""
+        documented install step leaves in preflight's scratch HOME; the Mac probe passed both phases.
+        Writes to ``interrupt`` during the window fail half-written, like a full volume."""
         compatibility = self.clone / "compatibility.json"
         authority = json.loads(compatibility.read_text(encoding="utf-8"))
         client = next(profile["client_distribution"] for profile in authority["profiles"]
@@ -159,8 +161,26 @@ if($ModelId){$parameters.ModelId=$ModelId}
         write_json(self.root / "mac-structured/receipt.json",
                    {"live_acceptance": {"fail_closed": {"no_model_response": True}}})
         self.collecting = True
-        with self.assertRaises(WindowEnded):
+        with interrupted_writes(interrupt) if interrupt else contextlib.nullcontext(), \
+                self.assertRaises(WindowEnded):
             drive(self.root, self.wsl, "window", self.command)
+
+    def test_a_passed_receipt_is_rewritten_whole_with_its_former_bytes(self) -> None:
+        self.run_window()
+        receipt = self.root / "mac-structured/receipt.json"
+        self.assertEqual(receipt.read_text(encoding="utf-8"), json.dumps(
+            {"live_acceptance": {"fail_closed": {"no_model_response": True}}, "status": "passed"}, indent=2) + "\n")
+        self.assertEqual(sorted(receipt.parent.glob("*.partial")), [])
+
+    def test_an_interrupted_receipt_rewrite_keeps_the_probe_receipt(self) -> None:
+        receipt = self.root / "mac-structured/receipt.json"
+        self.run_window(interrupt="receipt.json")
+        # The window failed at the rewrite, restored the host, and still parses the probe's receipt.
+        self.assertIn("injected full volume", json.loads((self.root / "first-failure.json").read_text())["boundary"])
+        self.assertEqual(json.loads(receipt.read_text(encoding="utf-8")),
+                         {"live_acceptance": {"fail_closed": {"no_model_response": True}}})
+        self.assertEqual(sorted(receipt.parent.glob("*.partial")), [])
+        self.assertTrue(self.host_commands("restore"))
 
     def host_commands(self, *actions: str) -> list[list[str]]:
         """The WSL host script's argv for each of ``actions``, as the driver's ssh commands start it."""
