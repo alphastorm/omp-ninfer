@@ -53,6 +53,15 @@ $baseline=Join-Path $Workspace 'baseline'
 $journal=Join-Path $Workspace 'preparation.json'
 $realClient=Join-Path $RealHome 'AppData\Local\OMP'
 function SaveJson($path,$value) { [IO.File]::WriteAllText($path,($value|ConvertTo-Json -Depth 50)+"`n",$utf8) }
+function BestEffortWrite($label,[scriptblock]$write) {
+    try {$null=& $write}
+    catch {
+        $e=$_.Exception
+        while($null -ne $e.InnerException){$e=$e.InnerException}
+        Write-Warning "$label was not written; restoration continues" -WarningAction Continue
+        [ordered]@{write=$label;error_type=$e.GetType().FullName;hresult=('0x{0:X8}' -f $e.HResult);utc=[DateTime]::UtcNow.ToString('o')}
+    }
+}
 function ReadJson($path) { Get-Content -LiteralPath $path -Raw -Encoding UTF8|ConvertFrom-Json }
 function Hash($path) { if(Test-Path -LiteralPath $path -PathType Leaf){(Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()}else{$null} }
 function Quote($value) { "'"+([string]$value).Replace("'","''")+"'" }
@@ -240,13 +249,16 @@ function Child($childMode,$seconds) {
     if($null -eq $code){throw "$childMode child exit code unavailable"}
     return [int]$code
 }
-function Control($action,$file) {
+function Control($action,$file,[switch]$BestEffort) {
     # The installed controller resolves support files through PSScriptRoot. Only the
     # documented runner is pasted as text; lifecycle helpers must retain their file scope.
     $priorPolicy=Get-ExecutionPolicy -Scope Process
     try {
         Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
-        & $controller -Action $action -StateRoot $StateRoot | Out-File -Encoding UTF8 (Join-Path $Workspace $file)
+        # Finish the lifecycle action before opening its evidence file.
+        $output=@(& $controller -Action $action -StateRoot $StateRoot)
+        if($BestEffort){BestEffortWrite $file {$output|Out-File -Encoding UTF8 (Join-Path $Workspace $file)}}
+        else{$output|Out-File -Encoding UTF8 (Join-Path $Workspace $file)}
     } finally { Set-ExecutionPolicy -Scope Process -ExecutionPolicy $priorPolicy -Force }
 }
 function Audit($b) {
@@ -276,20 +288,24 @@ function Audit($b) {
     return @{status=$(if($ok){'passed'}else{'failed'});completed_utc=[DateTime]::UtcNow.ToString('o');checks=$checks;after=$after}
 }
 function SaveServerLogs($installed) {
-    $capture=[ordered]@{copied=@();missing=@();failed=@()}
+    $capture=[ordered]@{copied=@();retained=@();missing=@();failed=@()}
     foreach($pair in @(@('requests.jsonl','server-requests.jsonl'),@('stderr.log','server-stderr.log'),
                        @('stderr.log.previous','server-stderr.previous.log'),@('shutdown.json','shutdown.json'))) {
         try {
             $destination=Join-Path $Workspace $pair[1]
-            # Copied names include evidence retained from an earlier Stop in this window.
-            if(Test-Path -LiteralPath $destination -PathType Leaf){$capture.copied+=$pair[1];continue}
+            # Retained evidence belongs to an earlier Stop and is never overwritten or re-counted.
+            if(Test-Path -LiteralPath $destination -PathType Leaf){$capture.retained+=$pair[1];continue}
             $source=if($null -ne $installed){Join-Path (Join-Path $installed.release_root 'logs') $pair[0]}else{$null}
             if($null -eq $source -or -not (Test-Path -LiteralPath $source -PathType Leaf)){
                 $capture.missing+=$pair[1];continue
             }
-            Copy-Item -LiteralPath $source -Destination $destination -ErrorAction Stop
+            Copy-Item -LiteralPath $source -Destination "$destination.partial" -Force -ErrorAction Stop
+            Move-Item -LiteralPath "$destination.partial" -Destination $destination -ErrorAction Stop
             $capture.copied+=$pair[1]
-        } catch {$capture.failed+=$pair[1]}
+        } catch {
+            Remove-Item -LiteralPath "$destination.partial" -Force -ErrorAction SilentlyContinue
+            $capture.failed+=$pair[1]
+        }
     }
     # A full or unavailable evidence volume must not prevent either restoration leg.
     try{SaveJson (Join-Path $Workspace 'server-log-capture.json') $capture}
@@ -303,9 +319,13 @@ function AssertServerHealth {
     if($LASTEXITCODE -ne 0){throw 'server health evidence failed'}
 }
 function Restore {
+    $writes=@()
     $started=[DateTime]::UtcNow;$b=ValidateSnapshot $baseline;EnableExactAcl
     $prep=ReadJson $journal
-    if($prep.status -eq 'restored'){AssertFreeSpace 'restored' -ObserveOnly;return Audit $b}
+    if($prep.status -eq 'restored'){
+        $writes+=@(BestEffortWrite 'free-space-restored.json' {AssertFreeSpace 'restored' -ObserveOnly})
+        $result=Audit $b;$result.write_failures=$writes;return $result
+    }
     # A first-install failure may leave no active record or no state file. The unchanged
     # controller rejects that state; skip Stop only for this mode, then prove quiescence.
     $current=if(Test-Path "$StateRoot\state.json"){ReadJson "$StateRoot\state.json"}else{$null}
@@ -313,7 +333,7 @@ function Restore {
         # The baseline's active instance is the candidate; preparation may still have the
         # incumbent active when the documented install fails before candidate activation.
         $candidateRecord=$current.releases.PSObject.Properties[[string]$b.observable.active_release]
-        try{Control Stop 'restoration-stop.json'}finally{SaveServerLogs $(if($null -ne $candidateRecord){$candidateRecord.Value}else{$null})}
+        try{$writes+=@(Control Stop 'restoration-stop.json' -BestEffort)}finally{SaveServerLogs $(if($null -ne $candidateRecord){$candidateRecord.Value}else{$null})}
     } elseif(-not $FirstRelease){throw 'restoration requires an active lifecycle record'}
     $task=Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
     if(@(Get-CimInstance Win32_Process -Filter "Name='ninfer-serve.exe'").Count -ne 0 -or
@@ -353,9 +373,18 @@ function Restore {
     $power=Get-NativeGpuPowerLimit $gpuUuid
     if($power -ne $b.observable.power_limit_w){& nvidia-smi -i $gpuUuid -pl $b.observable.power_limit_w|Out-Null;if($LASTEXITCODE -ne 0){throw 'power restoration failed'}}
     $result=Audit $b;$result.started_utc=$started.ToString('o');$result.elapsed_seconds=([DateTime]::UtcNow-$started).TotalSeconds
-    SaveJson "$Workspace\restoration.json" $result
-    if($result.status -ceq 'passed'){$prep.status='restored';SaveJson $journal $prep}
-    AssertFreeSpace 'restored' -ObserveOnly
+    $result.write_failures=$writes
+    $receipt=@(BestEffortWrite 'restoration.json' {SaveJson "$Workspace\restoration.json" $result})
+    $writes+=$receipt;$result.restoration_receipt_written=($receipt.Count -eq 0)
+    $result.journal_restored=$false
+    # A restored journal always has a durable restoration receipt; otherwise allow a safe rerun.
+    if($result.status -ceq 'passed' -and $result.restoration_receipt_written){
+        $prep.status='restored'
+        $j=@(BestEffortWrite 'preparation.json' {SaveJson $journal $prep})
+        $writes+=$j;$result.journal_restored=($j.Count -eq 0)
+    }
+    $writes+=@(BestEffortWrite 'free-space-restored.json' {AssertFreeSpace 'restored' -ObserveOnly})
+    $result.write_failures=$writes
     return $result
 }
 function Retire {
@@ -595,7 +624,7 @@ if(Test-Path $journal){throw 'attempt already spent; never repeat acceptance in 
 if(-not (Test-Path "$Workspace\omp-client-probe.py")){throw 'shared structured probe missing'}
 AssertFreeSpace 'accept'
 $started=[DateTime]::UtcNow;$b=Snapshot $baseline
-$null=ValidateSnapshot $baseline
+$null=ValidateSnapshot $baseline;EnableExactAcl
 $state=ReadJson "$StateRoot\state.json";$instance=[string]$state.active_release
 $variant=@((ReadJson "$Clone\releases\$Release\manifest.json").components.ninfer_variants|Where-Object id -CEQ "$Lane-windows-native")[0]
 if($state.releases.$instance.package_sha256 -cne $variant.package_sha256){throw 'active instance is not the candidate published package'}
@@ -654,9 +683,9 @@ try {
 } catch {$failure=$_.Exception.Message;SaveJson "$Workspace\window-failure.json" @{boundary=$boundary;error=$failure;utc=[DateTime]::UtcNow.ToString('o')}}
 finally {
     if($effect){$restored=Restore}
-    else{$restored=Audit $b;SaveJson "$Workspace\restoration.json" $restored}
+    else{$restored=Audit $b;$restored.write_failures=@(BestEffortWrite 'restoration.json' {SaveJson "$Workspace\restoration.json" $restored})}
     try{AssertServerHealth}catch{if(-not $failure){$failure=$_.Exception.Message;$boundary='server-health'}}
-    SaveJson "$Workspace\window.json" @{status=$(if($failure -or $restored.status -ne 'passed'){'failed'}else{'passed_and_restored'});release=$Release;candidate=$Candidate;attempt=$Attempt;started_utc=$started.ToString('o');completed_utc=[DateTime]::UtcNow.ToString('o');elapsed_seconds=([DateTime]::UtcNow-$started).TotalSeconds;route_exit=$routeExit;first_failing_boundary=$(if($failure){$boundary}else{$null});error=$failure;restoration_status=$restored.status}
+    SaveJson "$Workspace\window.json" @{status=$(if($failure -or $restored.status -ne 'passed'){'failed'}else{'passed_and_restored'});release=$Release;candidate=$Candidate;attempt=$Attempt;started_utc=$started.ToString('o');completed_utc=[DateTime]::UtcNow.ToString('o');elapsed_seconds=([DateTime]::UtcNow-$started).TotalSeconds;route_exit=$routeExit;first_failing_boundary=$(if($failure){$boundary}else{$null});error=$failure;restoration_status=$restored.status;restoration_write_failures=@($restored.write_failures|ForEach-Object write)}
 }
 if($restored.status -ne 'passed'){throw 'restoration audit failed'}
 if($failure){throw $failure}
