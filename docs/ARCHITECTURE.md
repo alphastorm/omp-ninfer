@@ -3,16 +3,18 @@
 Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release layer) → NInfer
 (inference engine) → Qwen3.8 27B (served model).
 
-OMP NInfer is an integration and release product, not a third inference runtime. Each published
-release (`v0.19.0`) binds an exact Oh My Pi (OMP) client, NInfer runtime, shared Qwen3.8 27B
-artifact, hardware profile, loopback topology, and qualification summary.
+OMP NInfer is an integration and release product, not a third inference runtime. Oh My Pi (OMP)
+owns the session transcript and tools, while NInfer owns in-memory and checkpointed continuation
+state over a bearer-authenticated loopback route. Each release binds a client, runtime, shared
+model, hardware profile, topology, and qualification summary
+([current release facts](FACTS.md#current-release)).
 
 ## Runtime topology
 
 ```mermaid
 sequenceDiagram
     participant User
-    participant OMP as OMP 18.20.0 client (Windows/macOS/Linux)
+    participant OMP as OMP client (Windows/macOS/Linux)
     participant Route as Loopback route (local or SSH forward)
     participant NInfer as NInfer on a qualified GPU lane
     participant GPU as Shared Qwen3.8 27B artifact
@@ -30,140 +32,120 @@ sequenceDiagram
 Every listener endpoint is loopback-only:
 
 - **RTX 5090 container lane (`127.0.0.1:18089`):** On Windows 11 with Docker Desktop and WSL2,
-  `examples/manual-tunnel/start-ninfer.sh` runs `ninfer-serve` on `0.0.0.0:8080` inside a Docker
-  `bridge` container (`omp-ninfer-beta`, `--restart no`, `--cap-drop ALL`, `no-new-privileges`, and
-  the hash-pinned `io_uring` seccomp profile `examples/manual-tunnel/ninfer_io_uring_seccomp.json`)
-  and publishes that port to the runtime host's loopback (`--publish 127.0.0.1:18089:8080`). Docker
-  host networking is not used because `--network host` on Docker Desktop binds inside the utility VM
-  rather than the Windows and WSL2 host loopback. A local Windows client reaches
-  `http://127.0.0.1:18089/v1` directly; on the macOS preview route,
-  `examples/manual-tunnel/open-tunnel.sh` opens a manual SSH local forward
-  (`-L 127.0.0.1:18089:127.0.0.1:18089`, `ExitOnForwardFailure=yes`) from Mac loopback to remote
-  loopback. The deployment profile (`qwen38-5090-v0.13.0`, configuration `751d22dc`; kept from `v0.13.0`) admits up to two requests
-  in flight (`--max-concurrency 2`, `--device-state-slots 2`, `--pending-timeout-ms 180000`,
-  `--session-checkpoint-require-origin-auth`) over an automatic 146,368-token BF16 device KV pool
-  and a shared 20,867.734375 MiB (21,881,405,440-byte) Host context budget, mounting
-  container path `/checkpoints-v013` (fixed by the retained `qwen38-5090-v0.13.0` profile) from host directory `checkpoints-v019` (isolated from host directories `checkpoints-v018` in `v0.18.0`, `checkpoints-v017` in `v0.17.0`, and `checkpoints-v013` in `v0.13.0`–`v0.16.2`).
-- **Native Windows RTX 4090 and RTX 3090 lanes (`127.0.0.1:18082`):** Both native packages
-  (`v0.8.0-qwen38-3090-beta.4` from source `15c3e395`—identical serve source to RTX 5090 `beta.8` at `41f89b31`, capping retryable memory-pressure checkpoint-save refusals at six retries or 10 s—and `v0.8.0-qwen38-4090-beta.3` carried unchanged from `v0.18.0` at source `48c8ac46` without bounded pressure saves until rebuilt at the next engine freeze, on upstream
-  `Neroued/ninfer` master `64d10fbf`) install on one two-GPU Windows 11 host under
-  `%ProgramData%\NInfer\qwen38-4090-native` and `%ProgramData%\NInfer\qwen38-3090-native`. Each
-  installer binds its card by GPU UUID (`Control-GpuOwner.ps1`) rather than device ordinal. Both
-  lanes share `http://127.0.0.1:18082/v1` and run sequentially, one lane at a time (INT8 KV,
-  DFlash2 draft window 7 with `proposal: "artifact-default"`, `Q4_G64_FP16` draft MLP `gate`/`up`
-  weights and host-mapped `token_embedding`, small-T tensor-core verify at `T=8/16` enabled on RTX
-  3090 `native-v0.8.0-beta.4-tc-rtx3090` and off on RTX 4090 `native-v0.8.0-beta.3-rtx4090`,
-  `Group64` A8 and FP32 head logits off, 1,024-token prefill chunk, mandatory
-  `--session-checkpoint-require-origin-auth`, release-isolated schema 3 checkpoint directory
-  `cache/<release-instance-id>/session-checkpoints-v3` where `<release-instance-id>` is the
-  installed release ID such as `qwen38-3090-native-v0.8.0-beta.4-15c3e3959c0a` or carried `qwen38-4090-native-v0.8.0-beta.3-48c8ac464432`, one active request / `C1` with a 30 s pending
-  timeout, `15,747.734375 MiB` / `16,512,696,320-byte` shared Host budget, `640 MiB` admission
-  headroom, and two extra device-state slots on RTX 4090, and two active requests / `C2` over one
-  shared 131,072-token pool with a 180 s pending timeout, `20,867.734375 MiB` /
-  `21,881,405,440-byte` shared Host budget, `768 MiB` admission headroom, and two extra
-  device-state slots on RTX 3090). This is not multi-GPU inference or
-  simultaneous RTX 4090 and RTX 3090 serving. A managed stop (`Control-Release.ps1 -Action Stop`) signals
-  `stop-event` (900 s graceful wait), flushes live sessions to checkpoints, records the stop in
-  `last-stop.json`, releases the GPU lease, and on the RTX 3090 restores the default 370 W power
-  limit from its 350 W serving cap.
-- **Shared model artifact (`components.model`):** All three lanes serve the same registered Qwen3.8
-  27B model container version 3 `.ninfer` artifact from `huggingface.co/neroued/Qwen3.8-27B-NInfer`
-  at pinned revision `1cbd84e7` (`81f924d4`, 20,437,521,664 bytes, downloaded to
-  `qwen3_8_27b-v3.ninfer`; the RTX 5090 container lane enables vision, tools, DFlash2 K=7,
-  JSON-schema output, and preserved thinking, while the native Windows RTX 4090 and RTX 3090 lanes
-  serve text, tools, JSON-schema output, and preserved thinking under DFlash2 K=7 with vision disabled).
+  `examples/manual-tunnel/start-ninfer.sh` runs `ninfer-serve` on `0.0.0.0:8080` inside Docker
+  `bridge` container `omp-ninfer-beta` with `--restart no`, `--cap-drop ALL`, `no-new-privileges`,
+  and the hash-pinned `io_uring` seccomp profile
+  `examples/manual-tunnel/ninfer_io_uring_seccomp.json`, and Docker publishes that port to host
+  loopback (`--publish 127.0.0.1:18089:8080`). Docker `--network host` is not used because on
+  Docker Desktop it binds inside the utility VM rather than the Windows and WSL2 host loopback.
+  Local Windows and WSL2 Linux clients reach `http://127.0.0.1:18089/v1` directly; on macOS
+  (preview), `examples/manual-tunnel/open-tunnel.sh` forwards Mac loopback to the RTX 5090 host
+  loopback (`-L 127.0.0.1:18089:127.0.0.1:18089`, `ExitOnForwardFailure=yes`). Each release writes
+  checkpoints to its own host directory while the container mount path stays the one its profile
+  fixes, with `--session-checkpoint-require-origin-auth`.
+- **Native Windows RTX 4090 and RTX 3090 lanes (`127.0.0.1:18082`):** Both packages install on one
+  two-GPU Windows 11 host under `%ProgramData%\NInfer\qwen38-4090-native` and
+  `%ProgramData%\NInfer\qwen38-3090-native`, binding each card by GPU UUID (`Control-GpuOwner.ps1`)
+  rather than ordinal. Both share `http://127.0.0.1:18082/v1` and run one lane at a time, never as
+  multi-GPU or simultaneous serving. Under its state root, each installed release writes
+  checkpoints to `cache/<release-instance-id>/session-checkpoints-v3` with
+  `--session-checkpoint-require-origin-auth`. Managed stop (`Control-Release.ps1 -Action Stop`)
+  signals `stop-event` (900 s graceful wait), flushes live sessions to checkpoints, writes
+  `last-stop.json`, releases the GPU lease, and on RTX 3090 restores the default power limit from
+  its serving cap.
+- **Shared model artifact (`components.model`):** All three lanes serve one hash-pinned Qwen3.8 27B
+  `.ninfer` artifact (`huggingface.co/neroued/Qwen3.8-27B-NInfer`) with
+  [DFlash2](FACTS.md#glossary) speculative decoding (draft window 7), tools, JSON-schema output,
+  and preserved thinking. Only the RTX 5090 lane serves vision; native lanes disable vision.
+  Per-lane limits and checkpoint paths are in [lanes and limits](FACTS.md#lanes-and-limits).
 
-SSH (where used) authenticates the machine path; a separate bearer token always authenticates the
-HTTP endpoint (`~/.config/omp-ninfer/api-key` mounted at `/run/secrets/ninfer_api_key` for the
-container, `~/.omp/agent/ninfer-beta.key` on clients, and `%ProgramData%\omp-ninfer-keys\api-key.txt`
-for native lanes). All three lanes write authenticated, session-scoped checkpoints to local storage
-and restore the prior Responses chain after a server restart. OMP's transcript remains
-authoritative if any retained state is absent or invalid.
+Where SSH is used, it authenticates the machine path; a separate bearer token authenticates every
+HTTP endpoint (key paths and permissions are in the
+[security model](SECURITY.md#release-invariants)). All three lanes write authenticated,
+session-scoped checkpoints to local storage and restore the prior Responses chain after a restart;
+OMP's transcript remains authoritative if retained state is absent or invalid.
 
 ## State ownership
 
-- **OMP transcript:** authoritative messages, tool calls/results, branches, and session history.
-- **OMP provider snapshot:** a private acceleration envelope containing the committed NInfer response
+- **OMP transcript:** authoritative messages, tool calls and results, branches, and history.
+- **OMP provider snapshot:** private acceleration envelope holding the committed NInfer response
   baseline and identity needed to append the next turn.
-- **NInfer Responses state:** retained response/cache state scoped by authenticated client and
+- **NInfer Responses state:** retained response and cache state scoped by authenticated client and
   session identity, with durable checkpoints for restart recovery on all three lanes.
 - **Qwen artifact:** immutable model bytes pinned by revision, size, and SHA-256.
 
-A turn advances provider state only after a complete valid stream and durable transcript publication.
-Cancellation, malformed/incomplete output, transport failure, or transcript persistence failure must
-leave the prior committed baseline usable. If acceleration state is absent or invalid, OMP's
-transcript remains sufficient for a full replay.
+A turn advances provider state only after a complete valid stream and durable transcript
+publication. Cancellation, malformed or incomplete output, transport failure, or transcript
+persistence failure leaves the prior committed baseline usable. If acceleration state is absent or
+invalid, OMP's transcript is sufficient for a full replay.
 
-This is why another stateful gateway is not inserted between OMP and NInfer. It would create a second
-owner for continuation, persistence, and failure recovery without solving a first-release problem.
+This is why no stateful gateway sits between OMP and NInfer. A gateway would create a second owner
+for continuation, persistence, and failure recovery.
 
 ## Checkpoint transport
 
-`scripts/checkpoint_sync.py` exports verified published generations to replica storage and
-imports them into a local checkpoint root before restore. Host-to-host copying and NAS
-replication are implemented; the live runtime never serves a network-share checkpoint root.
-Sync checks payload hashes; the runtime authenticates `manifest.mac`. Restore requires the
-matching runtime binary, model, profile, and bearer-bound session identity. The recorded
-recovery probes return state to its original lane, not a second inference host or different GPU.
-See [operator guidance and receipts](FACTS.md#checkpoint-transport-and-nas-replication).
+`scripts/checkpoint_sync.py` exports verified published generations to replica storage and imports
+them into a local checkpoint root before restore; the live runtime never serves a network share.
+Host-to-host copy and NAS replication check payload hashes, and the runtime authenticates
+`manifest.mac`. Restore requires the matching runtime binary, model, profile, and bearer-bound
+session identity. The recorded recovery probes return state to its original lane, not to a second
+inference host or a different GPU
+([checkpoint transport and NAS replication](FACTS.md#checkpoint-transport-and-nas-replication)).
 
 ## Identity chain
 
-The [published release manifest](../releases/v0.19.0/manifest.json) binds:
+Each release manifest (linked from the [current release facts](FACTS.md#current-release)) binds:
 
 1. product release and support channel;
-2. upstream OMP 18.20.0 source revision, platform binaries, byte counts, and SHA-256 pins;
+2. upstream OMP source revision, platform binaries, byte counts, and SHA-256 pins;
 3. primary RTX 5090 NInfer source, server binary, OCI digest, and SBOM plus each UUID-bound native
-   variant package, source archive, SPDX and CycloneDX dependency SBOMs, installer/controller
+   variant package, source archive, SPDX and CycloneDX dependency SBOMs, installer and controller
    scripts, configuration, and qualification receipt;
-4. the shared Qwen3.8 27B model container version 3 artifact (`components.model`) by revision, byte
-   count, and SHA-256;
+4. the shared Qwen3.8 27B model artifact (`components.model`) by revision, byte count, and SHA-256;
 5. canonical runtime configuration hash, seccomp profile hash, and hardware profile; and
 6. the public product qualification summary and composed external-installation result.
 
-`draft` permits incomplete publication fields and requires explicit blockers. `candidate` requires
-every installable component identity and retains the external-install blocker. `ready` additionally
-requires an exact qualification-summary hash, an external-install pass, and zero blockers.
-`scripts/verify_release.py --require-ready` enforces the cut boundary.
+Manifest status uses three states
+([release state transition](RELEASES.md#release-state-transition)). `draft` permits incomplete
+publication fields and requires explicit blockers. `candidate` requires every installable component
+identity and retains the external-install blocker. `ready` adds an exact qualification-summary
+hash, an external-install pass, and zero blockers (`scripts/verify_release.py --require-ready`).
 
-The manifest is authoritative over README examples, mutable container tags, and
-branch names. Release images are consumed only by `@sha256:` digest.
+The manifest is authoritative over README examples, mutable container tags, and branch names.
+Release images are consumed only by `@sha256:` digest.
 
 ## Component boundaries
 
 ### `omp-ninfer`
 
-Owns product naming, release/profile contracts, setup and support paths, public qualification
-composition, and cross-component version pins. It does not own model mathematics, CUDA kernels,
-OMP session semantics, or another request proxy.
+Owns product naming, release and profile contracts, setup and support paths, public qualification
+composition, and cross-component pins. It does not own model mathematics, CUDA kernels, OMP session
+semantics, or a request proxy.
 
-### OMP
+<a id="omp"></a>
 
-Owns the coding-agent UX, transcript, tools, and model configuration. The client is unmodified
-[upstream Oh My Pi 18.20.0](https://github.com/can1357/oh-my-pi/releases/tag/v18.20.0) (source
-`c308970263ae13744ea15ab67302e3dac840e266`), pinned by byte count and SHA-256 across Windows x64,
-macOS arm64 (preview), and Linux x64 (WSL2). Each NInfer model entry sets
-`compat.statefulResponses: true` for OpenAI Responses chaining (`previous_response_id` and
-`prompt_cache_key`) with `PI_OPENAI_STATEFUL` unset, and `examples/manual-tunnel/fail-closed.yml`
-disables retries and cloud fallback while bounding per-provider concurrency via
-`providers.maxInFlightRequests`. Stock OMP includes no built-in runtime installer or lifecycle
-subcommands. Through v0.7.4, a downstream fork and the `alphastorm/homebrew-omp` tap (private since
-2026-10-02) distributed the client; this repository no longer builds or publishes an OMP binary
-(see [release history](RELEASES.md#version-identities)).
+### Oh My Pi
+
+Owns the coding-agent interface, transcript, tools, and model configuration. Each release pins
+unmodified upstream [Oh My Pi](https://github.com/can1357/oh-my-pi) binaries by byte count and
+SHA-256 across Windows x64, macOS arm64 (preview), and Linux x64 under WSL2. Each model entry sets
+`compat.statefulResponses: true` (`previous_response_id` and `prompt_cache_key`) with
+`PI_OPENAI_STATEFUL` unset. Applying `examples/manual-tunnel/fail-closed.yml` disables retries,
+cloud fallback, and automatic updates while bounding requests via `providers.maxInFlightRequests`.
+Stock Oh My Pi has no runtime installer or lifecycle subcommands, and this repository builds and
+publishes no Oh My Pi binary ([version identities](RELEASES.md#version-identities)).
 
 ### NInfer
 
 Owns the `.ninfer` engine and server, CUDA execution, Qwen3.8 runtime, Responses state and
-checkpoint store, authenticated status, numerical behavior, container and native packages, and
-runtime qualification. The RTX 5090 container runtime (`v0.7.0-qwen38-5090-beta.8`, source `41f89b31`) and the
-UUID-bound native Windows RTX 3090 (`v0.8.0-qwen38-3090-beta.4`, source `15c3e395`, identical serve source) and carried RTX 4090
-(`v0.8.0-qwen38-4090-beta.3`, source `48c8ac46` from `v0.18.0`) packages on upstream `Neroued/ninfer`
-master `64d10fbf` are published under
-[alphastorm/ninfer](https://github.com/alphastorm/ninfer), retaining their upstream lineage and
-separate hardware contracts.
+checkpoint store, authenticated status endpoint, numerical behavior, container and native packages,
+and runtime qualification. The RTX 5090 image and UUID-bound native Windows RTX 4090 and RTX 3090
+packages are published under [`alphastorm/ninfer`](https://github.com/alphastorm/ninfer) from
+upstream [`Neroued/ninfer`](https://github.com/Neroued/ninfer), keeping separate lane contracts.
 
 ## Lifecycle routes
 
-Install, upgrade, stop, and rollback follow the documented container scripts and native Windows
-controllers in the [Quickstart](QUICKSTART.md). OMP remains the transcript and coding-agent UX
-owner.
+Install, upgrade, stop, and rollback follow the container scripts and native Windows controllers in
+the [Quickstart](QUICKSTART.md). OMP remains the transcript and coding-agent interface owner.
+
+Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or NVIDIA.

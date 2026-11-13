@@ -5,12 +5,71 @@ to NInfer (inference engine) serving Qwen3.8 27B (served model). OMP NInfer vers
 product; component repositories keep their own versions and tags, and the product manifest binds
 the exact combination.
 
-**Navigation:** [Current release (v0.19.0)](#v0190--bounded-pressure-saves-rtx-3090-beta4-and-stock-omp-18200) · [Previous v0.18.0](#v0180--unified-engine-native-re-cut-and-stock-omp-18187) · [Earlier v0.17.0](#v0170--bounded-resume-admission-serving-robustness-and-stock-omp-18186) ·
-[Channels](#channels) · [Version identities](#version-identities) ·
-[Release state transition](#release-state-transition) · [Candidate freeze](#candidate-freeze) ·
-[Next native release sequencing](#next-native-release-sequencing) ·
-[External-install acceptance](#external-install-acceptance) · [Cut procedure](#cut-procedure) ·
-[Release notes](#release-notes)
+**On this page:** [Current release](#current-release) ·
+[Upgrading from the previous release](#upgrading-from-the-previous-release) ·
+[Channels](#channels) · [How a release is cut](#how-a-release-is-cut) ·
+[Release records](#release-records)
+
+## Current release
+
+`v0.19.0` (published 2026-11-13) is the GitHub `Latest` public release, superseding `v0.18.0`
+(2026-11-12).
+
+- **Client:** Pins unmodified stock Oh My Pi 18.20.0 on macOS arm64, Windows x64, and Linux x64
+  ([client upgrade review](measurements/2026-11-13-omp-18200-client-upgrade-review.json)).
+- **RTX 5090 and RTX 3090 runtimes:** Rebuilt with bounded memory-pressure checkpoint saves
+  ([alphastorm/ninfer #122](https://github.com/alphastorm/ninfer/pull/122)). When a save triggered
+  by memory pressure is refused for disk capacity, an I/O outage, or a superseded session checkpoint
+  tag, the server gives up after six retries or 10 seconds and releases the session's
+  continuation instead of holding new requests behind the unsettled save. Checkpoint store-quota
+  refusals (`--session-checkpoint-quota-mib`) settle on the first refusal without retries.
+- **RTX 4090 runtime:** Uses the `v0.18.0` native Windows package (`v0.8.0-qwen38-4090-beta.3`) and
+  does not include the bounded checkpoint-save retries.
+- **Model and configuration:** The shared Qwen3.8 27B model artifact and the reviewed model and
+  configuration fragments did not change.
+
+Every documented route and both native Windows public installs passed acceptance on the published
+components ([documented-route acceptance](../releases/v0.19.0/acceptance/documented-routes.json),
+[composed acceptance](../releases/v0.19.0/acceptance/composed-external-installation.json)).
+
+[Download `v0.19.0`](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.19.0) ·
+[Release notes](../releases/v0.19.0/NINFER_RELEASE_NOTES.md) ·
+[Manifest](../releases/v0.19.0/manifest.json) · [Current release facts](FACTS.md#current-release) ·
+[Changelog](../CHANGELOG.md)
+
+## Upgrading from the previous release
+
+Upgrade from `v0.18.0` to `v0.19.0` by updating the pieces you run:
+
+1. **Client.** Install stock Oh My Pi 18.20.0 as [client setup](QUICKSTART.md#omp-18186-client)
+   describes ([18.20.0 review](measurements/2026-11-13-omp-18200-client-upgrade-review.json)), with
+   this release's fail-closed configuration and your lane's per-model fragment. Each lane's route
+   in the quickstart installs its own fragment.
+2. **RTX 5090 container.** Inside WSL2 on the host, stop the `v0.18.0` container with
+   [`examples/manual-tunnel/stop-ninfer.sh`](../examples/manual-tunnel/stop-ninfer.sh) from your
+   `v0.18.0` checkout. Clone tag `v0.19.0`, run `python3 scripts/verify_release.py --require-ready`,
+   create the `checkpoints-v019` host directory
+   ([host preparation](QUICKSTART.md#3-prepare-the-model-and-key-on-the-inference-host)), and
+   [start `v0.7.0-qwen38-5090-beta.8`](QUICKSTART.md#4-start-ninfer-on-the-inference-host) with
+   [`examples/manual-tunnel/start-ninfer.sh`](../examples/manual-tunnel/start-ninfer.sh); keep
+   `checkpoints-v018`, `checkpoints-v017`, and `checkpoints-v013` for rollback.
+3. **RTX 3090.** Stop any running RTX 4090 lane on shared port `18082` and keep at least 40 GiB
+   free on the checkpoint drive, then follow the
+   [RTX 3090 route](QUICKSTART.md#native-windows-rtx-3090-release-lane) to run `Install-Release.ps1`
+   for `v0.8.0-qwen38-3090-beta.4`. It stops a running `v0.8.0-qwen38-3090-beta.3` (`beta.3`) lane
+   via that lane's `Control-Release.ps1` and keeps it as `previous_release` for
+   `Control-Release.ps1 -Action Rollback`
+   ([upgrade receipt](../releases/v0.19.0/qualification/rtx3090-upgrade.json),
+   [native upgrade recovery](QUICKSTART.md#native-upgrade-recovery)).
+4. **RTX 4090.** An existing `v0.18.0` install of `v0.8.0-qwen38-4090-beta.3` matches `v0.19.0` and
+   needs no runtime reinstall (new installs:
+   [RTX 4090 route](QUICKSTART.md#native-windows-rtx-4090-release-lane)).
+5. **Sessions after the upgrade.** After an RTX 5090 or RTX 3090 runtime upgrade, Oh My Pi replays
+   its authoritative transcripts for a fresh prefill; an existing RTX 4090 `beta.3` install keeps
+   its checkpoint store.
+
+Native owners staying on `v0.10.0` keep the
+[`v0.10.0` guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md).
 
 ## Channels
 
@@ -19,16 +78,22 @@ the exact combination.
 | Public release | Published exact profiles with stated limitations and non-claims | `v0.19.0`, published 2026-11-13 (`Latest`); predecessor `v0.18.0` (2026-11-12) |
 
 Prereleases never take GitHub `Latest`; `Latest` always points at the current public release.
-The historical fork client used separate `omp-beta` and stable `omp` Homebrew casks through
-v0.7.4. v0.10.0 introduced upstream OMP 18.4.10 binaries and no client cask; v0.11.0 and v0.12.0
-pinned stock OMP 18.8.7, v0.12.1 pinned 18.10.1, and v0.12.2 pinned 18.12.1; `v0.13.0` through
-`v0.14.0` pinned stock OMP 18.12.6, `v0.15.0` through `v0.16.0` pinned stock OMP 18.14.0,
-`v0.16.2` pinned stock OMP 18.15.0, `v0.17.0` pinned stock OMP 18.18.6, `v0.18.0` pinned stock OMP
-18.18.7, and current `v0.19.0` pins stock OMP 18.20.0. All five documented routes, fresh
-platform-client acceptance, and both native post-route campaigns and public installs passed on their
-first attempts on the published components without a waiver; see
-[documented-route acceptance](../releases/v0.19.0/acceptance/documented-routes.json) and
-[composed acceptance](../releases/v0.19.0/acceptance/composed-external-installation.json).
+
+## How a release is cut
+
+Cutting a release advances `releases/<version>/manifest.json` from `draft` to GitHub `Latest`
+(maintainer terms are defined below and in the [glossary](FACTS.md#glossary)):
+
+1. [Release state transition](#release-state-transition) — `draft`, `candidate`, and `ready` rules.
+2. [Candidate freeze](#candidate-freeze) — freeze client, runtime, model, and receipt bytes.
+3. [Next native release sequencing](#next-native-release-sequencing) — native gates and SBOM.
+4. [External-install acceptance](#external-install-acceptance) — clean client and route smoke.
+5. [Cut procedure](#cut-procedure) — stage the draft, bind waivers, and run the four
+   [cut stages](#cut-stages).
+6. [Release notes](#release-notes) — pin the client, cut native components,
+   [add a lane](#adding-a-lane), and what notes may claim.
+7. [After publication](#after-publication) — date the changelog, update the living pages, and
+   append records on `main`.
 
 ## Release state transition
 
@@ -76,31 +141,15 @@ release state.
 Markdown errors name `file:line`; JSON errors name the field.
 A version-and-scope banner such as v0.10.0's stays true before and after publication;
 published evidence under `releases/` is not subject to this living-docs check.
-The qualification's G4 review summary must pin its ledger's bytes and restate the ledger's closed
-status and approval, and its documented-route acceptance summary must restate the routes evidence
-the composition binds.
+The qualification's G4 review summary (`observed_gates.g4_review`, the release-review ledger) must
+pin its ledger's bytes and restate the ledger's closed status and approval, and its
+documented-route acceptance summary must restate the routes evidence the composition binds.
 
 `ready` means the package is technically cuttable. It does not grant authority to create repositories,
 push commits/tags, upload images/assets, publish a GitHub release, or modify the Homebrew tap.
 Authorization for those external effects remains separate and bounded.
 
 ## Candidate freeze
-
-### v0.13.0 server shape and profile migration
-
-When a release changes the server CLI shape (as `v0.13.0` did for `/checkpoints-v013`, the shared
-`--host-context-mib` budget, and mandatory `--session-checkpoint-require-origin-auth` with
-configuration hash `751d22dc`), `stage_release.py --profile-template-dir profiles/v0.13.0` binds the
-cut's binary, model, configuration, and client identities into release-local profile copies. That
-new server shape is promoted to the root `profiles/` and `compatibility.json` only by
-`rebind_release.py --stage lane`; editing identities alone cannot migrate the checkpoint mount or
-the unified Host budget.
-
-Staging also incorporates the release-local protocol boundaries (`runtime_contracts`) into the
-compatibility authority so that container capabilities (such as JSON-schema structured output and
-128-character tool names on the rebased RTX 5090 lane) remain distinct from carried native package
-limits. Never edit the immutable predecessor to make the root matrix match a candidate: root
-authority, public matrix, and live profiles stay byte-identical until the lane-pin cut.
 
 Before the final external-install smoke, freeze these bytes together:
 
@@ -117,6 +166,11 @@ Before the final external-install smoke, freeze these bytes together:
 Changing executable code, the model, server arguments, OMP state semantics, transport, security
 boundary, or support claim invalidates dependent evidence and requires a new candidate. Editing a
 mutable tag or rebinding an old qualification to new bytes is prohibited.
+
+Root `profiles/`, `compatibility.json`, and the generated public matrix (`docs/COMPATIBILITY.md`)
+stay byte-identical until `rebind_release.py --stage lane` promotes the candidate's server shape and
+per-lane protocol boundaries (`runtime_contracts`); the
+[v0.13.0 migration](#v0130-server-shape-and-profile-migration) is the precedent.
 
 ## Next native release sequencing
 
@@ -138,11 +192,8 @@ GPU leases:
    and security verification, GPU protocol/restart/performance/OMP gates, then receipt-only closure
    review.
 
-The RTX 3090 parity candidate first exercised this sequence end to end with one checkpointed
-command: preflight, neutral build, private-path scan, deterministic package, managed install,
-protocol, 64K, restart, rollback, security, OMP, C1, receipt, and 370 W restoration. The sequence
-prevents shared correctness classes from being discovered after variant binaries and hardware
-evidence are already frozen.
+The sequence prevents shared correctness classes from being discovered after variant binaries and
+hardware evidence are already frozen.
 
 ### Canonical native protocol evidence
 
@@ -174,8 +225,7 @@ actual smaller shared Host budget while retaining the profile's extra device slo
 recreate `host_state_slots`, separate host-KV budgets or a fixed authored check count.
 Native components from v0.7.0 must satisfy these protocol gates in `verify_release.py`.
 Immutable older native receipts stay valid under their real older component tags, not by
-relabeling their legacy fields as new-runtime evidence. In `v0.13.1`, both rebased native lanes
-supply passed canonical schema 2 product payloads at full and reduced shared Host budgets.
+relabeling their legacy fields as new-runtime evidence.
 
 `verify_release.py` binds each lane receipt to its manifest row: source, server, configuration and
 model identities; package filename, SHA-256 and size; SPDX and support-asset hashes; and the
@@ -194,8 +244,8 @@ For a new native package, generate the additional CycloneDX 1.5 JSON inventory w
 and `--vcpkg-lock`, `--cuda-inventory`, `--third-party-inventory` and `--output` files.
 For the rebased native packages, also pass the actual `runtime-redist.json` through
 `--runtime-inventory`; the native package wrapper requires this input.
-The default manifest is the source tree's `vcpkg.json` and the default runtime executable is
-`bin/ninfer-serve.exe`; both have explicit override flags.
+The default manifest is the source tree's `vcpkg.json` (override: `--vcpkg-manifest`) and the
+default runtime executable is `bin/ninfer-serve.exe` (override: `--runtime-binary`).
 
 The resolved vcpkg lock input is a build-owner snapshot, not vcpkg's filesystem mutex file:
 it records the manifest's `builtin-baseline` and a `packages` array containing each resolved
@@ -243,7 +293,6 @@ only after binding the final native component. Omitted arguments retain an alrea
 for an unchanged component. The verifier accepts historical components before v0.7.0 without
 dependency pins, but requires the separate canonical inventory and its outer checksum entry on
 rebased v0.7.0 components. Partial, malformed, renamed or cross-release pairs fail even in a draft.
-No published `v0.13.1`, `v0.13.0`, or historical release pin is changed by this tooling.
 
 ## External-install acceptance
 
@@ -280,16 +329,14 @@ after smoke failure. An owned Stop failure fails the receipt explicitly; an alre
 incumbent is never stopped by that cleanup. A failed Windows hold acquisition removes only the hold
 whose exclusive creation it completed, including ownership-save/ACL failures.
 
-These are host-free guard regressions, not fresh hardware acceptance. Two
-[#128](https://github.com/alphastorm/omp-ninfer/issues/128) rows remain deferred: P4 retains the
-long-action/restoration design choice in [#109](https://github.com/alphastorm/omp-ninfer/issues/109);
-P13's native QUICKSTART operate blocks remain unchanged under the founder's native-documentation
-freeze.
+The guards in the previous paragraph are proven by host-free regression tests, not by fresh hardware
+acceptance.
 
 ## Cut procedure
 
-The release tree is staged as a draft and cut with the pin dance; every step is a script and
-the verifier decides what remains:
+The release tree is staged as a draft and cut with the pin dance, the four `rebind_release.py`
+stages listed under [cut stages](#cut-stages). Every step is a script and the verifier decides what
+remains.
 
 The verifier resolves predecessors from **ready GA manifests**, not the newest
 GA-named directory. Published product releases use `status: ready`; neither
@@ -320,20 +367,15 @@ from the successor manifest and platform rows, without claiming client acceptanc
 `verify_release.py` byte-checks carried native quality/fit bindings even when no
 observed gate names them. It also checks retained receipt-audit `staged_sha256`
 entries and all three stock-client descriptor identities against the manifest and
-compatibility authority. Dropped audit entries and superseded composition hashes
-are historical observations, not retained-byte claims; early v0.13.x audits used
-pre-replacement snapshots. Stock descriptors do not compare mutable compatibility
-URL metadata.
+compatibility authority. Stock descriptors do not compare mutable compatibility URL metadata.
 
-Waivers must bind their lane's current component and their release-local file.
-Original v0.16.x projections without complete release/candidate or raw-position
-bindings retain only their exact historical bytes and scope, including the held
-v0.16.1 records; they confer no successor acceptance. New parity waivers must name
-the release, retain exactly one failed restore/sibling position and rule, and match the complete failed set
-and measurements in a same-release, hash-bound contract-2
-`p16-agent-parity/2` raw verdict. A TTFT waiver cannot also waive a cache-gap failure,
-or vice versa. Its `raw_verdict.evidence_sha256["agent-verdict.json"]` must equal
-the observed parity gate's bound verdict hash.
+Waivers must bind their lane's current component and their release-local file. New parity waivers
+([agent-probe parity gate](PERFORMANCE.md#agent-probe-parity-gate)) must name the release, retain
+exactly one failed restore/sibling position and rule, and match the complete failed set and
+measurements in a same-release, hash-bound contract-2 `p16-agent-parity/2` raw verdict. A TTFT
+waiver cannot also waive a cache-gap failure, or vice versa. Its
+`raw_verdict.evidence_sha256["agent-verdict.json"]` must equal the observed parity gate's bound
+verdict hash.
 
 The product `candidate` field is not required while route acceptance is pending:
 gates and waivers are authored before the candidate commit exists. Once
@@ -352,7 +394,10 @@ Supported new waiver shapes are deliberately narrow:
   Verdicts with multiple failing positions or both TTFT and cache-gap failure are
   unsupported, even when separate waiver files are supplied.
 - New `*_speed_waiver` records are unsupported. Only the exact historical speed
-  waivers listed above retain their original scope. Unsupported shapes fail closed.
+  waivers in the [release records](#release-records) retain their original scope. Unsupported
+  shapes fail closed.
+
+### Cut stages
 
 1. `scripts/stage_release.py --from <previous> --release <new> ...` copies the tree, rewrites
    the component and identity pins (including `--config-sha`, the lifecycle configuration
@@ -387,9 +432,9 @@ still refuses an existing tag or GitHub release. If a founder-owned publication 
 tag push**, repeat its exact `--release`, `--commit` and `--pr` arguments with
 `--complete-existing --dry-run`. Completion requires remote `main` and the peeled remote tag to
 resolve to that exact commit, the original PR head/base and green checks to match (the PR may now be
-merged), and the clean exact-commit ready/pin verifier to pass again. Completion waits for the
-push-to-main and tag CI runs on the same SHA to finish green; in-progress or failed runs refuse
-completion.
+merged), and the clean exact-commit ready/pin verifier to pass again. The script reads only the
+pull request's check rollup: it does not query the push-to-`main` or tag CI runs, so confirm that
+those runs are green on the same SHA before `--publish`.
 
 Only after that preflight may the founder replace `--dry-run` with `--publish`. Completion never
 pushes `main` or a tag and never creates a local tag. It creates the missing release with the
@@ -450,11 +495,170 @@ then reports failure. Re-reading that proof still fails; it never deletes the ot
 state. Windows hold receipts start with `hold_created: false`, claim ownership only after
 exclusive file creation succeeds, and remove a hold only when that claim is true.
 
-The absent-directory correction was a successor to the frozen v0.12.0 acceptance candidate,
-not part of that candidate. PR #82's ordering rule required publication first: merging it
-earlier would have changed the exact commit that the completed release acceptance names.
+### Adding a lane
+
+The steps for a new lane follow the
+[completed v0.9.1 RTX 3090 addition](#completed-v091-rtx-3090-addition-and-future-lane-procedure),
+which keeps the full commands as a worked example. Obtain real qualification and package-build
+receipts plus the complete asset directory for the lane; never infer a package hash or a hardware
+result.
+
+1. Publish the lane's component prerelease (`scripts/hosts/cut-ninfer-4090-component.sh`; its
+   `--publish` is founder-only), then stage the product release with `scripts/stage_release.py`,
+   `--keep-deployment-profile`, and the predecessor's `client-components.json` as
+   `--omp-component`, leaving the existing lanes' component pins and deployment profiles intact.
+2. Commit the lane receipt under `releases/<version>/qualification/`. Run
+   `scripts/bind_native_variant.py --release <version> --lane <lane> --add`, which checks the
+   receipt and the supplied `SHA256SUMS` before it writes anything and creates the compatibility
+   and qualification-composition rows in canonical order. Then run
+   `scripts/rebind_release.py --release <version> --draft`.
+3. Commit the bindings and run
+   `scripts/rebind_release.py --release <version> --pin <receipt-commit> --stage lane`. Update the
+   existing routes' product pins and the current-release prose without changing their component
+   pins, and freeze the candidate only after those edits are committed.
+4. On the lane's host, from the clean candidate clone, run
+   `scripts/hosts/accept-native-public-install.ps1` (`-CandidateClone` and `-ClientBinary` are
+   observed provenance, not manifest-derived labels). Then run
+   `scripts/hosts/accept-rtx4090-route.py` with `--mode dry-run`, then `preflight`, then once with
+   `accept`.
+5. Run all five documented routes fresh (`rtx5090-container-host`, `rtx5090-macos-client`,
+   `rtx5090-windows-client`, `rtx4090-native`, `rtx3090-native`); no predecessor-route acceptance
+   is carried forward. Compose with `compose_route_acceptance.py`, commit the acceptance, and
+   advance `rebind_release.py` through `--stage platform`, `--stage acceptance`, and
+   `--stage manifest`, committing between stages and taking each `--pin` from the commit that
+   holds that stage's input evidence. Finish with
+   `python3 scripts/verify_release.py --release <version> --require-ready --check-pins`.
+
+### What release notes must and must not say
+
+Release notes must lead with the exact support boundary and manual topology, then link the manifest,
+qualification summary, quickstart, security model, and known limitations. Do not claim:
+
+- “first stateful Responses” or “first persistent KV cache”;
+- automatic container restart, multi-GPU inference, concurrent serving across both native lanes, or
+  multi-tenant support;
+- structured JSON-schema output on a runtime that lacks it, or unattended RTX 3090 role activation;
+- support response-time guarantees or other SLAs;
+- universal GPU performance; or
+- benchmark values not present in the public qualification summary.
+
+Use “OMP NInfer” for the product and repository.
+
+## After publication
+
+Publication does not change the tagged tree: the tag keeps `[Unreleased]` in `CHANGELOG.md` and its
+pre-publication wording. Once the release is GitHub `Latest`, edit these pages on `main`. No other
+page names a release.
+
+| Page | Edit |
+| --- | --- |
+| `README.md` | Proof paragraph, download link, the six lane numbers and their receipt links, the per-lane difference sentence, the clone-tag step, the decode badge value, the receipts-figure alt text, the support line |
+| `BRAND.md` | The README header copy, byte for byte |
+| `docs/FACTS.md` | Every section that names the release: the status line, "Current release", "Models" when the artifact changes, the manifest link in "Privacy and security boundary", the "Measured proof" table, "Where the history lives" |
+| `docs/RELEASES.md` | "Current release", "Upgrading from the previous release", the "Channels" row; one new record directly under `## Records` |
+| `docs/BENCHMARKS.md` | "Current qualified results"; one new record at the top of "Historical measurements" |
+| `docs/UPSTREAM.md` | "Current positions"; one new binding record directly under `## Records` |
+| `ROADMAP.md` | The "Current release" line, receipt links and open trackers in "Remaining work", one new "Shipped" row |
+| `docs/PERFORMANCE.md` | "Current state", only when a lane's kernel or schedule configuration changed |
+| `CHANGELOG.md` | Move the entries from `[Unreleased]` under the version heading with the actual ISO 8601 release date, open a new `[Unreleased]`, and update the comparison and tag links ([Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/)). Never date an unpublished version |
+| `llms.txt` and `site/llms.txt` | The summary block and the tagged links under "Release authorities"; the two files stay byte-identical |
+| `site/**/*.html` | Release, date, numbers and tagged links |
+| `assets/benchmarks.html` | The release label and the six numbers, then re-render `assets/benchmarks.png` as `BRAND.md` describes |
+
+Then search the living pages for the previous release, client version, and component tags. Only
+records and links pinned to an earlier tag may keep them.
+
+Three rules keep the records stable. A record is added, never edited: the predecessor's record is
+not marked superseded, because "Channels" names the current release. A new release gets one record
+in this page, with its summary and its component identities together. Every heading inside a new
+record contains its version or date, so it cannot take an older record's anchor.
+
+Never edited at publication: `docs/QUICKSTART.md` (its bytes are bound to the release's acceptance
+evidence and change only when the next release's guide is prepared), `docs/COMPATIBILITY.md`
+(generated), and the release-neutral pages `docs/ARCHITECTURE.md`, `docs/SECURITY.md`,
+`SECURITY.md`, `docs/DECISION_GUIDE.md`, `docs/RELATED_WORK.md`, `docs/TROUBLESHOOTING.md`,
+`CONTRIBUTING.md` and `examples/fleet/README.md`. `tests/test_docs.py` fails if the current
+release, client version or a component tag appears in one of them, and if any link names an anchor
+that does not exist.
+
+## Incidents and precedents behind these rules
+
+Dated notes moved out of the procedure above. Each subsection names the rule it sits behind.
+
+### Client distribution history
+
+Behind [Channels](#channels):
+
+- The historical fork client used separate `omp-beta` and stable `omp` Homebrew casks through
+  v0.7.4.
+- v0.10.0 introduced upstream OMP 18.4.10 binaries and no client cask; v0.11.0 and v0.12.0 pinned
+  stock OMP 18.8.7, v0.12.1 pinned 18.10.1, and v0.12.2 pinned 18.12.1; `v0.13.0` through `v0.14.0`
+  pinned stock OMP 18.12.6, `v0.15.0` through `v0.16.0` pinned stock OMP 18.14.0, `v0.16.2` pinned
+  stock OMP 18.15.0, `v0.17.0` pinned stock OMP 18.18.6, `v0.18.0` pinned stock OMP 18.18.7, and
+  current `v0.19.0` pins stock OMP 18.20.0.
+
+### v0.13.0 server shape and profile migration
+
+Behind [Candidate freeze](#candidate-freeze):
+
+When a release changes the server CLI shape (as `v0.13.0` did for `/checkpoints-v013`, the shared
+`--host-context-mib` budget, and mandatory `--session-checkpoint-require-origin-auth` with
+configuration hash `751d22dc`), `stage_release.py --profile-template-dir profiles/v0.13.0` binds the
+cut's binary, model, configuration, and client identities into release-local profile copies. That
+new server shape is promoted to the root `profiles/` and `compatibility.json` only by
+`rebind_release.py --stage lane`; editing identities alone cannot migrate the checkpoint mount or
+the unified Host budget.
+
+Staging also incorporates the release-local protocol boundaries (`runtime_contracts`) into the
+compatibility authority so that container capabilities (such as JSON-schema structured output and
+128-character tool names on the rebased RTX 5090 lane) remain distinct from carried native package
+limits. Never edit the immutable predecessor to make the root matrix match a candidate: root
+authority, public matrix, and live profiles stay byte-identical until the lane-pin cut.
+
+### Native sequencing notes
+
+Behind [Next native release sequencing](#next-native-release-sequencing):
+
+- **First run of the sequence:** The RTX 3090 parity candidate first exercised this sequence end
+  to end with one checkpointed command: preflight, neutral build, private-path scan, deterministic
+  package, managed install, protocol, 64K, restart, rollback, security, OMP, C1, receipt, and 370 W
+  restoration.
+- **Canonical native protocol evidence:** In `v0.13.1`, both rebased native lanes supply passed
+  canonical schema 2 product payloads at full and reduced shared Host budgets.
+- **Native dependency SBOM:** No published `v0.13.1`, `v0.13.0`, or historical release pin is
+  changed by this tooling.
+
+### External-install acceptance notes
+
+Behind [External-install acceptance](#external-install-acceptance):
+
+- **Deferred rows:** Two [#128](https://github.com/alphastorm/omp-ninfer/issues/128) rows remain
+  deferred: P4 retains the long-action/restoration design choice in
+  [#109](https://github.com/alphastorm/omp-ninfer/issues/109); P13's native QUICKSTART operate
+  blocks remain unchanged under the founder's native-documentation freeze.
+
+### Cut procedure notes
+
+Behind [Cut procedure](#cut-procedure):
+
+- **Receipt-audit scope:** Dropped audit entries and superseded composition hashes are historical
+  observations, not retained-byte claims; early v0.13.x audits used pre-replacement snapshots.
+- **Waiver projections:** Original v0.16.x projections without complete release/candidate or
+  raw-position bindings retain only their exact historical bytes and scope, including the held
+  v0.16.1 records; they confer no successor acceptance.
+
+### Release notes precedents
+
+Behind [Release notes](#release-notes):
+
+- **Absent-directory snapshots:** The absent-directory correction was a successor to the frozen
+  v0.12.0 acceptance candidate, not part of that candidate. PR #82's ordering rule required
+  publication first: merging it earlier would have changed the exact commit that the completed
+  release acceptance names.
 
 ### Completed v0.9.1 RTX 3090 addition and future lane procedure
+
+Behind [Adding a lane](#adding-a-lane):
 
 The RTX 3090 addition is complete: v0.9.1 accepted all five documented routes on candidate
 `c55185dd`, with the published package `da1d62f2` and all three hosts restored.
@@ -463,16 +667,15 @@ The RTX 3090 addition is complete: v0.9.1 accepted all five documented routes on
 [Composed acceptance](../releases/v0.9.1/acceptance/composed-external-installation.json).
 
 The commands below retain the completed v0.9.0-to-v0.9.1 cut as a worked example, not an
-instruction to republish it. For a future lane, substitute its release, candidate, lane,
-component identities, state root and fresh workspaces while preserving the composer, rebind
-and verification sequence. Obtain real qualification and package-build receipts plus the
-complete asset directory for that lane; never infer a package hash or hardware result.
-The v0.9.1 component uses source
-`f08309da3cc1d4226d127b7c9ce22267d12070cc` (v0.9.0's RTX 5090 source `e20060b6` plus the
-controller fix that lets a rollback launch a predecessor whose config predates
-`context_cache.host_kv_mib`), tag `v0.6.2-qwen38-3090-beta.1` and package
-`ninfer-rtx3090-native-v0.6.2-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz`.
-`ASSETS` must name a verified local copy of the complete component asset directory.
+instruction to republish it. For a future lane, substitute its release, candidate, lane, component
+identities, state root and fresh workspaces while preserving the composer, rebind and verification
+sequence. Obtain real qualification and package-build receipts plus the complete asset directory for
+that lane; never infer a package hash or hardware result. The v0.9.1 component uses source
+`f08309da3cc1d4226d127b7c9ce22267d12070cc` (v0.9.0's RTX 5090 source `e20060b6` plus the controller
+fix that lets a rollback launch a predecessor whose config predates `context_cache.host_kv_mib`),
+tag `v0.6.2-qwen38-3090-beta.1` and package
+`ninfer-rtx3090-native-v0.6.2-beta.1-windows-x86_64-cuda13.3-rtx3090.tar.gz`. `ASSETS` must name a
+verified local copy of the complete component asset directory.
 
 ```sh
 export NINFER_RUNTIME_DIR=/path/to/ninfer-checkout
@@ -484,11 +687,11 @@ bash scripts/hosts/cut-ninfer-4090-component.sh --lane rtx3090 --version v0.6.2 
 # FOUNDER-ONLY / AGENT MUST NOT EXECUTE: repeat that command with --publish instead of --dry-run.
 ```
 
-After founder publication, stage the next product release with the existing lanes' component
-pins and deployment profiles intact. In the worked example, v0.9.0 is the predecessor, not
-the current release. Passing the existing stock-client descriptor resets client/route acceptance
-without changing the OMP binary. Its predecessor-pin warnings are expected because OMP remains
-18.4.0; do not use `--require-clean-client` to demand a different client identity.
+After founder publication, stage the next product release with the existing lanes' component pins
+and deployment profiles intact. In the worked example, v0.9.0 is the predecessor, not the current
+release. Passing the existing stock-client descriptor resets client/route acceptance without
+changing the OMP binary. Its predecessor-pin warnings are expected because OMP remains 18.4.0; do
+not use `--require-clean-client` to demand a different client identity.
 
 ```sh
 python3 - <<'PY'
@@ -519,21 +722,20 @@ python3 scripts/rebind_release.py --release v0.9.1 --draft
 ```
 
 Every bind, a rebind of an existing lane as well as `--add`, runs the verifier's native-row checks
-against the lane receipt already in the release tree and the supplied `SHA256SUMS` before it
-writes anything; only then does it check that set into the release tree and write the manifest.
-`--add` also creates the release compatibility and qualification-composition rows in canonical
-order. Without it a missing row remains an error. The root authority and existing lanes are
-untouched.
-Commit the bindings, then run `rebind_release.py --release v0.9.1 --pin <receipt-commit> --stage lane`.
-At that cut update the existing routes' product pins to v0.9.1 and the current-release prose;
-do not change their component pins. Freeze the candidate only after those edits are committed.
+against the lane receipt already in the release tree and the supplied `SHA256SUMS` before it writes
+anything; only then does it check that set into the release tree and write the manifest. `--add`
+also creates the release compatibility and qualification-composition rows in canonical order.
+Without it a missing row remains an error. The root authority and existing lanes are untouched.
+Commit the bindings, then run
+`rebind_release.py --release v0.9.1 --pin <receipt-commit> --stage lane`.
+At that cut update the existing routes' product pins to v0.9.1 and the current-release prose; do not
+change their component pins. Freeze the candidate only after those edits are committed.
 
 On the authorized RTX 3090 host, run the public-asset check from the clean candidate clone.
 `-CandidateClone` must identify the checkout that actually executed the documented route, and
-`-ClientBinary` must identify the same stock OMP binary that route invoked. The example assumes
-that binary is installed in this acceptance home's `LOCALAPPDATA`; pass its retained path if
-the route used another location. These inputs are observed provenance, not manifest-derived
-identity labels.
+`-ClientBinary` must identify the same stock OMP binary that route invoked. The example assumes that
+binary is installed in this acceptance home's `LOCALAPPDATA`; pass its retained path if the route
+used another location. These inputs are observed provenance, not manifest-derived identity labels.
 
 ```powershell
 .\scripts\hosts\accept-native-public-install.ps1 -Lane rtx3090 `
@@ -545,8 +747,8 @@ identity labels.
 ```
 
 For documented acceptance, use a fresh same-volume remote workspace and the exact state hash and
-temporary previous-release id from the stopped hardware qualification baseline. Run the same
-driver arguments with `--mode dry-run`, then `preflight`, then once with `accept`.
+temporary previous-release id from the stopped hardware qualification baseline. Run the same driver
+arguments with `--mode dry-run`, then `preflight`, then once with `accept`.
 
 For a host that actually needs a container pause hold, add
 `--require-hold C:/ProgramData/OMP/windows-hosts/state/container-host-paused` to all three
@@ -560,37 +762,21 @@ python3 scripts/hosts/accept-rtx4090-route.py --lane rtx3090 --release v0.9.1 \
 ```
 
 Run all five documented routes fresh; no predecessor-route acceptance is carried forward.
-`compose_route_acceptance.py --release v0.9.1 --candidate "$CANDIDATE" --as-of "$AS_OF"`
-also takes `--measurement-prefix "$PREFIX" --evidence "$EVIDENCE"` and five `--route LANE=PATH`
-arguments: `rtx5090-container-host`, `rtx5090-macos-client`, `rtx5090-windows-client`,
-`rtx4090-native` and `rtx3090-native`. Evidence needs separate `rtx4090` and `rtx3090`
-preparation/observations/limitations, with real public-install and behavior/restoration results.
-It writes both native public-install receipts and refuses missing lanes or an accepted route
-also listed as deferred. Commit the acceptance, then perform the existing `--stage platform`,
-`--stage acceptance` and `--stage manifest` pin dance, committing between stages and taking
-each pin from the commit containing that stage's input evidence. Finish with:
+`compose_route_acceptance.py --release v0.9.1 --candidate "$CANDIDATE" --as-of "$AS_OF"` also takes
+`--measurement-prefix "$PREFIX" --evidence "$EVIDENCE"` and five `--route LANE=PATH` arguments:
+`rtx5090-container-host`, `rtx5090-macos-client`, `rtx5090-windows-client`, `rtx4090-native` and
+`rtx3090-native`. Evidence needs separate `rtx4090` and `rtx3090`
+preparation/observations/limitations, with real public-install and behavior/restoration results. It
+writes both native public-install receipts and refuses missing lanes or an accepted route also
+listed as deferred. Commit the acceptance, then perform the existing `--stage platform`,
+`--stage acceptance` and `--stage manifest` pin dance, committing between stages and taking each pin
+from the commit containing that stage's input evidence. Finish with:
 
 ```sh
 python3 scripts/verify_release.py --release v0.9.1 --require-ready --check-pins
 ```
 
-At cut time, move the applicable human-readable entries from `[Unreleased]` in
-[`CHANGELOG.md`](../CHANGELOG.md) into the exact version heading, using the actual ISO 8601
-release date, and add comparison/tag links as defined by
-[Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/). Never date an unpublished version.
-
-Release notes must lead with the exact support boundary and manual topology, then link the manifest,
-qualification summary, quickstart, security model, and known limitations. Do not claim:
-
-- “first stateful Responses” or “first persistent KV cache”;
-- automatic container restart, multi-GPU inference, concurrent native serving or multi-tenant support;
-- structured JSON-schema output on carried native lanes or unattended RTX 3090 role activation;
-- support response-time guarantees or other SLAs;
-- universal GPU performance; or
-- benchmark values not present in the public qualification summary.
-
-Use “OMP NInfer” for the product and repository.
-
+<a id="release-records"></a>
 ## Records
 
 Everything below this heading is a dated record, preserved as published. Records are append-only:

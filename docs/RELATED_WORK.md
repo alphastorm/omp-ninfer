@@ -10,11 +10,6 @@ provider continuation, a target-specific NInfer/Qwen runtime, a private client-t
 and one release and qualification authority. It does not claim invention of stateful Responses or
 persistent KV caching.
 
-External sources below were reviewed on 2026-08-26, the NInfer family section on 2026-08-28, and
-the local-server section on 2026-08-29; OMP NInfer self-descriptions were updated on 2026-11-13
-for published release **v0.19.0** (2026-11-13). These projects move quickly; consult their current
-documentation before making a deployment decision.
-
 ## The NInfer family
 
 The runtime is not ours alone; it rides an ecosystem of single-GPU NInfer ports, and the credit
@@ -22,39 +17,36 @@ ordering matters:
 
 - [Neroued/ninfer](https://github.com/Neroued/ninfer) is the original from-scratch C++20/CUDA
   engine for registered Qwen checkpoints on one RTX 5090 (`sm_120a`): the `.ninfer` artifact
-  format, MTP and DFlash2 speculative decoding, hybrid Gated DeltaNet execution, vision, and the
-  published performance and evaluation campaigns. Apache-2.0.
+  format, multi-token prediction (MTP) and [DFlash2](FACTS.md#glossary) speculative decoding,
+  hybrid Gated DeltaNet execution, vision, and the published performance and evaluation
+  campaigns. Apache-2.0.
 - [alphastorm/ninfer](https://github.com/alphastorm/ninfer) is this product's runtime fork of
-  `Neroued/ninfer`. It adds the OMP-oriented pieces: stateful OpenAI Responses
-  continuation/fork/delete semantics, durable local NVMe checkpoints, authenticated status
-  identity, container/OCI/SBOM and native Windows release packaging, and the qualification
-  evidence bound into the [`v0.19.0` manifest](../releases/v0.19.0/manifest.json) across the
-  RTX 5090 container lane (`v0.7.0-qwen38-5090-beta.8`, source `41f89b31`) and the UUID-bound native Windows RTX 3090
-  (`v0.8.0-qwen38-3090-beta.4`, `tc` tensor-core draft-verification build profile vs default SIMT verification, source `15c3e395`, identical serve source) and carried RTX 4090
-  (`v0.8.0-qwen38-4090-beta.3`, source `48c8ac46` from `v0.18.0`, without `v0.19.0`'s 6-retry / 10 s cap on memory-pressure checkpoint saves) lanes on upstream `Neroued/ninfer` master
-  `64d10fbf`.
-- [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090) ports the engine
-  to RTX 4090 (`sm_89`) with E8-lattice KV quantization, DirectStorage weight DMA, and D3D12
-  residency management. It originated the native Windows RTX 4090 lineage before the mainline
-  native runtime converged in `alphastorm/ninfer`.
+  `Neroued/ninfer`. It adds stateful OpenAI Responses continuation, fork, and delete semantics;
+  durable local NVMe checkpoints; authenticated status identity; container, OCI, SBOM, and native
+  Windows release packaging; and the qualification evidence. The qualified components for the
+  RTX 5090 container lane and the GPU-UUID-bound native Windows RTX 4090 and RTX 3090 lanes are
+  bound in [the current release](FACTS.md#current-release).
+- [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090) ports the engine to
+  RTX 4090 (`sm_89`) with E8-lattice KV quantization, DirectStorage weight DMA, and D3D12 residency
+  management. It originated the native Windows RTX 4090 lineage before the mainline native runtime
+  converged in `alphastorm/ninfer`.
 - [Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090) ports the engine to RTX 3090
-  (`sm_86`) with ReplaySSM and RotorQuant KV compression. It originated the historical v0.7.2
-  RTX 3090 lineage; current native Windows RTX 3090 releases build from the mainline
-  `alphastorm/ninfer` native runtime for `sm_86`.
+  (`sm_86`) with ReplaySSM and RotorQuant KV compression. It originated the first RTX 3090
+  lineage; native Windows RTX 3090 releases build from the mainline `alphastorm/ninfer` native
+  runtime for `sm_86` ([fork-point rationale](UPSTREAM.md#why-the-fork-points-are-what-they-are)).
 
-Numbers in the table below for `Neroued/ninfer`, `UDPSendToFailed/ninfer-4090`, and
-`Don-Chad/ninfer-3090` are published by each repository's maintainers on their own profiles,
-models, and quantization schemes; they are not cross-comparable and are not claims of this
-product. Product claims for OMP NInfer are bound to the per-lane qualification receipts in
-[`releases/v0.19.0/manifest.json`](../releases/v0.19.0/manifest.json) and detailed in
-[`BENCHMARKS.md`](BENCHMARKS.md).
+Numbers below for `Neroued/ninfer`, `UDPSendToFailed/ninfer-4090`, and `Don-Chad/ninfer-3090` come
+from each repository's maintainers on their own profiles, models, and quantization schemes; they
+are not cross-comparable or claims of this product. OMP NInfer claims are bound in
+[the current release](FACTS.md#current-release) and measured in
+[current qualified results](BENCHMARKS.md#current-qualified-results).
 
 | Repository | GPU | Published highlights | Relationship |
 | --- | --- | --- | --- |
 | [Neroued/ninfer](https://github.com/Neroued/ninfer) | RTX 5090 (`sm_120a`) | 1,313.8 aggregate tok/s at C=8 (35B-A3B); 15,544 tok/s prefill at 7,680 tokens (maintainer-reported) | The original engine; everything below forks or derives from it |
-| [alphastorm/ninfer](https://github.com/alphastorm/ninfer) | RTX 5090, RTX 4090, RTX 3090 | v0.19.0 runtime receipts: RTX 5090 181.71 server / 180.20 wall tok/s (2,048-token decode, DFlash2 K=7, BF16 KV); native RTX 4090 253.71 tok/s one-request (`C1`) decode (83.88% DFlash2 K=7 acceptance, INT8 KV, carried `beta.3`); native RTX 3090 227.19 tok/s one-request (`C1`) decode (84.04% DFlash2 K=7 acceptance, `tc` tensor-core draft verification, INT8 KV, two-request `C2` shared pool, 350 W cap) | This product's public runtime source and qualified component releases |
+| [alphastorm/ninfer](https://github.com/alphastorm/ninfer) | RTX 5090, RTX 4090, RTX 3090 | Per-lane qualification receipts in [current qualified results](BENCHMARKS.md#current-qualified-results) | This product's public runtime source and qualified component releases |
 | [UDPSendToFailed/ninfer-4090](https://github.com/UDPSendToFailed/ninfer-4090) | RTX 4090 (`sm_89`) | 229.9 tok/s MTP7 deep-context decode; 10.1 GB/s DirectStorage cold weight DMA; E8-lattice KV to 567K-token ceilings (maintainer-reported) | Upstream of the original native RTX 4090 port |
-| [Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090) | RTX 3090 (`sm_86`) | 165.3 tok/s decode at C=8; RotorQuant KV to 247,872-token contexts; ReplaySSM (maintainer-reported) | Upstream of the historical v0.7.2 RTX 3090 lineage |
+| [Don-Chad/ninfer-3090](https://github.com/Don-Chad/ninfer-3090) | RTX 3090 (`sm_86`) | 165.3 tok/s decode at C=8; RotorQuant KV to 247,872-token contexts; ReplaySSM (maintainer-reported) | Upstream of the original RTX 3090 port |
 
 ## Closest semantic prior art
 
@@ -63,8 +55,9 @@ product. Product claims for OMP NInfer are bound to the per-lane qualification r
 A stateful gateway in front of stateless vLLM core. Its public design includes OpenAI-compatible
 Responses, `previous_response_id`, tool-oriented request state, SSE/WebSocket transport, and
 SQLite/Postgres persistence. It is the closest public prior art for stateful Responses semantics.
-As of 2026-08 its [roadmap](https://github.com/vllm-project/agentic-api/blob/main/ROADMAP.md)
-still lists reliable `previous_response_id` state hydration as active work.
+When reviewed in 2026-08, its
+[roadmap](https://github.com/vllm-project/agentic-api/blob/main/ROADMAP.md) listed reliable
+`previous_response_id` state hydration as active work.
 
 OMP NInfer does not insert Agentic API because OMP already owns the authoritative transcript and
 transactional provider snapshot while NInfer owns local response and checkpoint state. Adding
@@ -74,23 +67,22 @@ durable conversation storage becomes a product requirement.
 
 ### [Ollama](https://docs.ollama.com/api/openai-compatibility)
 
-A widely used local model runtime with OpenAI-compatible endpoints and an accessible install UX.
-Its documented Responses compatibility is not the same OMP-owned `previous_response_id` transaction
-used here. Ollama is a better fit when broad model/hardware convenience matters more than the exact
-qualified NInfer/Qwen/RTX route.
+A widely used local runtime with OpenAI-compatible endpoints and accessible install UX. Its
+documented Responses compatibility is not the OMP-owned `previous_response_id` transaction here;
+choose Ollama when model and hardware breadth matter more than one qualified NInfer/Qwen/RTX route.
 
 ### [LM Studio](https://lmstudio.ai/docs)
 
-The most polished desktop path to discovering and running local models, with a headless daemon,
-OpenAI- and Anthropic-compatible local endpoints, tool calling, and structured output. Its
-documented endpoints are stateless chat-style requests: cross-turn state lives in the client, and
-no `previous_response_id` continuation contract is documented. A better fit when desktop model
-management and catalog breadth matter more than one qualified stateful OMP route.
+A polished desktop path to discovering and running local models, with a headless daemon, OpenAI-
+and Anthropic-compatible local endpoints, tool calling, and structured output. Its documented
+endpoints are stateless chat-style requests: the client holds cross-turn state, and no
+`previous_response_id` continuation contract is documented. LM Studio is a better fit when desktop
+model management and catalog breadth matter more than one qualified stateful OMP route.
 
 Adjacent single-machine servers with strong NVIDIA followings —
 [TabbyAPI](https://github.com/theroyallab/tabbyAPI) (ExLlama-based) and
-[mistral.rs](https://github.com/EricLBuehler/mistral.rs) — offer quant-focused OpenAI-compatible
-serving under the same stateless per-request contract.
+[mistral.rs](https://github.com/EricLBuehler/mistral.rs) — also serve quant-focused
+OpenAI-compatible endpoints as stateless per-request calls.
 
 ### [LocalAI](https://github.com/mudler/LocalAI)
 
@@ -100,8 +92,8 @@ breadth is a feature for a different product boundary, not a deficiency.
 
 ## Prefix and KV reuse
 
-- [Neroued/ninfer](https://github.com/Neroued/ninfer) itself ships in-process prefix reuse
-  (`prefix_reuse`, enabled in every profile this project ships): a live process avoids
+- [Neroued/ninfer](https://github.com/Neroued/ninfer) itself ships in-process prefix reuse (its
+  `prefix_reuse` engine setting, enabled in every lane profile here): a live process avoids
   recomputing an append-only prefix with no OMP NInfer involvement.
 - [vLLM Automatic Prefix Caching](https://docs.vllm.ai/en/latest/features/automatic_prefix_caching/)
   reuses matching prefix blocks inside vLLM.
@@ -109,31 +101,28 @@ breadth is a feature for a different product boundary, not a deficiency.
   instances and storage tiers.
 - [SGLang HiCache](https://docs.sglang.ai/advanced_features/hicache_best_practices.html) manages
   hierarchical KV cache tiers.
-- [llama.cpp server](https://github.com/ggml-org/llama.cpp/tree/master/tools/server) exposes slots and
-  cache-oriented local serving behavior.
+- [llama.cpp server](https://github.com/ggml-org/llama.cpp/tree/master/tools/server)
+  exposes slots and cache-oriented local serving behavior.
 
-Those systems establish extensive KV and prefix-cache prior art, and they fully cover the
-live-process append-only case. OMP NInfer's relevant distinction is that continuation is
-explicit, transactional, and durable rather than an implicit longest-prefix match: OMP publishes
-the transcript before committing a provider baseline, lineage (forks, rollback) is addressable
-through `previous_response_id`, and across all three qualified lanes the continuation is
-checkpointed to local NVMe so it survives inference-server restarts within each profile's restore
-boundary — which an in-process cache structurally cannot. The user-facing claim is therefore to
-keep a long coding session durable and resumable across process restarts on a GPU you own, not
-"no re-prefill," not "invent persistent KV," and not universal speedups.
+Those systems establish extensive KV and prefix-cache prior art and cover the live-process
+append-only case. OMP NInfer differs because continuation is explicit, transactional, and durable
+rather than an implicit longest-prefix match. OMP commits the transcript before advancing the
+provider baseline, and `previous_response_id` addresses forks and rollback. Across all three
+qualified lanes, local NVMe checkpoints preserve continuation across server restarts within each
+lane's [durability boundary](FACTS.md#durability) (same runtime, model, profile, and credentials),
+which an in-process cache cannot do. The product claim is a long coding session that survives
+process restarts on a GPU you own — not "no re-prefill", not inventing persistent KV, and not
+universal speedups.
 
 ## Distributed inference control planes
 
-- [NVIDIA Dynamo](https://github.com/ai-dynamo/dynamo) targets distributed inference serving and
-  disaggregated runtime concerns.
+- [NVIDIA Dynamo](https://github.com/ai-dynamo/dynamo) targets disaggregated distributed serving.
 - [llm-d](https://github.com/llm-d/llm-d) targets Kubernetes-native distributed inference.
 
-They address materially broader multi-node and multi-tenant scheduling and serving problems. The
-OMP NInfer v0.19.0 contract is one active GPU lane per host, one resident Qwen3.8 27B artifact per
-lane, one trusted owner, and bounded local concurrency (two requests in flight on the RTX 5090
-container lane and on the native Windows RTX 3090 lane over one shared 131,072-token pool; one
-request at a time on the native Windows RTX 4090 lane, with only one native lane running at a time on port `18082`); a distributed control plane would add cost without serving the
-local single-owner workflow.
+Both address multi-node and multi-tenant scheduling and serving. The OMP NInfer contract is one
+active GPU lane per host, one resident Qwen3.8 27B model per lane, one trusted owner, and at most
+two requests in flight on a lane ([lanes and limits](FACTS.md#lanes-and-limits)). A distributed
+control plane would add cost without serving this local single-owner workflow.
 
 ## Why direct OMP to NInfer
 
@@ -144,10 +133,16 @@ The direct route is intentional:
   and GPU cache lifetime;
 - the documented launchers, native controllers, and SSH/local-loopback transports already supply
   the narrow private machine boundary; and
-- the product manifest binds exact bytes and support claims across both.
+- the release manifest in [the current release](FACTS.md#current-release) binds exact bytes and
+  support claims across client and runtime.
 
-A new gateway or generic model framework should be introduced only if a named requirement cannot be
-owned cleanly by those existing boundaries.
+Add a gateway or generic framework only when existing boundaries cannot own a named requirement.
+
+## Review dates
+
+External sources were reviewed on 2026-08-26, the NInfer family section on 2026-08-28, and the
+local-server section on 2026-08-29. These projects move quickly; consult their current
+documentation before making a deployment decision.
 
 [Canonical facts](FACTS.md) · [Decision guide](DECISION_GUIDE.md) ·
 [Benchmarks](BENCHMARKS.md) · [Quickstart](QUICKSTART.md)

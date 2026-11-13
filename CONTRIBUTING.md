@@ -1,46 +1,47 @@
 # Contributing
 
-OMP NInfer connects [Oh My Pi](https://github.com/can1357/oh-my-pi) (OMP) to three exact qualified
-GPU lanes (RTX 5090, RTX 4090, and RTX 3090). High-signal installation
-reports, reproducible integration defects, documentation corrections, benchmark submissions,
-performance work through the
-[performance program](docs/PERFORMANCE.md), and release-contract fixes are useful. Generic
-model/runtime expansion and speculative abstractions are not current goals.
+[Oh My Pi](https://github.com/can1357/oh-my-pi) (coding-agent client) → OMP NInfer (qualified
+appliance and release layer) → NInfer (inference engine) → Qwen3.8 27B (served model). Qualified on
+RTX 5090 · 4090 · 3090. Installation reports, reproducible integration defects, documentation
+corrections, benchmark submissions, kernel work through the
+[performance program](docs/PERFORMANCE.md), and release-contract fixes are welcome. Generic model
+or runtime expansion and speculative abstractions are out of scope.
 
-## Help close a real gate
+<a id="help-close-a-real-gate"></a>
+## Ways to help
 
-- **Want to run an RTX 5090, 4090, or 3090 lane?**
-  [`Get started`](docs/QUICKSTART.md) with the exact published lane, then use the
+- **Want to run an RTX 5090, RTX 4090, or RTX 3090 [lane](docs/FACTS.md#glossary)?**
+  [Get started](docs/QUICKSTART.md) with the published lane, then file the matching
   [hardware qualification report](https://github.com/alphastorm/omp-ninfer/issues/new?template=hardware-report.yml),
   [performance result form](https://github.com/alphastorm/omp-ninfer/issues/new?template=benchmark-report.yml),
-  or [clean-install report](https://github.com/alphastorm/omp-ninfer/issues/new?template=clean-install-report.yml)
-  that matches the observation.
+  or [clean-install report](https://github.com/alphastorm/omp-ninfer/issues/new?template=clean-install-report.yml).
 - **Own a qualified card and a published package?** Run a clean install and report
   [time-to-first-turn plus every manual step](https://github.com/alphastorm/omp-ninfer/issues/new?template=clean-install-report.yml).
-- **Own an RTX 3090?** The qualified release package is public; independent content-safe hardware
-  reports now test transferability rather than closing a missing maintainer-hardware gate.
+- **Own an RTX 3090?** The qualified release package is public; independent redacted
+  [hardware reports](https://github.com/alphastorm/omp-ninfer/issues/new?template=hardware-report.yml)
+  test transferability across owner machines.
 - **Work on CUDA kernels?** Pick a measured bottleneck from the
   [performance program](docs/PERFORMANCE.md), then submit before/after receipts for the affected
   end-to-end workload with the
   [performance result form](https://github.com/alphastorm/omp-ninfer/issues/new?template=benchmark-report.yml).
-- **Need a different model/profile?** Use the
+- **Need a different model or profile?** Use the
   [model/profile request](https://github.com/alphastorm/omp-ninfer/issues/new?template=model-profile-request.yml)
   so a derivative cannot silently inherit the official artifact identity or qualification.
 
 Every public form forbids keys, private identifiers and paths, prompts, source code, model output,
-raw logs, and session data unless a reporter deliberately publishes content they own after
-redaction. Security reports always stay private.
+raw logs, and session data unless a reporter deliberately publishes redacted content they own.
+Security reports stay private ([`SECURITY.md`](SECURITY.md)).
 
 ## Route the change to its owner
 
 - Product manifest, profile, setup, qualification composition, benchmarks/leaderboard, and support
-  docs: this repository.
+  docs: `alphastorm/omp-ninfer` (this repository).
 - NInfer engine/server, CUDA kernels, numerical behavior, or container:
   [`alphastorm/ninfer`](https://github.com/alphastorm/ninfer) (downstream of
   [Neroued/ninfer](https://github.com/Neroued/ninfer); kernel/perf work starts at
-  [docs/PERFORMANCE.md](docs/PERFORMANCE.md)).
-- OMP session/tool/provider semantics: upstream
-  [Oh My Pi](https://github.com/can1357/oh-my-pi). This product pins unmodified upstream release
+  [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md)).
+- Oh My Pi (OMP) session/tool/provider semantics: upstream
+  [Oh My Pi](https://github.com/can1357/oh-my-pi). OMP NInfer pins unmodified upstream release
   binaries by SHA-256 and carries no client fork.
 - Native Windows RTX 4090 and RTX 3090 runtime components:
   [`alphastorm/ninfer`](https://github.com/alphastorm/ninfer) (upstream port lineage:
@@ -49,24 +50,50 @@ redaction. Security reports always stay private.
 
 Do not duplicate implementation across repositories to make a local patch easier.
 
-## Performance submissions
+<a id="performance-submissions"></a>
+<a id="performance-contributions"></a>
+## Performance work
 
-Use the
-[performance result form](https://github.com/alphastorm/omp-ninfer/issues/new?template=benchmark-report.yml).
-Entries land in the [community results table](docs/BENCHMARKS.md#community-results) after the
-release identities check out. Content-safe values only; the measurement method is part of the
-submission.
+- **Benchmark submissions:** use the
+  [performance result form](https://github.com/alphastorm/omp-ninfer/issues/new?template=benchmark-report.yml)
+  with redacted values and the measurement method. Entries land in the
+  [community results table](docs/BENCHMARKS.md#community-results) after their release identities
+  check out.
+- **Kernel and runtime changes:** read [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md) for the
+  measured baseline, [profiling lane](docs/PERFORMANCE.md#the-profiling-lane),
+  [experiment ledger](docs/PERFORMANCE.md#experiment-ledger),
+  [ideas backlog](docs/PERFORMANCE.md#ideas-backlog), and
+  [submission rules](docs/PERFORMANCE.md#contributing-a-result). Claim a `perf: <idea>` issue in
+  [`alphastorm/ninfer`](https://github.com/alphastorm/ninfer) before writing code, and submit
+  results with preserved profiling packets and oracle tests.
 
-## Performance contributions
+## Where each fact lives
 
-Read [docs/PERFORMANCE.md](docs/PERFORMANCE.md) first: it holds the measured baseline, the scripted
-profiling lane, the experiment ledger (including rejected attempts, so you do not repeat them), and
-the open ideas backlog. Claim an idea with a `perf: <idea>` issue in the runtime repository before
-writing code; land results with preserved profiling packets and oracle tests.
+| Fact class | Owner |
+| --- | --- |
+| Current release identities and lane limits | [`docs/FACTS.md`](docs/FACTS.md) |
+| Measured results and method | [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md) |
+| Install steps | [`docs/QUICKSTART.md`](docs/QUICKSTART.md) |
+| Upgrade steps, release procedure, and release records | [`docs/RELEASES.md`](docs/RELEASES.md) |
+| Failure recovery | [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) |
+| Security boundary (reporting policy: [`SECURITY.md`](SECURITY.md)) | [`docs/SECURITY.md`](docs/SECURITY.md) |
+| Experiments and kernel backlog | [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md) |
+| Upstream positions | [`docs/UPSTREAM.md`](docs/UPSTREAM.md) |
+| Open work and decisions | [`ROADMAP.md`](ROADMAP.md) |
+
+- Link to the owner instead of restating a fact on another page.
+- A heading's anchor is an interface; keep `<a id="old-slug"></a>` above any renamed heading.
+- Text below a `## Records` heading is append-only; add new records without editing old ones.
+- Never edit `docs/QUICKSTART.md`, `docs/COMPATIBILITY.md`, `releases/`, or `docs/measurements/` by
+  hand (updated via the [release procedure](docs/RELEASES.md#how-a-release-is-cut)).
+- Reference pages (`CONTRIBUTING.md`, `SECURITY.md`, `docs/ARCHITECTURE.md`, `docs/SECURITY.md`,
+  `docs/DECISION_GUIDE.md`, `docs/RELATED_WORK.md`, `docs/TROUBLESHOOTING.md`, and
+  `examples/fleet/README.md`) name no current release, client version, or component tag;
+  `tests/test_docs.py` checks anchors and release-neutral pages.
 
 ## Before opening a pull request
 
-1. Base the change on current `main`.
+1. Base the change on `main`.
 2. Keep release/profile identities exact; do not replace hashes with mutable tags or sample values.
 3. Remove API keys, credentials, prompts, outputs, raw request logs, private paths, hostnames, IPs,
    and workstation-specific receipts.
@@ -81,18 +108,21 @@ writing code; land results with preserved profiling packets and oracle tests.
    bash -n examples/manual-tunnel/*.sh
    ```
 
-A draft manifest is expected to pass the first command and fail `--require-ready`. A release-cut pull
-request must make `python3 scripts/verify_release.py --require-ready` pass with real published
-identities and a recorded external-install result.
+A draft manifest is expected to pass the first command and fail `--require-ready`. A release-cut
+pull request ([how a release is cut](docs/RELEASES.md#how-a-release-is-cut)) must make
+`python3 scripts/verify_release.py --require-ready` pass with real published identities and a
+recorded external-install result.
 
 Use Conventional Commits 1.0.0 subjects (`type(scope): lowercase imperative description`). Keep
 release notes human-readable; the changelog is not a commit dump.
 
 ## Support reports
 
-Use the issue forms rather than attaching raw bundles. Hardware diversity is useful only when the
-observed OS/GPU/driver/runtime state and failing transition are clear. See
-[`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) for safe fields.
+Use the issue forms, including the
+[installation-failure form](https://github.com/alphastorm/omp-ninfer/issues/new?template=installation-failure.yml),
+rather than attaching raw log archives. Include the observed OS, GPU, driver, runtime state, and
+failing step; see [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md#reporting-safely) for safe
+fields.
 
 ## Security
 
