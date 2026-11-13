@@ -17,6 +17,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Recheck container-host space read-only before every attempt marker or Windows hold, and
   preserve failed public-install receipts even when their parent workspace does not exist.
 
+### Added
+
+- Archive native server request, retained stderr and shutdown records after managed Stop;
+  fail both host and collected acceptance windows on HTTP 503 rejections, checkpoint
+  write errors or incomplete/refused shutdown saves. Record counts without private paths;
+  capacity/stale save receipts and client cancellations remain observations, not failures.
+  Capture only candidate logs, once per file, with path-free copied/missing/failed names;
+  log or capture-receipt failures never interrupt canonical restoration.
+
 ### Changed
 
 - Mark v0.18.0 as the published release across the README, facts, roadmap, release history,

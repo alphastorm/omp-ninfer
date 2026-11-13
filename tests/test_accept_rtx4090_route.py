@@ -115,6 +115,12 @@ def rtx3090_window(root: Path, model: str) -> dict:
     requests = [{"event": "request_done", "request": {"request_id": str(i), "model": model,
                  "has_tool_history": i == 1}, "result": {"tool_call_count": int(i == 0)}} for i in range(4)]
     (evidence / "documented-requests.jsonl").write_text("\n".join(map(json.dumps, requests)))
+    (evidence / "server-requests.jsonl").write_text("\n".join(map(json.dumps, requests)))
+    (evidence / "server-stderr.log").write_text("synthetic server ready\n")
+    write_json(evidence / "shutdown.json", {"artifact_type": "ninfer_serve_shutdown_report",
+               "schema_version": 1, "complete": True, "saved": 1, "refused": 0, "skipped": 0})
+    write_json(evidence / "window.json", {"status": "passed_and_restored",
+               "first_failing_boundary": None, "restoration_status": "passed"})
     logs = [{"timestamp": "2026-01-01T00:00:00Z", "provider": "ninfer-native-3090", "model": model,
              "message": "agent_end maintenance routing", "stopReason": "error", "contentBlocks": 0,
              "hasText": False, "hasToolCalls": False},
@@ -876,7 +882,7 @@ FreeSpaceRecord $Scratch|ConvertTo-Json -Compress
             write_json(root / "driver-preflight.json", {"plan": {"candidate": "1" * 40,
                        "client_install": {"lane": "rtx4090-native"}},
                        **{key: "a" * 64 for key in
-                          ("orchestrator_sha256", "probe_sha256", "gpu_helper_sha256")}})
+                          ("orchestrator_sha256", "health_reducer_sha256", "probe_sha256", "gpu_helper_sha256")}})
             command = ["accept-rtx4090-route.py", "--release", "v0.18.0", "--candidate", "1" * 40,
                        "--host", "fixture-host", "--workspace", directory,
                        "--remote-workspace", "C:/acceptance", "--expected-state-sha256", "2" * 64,
@@ -961,6 +967,277 @@ FreeSpaceRecord $Scratch|ConvertTo-Json -Compress
         self.assertLess(source.index("check_free_space()"), source.index("root.mkdir(mode=0o700"))
         public = (ROOT / "scripts/hosts/accept-native-public-install.ps1").read_text(encoding="utf-8")
         self.assertLess(public.index("$receipt.free_space ="), public.index("New-Item -ItemType Directory"))
+
+
+class ServerHealthTests(unittest.TestCase):
+    RESTORE_CAPTURE = r'''
+param($Source,$Scratch,$Case)
+$ErrorActionPreference='Stop'
+Set-StrictMode -Version Latest
+$tokens=$null;$errors=$null
+$ast=[Management.Automation.Language.Parser]::ParseFile($Source,[ref]$tokens,[ref]$errors)
+if($errors.Count){throw ($errors|Out-String)}
+foreach($name in @('SaveJson','ReadJson','Hash','Describe','SaveServerLogs','Restore','Audit')){
+    $node=$ast.Find({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -ceq $name},$true)
+    Invoke-Expression $node.Extent.Text
+}
+$utf8=[Text.UTF8Encoding]::new($false)
+$Workspace=Join-Path $Scratch 'evidence';$StateRoot=Join-Path $Scratch 'state'
+$baseline=Join-Path $Scratch 'baseline';$Stage=Join-Path $Scratch 'stage'
+$journal=Join-Path $Workspace 'preparation.json';$TaskName='fixture-task';$FirstRelease=$false
+New-Item -ItemType Directory -Force $Workspace,$StateRoot,$Stage,"$Workspace/preserved","$Workspace/qualified-artifacts","$baseline/files"|Out-Null
+function SaveJson($path,$value){
+    if($Case -eq 'receipt-failure' -and $path.EndsWith('server-log-capture.json')){throw 'injected receipt failure'}
+    [IO.File]::WriteAllText($path.Replace('\','/'),($value|ConvertTo-Json -Depth 50),$utf8)
+}
+function Get-Acl {param($Path,$LiteralPath) @{Sddl='fixture-acl'}}
+function SetExactAcl($path,$sddl){if(-not (Test-Path -LiteralPath $path)){throw 'restoring absent path'}}
+function EnableExactAcl {}
+function Get-ScheduledTask {param($TaskName,$ErrorAction) @{State='Ready'}}
+function Export-ScheduledTask {param($TaskName) '<Task/>'}
+function Get-CimInstance {param($ClassName,$Filter)}
+function Get-NetTCPConnection {param($State,$ErrorAction)}
+function Resolve-NativeGpuUuid($root){'fixture-gpu'}
+function Get-NativeGpuPowerLimit($uuid){450}
+function SupportFiles {[pscustomobject]@{FullName="$StateRoot\state.json"}}
+function SupportDirectories {[pscustomobject]@{FullName=$StateRoot}}
+function AssertFreeSpace($phase,[switch]$ObserveOnly){$script:spaceObserved=$true}
+function Probe {
+    $s=ReadJson "$StateRoot/state.json"
+    @{state_sha256=(Hash "$StateRoot/state.json");state_sddl='fixture-acl';root_sddl='fixture-acl'
+      task_state='Ready';processes=@();listeners=@();lease_present=$false;lease_entries=@()
+      power_limit_w=450;active_release=$s.active_release;previous_release=$s.previous_release
+      prepared_release=$s.prepared_release;holds=@();client_files=@()}
+}
+$candidate=[pscustomobject]@{release_root=(Join-Path $Scratch 'candidate')}
+$incumbent=[pscustomobject]@{release_root=(Join-Path $Scratch 'incumbent')}
+foreach($record in @($candidate,$incumbent)){New-Item -ItemType Directory -Force (Join-Path $record.release_root 'logs')|Out-Null}
+$original=[pscustomobject]@{active_release='candidate';previous_release='incumbent';prepared_release=$null
+    releases=[pscustomobject]@{candidate=$candidate;incumbent=$incumbent}}
+SaveJson "$StateRoot/state.json" $original
+Copy-Item "$StateRoot/state.json" "$baseline/files/state.json"
+[IO.File]::WriteAllText("$baseline\task.xml",'<Task/>')
+[IO.File]::WriteAllText((Join-Path $Stage 'original.txt'),'original stage')
+$script:snapshot=@{observable=(Probe);files=@(@{relative='state.json';sha256=(Hash "$StateRoot/state.json");sddl='fixture-acl'})
+    directories=@(@{relative='';exists=$true;sddl='fixture-acl'});documented_stage=(Describe $Stage)}
+function ValidateSnapshot($path){$script:snapshot}
+Move-Item $Stage "$Workspace/preserved/stage"
+New-Item -ItemType Directory $Stage|Out-Null
+[IO.File]::WriteAllText((Join-Path $Stage 'window.txt'),'window stage')
+SaveJson $journal @{status='prepared';moves=@(@{kind='documented-stage';path=$Stage;preserved="$Workspace/preserved/stage";exists=$true})}
+if($Case -eq 'incumbent'){
+    SaveJson "$StateRoot/state.json" @{active_release='incumbent';previous_release='older';prepared_release=$null;releases=@{incumbent=$incumbent}}
+}else{
+    $original.previous_release='older';SaveJson "$StateRoot/state.json" $original
+}
+$script:stops=0;$script:copyNames=@();$script:spaceObserved=$false
+function Control($action,$file){
+    $script:stops++
+    $s=ReadJson "$StateRoot/state.json";$root=$s.releases.([string]$s.active_release).release_root
+    [IO.File]::WriteAllText((Join-Path $root 'logs/requests.jsonl'),"{`"event`":`"stop_$script:stops`"}")
+    [IO.File]::WriteAllText((Join-Path $root 'logs/stderr.log'),"stop $script:stops")
+    [IO.File]::WriteAllText((Join-Path $root 'logs/stderr.log.previous'),"previous $script:stops")
+    SaveJson (Join-Path $root 'logs/shutdown.json') @{complete=$true;refused=0;saved=$script:stops;skipped=0}
+}
+function Copy-Item {
+    param($LiteralPath,$Path,$Destination,[switch]$Force,$ErrorAction)
+    $source=if($LiteralPath){$LiteralPath}else{$Path}
+    if($source -match '[\\/]logs[\\/]'){
+        $script:copyNames+=([IO.Path]::GetFileName($source))
+        if($Case -in @('copy-failure','outage-copy-failure') -and $source.EndsWith('stderr.log')){throw 'injected log copy failure'}
+    }
+    Microsoft.PowerShell.Management\Copy-Item -LiteralPath $source -Destination $Destination -Force:$Force
+}
+$outageContinued=$false
+if($Case -in @('captured-outage','outage-copy-failure')){
+    $installed=$candidate
+    $outage=$ast.Find({param($n) $n -is [Management.Automation.Language.TryStatementAst] -and
+        $n.Extent.Text.StartsWith("try{Control Stop 'outage-stop.json'}")},$true)
+    if(-not $outage){throw 'missing production outage capture'}
+    Invoke-Expression $outage.Extent.Text
+    $outageContinued=$true
+}
+$result=Restore
+if($result.status -cne 'passed'){throw 'production restoration audit failed'}
+if((Get-Content (Join-Path $Stage 'original.txt')) -cne 'original stage'){throw 'stage not restored'}
+if((Get-Content "$Workspace/qualified-artifacts/documented-stage/window.txt") -cne 'window stage'){throw 'window evidence lost'}
+if((ReadJson $journal).status -cne 'restored' -or -not $script:spaceObserved){throw 'restoration did not finish'}
+@{restoration=$result;copy_names=@($script:copyNames);outage_continued=$outageContinued;stops=$script:stops}|ConvertTo-Json -Depth 20 -Compress
+'''
+
+    def restored_log_capture(self, case):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            script = root / "restore-capture.ps1"
+            script.write_text(self.RESTORE_CAPTURE, encoding="utf-8")
+            result = subprocess.run([shutil.which("pwsh"), "-NoProfile", "-File", str(script),
+                                     str(ROOT / "scripts/hosts/accept-rtx4090-route.ps1"), directory, case],
+                                    capture_output=True, text=True, encoding="utf-8", timeout=30)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            value = json.loads(result.stdout.splitlines()[-1])
+            self.assertEqual(value["restoration"]["status"], "passed")
+            self.assertTrue(all(value["restoration"]["checks"].values()))
+            evidence = root / "evidence"
+            capture = evidence / "server-log-capture.json"
+            value["capture"] = json.loads(capture.read_text()) if capture.exists() else None
+            value["logs"] = {name: (evidence / name).read_text() for name in
+                             ("server-requests.jsonl", "server-stderr.log", "server-stderr.previous.log", "shutdown.json")
+                             if (evidence / name).is_file()}
+            value["health"] = DRIVER.assess_server_health(evidence)
+            value["candidate_shutdown"] = json.loads((root / "candidate/logs/shutdown.json").read_text()) \
+                if (root / "candidate/logs/shutdown.json").exists() else None
+            return value
+
+    @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed for capture failure restoration")
+    def test_restore_completes_and_audits_when_log_copy_or_receipt_fails(self):
+        for case in ("copy-failure", "outage-copy-failure", "receipt-failure"):
+            with self.subTest(case=case):
+                value = self.restored_log_capture(case)
+                if case == "receipt-failure":
+                    self.assertIsNone(value["capture"])
+                else:
+                    self.assertEqual(value["capture"]["failed"], ["server-stderr.log"])
+                    self.assertEqual(value["capture"]["missing"], [])
+                    self.assertEqual(set(value["capture"]["copied"]),
+                                     {"server-requests.jsonl", "server-stderr.previous.log", "shutdown.json"})
+                    self.assertEqual(value["health"]["status"], "failed")
+                    self.assertFalse(value["health"]["checks"]["stderr_log_present"])
+                if case == "outage-copy-failure":
+                    self.assertTrue(value["outage_continued"])
+
+    @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed for candidate-only log capture")
+    def test_restore_does_not_copy_incumbent_logs(self):
+        value = self.restored_log_capture("incumbent")
+        self.assertEqual(value["logs"], {})
+        self.assertEqual(value["copy_names"], [])
+        self.assertEqual(value["capture"]["copied"], [])
+        self.assertEqual(value["capture"]["failed"], [])
+        self.assertEqual(set(value["capture"]["missing"]),
+                         {"server-requests.jsonl", "server-stderr.log", "server-stderr.previous.log", "shutdown.json"})
+        self.assertEqual(value["health"]["status"], "failed")
+
+    @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed for write-once log capture")
+    def test_restore_preserves_logs_captured_after_outage(self):
+        value = self.restored_log_capture("captured-outage")
+        self.assertTrue(value["outage_continued"])
+        self.assertEqual(value["stops"], 2)
+        self.assertEqual(len(value["copy_names"]), 4)
+        self.assertEqual(value["logs"]["server-requests.jsonl"], '{"event":"stop_1"}')
+        self.assertEqual(value["logs"]["server-stderr.log"], "stop 1")
+        self.assertEqual(value["logs"]["server-stderr.previous.log"], "previous 1")
+        self.assertEqual(json.loads(value["logs"]["shutdown.json"])["saved"], 1)
+        self.assertEqual(value["candidate_shutdown"]["saved"], 2)
+        self.assertEqual(value["capture"]["failed"], [])
+        self.assertEqual(value["capture"]["missing"], [])
+
+    def test_health_failures_fail_behavior_and_the_collected_window(self):
+        for fault in ("queue", "write", "incomplete", "refused", "missing"):
+            with self.subTest(fault=fault), tempfile.TemporaryDirectory() as directory:
+                window = rtx3090_window(Path(directory), "q38-ninfer")
+                evidence = window["evidence"]
+                if fault == "queue":
+                    (evidence / "server-requests.jsonl").write_text(json.dumps({
+                        "artifact_type": "ninfer_serve_request_log", "event": "request_rejected",
+                        "error": {"status": 503, "code": "request_queue_timeout",
+                                  "message": "synthetic private path must not be published"}}) + "\n")
+                elif fault == "write":
+                    (evidence / "server-stderr.log").write_text(json.dumps({
+                        "schema": "ninfer-checkpoint-io-error/1", "operation": "payload_write",
+                        "error_code": 112, "reason": "capacity", "path": "private synthetic path"}) + "\n")
+                elif fault == "missing":
+                    (evidence / "shutdown.json").unlink()
+                else:
+                    write_json(evidence / "shutdown.json", {"complete": fault != "incomplete",
+                               "saved": 0, "refused": int(fault == "refused"), "skipped": 1})
+                result = DRIVER.assess_evidence(evidence, window["clone"], window["bundle"],
+                                                "v0.9.1", "1" * 40, "rtx3090")
+                self.assertEqual(result["status"], "failed")
+                self.assertFalse(result["checks"]["server_health_passed"])
+                self.assertNotIn("private", json.dumps(result["server_health"]))
+                host_window = json.loads((evidence / "window.json").read_text(encoding="utf-8"))
+                self.assertEqual(host_window["status"], "failed")
+                self.assertEqual(host_window["first_failing_boundary"], "behavior-evidence")
+
+    def test_capacity_stale_client_cancel_and_non_503_rejections_are_observations(self):
+        with tempfile.TemporaryDirectory() as directory:
+            evidence = Path(directory)
+            rows = [{"event": "request_rejected", "error": {"status": status, "code": code}}
+                    for status, code in ((499, "client_disconnected"), (400, "reasoning_effort_not_supported"))]
+            (evidence / "server-requests.jsonl").write_text("\n".join(map(json.dumps, rows)), encoding="utf-8")
+            (evidence / "server-stderr.log").write_text(
+                "synthetic req#1 response failed during transport | HTTP 499 | client disconnected\n" + "\n".join(map(json.dumps, [
+                {"schema": "ninfer-durable-operation/1", "operation": "save", "state": "refused",
+                 "reason": "capacity", "host_shortage": "busy"},
+                {"schema": "ninfer-durable-operation/1", "operation": "save", "state": "stale",
+                 "reason": "stale_publication"}])), encoding="utf-8")
+            write_json(evidence / "shutdown.json", {"complete": True, "refused": 0, "saved": 2, "skipped": 1})
+            health = DRIVER.assess_server_health(evidence)
+            self.assertEqual(health["status"], "passed")
+            self.assertEqual(health["capacity_save_receipts"], 1)
+            self.assertEqual(health["stale_save_receipts"], 1)
+            self.assertEqual(health["client_disconnections"], 1)
+            self.assertEqual(health["http_499_transport_errors"], 1)
+            # A prior launch's retained stderr must count too.
+            (evidence / "server-stderr.previous.log").write_text(json.dumps({
+                "schema": "ninfer-checkpoint-io-error/1", "operation": "payload_write", "error_code": 112}))
+            health = DRIVER.assess_server_health(evidence)
+            self.assertEqual(health["checkpoint_write_errors"], 1)
+            self.assertEqual(health["status"], "failed")
+            command = [sys.executable, str(ROOT / "scripts/hosts/accept-rtx4090-route.py"),
+                       "server-health", "--evidence", str(evidence)]
+            result = subprocess.run(command, capture_output=True, text=True, encoding="utf-8")
+            self.assertEqual(result.returncode, 1, result.stderr)
+            self.assertEqual(json.loads((evidence / "server-health.json").read_text())["status"], "failed")
+
+    def test_host_captures_health_after_stop_and_gates_its_window(self):
+        source = (ROOT / "scripts/hosts/accept-rtx4090-route.ps1").read_text(encoding="utf-8")
+        self.assertIn("finally{SaveServerLogs", source)
+        self.assertIn("server-stderr.previous.log", source)
+        self.assertIn("AssertServerHealth", source)
+        self.assertLess(source.rindex("AssertServerHealth"), source.index('SaveJson "$Workspace\\window.json"'))
+        self.assertIn("initial install launch covered by requests only", source)
+        driver = (ROOT / "scripts/hosts/accept-rtx4090-route.py").read_text(encoding="utf-8")
+        self.assertIn('str(orchestrator.with_suffix(".py"))', driver)
+        self.assertIn('sync_window_failure', driver)
+
+    @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed for stopped-server log capture")
+    def test_stopped_server_capture_copies_only_the_four_named_logs(self):
+        proof = r'''
+param($Source,$Scratch)
+$ErrorActionPreference='Stop'
+$tokens=$null;$errors=$null
+$ast=[Management.Automation.Language.Parser]::ParseFile($Source,[ref]$tokens,[ref]$errors)
+if($errors.Count){throw ($errors|Out-String)}
+$utf8=[Text.UTF8Encoding]::new($false)
+foreach($name in @('SaveJson','SaveServerLogs')){
+    $node=$ast.Find({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq $name},$true)
+    if(-not $node){throw 'missing log capture'}
+    Invoke-Expression $node.Extent.Text
+}
+$Workspace=Join-Path $Scratch 'evidence'
+SaveServerLogs @{release_root=(Join-Path $Scratch 'candidate')}
+'''
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            logs = root / "candidate/logs"
+            logs.mkdir(parents=True)
+            (root / "evidence").mkdir()
+            names = {"requests.jsonl": "server-requests.jsonl", "stderr.log": "server-stderr.log",
+                     "stderr.log.previous": "server-stderr.previous.log", "shutdown.json": "shutdown.json"}
+            for name in (*names, "private-key.txt"):
+                (logs / name).write_text("synthetic " + name, encoding="utf-8")
+            script = root / "capture.ps1"
+            script.write_text(proof, encoding="utf-8")
+            result = subprocess.run([shutil.which("pwsh"), "-NoProfile", "-File", str(script),
+                                     str(ROOT / "scripts/hosts/accept-rtx4090-route.ps1"), directory],
+                                    capture_output=True, text=True, encoding="utf-8", timeout=30)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertEqual({p.name for p in (root / "evidence").iterdir()},
+                             set(names.values()) | {"server-log-capture.json"})
+            capture = json.loads((root / "evidence/server-log-capture.json").read_text())
+            self.assertEqual(capture, {"copied": list(names.values()), "missing": [], "failed": []})
+            for source, destination in names.items():
+                self.assertEqual((root / "evidence" / destination).read_bytes(), (logs / source).read_bytes())
 
 
 class DocumentedModelTests(unittest.TestCase):

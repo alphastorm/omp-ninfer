@@ -22,11 +22,6 @@ import sys
 import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from compose_native_qualification import (
-    first_release_rollback, native_status_errors, native_probe_summary, native_probe_acceptance_errors,
-)
-from documented_route import provider_model_id
-from verify_release import native_profile, product_version
 
 
 def quote(value: object) -> str:
@@ -90,6 +85,7 @@ def request_shape(completed: list[dict]) -> dict[str, bool]:
 def documented_model(bundle: Path, clone: Path) -> str:
     """The model the bundle's documented provider step configures from the candidate clone, which
     every documented request names. The candidate documents it; no lane table here can drift."""
+    from documented_route import provider_model_id
     steps = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))["steps"]
     provider = [step for step in steps if step["slug"] == "provider"]
     if len(provider) != 1:
@@ -97,8 +93,91 @@ def documented_model(bundle: Path, clone: Path) -> str:
     return provider_model_id((bundle / provider[0]["file"]).read_text(encoding="utf-8"), clone)
 
 
+def assess_server_health(evidence: Path) -> dict:
+    """Reduce private server records to counts and bounded fields, never paths or messages.
+
+    The server retains current/previous stderr only. The initial install launch is
+    covered by the append-only request log, not a claim of complete stderr history.
+    This reducer also runs on the host before window.json is finalized.
+    """
+    def rows(path: Path) -> list[dict]:
+        if not path.is_file():
+            return []
+        result = []
+        for line in private_text(path).splitlines():
+            try:
+                row = json.loads(line)
+            except ValueError:
+                continue  # stderr also contains human-readable messages
+            if isinstance(row, dict):
+                result.append(row)
+        return result
+
+    requests = rows(evidence / "server-requests.jsonl")
+    stderr_paths = [evidence / name for name in ("server-stderr.previous.log", "server-stderr.log")
+                    if (evidence / name).is_file()]
+    stderr = [row for path in stderr_paths for row in rows(path)]
+    # Active-stream cancellations are human transport messages, not request_rejected
+    # records. Count them separately; neither form is a health failure.
+    transport_cancellations = sum(
+        len(re.findall(r"\| HTTP 499 \| client disconnected(?:\r?$)", private_text(path), re.M))
+        for path in stderr_paths)
+    rejected = [row.get("error", {}) for row in requests if row.get("event") == "request_rejected"]
+    errors = [row for row in stderr if row.get("schema") == "ninfer-checkpoint-io-error/1"]
+    saves = [row for row in stderr if row.get("schema") == "ninfer-durable-operation/1"
+             and row.get("operation") == "save"]
+    # shutdown.json is one JSON object, not JSONL; tolerate pretty-printed captures.
+    try:
+        shutdown = json.loads(private_text(evidence / "shutdown.json"))
+    except (OSError, ValueError):
+        shutdown = {}
+    if not isinstance(shutdown, dict):
+        shutdown = {}
+    shutdown = {key: shutdown[key] for key in ("complete", "saved", "refused", "skipped")
+                if key in shutdown and (type(shutdown[key]) is bool if key == "complete"
+                                       else type(shutdown[key]) is int)}
+    http_503 = sum(error.get("status") == 503 for error in rejected)
+    checks = {
+        "request_log_present": (evidence / "server-requests.jsonl").is_file(),
+        "stderr_log_present": (evidence / "server-stderr.log").is_file(),
+        "no_http_503": http_503 == 0,
+        "no_checkpoint_write_errors": not errors,
+        "shutdown_complete_without_refusals": shutdown.get("complete") is True
+            and type(shutdown.get("refused")) is int and shutdown["refused"] == 0,
+    }
+    return {"status": "passed" if all(checks.values()) else "failed", "checks": checks,
+            "http_503_rejections": http_503,
+            "request_queue_timeouts": sum(error.get("status") == 503 and
+                error.get("code") == "request_queue_timeout" for error in rejected),
+            "client_disconnections": sum(error.get("status") == 499 and
+                error.get("code") == "client_disconnected" for error in rejected),
+            "http_499_transport_errors": transport_cancellations,
+            "checkpoint_write_errors": len(errors),
+            "checkpoint_error_codes": sorted({row["error_code"] for row in errors
+                                               if type(row.get("error_code")) is int}),
+            "capacity_save_receipts": sum(row.get("reason") == "capacity" for row in saves),
+            "stale_save_receipts": sum(row.get("state") == "stale" for row in saves),
+            "shutdown": shutdown,
+            "stderr_coverage": "current and previous launches; initial install launch covered by requests only"}
+
+
+def fail_collected_window(evidence: Path) -> None:
+    path = evidence / "window.json"
+    if path.is_file():
+        window = json.loads(private_text(path))
+        window["status"] = "failed"
+        if not window.get("first_failing_boundary"):
+            window["first_failing_boundary"] = "behavior-evidence"
+            window["error"] = "collected behavior evidence failed"
+        path.write_text(json.dumps(window, indent=2) + "\n", encoding="utf-8")
+
+
 def assess_evidence(evidence: Path, clone: Path, bundle: Path, release: str, candidate: str,
                     lane: str = "rtx4090") -> dict[str, object]:
+    from compose_native_qualification import (
+        first_release_rollback, native_status_errors, native_probe_summary, native_probe_acceptance_errors,
+    )
+    from verify_release import native_profile, product_version
     model = documented_model(bundle, clone)
     provider = f"ninfer-native-{lane.removeprefix('rtx')}"
     def load(name: str) -> dict:
@@ -136,7 +215,10 @@ def assess_evidence(evidence: Path, clone: Path, bundle: Path, release: str, can
     provider_errors = [row for row in logs if row.get("message") == "agent turn ended with provider error"]
     structured = load("structured/receipt.json")
     live = structured["live_acceptance"]
+    server_health = assess_server_health(evidence)
     checks = {
+        "server_health_passed": server_health["status"] == "passed",
+        "window_passed_and_restored": load("window.json")["status"] == "passed_and_restored",
         "runner_passed": route["status"] == "passed" and route["clone_commit"] == candidate and
             route["lane"] == blocks["lane"] == f"{lane}-native",
         "document_hash_matched": route["document_sha256"] == blocks["document_sha256"],
@@ -204,7 +286,7 @@ def assess_evidence(evidence: Path, clone: Path, bundle: Path, release: str, can
                     "prefix_reuse_path": row["result"].get("prefix_reuse_path")} for row in completed],
                 "local_compatibility_errors": [row["error"] for row in rejected],
                 "offline_provider_errors": [{key: row.get(key) for key in ("provider", "model", "errorMessage")} for row in provider_errors],
-                "live_acceptance": live}
+                "live_acceptance": live, "server_health": server_health}
     # These came from the runner's executed clone/client and the installed package record.
     # A later collector must not author them from its own --candidate or expected manifest.
     for field in ("candidate_commit", "release", "client", "installed"):
@@ -214,10 +296,22 @@ def assess_evidence(evidence: Path, clone: Path, bundle: Path, release: str, can
         behavior["runtime_configuration"] = configuration
         behavior["probe_acceptance"] = probe_acceptance
     (evidence / "behavior-evidence.json").write_text(json.dumps(behavior, indent=2) + "\n")
+    if behavior["status"] != "passed":
+        fail_collected_window(evidence)
     return behavior
 
 
 def main() -> int:
+    # Standalone, standard-library-only host reducer: no candidate imports or host paths
+    # are needed to decide whether a stopped server's window is healthy.
+    if sys.argv[1:2] == ["server-health"]:
+        parser = argparse.ArgumentParser(description=assess_server_health.__doc__)
+        parser.add_argument("--evidence", type=Path, required=True)
+        args = parser.parse_args(sys.argv[2:])
+        health = assess_server_health(args.evidence)
+        (args.evidence / "server-health.json").write_text(json.dumps(health, indent=2) + "\n", encoding="utf-8")
+        print(json.dumps(health))
+        return int(health["status"] != "passed")
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--lane", choices=("rtx3090", "rtx4090"), default="rtx4090")
     p.add_argument("--release", required=True)
@@ -271,7 +365,7 @@ def main() -> int:
                                "distribution_kind": "upstream-release"},
             "restoration": "on-host finally plus independent SSH Restore leg",
             "collection_excludes": ["preserved", "qualified-artifacts", "*-home", "*-temp", "assets", "baseline/files"],
-            "scripts": [str(orchestrator), str(probe), str(gpu_helper)]}
+            "scripts": [str(orchestrator), str(orchestrator.with_suffix(".py")), str(probe), str(gpu_helper)]}
     if a.mode == "dry-run" or a.dry_run:
         print(json.dumps({"status": "passed", "canonical_mutations": 0, "plan": plan}, indent=2))
         return 0
@@ -311,6 +405,17 @@ foreach($name in @('baseline','preflight-snapshot')) {if(Test-Path (Join-Path $w
         destination.mkdir(exist_ok=True)
         run(["tar", "-xzf", str(w / "evidence.tar.gz"), "-C", str(destination)], timeout=60)
 
+    def sync_window_failure() -> None:
+        # The composer does not read behavior-evidence.json: retain its failed status
+        # in both collected and host window.json, so later collections cannot erase it.
+        fail_collected_window(w / "evidence")
+        code = r"""$ErrorActionPreference='Stop';$p=Join-Path WORKSPACE 'window.json';
+if(Test-Path -LiteralPath $p){$r=Get-Content -LiteralPath $p -Raw -Encoding UTF8|ConvertFrom-Json;
+$r.status='failed';if(-not $r.first_failing_boundary){$r.first_failing_boundary='behavior-evidence';$r.error='collected behavior evidence failed'};
+[IO.File]::WriteAllText($p,($r|ConvertTo-Json -Depth 50)+"`n",[Text.UTF8Encoding]::new($false))}
+""".replace("WORKSPACE", quote(remote))
+        ssh(a.host, code, log=w / "behavior-window-status.log", timeout=30)
+
     if a.mode == "preflight":
         if not clone.exists():
             run(["git", "clone", "--quiet", "https://github.com/alphastorm/omp-ninfer.git", str(clone)], timeout=180)
@@ -329,7 +434,7 @@ foreach($name in @('baseline','preflight-snapshot')) {if(Test-Path (Join-Path $w
         if len(manifest["steps"]) != 7 or any(sha(bundle / step["file"]) != step["sha256"] for step in manifest["steps"]):
             raise RuntimeError("documented block bytes differ")
         ssh(a.host, "$ErrorActionPreference='Stop';New-Item -ItemType Directory -Force " + quote(remote) + "|Out-Null", timeout=30)
-        run(["scp", "-q", str(orchestrator), str(probe), str(gpu_helper), str(clone / "scripts/hosts/run-documented-route.ps1"),
+        run(["scp", "-q", str(orchestrator), str(orchestrator.with_suffix(".py")), str(probe), str(gpu_helper), str(clone / "scripts/hosts/run-documented-route.ps1"),
              a.host + ":" + remote.replace("\\", "/") + "/"], timeout=60)
         run(["scp", "-qr", str(bundle), a.host + ":" + remote.replace("\\", "/") + "/"], timeout=60)
         parse = "$t=$null;$e=$null;[Management.Automation.Language.Parser]::ParseFile(" + quote(remote + "\\accept-rtx4090-route.ps1") + ",[ref]$t,[ref]$e)|Out-Null;if($e.Count){$e|ConvertTo-Json;exit 1};'PARSE_OK'"
@@ -338,7 +443,7 @@ foreach($name in @('baseline','preflight-snapshot')) {if(Test-Path (Join-Path $w
         invoke("DryRun", "restoration-dry-run.json", 120)
         collect()
         (w / "driver-preflight.json").write_text(json.dumps({"status": "passed", "plan": plan,
-            "orchestrator_sha256": sha(orchestrator), "probe_sha256": sha(probe),
+            "orchestrator_sha256": sha(orchestrator), "health_reducer_sha256": sha(orchestrator.with_suffix(".py")), "probe_sha256": sha(probe),
             "gpu_helper_sha256": sha(gpu_helper),
             "document_sha256": manifest["document_sha256"], "steps": manifest["steps"]}, indent=2) + "\n")
     elif a.mode == "validate":
@@ -347,7 +452,7 @@ foreach($name in @('baseline','preflight-snapshot')) {if(Test-Path (Join-Path $w
         if preflight["plan"]["candidate"] != a.candidate or preflight["plan"]["client_install"]["lane"] != route_lane:
             raise RuntimeError("candidate changed since preflight")
         selector = f"{provider}/{documented_model(bundle, clone)}"
-        run(["scp", "-q", str(orchestrator), str(probe), str(gpu_helper),
+        run(["scp", "-q", str(orchestrator), str(orchestrator.with_suffix(".py")), str(probe), str(gpu_helper),
              a.host + ":" + remote.replace("\\", "/") + "/"], timeout=60)
         code = r"""$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';$w=WORKSPACE;
 $t=$null;$e=$null;[Management.Automation.Language.Parser]::ParseFile((Join-Path $w 'accept-rtx4090-route.ps1'),[ref]$t,[ref]$e)|Out-Null;if($e.Count){throw 'orchestrator parse failed'};
@@ -358,13 +463,14 @@ $binary=Join-Path $env:LOCALAPPDATA 'OMP\omp.exe';if(-not (Test-Path $binary -Pa
         ssh(a.host, code, log=w / "preflight-revalidation.log", timeout=120)
         invoke("DryRun", "restoration-dry-run.json", 120)
         preflight["orchestrator_sha256"] = sha(orchestrator)
+        preflight["health_reducer_sha256"] = sha(orchestrator.with_suffix(".py"))
         preflight["probe_sha256"] = sha(probe)
         preflight["gpu_helper_sha256"] = sha(gpu_helper)
         (w / "driver-preflight.json").write_text(json.dumps(preflight, indent=2) + "\n")
         collect()
     elif a.mode == "accept":
         preflight = json.loads((w / "driver-preflight.json").read_text(encoding="utf-8"))
-        if preflight["plan"]["candidate"] != a.candidate or preflight["plan"]["client_install"]["lane"] != route_lane or preflight["orchestrator_sha256"] != sha(orchestrator) or preflight["probe_sha256"] != sha(probe) or preflight["gpu_helper_sha256"] != sha(gpu_helper):
+        if preflight["plan"]["candidate"] != a.candidate or preflight["plan"]["client_install"]["lane"] != route_lane or preflight["orchestrator_sha256"] != sha(orchestrator) or preflight.get("health_reducer_sha256") != sha(orchestrator.with_suffix(".py")) or preflight["probe_sha256"] != sha(probe) or preflight["gpu_helper_sha256"] != sha(gpu_helper):
             raise RuntimeError("preflighted script or candidate changed; stage and exercise preflight again before acceptance")
         if (w / "driver-window.json").exists():
             raise RuntimeError("acceptance attempt already spent; use a new workspace for one authorized correction")
@@ -389,8 +495,11 @@ $binary=Join-Path $env:LOCALAPPDATA 'OMP\omp.exe';if(-not (Test-Path $binary -Pa
                 try:
                     behavior = assess_evidence(w / "evidence", clone, bundle, a.release, a.candidate, a.lane)
                     result["behavior_status"] = behavior["status"]
+                    if behavior["status"] != "passed":
+                        sync_window_failure()
                 except Exception as exc:
                     result["behavior_error"] = str(exc)
+                    sync_window_failure()
                 result["completed_unix"] = time.time()
                 result["elapsed_seconds"] = time.time() - start
                 result["status"] = "passed_and_restored" if all(result.get(key) == 0 for key in ("accept_exit", "restoration_exit", "audit_exit")) and result.get("behavior_status") == "passed" else "failed"
@@ -405,9 +514,17 @@ $binary=Join-Path $env:LOCALAPPDATA 'OMP\omp.exe';if(-not (Test-Path $binary -Pa
     else:
         collect()
         if (w / "evidence" / "route.json").exists():
-            behavior = assess_evidence(w / "evidence", clone, bundle, a.release, a.candidate, a.lane)
+            try:
+                behavior = assess_evidence(w / "evidence", clone, bundle, a.release, a.candidate, a.lane)
+            except Exception:
+                sync_window_failure()
+                raise
             if behavior["status"] != "passed":
+                sync_window_failure()
                 return 1
+        window = w / "evidence" / "window.json"
+        if window.is_file() and json.loads(private_text(window))["status"] != "passed_and_restored":
+            return 1
     print(json.dumps({"status": "passed", "mode": a.mode, "evidence": str(w / "evidence")}))
     return 0
 
