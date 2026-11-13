@@ -30,6 +30,7 @@ param(
     [string]$RealHome=$env:USERPROFILE,
     [ValidateRange(1,2)][int]$Attempt=1,
     [ValidateRange(1,45)][int]$WindowMinutes=45,
+    [ValidateRange(1,1048576)][int]$MinimumFreeGiB=60,
     [ValidateSet('rtx3090','rtx4090')][string]$Lane='rtx4090'
 )
 Set-StrictMode -Version Latest
@@ -54,6 +55,16 @@ function SaveJson($path,$value) { [IO.File]::WriteAllText($path,($value|ConvertT
 function ReadJson($path) { Get-Content -LiteralPath $path -Raw -Encoding UTF8|ConvertFrom-Json }
 function Hash($path) { if(Test-Path -LiteralPath $path -PathType Leaf){(Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()}else{$null} }
 function Quote($value) { "'"+([string]$value).Replace("'","''")+"'" }
+function FreeBytes($path) {
+    [IO.DriveInfo]::new([IO.Path]::GetPathRoot($path)).AvailableFreeSpace
+}
+function AssertFreeSpace($phase,[switch]$ObserveOnly) {
+    $free=[int64](FreeBytes $StateRoot);$minimum=[int64]$MinimumFreeGiB*1GB
+    if(-not $ObserveOnly -and $free -lt $minimum){throw "insufficient free space: $free bytes available; $minimum required"}
+    SaveJson (Join-Path $Workspace "free-space-$phase.json") @{
+        utc=[DateTime]::UtcNow.ToString('o');free_bytes=$free;minimum_free_bytes=$minimum
+    }
+}
 function Describe($path) {
     $exists=Test-Path -LiteralPath $path
     [ordered]@{path=$path;exists=$exists;sha256=(Hash $path);sddl=$(if($exists){(Get-Acl -LiteralPath $path).Sddl}else{$null})}
@@ -207,7 +218,7 @@ function SetIsolation($name) {
 }
 function Child($childMode,$seconds) {
     $values=@{Release=$Release;Candidate=$Candidate;Workspace=$Workspace;Bundle=$Bundle;Clone=$Clone;
-        Lane=$Lane;
+        Lane=$Lane;MinimumFreeGiB=$MinimumFreeGiB;
         ExpectedStateSha256=$ExpectedStateSha256;TemporaryPrevious=$TemporaryPrevious;Mode=$childMode;
         StateRoot=$StateRoot;TaskName=$TaskName;Stage=$Stage;Model=$Model;KeyFile=$KeyFile;HostState=$HostState;RealHome=$RealHome;Attempt=$Attempt;WindowMinutes=$WindowMinutes}
     $command='& ([scriptblock]::Create([IO.File]::ReadAllText('+ (Quote $self) +')))'
@@ -266,7 +277,7 @@ function Audit($b) {
 function Restore {
     $started=[DateTime]::UtcNow;$b=ValidateSnapshot $baseline;EnableExactAcl
     $prep=ReadJson $journal
-    if($prep.status -eq 'restored'){return Audit $b}
+    if($prep.status -eq 'restored'){AssertFreeSpace 'restored' -ObserveOnly;return Audit $b}
     # A first-install failure may leave no active record or no state file. The unchanged
     # controller rejects that state; skip Stop only for this mode, then prove quiescence.
     $current=if(Test-Path "$StateRoot\state.json"){ReadJson "$StateRoot\state.json"}else{$null}
@@ -313,6 +324,7 @@ function Restore {
     $result=Audit $b;$result.started_utc=$started.ToString('o');$result.elapsed_seconds=([DateTime]::UtcNow-$started).TotalSeconds
     SaveJson "$Workspace\restoration.json" $result
     if($result.status -ceq 'passed'){$prep.status='restored';SaveJson $journal $prep}
+    AssertFreeSpace 'restored' -ObserveOnly
     return $result
 }
 # Child isolation happens before any OMP invocation; none of these modes write real client pointers.
@@ -383,6 +395,7 @@ if($Mode -eq 'NativeProbes') {
 }
 if($Mode -eq 'DryRun') {
     $p=Probe;AssertBaseline $p
+    AssertFreeSpace 'dry-run'
     Control Status 'dryrun-controller-status.json'
     $status=ReadJson "$Workspace\dryrun-controller-status.json"
     if($status.process_state -cne 'stopped' -or $status.task_state -cne 'Ready'){throw 'controller dry-run state drift'}
@@ -393,6 +406,7 @@ if($Mode -eq 'DryRun') {
 }
 if($Mode -eq 'Preflight') {
     $started=[DateTime]::UtcNow;AssertBaseline (Probe)
+    AssertFreeSpace 'preflight'
     if(Test-Path "$Workspace\preflight.json"){throw 'preflight receipt exists; do not repeat successful setup'}
     # Protect private snapshots and moved originals with the already-installed trusted helper.
     . ([scriptblock]::Create([IO.File]::ReadAllText("$StateRoot\Protect-StateRoot.ps1")))
@@ -466,6 +480,7 @@ if($Mode -eq 'Audit'){$r=Audit (ValidateSnapshot $baseline);SaveJson "$Workspace
 if((ReadJson "$Workspace\preflight.json").status -cne 'passed'){throw 'successful preflight required'}
 if(Test-Path $journal){throw 'attempt already spent; never repeat acceptance in this workspace'}
 if(-not (Test-Path "$Workspace\omp-client-probe.py")){throw 'shared structured probe missing'}
+AssertFreeSpace 'accept'
 $started=[DateTime]::UtcNow;$b=Snapshot $baseline
 $null=ValidateSnapshot $baseline
 $state=ReadJson "$StateRoot\state.json";$instance=[string]$state.active_release

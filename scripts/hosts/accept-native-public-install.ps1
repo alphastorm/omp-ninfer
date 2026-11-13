@@ -8,7 +8,9 @@ param(
     [Parameter(Mandatory = $true)][string]$ReceiptPath,
     [Parameter(Mandatory = $true)][string]$CandidateClone,
     [Parameter(Mandatory = $true)][string]$ClientBinary,
-    [string]$ModelArtifactPath = ''
+    [string]$ModelArtifactPath = '',
+    # Measured already-installed public check: about 1.02 GB downloaded and a three-token smoke.
+    [ValidateRange(1,1048576)][int]$MinimumFreeGiB = 10
 )
 # Public-URL install acceptance for a native Windows lane. Downloads every manifest-bound asset
 # from the published component release, verifies the closed checksum set and each hash against
@@ -26,10 +28,19 @@ $ProgressPreference = 'SilentlyContinue'
 function Sha([string]$Path) { (Get-FileHash -Algorithm SHA256 -LiteralPath $Path).Hash.ToLowerInvariant() }
 function ShaText([string]$Text) { $s=[Security.Cryptography.SHA256]::Create(); try { ([BitConverter]::ToString($s.ComputeHash([Text.Encoding]::UTF8.GetBytes($Text))) -replace '-','').ToLowerInvariant() } finally { $s.Dispose() } }
 function Utc() { [DateTime]::UtcNow.ToString('o') }
+function FreeBytes($path) {
+    [IO.DriveInfo]::new([IO.Path]::GetPathRoot($path)).AvailableFreeSpace
+}
+function FreeSpaceRecord($path) {
+    $free=[int64](FreeBytes $path);$minimum=[int64]$MinimumFreeGiB*1GB
+    if($free -lt $minimum){throw "insufficient free space: $free bytes available; $minimum required"}
+    @{utc=(Utc);free_bytes=$free;minimum_free_bytes=$minimum}
+}
 $receipt = [ordered]@{ artifact_type='omp_ninfer_native_public_install_acceptance'; schema_version=1; status='running'; lane=$Lane; started_utc=(Utc) }
 function Finish([string]$Status) {
     $receipt.status = $Status; $receipt.completed_utc = (Utc)
     $json = $receipt | ConvertTo-Json -Depth 8
+    [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName([IO.Path]::GetFullPath($ReceiptPath))) | Out-Null
     [IO.File]::WriteAllText($ReceiptPath, $json, [Text.UTF8Encoding]::new($false))
 }
 $baselineObserved = $false
@@ -50,6 +61,8 @@ function Restore-PublicInstallState {
     if (-not $restored) { throw 'public-install controller baseline was not restored' }
 }
 try {
+    # Downloads/extraction and the smoke's checkpoint saves can use different volumes.
+    $receipt.free_space = @{workspace=(FreeSpaceRecord $Workspace);checkpoints=(FreeSpaceRecord $StateRoot)}
     $manifest = Get-Content -LiteralPath $ManifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
     $nativeModel = if ($manifest.components.PSObject.Properties.Name -contains 'native_model') { $manifest.components.native_model } else { $manifest.components.model }
     $variant = @($manifest.components.ninfer_variants | Where-Object { $_.id -ceq "$Lane-windows-native" })

@@ -26,6 +26,18 @@ def now():
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
 
 
+def free_space_record(path, minimum_free_gib):
+    """Measure the containing filesystem even before a private directory exists."""
+    path = Path(path)
+    while not path.exists():
+        path = path.parent
+    free = shutil.disk_usage(path).free
+    minimum = minimum_free_gib * 1024 ** 3
+    if free < minimum:
+        raise RuntimeError(f'insufficient free space: {free} bytes available; {minimum} required')
+    return {'utc': now(), 'free_bytes': free, 'minimum_free_bytes': minimum}
+
+
 def digest(path):
     h = hashlib.sha256()
     with Path(path).open('rb') as f:
@@ -97,15 +109,18 @@ def probe_selector(model_id):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--action', required=True, choices=('preflight', 'begin', 'restore', 'watchdog', 'host-route', 'setup', 'identity', 'linux-live', 'linux-outage', 'beta-start', 'beta-stop'))
+    p.add_argument('--action', required=True, choices=('space', 'preflight', 'begin', 'restore', 'watchdog', 'host-route', 'setup', 'identity', 'linux-live', 'linux-outage', 'beta-start', 'beta-stop'))
     for name in ('workspace', 'release', 'candidate', 'windows-workspace', 'production-image'):
         p.add_argument('--' + name, required=True)
     p.add_argument('--production', default='ninfer-5090-v070p')
     p.add_argument('--window-dir', required=True, help='Private directory containing the host window.sh')
     p.add_argument('--restore-after-seconds', type=int, default=3000, help='Independent watchdog delay; reserve restoration time inside the total envelope')
+    p.add_argument('--minimum-free-gib', type=int, default=60)
     p.add_argument('--model-id', help="Model the Linux structured client requests, from the candidate's documented provider step; required by the actions that start the client probe")
     p.add_argument('--dry-run', action='store_true')
     a = p.parse_args()
+    if not 1 <= a.minimum_free_gib <= 1048576:
+        p.error('--minimum-free-gib must be between 1 and 1048576')
     if a.action in ('preflight', 'linux-live', 'linux-outage') and not a.model_id:
         p.error('--action ' + a.action + ' starts the client probe and requires --model-id')
     if a.dry_run:
@@ -273,9 +288,30 @@ def main():
             save('restoration.json', result)
             assert result['documented_directories_restored'], 'window-created parents retained; restoration proof failed'
     env = dict(os.environ, DOCKER_CONFIG=str(root / 'anonymous-docker'))
+    def check_free_space():
+        # Docker's writable layers may be on a different filesystem from the WSL
+        # workspace and bind-mounted checkpoint store. Read its existing container,
+        # without creating a container or pulling an image to perform the check.
+        volumes = {name: free_space_record(path, a.minimum_free_gib)
+                   for name, path in (('workspace', root), ('checkpoints', checkpoints))}
+        docker_command = ['docker', 'exec', a.production, 'df', '-Pk', '/']
+        try:
+            free = int(run(docker_command).splitlines()[-1].split()[3]) * 1024
+        except (OSError, RuntimeError, subprocess.TimeoutExpired, ValueError, IndexError) as exc:
+            raise RuntimeError('free-space measurement failed: ' + ' '.join(docker_command)) from exc
+        minimum = a.minimum_free_gib * 1024 ** 3
+        if free < minimum:
+            raise RuntimeError(f'insufficient Docker free space: {free} bytes available; {minimum} required')
+        volumes['docker'] = {'utc': now(), 'free_bytes': free, 'minimum_free_bytes': minimum}
+        return volumes
+    space = check_free_space() if a.action in ('space', 'preflight') else None
+    if a.action == 'space':
+        print(json.dumps({'action': a.action, 'status': 'passed', 'free_space': space}))
+        return
     if a.action == 'preflight':
         root.mkdir(mode=0o700, parents=True, exist_ok=True)
         os.chmod(root, 0o700)
+        save('free-space-preflight.json', space)
         if not clone.exists():
             run(['git', 'clone', '-q', 'https://github.com/alphastorm/omp-ninfer.git', clone], 180)
             run(['git', '-C', clone, 'checkout', '-q', a.candidate])
@@ -309,6 +345,7 @@ def main():
             assert not (root / 'baseline.json').exists(), 'window already attempted; no implicit retry'
             assert not (root / 'restoration.json').exists(), 'window already restored; host unchanged'
             assert 0 < a.restore_after_seconds <= 3000
+            save('free-space-begin.json', check_free_space())
             b = baseline(); b['start_epoch'] = time.time(); b['restore_deadline_epoch'] = time.time() + a.restore_after_seconds
             save('baseline.json', b)
             with (root / 'watchdog.log').open('w', encoding='utf-8') as log:

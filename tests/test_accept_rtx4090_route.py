@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import ast
 import base64
 import contextlib
 import hashlib
 import importlib.util
 import io
 import json
+import os
 import shutil
 import re
 import subprocess
@@ -651,6 +653,314 @@ $results|ConvertTo-Json -Compress
             self.assertFalse(result["checks"]["runner_passed"])
             self.assertFalse(result["checks"]["only_expected_server_model"])
             self.assertFalse(result["checks"]["installed_package_bound"])
+
+
+class FreeSpaceFloorTests(unittest.TestCase):
+    def test_linux_host_imports_are_skipped_on_windows(self):
+        tree = ast.parse(Path(__file__).read_text(encoding="utf-8"))
+        expected = ast.dump(ast.parse(
+            'unittest.skipIf(os.name == "nt", '
+            '"the RTX 5090 host driver runs under Linux and imports fcntl")', mode="eval").body)
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.FunctionDef) or not node.name.startswith("test_"):
+                continue
+            if any(isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute)
+                   and call.func.attr == "spec_from_file_location"
+                   and any(isinstance(value, ast.Constant) and isinstance(value.value, str)
+                           and value.value.endswith("accept-rtx5090-host.py") for value in ast.walk(call))
+                   for call in ast.walk(node)):
+                with self.subTest(test=node.name):
+                    self.assertIn(expected, [ast.dump(decorator) for decorator in node.decorator_list])
+
+    @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed for failed public-install receipts")
+    def test_public_install_refusal_creates_the_receipt_parent(self):
+        proof = r'''
+param($Source,$Scratch)
+$ErrorActionPreference='Stop'
+$text=[IO.File]::ReadAllText($Source)
+$start=$text.IndexOf('function Sha(')
+$Workspace=Join-Path $Scratch 'absent';$StateRoot=$Scratch
+$ReceiptPath=Join-Path $Workspace 'evidence/receipt.json';$Lane='rtx4090';$MinimumFreeGiB=10
+$tokens=$null;$errors=$null
+$ast=[Management.Automation.Language.Parser]::ParseInput($text,[ref]$tokens,[ref]$errors)
+if($errors.Count){throw ($errors|Out-String)}
+$free=$ast.Find({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -ceq 'FreeBytes'},$true)
+$text=$text.Remove($free.Extent.StartOffset,$free.Extent.Text.Length).Insert($free.Extent.StartOffset,'function FreeBytes($path){1}')
+& ([scriptblock]::Create($text.Substring($start)))
+'''
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            script = root / "public-refusal.ps1"
+            script.write_text(proof, encoding="utf-8")
+            result = subprocess.run([shutil.which("pwsh"), "-NoProfile", "-File", str(script),
+                                     str(ROOT / "scripts/hosts/accept-native-public-install.ps1"), directory],
+                                    capture_output=True, text=True, encoding="utf-8", timeout=30)
+            self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+            receipt = root / "absent/evidence/receipt.json"
+            self.assertTrue(receipt.is_file(), result.stdout + result.stderr)
+            value = json.loads(receipt.read_text(encoding="utf-8"))
+            self.assertEqual(value["status"], "failed")
+            self.assertIn("insufficient free space", value["error"])
+            self.assertEqual(list((root / "absent").rglob("*")), [receipt.parent, receipt])
+
+    @unittest.skipIf(os.name == "nt", "the RTX 5090 host driver runs under Linux and imports fcntl")
+    def test_space_action_is_read_only_for_each_volume(self):
+        spec = importlib.util.spec_from_file_location("read_only_space_host", ROOT / "scripts/hosts/accept-rtx5090-host.py")
+        host = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(host)
+        floor = 60 * 1024 ** 3
+        for existing in (False, True):
+            for refusal in ("workspace", "checkpoints", "docker", None):
+                with self.subTest(existing=existing, refusal=refusal), tempfile.TemporaryDirectory() as directory:
+                    root = Path(directory)
+                    workspace = root / "window"
+                    if existing:
+                        workspace.mkdir()
+                    before = set(root.rglob("*"))
+                    args = ["accept-rtx5090-host.py", "--action", "space", "--workspace", str(workspace),
+                            "--release", "v0.18.0", "--candidate", "1" * 40,
+                            "--windows-workspace", "C:/fixture", "--production-image", "fixture-image",
+                            "--window-dir", "/fixture/window"]
+                    def measurement(path, minimum):
+                        self.assertEqual(minimum, 60)
+                        volume = "workspace" if path == workspace.resolve() else "checkpoints"
+                        if volume == refusal:
+                            raise RuntimeError("insufficient free space")
+                        return {"free_bytes": floor, "minimum_free_bytes": floor}
+                    output = f"Filesystem 1024-blocks Used Available Capacity Mounted on\noverlay 200000000 0 {floor // 1024 - int(refusal == 'docker')} 0% /\n"
+                    with mock.patch.object(sys, "argv", args), mock.patch.dict(os.environ), \
+                            mock.patch.object(host.Path, "home", return_value=root / "home"), \
+                            mock.patch.object(host, "free_space_record", side_effect=measurement) as measure, \
+                            mock.patch.object(host, "windows_environment") as interop, \
+                            mock.patch.object(host.subprocess, "run", return_value=
+                                subprocess.CompletedProcess([], 0, output, "")) as command, \
+                            contextlib.redirect_stdout(io.StringIO()):
+                        if refusal:
+                            with self.assertRaisesRegex(RuntimeError, "free space"):
+                                host.main()
+                        else:
+                            host.main()
+                        interop.assert_not_called()
+                    self.assertEqual(set(root.rglob("*")), before)
+                    if refusal not in ("workspace", "checkpoints"):
+                        self.assertEqual(measure.call_count, 2)
+                        self.assertEqual(command.call_args.args[0],
+                                         ["docker", "exec", "ninfer-5090-v070p", "df", "-Pk", "/"])
+
+    def test_space_refusal_leaves_every_attempt_unspent_and_no_hold_acquired(self):
+        spec = importlib.util.spec_from_file_location("space_routes", ROOT / "scripts/hosts/accept-rtx5090-routes.py")
+        routes = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(routes)
+        for attempt in ("initial", "corrected", "completion"):
+            with self.subTest(attempt=attempt), tempfile.TemporaryDirectory() as directory:
+                root, prior = Path(directory) / "window", Path(directory) / "prior"
+                write_json(root / "preflight.json", {"status": "passed"})
+                write_json(prior / "window-attempt.json", {"attempt": "initial"})
+                write_json(prior / "corrections.json", [{"route": "host", "change": "corrected fixture"}])
+                write_json(prior / "restoration.json", {"window_seconds": 1, **{field: True for field in
+                           ("checkout_restored", "documented_key_restored", "beta_absent", "documented_directories_restored")}})
+                for label in ("host", "mac", "windows"):
+                    write_json(prior / (label + "-route.json"), {"status": "passed"})
+                args = ["accept-rtx5090-routes.py", "--action", "windows-live-only" if attempt == "completion" else "window",
+                        "--workspace", str(root), "--prior-workspace", str(prior),
+                        "--release", "v0.18.0", "--candidate", "1" * 40,
+                        "--wsl-workspace", "/fixture/window", "--windows-workspace", "C:/fixture",
+                        "--wsl-host", "fixture-wsl", "--windows-host", "fixture-windows",
+                        "--route-ssh-destination", "fixture-route", "--production-image", "fixture-image",
+                        "--window-dir", "/fixture/window"]
+                if attempt == "corrected":
+                    args += ["--attempt", "corrected"]
+                with mock.patch.object(sys, "argv", args), \
+                        mock.patch.object(routes, "documented_model", return_value="fixture-model"), \
+                        mock.patch.object(routes.socket, "socket"), \
+                        mock.patch.object(routes, "acquire_windows_hold") as hold, \
+                        mock.patch.object(routes.subprocess, "run", return_value=
+                            subprocess.CompletedProcess([], 1, "", "insufficient free space")) as command:
+                    with self.assertRaises(RuntimeError):
+                        routes.main()
+                self.assertFalse((root / "window-attempt.json").exists())
+                self.assertFalse((prior / "corrected-attempt.json").exists())
+                self.assertFalse((prior / "windows-completion-attempt.json").exists())
+                hold.assert_not_called()
+                self.assertEqual(command.call_count, 1)
+                self.assertIn("--action space", command.call_args.args[0][-1])
+
+    @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed for the free-space floor")
+    def test_floor_refuses_before_effects_and_accepts_exactly_the_floor(self):
+        proof = r'''
+param($Source,$Scratch)
+$ErrorActionPreference='Stop'
+$text=[IO.File]::ReadAllText($Source);$tokens=$null;$errors=$null
+$ast=[Management.Automation.Language.Parser]::ParseInput($text,[ref]$tokens,[ref]$errors)
+if($errors.Count){throw ($errors|Out-String)}
+foreach($name in @('FreeBytes','AssertFreeSpace')){
+    $node=$ast.Find({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq $name},$true)
+    if(-not $node){throw "missing floor function: $name"}
+    Invoke-Expression $node.Extent.Text
+}
+$Workspace=Join-Path $Scratch 'absent';$StateRoot=$Scratch;$MinimumFreeGiB=60
+$script:bytes=60GB-1;$script:records=@()
+function FreeBytes($path){if($path -cne $StateRoot){throw 'wrong checkpoint volume'};$script:bytes}
+function SaveJson($path,$value){$script:records+=@{path=$path;value=$value}}
+$rejected=$false;try{AssertFreeSpace 'accept'}catch{$rejected=$true}
+if(-not $rejected){throw 'accepted below the floor'}
+if(Test-Path $Workspace){throw 'floor refusal created a directory'}
+if($script:records.Count){throw 'floor refusal spent evidence before refusing'}
+$script:bytes=60GB
+AssertFreeSpace 'accept'
+if($script:records.Count -ne 1){throw 'floor did not record its observation'}
+$record=$script:records[0].value
+if($record.free_bytes -ne 60GB -or $record.minimum_free_bytes -ne 60GB -or -not $record.utc){throw 'invalid free-space record'}
+$script:bytes=1
+AssertFreeSpace 'restored' -ObserveOnly
+if($script:records[-1].value.free_bytes -ne 1){throw 'restoration observation enforced the floor'}
+# Execute the production acceptance prefix: refusal must precede Snapshot's mkdir,
+# preserved/qualified-artifacts directories, the journal, and every move.
+$start=$text.IndexOf('# One window per workspace.')
+$end=$text.IndexOf('$started=[DateTime]::UtcNow;$b=Snapshot',$start)
+if($end -lt 0){throw 'acceptance prefix not found'}
+$prefix=$text.Substring($start,$end-$start)
+function ReadJson($path){@{status='passed'}}
+function Test-Path {param($LiteralPath,$Path) $p=if($LiteralPath){$LiteralPath}else{$Path};$p -like '*omp-client-probe.py'}
+$journal='unused';$script:records=@();$script:bytes=60GB-1
+$rejected=$false;try{Invoke-Expression $prefix}catch{$rejected=$true}
+if(-not $rejected){throw 'acceptance reached snapshot before checking the floor'}
+foreach($mode in @('DryRun','Preflight')) {
+    $node=$ast.Find({param($n) $n -is [Management.Automation.Language.IfStatementAst] -and
+        $n.Clauses[0].Item1.Extent.Text -ceq ("`$Mode -eq '"+$mode+"'")},$true)
+    if(-not $node.Extent.Text.Contains('AssertFreeSpace')){throw "$mode omitted the floor"}
+}
+'FLOOR_OK'
+'''
+        with tempfile.TemporaryDirectory() as directory:
+            script = Path(directory) / "floor.ps1"
+            script.write_text(proof, encoding="utf-8")
+            result = subprocess.run([shutil.which("pwsh"), "-NoProfile", "-File", str(script),
+                                     str(ROOT / "scripts/hosts/accept-rtx4090-route.ps1"), directory],
+                                    capture_output=True, text=True, encoding="utf-8", timeout=30)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertIn("FLOOR_OK", result.stdout)
+
+    @unittest.skipUnless(shutil.which("pwsh"), "PowerShell is needed for the public-install floor")
+    def test_public_install_default_admits_post_window_free_space(self):
+        proof = r'''
+param($Source,$Scratch)
+$ErrorActionPreference='Stop'
+$tokens=$null;$errors=$null
+$ast=[Management.Automation.Language.Parser]::ParseFile($Source,[ref]$tokens,[ref]$errors)
+if($errors.Count){throw ($errors|Out-String)}
+$parameter=$ast.ParamBlock.Parameters|Where-Object {$_.Name.VariablePath.UserPath -ceq 'MinimumFreeGiB'}
+$MinimumFreeGiB=$parameter.DefaultValue.SafeGetValue()
+foreach($name in @('Utc','FreeBytes','FreeSpaceRecord')){
+    $node=$ast.Find({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq $name},$true)
+    if(-not $node){throw "missing free-space function: $name"}
+    Invoke-Expression $node.Extent.Text
+}
+function FreeBytes($path){[int64]36.5GB}
+FreeSpaceRecord $Scratch|ConvertTo-Json -Compress
+'''
+        with tempfile.TemporaryDirectory() as directory:
+            script = Path(directory) / "public-floor.ps1"
+            script.write_text(proof, encoding="utf-8")
+            result = subprocess.run([shutil.which("pwsh"), "-NoProfile", "-File", str(script),
+                                     str(ROOT / "scripts/hosts/accept-native-public-install.ps1"), directory],
+                                    capture_output=True, text=True, encoding="utf-8", timeout=30)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            record = json.loads(result.stdout)
+            self.assertEqual(record["free_bytes"], int(36.5 * 1024 ** 3))
+            self.assertEqual(record["minimum_free_bytes"], 10 * 1024 ** 3)
+
+    def test_accept_refusing_dry_run_does_not_spend_attempt(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_json(root / "driver-preflight.json", {"plan": {"candidate": "1" * 40,
+                       "client_install": {"lane": "rtx4090-native"}},
+                       **{key: "a" * 64 for key in
+                          ("orchestrator_sha256", "probe_sha256", "gpu_helper_sha256")}})
+            command = ["accept-rtx4090-route.py", "--release", "v0.18.0", "--candidate", "1" * 40,
+                       "--host", "fixture-host", "--workspace", directory,
+                       "--remote-workspace", "C:/acceptance", "--expected-state-sha256", "2" * 64,
+                       "--first-release", "--mode", "accept"]
+            calls = []
+
+            def refusing(host, code, **kwargs):
+                calls.append(code)
+                raise RuntimeError("free space below floor")
+
+            with mock.patch.object(sys, "argv", command), mock.patch.object(DRIVER, "sha", return_value="a" * 64), \
+                    mock.patch.object(DRIVER, "ssh", side_effect=refusing):
+                with self.assertRaisesRegex(RuntimeError, "free space below floor"):
+                    DRIVER.main()
+            self.assertFalse((root / "driver-window.json").exists())
+            self.assertEqual(len(calls), 1)
+            self.assertIn("-Mode 'DryRun'", calls[0])
+            self.assertIn("-MinimumFreeGiB '60'", calls[0])
+
+    @unittest.skipIf(os.name == "nt", "the RTX 5090 host driver runs under Linux and imports fcntl")
+    def test_docker_space_errors_name_the_exact_read_only_command_and_fail_closed(self):
+        spec = importlib.util.spec_from_file_location("docker_space_host", ROOT / "scripts/hosts/accept-rtx5090-host.py")
+        host = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(host)
+        docker = ["docker", "exec", "ninfer-5090-v070p", "df", "-Pk", "/"]
+        for fault in ("unavailable", "parse", "below", "at"):
+            with self.subTest(fault=fault), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                window = root / "window"
+                args = ["accept-rtx5090-host.py", "--action", "preflight", "--workspace", str(window),
+                        "--release", "v0.18.0", "--candidate", "1" * 40,
+                        "--windows-workspace", "C:/fixture", "--production-image", "fixture-image",
+                        "--window-dir", "/fixture/window", "--model-id", "fixture-model"]
+
+                def command(argv, **kwargs):
+                    if argv != docker:
+                        raise RuntimeError("past-floor")
+                    free_kib = 60 * 1024 ** 2 - int(fault == "below")
+                    text = ("not a filesystem record" if fault == "parse" else
+                            f"Filesystem 1024-blocks Used Available Capacity Mounted on\n"
+                            f"overlay 209715200 104857600 {free_kib} 50% /\n")
+                    return subprocess.CompletedProcess(argv, int(fault == "unavailable"), text, "")
+
+                environment = dict(os.environ)
+                with mock.patch.dict(os.environ, clear=False), mock.patch.object(sys, "argv", args), \
+                        mock.patch.object(host.Path, "home", return_value=root), \
+                        mock.patch.object(host, "windows_environment", return_value={}), \
+                        mock.patch.object(host.shutil, "disk_usage", return_value=shutil._ntuple_diskusage(
+                            100 * 1024 ** 3, 40 * 1024 ** 3, 60 * 1024 ** 3)), \
+                        mock.patch.object(host.subprocess, "run", side_effect=command):
+                    message = ("docker exec ninfer-5090-v070p df -Pk /" if fault in ("unavailable", "parse")
+                               else "past-floor" if fault == "at" else "insufficient Docker free space")
+                    with self.assertRaisesRegex(RuntimeError, re.escape(message)):
+                        host.main()
+                self.assertEqual(dict(os.environ), environment)
+                self.assertEqual(window.exists(), fault == "at")
+
+    def test_minimum_free_gib_is_recorded_offline(self):
+        command = [sys.executable, str(ROOT / "scripts/hosts/accept-rtx4090-route.py"),
+                   "--release", "v0.18.0", "--candidate", "1" * 40, "--host", "fixture-host",
+                   "--workspace", "unused", "--remote-workspace", "C:/acceptance",
+                   "--expected-state-sha256", "2" * 64, "--first-release", "--minimum-free-gib", "72"]
+        result = subprocess.run(command, capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout)["plan"]["minimum_free_gib"], 72)
+
+    @unittest.skipIf(os.name == "nt", "the RTX 5090 host driver runs under Linux and imports fcntl")
+    def test_large_write_sweep_checks_wsl_and_docker_volumes(self):
+        spec = importlib.util.spec_from_file_location("space_host", ROOT / "scripts/hosts/accept-rtx5090-host.py")
+        host = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(host)
+        with tempfile.TemporaryDirectory() as directory:
+            floor = 60 * 1024 ** 3
+            usage = shutil._ntuple_diskusage(100 * floor, floor, floor - 1)
+            with mock.patch.object(host.shutil, "disk_usage", return_value=usage):
+                with self.assertRaisesRegex(RuntimeError, "free space"):
+                    host.free_space_record(Path(directory) / "absent", 60)
+            with mock.patch.object(host.shutil, "disk_usage", return_value=usage._replace(free=floor)):
+                self.assertEqual(host.free_space_record(Path(directory), 60)["free_bytes"], floor)
+        source = (ROOT / "scripts/hosts/accept-rtx5090-host.py").read_text(encoding="utf-8")
+        self.assertIn("['docker', 'exec', a.production, 'df', '-Pk', '/']", source)
+        self.assertLess(source.index("check_free_space()"), source.index("root.mkdir(mode=0o700"))
+        public = (ROOT / "scripts/hosts/accept-native-public-install.ps1").read_text(encoding="utf-8")
+        self.assertLess(public.index("$receipt.free_space ="), public.index("New-Item -ItemType Directory"))
 
 
 class DocumentedModelTests(unittest.TestCase):

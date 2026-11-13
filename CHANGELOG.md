@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Refuse native Windows acceptance below a configurable 60 GiB free-space floor before
+  spending a window; record preflight, dry-run, acceptance and restored free bytes.
+  Apply the same 60 GiB floor to the container acceptance host's WSL workspace, checkpoint
+  and Docker filesystems. Use a separate 10 GiB floor for the smaller post-window native
+  public-install downloads and smoke so that check can pass before checkpoint retirement.
+  Recheck container-host space read-only before every attempt marker or Windows hold, and
+  preserve failed public-install receipts even when their parent workspace does not exist.
+
 ### Changed
 
 - Mark v0.18.0 as the published release across the README, facts, roadmap, release history,
