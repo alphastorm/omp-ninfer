@@ -1,23 +1,23 @@
 {
   "schema_version": 1,
   "profile_id": "qwen38-rtx5090-manual-tunnel",
-  "release": "v0.18.0",
+  "release": "v0.19.0",
   "installation_mode": "manual-ssh-tunnel",
   "client": {
     "distribution_kind": "upstream-release",
     "upstream_repository": "https://github.com/can1357/oh-my-pi",
-    "upstream_tag": "v18.18.7",
-    "upstream_commit": "e325ffc73ab86e03bdd20a91b77d8e2b3964c906",
+    "upstream_tag": "v18.20.0",
+    "upstream_commit": "c308970263ae13744ea15ab67302e3dac840e266",
     "os": "macOS 27",
     "architecture": "arm64",
     "published": true,
     "asset_name": "omp-darwin-arm64",
-    "asset_bytes": 221982864,
-    "asset_sha256": "0cecaac781d3c37f32ff7ecf3b6ba94842e7f058358e4748d5071d772f0aa4df",
-    "binary_sha256": "0cecaac781d3c37f32ff7ecf3b6ba94842e7f058358e4748d5071d772f0aa4df",
-    "release_id": 440868478,
-    "asset_id": 732828892,
-    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.18.7/omp-darwin-arm64"
+    "asset_bytes": 223369360,
+    "asset_sha256": "2b1309b06a743ae939708f939b63f75c7a436ed08c7953309f0e387e0c793ead",
+    "binary_sha256": "2b1309b06a743ae939708f939b63f75c7a436ed08c7953309f0e387e0c793ead",
+    "release_id": 443638329,
+    "asset_id": 741515219,
+    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.20.0/omp-darwin-arm64"
   },
   "runtime_host": {
     "os": [
@@ -59,7 +59,7 @@
       "--model-id",
       "q38-ninfer",
       "--binary-sha256",
-      "804ef8ac6d062dc8da8784ba3f52e5cece2178a5f5bc46cb2c7bc1d3e8937fe3",
+      "147da36b05c2795fb50bb0a38f9756f782f0b05ae08e4fed34a3f58b56c2eec0",
       "--artifact-sha256",
       "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
       "--config-sha256",
@@ -103,7 +103,7 @@
     "published_bind_host": "127.0.0.1",
     "published_port": 18089,
     "checkpoint_mount_target": "/checkpoints-v013",
-    "checkpoint_host_directory": "checkpoints-v018",
+    "checkpoint_host_directory": "checkpoints-v019",
     "checkpoint_seccomp_profile": "examples/manual-tunnel/ninfer_io_uring_seccomp.json",
     "checkpoint_seccomp_sha256": "3b7bf1e9fa71bfd8ed536c8aaaa2d40e4f133a0c853d226efd9b9e4966dd1506"
   },

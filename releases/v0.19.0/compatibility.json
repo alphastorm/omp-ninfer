@@ -65,7 +65,7 @@
         "profile": "qwen38-5090-v0.13.0",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/0a7c8fc07008bf621f3308f436e923498916c1b7/releases/v0.19.0/qualification/rtx5090.json",
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/bf2a0591f5cef458a1999179e832a04abe511a4a/releases/v0.19.0/qualification/rtx5090.json",
           "sha256": "4873087eded50a20fa4d5b50d4248e017a763eb1564650ab6047e808908ad87b"
         }
       },
@@ -163,7 +163,7 @@
         "profile": "qwen38-5090-v0.13.0",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/0a7c8fc07008bf621f3308f436e923498916c1b7/releases/v0.19.0/qualification/rtx5090.json",
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/bf2a0591f5cef458a1999179e832a04abe511a4a/releases/v0.19.0/qualification/rtx5090.json",
           "sha256": "4873087eded50a20fa4d5b50d4248e017a763eb1564650ab6047e808908ad87b"
         }
       },
@@ -262,7 +262,7 @@
         "profile": "qwen38-5090-v0.13.0",
         "status": "qualified",
         "receipt": {
-          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/0a7c8fc07008bf621f3308f436e923498916c1b7/releases/v0.19.0/qualification/rtx5090.json",
+          "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/bf2a0591f5cef458a1999179e832a04abe511a4a/releases/v0.19.0/qualification/rtx5090.json",
           "sha256": "4873087eded50a20fa4d5b50d4248e017a763eb1564650ab6047e808908ad87b"
         }
       },
@@ -329,7 +329,7 @@
       "maximum_context_tokens": 131072,
       "qualification_receipt": {
         "path": "releases/v0.19.0/qualification/rtx3090.json",
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/0a7c8fc07008bf621f3308f436e923498916c1b7/releases/v0.19.0/qualification/rtx3090.json",
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/bf2a0591f5cef458a1999179e832a04abe511a4a/releases/v0.19.0/qualification/rtx3090.json",
         "sha256": "9bddbdfd78c5ed5bc0503bd38c0d6d8d57c6a5ad121ca8b2bb6298166dd31b66"
       },
       "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/1cbd84e7221e51186bd7f093a149912d2489625b/qwen3_8_27b.ninfer",
@@ -370,7 +370,7 @@
       "maximum_context_tokens": 131072,
       "qualification_receipt": {
         "path": "releases/v0.19.0/qualification/rtx4090.json",
-        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/0a7c8fc07008bf621f3308f436e923498916c1b7/releases/v0.19.0/qualification/rtx4090.json",
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/bf2a0591f5cef458a1999179e832a04abe511a4a/releases/v0.19.0/qualification/rtx4090.json",
         "sha256": "165999b96f2f8cb1245b043f1c5256dfab94b65d224fa6ac866edbd5c2fff2d7"
       },
       "model_url": "https://huggingface.co/neroued/Qwen3.8-27B-NInfer/resolve/1cbd84e7221e51186bd7f093a149912d2489625b/qwen3_8_27b.ninfer",
