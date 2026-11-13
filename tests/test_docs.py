@@ -85,7 +85,7 @@ def anchors(path: Path) -> frozenset[str]:
             base = slug(heading.group(1))
             found.add(base if seen[base] == 0 else f"{base}-{seen[base]}")
             seen[base] += 1
-        found.update(EXPLICIT_ANCHOR.findall(line))
+        found.update(EXPLICIT_ANCHOR.findall(CODE_SPAN.sub("", line)))
     return frozenset(found)
 
 
@@ -165,6 +165,7 @@ class DocumentationAnchorTests(unittest.TestCase):
         self.assertIsNone(broken(document, 1, "anchors.md#kept-old-slug"))
         self.assertIn("names no heading or anchor in tests/fixtures/anchors.md",
                       broken(document, 1, "#in-a-fence") or "")
+        self.assertIn("names no heading or anchor", broken(document, 1, "#in-a-code-span") or "")
         self.assertIn("names no heading or anchor", broken(document, 1, "anchors.md#Fixed") or "")
 
 
