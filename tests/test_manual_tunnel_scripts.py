@@ -9,6 +9,7 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from typing import Callable
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLES = ROOT / "examples" / "manual-tunnel"
@@ -255,6 +256,10 @@ class ManualTunnelScriptsTest(unittest.TestCase):
     def launch_with_fakes(
         self, root: Path, docker_script: str, mutate_profile=None, probe: dict | None = None,
         checkpoint_directory: str | None = None,
+        checkpoint_argument: str | None = None,
+        extra_fakes: dict[str, str] | None = None,
+        environment: dict[str, str] | None = None,
+        before_launch: Callable[[Path], None] | None = None,
     ) -> tuple[subprocess.CompletedProcess[str], Path, dict]:
         """Run the launcher against a synthetic release with a fake docker on PATH; the fake
         captures the `run` argv the launcher would hand to Docker. The synthetic manifest
@@ -286,19 +291,26 @@ class ManualTunnelScriptsTest(unittest.TestCase):
         capture = root / "docker-arguments"
         (fake_bin / "docker").write_text(docker_script, encoding="utf-8")
         self.write_common_fakes(fake_bin)
-        environment = os.environ.copy()
-        environment["PATH"] = f"{fake_bin}:{environment['PATH']}"
-        environment["DOCKER_ARGUMENT_CAPTURE"] = str(capture)
-        environment["EXPECTED_BINARY_SHA256"] = manifest["components"]["ninfer"]["server_binary_sha256"]
-        environment["EXPECTED_MODEL_SHA256"] = manifest["components"]["model"]["artifact_sha256"]
+        for name, content in (extra_fakes or {}).items():
+            path = fake_bin / name
+            path.write_text(content, encoding="utf-8")
+            path.chmod(0o700)
+        env = os.environ.copy()
+        env.update(environment or {})
+        env["PATH"] = f"{fake_bin}:{env['PATH']}"
+        env["DOCKER_ARGUMENT_CAPTURE"] = str(capture)
+        env["EXPECTED_BINARY_SHA256"] = manifest["components"]["ninfer"]["server_binary_sha256"]
+        env["EXPECTED_MODEL_SHA256"] = manifest["components"]["model"]["artifact_sha256"]
         # What the fake docker reports from inside the bind-staging probe container. The defaults
         # are a correctly staged route; a test overrides them to stage one incompletely.
         answers = {"key_bytes": str(len("test-key\n")), "store": "directory", "memory_mib": "65536"}
         answers.update(probe or {})
-        environment["EXPECTED_MODEL_BYTES"] = str(manifest["components"]["model"]["artifact_bytes"])
-        environment["PROBE_KEY_BYTES"] = answers["key_bytes"]
-        environment["PROBE_STORE"] = answers["store"]
-        environment["PROBE_MEMORY_MIB"] = answers["memory_mib"]
+        env["EXPECTED_MODEL_BYTES"] = str(manifest["components"]["model"]["artifact_bytes"])
+        env["PROBE_KEY_BYTES"] = answers["key_bytes"]
+        env["PROBE_STORE"] = answers["store"]
+        env["PROBE_MEMORY_MIB"] = answers["memory_mib"]
+        if before_launch is not None:
+            before_launch(root)
         result = subprocess.run(
             [
                 "bash",
@@ -306,11 +318,12 @@ class ManualTunnelScriptsTest(unittest.TestCase):
                 "--model", str(model),
                 "--api-key-file", str(key),
                 "--log-dir", str(root / "logs"),
-                "--checkpoint-dir", str(root / (checkpoint_directory or profile["server"].get(
+                "--checkpoint-dir", checkpoint_argument if checkpoint_argument is not None else
+                str(root / (checkpoint_directory or profile["server"].get(
                     "checkpoint_host_directory", "checkpoints"))),
             ],
             cwd=root,
-            env=environment,
+            env=env,
             text=True,
             capture_output=True,
             check=False,
@@ -528,6 +541,78 @@ class ManualTunnelScriptsTest(unittest.TestCase):
             self.assertEqual(result.returncode, 1, result.stderr)
             self.assertIn("separate, non-symlink checkpoints-v013", result.stderr)
             self.assertFalse(capture.exists())
+
+    def test_trailing_slash_symlink_cannot_enter_a_predecessor_store(self) -> None:
+        def new_store(profile: dict) -> None:
+            profile["server"]["checkpoint_host_directory"] = "checkpoints-v019"
+
+        def prepare(root: Path) -> None:
+            prior = root / "checkpoints-v018"
+            prior.mkdir(mode=0o755)
+            prior.chmod(0o755)
+            (prior / "sentinel").write_text("retained checkpoint", encoding="utf-8")
+            (root / "checkpoints-v019").symlink_to(prior, target_is_directory=True)
+
+        for suffix in ("/", "//"):
+            with self.subTest(suffix=suffix), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                result, capture, _ = self.launch_with_fakes(
+                    root, self.CAPTURING_DOCKER, new_store,
+                    checkpoint_argument=str(root / "checkpoints-v019") + suffix,
+                    before_launch=prepare)
+                self.assertEqual(result.returncode, 1, result.stderr)
+                self.assertIn("non-symlink checkpoints-v019", result.stderr)
+                self.assertFalse(capture.exists())
+                prior = root / "checkpoints-v018"
+                self.assertEqual(stat.S_IMODE(prior.stat().st_mode), 0o755)
+                self.assertEqual((prior / "sentinel").read_text(), "retained checkpoint")
+
+    def test_a_store_swapped_for_a_symlink_after_the_guard_is_refused_after_realpath(self) -> None:
+        def new_store(profile: dict) -> None:
+            profile["server"]["checkpoint_host_directory"] = "checkpoints-v019"
+
+        def prepare(root: Path) -> None:
+            prior = root / "checkpoints-v018"
+            prior.mkdir(mode=0o755)
+            prior.chmod(0o755)
+            (prior / "sentinel").write_text("retained checkpoint", encoding="utf-8")
+
+        mkdir = (
+            "#!/bin/sh\n"
+            "/bin/mkdir \"$@\" || exit $?\n"
+            "for directory in \"$@\"; do :; done\n"
+            "if [ \"$directory\" = \"$SWAP_CHECKPOINT_DIR\" ]; then\n"
+            "  /bin/rmdir \"$directory\" || exit $?\n"
+            "  /bin/ln -s \"$SWAP_TARGET\" \"$directory\"\n"
+            "fi\n"
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            result, capture, _ = self.launch_with_fakes(
+                root, self.CAPTURING_DOCKER, new_store,
+                extra_fakes={"mkdir": mkdir}, before_launch=prepare,
+                environment={"SWAP_CHECKPOINT_DIR": str(root / "checkpoints-v019"),
+                             "SWAP_TARGET": str(root / "checkpoints-v018")})
+            self.assertEqual(result.returncode, 1, result.stderr)
+            self.assertIn("resolves to", result.stderr)
+            self.assertFalse(capture.exists())
+            prior = root / "checkpoints-v018"
+            self.assertEqual(stat.S_IMODE(prior.stat().st_mode), 0o755)
+            self.assertEqual((prior / "sentinel").read_text(), "retained checkpoint")
+
+    def test_a_real_release_store_with_a_trailing_slash_reaches_docker(self) -> None:
+        def new_store(profile: dict) -> None:
+            profile["server"]["checkpoint_host_directory"] = "checkpoints-v019"
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            result, capture, _ = self.launch_with_fakes(
+                root, self.CAPTURING_DOCKER, new_store,
+                checkpoint_argument=str(root / "checkpoints-v019") + "/")
+            self.assertEqual(result.returncode, 42, result.stderr)
+            self.assertIn(f"{(root / 'checkpoints-v019').resolve()}:/checkpoints",
+                          capture.read_text().splitlines())
+            self.assertEqual(stat.S_IMODE((root / "checkpoints-v019").stat().st_mode), 0o700)
 
     @staticmethod
     def write_common_fakes(fake_bin: Path) -> None:
