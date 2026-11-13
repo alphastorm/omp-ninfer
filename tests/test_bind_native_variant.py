@@ -534,6 +534,89 @@ class BindNativeVariantTest(unittest.TestCase):
         self.assertEqual(validate.call_args.kwargs["incoming_identity_proofs"],
                          {"rtx4090-windows-native": proof})
 
+    def test_same_profile_tensor_core_identity_is_verified_before_mutating_the_manifest(self):
+        from test_native_gate_decisions import identity_fixture
+        from test_speed_gate import SPEED
+
+        package = self.prepare_p15()
+        metadata = BINDER.package_metadata(package, self.receipt)
+        spec = json.loads(metadata["release-spec.json"])
+        spec["build_profile"] = "native-v0.8.0-beta.4-tc-rtx4090"
+        package = package.rename(package.with_name(package.name.replace("-beta.1-", "-beta.4-")))
+        with tarfile.open(package, "w:gz") as archive:
+            for name, data in (("server-config.json", metadata["server-config.json"]),
+                               ("release-spec.json", json.dumps(spec).encode())):
+                member = tarfile.TarInfo("payload/" + name)
+                member.size = len(data)
+                archive.addfile(member, io.BytesIO(data))
+        self.receipt["build_profile"] = spec["build_profile"]
+        self.receipt["package"].update(
+            filename=package.name, sha256=BINDER.sha256_file(package), bytes=package.stat().st_size)
+        self.write_receipt()
+        self.entries = {name.replace("-beta.1-", "-beta.4-"): value for name, value in self.entries.items()}
+        self.entries[package.name] = self.receipt["package"]["sha256"]
+        self.entries[self.receipt_path.name] = self.receipt_digest
+        self.write_checksums()
+        qualified = json.loads((self.release_root / "rtx4090.json").read_text())
+        qualified["identity"]["build_profile"] = spec["build_profile"]
+        qualified["configuration"]["prefill_chunk"] = json.loads(
+            metadata["server-config.json"])["engine"]["prefill_chunk"]
+        self.write_lane_receipt(qualified)
+        target = self.workspace / "releases/v0.99.0/qualification"
+        self.release_root.parent.rename(target.parent)
+        self.release_root = target
+        self.manifest_path = target.parent / "manifest.json"
+
+        with mock.patch.object(SPEED, "ROOT", self.workspace):
+            gate, captures, runs, _, _, predecessor, decision_path = identity_fixture(
+                self.workspace, profile_variant="tc")
+            predecessor["model_artifact_sha256"] = self.receipt["model_sha256"]
+            previous_path = self.workspace / "releases/v0.98.0/manifest.json"
+            previous_path.write_text(json.dumps({
+                "status": "ready", "components": {"ninfer_variants": [predecessor]},
+            }), encoding="utf-8")
+            for index in (1, 2):
+                captures[index]["identity"] = {
+                    "binary_sha256": self.receipt["binaries"]["server_sha256"],
+                    "configuration_sha256": self.receipt["config_sha256"],
+                    "build_profile": spec["build_profile"],
+                }
+            for index, run in enumerate(runs):
+                arm_path = run / "arm.json"
+                arm = json.loads(arm_path.read_text())
+                arm["model_artifact_sha256"] = self.receipt["model_sha256"]
+                if index == 1:
+                    arm.update(package_sha256=self.receipt["package"]["sha256"],
+                               server_binary_sha256=self.receipt["binaries"]["server_sha256"],
+                               configuration_sha256=self.receipt["config_sha256"])
+                arm_path.write_text(json.dumps(arm), encoding="utf-8")
+            decision = json.loads(decision_path.read_text())
+            decision["sealed_incumbent_determinism"]["rtx4090"]["identity"] = SPEED.native_identity(predecessor)
+            decision_path.write_text(json.dumps(decision), encoding="utf-8")
+            qualification_path = target.parent / "qualification.json"
+            qualification = json.loads(qualification_path.read_text())
+            qualification["observed_gates"]["native_identity_decision"]["sha256"] = BINDER.sha256_file(decision_path)
+            qualification_path.write_text(json.dumps(qualification), encoding="utf-8")
+            proof = SPEED.create_identity_proof(
+                gate, captures, SPEED.prescreen(gate, captures[1]["identity"], root=self.workspace),
+                *runs, spec, root=self.workspace)
+        proof_path = self.workspace / "identity.json"
+        proof_path.write_text(json.dumps(proof), encoding="utf-8")
+        variant = BINDER.bind(
+            self.manifest, "rtx4090", "v0.8.0-qwen38-4090-beta.4", self.checksums_path,
+            self.receipt_path, "v0.99.0", identity_proof=proof_path)
+        self.assertEqual(variant["build_profile"], spec["build_profile"])
+        self.assertEqual(variant["qualification"]["identity_proof"]["sha256"], BINDER.sha256_file(proof_path))
+        self.assertNotIn("quality_screen", variant["qualification"])
+        before = deepcopy(self.manifest)
+        proof["determinism"]["outputs"][0]["candidate_sha256"] = "f" * 64
+        proof_path.write_text(json.dumps(proof), encoding="utf-8")
+        with self.assertRaisesRegex(BINDER.BindError, "80/80 byte-identical"):
+            BINDER.bind(
+                self.manifest, "rtx4090", "v0.8.0-qwen38-4090-beta.4", self.checksums_path,
+                self.receipt_path, "v0.99.0", identity_proof=proof_path)
+        self.assertEqual(self.manifest, before)
+
     def test_identity_proof_and_screen_or_t1_cannot_claim_two_admission_paths(self):
         self.prepare_p15()
         before = deepcopy(self.manifest)

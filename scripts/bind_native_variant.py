@@ -31,7 +31,12 @@ schema-5 runtime_shape is derived from bytes. New/changed native runtimes bind
 actual retained-output-byte comparisons. DFlash2 also requires --fit-proof.
 An explicitly recorded identity-first decision may instead admit --identity-proof:
 all speed-ABBA outputs and 80 sealed incumbent determinism outputs must match,
-and the authenticated candidate must use the default, non-output-changing build profile.
+and the authenticated candidate must use the default build profile, or the decision's
+rule.build_variant must be "default-or-same-profile-published-incumbent".
+For non-default builds the seal's component and build_profile must match the latest
+ready product's incumbent, with the same lane and variant token as the candidate.
+Different variants or differing outputs still require a powered screen; DFlash2 fit
+evidence and the complete speed declaration remain mandatory.
 --maximum-context-tokens replaces both an existing row and its release-local mirror.
 From v0.16.0 the binder also stages the authenticated release-spec/server-config
 under profiles/<lane>/ and binds both in qualification. The native fit and lane
@@ -382,7 +387,8 @@ def main() -> int:
     quality.add_argument("--quality-screen", type=Path, help="passing powered native screen verdict")
     quality.add_argument("--t1-parity", type=Path, help="84/84 retained-byte parity for an unchanged MTP rebuild")
     quality.add_argument("--identity-proof", type=Path,
-                         help="decision-authorized speed-ABBA and sealed 80-prompt incumbent byte-identity proof")
+                         help="decision-authorized default or same-profile published-incumbent "
+                              "speed-ABBA and sealed 80-prompt byte-identity proof")
     parser.add_argument("--fit-proof", type=Path, help="shipping-config native DFlash2 fit receipt")
     parser.add_argument("--package", type=Path, help="native tar; defaults to beside SHA256SUMS (v0.15.0+)")
     parser.add_argument("--qualification-commit",

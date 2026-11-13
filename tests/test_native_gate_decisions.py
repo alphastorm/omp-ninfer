@@ -14,9 +14,10 @@ from unittest import mock
 from test_speed_gate import ROOT, SCREEN_RULE, SPEED, fixture, plan_for, record_decision
 
 IDENTITY_RULE = "speed-ABBA byte identity and 80/80 sealed incumbent determinism byte identity"
+SAME_PROFILE_BUILD_RULE = "default-or-same-profile-published-incumbent"
 
 
-def identity_fixture(root):
+def identity_fixture(root, *, lane="rtx4090", profile_variant="", incumbent_variant=None):
     """Synthetic retained outputs with real frozen prompt membership, never release evidence."""
     from quality_screen import FROZEN_SCREEN_IDS, FROZEN_DETERMINISM_MEMBERSHIP
     gate, captures = fixture()
@@ -29,7 +30,9 @@ def identity_fixture(root):
         directory.mkdir(exist_ok=True)
         arm = deepcopy(screen["runs"][role + "_determinism"]["arm"])
         arm.update(server_binary_sha256=captures[index]["identity"]["binary_sha256"],
-                   configuration_sha256=SPEED.digest(captures[index]["identity"]["config"]))
+                   configuration_sha256=SPEED.digest(captures[index]["identity"]["config"]),
+                   lane=lane, gpu_name="NVIDIA GeForce RTX " + lane[3:],
+                   release_id=f"qwen38-{lane[3:]}-native-v0.8.0-beta.3")
         (directory / "arm.json").write_text(json.dumps(arm), encoding="utf-8")
         rows = [{"case_id": case, "content": "retained " + case, "reasoning": "",
                  "tool_calls": [], "error": None} for case in FROZEN_SCREEN_IDS[:80]]
@@ -38,16 +41,36 @@ def identity_fixture(root):
         directories.append(directory)
         identities.append({key: arm[key] for key in (
             "package_sha256", "server_binary_sha256", "configuration_sha256", "model_artifact_sha256")})
-    spec = {"lane": "rtx4090", "build_profile": "native-v0.9.0-beta.1-rtx4090"}
+    suffix = f"-{profile_variant}" if profile_variant else ""
+    spec = {"lane": lane, "build_profile": f"native-v0.9.0-beta.1{suffix}-{lane}"}
     decision = {
         "artifact_type": "omp_ninfer_founder_gate_decision", "schema_version": 1,
         "release": gate["release"], "rule": {"quality_admission": IDENTITY_RULE},
         "lanes": ["rtx3090", "rtx4090"],
-        "sealed_incumbent_determinism": {"rtx4090": {
+        "sealed_incumbent_determinism": {lane: {
             "identity": identities[0], **FROZEN_DETERMINISM_MEMBERSHIP,
             "responses_sha256": hashlib.sha256((directories[0] / "responses.jsonl").read_bytes()).hexdigest(),
         }},
     }
+    predecessor = identities[0]
+    variant = {"id": lane + "-windows-native", **identities[1]}
+    if profile_variant:
+        incumbent_variant = profile_variant if incumbent_variant is None else incumbent_variant
+        previous_suffix = f"-{incumbent_variant}" if incumbent_variant else ""
+        predecessor = {
+            **predecessor, "id": variant["id"],
+            "release_tag": f"v0.8.0-qwen38-{lane[3:]}-beta.3",
+            "build_profile": f"native-v0.8.0-beta.3{previous_suffix}-{lane}",
+        }
+        variant["build_profile"] = spec["build_profile"]
+        decision["rule"]["build_variant"] = SAME_PROFILE_BUILD_RULE
+        decision["sealed_incumbent_determinism"][lane].update(
+            component=predecessor["release_tag"], build_profile=predecessor["build_profile"])
+        previous_path = root / "releases/v0.98.0/manifest.json"
+        previous_path.parent.mkdir(parents=True, exist_ok=True)
+        previous_path.write_text(json.dumps({
+            "status": "ready", "components": {"ninfer_variants": [predecessor]},
+        }), encoding="utf-8")
     path = root / "releases" / gate["release"] / "qualification/native-identity-decision.json"
     path.write_text(json.dumps(decision), encoding="utf-8")
     qual_path = path.parent.parent / "qualification.json"
@@ -56,8 +79,7 @@ def identity_fixture(root):
         "repository_path": path.relative_to(root).as_posix(),
         "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
     qual_path.write_text(json.dumps(qualification), encoding="utf-8")
-    variant = {"id": "rtx4090-windows-native", **identities[1]}
-    return gate, captures, directories, spec, variant, identities[0], path
+    return gate, captures, directories, spec, variant, predecessor, path
 
 
 class NativeDecisionTests(unittest.TestCase):
@@ -160,8 +182,8 @@ class NativeDecisionTests(unittest.TestCase):
                         row.update(completion_tokens=count, decode_seconds=1)
                 self.assertEqual(SPEED.reduce(gate, captures, plan_for(gate, captures))["status"], status)
 
-    def identity_proof(self):
-        gate, captures, directories, spec, variant, predecessor, path = identity_fixture(self.root)
+    def identity_proof(self, **kwargs):
+        gate, captures, directories, spec, variant, predecessor, path = identity_fixture(self.root, **kwargs)
         proof = SPEED.create_identity_proof(gate, captures, plan_for(gate, captures),
                                             *directories, spec, root=self.root)
         return proof, gate, captures, directories, spec, variant, predecessor, path
@@ -173,6 +195,110 @@ class NativeDecisionTests(unittest.TestCase):
         self.assertEqual(proof["determinism"]["identical"], 80)
         self.assertNotIn("retained ", json.dumps(proof))
         self.assertNotIn(str(self.root), json.dumps(proof))
+
+    def test_same_profile_nondefault_proofs_admit_identical_outputs_on_both_lanes(self):
+        for lane in ("rtx3090", "rtx4090"):
+            for profile_variant in ("tc", "a8", "tc-a8"):
+                with self.subTest(lane=lane, profile_variant=profile_variant):
+                    proof, gate, _, _, spec, variant, predecessor, _ = self.identity_proof(
+                        lane=lane, profile_variant=profile_variant)
+                    SPEED.validate_identity_proof(
+                        proof, self.root, gate["release"], variant, predecessor, spec)
+                    self.assertEqual(proof["build_profile"], spec["build_profile"])
+                    self.assertEqual(proof["determinism"]["identical"], 80)
+                    self.assertEqual([arm["arm"] for arm in proof["speed_abba"]["arms"]], list("ABBA"))
+
+    def test_tensor_core_identity_refuses_a_default_or_different_variant_incumbent(self):
+        for incumbent_variant in ("", "a8", "tc-a8"):
+            with self.subTest(incumbent_variant=incumbent_variant):
+                gate, captures, runs, spec, _, _, _ = identity_fixture(
+                    self.root, lane="rtx3090", profile_variant="tc", incumbent_variant=incumbent_variant)
+                with self.assertRaises(SPEED.SpeedGateError):
+                    SPEED.create_identity_proof(gate, captures, plan_for(gate, captures),
+                                                *runs, spec, root=self.root)
+
+    def test_same_profile_still_refuses_one_changed_speed_or_determinism_output(self):
+        for source in ("speed", "determinism"):
+            with self.subTest(source=source):
+                gate, captures, runs, spec, _, _, _ = identity_fixture(
+                    self.root, lane="rtx3090", profile_variant="tc")
+                if source == "speed":
+                    for index in (1, 2):
+                        captures[index]["requests"][0]["normalized_output"] += " changed"
+                else:
+                    path = runs[1] / "responses.jsonl"
+                    rows = [json.loads(line) for line in path.read_text().splitlines()]
+                    rows[0]["content"] += " changed"
+                    path.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
+                with self.assertRaisesRegex(SPEED.SpeedGateError, "byte-identical"):
+                    SPEED.create_identity_proof(gate, captures, plan_for(gate, captures),
+                                                *runs, spec, root=self.root)
+
+    def test_same_profile_permission_and_sealed_component_profile_are_authenticated(self):
+        for field in ("permission", "component", "build_profile", "identity", "seal", "hash"):
+            with self.subTest(field=field):
+                proof, gate, _, _, spec, variant, predecessor, path = self.identity_proof(
+                    lane="rtx3090", profile_variant="tc")
+                decision = json.loads(path.read_text())
+                if field == "permission":
+                    decision["rule"].pop("build_variant")
+                elif field == "seal":
+                    decision["sealed_incumbent_determinism"] = None
+                elif field == "identity":
+                    decision["sealed_incumbent_determinism"]["rtx3090"]["identity"]["package_sha256"] = "f" * 64
+                elif field != "hash":
+                    decision["sealed_incumbent_determinism"]["rtx3090"][field] = "foreign"
+                path.write_text(json.dumps(decision) + " ", encoding="utf-8")
+                if field != "hash":
+                    qualification_path = path.parent.parent / "qualification.json"
+                    qualification = json.loads(qualification_path.read_text())
+                    binding = qualification["observed_gates"]["native_identity_decision"]
+                    binding["sha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
+                    proof["decision_sha256"] = binding["sha256"]
+                    qualification_path.write_text(json.dumps(qualification), encoding="utf-8")
+                with self.assertRaises(SPEED.SpeedGateError):
+                    SPEED.validate_identity_proof(proof, self.root, gate["release"], variant, predecessor, spec)
+
+    def test_same_profile_producer_requires_the_published_predecessor_not_a_held_candidate(self):
+        for mutation in ("missing", "draft", "candidate", "profile", "package", "lane"):
+            with self.subTest(mutation=mutation):
+                gate, captures, runs, spec, _, _, _ = identity_fixture(
+                    self.root, lane="rtx3090", profile_variant="tc")
+                path = self.root / "releases/v0.98.0/manifest.json"
+                previous = json.loads(path.read_text())
+                if mutation == "missing":
+                    path.unlink()
+                else:
+                    row = previous["components"]["ninfer_variants"][0]
+                    if mutation in ("draft", "candidate"):
+                        previous["status"] = mutation
+                    elif mutation == "profile":
+                        row.pop("build_profile")
+                    elif mutation == "package":
+                        row["package_sha256"] = "f" * 64
+                    else:
+                        row["id"] = "rtx4090-windows-native"
+                    path.write_text(json.dumps(previous), encoding="utf-8")
+                with self.assertRaises(SPEED.SpeedGateError):
+                    SPEED.create_identity_proof(gate, captures, plan_for(gate, captures),
+                                                *runs, spec, root=self.root)
+
+    def test_same_profile_receipt_still_requires_complete_speed_declaration(self):
+        for mutation in ("declaration", "case", "arm", "output"):
+            with self.subTest(mutation=mutation):
+                proof, gate, _, _, spec, variant, predecessor, _ = self.identity_proof(
+                    lane="rtx3090", profile_variant="tc")
+                speed = proof["speed_abba"]
+                if mutation == "declaration":
+                    speed.pop("declaration")
+                elif mutation == "case":
+                    speed["arms"][2]["requests"].pop()
+                elif mutation == "arm":
+                    speed["arms"].pop()
+                else:
+                    speed["arms"][2]["requests"][0]["normalized_output_sha256"] = "f" * 64
+                with self.assertRaises(SPEED.SpeedGateError):
+                    SPEED.validate_identity_proof(proof, self.root, gate["release"], variant, predecessor, spec)
 
     def test_identity_proof_rejects_a_changed_output_build_profile_even_with_identical_samples(self):
         proof, gate, _, _, spec, variant, predecessor, _ = self.identity_proof()
