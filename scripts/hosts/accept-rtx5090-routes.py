@@ -24,6 +24,7 @@ import subprocess
 import sys
 import time
 import urllib.request
+import uuid
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import documented_route  # noqa: E402
@@ -31,6 +32,23 @@ import documented_route  # noqa: E402
 
 def now():
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+def write_atomic(path, text):
+    """Window resumption and summaries parse these records back: write the whole text beside
+    ``path``, then swap it in, so a failed or interrupted write leaves the previous file and no
+    temporary."""
+    path = Path(path)
+    temporary = path.with_name(path.name + '.' + uuid.uuid4().hex + '.partial')
+    try:
+        with temporary.open('x') as handle:
+            handle.write(text)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    except BaseException:
+        temporary.unlink(missing_ok=True)
+        raise
 
 
 def sha(path):
@@ -156,7 +174,7 @@ def main():
     watchdog_seconds = 3000
     timings = json.loads((root / 'timings.json').read_text(encoding="utf-8")) if (root / 'timings.json').exists() else []
     def save(name, value):
-        (root / name).write_text(json.dumps(value, indent=2) + '\n')
+        write_atomic(root / name, json.dumps(value, indent=2) + '\n')
     def run(argv, label, timeout=120, env=None, capture=False, cwd=None):
         # No child reads the operator's stdin: forwarded over ssh from a terminal that never
         # closes, it never ends, and a client that inherits it waits for it before it starts.
@@ -418,7 +436,7 @@ def main():
         assert watchdog_seconds > 0, 'insufficient remaining envelope including restoration reserve'
         assert not (prior / 'windows-completion-attempt.json').exists(), 'Windows-only completion already attempted'
         host('space')
-        (prior / 'windows-completion-attempt.json').write_text(json.dumps({'workspace': str(root), 'started_utc': now()}) + '\n')
+        write_atomic(prior / 'windows-completion-attempt.json', json.dumps({'workspace': str(root), 'started_utc': now()}) + '\n')
         save('window-attempt.json', {'attempt': 'explicitly-authorized Windows first-live completion', 'started_utc': now(), 'no_documented_route_runner': True})
         held, restored, error = False, False, None
         try:
@@ -478,7 +496,7 @@ def main():
             watchdog_seconds = int(3600 - restoration['window_seconds'] - 600)
             assert watchdog_seconds > 0, 'insufficient remaining envelope including restoration reserve'
             assert not (prior / 'corrected-attempt.json').exists(), 'the corrected attempt was already spent'
-            (prior / 'corrected-attempt.json').write_text(json.dumps({'workspace': str(root), 'started_utc': now()}) + '\n')
+            write_atomic(prior / 'corrected-attempt.json', json.dumps({'workspace': str(root), 'started_utc': now()}) + '\n')
         save('window-attempt.json', {'started_utc': now(), 'attempt': a.attempt, 'prior_workspace': a.prior_workspace})
         held = False
         restored = False
@@ -515,7 +533,7 @@ def main():
             path = root / 'mac-structured/receipt.json'
             receipt = json.loads(path.read_text(encoding="utf-8"))
             assert receipt['live_acceptance']['fail_closed']['no_model_response']
-            receipt['status'] = 'passed'; path.write_text(json.dumps(receipt, indent=2) + '\n')
+            receipt['status'] = 'passed'; write_atomic(path, json.dumps(receipt, indent=2) + '\n')
             tunnel.terminate(); tunnel.wait(timeout=15); tunnel = None; tunnel_log.close()
             win('Live', 850, model_id=documented['windows'])
             # The documented fail-closed block removes beta, not merely stops it.
@@ -544,7 +562,7 @@ def main():
         path = root / 'windows-structured/receipt.json'
         receipt = json.loads(path.read_text(encoding="utf-8"))
         assert receipt['live_acceptance']['fail_closed']['no_model_response'] and receipt['live_acceptance']['continuation_exact_nonce']
-        receipt['status'] = 'passed'; path.write_text(json.dumps(receipt, indent=2) + '\n')
+        receipt['status'] = 'passed'; write_atomic(path, json.dumps(receipt, indent=2) + '\n')
         summarize()
     print(json.dumps({'status': 'passed', 'action': a.action, 'workspace': str(root)}))
 
