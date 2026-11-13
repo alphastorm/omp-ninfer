@@ -1481,7 +1481,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "5598f1b4a71e681c61a937d367d613e322c80af3ff6c4f32c58e0913f04a6b51",
-      "staged_value_sha256": "7914825b38c6362e7f3c8b5365569f5654d72283c6e5e887b84b1c286bf06bab"
+      "staged_value_sha256": "baa04eefcf9a5e7c956c2fb3df446b3e30b7cdff48c3a86b5fe9ae69d2c5f188"
     },
     {
       "file": "manifest.json",
@@ -1784,7 +1784,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "7413c539542b8caf5f9f20404d82a2695ebb2a50ae7c3c4624da50ebd30ac679",
-      "staged_value_sha256": "40526ea51bf91ded661da64b8c79f049bf67764ba71b06dcdc2f20506cd563c7"
+      "staged_value_sha256": "166c0060c67aa36026dc415ff1f31a9fd04144e9dd037580efbf4adc7173d04e"
     },
     {
       "file": "manifest.json",
@@ -2008,7 +2008,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "5598f1b4a71e681c61a937d367d613e322c80af3ff6c4f32c58e0913f04a6b51",
-      "staged_value_sha256": "7914825b38c6362e7f3c8b5365569f5654d72283c6e5e887b84b1c286bf06bab"
+      "staged_value_sha256": "baa04eefcf9a5e7c956c2fb3df446b3e30b7cdff48c3a86b5fe9ae69d2c5f188"
     },
     {
       "file": "qualification.json",
@@ -2088,7 +2088,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "ef1bd47b0d779e55af316480d02988b6f3256bd7824620b48eb25bf8238895ac",
-      "staged_value_sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+      "staged_value_sha256": "9835aa4711fb226ea28ccd8adfcf116c225e05dfe64e111460bb67f544456020"
     },
     {
       "file": "qualification.json",
@@ -2120,7 +2120,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "4797a46824cf29aa3557f09baf61613a53d10bf78934a2a80e8b9cc0d0f2d416",
-      "staged_value_sha256": "9adf0a51fcb7fa8bf513c22f952be6cd08a6785c35e59d2cc4b7dbe482827809"
+      "staged_value_sha256": "7f4a7891d991f5fd0cb0a619b0b8c33ddd2a7e3fbdc07370cf6294ec35a197f4"
     },
     {
       "file": "qualification.json",
@@ -3779,7 +3779,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "9271807c94f129a3737aa683e2e9d718daa6b4d1f1a2179d622d159431dcfe64",
-      "staged_value_sha256": "61ded982d1eaa6acf972b185f953c84b2daf853f4e81d5032366f200d3a2dcdc"
+      "staged_value_sha256": "5458b4679f92bf4f6305c485beb6ce30b3dbc063537422d6d4f3adb7de46a733"
     },
     {
       "file": "compatibility.json",
@@ -4371,7 +4371,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "deca3f9d1cc87c51310ab80954fd123f4d13d56d1f8b2fbbd128e577d75490de",
-      "staged_value_sha256": "b9bce3260c8291ffd926f2c37dd35fb3f6d46bcb5593b78e84de455bd762b07b"
+      "staged_value_sha256": "711acd03f2781098916b9fc92044bd78d4f87e06107ffd5bddbee5ebb51bf6e7"
     },
     {
       "file": "compatibility.json",
@@ -4955,7 +4955,7 @@
       "disposition": "replaced",
       "reason": "Scalar identity/schema/policy inventory; file receipts retain their own exact execution subjects.",
       "predecessor_value_sha256": "3ca7e9f3c4a0fb74e4715fcf95f9ff3d4a8cf4060db5df974d7403cadb70a3f0",
-      "staged_value_sha256": "e5a35cae419aa20b534fd0816b40b318a878c3a1d963a17f0fbc4b37c2006e72"
+      "staged_value_sha256": "3db41d02b91789754c39b69e8e860fdf3c6a1c0c16175719c4b9ec4ee587ab7a"
     },
     {
       "file": "compatibility.json",

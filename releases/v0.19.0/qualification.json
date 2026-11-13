@@ -282,7 +282,7 @@
   "remaining_release_gates": [],
   "receipt_audit": {
     "repository_path": "releases/v0.19.0/qualification/receipt-audit.json",
-    "sha256": "b5d5cf3b8dc02f6e58d514a92ac8682e0f8a7e1de5ae2121bc35f535f919f683"
+    "sha256": "527410abd01f0a76b3ba3596a8180d7e6aeefe7b07a457111934c15638a81ca8"
   },
   "eligibility_scope": "Current component lanes only; external-install acceptance, native public installs/campaigns, product review, audit reconciliation and immutable pins remain binding."
 }
