@@ -80,6 +80,9 @@ from pathlib import Path
 print(json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))["server"].get("checkpoint_host_directory", ""))
 PY
 )
+while [[ "$CHECKPOINT_DIR" != / && "$CHECKPOINT_DIR" == */ ]]; do
+  CHECKPOINT_DIR=${CHECKPOINT_DIR%/}
+done
 if [[ -n "$CHECKPOINT_HOST_DIRECTORY" ]]; then
   if [[ "$(basename -- "$CHECKPOINT_DIR")" != "$CHECKPOINT_HOST_DIRECTORY" || -L "$CHECKPOINT_DIR" ]]; then
     printf 'error: --checkpoint-dir must name a separate, non-symlink %s directory; retain the prior store for rollback\n' \
@@ -108,10 +111,19 @@ API_KEY_FILE=$(realpath -- "$API_KEY_FILE")
 # operator and readable by scripts/checkpoint_sync.py without root.
 for directory in "$LOG_DIR" "$CHECKPOINT_DIR"; do
   mkdir -p -- "$directory"
-  chmod 700 -- "$directory"
 done
+REQUESTED_CHECKPOINT_DIR=$CHECKPOINT_DIR
 LOG_DIR=$(realpath -- "$LOG_DIR")
 CHECKPOINT_DIR=$(realpath -- "$CHECKPOINT_DIR")
+if [[ -n "$CHECKPOINT_HOST_DIRECTORY" ]]; then
+  REQUESTED_CHECKPOINT_PARENT=$(realpath -- "$(dirname -- "$REQUESTED_CHECKPOINT_DIR")")
+  if [[ "$(basename -- "$CHECKPOINT_DIR")" != "$CHECKPOINT_HOST_DIRECTORY" ||
+        "$CHECKPOINT_DIR" != "${REQUESTED_CHECKPOINT_PARENT%/}/$(basename -- "$REQUESTED_CHECKPOINT_DIR")" ]]; then
+    printf 'error: --checkpoint-dir must name a separate, non-symlink %s directory; it resolves to %s; retain the prior store for rollback\n' \
+      "$CHECKPOINT_HOST_DIRECTORY" "$CHECKPOINT_DIR" >&2
+    exit 1
+  fi
+fi
 if [[ "$CHECKPOINT_DIR" == "$LOG_DIR" || "$CHECKPOINT_DIR" == "$(dirname -- "$MODEL_PATH")" ]]; then
   printf 'error: --checkpoint-dir must be its own directory, not the log or model directory\n' >&2
   exit 1
@@ -120,6 +132,9 @@ if [[ ! -O "$CHECKPOINT_DIR" ]]; then
   printf 'error: --checkpoint-dir must be owned by the invoking user: %s\n' "$CHECKPOINT_DIR" >&2
   exit 1
 fi
+for directory in "$LOG_DIR" "$CHECKPOINT_DIR"; do
+  chmod 700 -- "$directory"
+done
 
 python3 - "$API_KEY_FILE" <<'PY'
 import os
