@@ -397,6 +397,11 @@ Supply private inputs as arguments to `candidate`, not as plan fields:
   files come from the cut. The driver always takes the release tag and source commit from the
   plan. Relative file options resolve beside this JSON. A carried container derives its staging
   arguments from the predecessor and refuses a new runtime-publication record.
+- Instead, `candidate --runtime-handoff DIR` verifies a closed runtime handoff and expands those
+  three inputs to absolute private paths. It refuses mixed raw arguments, mismatched plan identity
+  or predecessor, extra files, and incorrect sizes/hashes. The handoff uses schema
+  `omp-ninfer.rtx5090-handoff/1`, a filename-keyed `files` object and exactly the three parsed
+  `driver_arguments` pairs; arbitrary arguments are never forwarded.
 - Each re-cut native lane requires `--bundle LANE=DIR` and
   `--native-publication LANE=JSON`; repeat per lane. External package files use
   `--asset ROLE=PATH` when the bundle declares them. Carried native lanes take neither bundle

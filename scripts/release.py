@@ -18,7 +18,7 @@ from urllib.parse import urlsplit
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from release_io import atomic_write, atomic_write_json, git
-from release_plan import (COMPONENT_IDS, initial_plan, latest_ready_manifest, load_plan,
+from release_plan import (COMPONENT_IDS, SHA256_RE, initial_plan, latest_ready_manifest, load_plan,
                           manifest_components, plan_errors)
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -188,6 +188,15 @@ class ReleaseDriver:
 
     def set_options(self, options: argparse.Namespace) -> None:
         private = self.state["private"]
+        handoff = getattr(options, "runtime_handoff", None)
+        raw_runtime = any(getattr(options, name, None) is not None
+                          for name in ("stage_input", "lane_receipts", "runtime_publication"))
+        if handoff is not None and raw_runtime:
+            raise ReleaseError("--runtime-handoff cannot be combined with --stage-input, "
+                               "--lane-receipt or --runtime-publication")
+        expanded = self._runtime_handoff_inputs(Path(handoff)) if handoff is not None else None
+        if handoff is None and raw_runtime:
+            private.pop("runtime_handoff", None)
         for name in PATH_INPUTS:
             value = getattr(options, name, None)
             if value is not None:
@@ -204,6 +213,8 @@ class ReleaseDriver:
                         raise ReleaseError(f"--{name.replace('_', '-')} requires unique NAME=PATH entries")
                     parsed[key] = str(Path(value).resolve())
                 private[name] = parsed
+        if expanded is not None:
+            private.update(expanded)
         for name in ("as_of", "measurement_prefix"):
             value = getattr(options, name, None)
             if value is not None:
@@ -220,6 +231,73 @@ class ReleaseDriver:
                 calendar_date.fromisoformat(date)
             except ValueError as error:
                 raise ReleaseError("--as-of must be an ISO calendar date") from error
+
+    def _runtime_handoff_inputs(self, directory: Path) -> dict[str, Any]:
+        runtime = next(row for row in self.plan["components"] if row["id"] == COMPONENT_IDS[0])
+        if runtime["disposition"] != "recut":
+            raise ReleaseError("--runtime-handoff requires a re-cut rtx5090-container")
+        directory = directory.resolve()
+        if not directory.is_dir():
+            raise ReleaseError("runtime handoff must be an existing directory")
+        manifest = directory / "handoff.json"
+        if not manifest.is_file() or manifest.is_symlink():
+            raise ReleaseError("runtime handoff requires a regular handoff.json")
+        handoff = read_json(manifest)
+        if handoff.get("schema") != "omp-ninfer.rtx5090-handoff/1":
+            raise ReleaseError("runtime handoff schema must be omp-ninfer.rtx5090-handoff/1")
+        for name, expected in (("source_commit", runtime["source_commit"]),
+                               ("component_tag", runtime["release_tag"])):
+            if handoff.get(name) != expected:
+                raise ReleaseError(f"runtime handoff {name} differs from the plan")
+        baseline = handoff.get("baseline")
+        baseline_release = baseline.get("release") if isinstance(baseline, dict) else None
+        if baseline_release != self.plan["predecessor"]:
+            raise ReleaseError(f"runtime handoff baseline release {baseline_release!r} differs from "
+                               f"plan predecessor {self.plan['predecessor']!r}")
+        files = handoff.get("files")
+        if not isinstance(files, dict) or not files:
+            raise ReleaseError("runtime handoff files must be a nonempty object")
+        for name, binding in files.items():
+            if (not name or name in (".", "..", "handoff.json")
+                    or any(separator in name for separator in ("/", "\\", ":"))):
+                raise ReleaseError("runtime handoff files must use separator-free relative file names")
+            if (not isinstance(binding, dict) or type(binding.get("bytes")) is not int
+                    or binding["bytes"] < 0 or not isinstance(binding.get("sha256"), str)
+                    or SHA256_RE.fullmatch(binding["sha256"]) is None):
+                raise ReleaseError(f"runtime handoff {name} requires bytes and a lowercase SHA-256")
+        actual = {path.name for path in directory.iterdir()}
+        if actual != set(files) | {"handoff.json"}:
+            raise ReleaseError("runtime handoff file set differs from handoff.json")
+        for name, binding in files.items():
+            path = directory / name
+            if not path.is_file() or path.is_symlink():
+                raise ReleaseError(f"runtime handoff {name} must be a regular file")
+            if path.stat().st_size != binding["bytes"]:
+                raise ReleaseError(f"runtime handoff {name} byte size differs from handoff.json")
+            observed = file_sha(path)
+            if observed != binding["sha256"]:
+                raise ReleaseError(f"runtime handoff {name} SHA-256 differs: "
+                                   f"observed {observed}, declared {binding['sha256']}")
+        arguments = handoff.get("driver_arguments")
+        expected_flags = {"--stage-input", "--lane-receipt", "--runtime-publication"}
+        if (not isinstance(arguments, list) or len(arguments) != 6
+                or not all(isinstance(value, str) for value in arguments)):
+            raise ReleaseError("runtime handoff driver_arguments must contain exactly three flag/value pairs")
+        selected = {}
+        for index in range(0, len(arguments), 2):
+            flag, name = arguments[index:index + 2]
+            if flag not in expected_flags or flag in selected:
+                raise ReleaseError("runtime handoff driver_arguments have duplicate or unknown flags")
+            if flag == "--lane-receipt":
+                lane, separator, name = name.partition("=")
+                if not separator or lane != "rtx5090":
+                    raise ReleaseError("runtime handoff --lane-receipt must name rtx5090")
+            if name not in files:
+                raise ReleaseError("runtime handoff driver_arguments must name files in the handoff")
+            selected[flag] = str(directory / name)
+        return {"runtime_handoff": str(directory), "stage_input": selected["--stage-input"],
+                "lane_receipts": {"rtx5090": selected["--lane-receipt"]},
+                "runtime_publication": selected["--runtime-publication"]}
 
     @property
     def prefix(self) -> str:
@@ -371,7 +449,7 @@ class ReleaseDriver:
 
     def inputs_digest(self, group: str, head: str) -> str:
         names = ({"stage_input", "notes", "client_component", "runtime_publication", "bundles",
-                  "lane_receipts", "assets", "native_publications"} if group == "stage" else
+                  "lane_receipts", "assets", "native_publications", "runtime_handoff"} if group == "stage" else
                  {"window_root", "reviews", "values", "compose_notes"} if group == "compose" else set())
         private = {}
         for name in sorted(names & self.state["private"].keys()):
@@ -394,6 +472,10 @@ class ReleaseDriver:
 
     def validate_stage_inputs(self) -> None:
         private = self.state["private"]
+        if "runtime_handoff" in private:
+            expected_inputs = self._runtime_handoff_inputs(Path(private["runtime_handoff"]))
+            if any(private.get(name) != value for name, value in expected_inputs.items()):
+                raise ReleaseError("recorded runtime inputs differ from their runtime handoff")
         expected = {row["id"].split("-", 1)[0] for row in self.recut_native()}
         supplied = set(private.get("bundles", {}))
         if expected != supplied:
@@ -733,7 +815,8 @@ def required_input(driver: ReleaseDriver, group: str) -> str:
         if driver.recut_native():
             items += ["--bundle LANE=DIR", "--native-publication LANE=JSON", "--asset ROLE=PATH when external"]
         if any(row["id"] == COMPONENT_IDS[0] and row["disposition"] == "recut" for row in driver.plan["components"]):
-            items += ["--stage-input JSON", "--lane-receipt rtx5090=PATH", "--runtime-publication JSON"]
+            items += ["--runtime-handoff DIR (or --stage-input JSON, --lane-receipt rtx5090=PATH, "
+                      "--runtime-publication JSON)"]
         if driver.plan["client"]["disposition"] == "updated":
             items += ["--client-component JSON"]
         return ", ".join(items)
@@ -951,6 +1034,9 @@ def main(argv: list[str] | None = None, *, root: Path = ROOT) -> int:
                 command.add_argument("--" + flag, dest=option, action="append", metavar="NAME=PATH")
             command.add_argument("--as-of")
             command.add_argument("--measurement-prefix")
+            if name == "candidate":
+                command.add_argument("--runtime-handoff", type=Path,
+                                     help="verify a closed runtime handoff and expand its three inputs")
         if name == "publish":
             command.add_argument("--preflight", action="store_true", required=True)
             command.add_argument("--pr", type=int, required=True)

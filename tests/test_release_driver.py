@@ -299,6 +299,41 @@ class ReleaseDriverTests(unittest.TestCase):
         atomic_write_json(self.private / "windows" / "window-state.json", state)
         return state
 
+    def runtime_handoff(self) -> tuple[Path, dict]:
+        self.plan["components"][0].update(disposition="recut",
+                                           release_tag="v3.0.0-qwen38-5090-beta.1",
+                                           source_commit="9" * 40)
+        atomic_write_json(self.root / "releases" / RELEASE / "plan.json", self.plan)
+        self.git("add", "--", f"releases/{RELEASE}/plan.json")
+        self.git("commit", "-qm", "test(release): declare the runtime handoff identity")
+        directory = self.private / "handoff"
+        directory.mkdir()
+        values = {
+            "source_tag": "v3.0.0-source", "binary_sha": "7" * 64,
+            "archive_sha": "6" * 64, "source_archive_sha": "5" * 64,
+            "sbom_sha": "4" * 64, "image_digest": "sha256:" + "3" * 64,
+            "runtime_receipt_release": "v3.0.0-image", "source_archive": "source.tar.gz",
+            "checksums": "SHA256SUMS",
+        }
+        atomic_write_json(directory / "stage-input.json", values)
+        atomic_write_json(directory / "rtx5090.json", {"status": "passed"})
+        atomic_write_json(directory / "runtime-publication.json", {"status": "passed"})
+        atomic_write(directory / "source.tar.gz", b"source fixture")
+        atomic_write(directory / "SHA256SUMS", "checksum fixture\n")
+        handoff = {
+            "schema": "omp-ninfer.rtx5090-handoff/1",
+            "source_commit": "9" * 40, "component_tag": self.plan["components"][0]["release_tag"],
+            "plan_sha256": "ignored", "baseline": {"release": PREDECESSOR, "commit": "ignored",
+                                                  "manifest_sha256": "ignored"},
+            "files": {path.name: {"bytes": path.stat().st_size, "sha256": DRIVER.file_sha(path)}
+                      for path in directory.iterdir()},
+            "driver_arguments": ["--runtime-publication", "runtime-publication.json",
+                                 "--lane-receipt", "rtx5090=rtx5090.json",
+                                 "--stage-input", "stage-input.json"],
+        }
+        atomic_write_json(directory / "handoff.json", handoff)
+        return directory, handoff
+
     def driver(self, **values) -> Any:
         options = argparse.Namespace(**{"notes": self.private / "notes.md", **values})
         return DRIVER.ReleaseDriver(self.root, RELEASE, options)
@@ -920,9 +955,10 @@ class ReleaseDriverTests(unittest.TestCase):
                        "--native-publication", f"rtx4090={publication}")
         sequence = [call["tool"] + (" " + call["arguments"][0] if call["tool"] == "aggregate_qualification.py" else "")
                     for call in self.calls()]
-        self.assertEqual(sequence[:7], ["stage_release.py", "aggregate_qualification.py admit",
+        self.assertEqual(sequence[:8], ["stage_release.py", "aggregate_qualification.py admit",
                                        "bind_native_variant.py", "rebind_release.py",
-                                       "aggregate_qualification.py compose", "rebind_release.py", "receipt_audit.py"])
+                                       "aggregate_qualification.py compose", "rebind_release.py",
+                                       "receipt_audit.py", "rebind_release.py"])
 
     def test_admit_output_wrong_lane_or_arguments_is_refused(self) -> None:
         for output in ({"schema": 1, "lanes": {"unexpected": {"binder_arguments": ["--release", RELEASE]}}},
@@ -1006,6 +1042,96 @@ class ReleaseDriverTests(unittest.TestCase):
         self.assertNotIn("--runtime-publication", calls[0]["arguments"])
         self.assertIn("--runtime-publication", calls[1]["arguments"])
         self.assertNotIn("--native-publication", calls[1]["arguments"])
+
+    def test_runtime_handoff_expands_the_three_verified_inputs(self) -> None:
+        directory, _ = self.runtime_handoff()
+        self.candidate("--no-suite", "--runtime-handoff", str(directory))
+        arguments = self.calls("stage_release.py")[0]["arguments"]
+        self.assertEqual(arguments[arguments.index("--lane-receipt") + 1],
+                         str((directory / "rtx5090.json").resolve()))
+        self.assertEqual(arguments[arguments.index("--source-archive") + 1],
+                         str((directory / "source.tar.gz").resolve()))
+        compose = next(call for call in self.calls("aggregate_qualification.py")
+                       if call["arguments"][0] == "compose")["arguments"]
+        self.assertEqual(compose[compose.index("--runtime-publication") + 1],
+                         str((directory / "runtime-publication.json").resolve()))
+        state = json.loads((self.root / ".release-state" / (RELEASE + ".json")).read_text())
+        self.assertEqual(state["private"]["stage_input"], str((directory / "stage-input.json").resolve()))
+        self.assertNotIn(str(directory), (self.root / "releases" / RELEASE / "plan.json").read_text())
+
+    def test_runtime_handoff_refuses_combined_raw_arguments(self) -> None:
+        directory, _ = self.runtime_handoff()
+        for flag, value in (("--stage-input", str(directory / "stage-input.json")),
+                            ("--lane-receipt", "rtx5090=" + str(directory / "rtx5090.json")),
+                            ("--runtime-publication", str(directory / "runtime-publication.json"))):
+            with self.subTest(flag=flag):
+                result = self.invoke("candidate", "--no-suite", "--runtime-handoff", str(directory),
+                                     flag, value, success=False)
+                self.assertIn("--runtime-handoff cannot be combined", result.stderr)
+                self.assertEqual(self.calls(), [])
+
+    def test_runtime_handoff_refuses_carried_runtime(self) -> None:
+        result = self.invoke("candidate", "--no-suite", "--runtime-handoff", str(self.private), success=False)
+        self.assertIn("requires a re-cut rtx5090-container", result.stderr)
+        self.assertEqual(self.calls(), [])
+
+    def test_runtime_handoff_refusals_leave_product_bytes_unchanged(self) -> None:
+        directory, baseline = self.runtime_handoff()
+        mutations = [
+            ("schema", lambda value: value.update(schema=1), "schema must be"),
+            ("source", lambda value: value.update(source_commit="8" * 40), "source_commit differs"),
+            ("tag", lambda value: value.update(component_tag="other"), "component_tag differs"),
+            ("baseline", lambda value: value["baseline"].update(release="v0.1.0"), "baseline release 'v0.1.0'"),
+            ("files-type", lambda value: value.update(files=[]), "files must be"),
+            ("size", lambda value: value["files"]["rtx5090.json"].update(bytes=1), "byte size differs"),
+            ("size-type", lambda value: value["files"]["rtx5090.json"].update(bytes=True), "requires bytes"),
+            ("digest", lambda value: value["files"]["rtx5090.json"].update(sha256="0" * 64), "SHA-256 differs"),
+            ("digest-type", lambda value: value["files"]["rtx5090.json"].update(sha256="short"), "requires bytes"),
+            ("closure", lambda value: value["files"].pop("source.tar.gz"), "file set differs"),
+            ("file-name", lambda value: value["files"].update({"../outside": {"bytes": 0, "sha256": "0" * 64}}),
+             "separator-free"),
+            ("arguments", lambda value: value.update(driver_arguments=[]), "exactly three"),
+            ("duplicate", lambda value: value["driver_arguments"].__setitem__(2, "--runtime-publication"), "duplicate or unknown"),
+            ("arbitrary", lambda value: value["driver_arguments"].__setitem__(0, "--publish"), "duplicate or unknown"),
+            ("lane", lambda value: value["driver_arguments"].__setitem__(3, "rtx4090=rtx5090.json"), "must name rtx5090"),
+            ("path", lambda value: value["driver_arguments"].__setitem__(1, "../runtime-publication.json"),
+             "must name files in the handoff"),
+        ]
+        before = self.worktree_bytes()
+        for name, mutate, message in mutations:
+            with self.subTest(rule=name):
+                value = copy.deepcopy(baseline)
+                mutate(value)
+                atomic_write_json(directory / "handoff.json", value)
+                result = self.invoke("candidate", "--no-suite", "--runtime-handoff", str(directory), success=False)
+                self.assertIn(message, result.stderr)
+                self.assertEqual(self.calls(), [])
+                self.assertEqual(self.worktree_bytes(), before)
+
+    def test_runtime_handoff_rejects_unlisted_and_nonregular_files(self) -> None:
+        directory, _ = self.runtime_handoff()
+        extra = directory / "extra.json"
+        atomic_write_json(extra, {})
+        result = self.invoke("candidate", "--no-suite", "--runtime-handoff", str(directory), success=False)
+        self.assertIn("file set differs", result.stderr)
+        extra.unlink()
+        path = directory / "source.tar.gz"
+        path.unlink()
+        path.mkdir()
+        result = self.invoke("candidate", "--no-suite", "--runtime-handoff", str(directory), success=False)
+        self.assertIn("must be a regular file", result.stderr)
+        self.assertEqual(self.calls(), [])
+
+    def test_runtime_handoff_is_revalidated_when_an_attempt_resumes(self) -> None:
+        directory, _ = self.runtime_handoff()
+        self.interrupt(runtime_handoff=directory)
+        path = directory / "source.tar.gz"
+        atomic_write(path, b"S" + path.read_bytes()[1:])
+        before = self.worktree_bytes()
+        result = self.invoke("candidate", "--no-suite", success=False)
+        self.assertIn("SHA-256 differs", result.stderr)
+        self.assertEqual(len(self.calls("stage_release.py")), 1)
+        self.assertEqual(self.worktree_bytes(), before)
 
     def test_publish_only_wraps_preflight_with_exact_head(self) -> None:
         if shutil.which("bash") is None:
