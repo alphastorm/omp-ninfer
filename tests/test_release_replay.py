@@ -18,10 +18,6 @@ SPEC = importlib.util.spec_from_file_location("release_history", ROOT / "tests/h
 assert SPEC is not None and SPEC.loader is not None
 HISTORY = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(HISTORY)
-IO_SPEC = importlib.util.spec_from_file_location("replay_io", ROOT / "scripts/release_io.py")
-assert IO_SPEC is not None and IO_SPEC.loader is not None
-IO = importlib.util.module_from_spec(IO_SPEC)
-IO_SPEC.loader.exec_module(IO)
 BOUND_PATHS = (
     "compatibility.json", "docs/COMPATIBILITY.md", "profiles", "releases/v0.19.0",
     "examples/manual-tunnel/start-ninfer.sh", "examples/manual-tunnel/stop-ninfer.sh",
@@ -29,6 +25,13 @@ BOUND_PATHS = (
 
 
 class HistoryPolicyTests(unittest.TestCase):
+    def test_lane_correction_cannot_write_a_callers_live_authority(self):
+        for path in (ROOT / "compatibility.json", "../compatibility.json"):
+            with self.subTest(path=path), mock.patch.object(HISTORY.subprocess, "run") as run:
+                with self.assertRaisesRegex(ValueError, "repository-relative"):
+                    HISTORY.corrected_lane_snapshot("a" * 40, path, False)
+                run.assert_not_called()
+
     def test_shallow_history_skips_locally_and_fails_when_required(self):
         result = subprocess.CompletedProcess([], 0, stdout="true\n")
         with mock.patch.object(HISTORY.subprocess, "run", return_value=result):
@@ -47,64 +50,16 @@ class ReleasePinReplayTests(unittest.TestCase):
                       "143a9bc", "57526ad", "v0.19.0")
         cls.commits = dict(zip(references, HISTORY.resolve_commits(*references)))
 
-    @staticmethod
-    def snapshot(root: Path) -> dict[str, bytes]:
-        paths = []
-        for name in BOUND_PATHS:
-            path = root / name
-            paths.extend(path.rglob("*") if path.is_dir() else [path])
-        return {path.relative_to(root).as_posix(): path.read_bytes()
-                for path in paths if path.is_file()}
-
-    def lane_golden(self, root: Path) -> dict[str, bytes]:
-        subprocess.run(["git", "clone", "--quiet", "--config", "core.autocrlf=false",
-                        "--shared", "--no-checkout",
-                        str(ROOT), str(root)], check=True, capture_output=True)
-        subprocess.run(["git", "checkout", "--quiet", "--detach", self.commits["fc15ffc"]],
-                       cwd=root, check=True, capture_output=True)
-        published = json.loads(subprocess.run(
-            ["git", "show", f"{self.commits['v0.19.0']}:compatibility.json"],
-            cwd=root, capture_output=True, check=True,
-        ).stdout)
-        path = root / "compatibility.json"
-        authority = json.loads(path.read_text(encoding="utf-8"))
-        # One historical defect is allowed, with its deterministic hash/render closure.
-        # The historical rebind computes that closure, not the implementation under test.
-        rows = [row for row in authority["runtime_contracts"] if row["lane"].startswith("RTX 3090 ")]
-        final = next(row["lane"] for row in published["runtime_contracts"]
-                     if row["lane"].startswith("RTX 3090 "))
-        self.assertEqual(len(rows), 1)
-        self.assertNotEqual(rows[0]["lane"], final)
-        rows[0]["lane"] = final
-        IO.atomic_write_json(path, authority)
-        # Keep the historical derivation and renderer, but use the shared byte writer:
-        # historical text-mode output would otherwise translate LF on Windows.
-        historical = """
-import sys
-from pathlib import Path
-root, helpers = map(Path, sys.argv[1:])
-sys.path.insert(0, str(root / "scripts"))
-import rebind_release
-import render_compatibility
-sys.path.insert(0, str(helpers))
-from release_io import atomic_write, atomic_write_json
-rebind_release.save = atomic_write_json
-rebind_release.render = lambda authority, output: atomic_write(
-    output, render_compatibility.render(render_compatibility.load_authority(authority)))
-sys.argv = ["rebind_release.py", "--release", "v0.19.0"]
-raise SystemExit(rebind_release.main())
-"""
-        result = subprocess.run(
-            [sys.executable, "-c", historical, str(root), str(ROOT / "scripts")],
-            cwd=root, capture_output=True, text=True,
-        )
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        return self.snapshot(root)
-
     def replay(self, before: str, stage: str, after: str) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary) / "replay"
-            expected = self.lane_golden(Path(temporary) / "golden") if stage == "lane" else None
+            expected = None
+            if stage == "lane":
+                expected, pointers = HISTORY.corrected_lane_snapshot(
+                    self.commits[after], "compatibility.json", False)
+                lane_pointers = {name for name, pointer in pointers if pointer.endswith("/lane")}
+                self.assertEqual(lane_pointers,
+                                 {"compatibility.json", "releases/v0.19.0/compatibility.json"})
             subprocess.run(["git", "clone", "--quiet", "--config", "core.autocrlf=false",
                             "--shared", "--no-checkout",
                             str(ROOT), str(root)], check=True, capture_output=True)
@@ -119,7 +74,7 @@ raise SystemExit(rebind_release.main())
             )
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             if expected is not None:
-                self.assertEqual(self.snapshot(root), expected)
+                self.assertEqual(HISTORY.release_snapshot(root, "v0.19.0"), expected)
                 return
             difference = subprocess.run(
                 ["git", "diff", "--exit-code", self.commits[after], "--", *BOUND_PATHS],
@@ -138,6 +93,43 @@ raise SystemExit(rebind_release.main())
 
     def test_manifest_pin(self):
         self.replay("143a9bc", "manifest", "57526ad")
+
+    def test_draft_lane_correction_preserves_the_unpromoted_root(self):
+        expected, pointers = HISTORY.corrected_lane_snapshot(
+            self.commits["bf2a059"], "releases/v0.19.0/compatibility.json", True)
+        lane_pointers = {(name, pointer) for name, pointer in pointers if pointer.endswith("/lane")}
+        self.assertEqual(len(lane_pointers), 1)
+        self.assertEqual(next(iter(lane_pointers))[0], "releases/v0.19.0/compatibility.json")
+        self.assertTrue(all(name.startswith("releases/v0.19.0/") for name, _ in pointers))
+        for name, data in expected.items():
+            if not name.startswith("releases/v0.19.0/"):
+                original = subprocess.run(["git", "show", f"{self.commits['bf2a059']}:{name}"],
+                                          cwd=ROOT, capture_output=True, check=True).stdout
+                self.assertEqual(data, original, name)
+        authority = json.loads(expected["releases/v0.19.0/compatibility.json"])
+        published = json.loads(subprocess.run(
+            ["git", "show", f"{self.commits['v0.19.0']}:compatibility.json"],
+            cwd=ROOT, capture_output=True, check=True,
+        ).stdout)
+        self.assertEqual(next(row["lane"] for row in authority["runtime_contracts"]
+                              if row["lane"].startswith("RTX 3090 ")),
+                         next(row["lane"] for row in published["runtime_contracts"]
+                              if row["lane"].startswith("RTX 3090 ")))
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "draft"
+            subprocess.run(["git", "clone", "--quiet", "--config", "core.autocrlf=false",
+                            "--shared", "--no-checkout", str(ROOT), str(root)],
+                           capture_output=True, check=True)
+            subprocess.run(["git", "checkout", "--quiet", "--detach", self.commits["bf2a059"]],
+                           cwd=root, capture_output=True, check=True)
+            shutil.copytree(ROOT / "scripts", root / "scripts", dirs_exist_ok=True,
+                            ignore=shutil.ignore_patterns("__pycache__"))
+            result = subprocess.run(
+                [sys.executable, str(root / "scripts/rebind_release.py"),
+                 "--release", "v0.19.0", "--draft"],
+                cwd=root, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertEqual(HISTORY.release_snapshot(root, "v0.19.0"), expected)
 
 
 if __name__ == "__main__":
