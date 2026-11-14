@@ -1210,6 +1210,28 @@ class ReleaseDriverTests(unittest.TestCase):
                 self.assertIn("--runtime-handoff cannot be combined", result.stderr)
                 self.assertEqual(self.calls(), [])
 
+    def test_runtime_handoff_stage_paths_must_name_hash_bound_files(self) -> None:
+        directory, baseline = self.runtime_handoff()
+        stage_input = directory / "stage-input.json"
+        original = json.loads(stage_input.read_text())
+        outside = self.private / "outside"
+        atomic_write(outside, b"unbound input")
+        before = self.worktree_bytes()
+        for field in ("source_archive", "checksums", "profile_template_dir"):
+            for value in (str(outside.resolve()), "C:/outside", "C:\\outside", "..", ".",
+                          "../outside", "nested/source.tar.gz", "nested\\source.tar.gz",
+                          "unlisted.tar.gz", "", None, ["source.tar.gz"]):
+                with self.subTest(field=field, value=value):
+                    atomic_write_json(stage_input, {**original, field: value})
+                    handoff = copy.deepcopy(baseline)
+                    handoff["files"][stage_input.name] = {
+                        "bytes": stage_input.stat().st_size, "sha256": DRIVER.file_sha(stage_input)}
+                    atomic_write_json(directory / "handoff.json", handoff)
+                    with self.assertRaisesRegex(DRIVER.ReleaseError, "stage-input " + field):
+                        self.driver(runtime_handoff=directory)
+                    self.assertEqual(self.calls(), [])
+                    self.assertEqual(self.worktree_bytes(), before)
+
     def test_runtime_handoff_refuses_carried_runtime(self) -> None:
         result = self.invoke("candidate", "--no-suite", "--runtime-handoff", str(self.private), success=False)
         self.assertIn("requires a re-cut rtx5090-container", result.stderr)

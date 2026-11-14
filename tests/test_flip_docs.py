@@ -313,6 +313,35 @@ class FlipDocsTests(unittest.TestCase):
         self.assertIn("refusal (a)", result.issues[0].detail)
         self.assertEqual((self.root / "docs/FACTS.md").read_bytes(), original)
 
+    def test_later_page_refusal_writes_none_of_the_declared_pages(self) -> None:
+        self.pages("README.md", "docs/FACTS.md")
+        self.write("README.md", f"Version {OLD}.\r\n")
+        self.write("docs/FACTS.md", f"Version {OLD}.\n\nSource `aaaaaaaa`.\n")
+        before = {path: path.read_bytes() for path in FLIP.publication_pages(self.root)}
+        result = self.flip()
+        self.assertTrue(any(issue.kind == "refused" for issue in result.issues))
+        self.assertEqual({path: path.read_bytes() for path in before}, before)
+        self.assertEqual(result.changed, ())
+
+    def test_failed_post_write_validation_restores_every_original_page(self) -> None:
+        self.pages("README.md", "docs/FACTS.md")
+        self.write("README.md", f"Version {OLD}.\r\n")
+        self.write("docs/FACTS.md",
+                   f"Version {OLD}.\n\nRelease {NEW}: acceptance is pending.\n")
+        before = {path: path.read_bytes() for path in FLIP.publication_pages(self.root)}
+        validate = FLIP.validate_release_documentation
+
+        def validate_written_pages(root, release, errors):
+            for path in before:
+                self.assertIn(f"Version {NEW}.", path.read_text(encoding="utf-8"))
+            validate(root, release, errors)
+
+        with mock.patch.object(FLIP, "validate_release_documentation", side_effect=validate_written_pages):
+            result = self.flip()
+        self.assertTrue(any(issue.kind == "stale release state" for issue in result.issues))
+        self.assertEqual({path: path.read_bytes() for path in before}, before)
+        self.assertEqual(result.changed, ())
+
     def test_prefix_used_as_an_unrelated_token_is_not_silently_rewritten(self) -> None:
         self.write("docs/FACTS.md", f"Version {OLD}.\n\nUnrelated token `dddddddd`.\n")
         result = self.flip()
@@ -376,6 +405,20 @@ class FlipDocsTests(unittest.TestCase):
         result = self.flip()
         self.assertEqual(result.issues, ())
         self.assertTrue((self.root / "docs/FACTS.md").read_text(encoding="utf-8").endswith(records))
+
+    def test_shorter_or_different_fences_do_not_expose_the_records_section(self) -> None:
+        records = f"## Records\n\nRTX 5090 {TAG}; {'a' * 8}.\n"
+        for opening, literal, closing in (("````", "```", "````"),
+                                          ("~~~~", "~~~", "~~~~~"),
+                                          ("````", "~~~~", "`````")):
+            with self.subTest(opening=opening, literal=literal, closing=closing):
+                self.write("docs/FACTS.md",
+                           f"Version {OLD}.\n\n{opening}text\n{literal}\n{closing}\n\n" + records)
+                result = self.flip()
+                self.assertEqual(result.issues, ())
+                value = (self.root / "docs/FACTS.md").read_text(encoding="utf-8")
+                self.assertIn(f"Version {NEW}.", value)
+                self.assertTrue(value.endswith(records))
 
     def test_reviewed_historical_boundary_inserts_and_removes_exactly_one_line(self) -> None:
         heading = "## Prior release record"
@@ -669,7 +712,17 @@ class PublicDocumentationTests(unittest.TestCase):
             for page, (line, token) in HISTORY_REFUSALS.items():
                 self.assertEqual(refused[page].line, line)
                 self.assertIn(repr(token), refused[page].detail)
+            for page in paths:
                 self.assertEqual((root / page).read_bytes(), original_pages[page])
+            self.assertEqual(result.changed, ())
+            # The whole publication is atomic. Keep the existing per-page inventory proof
+            # by selecting each page independently, not by accepting a partially written set.
+            single_page_owner = root / "publication-pages.md"
+            for page in paths:
+                atomic_write(single_page_owner, declaration((page,)))
+                single = FLIP.flip(root, "v0.18.0", "v0.19.0", declaration=single_page_owner)
+                self.assertEqual({issue.page for issue in single.issues if issue.kind == "refused"},
+                                 {page} if page in HISTORY_REFUSALS else set())
             mappings, _ = ENGINE.identity_map(root, "v0.18.0", "v0.19.0", projections=True)
             inventory = ENGINE.identity_pattern(mappings, projections=True)
             differences = {}

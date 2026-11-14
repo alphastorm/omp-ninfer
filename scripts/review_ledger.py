@@ -40,13 +40,11 @@ SEAT_FIELDS = ("reviewer_id", "selectionClass", "role", "independence_class", "a
                "model", "model_family")
 SECTIONS = ("native_runtime", "native_component_delta", "product_tooling")
 # Private paths and synthetic identifiers, applied to string leaves, never to source bytes.
-# Where a path ends inside prose is not decidable, so the patterns err toward removing too much:
-# a path runs to whitespace or a quote, and following words that still contain a path separator
-# go with it. Brackets do not end a path; a directory name may contain them.
-_PATH_REST = r"""[^\s"'`]*(?:[ \t]+[^\s"'`]*[\\/][^\s"'`]*)*"""
+# A private path's end is undecidable in prose. Remove the rest of its pipe-separated
+# field, never guessing at quotes, brackets, spaces or the remaining directory names.
 SANITIZE = (
-    (re.compile(r"[A-Z]:[\\/]+Users[\\/]+" + _PATH_REST, re.I), "a Windows user-profile path"),
-    (re.compile(r"/(?:Users|home)/" + _PATH_REST), "a POSIX user-profile path"),
+    (re.compile(r"(?:[A-Z]:[\\/]+(?:Users|Home)[\\/]+|/(?:Users|home)/+)[^|\r\n]*", re.I),
+     "a user-profile path and the rest of its field were removed"),
     (re.compile(r"GPU-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"),
      "a synthetic GPU-identifier sentinel"),
 )

@@ -308,6 +308,12 @@ class ReleaseDriver:
             if name not in files:
                 raise ReleaseError("runtime handoff driver_arguments must name files in the handoff")
             selected[flag] = str(directory / name)
+        # Stage options must stay inside the same hash-verified file set as driver inputs.
+        stage_input = read_json(Path(selected["--stage-input"]))
+        for field in STAGE_FILE_OPTIONS & stage_input.keys():
+            name = stage_input[field]
+            if not isinstance(name, str) or name not in files:
+                raise ReleaseError(f"runtime handoff stage-input {field} must name a file in handoff.json")
         return {"runtime_handoff": str(directory), "stage_input": selected["--stage-input"],
                 "lane_receipts": {"rtx5090": selected["--lane-receipt"]},
                 "runtime_publication": selected["--runtime-publication"]}

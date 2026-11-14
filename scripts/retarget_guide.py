@@ -96,8 +96,8 @@ def immutable_regions(text: str, document: Path | str) -> tuple[tuple[int, int],
         fenced = re.match(r"^\s*(`{3,}|~{3,})", line) if not html else None
         if fenced:
             if fence is None:
-                fence = fenced[1][0]
-            elif fenced[1][0] == fence:
+                fence = fenced[1]
+            elif fenced[1][0] == fence[0] and len(fenced[1]) >= len(fence):
                 fence = None
         if not fenced and fence is None:
             visible = line if html else re.sub(r"(`+)(?!`).*?(?<!`)\1(?!`)", "", line)
@@ -128,8 +128,8 @@ def immutable_regions(text: str, document: Path | str) -> tuple[tuple[int, int],
         marker = re.match(r"^\s*(`{3,}|~{3,})", line)
         if marker:
             if fence is None:
-                fence = marker[1][0]
-            elif marker[1][0] == fence:
+                fence = marker[1]
+            elif marker[1][0] == fence[0] and len(marker[1]) >= len(fence):
                 fence = None
         if fence is None and not marker:
             if re.fullmatch(r" {0,3}##\s+Records(?:\s+#+)?\s*", line):
@@ -557,8 +557,18 @@ def retarget_text(text: str, guide: Path, predecessor: str, release: str,
                         else boundary_pattern(residual_versions(predecessor)))
     allowed: set[tuple[int, int]] = set()
     delta = 0
-    current = boundary_pattern([predecessor, release]).search(masked)
-    completed = completed if completed is not None else current is not None and current[0] == release
+    if completed is None:
+        # Published and prepared guides declare their subject explicitly. A rollback
+        # sentence before that declaration does not make a completed guide a first pass.
+        declarations = re.finditer(
+            r"^ {0,3}>[ \t]+\*\*(?:Prepared|Versioned) guide:[ \t]+(v\d+\.\d+\.\d+)(?![\w.-])",
+            masked, re.MULTILINE)
+        current = next((match[1] for match in declarations
+                        if not blocks[bisect.bisect_right(starts, match.start()) - 1].fenced), None)
+        if current is None:
+            literal = boundary_pattern([predecessor, release]).search(masked)
+            current = literal[0] if literal else None
+        completed = current == release
     previous_outputs: dict[str, set[str]] = {}
     target_outputs: dict[str, set[str]] = {}
     if projections or completed:
@@ -588,10 +598,16 @@ def retarget_text(text: str, guide: Path, predecessor: str, release: str,
         scopes: set[str] = set()
         targets = {option.value for option in options}
         if targets == {match[0]}:
+            start = match.start() + delta
+            allowed.update((start + item.start(), start + item.end())
+                           for item in residual_pattern.finditer(match[0]))
             return match[0]
         if completed and not projections:
             # Product versions and their derived store names keep the residual checks.
+            component_asset = (any(scope != "release" for scope in candidates)
+                               and identity_class("/package_name", match[0]) in {"url", "package"})
             if (identity_class("", match[0]) not in {"hex", "digest", "image", "component-tag"}
+                    and not component_asset
                     or not any(option.tier == 1 and option.value != match[0] for option in options)):
                 return match[0]
             scopes, block_text = block_scopes(match.start())
@@ -648,8 +664,7 @@ def retarget_text(text: str, guide: Path, predecessor: str, release: str,
         delta += len(target) - len(match[0])
         return target
 
-    # The first unmasked product-release literal identifies the guide's current release.
-    # Later predecessor references may be legitimate tier-2 outputs, including on a rerun.
+    # Substitute original spans once; rollback references may be legitimate tier-2 outputs.
     result = pattern.sub(substitute, text)
     if completed and not projections:
         tier_two = {option.value for scopes in mappings.values() for options in scopes.values()

@@ -8,6 +8,7 @@ sections are immutable. This tool changes identity tokens, never release-state s
 measured results, publication dates, record entries or rendered images.
 Check mode fails on bound-identity drift, unresolved identities or the verifier's stale-state
 errors; results/provenance paragraphs and unbound evidence links are advisory author reviews.
+All candidates are prepared before writing; refusals and failed validation preserve page bytes.
 """
 from __future__ import annotations
 
@@ -225,6 +226,7 @@ def flip(root: Path, predecessor: str, release: str, *, check: bool = False,
     issues = []
     edits = []
     statistics = []
+    pending: dict[Path, tuple[bytes, bytes]] = {}
     for path in publication_pages(root, declaration=declaration):
         page = path.relative_to(root).as_posix()
         original = path.read_bytes()
@@ -270,12 +272,28 @@ def flip(root: Path, predecessor: str, release: str, *, check: bool = False,
                                               masked=records_mask(candidate, page))
         issues.extend(Issue(page, line, "review: evidence link", target) for line, target in unbound)
         statistics.append(PageStatistics(page, len(substitutions), len(authoring_lines)))
-        if candidate.encode("utf-8") != original:
+        candidate_bytes = candidate.encode("utf-8")
+        if candidate_bytes != original:
             changed.append(page)
-            if not check:
-                atomic_write(path, candidate)
+            pending[path] = (original, candidate_bytes)
+    if any(issue.kind == "refused" for issue in issues):
+        return Result((), tuple(issues), tuple(edits), tuple(statistics))
     wording: list[str] = []
-    validate_release_documentation(root, release, wording)
+    try:
+        if not check:
+            for path, (_, candidate) in pending.items():
+                atomic_write(path, candidate)
+        validate_release_documentation(root, release, wording)
+    except Exception:
+        if not check:
+            for path, (original, _) in pending.items():
+                atomic_write(path, original)
+        raise
+    if wording:
+        if not check:
+            for path, (original, _) in pending.items():
+                atomic_write(path, original)
+        changed.clear()
     for error in wording:
         location = re.match(r"(.+?):(\d+):", error)
         issues.append(Issue(location[1] if location else "docs/RELEASES.md",

@@ -185,6 +185,23 @@ class RetargetGuideTest(unittest.TestCase):
         self.run_retarget()
         self.assertIn(f"Source `{CONTAINER_SOURCE}`.", self.guide.read_text(encoding="utf-8"))
 
+    def test_unchanged_shared_url_allows_its_embedded_predecessor_version(self) -> None:
+        url = f"https://example.invalid/download/{OLD}/carried.zip"
+        for documents in (self.before, self.after):
+            for relative, document in documents.items():
+                if relative == "manifest.json":
+                    document["components"]["omp"]["artifact_url"] = url
+                    document["components"]["ninfer"]["binary_archive_url"] = url
+                elif relative == "compatibility.json":
+                    document["profiles"][0]["client_distribution"]["artifact_url"] = url
+                else:
+                    document["client"]["artifact_url"] = url
+        self.write_releases()
+        self.append(url + "\n")
+        self.assertTrue(self.run_retarget())
+        self.assertIn(url, self.guide.read_text(encoding="utf-8"))
+        self.assertFalse(self.run_retarget())
+
     def test_conflicting_targets_inside_one_scope_refuse_at_the_occurrence(self) -> None:
         old = self.before["manifest.json"]["components"]["ninfer"]
         new = self.after["manifest.json"]["components"]["ninfer"]
@@ -246,6 +263,47 @@ class RetargetGuideTest(unittest.TestCase):
         self.assertIn(SOURCE, error)
         self.assertIn("rtx5090-container", error)
         self.assertIn("rtx4090-windows-native", error)
+
+    def test_completed_guide_refuses_stale_component_download_urls_and_package_names(self) -> None:
+        client = self.before["manifest.json"]["components"]["omp"]
+        for value in (client["artifact_url"], client["artifact_name"], "native-old.zip"):
+            with self.subTest(identity=value):
+                atomic_write(self.guide, route_guide(NEW))
+                line = len(self.guide.read_text(encoding="utf-8").splitlines()) + 1
+                self.append(value + "\n")
+                error = self.assert_refuses("c")
+                self.assertIn(f"{self.guide}:{line}:", error)
+                self.assertIn(value, error)
+
+    def test_completed_download_and_package_rollback_clauses_are_occurrence_scoped(self) -> None:
+        prior = self.write_prior()
+        old = self.before["manifest.json"]["components"]["omp"]
+        prior["components"]["omp"].update(
+            artifact_url="https://example.invalid/client/prior/client.zip",
+            artifact_name="client-prior.zip")
+        atomic_write_json(self.root / "releases" / prior["release"] / "manifest.json", prior)
+        new = self.after["manifest.json"]["components"]["omp"]
+        for key in ("artifact_url", "artifact_name"):
+            with self.subTest(key=key):
+                text = route_guide() + f"Client current {old[key]}; rollback {prior['components']['omp'][key]}.\n"
+                atomic_write(self.guide, text)
+                self.assertTrue(self.run_retarget())
+                completed = self.guide.read_bytes()
+                self.assertIn(f"current {new[key]}; rollback {old[key]}.", completed.decode("utf-8"))
+                self.assertFalse(self.run_retarget())
+                self.assertEqual(self.guide.read_bytes(), completed)
+                atomic_write(self.guide, completed.decode("utf-8").replace(new[key], old[key], 1))
+                self.assert_refuses("c")
+
+    def test_release_anchor_wins_over_an_earlier_predecessor_rollback_sentence(self) -> None:
+        self.write_prior()
+        for kind in ("Prepared", "Versioned"):
+            with self.subTest(kind=kind):
+                text = (f"Rollback release {OLD}.\n\n"
+                        f"> **{kind} guide: {NEW} · documented routes**\n\n" + route_guide(NEW))
+                atomic_write(self.guide, text)
+                self.assertFalse(self.run_retarget())
+                self.assertEqual(self.guide.read_bytes(), text.encode("utf-8"))
 
     def test_completed_guide_resolves_current_and_rollback_occurrences_individually(self) -> None:
         prior = self.write_prior()
@@ -623,6 +681,24 @@ class HistoryGoldenTest(unittest.TestCase):
                                  [(step.slug, block.text) for step, block in expected_blocks], lane)
             self.assertFalse(GUIDE.retarget(root, "v0.18.0", "v0.19.0", guide, check=True))
             self.assertFalse(GUIDE.retarget(root, "v0.18.0", "v0.19.0", guide))
+
+    def test_published_and_real_guide_anchors_preserve_an_early_rollback_reference(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            guide, expected = self.write_history(root, "v0.18.0", "v0.19.0")
+            real = (ROOT / "docs" / "QUICKSTART.md").read_text(encoding="utf-8")
+            anchor = re.search(r"\*\*(?:Prepared|Versioned) guide: (v\d+\.\d+\.\d+)", real)
+            self.assertIsNotNone(anchor)
+            release = anchor[1]
+            predecessor = GUIDE.ready_history(ROOT, release)[0][0]
+            cases = ((root, expected.read_text(encoding="utf-8"), "v0.18.0", "v0.19.0"),
+                     (ROOT, real, predecessor, release))
+            for authority, text, predecessor, release in cases:
+                with self.subTest(authority=authority):
+                    text = f"Rollback release {predecessor}.\n\n" + text
+                    mappings, anchors = GUIDE.identity_map(authority, predecessor, release)
+                    self.assertEqual(GUIDE.retarget_text(text, guide, predecessor, release, mappings, anchors),
+                                     text)
 
 
 class HistoryPolicyTest(unittest.TestCase):
