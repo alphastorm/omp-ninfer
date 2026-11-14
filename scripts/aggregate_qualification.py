@@ -472,21 +472,27 @@ def verify_runtime(inputs: Inputs, root: Path, release: str, manifest: dict[str,
             file, "/composition", "stock-client descriptor differs")
 
 
-def provenance(release: str, manifest: dict[str, Any], previous: dict[str, Any],
-               recut: set[str]) -> str:
-    parts = []
-    component = manifest["components"]["ninfer"]
-    carried = all(component.get(key) == previous["components"]["ninfer"].get(key) for key in (
-        "release_tag", "oci_manifest_digest", "server_binary_sha256", "source_commit"))
-    for label, row, is_carried in [
-        ("RTX 5090 container", component, carried),
-        *((f"RTX {lane[3:]} native Windows", row, lane not in recut)
-          for lane, row in native_rows(manifest, "manifest.json").items()),
-    ]:
-        disposition = ("carried unchanged from " + previous["release"]) if is_carried else "re-cut for this release"
-        parts.append(f"{label} `{row['release_tag']}` {disposition}")
-    sources = {component["source_commit"], *(row["source_commit"] for row in manifest["components"]["ninfer_variants"])}
-    return "Runtime components: " + "; ".join(parts) + f". They were built from {len(sources)} distinct NInfer source commits."
+def provenance(root: Path, release: str, manifest: dict[str, Any], recut: set[str],
+               plan: dict[str, Any], plan_path: Path) -> tuple[str, dict[str, str]]:
+    """The verifier's generated statement and per-component clauses; never a second wording."""
+    record, clauses = verifier.component_provenance_parts(root, release, manifest)
+    planned = {row["id"]: row["disposition"] for row in plan["components"]}
+    derived = {row["id"]: row["disposition"] for row in record["components"]}
+    require(derived == planned and {name.split("-")[0] for name, value in derived.items()
+                                    if value == "recut" and name != "rtx5090-container"} == set(recut),
+            plan_path, "/components", "manifest-derived component provenance differs from the plan")
+    return record["statement"], clauses
+
+
+def plan_limitations(plan: dict[str, Any], plan_path: Path) -> list[str]:
+    """Release-level limitations are authored once, in the plan; none is inherited."""
+    values = field(plan, "limitations", list, plan_path)
+    require(all(isinstance(value, str) and value.strip() == value and value for value in values)
+            and len(set(values)) == len(values),
+            plan_path, "/limitations", "expected unique non-empty sentences")
+    claims = verifier.provenance_claim_errors(values, "plan.limitations")
+    require(not claims, plan_path, "/limitations", "; ".join(claims))
+    return values
 
 
 def source_identity(bundles: dict[str, Bundle], manifest: dict[str, Any],
@@ -541,7 +547,8 @@ def source_identity(bundles: dict[str, Bundle], manifest: dict[str, Any],
 
 
 def carried_entry(inputs: Inputs, root: Path, release: str, previous: dict[str, Any],
-                  row: dict[str, Any], mirror: dict[str, Any], entry: dict[str, Any]) -> dict[str, Any]:
+                  row: dict[str, Any], mirror: dict[str, Any], entry: dict[str, Any],
+                  clause: str) -> dict[str, Any]:
     lane, pred = row["id"].split("-")[0], previous["release"]
     old = native_rows(previous, "predecessor manifest")[lane]
     expected = deepcopy(old)
@@ -570,8 +577,8 @@ def carried_entry(inputs: Inputs, root: Path, release: str, previous: dict[str, 
             == {key: item for key, item in relocated.items() if key != "scope"},
             f"releases/{release}/qualification.json", "/composition/native_runtime_variants/" + row["id"],
             "carried composition identity was altered")
-    return {**relocated, "scope": f"Component `{row['release_tag']}` carried unchanged from `{pred}`; "
-            "byte-identical published qualification, not fresh hardware or product-route acceptance."}
+    return {**relocated, "scope": clause + "; byte-identical published qualification, "
+            "not fresh hardware or product-route acceptance."}
 
 
 def upgrades(bundle: Bundle, release: str) -> dict[str, Any]:
@@ -894,11 +901,10 @@ def plan_outputs(root: Path, release: str, plan_path: Path, directories: dict[st
     output = deepcopy(q)
     if output["composition"]["review"].get("status") != "pending":
         output["composition"]["review"] = {"status": "pending"}
-    runtime_recut = runtime_plan["disposition"] == "recut"
-    runtime_tag = manifest["components"]["ninfer"]["release_tag"]
+    statement, clauses = provenance(root, release, manifest, set(recut), plan, plan_path)
+    limitations = plan_limitations(plan, plan_path)
     output["composition"]["behavioral_qualification"]["scope"] = (
-        f"Component `{runtime_tag}` " + ("re-cut for this release" if runtime_recut
-                                       else f"carried unchanged from `{previous['release']}`")
+        clauses["rtx5090-container"]
         + "; retained component-level runtime qualification, not client-platform or product-route acceptance.")
     output["native_runtime_identity"] = source_identity(bundles, manifest, previous)
     pending = {}
@@ -917,7 +923,8 @@ def plan_outputs(root: Path, release: str, plan_path: Path, directories: dict[st
             require(not any(name.startswith(lane + "_") for name in q["observed_gates"]),
                     base / "qualification.json", "/observed_gates", "carried lane claims a current gate")
             output["composition"]["native_runtime_variants"][row["id"]] = carried_entry(
-                inputs, root, release, previous, row, mirror, q["composition"]["native_runtime_variants"][row["id"]])
+                inputs, root, release, previous, row, mirror,
+                q["composition"]["native_runtime_variants"][row["id"]], clauses[row["id"]])
             continue
         bundle = bundles[lane]
         require(row.get("status") == "qualified" and row.get("installable") is True,
@@ -981,7 +988,7 @@ def plan_outputs(root: Path, release: str, plan_path: Path, directories: dict[st
             **{key: row[key] for key in ("source_commit", "release_tag", "package_sha256", "configuration_sha256",
                                         "model_artifact_sha256", "build_profile")},
             "public_package_executed": False,
-            "scope": f"Component `{row['release_tag']}` re-cut for this release; current pre-cut lane qualification. "
+            "scope": clauses[row["id"]] + "; current pre-cut lane qualification. "
                      "Published-byte authentication and product-route acceptance are separate."}
         output["composition"]["native_runtime_variants"][row["id"]] = entry
         upgrade = upgrades(bundle, release)
@@ -1009,7 +1016,6 @@ def plan_outputs(root: Path, release: str, plan_path: Path, directories: dict[st
             pending[waiver_path] = json_bytes(waiver)
             output["observed_gates"][lane + "_" + waived["job"] + "_waiver"] = binding(
                 waiver_path, pending[waiver_path], status="waived-by-founder")
-    statement = provenance(release, manifest, previous, recut)
     output.update(status="runtime-release-eligible", scope=statement + " No product-route or client-platform execution is inferred.",
                   eligibility_scope="Current component lanes only; external-install acceptance, native public installs/campaigns, "
                                     "product review, audit reconciliation and immutable pins remain binding.",
@@ -1021,9 +1027,9 @@ def plan_outputs(root: Path, release: str, plan_path: Path, directories: dict[st
     manifest = deepcopy(manifest)
     manifest["qualification"]["runtime_release_eligible"] = True
     targets = manifest["publication"]["targets"]
+    # Targets carry identity only; which components are carried is the generated statement's job.
     native_targets = [
-        f"NInfer native {row['release_tag']}" + (" (carried unchanged)" if lane not in recut else "")
-        + "; package sha256:" + row["package_sha256"]
+        f"NInfer native {row['release_tag']}; package sha256:" + row["package_sha256"]
         for lane, row in sorted(rows.items(), key=lambda item: (item[0] not in recut, item[0]))]
     insertion = next((index for index, value in enumerate(targets) if isinstance(value, str) and value.startswith("NInfer native ")), len(targets))
     targets = [value for value in targets if not (isinstance(value, str) and value.startswith("NInfer native "))]
@@ -1039,11 +1045,9 @@ def plan_outputs(root: Path, release: str, plan_path: Path, directories: dict[st
         if not any(blocker in value for value in manifest["publication"]["blockers"]):
             manifest["publication"]["blockers"].append(blocker)
     neutral_limitation = "Current component evidence does not transfer predecessor review approval or authorize production promotion."
-    manifest["limitations"] = [
-        value for value in manifest["limitations"]
-        if value != neutral_limitation
-        and not ("native" in value.lower() and any(word in value.lower() for word in ("unbound", "carried", "source", "bound")))]
-    manifest["limitations"].extend([statement, neutral_limitation])
+    require(statement not in limitations and neutral_limitation not in limitations,
+            plan_path, "/limitations", "generated sentences must not be authored in the plan")
+    manifest["limitations"] = [*limitations, statement, neutral_limitation]
     pending[base / "qualification.json"] = json_bytes(output)
     pending[base / "manifest.json"] = json_bytes(manifest)
     for path, data in pending.items():

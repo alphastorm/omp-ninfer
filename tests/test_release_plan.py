@@ -52,6 +52,7 @@ def plan_fixture(root: Path) -> tuple[dict, dict, dict]:
                        for key, row in PLAN.manifest_components(manifest).items()],
         "platforms": {row["id"]: "preview" if row["id"].startswith("darwin") else "qualified"
                       for row in authority["profiles"]},
+        "limitations": ["No general performance guarantee is implied."],
         "decisions": [{"id": "support", "kind": "scope", "sha256": "5" * 64}],
     }
     atomic_write_json(root / "releases" / PREDECESSOR / "manifest.json", manifest)
@@ -224,6 +225,9 @@ class ReleasePlanTests(unittest.TestCase):
         mutations = [
             ("artifact_type", "other"), ("schema_version", True), ("extra", "field"),
             ("client", []), ("components", {}), ("platforms", []), ("decisions", {}),
+            ("limitations", {}), ("limitations", [""]), ("limitations", [" padded "]),
+            ("limitations", ["same", "same"]),
+            ("limitations", ["The native component is carried unchanged."]),
         ]
         original = copy.deepcopy(self.plan)
         for key, value in mutations:

@@ -18,8 +18,13 @@ VERIFY = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(VERIFY)
 from release_io import atomic_write, atomic_write_json
 
+HISTORY_SPEC = importlib.util.spec_from_file_location("lint_history", ROOT / "tests/history.py")
+assert HISTORY_SPEC is not None and HISTORY_SPEC.loader is not None
+HISTORY = importlib.util.module_from_spec(HISTORY_SPEC)
+HISTORY_SPEC.loader.exec_module(HISTORY)
 
-def stage_successor(root: Path) -> str:
+
+def stage_successor(root: Path, *, release: str | None = None) -> str:
     """Carry the latest published runtime and client through the real staging CLI."""
     manifests = [json.loads(path.read_text(encoding="utf-8"))
                  for path in (root / "releases").glob("*/manifest.json")]
@@ -27,7 +32,7 @@ def stage_successor(root: Path) -> str:
                   if item.get("status") == "ready" and VERIFY.ga_release(item.get("release"))),
                  key=lambda item: VERIFY.product_version(item["release"]))
     major, minor, patch = VERIFY.product_version(source["release"])
-    release = f"v{major}.{minor}.{patch + 1}"
+    release = release or f"v{major}.{minor}.{patch + 1}"
     runtime = source["components"]["ninfer"]
     command = [
         sys.executable, str(root / "scripts/stage_release.py"), "--from", source["release"],
@@ -70,6 +75,22 @@ class ReadyTableTests(unittest.TestCase):
         context = VERIFY.ReadyContext(ROOT, "v0.19.0", {}, {}, {}, [], True, True, "acceptance")
         selected = VERIFY.selected_ready_checks(context, flagged=True)
         self.assertEqual({row.name for row in selected if row.legacy}, expected)
+
+    def test_receipt_audit_is_one_non_legacy_ga_candidate_check(self):
+        rows = [row for row in VERIFY.READY_CHECKS if row.name == "receipt_audit"]
+        self.assertEqual(len(rows), 1)
+        row = rows[0]
+        self.assertEqual(row.phase, "candidate")
+        self.assertTrue(row.ga_only)
+        self.assertFalse(row.legacy)
+        self.assertIs(row.run, VERIFY.ready_receipt_audit)
+        context = VERIFY.ReadyContext(ROOT, "v0.20.0", {}, {}, {}, [], True, True, "draft")
+        for phase in VERIFY.READY_PHASES:
+            with self.subTest(phase=phase):
+                selected = VERIFY.selected_ready_checks(context._replace(through=phase), flagged=True)
+                self.assertEqual(row in selected, phase != "draft")
+        self.assertNotIn(row, VERIFY.selected_ready_checks(
+            context._replace(release="v0.20.0-rc.1", through="candidate"), flagged=True))
 
     def test_link_row_defers_own_acceptance_only_before_acceptance_phase(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -191,6 +212,62 @@ class LintDraftTests(unittest.TestCase):
         self.assertEqual(code, 1, report)
         self.assertTrue(any("draft posture" in error and "byte" in error
                             for error in report["errors"]), report)
+
+    def test_candidate_lint_requires_the_audit_only_from_v0200(self):
+        # The historical boundary is fixed even after the live root advances.
+        source = HISTORY.resolve_commits("v0.19.0")[0]
+        for release in ("v0.19.1", "v0.20.0"):
+            with self.subTest(release=release), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary) / "candidate"
+                subprocess.run(["git", "clone", "--quiet", "--config", "core.autocrlf=false",
+                                "--shared", "--no-checkout", str(ROOT), str(root)],
+                               capture_output=True, check=True)
+                subprocess.run(["git", "checkout", "--quiet", "--detach", source],
+                               cwd=root, capture_output=True, check=True)
+                shutil.copytree(ROOT / "scripts", root / "scripts", dirs_exist_ok=True,
+                                ignore=shutil.ignore_patterns("__pycache__"))
+                self.assertEqual(stage_successor(root, release=release), release)
+                directory = root / "releases" / release
+                manifest = VERIFY.load_json(directory / "manifest.json")
+                statement = VERIFY.component_provenance(root, release, manifest)["statement"]
+
+                def authored_prose(value):
+                    if isinstance(value, dict):
+                        return {key: authored_prose(child) for key, child in value.items()}
+                    if isinstance(value, list):
+                        return [authored_prose(child) for child in value]
+                    if isinstance(value, str) and VERIFY.provenance_claim_errors(
+                            value, "fixture", statement=statement):
+                        return statement
+                    return value
+
+                for name in ("manifest.json", "compatibility.json", "qualification.json"):
+                    document = authored_prose(VERIFY.load_json(directory / name))
+                    if name == "compatibility.json":
+                        # Candidate prose stays neutral; no acceptance flag is promoted.
+                        document["composition"]["status"] = "candidate"
+                    atomic_write_json(directory / name, document)
+                atomic_write(directory / "NINFER_RELEASE_NOTES.md",
+                             f"# OMP NInfer {release}\n\nQualification is limited to documented routes.\n")
+                promoted = subprocess.run([
+                    sys.executable, str(root / "scripts/rebind_release.py"), "--release", release,
+                    "--pin", source, "--stage", "lane",
+                ], cwd=root, capture_output=True, text=True)
+                self.assertEqual(promoted.returncode, 0, promoted.stdout + promoted.stderr)
+                audit = f"releases/{release}/qualification/receipt-audit.json"
+                self.assertFalse((root / audit).exists())
+                lint = subprocess.run([
+                    sys.executable, str(root / "scripts/verify_release.py"),
+                    "--release", release, "--lint-ready", "--json",
+                ], cwd=root, capture_output=True, text=True)
+                report = json.loads(lint.stdout)
+                self.assertEqual(report["lint_phase"], "candidate")
+                if release == "v0.20.0":
+                    self.assertEqual(lint.returncode, 1, report)
+                    self.assertEqual(report["errors"], [f"[receipt_audit] receipt audit: {audit} is required"])
+                else:
+                    self.assertEqual(lint.returncode, 0, report)
+                    self.assertEqual(report["errors"], [])
 
 
 if __name__ == "__main__":
