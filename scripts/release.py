@@ -462,6 +462,10 @@ class ReleaseDriver:
 
     def audit(self, phase: str) -> None:
         arguments = ["--release", self.release, "--phase", phase]
+        if phase == "lane-stage":
+            # A staged draft still holds predecessor copies that no successor row binds. The
+            # audit tool owns that definition: it removes exactly those and logs each one.
+            arguments.append("--prune-unbound")
         if self.state["options"].get("as_of"):
             arguments += ["--as-of", self.state["options"]["as_of"]]
         self.tool("receipt_audit.py", *arguments)
