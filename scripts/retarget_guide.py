@@ -8,6 +8,7 @@ snapshots. A shared identity that splits between components needs an unambiguous
 anchor in its original Markdown block. Previous-distinct identities come from older ready
 manifests, not from prose guesses. Immutable predecessor links remain untouched. The whole
 guide remains the acceptance document; this tool does not grant release readiness.
+A completed guide is checked for stale scoped component identities, never rewritten.
 """
 from __future__ import annotations
 
@@ -560,10 +561,12 @@ def retarget_text(text: str, guide: Path, predecessor: str, release: str,
     completed = completed if completed is not None else current is not None and current[0] == release
     previous_outputs: dict[str, set[str]] = {}
     target_outputs: dict[str, set[str]] = {}
-    if projections:
+    if projections or completed:
         for candidates in mappings.values():
             for scope, options in candidates.items():
-                target_outputs.setdefault(scope, set()).update(option.value for option in options if option.value is not None)
+                target_outputs.setdefault(scope, set()).update(
+                    option.value for option in options
+                    if option.value is not None and (projections or option.tier == 1))
                 previous_outputs.setdefault(scope, set()).update(
                     option.value for option in options if option.tier == 2 and option.value is not None)
 
@@ -586,6 +589,23 @@ def retarget_text(text: str, guide: Path, predecessor: str, release: str,
         targets = {option.value for option in options}
         if targets == {match[0]}:
             return match[0]
+        if completed and not projections:
+            # Product versions and their derived store names keep the residual checks.
+            if (identity_class("", match[0]) not in {"hex", "digest", "image", "component-tag"}
+                    or not any(option.tier == 1 and option.value != match[0] for option in options)):
+                return match[0]
+            scopes, block_text = block_scopes(match.start())
+            selected = ("release" if set(candidates) == {"release"} else
+                        next(iter(scopes)) if len(scopes) == 1 else
+                        next(iter(candidates)) if len(candidates) == 1 else None)
+            block = blocks[bisect.bisect_right(starts, match.start()) - 1]
+            prefix = re.split(r"[,;]|[.!?](?=\s)", block_text[:match.start() - block.start])[-1]
+            roles = re.findall(r"\b(current|rollback)\b", prefix, re.IGNORECASE)
+            rollback = bool(roles and roles[-1].lower() == "rollback")
+            if (selected is not None
+                    and (match[0] in target_outputs.get(selected, set())
+                         or (rollback and match[0] in previous_outputs.get(selected, set())))):
+                return match[0]
         collision = projections and (
             len({option.origin for option in options if option.origin}) > 1
             or any(option.projection in {"prefix8", "prefix12", "grouped"} for option in options)
@@ -616,6 +636,9 @@ def retarget_text(text: str, guide: Path, predecessor: str, release: str,
                           f"block anchors: {', '.join(sorted(scopes)) or 'none'}")
         target = next(iter(targets))
         assert target is not None
+        if completed and not projections:
+            line = text.count("\n", 0, match.start()) + 1
+            raise Refusal(f"{guide}:{line}: refusal (c): guide still names a predecessor identity {match[0]!r}")
         if projections or any(option.tier == 2 for option in options) or target == match[0]:
             start = match.start() + delta
             allowed.update((start + item.start(), start + item.end())
@@ -627,7 +650,7 @@ def retarget_text(text: str, guide: Path, predecessor: str, release: str,
 
     # The first unmasked product-release literal identifies the guide's current release.
     # Later predecessor references may be legitimate tier-2 outputs, including on a rerun.
-    result = text if completed and not projections else pattern.sub(substitute, text)
+    result = pattern.sub(substitute, text)
     if completed and not projections:
         tier_two = {option.value for scopes in mappings.values() for options in scopes.values()
                     for option in options if option.tier == 2 and option.value is not None}
