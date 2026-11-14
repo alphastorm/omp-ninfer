@@ -153,6 +153,16 @@ subject, and each later epoch's, must lie in this release's own history, from th
 its plan through the route candidate, and an included runtime council or native component review
 must name the source commit of a component the release ships.
 
+From v0.20.0 the public ledger also changes what it carries. Reviewer prose stays in the private
+review records, which the ledger binds by digest; each published finding keeps only its id,
+severity and confidence, and the accountable lead's disposition rows explain it. `review_ledger.py`
+refuses, rather than edits, operator-written text (scope sentence, closures, follow-up, disposition
+rows and the composition review) when any word contains a slash, backslash, tilde, percent or
+dollar sign, except links into the project's GitHub organization: write file and path references
+as links or in words. The builder also refuses a review section whose selected reviewer result is
+missing or whose review record, focused receipt or epoch record lacks a closed status, and an epoch
+whose record names a different review than its directory.
+
 `ready` means the package is technically cuttable. It does not grant authority to create repositories,
 push commits/tags, upload images/assets, publish a GitHub release, or modify the Homebrew tap.
 Authorization for those external effects remains separate and bounded.
