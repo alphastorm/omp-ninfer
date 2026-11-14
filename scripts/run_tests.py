@@ -20,19 +20,25 @@ ROOT = Path(__file__).resolve().parents[1]
 # Fixed estimates keep scheduling deterministic across checkouts. Unknown modules use one
 # second until a measured suite run justifies updating these estimates.
 MODULE_SECONDS = {
-    "test_documented_route": 170,
-    "test_verify_release": 116,
-    "test_accept_rtx4090_route": 41,
-    "test_concurrency_probe": 22,
-    "test_native_screen_arm": 13,
-    "test_stage_release": 10,
-    "test_agent_parity": 8,
-    "test_cut_native_component": 5,
-    "test_manual_tunnel_scripts": 5,
-    "test_accept_rtx5090_documented_model": 3,
-    "test_client_acceptance": 2,
-    "test_accept_windows_client": 2,
-    "test_publish_product_release": 2,
+    "test_verify_release": 201,
+    "test_documented_route": 51,
+    "test_stage_release": 50,
+    "test_accept_rtx4090_route": 47,
+    "test_concurrency_probe": 24,
+    "test_native_screen_arm": 18,
+    "test_manual_tunnel_scripts": 17,
+    "test_cut_native_component": 15,
+    "test_agent_parity": 14,
+    "test_publish_product_release": 7,
+    "test_stock_client_harness": 5,
+    "test_accept_rtx5090_documented_model": 4,
+    "test_client_acceptance": 3,
+    "test_run_variant_campaign": 3,
+    "test_run_tests": 3,
+    "test_accept_windows_client": 3,
+    "test_compose_route_acceptance": 3,
+    "test_rebind_release": 3,
+    "test_quality_screen": 2,
 }
 
 # Reserved for modules empirically shown to share ports or process-global state across
