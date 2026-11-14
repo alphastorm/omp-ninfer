@@ -1,9 +1,13 @@
-"""Run the contract suite in isolated, bounded-concurrency unittest processes."""
+"""Run measured, balanced contract-suite chunks in isolated unittest processes."""
 
 from __future__ import annotations
 
 import argparse
+from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import contextlib
+import json
+import math
 import os
 from pathlib import Path
 import re
@@ -31,15 +35,18 @@ MODULE_SECONDS = {
     "test_agent_parity": 14,
     "test_publish_product_release": 7,
     "test_stock_client_harness": 5,
+    "test_run_tests": 5,
     "test_accept_rtx5090_documented_model": 4,
     "test_client_acceptance": 3,
     "test_run_variant_campaign": 3,
-    "test_run_tests": 3,
     "test_accept_windows_client": 3,
     "test_compose_route_acceptance": 3,
     "test_rebind_release": 3,
     "test_quality_screen": 2,
 }
+# The verifier measures about 200 seconds; the next modules measure 47-53 seconds.
+# A 60-second target splits only that outlier into four roughly 50-second chunks.
+SPLIT_SECONDS = 60
 
 # Reserved for modules empirically shown to share ports or process-global state across
 # subprocesses. Entries must name the observed conflict; isolated fixtures need no entry.
@@ -94,17 +101,20 @@ def discover_modules(directory: Path, pattern: str = "test_*.py") -> list[str]:
                   if path.is_file() and path.name.startswith("test_") and path.suffix == ".py")
 
 
-def select_modules(modules: list[str], shard: tuple[int, int] | None) -> list[str]:
-    """Assign sorted names by round robin, independently of duration estimates."""
-    ordered = sorted(modules)
-    if shard is not None:
-        index, total = shard
-        ordered = ordered[index - 1::total]
-    return sorted(ordered, key=lambda name: (-MODULE_SECONDS.get(name, 1), name))
-
-
-class ModuleResult(NamedTuple):
+class Chunk(NamedTuple):
     module: str
+    test_ids: tuple[str, ...]
+    index: int
+    total: int
+    estimated_seconds: float
+
+    @property
+    def label(self) -> str:
+        return self.module if self.total == 1 else f"{self.module}[{self.index}/{self.total}]"
+
+
+class ChunkResult(NamedTuple):
+    chunk: Chunk
     seconds: float
     returncode: int
     tests: int
@@ -112,35 +122,143 @@ class ModuleResult(NamedTuple):
 
     @property
     def passed(self) -> bool:
-        return self.returncode == 0 and self.tests > 0
+        return self.returncode == 0 and self.tests > 0 and self.tests == len(self.chunk.test_ids)
 
 
-def run_module(directory: Path, module: str, windows_skips: bool) -> ModuleResult:
-    """Keep unittest's CLI and inherited environment, including for Windows exclusions."""
+class ModuleTests(NamedTuple):
+    module: str
+    test_ids: tuple[str, ...]
+    seconds: float
+    returncode: int
+    output: str
+
+
+def iter_test_ids(suite: unittest.TestSuite):
+    for test in suite:
+        if isinstance(test, unittest.TestSuite):
+            yield from iter_test_ids(test)
+        else:
+            yield test.id()
+
+
+def emit_test_ids(directory: Path, module: str, windows_skips: bool) -> int:
+    """Internal subprocess entry point: enumerate with unittest, never execute a test."""
+    loader = unittest.TestLoader()
+    # Import-time prints are diagnostics, not part of the JSON enumeration protocol.
+    with contextlib.redirect_stdout(sys.stderr):
+        suite = loader.discover(str(directory), pattern=module + ".py")
+        if loader.errors:
+            print("\n".join(loader.errors), file=sys.stderr)
+            return 1
+        if windows_skips:
+            apply_windows_skips(sys.modules[module])
+        ids = sorted(iter_test_ids(suite))
+    if not ids:
+        print(f"{module}: zero tests discovered", file=sys.stderr)
+        return 1
+    if len(set(ids)) != len(ids):
+        print(f"{module}: duplicate test ids cannot be partitioned", file=sys.stderr)
+        return 1
+    print(json.dumps(ids))
+    return 0
+
+
+def enumerate_tests(directory: Path, module: str, windows_skips: bool) -> ModuleTests:
+    started = time.perf_counter()
+    command = [sys.executable, str(Path(__file__).resolve()), "--test-dir", str(directory),
+               "--_enumerate-module", module]
+    if windows_skips:
+        command.append("--windows-skips")
+    ids: tuple[str, ...] = ()
+    try:
+        completed = subprocess.run(command, cwd=ROOT, capture_output=True, text=True,
+                                   encoding="utf-8", errors="replace", check=False)
+        output, returncode = completed.stderr + completed.stdout, completed.returncode
+        if returncode == 0:
+            try:
+                decoded = json.loads(completed.stdout)
+                if (not isinstance(decoded, list) or not decoded
+                        or not all(isinstance(test_id, str) for test_id in decoded)
+                        or len(set(decoded)) != len(decoded)):
+                    raise ValueError("expected a nonempty list of unique test ids")
+                ids = tuple(sorted(decoded))
+            except (ValueError, TypeError) as exc:
+                output = f"cannot enumerate {module}: {exc}\n" + output
+    except OSError as exc:
+        output, returncode = str(exc), 1
+    return ModuleTests(module, ids, time.perf_counter() - started, returncode, output)
+
+
+def split_module(module: str, ids: tuple[str, ...]) -> list[Chunk]:
+    seconds = MODULE_SECONDS.get(module, 1)
+    count = min(len(ids), math.ceil(seconds / SPLIT_SECONDS))
+    ordered = tuple(sorted(ids))
+    return [Chunk(module, ordered[index::count], index + 1, count, seconds / count)
+            for index in range(count)]
+
+
+def ordered_chunks(chunks: list[Chunk]) -> list[Chunk]:
+    return sorted(chunks, key=lambda chunk: (-chunk.estimated_seconds, chunk.label))
+
+
+def select_chunks(chunks: list[Chunk], shard: tuple[int, int] | None) -> list[Chunk]:
+    """Greedily balance fixed-duration chunks; test ids never move between chunks."""
+    ordered = ordered_chunks(chunks)
+    if shard is None:
+        return ordered
+    index, total = shard
+    buckets: list[list[Chunk]] = [[] for _ in range(total)]
+    seconds = [0.0] * total
+    for chunk in ordered:
+        destination = min(range(total), key=lambda number: (seconds[number], number))
+        buckets[destination].append(chunk)
+        seconds[destination] += chunk.estimated_seconds
+    return buckets[index - 1]
+
+
+def plan_chunks(directory: Path, modules: list[str], jobs: int,
+                windows_skips: bool) -> tuple[list[Chunk], list[ChunkResult]]:
+    chunks = []
+    failures = []
+    with ThreadPoolExecutor(max_workers=min(jobs, len(modules))) as executor:
+        pending = [executor.submit(enumerate_tests, directory, module, windows_skips)
+                   for module in modules]
+        for future in as_completed(pending):
+            discovered = future.result()
+            if discovered.returncode != 0 or not discovered.test_ids:
+                chunk = Chunk(discovered.module, (), 1, 1,
+                              MODULE_SECONDS.get(discovered.module, 1))
+                result = ChunkResult(chunk, discovered.seconds, discovered.returncode, 0,
+                                     "test-id enumeration failed\n" + discovered.output)
+                failures.append(result)
+                report(result)
+            else:
+                chunks.extend(split_module(discovered.module, discovered.test_ids))
+    return ordered_chunks(chunks), failures
+
+
+def run_chunk(directory: Path, chunk: Chunk, windows_skips: bool) -> ChunkResult:
+    """Load explicit ids under unittest's CLI without changing the inherited environment."""
     started = time.perf_counter()
     with tempfile.TemporaryDirectory(prefix="contract-tests-") as temporary:
-        start = directory
-        pattern = module + ".py"
-        excluded = {name for name, *_ in WINDOWS_CLASS_SKIPS + WINDOWS_METHOD_SKIPS}
-        if windows_skips and module in excluded:
-            # A discovery adapter lets the real `python -m unittest` subprocess apply skips
-            # before loading this module's suite. No PYTHONPATH or other environment changes.
-            start = Path(temporary)
-            pattern = "windows_" + module + ".py"
-            (start / pattern).write_text(
-                "import importlib\n"
-                "import importlib.util\n"
-                "import sys\n"
-                f"sys.path.insert(0, {str(directory)!r})\n"
-                f"spec = importlib.util.spec_from_file_location('contract_runner', {str(Path(__file__).resolve())!r})\n"
-                "runner = importlib.util.module_from_spec(spec)\n"
-                "spec.loader.exec_module(runner)\n"
-                "def load_tests(loader, suite, pattern):\n"
-                f"    module = importlib.import_module({module!r})\n"
-                "    runner.apply_windows_skips(module)\n"
-                "    return loader.loadTestsFromModule(module)\n",
-                encoding="utf-8",
-            )
+        start = Path(temporary)
+        pattern = "contract_chunk.py"
+        # An adapter avoids Windows command-line length limits while still running explicit
+        # ids in a real `python -m unittest` child. Fixtures run once per chunk, not per id.
+        (start / pattern).write_text(
+            "import importlib\n"
+            "import importlib.util\n"
+            "import sys\n"
+            f"sys.path.insert(0, {str(directory)!r})\n"
+            f"spec = importlib.util.spec_from_file_location('contract_runner', {str(Path(__file__).resolve())!r})\n"
+            "runner = importlib.util.module_from_spec(spec)\n"
+            "spec.loader.exec_module(runner)\n"
+            "def load_tests(loader, suite, pattern):\n"
+            f"    module = importlib.import_module({chunk.module!r})\n"
+            + ("    runner.apply_windows_skips(module)\n" if windows_skips else "")
+            + f"    return loader.loadTestsFromNames({chunk.test_ids!r})\n",
+            encoding="utf-8",
+        )
         command = [sys.executable, "-m", "unittest", "discover", "-s", str(start),
                    "-p", pattern, "-v"]
         try:
@@ -151,37 +269,39 @@ def run_module(directory: Path, module: str, windows_skips: bool) -> ModuleResul
         except OSError as exc:
             output, returncode = str(exc), 1
     counts = re.findall(r"(?m)^Ran (\d+) tests? in ", output)
-    return ModuleResult(module, time.perf_counter() - started, returncode,
-                        int(counts[-1]) if counts else 0, output)
+    return ChunkResult(chunk, time.perf_counter() - started, returncode,
+                       int(counts[-1]) if counts else 0, output)
 
 
-def report(result: ModuleResult) -> None:
+def report(result: ChunkResult) -> None:
     status = "PASS" if result.passed else "FAIL"
-    print(f"{status} {result.module} ({result.tests} tests, {result.seconds:.3f}s)", flush=True)
+    print(f"{status} {result.chunk.label} ({result.tests} tests, {result.seconds:.3f}s)", flush=True)
     if not result.passed:
-        print(f"--- {result.module}: exit {result.returncode}"
+        print(f"--- {result.chunk.label}: exit {result.returncode}"
               f"{'; zero tests or missing unittest result' if result.tests == 0 else ''} ---",
               flush=True)
         print(result.output, end="" if result.output.endswith("\n") else "\n", flush=True)
-        print(f"--- end {result.module} ---", flush=True)
+        if result.tests != len(result.chunk.test_ids):
+            print(f"expected {len(result.chunk.test_ids)} tests, ran {result.tests}", flush=True)
+        print(f"--- end {result.chunk.label} ---", flush=True)
 
 
-def run_modules(directory: Path, modules: list[str], jobs: int,
-                windows_skips: bool) -> list[ModuleResult]:
+def run_chunks(directory: Path, chunks: list[Chunk], jobs: int,
+               windows_skips: bool) -> list[ChunkResult]:
     results = []
-    parallel = [module for module in modules if module not in SERIAL_MODULES]
+    parallel = [chunk for chunk in chunks if chunk.module not in SERIAL_MODULES]
     if parallel:
         with ThreadPoolExecutor(max_workers=min(jobs, len(parallel))) as executor:
-            pending = [executor.submit(run_module, directory, module, windows_skips)
-                       for module in parallel]
+            pending = [executor.submit(run_chunk, directory, chunk, windows_skips)
+                       for chunk in parallel]
             for future in as_completed(pending):
                 result = future.result()
                 results.append(result)
                 report(result)
-    # Serial modules run only after every parallel child has exited, never alongside a suite.
-    for module in modules:
-        if module in SERIAL_MODULES:
-            result = run_module(directory, module, windows_skips)
+    # Serial chunks run only after every parallel child has exited, and never overlap each other.
+    for chunk in chunks:
+        if chunk.module in SERIAL_MODULES:
+            result = run_chunk(directory, chunk, windows_skips)
             results.append(result)
             report(result)
     return results
@@ -214,38 +334,64 @@ def shard_argument(value: str) -> tuple[int, int]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--jobs", type=positive_integer, default=os.cpu_count() or 1,
-                        help="maximum parallel modules (default: CPU count)")
+                        help="maximum parallel chunks (default: CPU count)")
     parser.add_argument("--shard", type=shard_argument, metavar="I/N",
-                        help="run the I-th stable name-based shard, numbered from one")
+                        help="run the I-th duration-balanced chunk shard, numbered from one")
     parser.add_argument("--durations", type=nonnegative_integer, default=10, metavar="K",
-                        help="print the K slowest modules (default: 10; zero disables)")
+                        help="print the K slowest chunks and module totals (default: 10)")
     parser.add_argument("--windows-skips", action="store_true",
                         help="apply native-Windows fixture exclusions, as CI does")
     parser.add_argument("--test-dir", type=Path, default=ROOT / "tests",
                         help="directory containing test modules (default: repository tests)")
     parser.add_argument("--pattern", default="test_*.py",
                         help="module filename pattern (default: test_*.py)")
-    parser.add_argument("--list", action="store_true", help="list selected modules without running")
+    listing = parser.add_mutually_exclusive_group()
+    listing.add_argument("--list", action="store_true",
+                         help="list selected chunks and estimated seconds without running")
+    listing.add_argument("--list-tests", action="store_true",
+                         help="list the selected test ids without running")
+    parser.add_argument("--_enumerate-module", help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
     directory = args.test_dir.resolve()
-    modules = select_modules(discover_modules(directory, args.pattern), args.shard)
+    if args._enumerate_module is not None:
+        return emit_test_ids(directory, args._enumerate_module, args.windows_skips)
+    started = time.perf_counter()
+    modules = discover_modules(directory, args.pattern)
     if not modules:
         parser.error("selection contains no test modules")
+    chunks, failures = plan_chunks(directory, modules, args.jobs, args.windows_skips)
+    chunks = select_chunks(chunks, args.shard)
+    if failures and (args.list or args.list_tests):
+        return 1
+    if not chunks and not failures:
+        parser.error("selection contains no test modules or chunks")
     if args.list:
-        print("\n".join(modules))
+        for chunk in chunks:
+            print(f"{chunk.label}\t{chunk.estimated_seconds:.3f}s\t{len(chunk.test_ids)} tests")
+        print(f"estimated_seconds={sum(chunk.estimated_seconds for chunk in chunks):.3f}")
         return 0
-    print(f"Running {len(modules)} modules with {args.jobs} jobs"
+    if args.list_tests:
+        print("\n".join(sorted(test_id for chunk in chunks for test_id in chunk.test_ids)))
+        return 0
+    print(f"Running {len(chunks)} chunks with {args.jobs} jobs"
           f"{' (Windows fixture exclusions)' if args.windows_skips else ''}", flush=True)
-    started = time.perf_counter()
-    results = run_modules(directory, modules, args.jobs, args.windows_skips)
+    results = failures + run_chunks(directory, chunks, args.jobs, args.windows_skips)
     failed = sum(not result.passed for result in results)
+    module_count = len({result.chunk.module for result in results})
     print(f"{'FAILED' if failed else 'OK'}: {sum(result.tests for result in results)} tests"
-          f" in {len(results)} modules, {failed} failed, {time.perf_counter() - started:.3f}s wall",
+          f" in {module_count} modules, {len(results)} chunks, {failed} failed,"
+          f" {time.perf_counter() - started:.3f}s wall",
           flush=True)
     if args.durations:
-        print("Slowest modules:", flush=True)
-        for result in sorted(results, key=lambda item: (-item.seconds, item.module))[:args.durations]:
-            print(f"  {result.seconds:9.3f}s  {result.module}", flush=True)
+        print("Slowest chunks:", flush=True)
+        for result in sorted(results, key=lambda item: (-item.seconds, item.chunk.label))[:args.durations]:
+            print(f"  {result.seconds:9.3f}s  {result.chunk.label}", flush=True)
+        totals: dict[str, float] = defaultdict(float)
+        for result in results:
+            totals[result.chunk.module] += result.seconds
+        print("Module totals (sum of chunk elapsed seconds):", flush=True)
+        for module, seconds in sorted(totals.items(), key=lambda item: (-item[1], item[0]))[:args.durations]:
+            print(f"  {seconds:9.3f}s  {module}", flush=True)
     return int(failed > 0)
 
 

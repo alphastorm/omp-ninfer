@@ -108,10 +108,13 @@ Do not duplicate implementation across repositories to make a local patch easier
    bash -n examples/manual-tunnel/*.sh
    ```
 
-The test runner defaults to one worker per CPU and reports the slowest modules. Use `--jobs N`
-to cap concurrency, `--shard I/N` for one stable shard, or `--durations K` to change the timing
-summary. On native Windows, run `python scripts/run_tests.py --windows-skips` to use the same
-fixture exclusions as CI; Linux and macOS still run those POSIX fixtures.
+The test runner defaults to one worker per CPU. Modules measured above 60 seconds are split
+into isolated chunks of sorted test ids; class and module fixtures run once per chunk. Use
+`--jobs N` to cap concurrency, `--shard I/N` for one duration-balanced shard, or `--durations K`
+to change the chunk and module-total timing summaries. `--list` shows chunks and estimated
+seconds; `--list-tests` shows their exact test ids. On native Windows, run
+`python scripts/run_tests.py --windows-skips` to use the same fixture exclusions as CI; Linux
+and macOS still run those POSIX fixtures.
 
 A draft manifest is expected to pass the first command and fail `--require-ready`. A release-cut
 pull request ([how a release is cut](docs/RELEASES.md#how-a-release-is-cut)) must make
