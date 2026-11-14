@@ -92,6 +92,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   size; it stages operator-authored notes before validating the draft.
   Publication targets describe the selected runtime image and client, not predecessor identities.
   Re-cut closure also bounds reviewer text, carried inputs, RC freshness, evidence edges and tag deadlines.
+  From v0.20.0 review closure requires every selected result, matching epoch identities and closed
+  focused receipts; operator free text uses a structural path-token refusal.
+  Published RC receipts cannot be reused by changing JSON formatting, current pinned guide
+  citations require authenticated evidence, and stage inputs cannot be null.
 - Route composition binds staged parity waivers to the accepted candidate and refreshes their
   hash chains. Review epochs must match their closed directories' frozen subjects; from v0.20.0
   the candidate must contain its release plan, and a carried runtime refuses staging identity

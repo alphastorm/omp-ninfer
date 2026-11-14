@@ -871,13 +871,14 @@ def _runtime_outputs(inputs: Inputs, root: Path, release: str, manifest: dict[st
             "arguments", "/runtime-evidence",
             "re-cut runtime requires --runtime-artifacts, --runtime-build-identity and --runtime-rc")
     rc_data = inputs.read(paths["rc"])
+    rc = decode(rc_data, paths["rc"])
     if (verifier.product_version(release) or (0, 0, 0)) >= (0, 20, 0):
         for published in sorted((root / "releases").glob("*/qualification/runtime-rc.json")):
             directory = published.parent.parent
             if directory.name == release:
                 continue
             if inputs.load(directory / "manifest.json").get("status") == "ready":
-                require(rc_data != inputs.read(published), paths["rc"], "/",
+                require(rc != inputs.load(published), paths["rc"], "/",
                         "a re-cut needs its own RC run, not a published release's runtime RC receipt")
     component = manifest["components"]["ninfer"]
     publication = inputs.load(publication_path)
@@ -894,7 +895,6 @@ def _runtime_outputs(inputs: Inputs, root: Path, release: str, manifest: dict[st
             and build.get("upstream_base_sha") == component["upstream_commit"]
             and build.get("binaries", {}).get("ninfer-serve") == component["server_binary_sha256"],
             paths["build_identity"], "/", "build identity differs from the selected runtime")
-    rc = decode(rc_data, paths["rc"])
     require(rc.get("source_commit") == component["source_commit"] and rc.get("phase") == "rc"
             and rc.get("diagnostic_preview") is False and rc.get("release_qualification") is True
             and rc.get("passed") is True and type(rc.get("exit")) is int and rc["exit"] == 0

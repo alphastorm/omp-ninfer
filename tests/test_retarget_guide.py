@@ -443,6 +443,8 @@ class RetargetGuideTest(unittest.TestCase):
             f"[{OLD} tree](../releases/{OLD}/manifest.json)",
             f"[{OLD} tag](https://github.com/example/product/releases/tag/{OLD})",
             f"[{OLD} raw](https://raw.githubusercontent.com/example/product/{'7' * 40}/docs/QUICKSTART.md)",
+            f"[{OLD} measurement](https://raw.githubusercontent.com/alphastorm/omp-ninfer/{'7' * 40}/releases/{OLD}/measurements/run.json)",
+            f"[{OLD} other measurement](https://raw.githubusercontent.com/alphastorm/omp-ninfer/{'7' * 40}/docs/measurements/run.json)",
         ]
         self.append("\n\n".join(links) + "\n")
         self.run_retarget()
@@ -562,6 +564,43 @@ class RetargetGuideTest(unittest.TestCase):
         with self.assertRaisesRegex(GUIDE.Refusal, "unbound evidence link"):
             self.run_retarget()
         self.assertEqual(self.guide.read_bytes(), original)
+
+    def test_current_release_pinned_raw_measurement_requires_the_named_commit_blob(self) -> None:
+        def commit(message):
+            subprocess.run(["git", "add", "--", "."], cwd=self.root, check=True, capture_output=True)
+            subprocess.run(["git", "-c", "user.name=Synthetic Test",
+                            "-c", "user.email=test@example.invalid", "-c", "commit.gpgsign=false",
+                            "commit", "--quiet", "-m", message],
+                           cwd=self.root, check=True, capture_output=True)
+            return subprocess.run(["git", "rev-parse", "HEAD"], cwd=self.root, check=True,
+                                  capture_output=True, text=True).stdout.strip()
+
+        subprocess.run(["git", "init", "--quiet"], cwd=self.root, check=True, capture_output=True)
+        missing = commit("test: before measurement")
+        target = f"releases/{NEW}/measurements/current.json"
+        atomic_write_json(self.root / target, {"status": "passed"})
+        present = commit("test: bind current measurement")
+        url = f"https://raw.githubusercontent.com/alphastorm/omp-ninfer/{missing}/{target}"
+        self.after["manifest.json"]["measurement"] = {
+            "url": url, "sha256": GUIDE.sha256_file(self.root / target)}
+        self.write_releases()
+        line = len(self.guide.read_text().splitlines()) + 1
+        self.append(f"[current measurement]({url})\n")
+        original = self.guide.read_bytes()
+        self.assertNotIn(url, GUIDE.bound_evidence(self.root, NEW))
+        with self.assertRaisesRegex(GUIDE.Refusal, "unbound evidence link") as caught:
+            self.run_retarget()
+        self.assertIn(f"{self.guide}:{line}:", str(caught.exception))
+        self.assertIn(url, str(caught.exception))
+        self.assertEqual(self.guide.read_bytes(), original)
+        bound = url.replace(missing, present)
+        self.after["manifest.json"]["measurement"]["url"] = bound
+        self.write_releases()
+        atomic_write(self.guide, original.replace(url.encode(), bound.encode()))
+        self.assertIn(bound, GUIDE.bound_evidence(self.root, NEW))
+        self.assertTrue(self.run_retarget())
+        self.assertIn(bound, self.guide.read_text())
+        self.assertFalse(self.run_retarget())
 
     def test_documented_route_receipt_binding_admits_and_retargets_a_measurement(self) -> None:
         targets = ("docs/measurements/old-route-run.json", "docs/measurements/new-route-run.json")

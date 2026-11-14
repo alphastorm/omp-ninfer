@@ -381,8 +381,8 @@ def bound_evidence(root: Path, release: str) -> set[str]:
                 evidence = evidence_reference(path.relative_to(root.resolve()).as_posix())
                 if evidence:
                     result.add(evidence)
-                    if urlsplit(reference).scheme:
-                        result.add(reference)
+                if urlsplit(reference).scheme and (evidence := evidence_reference(reference)):
+                    result.add(evidence)
     return result
 
 
@@ -528,8 +528,9 @@ def markdown_blocks(text: str) -> list[MarkdownBlock]:
     return blocks
 
 
-def masked_text(text: str, predecessor: str, *, release_links: bool = True) -> str:
-    """Hide immutable predecessor Markdown links, preserving offsets and line numbers."""
+def masked_text(text: str, predecessor: str, *, release_links: bool = True,
+                evidence_release: str | None = None) -> str:
+    """Hide immutable links, except target-release pins during evidence diagnostics."""
     blocks = markdown_blocks(text)
     starts = [block.start for block in blocks]
     pieces = []
@@ -540,8 +541,10 @@ def masked_text(text: str, predecessor: str, *, release_links: bool = True) -> s
         if block.fenced:
             continue
         target = urlsplit(match[1].strip("<>"))
-        pinned_raw = (target.netloc == "raw.githubusercontent.com"
-                      and re.match(r"^/[^/]+/[^/]+/[0-9a-fA-F]{40}/", target.path) is not None)
+        pinned = (re.match(r"^/[^/]+/[^/]+/[0-9a-fA-F]{40}/(.+)", target.path)
+                  if target.netloc == "raw.githubusercontent.com" else None)
+        pinned_raw = pinned is not None and not (
+            evidence_release is not None and pinned[1].startswith(f"releases/{evidence_release}/"))
         immutable = release_links and (
             re.search(r"(?:^|/)releases/" + old + r"(?:/|$)", target.path)
             or re.search(r"/releases/tag/" + old + r"/?$", target.path)
@@ -754,7 +757,8 @@ def retarget(root: Path, predecessor: str, release: str, guide: Path, *, check: 
         raise Refusal(f"{guide}:1: cannot read guide: {error}") from error
     result = retarget_text(text, guide, predecessor, release, mappings, anchors)
     bindings = bound_evidence(root, release)
-    evidence_diagnostics(result, bindings, guide, mode="guide", masked=masked_text(result, predecessor))
+    evidence_diagnostics(result, bindings, guide, mode="guide",
+                         masked=masked_text(result, predecessor, evidence_release=release))
     with tempfile.TemporaryDirectory() as directory:
         candidate = Path(directory) / guide.name
         atomic_write(candidate, result)

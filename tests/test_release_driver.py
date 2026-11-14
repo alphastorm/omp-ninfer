@@ -1153,13 +1153,28 @@ class ReleaseDriverTests(unittest.TestCase):
                 self.assertEqual(self.git("rev-parse", "HEAD"), self.initial)
 
     def test_carried_runtime_stage_values_accept_equal_identity_and_clean_client(self) -> None:
-        values = self.driver().stage_values()
         runtime = self.previous["components"]["ninfer"]
-        supplied = {**values, "upstream_commit": runtime.get("upstream_commit"),
-                    "require_clean_client": True}
+        runtime["upstream_commit"] = "1" * 40
+        atomic_write_json(self.root / "releases" / PREDECESSOR / "manifest.json", self.previous)
+        values = self.driver().stage_values()
+        supplied = {**values, "upstream_commit": runtime["upstream_commit"], "require_clean_client": True}
         path = self.private / "stage-input.json"
         atomic_write_json(path, supplied)
         self.assertEqual(self.driver(stage_input=path).stage_values(), supplied)
+
+    def test_null_stage_values_refuse_before_carried_or_recut_checks(self) -> None:
+        path = self.private / "stage-input.json"
+        for disposition in ("carried", "recut"):
+            for field in sorted(DRIVER.STAGE_VALUE_OPTIONS | {"keep_deployment_profile", "require_clean_client"}):
+                with self.subTest(disposition=disposition, field=field):
+                    atomic_write_json(path, {field: None})
+                    driver = self.driver(stage_input=path)
+                    driver.plan["components"][0]["disposition"] = disposition
+                    before = self.worktree_bytes()
+                    with self.assertRaisesRegex(DRIVER.ReleaseError, "null.*" + field):
+                        driver.stage_values()
+                    self.assertEqual(self.worktree_bytes(), before)
+                    self.assertEqual(self.calls(), [])
 
     def test_carried_client_defaults_to_the_predecessor_public_descriptor(self) -> None:
         self.candidate("--no-suite")

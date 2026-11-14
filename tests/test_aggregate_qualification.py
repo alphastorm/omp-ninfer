@@ -310,6 +310,26 @@ class RuntimeEvidenceTests(unittest.TestCase):
         self.assertEqual(self.manifest, manifest)
         self.assertEqual(self.qualification, qualification)
 
+    def test_same_source_recut_refuses_a_reserialized_published_runtime_rc(self):
+        atomic_write_json(self.root / "releases" / self.release / "manifest.json", self.manifest)
+        published = self.paths["rc"]
+        receipt = load(published)
+        self.paths["rc"] = self.root / "reserialized-rc.json"
+        atomic_write(self.paths["rc"], json.dumps(dict(reversed(list(receipt.items()))),
+                                                 indent=4).replace("\n", "\r\n").encode() + b"\r\n")
+        self.assertNotEqual(self.paths["rc"].read_bytes(), published.read_bytes())
+        self.assertEqual(load(self.paths["rc"]), receipt)
+        self.release = "v0.20.0"
+        self.manifest["release"] = self.release
+        self.qualification["release"] = self.release
+        before = {path: path.read_bytes() for path in self.root.rglob("*") if path.is_file()}
+        manifest, qualification = deepcopy(self.manifest), deepcopy(self.qualification)
+        with self.assertRaisesRegex(AGGREGATE.BundleError, "re-cut needs its own RC run"):
+            self.outputs()
+        self.assertEqual({path: path.read_bytes() for path in self.root.rglob("*") if path.is_file()}, before)
+        self.assertEqual(self.manifest, manifest)
+        self.assertEqual(self.qualification, qualification)
+
     def test_stale_or_incomplete_runtime_receipts_refuse_without_writes(self):
         mutations = [
             ("artifacts", lambda value: value.update(source_commit="0" * 40)),

@@ -575,6 +575,9 @@ class ReleaseDriver:
         }
         supplied = (read_json(self.private_path("stage_input"))
                     if "stage_input" in self.state["private"] else {})
+        nulls = sorted(name for name, value in supplied.items() if value is None)
+        if nulls:
+            raise ReleaseError("--stage-input contains null values: " + ", ".join(nulls))
         runtime_plan = next(row for row in self.plan["components"] if row["id"] == COMPONENT_IDS[0])
         if runtime_plan["disposition"] == "carried" and tuple(map(int, self.release[1:].split("."))) >= (0, 20, 0):
             identity = {**values, "upstream_commit": runtime.get("upstream_commit")}

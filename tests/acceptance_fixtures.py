@@ -331,6 +331,8 @@ def write_reviews(out: Path, release: str, candidate: str, manifest: dict,
         subject = {"subjectCommit": commit, "subjectDigest": "1" * 64, "files": []}
         receipt = {"assignments": [seat], "subjectDigest": "2" * 64, "reviewClass": "focused"}
         if focused:
+            if tuple(map(int, release[1:].split("."))) >= (0, 20, 0):
+                receipt["status"] = "closed-by-disposition"
             atomic_write_json(directory / "subject.json", subject)
             atomic_write_json(directory / "receipt.json", receipt)
             from release_io import atomic_write
