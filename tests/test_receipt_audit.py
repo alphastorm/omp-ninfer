@@ -103,10 +103,18 @@ class ReceiptAuditTest(unittest.TestCase):
         return AUDIT.generate_audit(self.root, RELEASE, phase="lane-stage", as_of=DATE, **kwargs)
 
     def cli(self, *args: str) -> tuple[int, str]:
+        result, _, errors = self.invoke(*args)
+        return result, errors
+
+    def invoke(self, *args: str) -> tuple[int, str, str]:
         output, errors = io.StringIO(), io.StringIO()
         with contextlib.redirect_stdout(output), contextlib.redirect_stderr(errors):
             result = AUDIT.main(["--release", RELEASE, "--phase", "lane-stage", *args], root=self.root)
-        return result, errors.getvalue()
+        return result, output.getvalue(), errors.getvalue()
+
+    def snapshot(self) -> dict[str, bytes]:
+        return {path.relative_to(self.root).as_posix(): path.read_bytes()
+                for path in (self.root / "releases").rglob("*") if path.is_file()}
 
     def initialize_history(self) -> str:
         run_git(self.root, "init", "--quiet")
@@ -177,6 +185,46 @@ class ReceiptAuditTest(unittest.TestCase):
                 "runtime_base_receipt": {"repository_path": base,
                                          "sha256": sha((self.root / base).read_bytes())}}
             self.save(prefix + "qualification.json", qualification)
+
+    def recut_native(self) -> None:
+        path = f"releases/{RELEASE}/manifest.json"
+        manifest = self.load(path)
+        native = manifest["components"]["ninfer_variants"][0]
+        native.update(release_tag="v1.0.1-native1-beta.1", source_commit="f" * 40,
+                      package_sha256="9" * 64)
+        qualification = native["qualification"]
+        for field, reference in list(qualification.items()):
+            if field == "summary":
+                target = reference
+            elif isinstance(reference, dict):
+                target = reference["path"].replace(f"/{PREVIOUS}/", f"/{RELEASE}/")
+                reference["path"] = target
+            else:
+                continue
+            data = json_bytes({"recut_source": native["source_commit"], "field": field})
+            self.put(target, data)
+            if field == "summary":
+                qualification["sha256"] = sha(data)
+            else:
+                reference["sha256"] = sha(data)
+        checksums = b"recut native checksums\n"
+        self.put(f"releases/{RELEASE}/qualification/{native['id']}.SHA256SUMS", checksums)
+        native["checksums_sha256"] = sha(checksums)
+        self.save(path, manifest)
+
+    def add_reference_chain(self) -> list[str]:
+        children = {
+            "qualification/runtime-rc.json": json_bytes({"result": "previous subject"}),
+            "qualification/slow-first-request-parity-waiver-class.json": json_bytes({"decision": "previous subject"}),
+        }
+        parent = "qualification/unbound-parent.json"
+        files = {**children, parent: json_bytes({
+            "receipts": [{"path": Path(name).name, "sha256": sha(data)} for name, data in children.items()],
+        })}
+        for release in (PREVIOUS, RELEASE):
+            for name, data in files.items():
+                self.put(f"releases/{release}/{name}", data)
+        return sorted(files)
 
     def test_file_dispositions_and_scalar_pointer_hashes(self) -> None:
         audit = self.generate()
@@ -253,6 +301,124 @@ class ReceiptAuditTest(unittest.TestCase):
         with self.assertRaisesRegex(AUDIT.Refusal, "NINFER_RELEASE_NOTES.md"):
             self.generate()
 
+    def test_prune_preserves_unedited_notes_and_every_other_copy_on_refusal(self) -> None:
+        for release in (PREVIOUS, RELEASE):
+            self.put(f"releases/{release}/NINFER_RELEASE_NOTES.md", b"# Previous release\n")
+            self.put(f"releases/{release}/qualification/unbound.json", b'{"subject": "previous"}\n')
+        before = self.snapshot()
+        code, output, error = self.invoke("--prune-unbound", "--as-of", DATE)
+        self.assertEqual(code, 1)
+        self.assertIn("NINFER_RELEASE_NOTES.md", error)
+        self.assertEqual(output, "")
+        self.assertEqual(self.snapshot(), before)
+
+    def test_prune_refuses_references_from_all_three_release_authorities(self) -> None:
+        name = "qualification/unbound.json"
+        data = b'{"subject": "previous"}\n'
+        for release in (PREVIOUS, RELEASE):
+            self.put(f"releases/{release}/{name}", data)
+        prefix = f"releases/{RELEASE}/"
+        references = (
+            prefix + name,
+            "./" + name + "#evidence",
+            "https://raw.githubusercontent.com/alphastorm/omp-ninfer/" + "a" * 40 + "/" + prefix + name,
+            "The retained file is `" + prefix + name + "`.",
+        )
+        for document in ("manifest.json", "qualification.json", "compatibility.json"):
+            path = prefix + document
+            original = self.load(path)
+            for reference in references:
+                with self.subTest(document=document, reference=reference):
+                    value = copy.deepcopy(original)
+                    value["extra"] = {"repository_path": reference, "sha256": sha(data)}
+                    self.save(path, value)
+                    before = self.snapshot()
+                    code, output, error = self.invoke("--prune-unbound", "--as-of", DATE)
+                    self.assertEqual(code, 1)
+                    self.assertIn(prefix + name, error)
+                    self.assertIn(path + "#/extra/repository_path", error)
+                    self.assertEqual(output, "")
+                    self.assertEqual(self.snapshot(), before)
+            self.save(path, original)
+
+    def test_prune_flag_refuses_check_at_and_composed_final_without_effects(self) -> None:
+        for release in (PREVIOUS, RELEASE):
+            self.put(f"releases/{release}/qualification/unbound.json", b'{"subject": "previous"}\n')
+        before = self.snapshot()
+        for args in (("--check",), ("--at", "HEAD"), ("--phase", "composed-final")):
+            with self.subTest(args=args):
+                code, output, error = self.invoke("--prune-unbound", *args)
+                self.assertEqual(code, 1)
+                self.assertIn("--prune-unbound requires lane-stage without --check or --at", error)
+                self.assertEqual(output, "")
+                self.assertEqual(self.snapshot(), before)
+
+    def test_late_audit_planning_refusal_does_not_delete_copies(self) -> None:
+        for release in (PREVIOUS, RELEASE):
+            self.put(f"releases/{release}/qualification/unbound.json", b'{"subject": "previous"}\n')
+        before = self.snapshot()
+        code, output, error = self.invoke("--prune-unbound", "--as-of", "not-a-date")
+        self.assertEqual(code, 1)
+        self.assertIn("as_of must be an ISO date", error)
+        self.assertEqual(output, "")
+        self.assertEqual(self.snapshot(), before)
+
+    def test_prune_recut_lane_predecessor_only_copy_and_empty_directories(self) -> None:
+        self.add_carried_runtime()
+        self.add_carried_lane()
+        self.recut_native()
+        name = "qualification/obsolete/only/previous-result.json"
+        for release in (PREVIOUS, RELEASE):
+            self.put(f"releases/{release}/{name}", b'{"subject": "previous native component"}\n')
+        self.assertEqual(AUDIT.unadmitted_kept(self.root, RELEASE), [name])
+        code, output, error = self.invoke("--prune-unbound", "--as-of", DATE)
+        self.assertEqual((code, error), (0, ""))
+        self.assertFalse((self.root / "releases" / RELEASE / "qualification/obsolete").exists())
+        self.assertTrue((self.root / "releases" / PREVIOUS / name).is_file())
+        audit = self.load(AUDIT_PATH)
+        row = next(row for row in audit["files"] if row["file"] == name)
+        self.assertEqual(row["disposition"], "dropped")
+        self.assertEqual(row["reason"],
+                         "Predecessor evidence is not a current successor result, waiver or review approval.")
+        self.assertIn(f"pruned releases/{RELEASE}/{name}: {row['reason']}", output.splitlines())
+        self.assertEqual(self.cli("--check"), (0, ""))
+
+    def test_unrooted_parent_and_both_children_are_unadmitted_and_pruned_in_one_pass(self) -> None:
+        names = self.add_reference_chain()
+        self.assertEqual(AUDIT.unadmitted_kept(self.root, RELEASE), names)
+        with self.assertRaises(AUDIT.Refusal) as refused:
+            self.generate()
+        self.assertEqual(str(refused.exception), "unadmitted predecessor bytes: " + ", ".join(names))
+        code, output, error = self.invoke("--prune-unbound", "--as-of", DATE)
+        self.assertEqual((code, error), (0, ""))
+        self.assertEqual(AUDIT.unadmitted_kept(self.root, RELEASE), [])
+        audit = self.load(AUDIT_PATH)
+        rows = {row["file"]: row for row in audit["files"]}
+        self.assertEqual(len([line for line in output.splitlines() if line.startswith("pruned ")]), 3)
+        for name in names:
+            self.assertFalse((self.root / "releases" / RELEASE / name).exists())
+            self.assertEqual(rows[name]["disposition"], "dropped")
+            self.assertIn(f"pruned releases/{RELEASE}/{name}: {rows[name]['reason']}", output.splitlines())
+        self.assertEqual(self.cli("--check"), (0, ""))
+
+    def test_unchanged_row_roots_admission_of_a_complete_reference_chain(self) -> None:
+        names = self.add_reference_chain()
+        parent = "qualification/unbound-parent.json"
+        digest = sha((self.root / "releases" / PREVIOUS / parent).read_bytes())
+        for release in (PREVIOUS, RELEASE):
+            path = f"releases/{release}/manifest.json"
+            manifest = self.load(path)
+            manifest["components"]["retained"] = {
+                "release_tag": "v1.0.0", "source_commit": "b" * 40,
+                "qualification": {"path": parent, "sha256": digest},
+            }
+            self.save(path, manifest)
+        self.assertEqual(AUDIT.unadmitted_kept(self.root, RELEASE), [])
+        rows = {row["file"]: row for row in self.generate()["files"]}
+        for name in names:
+            self.assertEqual(rows[name]["disposition"], "kept")
+            self.assertIn("v1.0.0 (source bbbbbbbb)", rows[name]["reason"])
+
     def test_carried_lane_is_detected_and_its_bound_files_are_kept_or_in_place(self) -> None:
         self.add_carried_lane()
         audit = self.generate()
@@ -306,30 +472,7 @@ class ReceiptAuditTest(unittest.TestCase):
     def test_runtime_is_carried_in_a_mixed_release_with_a_recut_native(self) -> None:
         self.add_carried_runtime()
         self.add_carried_lane()
-        path = f"releases/{RELEASE}/manifest.json"
-        manifest = self.load(path)
-        native = manifest["components"]["ninfer_variants"][0]
-        native.update(release_tag="v1.0.1-native1-beta.1", source_commit="f" * 40,
-                      package_sha256="9" * 64)
-        qualification = native["qualification"]
-        for field, reference in list(qualification.items()):
-            if field == "summary":
-                target = reference
-            elif isinstance(reference, dict):
-                target = reference["path"].replace(f"/{PREVIOUS}/", f"/{RELEASE}/")
-                reference["path"] = target
-            else:
-                continue
-            data = json_bytes({"recut_source": native["source_commit"], "field": field})
-            self.put(target, data)
-            if field == "summary":
-                qualification["sha256"] = sha(data)
-            else:
-                reference["sha256"] = sha(data)
-        checksums = b"recut native checksums\n"
-        self.put(f"releases/{RELEASE}/qualification/{native['id']}.SHA256SUMS", checksums)
-        native["checksums_sha256"] = sha(checksums)
-        self.save(path, manifest)
+        self.recut_native()
         audit = self.generate()
         rows = {row["file"]: row for row in audit["files"]}
         self.assertEqual(AUDIT.unadmitted_kept(self.root, RELEASE), [])
@@ -461,7 +604,7 @@ class ReceiptAuditTest(unittest.TestCase):
 
 
 class StagedCarryAllTest(unittest.TestCase):
-    def test_staged_carry_all_admits_bound_components_after_pruning_only_unadmitted_copies(self) -> None:
+    def test_staged_carry_all_audits_with_logged_pruning_and_then_checks_without_effects(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary) / "copy"
             staged = stage_carry_all(root)
@@ -474,16 +617,15 @@ class StagedCarryAllTest(unittest.TestCase):
             self.assertEqual(manifest["components"]["ninfer"], previous_manifest["components"]["ninfer"])
             leftovers = AUDIT.unadmitted_kept(root, release)
             self.assertEqual(leftovers, sorted(leftovers))
-            for name in leftovers:
-                if name != "NINFER_RELEASE_NOTES.md":
-                    (prefix / name).unlink()
             AUDIT.atomic_write(prefix / "NINFER_RELEASE_NOTES.md", (
                 f"# {release}\n\nThis successor retains the published runtime and native components; "
                 "acceptance is evaluated separately.\n"))
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output):
+                self.assertEqual(AUDIT.main(["--release", release, "--phase", "lane-stage",
+                                             "--as-of", DATE, "--prune-unbound"], root=root), 0)
             self.assertEqual(AUDIT.unadmitted_kept(root, release), [])
             with contextlib.redirect_stdout(io.StringIO()):
-                self.assertEqual(AUDIT.main(["--release", release, "--phase", "lane-stage",
-                                             "--as-of", DATE], root=root), 0)
                 self.assertEqual(AUDIT.main(["--release", release, "--phase", "lane-stage",
                                              "--check"], root=root), 0)
             audit = json.loads((prefix / "qualification/receipt-audit.json").read_bytes())
@@ -494,6 +636,11 @@ class StagedCarryAllTest(unittest.TestCase):
             for name in leftovers:
                 if name != "NINFER_RELEASE_NOTES.md":
                     self.assertEqual(rows[name]["disposition"], "dropped")
+                    self.assertIn(f"pruned releases/{release}/{name}: {rows[name]['reason']}",
+                                  output.getvalue().splitlines())
+            self.assertEqual(len([line for line in output.getvalue().splitlines()
+                                  if line.startswith("pruned ")]),
+                             len([name for name in leftovers if name != "NINFER_RELEASE_NOTES.md"]))
             in_place = []
             old_prefix = f"releases/{PREVIOUS}/"
             for variant in manifest["components"]["ninfer_variants"]:
