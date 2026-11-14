@@ -297,6 +297,19 @@ class RuntimeEvidenceTests(unittest.TestCase):
             self.assertEqual(AGGREGATE.sha(data), edge["sha256"])
             self.assertEqual(data, (self.publication if role == "publication" else self.paths[role]).read_bytes())
 
+    def test_same_source_recut_refuses_a_published_runtime_rc_before_any_write(self):
+        atomic_write_json(self.root / "releases" / self.release / "manifest.json", self.manifest)
+        self.release = "v0.20.0"
+        self.manifest["release"] = self.release
+        self.qualification["release"] = self.release
+        before = {path: path.read_bytes() for path in self.root.rglob("*") if path.is_file()}
+        manifest, qualification = deepcopy(self.manifest), deepcopy(self.qualification)
+        with self.assertRaisesRegex(AGGREGATE.BundleError, "re-cut needs its own RC run"):
+            self.outputs()
+        self.assertEqual({path: path.read_bytes() for path in self.root.rglob("*") if path.is_file()}, before)
+        self.assertEqual(self.manifest, manifest)
+        self.assertEqual(self.qualification, qualification)
+
     def test_stale_or_incomplete_runtime_receipts_refuse_without_writes(self):
         mutations = [
             ("artifacts", lambda value: value.update(source_commit="0" * 40)),

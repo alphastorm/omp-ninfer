@@ -177,10 +177,12 @@ class HTTPTransport:
             require(time.monotonic() < deadline, label, "/timeout", "public read exceeded its deadline")
             raise BundleError(f"{label}#/transport: anonymous public read failed ({type(error).__name__})") from error
 
-    def api(self, path: str) -> dict[str, Any]:
+    def api(self, path: str, *, deadline: float | None = None) -> dict[str, Any]:
         relative(path, "public API", "/path")
+        timeout = self.api_timeout if deadline is None else min(self.api_timeout, deadline - time.monotonic())
+        require(timeout > 0, "public API", "/timeout", "public read exceeded its deadline")
         data = b"".join(self._chunks(self.api_origin + "/" + path, label="public API",
-                                     maximum=API_BYTES, timeout=self.api_timeout, exact=False,
+                                     maximum=API_BYTES, timeout=timeout, exact=False,
                                      accept="application/vnd.github+json"))
         return decode(data, "public API")
 
@@ -190,12 +192,14 @@ class HTTPTransport:
         seen = set()
         while True:
             require(time.monotonic() < deadline, "public tag", "/timeout", "tag lookup exceeded its deadline")
-            value = self.api(path)
+            value = self.api(path, deadline=deadline)
             target = field(value, "object", dict, "public tag")
             commit = field(target, "sha", str, "public tag", "/object")
             require(GIT_SHA_RE.fullmatch(commit), "public tag", "/object/sha", "expected a full git SHA")
             kind = target.get("type")
             if kind == "commit":
+                require(time.monotonic() < deadline, "public tag", "/timeout",
+                        "tag lookup exceeded its deadline")
                 return commit
             require(kind == "tag" and commit not in seen, "public tag", "/object/type",
                     "expected a commit or an acyclic annotated tag")

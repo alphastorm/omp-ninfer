@@ -14,8 +14,10 @@ from __future__ import annotations
 
 import argparse
 import bisect
+import hashlib
 import json
 import re
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -319,8 +321,7 @@ def evidence_sources(directory: Path) -> list[Path]:
     given, directory = directory, directory.resolve()
     root = directory.parent.parent
     sources = [file for file in [directory / "manifest.json", directory / "compatibility.json",
-                                directory / "qualification.json",
-                                *sorted((directory / "profiles").rglob("*.json"))] if file.is_file()]
+                                directory / "qualification.json"] if file.is_file()]
     seen = set(sources)
     documents = [json.loads(file.read_text(encoding="utf-8")) if file.is_file() else {}
                  for file in (directory / "manifest.json", directory / "compatibility.json",
@@ -343,7 +344,8 @@ def evidence_sources(directory: Path) -> list[Path]:
 def _evidence_bindings(value: Any):
     if isinstance(value, dict):
         for field, hash_field in (("repository_path", "sha256"), ("path", "sha256"),
-                                  ("summary", "sha256"), ("evidence_path", "evidence_sha256"),
+                                  ("summary", "sha256"), ("receipt", "sha256"),
+                                  ("evidence_path", "evidence_sha256"),
                                   ("url", "sha256"), ("public_url", "sha256")):
             if field in value and hash_field in value:
                 yield value[field], value[hash_field]
@@ -360,7 +362,14 @@ def _bound_reference(root: Path, reference: Any, digest: Any) -> Path | None:
     match = PRODUCT_RAW_URL_RE.fullmatch(reference)
     name = match[2] if match else reference
     path = bound_file(root, name)
-    return path if path is not None and sha256_file(path) == digest else None
+    if path is None or sha256_file(path) != digest:
+        return None
+    if match:
+        blob = subprocess.run(["git", "cat-file", "blob", f"{match[1]}:{name}"],
+                              cwd=root, capture_output=True)
+        if blob.returncode != 0 or hashlib.sha256(blob.stdout).hexdigest() != digest:
+            return None
+    return path
 
 
 def bound_evidence(root: Path, release: str) -> set[str]:

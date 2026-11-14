@@ -293,6 +293,7 @@ class HTTPTransportTests(OfflineTestCase):
         self.addCleanup(temporary.cleanup)
         self.fixture = PublicationFixture(Path(temporary.name))
         self.requests = []
+        self.tag_delays = (0, 0)
         test = self
 
         class Handler(BaseHTTPRequestHandler):
@@ -305,8 +306,10 @@ class HTTPTransportTests(OfflineTestCase):
                 test.requests.append((self.path, dict(self.headers)))
                 root = f"/repos/{PUBLICATION.REPOSITORY}"
                 if self.path.startswith(root + "/git/ref/tags/"):
+                    time.sleep(test.tag_delays[0])
                     payload = json.dumps({"object": {"type": "tag", "sha": "c" * 40}}).encode()
                 elif self.path == root + "/git/tags/" + "c" * 40:
+                    time.sleep(test.tag_delays[1])
                     payload = json.dumps({"object": {"type": "commit", "sha": test.fixture.fixture.row["source_commit"]}}).encode()
                 elif self.path.startswith(root + "/releases/tags/"):
                     payload = json.dumps(test.api).encode()
@@ -365,7 +368,10 @@ class HTTPTransportTests(OfflineTestCase):
                 self.send_header("Content-Length", str(len(payload)))
                 self.send_header("Set-Cookie", "not-an-authentication-cookie=test")
                 self.end_headers()
-                self.wfile.write(payload)
+                try:
+                    self.wfile.write(payload)
+                except (BrokenPipeError, ConnectionResetError):
+                    pass  # A deadline can close the client before the delayed response.
 
         self.server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
@@ -454,6 +460,18 @@ class HTTPTransportTests(OfflineTestCase):
             list(transport.download(self.origin + "/slow-redirect/5", len(expected)))
         self.assertLess(time.monotonic() - started, 1.0)
         self.assertLess(len(self.requests), 4, "header redirects reused the original socket timeout")
+
+    def test_annotated_tag_responses_share_one_operation_deadline(self):
+        self.tag_delays = (1.2, 1.2)
+        transport = PUBLICATION.HTTPTransport(self.origin, socket_timeout=4, api_timeout=2)
+        tag = self.fixture.fixture.row["release_tag"]
+        reference = transport.api(f"repos/{PUBLICATION.REPOSITORY}/git/ref/tags/{tag}")
+        resolved = transport.api(f"repos/{PUBLICATION.REPOSITORY}/git/tags/{reference['object']['sha']}")
+        self.assertEqual(resolved["object"]["sha"], self.fixture.fixture.row["source_commit"])
+        self.requests.clear()
+        with self.assertRaisesRegex(PUBLICATION.BundleError, "/timeout"):
+            transport.tag(PUBLICATION.REPOSITORY, tag)
+        self.assertEqual(len(self.requests), 2)
 
     def test_header_trickle_cannot_extend_the_operation_deadline(self):
         transport = PUBLICATION.HTTPTransport(

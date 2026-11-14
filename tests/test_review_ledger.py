@@ -117,6 +117,73 @@ class ReviewLedgerTests(unittest.TestCase):
         with self.assertRaisesRegex(SystemExit, "not closed"):
             self.write()
 
+    def test_new_council_records_require_their_own_closed_status(self):
+        for section in ("native_runtime", "product_tooling"):
+            with self.subTest(section=section):
+                path = self.out / "reviews" / section / "review-record.json"
+                record = LEDGER.load(path)
+                without_status = {key: value for key, value in record.items() if key != "status"}
+                atomic_write_json(path, without_status)
+                before = self.qualification.read_bytes()
+                with self.assertRaisesRegex(SystemExit, "review-record status is not closed"):
+                    self.write()
+                self.assertEqual(self.qualification.read_bytes(), before)
+                self.assertFalse((self.qualification.parent / "review").exists())
+                atomic_write_json(path, record)
+
+    def test_new_epoch_records_require_their_own_closed_status(self):
+        directory = self.out / "reviews/epoch"
+        atomic_write_json(directory / "review-record.json", {})
+        atomic_write_json(directory / "frozen-subject.json", {"subjectCommit": self.candidate})
+        self.values["product_council"]["epochs"] = [{
+            "directory": "epoch", "review_mode": "initial", "review_class": "full-council",
+            "status": "closed-by-disposition", "reviewed_commit": self.candidate,
+        }]
+        before = self.qualification.read_bytes()
+        with self.assertRaisesRegex(SystemExit, "epoch review-record status is not closed"):
+            self.write()
+        self.assertEqual(self.qualification.read_bytes(), before)
+        self.assertFalse((self.qualification.parent / "review").exists())
+
+    def test_new_reviewer_results_publish_only_finding_prefixes_and_a_fixed_summary(self):
+        paths = ("~/Library/x", r"\\host\Users\alice\x", r"\Users\alice\x")
+        originals = {}
+        for section in LEDGER.SECTIONS:
+            source = self.out / "reviews" / section / "critic.json"
+            atomic_write_json(source, {
+                "summary": "Private reviewer prose: " + " ".join(paths),
+                "evidence": [f"R{index}|P1|conf=0.9|claim=Observed {path}"
+                             for index, path in enumerate(paths, 1)] + ["Unprefixed reviewer prose."],
+                "unresolved": [f"U{index}|P2|conf=0.5|missing={path}"
+                               for index, path in enumerate(paths, 1)] + ["Unprefixed unresolved prose."],
+            })
+            originals[source] = source.read_bytes()
+        result = self.write()
+        ledger = LEDGER.load(self.root / result["repository_path"])
+        for section in LEDGER.SECTIONS:
+            with self.subTest(section=section):
+                self.assertEqual(ledger[section]["reviewer_results"]["critic"], {
+                    "summary": "Reviewer text is kept in the private review record bound by digest.",
+                    "evidence": [f"R{index}|P1|conf=0.9|" for index in range(1, 4)],
+                    "unresolved": [f"U{index}|P2|conf=0.5|" for index in range(1, 4)],
+                })
+        self.assertEqual({source: source.read_bytes() for source in originals}, originals)
+
+    def test_operator_private_paths_are_refused_before_public_writes(self):
+        source = self.out / "reviews/product_tooling/ledger.md"
+        original = source.read_text()
+        before = self.qualification.read_bytes()
+        for path in ("~/x", r"~\x", r"\\host\share\x", r"\Users\alice\x",
+                     r"C:\uSeRs\alice\x", "/uSeRs/alice/x", "/HOME/alice/x",
+                     "%userprofile%/x", "$home/x", "/PRIVATE/VAR/x", "/VAR/FOLDERS/x"):
+            with self.subTest(path=path):
+                source.write_text(original.replace("Synthetic evidence.", "See " + path + "."))
+                with self.assertRaisesRegex(SystemExit, "private"):
+                    self.write()
+                self.assertEqual(self.qualification.read_bytes(), before)
+                self.assertFalse((self.qualification.parent / "review").exists())
+        source.write_text(original)
+
     def test_another_operators_review_edit_is_never_overwritten(self):
         original = LEDGER.load(self.qualification)
         for edited in (None, {}, {"status": "draft"}, {"status": "passed"},
@@ -321,7 +388,7 @@ class ReviewLedgerTests(unittest.TestCase):
                 self.assertFalse((self.qualification.parent / "review").exists())
                 atomic_write_json(path, original)
 
-    def test_known_privacy_rule_examples_are_sanitized_and_counted_without_changing_sources(self):
+    def test_reviewer_private_identifiers_are_discarded_without_changing_sources(self):
         source = self.out / "reviews/product_tooling/critic.json"
         sentinel = "GPU-" + "12345678-1234-1234-1234-123456789abc"
         paths = ["C:/" + "Users/UNIQUE_NAME/private/file.txt",
@@ -334,10 +401,11 @@ class ReviewLedgerTests(unittest.TestCase):
         before = source.read_bytes()
         result = self.write()
         output = (self.root / result["repository_path"]).read_text()
-        for private in ("UNIQUE_NAME", "private", "file.txt", sentinel):
+        for private in ("UNIQUE_NAME", "file.txt", sentinel):
             self.assertNotIn(private, output)
-        self.assertEqual(result["sanitized"], {
-            LEDGER.REMOVED_STATEMENT: 1, "a synthetic GPU-identifier sentinel": 1})
+        self.assertEqual(LEDGER.load(self.root / result["repository_path"])[
+            "product_tooling"]["reviewer_results"]["critic"]["summary"], LEDGER.PRIVATE_REVIEW_SUMMARY)
+        self.assertEqual(result["sanitized"], {})
         self.assertEqual(source.read_bytes(), before)
 
     def test_each_private_path_is_consumed_including_its_username_and_final_segment(self):
@@ -353,9 +421,8 @@ class ReviewLedgerTests(unittest.TestCase):
                 ledger, counts = LEDGER.build(self.root, self.release, self.candidate,
                                               self.manifest_path, self.values)
                 summary = ledger["product_tooling"]["reviewer_results"]["critic"]["summary"]
-                for private in ("UNIQUE_NAME", "private", "file.txt"):
-                    self.assertNotIn(private, summary)
-                self.assertEqual(sum(counts.values()), 1)
+                self.assertEqual(summary, LEDGER.PRIVATE_REVIEW_SUMMARY)
+                self.assertEqual(counts, {})
                 self.assertEqual(source.read_bytes(), before)
 
     def test_a_statement_naming_a_private_path_is_removed_whole(self):
@@ -369,8 +436,8 @@ class ReviewLedgerTests(unittest.TestCase):
                 ledger, counts = LEDGER.build(self.root, self.release, self.candidate,
                                               self.manifest_path, self.values)
                 summary = ledger["product_tooling"]["reviewer_results"]["critic"]["summary"]
-                self.assertEqual(summary, LEDGER.REMOVED_STATEMENT)
-                self.assertEqual(sum(counts.values()), 1)
+                self.assertEqual(summary, LEDGER.PRIVATE_REVIEW_SUMMARY)
+                self.assertEqual(counts, {})
                 self.assertEqual(source.read_bytes(), before)
 
     def test_a_private_path_is_removed_through_brackets_and_spaced_segments(self):
@@ -409,8 +476,8 @@ class ReviewLedgerTests(unittest.TestCase):
                 ledger, counts = LEDGER.build(self.root, self.release, self.candidate,
                                               self.manifest_path, self.values)
                 evidence = ledger["product_tooling"]["reviewer_results"]["critic"]["evidence"]
-                self.assertEqual(evidence, ["R1|P1|conf=0.9|" + LEDGER.REMOVED_STATEMENT, public])
-                self.assertEqual(sum(counts.values()), 1)
+                self.assertEqual(evidence, ["R1|P1|conf=0.9|", "R2|P2|conf=0.5|"])
+                self.assertEqual(counts, {})
                 LEDGER.public_text(ledger)
 
     def test_verifier_self_check_happens_before_either_public_write(self):

@@ -1136,6 +1136,31 @@ class ReleaseDriverTests(unittest.TestCase):
                 self.assertEqual(self.calls(), [])
                 self.assertEqual(self.git("rev-parse", "HEAD"), self.initial)
 
+    def test_carried_runtime_stage_values_refuse_every_nonidentity_option(self) -> None:
+        for key, value in (
+            ("config_sha", "0" * 64), ("model_revision", "changed"),
+            ("model_sha256", "0" * 64), ("model_bytes", 1),
+            ("profile_from", PREDECESSOR), ("profile_template_dir", "templates"),
+            ("source_archive", "source.tar.gz"), ("checksums", "SHA256SUMS"),
+            ("keep_deployment_profile", False), ("keep_deployment_profile", 1),
+        ):
+            with self.subTest(key=key, value=value):
+                path = self.private / "stage-input.json"
+                atomic_write_json(path, {key: value})
+                driver = self.driver(stage_input=path)
+                with self.assertRaisesRegex(DRIVER.ReleaseError, key):
+                    driver.stage_values()
+                self.assertEqual(self.git("rev-parse", "HEAD"), self.initial)
+
+    def test_carried_runtime_stage_values_accept_equal_identity_and_clean_client(self) -> None:
+        values = self.driver().stage_values()
+        runtime = self.previous["components"]["ninfer"]
+        supplied = {**values, "upstream_commit": runtime.get("upstream_commit"),
+                    "require_clean_client": True}
+        path = self.private / "stage-input.json"
+        atomic_write_json(path, supplied)
+        self.assertEqual(self.driver(stage_input=path).stage_values(), supplied)
+
     def test_carried_client_defaults_to_the_predecessor_public_descriptor(self) -> None:
         self.candidate("--no-suite")
         arguments = self.calls("stage_release.py")[0]["arguments"]

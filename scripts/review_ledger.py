@@ -39,13 +39,13 @@ from verify_release import (CLOSED_REVIEW_STATUS_RE, PRIVATE_MARKERS, review_sub
 SEAT_FIELDS = ("reviewer_id", "selectionClass", "role", "independence_class", "authority",
                "model", "model_family")
 SECTIONS = ("native_runtime", "native_component_delta", "product_tooling")
-# Private paths and synthetic identifiers, applied to string leaves, never to source bytes.
-# Where a private path ends inside reviewer prose cannot be decided (spaces, brackets, quotes
-# and separators all occur in real paths), so a statement that names a user-profile path is
-# removed whole. Only the schema-fixed prefix of a finding (id, severity, confidence) is kept.
+# Historical sanitization rules preserve the bytes of pre-v0.20.0 public ledgers.
 USER_PATH = re.compile(r"[A-Z]:[\\/]+(?:Users|Home)[\\/]|/(?:Users|home)/", re.I)
+PRIVATE_PATH = re.compile(
+    r"~[\\/]|\\\\|[\\/]Users[\\/]|/(?:home)/|%USERPROFILE%|\$HOME|/private/var/|/var/folders/", re.I)
 FINDING_PREFIX = re.compile(r"[RU][1-9][0-9]*\|P[0-3]\|conf=(?:0(?:\.[0-9]{1,2})?|1(?:\.0{1,2})?)\|")
 REMOVED_STATEMENT = "the rest of this statement named a user-profile path and was removed"
+PRIVATE_REVIEW_SUMMARY = "Reviewer text is kept in the private review record bound by digest."
 SANITIZE = (
     (re.compile(r"GPU-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"),
      "a synthetic GPU-identifier sentinel"),
@@ -107,15 +107,16 @@ def results(directory: Path, seats: list[dict]) -> dict:
     return output
 
 
-def council(directory: Path, status: str, closure: str, *, product: bool) -> dict:
+def council(directory: Path, status: str, closure: str, *, product: bool,
+            require_record_status: bool) -> dict:
     closed(status, directory.name)
     frozen = load(directory / "frozen-subject.json")
     panel = load(directory / "panel-selection.json")
     resolver = load(directory / "resolver-receipt.json")
     record = load(directory / "review-record.json")
     require(record.get("review_id") == directory.name, "review-record review_id mismatch")
-    if "status" in record:
-        closed(record["status"], "review-record status")
+    if require_record_status or "status" in record:
+        closed(record.get("status"), "review-record status")
     selected = panel["selected"]
     output = {"repository": "https://github.com/alphastorm/omp-ninfer"} if product else {}
     output.update(review_id=directory.name, review_sequence_id=record["review_sequence_id"],
@@ -182,24 +183,27 @@ def sanitize(value: Any, counts: dict[str, int]) -> Any:
     return value
 
 
-def public_text(value: Any) -> None:
+def public_text(value: Any, *, private_paths: bool = True) -> None:
     if isinstance(value, str):
         require(not any(marker.casefold() in value.casefold() for marker in PRIVATE_MARKERS),
                 "private marker in public ledger")
         require(not re.search(r"GPU-[0-9a-f-]{8,}|[A-Z]:[\\/](?:[U]sers|[Hh]ome)[\\/]", value, re.I),
                 "private identifier in public ledger")
+        require(not private_paths or PRIVATE_PATH.search(value) is None,
+                "private path in public ledger")
     elif isinstance(value, dict):
         for key, child in value.items():
-            public_text(key)
-            public_text(child)
+            public_text(key, private_paths=private_paths)
+            public_text(child, private_paths=private_paths)
     elif isinstance(value, list):
         for child in value:
-            public_text(child)
+            public_text(child, private_paths=private_paths)
 
 
 def build(root: Path, release: str, candidate: str, reviews: Path,
           values: dict, *, as_of: str | None = None) -> tuple[dict, dict]:
     require(re.fullmatch(r"v\d+\.\d+\.\d+", release), "release must be a GA product version")
+    private_review = tuple(map(int, release[1:].split("."))) >= (0, 20, 0)
     require(re.fullmatch(r"[0-9a-f]{40}", candidate), "candidate must be a full commit")
     try:
         git(root, "merge-base", "--is-ancestor", candidate, "HEAD")
@@ -230,7 +234,8 @@ def build(root: Path, release: str, candidate: str, reviews: Path,
                     "native component delta must identify its base commit")
             sections[name] = focused(directory, status, closure, base)
         else:
-            sections[name] = council(directory, status, closure, product=name == "product_tooling")
+            sections[name] = council(directory, status, closure, product=name == "product_tooling",
+                                     require_record_status=private_review)
     tooling = sections["product_tooling"]
     require(entries["product_tooling"].get("stage_commit", candidate) == candidate,
             "stage_commit must equal candidate")
@@ -244,8 +249,8 @@ def build(root: Path, release: str, candidate: str, reviews: Path,
         if not directory.is_absolute():
             directory = manifest_path.parent / directory
         record = load(directory / "review-record.json")
-        if "status" in record:
-            closed(record["status"], "epoch review-record status")
+        if private_review or "status" in record:
+            closed(record.get("status"), "epoch review-record status")
         frozen = load(directory / "frozen-subject.json")
         require(epoch["reviewed_commit"] == frozen.get("subjectCommit"),
                 f"epoch reviewed_commit {epoch['reviewed_commit']} must equal its frozen subject "
@@ -295,8 +300,18 @@ def build(root: Path, release: str, candidate: str, reviews: Path,
         **sections,
     }
     counts: dict[str, int] = {}
-    ledger = sanitize(ledger, counts)
-    public_text(ledger)
+    if private_review:
+        for section in sections.values():
+            for result in section["reviewer_results"].values():
+                if "summary" not in result:
+                    continue
+                result["summary"] = PRIVATE_REVIEW_SUMMARY
+                for key in ("evidence", "unresolved"):
+                    result[key] = [prefix[0] for statement in result[key]
+                                   if (prefix := FINDING_PREFIX.match(statement))]
+    else:
+        ledger = sanitize(ledger, counts)
+    public_text(ledger, private_paths=private_review)
     return ledger, counts
 
 
@@ -336,8 +351,11 @@ def write_ledger(root: Path, release: str, candidate: str, reviews: Path, values
     payload = (json.dumps(ledger, indent=2) + "\n").encode("utf-8")
     qualification_path = root / "releases" / release / "qualification.json"
     qualification = deepcopy(load(qualification_path))
-    review = sanitize(composition_review(ledger, values, reference), counts)
-    public_text(review)
+    private_review = tuple(map(int, release[1:].split("."))) >= (0, 20, 0)
+    review = composition_review(ledger, values, reference)
+    if not private_review:
+        review = sanitize(review, counts)
+    public_text(review, private_paths=private_review)
     composition = qualification.get("composition")
     require(isinstance(composition, dict), "qualification.composition must contain the staged review")
     staged_review = composition.get("review")
