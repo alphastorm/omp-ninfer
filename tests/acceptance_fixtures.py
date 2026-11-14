@@ -195,8 +195,9 @@ def predecessor(root: Path, release: str | None = None) -> dict:
 def public_release_tree(root: Path, release: str, destination: Path) -> str:
     """Materialize the public tag's exact tree and history, never the current authority."""
     (commit,) = HISTORY.resolve_commits(f"refs/tags/{release}", root=root)
-    subprocess.run(["git", "clone", "--quiet", "--no-hardlinks", "--no-checkout",
-                    str(root), str(destination)], check=True, capture_output=True,
+    # The tree must be byte-exact on every platform: no end-of-line conversion at checkout.
+    subprocess.run(["git", "clone", "--quiet", "--config", "core.autocrlf=false", "--no-hardlinks",
+                    "--no-checkout", str(root), str(destination)], check=True, capture_output=True,
                    env=subprocess_environment(root))
     git(destination, "checkout", "--quiet", "--detach", commit)
     return commit

@@ -32,8 +32,11 @@ def load(path):
 
 
 def command(root, *arguments):
+    # The tools print non-ASCII status text; make the child's streams UTF-8 on every platform
+    # so decoding them here does not depend on the Windows console code page.
     return subprocess.run([sys.executable, *map(str, arguments)], cwd=root, capture_output=True,
-                          text=True, encoding="utf-8")
+                          text=True, encoding="utf-8",
+                          env={**os.environ, "PYTHONIOENCODING": "utf-8"})
 
 
 def carry_plan(root, release):
