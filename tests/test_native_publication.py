@@ -139,7 +139,7 @@ class NativePublicationTests(OfflineTestCase):
         self.assertEqual(result["identity"]["source_commit"], self.fixture.fixture.row["source_commit"])
         self.assertEqual(row["build_profile"], self.fixture.fixture.row["build_profile"])
         self.assertEqual(row["actual_hardware_qualification"], {
-            "repository_path": "releases/v0.19.0/qualification/rtx3090.json",
+            "repository_path": f"releases/{self.fixture.fixture.release}/qualification/{self.fixture.fixture.lane}.json",
             "sha256": PUBLICATION.sha((self.fixture.fixture.directory / "rtx3090.json").read_bytes())})
         self.assertEqual(row["outer_hashed_entries"] + 1, row["total_distribution_files"])
         self.assertFalse(result["publication_authorized_by_this_receipt"])
@@ -427,15 +427,16 @@ class PrivatePublicationGoldenTests(OfflineTestCase):
         bundle_root = Path(fixture["bundle_root"]).expanduser()
         bundle = bundle_root / "rtx3090"
         reference = load(bundle / "bundle.json")
+        release = reference["release"]
         assets = next(edge for edge in reference["inputs"] if edge["role"] == "assets")
         receipt = load(bundle / Path(assets["path"]).parent / "package-build-receipt.json")
         plan = {
-            "artifact_type": "omp_ninfer_release_plan", "schema_version": 1, "release": "v0.19.0",
+            "artifact_type": "omp_ninfer_release_plan", "schema_version": 1, "release": release,
             "components": [{"id": "rtx3090-windows-native", "disposition": "recut",
                             "release_tag": tag, "source_commit": receipt["patch_stack_sha"]}]}
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            plan_path = root / "releases/v0.19.0/plan.json"
+            plan_path = root / "releases" / release / "plan.json"
             atomic_write_json(plan_path, plan)
             out = root / "publication.json"
             result = PUBLICATION.authenticate(plan_path, "rtx3090", bundle, out,
