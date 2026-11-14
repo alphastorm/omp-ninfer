@@ -411,6 +411,26 @@ class ReceiptAuditTest(unittest.TestCase):
         self.assertEqual(output, "")
         self.assertEqual(self.snapshot(), before)
 
+    def test_a_copy_changed_after_planning_is_kept_and_nothing_is_deleted(self) -> None:
+        for release in (PREVIOUS, RELEASE):
+            self.put(f"releases/{release}/qualification/unbound.json", b'{"subject": "previous"}\n')
+            self.put(f"releases/{release}/qualification/also-unbound.json", b"{}\n")
+        edited = self.root / "releases" / RELEASE / "qualification" / "unbound.json"
+        plan = AUDIT._plan_pruning
+
+        def plan_then_edit(*arguments, **options):
+            planned = plan(*arguments, **options)
+            edited.write_bytes(b'{"subject": "operator edit"}\n')
+            return planned
+
+        with mock.patch.object(AUDIT, "_plan_pruning", plan_then_edit):
+            code, output, error = self.invoke("--prune-unbound", "--as-of", DATE)
+        self.assertEqual(code, 1)
+        self.assertIn("qualification/unbound.json", error)
+        self.assertEqual(output, "")
+        self.assertEqual(edited.read_bytes(), b'{"subject": "operator edit"}\n')
+        self.assertTrue((edited.parent / "also-unbound.json").exists())
+
     def test_prune_recut_lane_predecessor_only_copy_and_empty_directories(self) -> None:
         self.add_carried_runtime()
         self.add_carried_lane()

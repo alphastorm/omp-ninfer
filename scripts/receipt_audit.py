@@ -453,7 +453,7 @@ def _prune_references(tree: _Tree, release: str, names: list[str]) -> list[str]:
 
 
 def _plan_pruning(tree: _Tree, release: str, as_of: str | None) -> tuple[
-    dict[str, Any], list[tuple[str, str]],
+    dict[str, Any], list[tuple[str, str, str]],
 ]:
     _, carried, _, _, before, after, runtime_carried = _inventory(tree, release)
     names = [name for name in _unadmitted(before, after, carried, runtime_carried)
@@ -462,6 +462,7 @@ def _plan_pruning(tree: _Tree, release: str, as_of: str | None) -> tuple[
     if references:
         raise Refusal("cannot prune referenced files: " + "; ".join(references))
     excluded = {f"releases/{release}/{name}" for name in names}
+    planned = {name: _sha(tree.read(f"releases/{release}/{name}")) for name in names}
     tree.paths = [path for path in tree.paths if path not in excluded]
     for path in excluded:
         tree.cache.pop(path, None)
@@ -469,13 +470,19 @@ def _plan_pruning(tree: _Tree, release: str, as_of: str | None) -> tuple[
     # planned tree before the first filesystem effect. Notes still refuse here.
     audit = _generate_audit(tree, release, phase="lane-stage", as_of=as_of)
     reasons = {row["file"]: row["reason"] for row in audit["files"]}
-    return audit, [(name, reasons[name]) for name in names]
+    return audit, [(name, reasons[name], planned[name]) for name in names]
 
 
-def _apply_pruning(root: Path, release: str, deletions: list[tuple[str, str]]) -> None:
+def _apply_pruning(root: Path, release: str, deletions: list[tuple[str, str, str]]) -> None:
     directory = Path(root) / "releases" / release
+    # Planning judged these bytes. A file saved since then is someone's edit, not a copy.
+    changed = [name for name, _, digest in deletions
+               if _sha((directory / name).read_bytes()) != digest]
+    if changed:
+        raise Refusal("files changed after pruning was planned: "
+                      + ", ".join(f"releases/{release}/{name}" for name in changed))
     parents = set()
-    for name, reason in deletions:
+    for name, reason, _ in deletions:
         path = directory / name
         path.unlink()
         print(f"pruned releases/{release}/{name}: {reason}")

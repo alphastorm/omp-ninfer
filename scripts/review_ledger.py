@@ -39,11 +39,14 @@ from verify_release import (CLOSED_REVIEW_STATUS_RE, PRIVATE_MARKERS, review_sub
 SEAT_FIELDS = ("reviewer_id", "selectionClass", "role", "independence_class", "authority",
                "model", "model_family")
 SECTIONS = ("native_runtime", "native_component_delta", "product_tooling")
-# Whole private path tokens and synthetic identifiers, applied to leaves, never source bytes.
+# Private paths and synthetic identifiers, applied to string leaves, never to source bytes.
+# Where a path ends inside prose is not decidable, so the patterns err toward removing too much:
+# a path runs to whitespace or a quote, and following words that still contain a path separator
+# go with it. Brackets do not end a path; a directory name may contain them.
+_PATH_REST = r"""[^\s"'`]*(?:[ \t]+[^\s"'`]*[\\/][^\s"'`]*)*"""
 SANITIZE = (
-    (re.compile(r"""[A-Z]:[\\/]+Users[\\/]+[^\s"'`\])}]*""", re.I),
-     "a Windows user-profile path"),
-    (re.compile(r"""/(?:Users|home)/[^\s"'`\])}]*"""), "a POSIX user-profile path"),
+    (re.compile(r"[A-Z]:[\\/]+Users[\\/]+" + _PATH_REST, re.I), "a Windows user-profile path"),
+    (re.compile(r"/(?:Users|home)/" + _PATH_REST), "a POSIX user-profile path"),
     (re.compile(r"GPU-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"),
      "a synthetic GPU-identifier sentinel"),
 )

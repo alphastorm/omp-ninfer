@@ -317,10 +317,9 @@ class ReviewLedgerTests(unittest.TestCase):
                 self.assertEqual(sum(counts.values()), 1)
                 self.assertEqual(source.read_bytes(), before)
 
-    def test_private_paths_stop_at_prose_delimiters_without_consuming_the_surrounding_text(self):
+    def test_private_paths_stop_at_quotes_and_whitespace_without_consuming_the_surrounding_text(self):
         source = self.out / "reviews/product_tooling/critic.json"
-        for opening, closing in (("'", "'"), ('"', '"'), ("`", "`"), ("[", "]"),
-                                 ("{", "}"), ("(", ")"), ("", " ")):
+        for opening, closing in (("'", "'"), ('"', '"'), ("`", "`"), ("", " ")):
             with self.subTest(delimiter=closing):
                 path = "/" + "home/UNIQUE_NAME/private/file.txt"
                 atomic_write_json(source, {"summary": opening + path + closing + "Retained prose.",
@@ -334,6 +333,25 @@ class ReviewLedgerTests(unittest.TestCase):
                 self.assertTrue(summary.endswith(closing + "Retained prose."), summary)
                 self.assertEqual(sum(counts.values()), 1)
                 self.assertEqual(source.read_bytes(), before)
+
+    def test_a_private_path_is_removed_through_brackets_and_spaced_segments(self):
+        source = self.out / "reviews/product_tooling/critic.json"
+        for path, fragments in (
+            ("/" + "Users/UNIQUE_NAME/Projects/(client)/result.txt", ("UNIQUE_NAME", "client", "result.txt")),
+            ("/" + "home/UNIQUE_NAME/[drafts]/{old}/result.txt", ("UNIQUE_NAME", "drafts", "old", "result.txt")),
+            ("C:/" + "Users/First Last/AppData/private.txt", ("First", "Last", "AppData", "private.txt")),
+            ("C:\\" + "Users\\First Last\\AppData\\private.txt", ("First", "Last", "AppData", "private.txt")),
+            ("/" + "Users/UNIQUE_NAME/My Project/notes.txt", ("UNIQUE_NAME", "Project", "notes.txt")),
+        ):
+            with self.subTest(path=path):
+                atomic_write_json(source, {"summary": f"Observed {path} Retained prose.",
+                                           "evidence": [], "unresolved": []})
+                ledger, _ = LEDGER.build(self.root, self.release, self.candidate,
+                                         self.manifest_path, self.values)
+                summary = ledger["product_tooling"]["reviewer_results"]["critic"]["summary"]
+                for fragment in fragments:
+                    self.assertNotIn(fragment, summary)
+                self.assertTrue(summary.endswith(" Retained prose."), summary)
 
     def test_verifier_self_check_happens_before_either_public_write(self):
         before = self.qualification.read_bytes()
