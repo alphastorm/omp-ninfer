@@ -4,6 +4,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
+import stat
 import tempfile
 import unittest
 from pathlib import Path
@@ -33,6 +34,15 @@ class AtomicWriteTests(unittest.TestCase):
             release_io.atomic_write_json(target, {"status": "draft", "items": [1]})
             self.assertEqual(target.read_bytes(),
                              b'{\n  "status": "draft",\n  "items": [\n    1\n  ]\n}\n')
+
+    def test_a_rewrite_keeps_the_targets_permission_bits(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            target = Path(temporary) / "start.sh"
+            target.write_text("#!/bin/sh\n", encoding="utf-8")
+            target.chmod(0o755)
+            before = stat.S_IMODE(target.stat().st_mode)
+            release_io.atomic_write(target, "#!/bin/sh\nexit 0\n")
+            self.assertEqual(stat.S_IMODE(target.stat().st_mode), before)
 
 
 if __name__ == "__main__":
