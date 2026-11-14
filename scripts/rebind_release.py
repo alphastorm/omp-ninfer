@@ -26,13 +26,14 @@ import argparse
 import hashlib
 import json
 import re
-import shutil
 import subprocess
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from verify_release import effective_native_model
+from release_io import atomic_write, atomic_write_json
+from release_profiles import stamp_profile
+from verify_release import COMPONENT_TAG_RE, effective_native_model, product_version, runtime_contract_lanes
 
 ROOT = Path(__file__).resolve().parents[1]
 RAW = "https://raw.githubusercontent.com/alphastorm/omp-ninfer"
@@ -48,7 +49,7 @@ def load(path: Path) -> dict:
 
 
 def save(path: Path, document: dict) -> None:
-    path.write_text(json.dumps(document, indent=2) + "\n", encoding="utf-8")
+    atomic_write_json(path, document)
 
 
 def render(authority: Path, output: Path) -> None:
@@ -62,40 +63,50 @@ def render(authority: Path, output: Path) -> None:
 
 VARIANT_ROW_KEYS = ("release_tag", "source_commit", "package_name", "package_url",
                     "package_sha256", "package_bytes", "maximum_context_tokens")
-PROFILE_ARGUMENTS = (("--binary-sha256", ("components", "ninfer", "server_binary_sha256")),
-                     ("--artifact-sha256", ("components", "model", "artifact_sha256")),
-                     ("--config-sha256", ("runtime_identity", "configuration_sha256")),
-                     ("--deployment-profile", ("runtime_identity", "deployment_profile")))
-CLIENT_ARCHIVE_KEYS = ("component_release_tag", "asset_url", "asset_sha256", "binary_sha256")
 
 
-def stamp_profile(profile: dict, release: str, manifest: dict, clients: dict) -> None:
-    """Use the same identity projection for staged snapshots and their promoted copies."""
-    profile["release"] = release
-    model = manifest["components"]["model"]
-    profile["model"].update(artifact_sha256=model["artifact_sha256"],
-                            artifact_bytes=model["artifact_bytes"])
-    profile["server"]["deployment_profile"] = manifest["runtime_identity"]["deployment_profile"]
-    arguments = profile["server"]["arguments"]
-    for flag, keys in PROFILE_ARGUMENTS:
-        value = manifest
-        for key in keys:
-            value = value[key]
-        arguments[arguments.index(flag) + 1] = value
-    omp = manifest["components"]["omp"]
-    client = profile.get("client", {})
-    if omp.get("distribution_kind") == "upstream-release":
-        compatibility_id = {"manual-ssh-tunnel": "darwin-remote-ssh",
-                            "native-windows-docker-local": "windows-docker-local"}[
-                                profile["installation_mode"]]
-        profile["client"] = dict(clients[compatibility_id])
-        if profile.get("status") == "candidate":
-            profile.pop("status")
-    elif any(key in client for key in CLIENT_ARCHIVE_KEYS):
-        client["component_release_tag"] = omp["component_release_tag"]
-        client["asset_url"] = omp["artifact_url"]
-        client["asset_sha256"] = omp["artifact_sha256"]
-        client["binary_sha256"] = omp["binary_sha256"]
+def derive_runtime_contract_lanes(compatibility: dict, manifest: dict, release: str) -> None:
+    """Identify existing rows by their stable lane prefix; never invent contract content."""
+    if (product_version(release) or (0, 0, 0)) < (0, 18, 0):
+        return
+    lanes = runtime_contract_lanes(manifest)
+    seen: set[str] = set()
+    rows = compatibility.get("runtime_contracts")
+    if not isinstance(rows, list):
+        raise SystemExit("runtime_contracts must be an array")
+    for row in rows:
+        match = re.match(r"^RTX (5090|4090|3090) ", row.get("lane", "")) if isinstance(row, dict) else None
+        if match is None:
+            raise SystemExit(f"unrecognised runtime contract row: {row!r}")
+        component = "rtx5090-container" if match[1] == "5090" else f"rtx{match[1]}-windows-native"
+        if component in seen or component not in lanes:
+            raise SystemExit(f"duplicate or unmatched runtime contract row: {component}")
+        seen.add(component)
+        row["lane"] = lanes[component]
+    if seen != set(lanes):
+        raise SystemExit(f"manifest component without a contract row: {sorted(set(lanes) - seen)}")
+
+
+def derive_publication_target_tags(manifest: dict) -> None:
+    """Replace only component tag tokens; surrounding operator prose is preserved."""
+    components = manifest["components"]
+    bound = {"5090": components["ninfer"]["release_tag"],
+             "omp": components["omp"].get("component_release_tag")}
+    bound.update({item["id"].split("-")[0].removeprefix("rtx"): item["release_tag"]
+                  for item in components.get("ninfer_variants", [])})
+
+    def replace(match: re.Match[str]) -> str:
+        tag = match[0]
+        lane = "omp" if tag.startswith("omp-") else next(
+            (gpu for gpu in ("5090", "4090", "3090") if f"-{gpu}-" in tag), None)
+        if not bound.get(lane):
+            raise SystemExit(f"publication target names an unbound component tag: {tag}")
+        return bound[lane]
+
+    targets = manifest.get("publication", {}).get("targets", [])
+    for index, target in enumerate(targets):
+        if isinstance(target, str):
+            targets[index] = COMPONENT_TAG_RE.sub(replace, target)
 
 
 def bind_lane_receipts(release: str, compatibility_path: Path, manifest_path: Path,
@@ -112,6 +123,8 @@ def bind_lane_receipts(release: str, compatibility_path: Path, manifest_path: Pa
     native_model = effective_native_model(manifest)
     runtime = manifest["runtime_identity"]
     compatibility = load(compatibility_path)
+    derive_runtime_contract_lanes(compatibility, manifest, release)
+    derive_publication_target_tags(manifest)
     compatibility["product_release"] = release
     for profile in compatibility.get("profiles", []):
         profile["product_release"] = release
@@ -172,7 +185,7 @@ def promote_root(release: str, manifest_path: Path) -> None:
     and their existing release-local snapshots take identical manifest-stamped bytes,
     launcher pins advance, and a draft becomes an installable candidate."""
     release_root = ROOT / "releases" / release
-    shutil.copy(release_root / "compatibility.json", ROOT / "compatibility.json")
+    atomic_write(ROOT / "compatibility.json", (release_root / "compatibility.json").read_bytes())
     manifest = load(manifest_path)
     if manifest["status"] == "draft":
         manifest["status"] = "candidate"
@@ -185,7 +198,7 @@ def promote_root(release: str, manifest_path: Path) -> None:
         stamp_profile(profile, release, manifest, clients)
         save(profile_path, profile)
         if staged_profile.is_file():
-            staged_profile.write_bytes(profile_path.read_bytes())
+            atomic_write(staged_profile, profile_path.read_bytes())
     for name, pattern, replacement in (
         ("start-ninfer.sh", r'^MANIFEST="\$ROOT/releases/[^/]+/manifest\.json"$',
          f'MANIFEST="$ROOT/releases/{release}/manifest.json"'),
@@ -196,7 +209,7 @@ def promote_root(release: str, manifest_path: Path) -> None:
                               count=1, flags=re.MULTILINE)
         if count != 1:
             raise SystemExit(f"{path}: launcher pin not found")
-        path.write_text(text, encoding="utf-8")
+        atomic_write(path, text)
 
 
 def pin_lane_urls(compatibility_path: Path, manifest_path: Path, release: str, raw: str) -> None:
@@ -308,8 +321,8 @@ def main() -> int:
         render(authority_path, release_root / "COMPATIBILITY.md")
     else:
         render(authority_path, ROOT / "docs" / "COMPATIBILITY.md")
-        shutil.copy(authority_path, release_root / "compatibility.json")
-        shutil.copy(ROOT / "docs" / "COMPATIBILITY.md", release_root / "COMPATIBILITY.md")
+        atomic_write(release_root / "compatibility.json", authority_path.read_bytes())
+        atomic_write(release_root / "COMPATIBILITY.md", (ROOT / "docs" / "COMPATIBILITY.md").read_bytes())
     compatibility_sha = sha256(release_root / "compatibility.json")
 
     if acceptance_path.is_file():
