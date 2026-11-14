@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import argparse
 import copy
+import contextlib
 import importlib.util
+import io
 import json
 import os
 import shlex
@@ -341,6 +343,27 @@ class ReleaseDriverTests(unittest.TestCase):
         self.assertIn("plan init", result.stderr)
         self.assertIn("commit", result.stderr)
         self.assertEqual(self.worktree_bytes(), before)
+
+    def test_rehearsal_refuses_a_dirty_source_before_cloning(self) -> None:
+        atomic_write(self.root / "operator.txt", "Authored input.\n")
+        before = self.worktree_bytes()
+        destination = self.private / "rehearsal"
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            result = DRIVER.rehearse(self.root, keep=destination)
+        self.assertEqual(result, 1)
+        self.assertIn("rehearsal requires a clean repository", output.getvalue())
+        self.assertFalse(destination.exists())
+        self.assertEqual(self.worktree_bytes(), before)
+
+    def test_rehearsal_refuses_shallow_history_before_cloning(self) -> None:
+        destination = self.private / "rehearsal"
+        output = io.StringIO()
+        with mock.patch.object(DRIVER, "git", return_value="true\n"), contextlib.redirect_stdout(output):
+            result = DRIVER.rehearse(self.root, keep=destination)
+        self.assertEqual(result, 1)
+        self.assertIn("non-shallow", output.getvalue())
+        self.assertFalse(destination.exists())
 
     def interrupt(self, *, finalize: bool = False, **values) -> None:
         driver = self.driver(**values)

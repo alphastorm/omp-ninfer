@@ -350,6 +350,20 @@ python3 scripts/release.py finalize --release "$release" \
 python3 scripts/release.py publish --release "$release" --preflight --pr "$pr"
 ```
 
+Before starting a live cut, `python3 scripts/release.py rehearse` proves the full post-hardware
+path with synthetic, host-free evidence in a disposable local clone of HEAD. It refuses dirty or
+shallow repositories, removes the clone's origin and uses no network. `--keep DIR` retains the
+clone outside the source repository for inspection; otherwise it is removed. `--suite` additionally
+runs the contract suite inside the ready clone, checking that tests do not assume which release
+is current.
+
+The rehearsal initializes a carry-all next-minor plan, creates valid notes, runs the same candidate
+and finalization pipeline as a real cut, and supplies the shared acceptance fixtures. If the real
+guide retarget tool identifies an unbound evidence link, the rehearsal reports replacing just that
+Markdown link with its label, in the clone only. Success requires all eight groups, the strict
+ready/pin gate and two negative byte-change probes (audit and pinned evidence), each restored
+afterwards. Every step reports elapsed seconds and the first failing step stops the run.
+
 The plan is the release's first commit. `plan init` derives a carry-all plan from the latest ready
 GA release and the root authority's platform postures, validates it, then creates
 `chore(release): plan <version>` with a `Release:` trailer. This opening commit is not one of the

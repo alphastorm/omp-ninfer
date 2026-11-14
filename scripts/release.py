@@ -6,16 +6,20 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
+import tempfile
+import time
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any
 from urllib.parse import urlsplit
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from release_io import atomic_write, atomic_write_json, git
-from release_plan import COMPONENT_IDS, initial_plan, load_plan, manifest_components, plan_errors
+from release_plan import (COMPONENT_IDS, initial_plan, latest_ready_manifest, load_plan,
+                          manifest_components, plan_errors)
 
 ROOT = Path(__file__).resolve().parents[1]
 GROUPS = ("stage", "lane-pin", "guide", "compose", "platform-pin", "acceptance-pin",
@@ -712,6 +716,176 @@ def required_input(driver: ReleaseDriver, group: str) -> str:
     return "none (identities and pins come from the plan and trailers)"
 
 
+def _rehearsal_guide_edit(root: Path, predecessor: str, release: str) -> None:
+    """Apply only the authored link removals the real retarget tool requests."""
+    from verify_release import MARKDOWN_LINK_RE
+
+    guide = root / "docs" / "QUICKSTART.md"
+    while True:
+        result = subprocess.run(
+            [sys.executable, str(root / "scripts" / "retarget_guide.py"),
+             "--from", predecessor, "--to", release, "--check"],
+            cwd=root, capture_output=True, text=True, encoding="utf-8",
+        )
+        if result.returncode == 0 or (
+                result.returncode == 1 and not result.stderr and result.stdout.rstrip().endswith("would change")):
+            return
+        unbound = re.search(r": unbound evidence link: (.+)$", result.stderr, re.MULTILINE)
+        if unbound is None:
+            raise ReleaseError("retarget_guide.py: " + (result.stderr or result.stdout).strip())
+        target = unbound[1].strip("<>")
+        text = guide.read_text(encoding="utf-8")
+        matches = [match for match in MARKDOWN_LINK_RE.finditer(text) if match[1].strip("<>") == target]
+        if not matches:
+            raise ReleaseError("retarget_guide.py reported a link that cannot be located")
+        for match in reversed(matches):
+            link = match[0]
+            label = link[link.index("[") + 1:link.index("](")]
+            text = text[:match.start()] + label + text[match.end():]
+        atomic_write(guide, text)
+        print(f"rehearsal: guide: removed unbound evidence link {target}; kept its label", flush=True)
+
+
+def _rehearsal_negative_probe(root: Path, release: str, path: Path) -> None:
+    original = path.read_bytes()
+    try:
+        atomic_write(path, original + b" ")
+        result = subprocess.run(
+            [sys.executable, str(root / "scripts" / "verify_release.py"),
+             "--release", release, "--require-ready", "--check-pins"],
+            cwd=root, capture_output=True, text=True, encoding="utf-8",
+        )
+        if result.returncode != 1:
+            raise ReleaseError(f"{path.relative_to(root)} byte-change probe expected exit 1, "
+                               f"got {result.returncode}: {result.stdout}{result.stderr}")
+    finally:
+        atomic_write(path, original)
+
+
+def rehearse(root: Path = ROOT, *, keep: Path | None = None, suite: bool = False) -> int:
+    """Exercise the real product tail at HEAD in an isolated, network-free clone."""
+    root = Path(root).resolve()
+    temporary = None
+
+    def step(name: str, action):
+        started = time.perf_counter()
+        try:
+            result = action()
+        except Exception as error:
+            detail = error.stderr.strip() if isinstance(error, subprocess.CalledProcessError) and error.stderr else str(error)
+            print(f"rehearsal: {name}: failed ({time.perf_counter() - started:.3f}s): {detail}", flush=True)
+            raise
+        print(f"rehearsal: {name}: passed ({time.perf_counter() - started:.3f}s)", flush=True)
+        return result
+
+    def preflight():
+        if git(root, "rev-parse", "--is-shallow-repository").strip() == "true":
+            raise ReleaseError("rehearsal requires a full, non-shallow repository")
+        dirty = dirty_paths(root)
+        if dirty:
+            raise ReleaseError("rehearsal requires a clean repository: " + ", ".join(sorted(dirty)))
+        if keep is not None:
+            destination = Path(keep).resolve()
+            if destination.is_relative_to(root):
+                raise ReleaseError("--keep must be outside the source repository")
+            if destination.exists() and (not destination.is_dir() or any(destination.iterdir())):
+                raise ReleaseError("--keep must name an absent or empty directory")
+        return git(root, "rev-parse", "HEAD").strip(), latest_ready_manifest(root)
+
+    try:
+        head, previous = step("preflight", preflight)
+        version = tuple(map(int, previous["release"][1:].split(".")))
+        release = f"v{version[0]}.{version[1] + 1}.0"
+        if keep is None:
+            temporary = tempfile.TemporaryDirectory(prefix="release-rehearsal-")
+            clone = Path(temporary.name) / "product"
+        else:
+            clone = Path(keep).resolve()
+
+        def clone_head():
+            clone.parent.mkdir(parents=True, exist_ok=True)
+            git(root, "clone", "--quiet", "--no-hardlinks", "--no-checkout", str(root), str(clone))
+            for key, value in (("user.name", "Release rehearsal"), ("user.email", "release@example.invalid"),
+                               ("commit.gpgsign", "false"), ("core.autocrlf", "false")):
+                git(clone, "config", key, value)
+            git(clone, "checkout", "--quiet", "--detach", head)
+            git(clone, "remote", "remove", "origin")
+
+        step("clone", clone_head)
+        step("plan init", lambda: init_plan(clone, release))
+        inputs = clone / ".release-state" / "rehearsal"
+        staged_notes = inputs / "stage-notes.md"
+        final_notes = inputs / "final-notes.md"
+
+        def notes():
+            title = f"# OMP NInfer {release}\n\n"
+            atomic_write(staged_notes, title + "Synthetic host-free release-tooling rehearsal.\n"
+                         "Runtime identities and support limits come from the ready predecessor.\n"
+                         "This exercises tooling, not real hardware qualification or publication authority.\n")
+            atomic_write(final_notes, title + "Synthetic host-free release-tooling rehearsal.\n"
+                         "Documented-route fixture acceptance passed for every declared route.\n"
+                         "This exercises tooling, not real hardware qualification or publication authority.\n")
+
+        step("notes", notes)
+        predecessor = previous["release"]
+        candidate_driver = ReleaseDriver(clone, release, argparse.Namespace(
+            command="candidate", notes=staged_notes,
+            client_component=clone / "releases" / predecessor / "qualification" / "client-components.json"))
+        step("candidate lanes", lambda: run_pipeline(candidate_driver, finalize=False,
+                                                     no_suite=True, through="lane-pin"))
+        step("guide evidence", lambda: _rehearsal_guide_edit(clone, predecessor, release))
+        step("candidate", lambda: run_pipeline(candidate_driver, finalize=False, no_suite=True))
+        candidate = candidate_driver.records["guide"]["commit"]
+        windows = inputs / "windows"
+
+        def fixtures():
+            path = clone / "tests" / "acceptance_fixtures.py"
+            if not path.is_file():
+                raise ReleaseError("missing release tool: tests/acceptance_fixtures.py")
+            result = subprocess.run(
+                [sys.executable, str(path), "write", "--release", release, "--candidate", candidate,
+                 "--out", str(windows)], cwd=clone, check=True, capture_output=True,
+                text=True, encoding="utf-8", env={**os.environ, "PYTHONPATH": str(clone / "tests")},
+            )
+            return json.loads(result.stdout)
+
+        fixture = step("fixtures", fixtures)
+        qualification = read_json(clone / "releases" / predecessor / "qualification.json")
+        final_driver = ReleaseDriver(clone, release, argparse.Namespace(
+            command="finalize", notes=final_notes, window_root=Path(fixture["window_root"]),
+            reviews=Path(fixture["reviews"]), values=Path(fixture["values"]),
+            as_of=qualification["as_of"]))
+        step("finalize", lambda: run_pipeline(final_driver, finalize=True, no_suite=True))
+
+        def ready_gate():
+            final_driver.tool("verify_release.py", "--release", release, "--require-ready", "--check-pins")
+
+        step("ready gate", ready_gate)
+
+        def status():
+            if tuple(group_commits(clone, release)) != GROUPS:
+                raise ReleaseError("rehearsal did not complete all eight commit groups")
+            if main(["status", "--release", release], root=clone) != 0:
+                raise ReleaseError("release status failed")
+
+        step("status", status)
+        release_root = clone / "releases" / release
+        step("negative receipt audit", lambda: _rehearsal_negative_probe(
+            clone, release, release_root / "qualification" / "receipt-audit.json"))
+        step("negative pinned evidence", lambda: _rehearsal_negative_probe(
+            clone, release, release_root / "qualification.json"))
+        step("restored gate", ready_gate)
+        if suite:
+            step("suite", lambda: final_driver.tool("run_tests.py"))
+        print("rehearsal: passed", flush=True)
+        return 0
+    except Exception:
+        return 1
+    finally:
+        if temporary is not None:
+            temporary.cleanup()
+
+
 def main(argv: list[str] | None = None, *, root: Path = ROOT) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     subcommands = parser.add_subparsers(dest="command", required=True)
@@ -722,6 +896,9 @@ def main(argv: list[str] | None = None, *, root: Path = ROOT) -> int:
     initialize.add_argument("--recut", action="append", default=[], metavar="COMPONENT=TAG@COMMIT40")
     initialize.add_argument("--client-tag")
     initialize.add_argument("--decision", action="append", default=[], metavar="ID:KIND:SHA256")
+    rehearsal = subcommands.add_parser("rehearse", help="prove the real release tail without hosts or network")
+    rehearsal.add_argument("--keep", type=Path, help="retain the clone in an absent or empty directory")
+    rehearsal.add_argument("--suite", action="store_true", help="also run the contract suite at the ready state")
     for name in ("status", "next", "candidate", "finalize", "publish"):
         command = subcommands.add_parser(name)
         command.add_argument("--release", required=True)
@@ -739,6 +916,8 @@ def main(argv: list[str] | None = None, *, root: Path = ROOT) -> int:
             command.add_argument("--pr", type=int, required=True)
     args = parser.parse_args(argv)
     try:
+        if args.command == "rehearse":
+            return rehearse(root, keep=args.keep, suite=args.suite)
         if args.command == "plan":
             if args.plan_command == "init":
                 commit = init_plan(root, args.release, recut=args.recut, client_tag=args.client_tag,
