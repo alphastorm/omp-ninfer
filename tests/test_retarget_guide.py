@@ -599,13 +599,13 @@ class RetargetGuideTest(unittest.TestCase):
     def test_missing_identity_source_reports_file_and_line(self) -> None:
         path = self.root / "releases" / NEW / "manifest.json"
         path.unlink()
-        with self.assertRaisesRegex(GUIDE.Refusal, re.escape(str(path)) + ":1:"):
+        with self.assertRaisesRegex(GUIDE.Refusal, "^" + re.escape(str(path)) + ":1:"):
             self.run_retarget()
 
     def test_invalid_json_reports_its_actual_line(self) -> None:
         path = self.root / "releases" / NEW / "manifest.json"
         atomic_write(path, '{\n  "release":\n}\n')
-        with self.assertRaisesRegex(GUIDE.Refusal, re.escape(str(path)) + ":3:"):
+        with self.assertRaisesRegex(GUIDE.Refusal, "^" + re.escape(str(path)) + ":3:"):
             self.run_retarget()
 
     def test_cli_refusal_returns_one_and_leaves_the_guide_unchanged(self) -> None:

@@ -297,7 +297,7 @@ def string_leaves(file: Path, *, projections: bool = False) -> dict[str, Leaf]:
 
 
 def release_leaves(root: Path, release: str, *, projections: bool = False) -> dict[tuple[str, str], Leaf]:
-    directory = (root / "releases" / release).resolve()
+    directory = root / "releases" / release
     files = [directory / "manifest.json", directory / "compatibility.json",
              *sorted((directory / "profiles").rglob("*.json"))]
     leaves = {(file.relative_to(directory).as_posix(), pointer): leaf
@@ -311,7 +311,12 @@ def release_leaves(root: Path, release: str, *, projections: bool = False) -> di
 
 
 def evidence_sources(directory: Path) -> list[Path]:
-    directory = directory.resolve()
+    """Hash-bound JSON evidence of a release, as paths under the caller's ``directory``.
+
+    Containment is decided on resolved paths; results keep the caller's form, so refusals name
+    the file as the caller wrote it (a resolved Windows temporary path can differ in spelling).
+    """
+    given, directory = directory, directory.resolve()
     root = directory.parent.parent
     sources = [file for file in [directory / "manifest.json", directory / "compatibility.json",
                                 directory / "qualification.json",
@@ -332,7 +337,7 @@ def evidence_sources(directory: Path) -> list[Path]:
                     and path.suffix == ".json":
                 seen.add(path)
                 sources.append(path)
-    return sources
+    return [given / path.relative_to(directory) for path in sources]
 
 
 def _evidence_bindings(value: Any):
