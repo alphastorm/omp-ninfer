@@ -16,6 +16,7 @@ import socket
 import sys
 import tempfile
 import threading
+import time
 import unittest
 from unittest import mock
 import urllib.error
@@ -292,6 +293,7 @@ class HTTPTransportTests(OfflineTestCase):
         self.addCleanup(temporary.cleanup)
         self.fixture = PublicationFixture(Path(temporary.name))
         self.requests = []
+        self.tag_delays = (0, 0)
         test = self
 
         class Handler(BaseHTTPRequestHandler):
@@ -304,8 +306,10 @@ class HTTPTransportTests(OfflineTestCase):
                 test.requests.append((self.path, dict(self.headers)))
                 root = f"/repos/{PUBLICATION.REPOSITORY}"
                 if self.path.startswith(root + "/git/ref/tags/"):
+                    time.sleep(test.tag_delays[0])
                     payload = json.dumps({"object": {"type": "tag", "sha": "c" * 40}}).encode()
                 elif self.path == root + "/git/tags/" + "c" * 40:
+                    time.sleep(test.tag_delays[1])
                     payload = json.dumps({"object": {"type": "commit", "sha": test.fixture.fixture.row["source_commit"]}}).encode()
                 elif self.path.startswith(root + "/releases/tags/"):
                     payload = json.dumps(test.api).encode()
@@ -315,6 +319,31 @@ class HTTPTransportTests(OfflineTestCase):
                 elif self.path == "/redirect":
                     self.send_response(302)
                     self.send_header("Location", test.origin + "/assets/SHA256SUMS")
+                    self.end_headers()
+                    return
+                elif self.path == "/foreign-redirect":
+                    self.send_response(302)
+                    self.send_header("Location", "https://untrusted.example.invalid/asset")
+                    self.end_headers()
+                    return
+                elif self.path == "/slow-headers":
+                    try:
+                        self.connection.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+                        self.connection.sendall(b"HTTP/1.0 200 OK\r\nContent-Length: 0\r\nX-Slow: ")
+                        for _ in range(40):
+                            time.sleep(0.04)
+                            self.connection.sendall(b"x")
+                        self.connection.sendall(b"\r\n\r\n")
+                    except OSError:
+                        pass  # The deadline closes the client while headers are still arriving.
+                    return
+                elif self.path.startswith("/slow-redirect/"):
+                    time.sleep(0.2)
+                    number = int(self.path.rsplit("/", 1)[-1])
+                    self.send_response(302)
+                    self.send_header("Location", test.origin + (
+                        f"/slow-redirect/{number - 1}" if number else "/assets/SHA256SUMS"))
+                    self.send_header("Content-Length", "0")
                     self.end_headers()
                     return
                 elif self.path == "/oversize":
@@ -339,7 +368,10 @@ class HTTPTransportTests(OfflineTestCase):
                 self.send_header("Content-Length", str(len(payload)))
                 self.send_header("Set-Cookie", "not-an-authentication-cookie=test")
                 self.end_headers()
-                self.wfile.write(payload)
+                try:
+                    self.wfile.write(payload)
+                except (BrokenPipeError, ConnectionResetError):
+                    pass  # A deadline can close the client before the delayed response.
 
         self.server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
@@ -408,6 +440,47 @@ class HTTPTransportTests(OfflineTestCase):
             with self.assertRaisesRegex(PUBLICATION.BundleError, "/http_status"):
                 self.transport.api("missing")
         self.assertTrue(response.closed)
+
+    def test_initial_and_redirect_hosts_are_confined_to_github(self):
+        for url in ("https://untrusted.example.invalid/asset",
+                    "https://github.com.untrusted.example.invalid/asset",
+                    "https://release-assets.githubusercontent.com.untrusted.example.invalid/asset",
+                    "https://127.0.0.1/asset", self.origin + "/foreign-redirect"):
+            with self.subTest(url=url), self.assertRaisesRegex(PUBLICATION.BundleError, "/url"):
+                list(self.transport.download(url, 1))
+        for host in ("github.com", "api.github.com", "release-assets.githubusercontent.com"):
+            self.transport.validate_url("https://" + host + "/asset")
+
+    def test_redirect_headers_share_one_operation_deadline(self):
+        transport = PUBLICATION.HTTPTransport(
+            self.origin, socket_timeout=2, api_timeout=0.5, download_timeout=0.5)
+        expected = (self.fixture.fixture.assets / "SHA256SUMS").read_bytes()
+        started = time.monotonic()
+        with self.assertRaises(PUBLICATION.BundleError):
+            list(transport.download(self.origin + "/slow-redirect/5", len(expected)))
+        self.assertLess(time.monotonic() - started, 1.0)
+        self.assertLess(len(self.requests), 4, "header redirects reused the original socket timeout")
+
+    def test_annotated_tag_responses_share_one_operation_deadline(self):
+        self.tag_delays = (1.2, 1.2)
+        transport = PUBLICATION.HTTPTransport(self.origin, socket_timeout=4, api_timeout=2)
+        tag = self.fixture.fixture.row["release_tag"]
+        reference = transport.api(f"repos/{PUBLICATION.REPOSITORY}/git/ref/tags/{tag}")
+        resolved = transport.api(f"repos/{PUBLICATION.REPOSITORY}/git/tags/{reference['object']['sha']}")
+        self.assertEqual(resolved["object"]["sha"], self.fixture.fixture.row["source_commit"])
+        self.requests.clear()
+        with self.assertRaisesRegex(PUBLICATION.BundleError, "/timeout"):
+            transport.tag(PUBLICATION.REPOSITORY, tag)
+        self.assertEqual(len(self.requests), 2)
+
+    def test_header_trickle_cannot_extend_the_operation_deadline(self):
+        transport = PUBLICATION.HTTPTransport(
+            self.origin, socket_timeout=2, api_timeout=0.5, download_timeout=0.5)
+        started = time.monotonic()
+        with self.assertRaises(PUBLICATION.BundleError):
+            list(transport.download(self.origin + "/slow-headers", 0))
+        self.assertLess(time.monotonic() - started, 1.2)
+        self.assertEqual(self.requests[0][0], "/slow-headers")
 
 
 class PrivatePublicationGoldenTests(OfflineTestCase):

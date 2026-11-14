@@ -1267,6 +1267,9 @@ def review_subject_errors(root: Path, release: str, ledger: dict[str, Any],
                           "history (full history is required to verify review subjects)")
             return errors
         plan_start = commits[0]
+    elif (product_version(release) or (0, 0, 0)) >= (0, 20, 0):
+        errors.append(f"product_tooling.stage_commit {stage} must contain {plan}")
+        return errors
     subjects = [("product_tooling.reviewed_commit", tooling.get("reviewed_commit"))]
     epochs = tooling.get("epochs", [])
     if not isinstance(epochs, list):
@@ -1275,6 +1278,19 @@ def review_subject_errors(root: Path, release: str, ledger: dict[str, Any],
         subjects.extend((f"product_tooling.epochs[{index}].reviewed_commit",
                          epoch.get("reviewed_commit") if isinstance(epoch, dict) else None)
                         for index, epoch in enumerate(epochs))
+        frozen_subjects: dict[str, Any] = {}
+        for index, record in enumerate([tooling, *epochs]):
+            if not isinstance(record, dict):
+                continue
+            digest = record.get("receipt_digests", {}).get("frozen-subject.json")
+            if not isinstance(digest, str):
+                continue
+            reviewed = record.get("reviewed_commit")
+            if digest in frozen_subjects:
+                require(reviewed == frozen_subjects[digest],
+                        f"product_tooling review {index} must name the same reviewed_commit "
+                        "as its identical frozen subject receipt", errors)
+            frozen_subjects[digest] = reviewed
     ancestry: dict[tuple[str, str], bool] = {}
     for label, reviewed in subjects:
         if not isinstance(reviewed, str) or GIT_SHA_RE.fullmatch(reviewed) is None:

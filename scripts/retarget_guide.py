@@ -14,8 +14,10 @@ from __future__ import annotations
 
 import argparse
 import bisect
+import hashlib
 import json
 import re
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -25,7 +27,8 @@ from urllib.parse import urlsplit
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import documented_route
 from release_io import atomic_write
-from verify_release import COMPONENT_TAG_RE, MARKDOWN_LINK_RE, checkpoint_host_directory
+from verify_release import (COMPONENT_TAG_RE, MARKDOWN_LINK_RE, PRODUCT_RAW_URL_RE,
+                            bound_file, checkpoint_host_directory, pinned_evidence, sha256_file)
 
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE_RE = re.compile(r"v\d+\.\d+\.\d+\Z")
@@ -310,16 +313,77 @@ def release_leaves(root: Path, release: str, *, projections: bool = False) -> di
 
 
 def evidence_sources(directory: Path) -> list[Path]:
-    return [file for file in [directory / "manifest.json", directory / "qualification.json",
-                             *sorted((directory / "qualification").rglob("*.json")),
-                             *sorted((directory / "acceptance").rglob("*.json")),
-                             *sorted((directory / "profiles").rglob("*.json"))] if file.is_file()]
+    """Hash-bound JSON evidence of a release, as paths under the caller's ``directory``.
+
+    Containment is decided on resolved paths; results keep the caller's form, so refusals name
+    the file as the caller wrote it (a resolved Windows temporary path can differ in spelling).
+    """
+    given, directory = directory, directory.resolve()
+    root = directory.parent.parent
+    sources = [file for file in [directory / "manifest.json", directory / "compatibility.json",
+                                directory / "qualification.json"] if file.is_file()]
+    seen = set(sources)
+    documents = [json.loads(file.read_text(encoding="utf-8")) if file.is_file() else {}
+                 for file in (directory / "manifest.json", directory / "compatibility.json",
+                              directory / "qualification.json")]
+    # The verifier owns URL pin shapes; recursively follow only authenticated local
+    # file edges from those authorities, never orphan receipts copied by staging.
+    references = [(url, digest) for _, url, digest in pinned_evidence(*documents)]
+    for source in sources:
+        references.extend(_evidence_bindings(json.loads(source.read_text(encoding="utf-8"))))
+        while references:
+            reference, digest = references.pop()
+            path = _bound_reference(root, reference, digest)
+            if path is not None and path not in seen and path.is_relative_to(directory.resolve()) \
+                    and path.suffix == ".json":
+                seen.add(path)
+                sources.append(path)
+    return [given / path.relative_to(directory) for path in sources]
+
+
+def _evidence_bindings(value: Any):
+    if isinstance(value, dict):
+        for field, hash_field in (("repository_path", "sha256"), ("path", "sha256"),
+                                  ("summary", "sha256"), ("receipt", "sha256"),
+                                  ("evidence_path", "evidence_sha256"),
+                                  ("url", "sha256"), ("public_url", "sha256")):
+            if field in value and hash_field in value:
+                yield value[field], value[hash_field]
+        for child in value.values():
+            yield from _evidence_bindings(child)
+    elif isinstance(value, list):
+        for child in value:
+            yield from _evidence_bindings(child)
+
+
+def _bound_reference(root: Path, reference: Any, digest: Any) -> Path | None:
+    if not isinstance(reference, str) or not isinstance(digest, str):
+        return None
+    match = PRODUCT_RAW_URL_RE.fullmatch(reference)
+    name = match[2] if match else reference
+    path = bound_file(root, name)
+    if path is None or sha256_file(path) != digest:
+        return None
+    if match:
+        blob = subprocess.run(["git", "cat-file", "blob", f"{match[1]}:{name}"],
+                              cwd=root, capture_output=True)
+        if blob.returncode != 0 or hashlib.sha256(blob.stdout).hexdigest() != digest:
+            return None
+    return path
 
 
 def bound_evidence(root: Path, release: str) -> set[str]:
-    return {reference for file in evidence_sources(root / "releases" / release)
-            for leaf in string_leaves(file).values()
-            if (reference := evidence_reference(leaf.value)) is not None}
+    result = set()
+    for file in evidence_sources(root / "releases" / release):
+        for reference, digest in _evidence_bindings(json.loads(file.read_text(encoding="utf-8"))):
+            path = _bound_reference(root, reference, digest)
+            if path is not None:
+                evidence = evidence_reference(path.relative_to(root.resolve()).as_posix())
+                if evidence:
+                    result.add(evidence)
+                if urlsplit(reference).scheme and (evidence := evidence_reference(reference)):
+                    result.add(evidence)
+    return result
 
 
 def boundary_pattern(values: Any) -> re.Pattern[str]:
@@ -464,8 +528,9 @@ def markdown_blocks(text: str) -> list[MarkdownBlock]:
     return blocks
 
 
-def masked_text(text: str, predecessor: str, *, release_links: bool = True) -> str:
-    """Hide immutable predecessor Markdown links, preserving offsets and line numbers."""
+def masked_text(text: str, predecessor: str, *, release_links: bool = True,
+                evidence_release: str | None = None) -> str:
+    """Hide immutable links, except target-release pins during evidence diagnostics."""
     blocks = markdown_blocks(text)
     starts = [block.start for block in blocks]
     pieces = []
@@ -476,8 +541,10 @@ def masked_text(text: str, predecessor: str, *, release_links: bool = True) -> s
         if block.fenced:
             continue
         target = urlsplit(match[1].strip("<>"))
-        pinned_raw = (target.netloc == "raw.githubusercontent.com"
-                      and re.match(r"^/[^/]+/[^/]+/[0-9a-fA-F]{40}/", target.path) is not None)
+        pinned = (re.match(r"^/[^/]+/[^/]+/[0-9a-fA-F]{40}/(.+)", target.path)
+                  if target.netloc == "raw.githubusercontent.com" else None)
+        pinned_raw = pinned is not None and not (
+            evidence_release is not None and pinned[1].startswith(f"releases/{evidence_release}/"))
         immutable = release_links and (
             re.search(r"(?:^|/)releases/" + old + r"(?:/|$)", target.path)
             or re.search(r"/releases/tag/" + old + r"/?$", target.path)
@@ -690,7 +757,8 @@ def retarget(root: Path, predecessor: str, release: str, guide: Path, *, check: 
         raise Refusal(f"{guide}:1: cannot read guide: {error}") from error
     result = retarget_text(text, guide, predecessor, release, mappings, anchors)
     bindings = bound_evidence(root, release)
-    evidence_diagnostics(result, bindings, guide, mode="guide", masked=masked_text(result, predecessor))
+    evidence_diagnostics(result, bindings, guide, mode="guide",
+                         masked=masked_text(result, predecessor, evidence_release=release))
     with tempfile.TemporaryDirectory() as directory:
         candidate = Path(directory) / guide.name
         atomic_write(candidate, result)

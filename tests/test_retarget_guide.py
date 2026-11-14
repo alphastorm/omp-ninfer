@@ -443,6 +443,8 @@ class RetargetGuideTest(unittest.TestCase):
             f"[{OLD} tree](../releases/{OLD}/manifest.json)",
             f"[{OLD} tag](https://github.com/example/product/releases/tag/{OLD})",
             f"[{OLD} raw](https://raw.githubusercontent.com/example/product/{'7' * 40}/docs/QUICKSTART.md)",
+            f"[{OLD} measurement](https://raw.githubusercontent.com/alphastorm/omp-ninfer/{'7' * 40}/releases/{OLD}/measurements/run.json)",
+            f"[{OLD} other measurement](https://raw.githubusercontent.com/alphastorm/omp-ninfer/{'7' * 40}/docs/measurements/run.json)",
         ]
         self.append("\n\n".join(links) + "\n")
         self.run_retarget()
@@ -521,8 +523,15 @@ class RetargetGuideTest(unittest.TestCase):
                 self.guide = self.root / "docs" / "QUICKSTART.md"
                 self.before = release_documents(OLD)
                 self.after = release_documents(NEW, successor=True)
-                for documents, path in ((self.before, before), (self.after, after)):
-                    documents.setdefault(source, {})["review"] = {"repository_path": path}
+                for release, documents, path in ((OLD, self.before, before), (NEW, self.after, after)):
+                    atomic_write_json(self.root / path, {"status": "passed", "release": release})
+                    documents.setdefault(source, {})["review"] = {
+                        "repository_path": path, "sha256": GUIDE.sha256_file(self.root / path)}
+                    if source not in ("manifest.json", "qualification.json"):
+                        atomic_write_json(self.root / "releases" / release / source, documents[source])
+                        documents["manifest.json"]["evidence"] = {
+                            "repository_path": f"releases/{release}/{source}",
+                            "sha256": GUIDE.sha256_file(self.root / "releases" / release / source)}
                 self.write_releases()
                 atomic_write(self.guide, route_guide() + f"[client review]({before[5:]})\n")
                 self.run_retarget()
@@ -532,6 +541,105 @@ class RetargetGuideTest(unittest.TestCase):
     def test_guide_without_evidence_links_passes(self) -> None:
         self.assertTrue(self.run_retarget())
         self.assertFalse(self.run_retarget())
+
+    def test_raw_evidence_url_must_hash_the_named_commit_blob_not_the_local_file(self) -> None:
+        target = "docs/measurements/commit-bound.json"
+        path = self.root / target
+        atomic_write(path, b'{"observation": "committed"}\r\n')
+        for arguments in (("init", "--quiet"), ("add", "--", "."),
+                          ("-c", "user.name=Synthetic Test", "-c", "user.email=test@example.invalid",
+                           "-c", "commit.gpgsign=false", "commit", "--quiet", "-m", "test: bind evidence")):
+            subprocess.run(["git", *arguments], cwd=self.root, check=True, capture_output=True)
+        commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=self.root, check=True,
+                                capture_output=True, text=True).stdout.strip()
+        atomic_write(path, b'{"observation": "different local bytes"}\n')
+        reference = f"https://raw.githubusercontent.com/alphastorm/omp-ninfer/{commit}/{target}"
+        for documents in (self.before, self.after):
+            documents["manifest.json"]["observation"] = {
+                "url": reference, "sha256": GUIDE.sha256_file(path)}
+        self.write_releases()
+        self.assertNotIn(reference, GUIDE.bound_evidence(self.root, OLD))
+        self.append(f"[observation]({target[5:]})\n")
+        original = self.guide.read_bytes()
+        with self.assertRaisesRegex(GUIDE.Refusal, "unbound evidence link"):
+            self.run_retarget()
+        self.assertEqual(self.guide.read_bytes(), original)
+
+    def test_current_release_pinned_raw_measurement_requires_the_named_commit_blob(self) -> None:
+        def commit(message):
+            subprocess.run(["git", "add", "--", "."], cwd=self.root, check=True, capture_output=True)
+            subprocess.run(["git", "-c", "user.name=Synthetic Test",
+                            "-c", "user.email=test@example.invalid", "-c", "commit.gpgsign=false",
+                            "commit", "--quiet", "-m", message],
+                           cwd=self.root, check=True, capture_output=True)
+            return subprocess.run(["git", "rev-parse", "HEAD"], cwd=self.root, check=True,
+                                  capture_output=True, text=True).stdout.strip()
+
+        subprocess.run(["git", "init", "--quiet"], cwd=self.root, check=True, capture_output=True)
+        missing = commit("test: before measurement")
+        target = f"releases/{NEW}/measurements/current.json"
+        atomic_write_json(self.root / target, {"status": "passed"})
+        present = commit("test: bind current measurement")
+        url = f"https://raw.githubusercontent.com/alphastorm/omp-ninfer/{missing}/{target}"
+        self.after["manifest.json"]["measurement"] = {
+            "url": url, "sha256": GUIDE.sha256_file(self.root / target)}
+        self.write_releases()
+        line = len(self.guide.read_text().splitlines()) + 1
+        self.append(f"[current measurement]({url})\n")
+        original = self.guide.read_bytes()
+        self.assertNotIn(url, GUIDE.bound_evidence(self.root, NEW))
+        with self.assertRaisesRegex(GUIDE.Refusal, "unbound evidence link") as caught:
+            self.run_retarget()
+        self.assertIn(f"{self.guide}:{line}:", str(caught.exception))
+        self.assertIn(url, str(caught.exception))
+        self.assertEqual(self.guide.read_bytes(), original)
+        bound = url.replace(missing, present)
+        self.after["manifest.json"]["measurement"]["url"] = bound
+        self.write_releases()
+        atomic_write(self.guide, original.replace(url.encode(), bound.encode()))
+        self.assertIn(bound, GUIDE.bound_evidence(self.root, NEW))
+        self.assertTrue(self.run_retarget())
+        self.assertIn(bound, self.guide.read_text())
+        self.assertFalse(self.run_retarget())
+
+    def test_documented_route_receipt_binding_admits_and_retargets_a_measurement(self) -> None:
+        targets = ("docs/measurements/old-route-run.json", "docs/measurements/new-route-run.json")
+        for release, documents, target in ((OLD, self.before, targets[0]), (NEW, self.after, targets[1])):
+            atomic_write_json(self.root / target, {"status": "passed", "release": release})
+            routes = f"releases/{release}/acceptance/documented-routes.json"
+            atomic_write_json(self.root / routes, {"routes": [{
+                "receipt": target, "sha256": GUIDE.sha256_file(self.root / target)}]})
+            documents["qualification.json"] = {"documented_routes": {
+                "repository_path": routes, "sha256": GUIDE.sha256_file(self.root / routes)}}
+        self.write_releases()
+        self.append(f"[route run]({targets[0][5:]})\n")
+        self.assertTrue(self.run_retarget())
+        self.assertIn(f"[route run]({targets[1][5:]})", self.guide.read_text())
+        self.assertFalse(self.run_retarget())
+
+    def test_unreferenced_profile_cannot_admit_its_measurement_link(self) -> None:
+        target = "docs/measurements/unreferenced-profile.json"
+        atomic_write_json(self.root / target, {"status": "passed"})
+        for documents in (self.before, self.after):
+            documents["profiles/example.json"]["observation"] = {
+                "repository_path": target, "sha256": GUIDE.sha256_file(self.root / target)}
+        self.write_releases()
+        self.append(f"[unbound observation]({target[5:]})\n")
+        original = self.guide.read_bytes()
+        with self.assertRaisesRegex(GUIDE.Refusal, "unbound evidence link"):
+            self.run_retarget()
+        self.assertEqual(self.guide.read_bytes(), original)
+
+    def test_orphan_receipt_cannot_admit_its_measurement_link(self) -> None:
+        target = "docs/measurements/orphan.json"
+        for release in (OLD, NEW):
+            atomic_write_json(self.root / "releases" / release / "qualification/orphan.json",
+                              {"review": {"repository_path": target, "sha256": "1" * 64}})
+        self.append(f"[unbound observation]({target[5:]})\n")
+        before = self.guide.read_bytes()
+        with self.assertRaisesRegex(GUIDE.Refusal, "unbound evidence link"):
+            self.run_retarget()
+        self.assertEqual(self.guide.read_bytes(), before)
 
     def test_check_reports_drift_without_writing_and_then_accepts_a_rerun(self) -> None:
         argv = ["--from", OLD, "--to", NEW, "--guide", str(self.guide)]
@@ -581,13 +689,13 @@ class RetargetGuideTest(unittest.TestCase):
     def test_missing_identity_source_reports_file_and_line(self) -> None:
         path = self.root / "releases" / NEW / "manifest.json"
         path.unlink()
-        with self.assertRaisesRegex(GUIDE.Refusal, re.escape(str(path)) + ":1:"):
+        with self.assertRaisesRegex(GUIDE.Refusal, "^" + re.escape(str(path)) + ":1:"):
             self.run_retarget()
 
     def test_invalid_json_reports_its_actual_line(self) -> None:
         path = self.root / "releases" / NEW / "manifest.json"
         atomic_write(path, '{\n  "release":\n}\n')
-        with self.assertRaisesRegex(GUIDE.Refusal, re.escape(str(path)) + ":3:"):
+        with self.assertRaisesRegex(GUIDE.Refusal, "^" + re.escape(str(path)) + ":3:"):
             self.run_retarget()
 
     def test_cli_refusal_returns_one_and_leaves_the_guide_unchanged(self) -> None:

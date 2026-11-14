@@ -52,6 +52,10 @@ class ReviewLedgerTests(unittest.TestCase):
                           self.release_manifest)
         git(self.root, "add", "initial.json", "releases")
         git(self.root, "commit", "--quiet", "-m", "test: initialize synthetic subject")
+        self.before_plan = git(self.root, "rev-parse", "HEAD").strip()
+        atomic_write_json(self.root / "releases" / self.release / "plan.json", {"release": self.release})
+        git(self.root, "add", "releases")
+        git(self.root, "commit", "--quiet", "-m", "test: add release plan")
         self.candidate = git(self.root, "rev-parse", "HEAD").strip()
         self.out = self.root / "inputs"
         FIXTURES.write_reviews(self.out, self.release, self.candidate, self.release_manifest)
@@ -112,6 +116,257 @@ class ReviewLedgerTests(unittest.TestCase):
         atomic_write_json(record, source)
         with self.assertRaisesRegex(SystemExit, "not closed"):
             self.write()
+
+    def test_new_reviews_require_every_selected_reviewers_result(self):
+        before = self.qualification.read_bytes()
+        for section in LEDGER.SECTIONS:
+            with self.subTest(section=section):
+                path = self.out / "reviews" / section / "critic.json"
+                original = path.read_bytes()
+                path.unlink()
+                with self.assertRaisesRegex(SystemExit, "missing.*critic"):
+                    self.write()
+                self.assertEqual(self.qualification.read_bytes(), before)
+                self.assertFalse((self.qualification.parent / "review").exists())
+                path.write_bytes(original)
+
+    def test_new_focused_receipts_require_their_own_closed_status(self):
+        path = self.out / "reviews/native_component_delta/receipt.json"
+        original = LEDGER.load(path)
+        before = self.qualification.read_bytes()
+        for status in ("absent", None, "", "open", "pending"):
+            with self.subTest(status=status):
+                receipt = deepcopy(original)
+                if status == "absent":
+                    receipt.pop("status")
+                else:
+                    receipt["status"] = status
+                atomic_write_json(path, receipt)
+                with self.assertRaisesRegex(SystemExit, "focused receipt status is not closed"):
+                    self.write()
+                self.assertEqual(self.qualification.read_bytes(), before)
+                self.assertFalse((self.qualification.parent / "review").exists())
+
+    def test_new_council_records_require_their_own_closed_status(self):
+        for section in ("native_runtime", "product_tooling"):
+            with self.subTest(section=section):
+                path = self.out / "reviews" / section / "review-record.json"
+                record = LEDGER.load(path)
+                without_status = {key: value for key, value in record.items() if key != "status"}
+                atomic_write_json(path, without_status)
+                before = self.qualification.read_bytes()
+                with self.assertRaisesRegex(SystemExit, "review-record status is not closed"):
+                    self.write()
+                self.assertEqual(self.qualification.read_bytes(), before)
+                self.assertFalse((self.qualification.parent / "review").exists())
+                atomic_write_json(path, record)
+
+    def test_new_epoch_records_require_their_own_closed_status(self):
+        directory = self.out / "reviews/epoch"
+        atomic_write_json(directory / "review-record.json", {})
+        atomic_write_json(directory / "frozen-subject.json", {"subjectCommit": self.candidate})
+        self.values["product_council"]["epochs"] = [{
+            "directory": "epoch", "review_mode": "initial", "review_class": "full-council",
+            "status": "closed-by-disposition", "reviewed_commit": self.candidate,
+        }]
+        before = self.qualification.read_bytes()
+        with self.assertRaisesRegex(SystemExit, "epoch review-record status is not closed"):
+            self.write()
+        self.assertEqual(self.qualification.read_bytes(), before)
+        self.assertFalse((self.qualification.parent / "review").exists())
+
+    def test_new_epoch_review_id_must_match_its_directory(self):
+        directory = self.out / "reviews/epoch"
+        atomic_write_json(directory / "review-record.json",
+                          {"review_id": "different", "status": "closed-by-disposition"})
+        atomic_write_json(directory / "frozen-subject.json", {"subjectCommit": self.candidate})
+        self.values["product_council"]["epochs"] = [{
+            "directory": "epoch", "review_mode": "initial", "review_class": "full-council",
+            "status": "closed-by-disposition", "reviewed_commit": self.candidate,
+        }]
+        before = self.qualification.read_bytes()
+        with self.assertRaisesRegex(SystemExit, "epoch review-record review_id mismatch"):
+            self.write()
+        self.assertEqual(self.qualification.read_bytes(), before)
+        self.assertFalse((self.qualification.parent / "review").exists())
+
+    def test_new_reviewer_results_publish_only_finding_prefixes_and_a_fixed_summary(self):
+        paths = ("~/Library/x", r"\\host\Users\alice\x", r"\Users\alice\x")
+        originals = {}
+        for section in LEDGER.SECTIONS:
+            source = self.out / "reviews" / section / "critic.json"
+            atomic_write_json(source, {
+                "summary": "Private reviewer prose: " + " ".join(paths),
+                "evidence": [f"R{index}|P1|conf=0.9|claim=Observed {path}"
+                             for index, path in enumerate(paths, 1)] + ["Unprefixed reviewer prose."],
+                "unresolved": [f"U{index}|P2|conf=0.5|missing={path}"
+                               for index, path in enumerate(paths, 1)] + ["Unprefixed unresolved prose."],
+            })
+            originals[source] = source.read_bytes()
+        result = self.write()
+        ledger = LEDGER.load(self.root / result["repository_path"])
+        for section in LEDGER.SECTIONS:
+            with self.subTest(section=section):
+                self.assertEqual(ledger[section]["reviewer_results"]["critic"], {
+                    "summary": "Reviewer text is kept in the private review record bound by digest.",
+                    "evidence": [f"R{index}|P1|conf=0.9|" for index in range(1, 4)],
+                    "unresolved": [f"U{index}|P2|conf=0.5|" for index in range(1, 4)],
+                })
+        self.assertEqual({source: source.read_bytes() for source in originals}, originals)
+
+    def test_operator_private_paths_are_refused_before_public_writes(self):
+        source = self.out / "reviews/product_tooling/ledger.md"
+        original = source.read_text()
+        before = self.qualification.read_bytes()
+        for path in ("~/x", r"~\x", r"\\host\share\x", r"\Users\alice\x",
+                     r"C:\uSeRs\alice\x", "/uSeRs/alice/x", "/HOME/alice/x",
+                     "%userprofile%/x", "$home/x", "/PRIVATE/VAR/x", "/VAR/FOLDERS/x"):
+            with self.subTest(path=path):
+                source.write_text(original.replace("Synthetic evidence.", "See " + path + "."))
+                with self.assertRaisesRegex(SystemExit, "private"):
+                    self.write()
+                self.assertEqual(self.qualification.read_bytes(), before)
+                self.assertFalse((self.qualification.parent / "review").exists())
+        source.write_text(original)
+
+    def test_operator_path_tokens_are_refused_in_scope_closure_and_rationale(self):
+        source = self.out / "reviews/product_tooling/ledger.md"
+        original = source.read_text()
+        values = deepcopy(self.values)
+        before = self.qualification.read_bytes()
+        for field in ("product_council.scope_sentence", "product_council.closure",
+                      "product_tooling.dispositions.F1.rationale"):
+            for path in ("~alice/Documents/x", r"%HOMEPATH%\\x", "$HOME/x",
+                         r"\\host\share\x", "/Users/alice/x", "C:/Users/alice"):
+                with self.subTest(field=field, path=path):
+                    self.values = deepcopy(values)
+                    source.write_text(original)
+                    if field.endswith(".rationale"):
+                        source.write_text(original.replace("Synthetic evidence.", f"See `[{path}]`."))
+                    else:
+                        self.values["product_council"][field.rsplit(".", 1)[1]] = f"See `[{path}]`."
+                    inputs = source.read_bytes(), deepcopy(self.values)
+                    with self.assertRaisesRegex(SystemExit, field.replace(".", r"\.")):
+                        LEDGER.build(self.root, self.release, self.candidate,
+                                     self.manifest_path, self.values)
+                    self.assertEqual((source.read_bytes(), self.values), inputs)
+                    self.assertEqual(self.qualification.read_bytes(), before)
+                    self.assertFalse((self.qualification.parent / "review").exists())
+
+    def test_operator_token_rule_covers_each_sections_closure_and_disposition_text(self):
+        manifest = LEDGER.load(self.manifest_path)
+        for section in LEDGER.SECTIONS:
+            with self.subTest(section=section, field="closure"):
+                entries = deepcopy(manifest)
+                values = deepcopy(self.values)
+                lead = values["product_council"] if section == "product_tooling" else entries[section]
+                lead["closure"] = "See ~alice/x."
+                atomic_write_json(self.manifest_path, entries)
+                with self.assertRaisesRegex(SystemExit, "closure"):
+                    LEDGER.build(self.root, self.release, self.candidate, self.manifest_path, values)
+            atomic_write_json(self.manifest_path, manifest)
+            source = self.out / "reviews" / section / (
+                "dispositions.md" if section == "native_component_delta" else "ledger.md")
+            original = source.read_text()
+            fields = {"severity": "P3", "result": "verified", "disposition": "accept",
+                      "rationale": "Synthetic evidence."}
+            if section != "native_component_delta":
+                fields["change"] = "none"
+            for field, text in fields.items():
+                with self.subTest(section=section, field=field):
+                    source.write_text(original.replace(f"| {text} |", "| ~alice/x |"))
+                    with self.assertRaisesRegex(SystemExit, rf"{section}\.dispositions\.F1\.{field}"):
+                        LEDGER.build(self.root, self.release, self.candidate,
+                                     self.manifest_path, self.values)
+            source.write_text(original)
+        self.values["product_council"]["follow_up"] = "See ~alice/x."
+        with self.assertRaisesRegex(SystemExit, "follow_up"):
+            self.write()
+        self.assertFalse((self.qualification.parent / "review").exists())
+
+    def test_operator_composition_clauses_use_the_same_token_rule(self):
+        ledger, _ = LEDGER.build(self.root, self.release, self.candidate, self.manifest_path, self.values)
+        for field in self.values["composition_review"]:
+            with self.subTest(field=field):
+                values = deepcopy(self.values)
+                values["composition_review"][field] = "See ~alice/x."
+                with self.assertRaisesRegex(SystemExit, rf"composition_review\.{field}"):
+                    LEDGER.composition_review(ledger, values, "releases/v0.20.0/review/runtime-ledger.json")
+        self.values["product_council"]["residuals_sentence"] = "See ~alice/x."
+        with self.assertRaisesRegex(SystemExit, r"product_council\.residuals_sentence"):
+            self.write()
+        self.assertFalse((self.qualification.parent / "review").exists())
+
+    def test_operator_tokens_allow_only_project_https_links_and_strip_wrappers(self):
+        for token in ("/", "\\", "~", "%", "$", "P0/P1", "provider/model",
+                      "http://github.com/alphastorm/omp-ninfer",
+                      "https://github.com/example/omp-ninfer",
+                      "https://github.com/alphastorm-other/omp-ninfer",
+                      "https://github.com.example.invalid/alphastorm/omp-ninfer"):
+            with self.subTest(token=token):
+                values = deepcopy(self.values)
+                values["product_council"]["scope_sentence"] = f"See ({token})."
+                with self.assertRaisesRegex(SystemExit, r"product_council\.scope_sentence"):
+                    LEDGER.build(self.root, self.release, self.candidate, self.manifest_path, values)
+        github = "https://github.com/alphastorm/omp-ninfer/pull/183"
+        raw = "https://raw.githubusercontent.com/alphastorm/omp-ninfer/" + "a" * 40 + "/README.md"
+        self.values["product_council"]["scope_sentence"] = f"See `[{github}]` and 【{github}】."
+        self.values["product_council"]["closure"] = f"See “({raw})”."
+        source = self.out / "reviews/product_tooling/ledger.md"
+        source.write_text(source.read_text().replace("Synthetic evidence.", f"See <{github}>."))
+        result = self.write()
+        self.assertIn(github, LEDGER.load(self.root / result["repository_path"])["scope"])
+        self.assertIn(raw, LEDGER.load(self.root / result["repository_path"])["product_tooling"]["closure"])
+
+    def test_structured_model_identifiers_repository_paths_and_urls_are_not_free_text(self):
+        for section in LEDGER.SECTIONS:
+            filename = "receipt.json" if section == "native_component_delta" else "resolver-receipt.json"
+            path = self.out / "reviews" / section / filename
+            receipt = LEDGER.load(path)
+            receipt["assignments"][0]["model"] = "provider/model"
+            atomic_write_json(path, receipt)
+        path = self.out / "reviews/native_component_delta/subject.json"
+        subject = LEDGER.load(path)
+        subject["files"] = ["scripts/release.py", "tests/fixtures/var/folders/receipt.json"]
+        atomic_write_json(path, subject)
+        result = self.write()
+        ledger = LEDGER.load(self.root / result["repository_path"])
+        self.assertEqual(ledger["native_component_delta"]["changed_paths"], subject["files"])
+        self.assertEqual(ledger["product_tooling"]["resolver_assignments"][0]["model"], "provider/model")
+        LEDGER.public_text({"receipt_digests": {"reviews/var/folders/ledger.md": "a" * 64},
+                            "repository": "https://github.com/alphastorm/omp-ninfer"})
+
+    def test_pre_v020_review_inputs_keep_their_historical_behavior(self):
+        self.release = "v0.19.0"
+        atomic_write_json(self.root / "releases" / self.release / "manifest.json", self.release_manifest)
+        atomic_write_json(self.root / "releases" / self.release / "plan.json", {"release": self.release})
+        git(self.root, "add", "releases")
+        git(self.root, "commit", "--quiet", "-m", "test: add historical synthetic release")
+        self.candidate = git(self.root, "rev-parse", "HEAD").strip()
+        FIXTURES.write_reviews(self.out, self.release, self.candidate, self.release_manifest)
+        self.values = LEDGER.load(self.out / "values.json")
+        self.values["product_council"].update(scope_sentence="See ~alice/Documents/x.",
+                                              closure="See ~alice/Documents/x.", epochs=[{
+            "directory": "epoch", "review_mode": "initial", "review_class": "full-council",
+            "status": "closed-by-disposition", "reviewed_commit": self.candidate,
+        }])
+        self.values["composition_review"]["native_runtime_summary"] = "See ~alice/Documents/x."
+        directory = self.out / "reviews/epoch"
+        atomic_write_json(directory / "review-record.json", {"review_id": "different"})
+        atomic_write_json(directory / "frozen-subject.json", {"subjectCommit": self.candidate})
+        for section in LEDGER.SECTIONS:
+            (self.out / "reviews" / section / "critic.json").unlink()
+        ledger, counts = LEDGER.build(self.root, self.release, self.candidate,
+                                      self.manifest_path, self.values)
+        self.assertEqual(counts, {})
+        self.assertIn("~alice/Documents/x", ledger["scope"])
+        self.assertEqual(ledger["product_tooling"]["closure"], "See ~alice/Documents/x.")
+        self.assertEqual(ledger["product_tooling"]["epochs"][0]["review_id"], "epoch")
+        for section in LEDGER.SECTIONS:
+            self.assertEqual(ledger[section]["reviewer_results"]["critic"],
+                             {"status": "missing", "approval_granted": False})
+        review = LEDGER.composition_review(ledger, self.values, "releases/v0.19.0/review/runtime-ledger.json")
+        self.assertIn("~alice/Documents/x", review["scope"])
 
     def test_another_operators_review_edit_is_never_overwritten(self):
         original = LEDGER.load(self.qualification)
@@ -209,9 +464,6 @@ class ReviewLedgerTests(unittest.TestCase):
                           if path.is_file() and ".git" not in path.relative_to(self.root).parts}, before)
 
     def add_plan_and_candidate(self):
-        atomic_write_json(self.qualification.parent / "plan.json", {"release": self.release})
-        git(self.root, "add", "releases")
-        git(self.root, "commit", "--quiet", "-m", "test: add release plan")
         planned = git(self.root, "rev-parse", "HEAD").strip()
         git(self.root, "commit", "--quiet", "--allow-empty", "-m", "test: stage candidate")
         self.candidate = git(self.root, "rev-parse", "HEAD").strip()
@@ -229,12 +481,13 @@ class ReviewLedgerTests(unittest.TestCase):
                 self.assert_subject_refused_without_writes(reviewed)
 
     def test_product_review_must_not_predate_the_release_plan(self):
-        stale = self.candidate
+        stale = self.before_plan
         planned = self.add_plan_and_candidate()
+        self.set_reviewed_subject(stale)
         self.assert_subject_refused_without_writes(stale, planned)
 
     def test_every_epoch_must_be_between_the_plan_and_candidate(self):
-        stale = self.candidate
+        stale = self.before_plan
         planned = self.add_plan_and_candidate()
         self.set_reviewed_subject(planned)
         tree = git(self.root, "rev-parse", "HEAD^{tree}").strip()
@@ -251,16 +504,60 @@ class ReviewLedgerTests(unittest.TestCase):
     def test_plan_subject_and_candidate_epochs_can_close_together(self):
         planned = self.add_plan_and_candidate()
         self.set_reviewed_subject(planned)
+        later = self.out / "reviews/later"
+        shutil.copytree(self.out / "reviews/product_tooling", later)
+        record = LEDGER.load(later / "review-record.json")
+        record["review_id"] = later.name
+        atomic_write_json(later / "review-record.json", record)
+        subject = LEDGER.load(later / "frozen-subject.json")
+        subject["subjectCommit"] = self.candidate
+        atomic_write_json(later / "frozen-subject.json", subject)
         self.values["product_council"]["epochs"] = [{
-            "directory": "product_tooling", "review_mode": "initial",
+            "directory": directory, "review_mode": "initial",
             "review_class": "full-council", "status": "closed-by-disposition",
             "reviewed_commit": reviewed,
-        } for reviewed in (planned, self.candidate)]
+        } for directory, reviewed in (("product_tooling", planned), ("later", self.candidate))]
         result = self.write()
         product = LEDGER.load(self.root / result["repository_path"])["product_tooling"]
         self.assertEqual(product["reviewed_commit"], planned)
         self.assertEqual([epoch["reviewed_commit"] for epoch in product["epochs"]],
                          [planned, self.candidate])
+        product["epochs"][1]["receipt_digests"]["frozen-subject.json"] = (
+            product["receipt_digests"]["frozen-subject.json"])
+        self.assertTrue(LEDGER.review_subject_errors(
+            self.root, self.release, {"product_tooling": product}, self.release_manifest))
+
+    def test_epoch_cannot_claim_a_subject_other_than_its_closed_directory(self):
+        planned = self.add_plan_and_candidate()
+        self.set_reviewed_subject(planned)
+        self.values["product_council"]["epochs"] = [{
+            "directory": "product_tooling", "review_mode": "initial",
+            "review_class": "full-council", "status": "closed-by-disposition",
+            "reviewed_commit": self.candidate,
+        }]
+        before = self.qualification.read_bytes()
+        with self.assertRaisesRegex(SystemExit, "frozen subject"):
+            self.write()
+        self.assertEqual(self.qualification.read_bytes(), before)
+        self.assertFalse((self.qualification.parent / "review").exists())
+
+    def test_epoch_without_frozen_subject_refuses_values_only_approval(self):
+        directory = self.out / "reviews/epoch"
+        atomic_write_json(directory / "review-record.json",
+                          {"review_id": directory.name, "status": "closed-by-disposition"})
+        self.values["product_council"]["epochs"] = [{
+            "directory": "epoch", "review_mode": "initial", "review_class": "full-council",
+            "status": "closed-by-disposition", "reviewed_commit": self.candidate,
+        }]
+        with self.assertRaisesRegex(SystemExit, "frozen-subject"):
+            self.write()
+        self.assertFalse((self.qualification.parent / "review").exists())
+
+    def test_stage_without_plan_cannot_admit_a_new_release_review(self):
+        errors = LEDGER.review_subject_errors(self.root, self.release, {
+            "product_tooling": {"stage_commit": self.before_plan, "reviewed_commit": self.before_plan},
+        }, self.release_manifest)
+        self.assertTrue(any("plan.json" in error for error in errors), errors)
 
     def test_runtime_and_delta_reviews_must_name_released_component_sources(self):
         for section, filename in (("native_runtime", "frozen-subject.json"),
@@ -279,7 +576,7 @@ class ReviewLedgerTests(unittest.TestCase):
                 self.assertFalse((self.qualification.parent / "review").exists())
                 atomic_write_json(path, original)
 
-    def test_known_privacy_rule_examples_are_sanitized_and_counted_without_changing_sources(self):
+    def test_reviewer_private_identifiers_are_discarded_without_changing_sources(self):
         source = self.out / "reviews/product_tooling/critic.json"
         sentinel = "GPU-" + "12345678-1234-1234-1234-123456789abc"
         paths = ["C:/" + "Users/UNIQUE_NAME/private/file.txt",
@@ -292,10 +589,11 @@ class ReviewLedgerTests(unittest.TestCase):
         before = source.read_bytes()
         result = self.write()
         output = (self.root / result["repository_path"]).read_text()
-        for private in ("UNIQUE_NAME", "private", "file.txt", sentinel):
+        for private in ("UNIQUE_NAME", "file.txt", sentinel):
             self.assertNotIn(private, output)
-        self.assertEqual(result["sanitized"], {
-            LEDGER.REMOVED_STATEMENT: 1, "a synthetic GPU-identifier sentinel": 1})
+        self.assertEqual(LEDGER.load(self.root / result["repository_path"])[
+            "product_tooling"]["reviewer_results"]["critic"]["summary"], LEDGER.PRIVATE_REVIEW_SUMMARY)
+        self.assertEqual(result["sanitized"], {})
         self.assertEqual(source.read_bytes(), before)
 
     def test_each_private_path_is_consumed_including_its_username_and_final_segment(self):
@@ -311,9 +609,8 @@ class ReviewLedgerTests(unittest.TestCase):
                 ledger, counts = LEDGER.build(self.root, self.release, self.candidate,
                                               self.manifest_path, self.values)
                 summary = ledger["product_tooling"]["reviewer_results"]["critic"]["summary"]
-                for private in ("UNIQUE_NAME", "private", "file.txt"):
-                    self.assertNotIn(private, summary)
-                self.assertEqual(sum(counts.values()), 1)
+                self.assertEqual(summary, LEDGER.PRIVATE_REVIEW_SUMMARY)
+                self.assertEqual(counts, {})
                 self.assertEqual(source.read_bytes(), before)
 
     def test_a_statement_naming_a_private_path_is_removed_whole(self):
@@ -327,8 +624,8 @@ class ReviewLedgerTests(unittest.TestCase):
                 ledger, counts = LEDGER.build(self.root, self.release, self.candidate,
                                               self.manifest_path, self.values)
                 summary = ledger["product_tooling"]["reviewer_results"]["critic"]["summary"]
-                self.assertEqual(summary, LEDGER.REMOVED_STATEMENT)
-                self.assertEqual(sum(counts.values()), 1)
+                self.assertEqual(summary, LEDGER.PRIVATE_REVIEW_SUMMARY)
+                self.assertEqual(counts, {})
                 self.assertEqual(source.read_bytes(), before)
 
     def test_a_private_path_is_removed_through_brackets_and_spaced_segments(self):
@@ -367,8 +664,8 @@ class ReviewLedgerTests(unittest.TestCase):
                 ledger, counts = LEDGER.build(self.root, self.release, self.candidate,
                                               self.manifest_path, self.values)
                 evidence = ledger["product_tooling"]["reviewer_results"]["critic"]["evidence"]
-                self.assertEqual(evidence, ["R1|P1|conf=0.9|" + LEDGER.REMOVED_STATEMENT, public])
-                self.assertEqual(sum(counts.values()), 1)
+                self.assertEqual(evidence, ["R1|P1|conf=0.9|", "R2|P2|conf=0.5|"])
+                self.assertEqual(counts, {})
                 LEDGER.public_text(ledger)
 
     def test_verifier_self_check_happens_before_either_public_write(self):

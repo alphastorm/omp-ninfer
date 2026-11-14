@@ -1118,10 +1118,30 @@ def main() -> int:
     qualification["as_of"] = max(qualification["as_of"], args.as_of)
     qualification["external_installation_qualified"] = True
     qualification["remaining_release_gates"] = []
+    # Component waivers are authored before a product candidate exists. This is the
+    # first producer to record that candidate; bind only current, hash-verified waivers.
+    from verify_release import validate_gate_waivers
+    waiver_errors: list[str] = []
+    staged_qualification = {**qualification, "documented_route_acceptance": {"status": "pending"}}
+    validate_gate_waivers(ROOT, args.release, manifest, staged_qualification, waiver_errors)
+    require(not waiver_errors, "; ".join(waiver_errors))
+    parity_waivers = []
+    for name, edge in qualification.get("observed_gates", {}).items():
+        if re.fullmatch(r"rtx(?:5090|4090|3090)_(?:restore|sibling)_waiver", name) is None:
+            continue
+        path = ROOT / bound_file(ROOT, edge["repository_path"]).relative_to(ROOT.resolve())
+        waiver = load(path)
+        if waiver.get("artifact_type") != "omp_ninfer_founder_gate_waiver":
+            continue
+        require(waiver.get("candidate") in (None, candidate),
+                f"{name}: waiver already binds a different candidate")
+        waiver["candidate"] = candidate
+        stage(path, waiver)
+        parity_waivers.append(path)
     authored = [client_components, composed_path, routes_path, restoration_path,
                 *(ROOT / path for path in platform_paths),
                 *(ROOT / row["receipt"] for row in route_rows.values()),
-                *(ROOT / row["repository_path"] for row in native_refs.values())]
+                *(ROOT / row["repository_path"] for row in native_refs.values()), *parity_waivers]
     rebind_composed_evidence(qualification, {relative(path): staged_sha(path) for path in authored})
     stage(qualification_path, qualification)
     manifest["qualification"]["summary_sha256"] = staged_sha(qualification_path)

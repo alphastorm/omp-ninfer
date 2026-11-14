@@ -102,7 +102,9 @@ def run(name, args):
     qualification = directory / "qualification.json" if directory else None
     authority = directory / "compatibility.json" if directory else None
     if name == "stage_release.py":
-        assert not directory.exists(), "stager requires an absent directory"
+        assert not directory.exists() or (
+            "--prepared-draft" in args and {path.name for path in directory.iterdir()} == {"NINFER_RELEASE_NOTES.md"}
+        ), "stager requires an absent or prepared notes-only directory"
         prior = load(ROOT / "releases" / value("--from") / "manifest.json")
         prior.update(release=release, status="draft")
         runtime = prior["components"]["ninfer"]
@@ -120,7 +122,8 @@ def run(name, args):
         current["product_release"] = release
         atomic_write_json(authority, current)
         atomic_write(directory / "COMPATIBILITY.md", "matrix\n")
-        atomic_write(directory / "NINFER_RELEASE_NOTES.md", "# " + release + "\n")
+        if "--prepared-draft" not in args:
+            atomic_write(directory / "NINFER_RELEASE_NOTES.md", "# " + release + "\n")
     elif name == "aggregate_qualification.py":
         plan = load(ROOT / value("--plan"))
         expected = {row["id"].split("-")[0] for row in plan["components"]
@@ -345,6 +348,13 @@ class ReleaseDriverTests(unittest.TestCase):
         }
         atomic_write_json(directory / "handoff.json", handoff)
         return directory, handoff
+
+    def runtime_inputs(self) -> dict[str, Path]:
+        paths = {name: self.private / (name.replace("_", "-") + ".json")
+                 for name in ("runtime_artifacts", "runtime_build_identity", "runtime_rc")}
+        for path in paths.values():
+            atomic_write_json(path, {"status": "passed"})
+        return paths
 
     def driver(self, **values) -> Any:
         options = argparse.Namespace(**{"notes": self.private / "notes.md", **values})
@@ -1116,6 +1126,56 @@ class ReleaseDriverTests(unittest.TestCase):
         self.assertIn("carried rtx5090-container refuses", result.stderr)
         self.assertEqual(self.calls(), [])
 
+    def test_carried_runtime_refuses_changed_archive_and_sbom_before_staging(self) -> None:
+        for field in ("archive_sha", "sbom_sha"):
+            with self.subTest(field=field):
+                path = self.private / "stage-input.json"
+                atomic_write_json(path, {field: "0" * 64})
+                result = self.invoke("candidate", "--no-suite", "--stage-input", str(path), success=False)
+                self.assertIn("carried rtx5090-container", result.stderr)
+                self.assertEqual(self.calls(), [])
+                self.assertEqual(self.git("rev-parse", "HEAD"), self.initial)
+
+    def test_carried_runtime_stage_values_refuse_every_nonidentity_option(self) -> None:
+        for key, value in (
+            ("config_sha", "0" * 64), ("model_revision", "changed"),
+            ("model_sha256", "0" * 64), ("model_bytes", 1),
+            ("profile_from", PREDECESSOR), ("profile_template_dir", "templates"),
+            ("source_archive", "source.tar.gz"), ("checksums", "SHA256SUMS"),
+            ("keep_deployment_profile", False), ("keep_deployment_profile", 1),
+        ):
+            with self.subTest(key=key, value=value):
+                path = self.private / "stage-input.json"
+                atomic_write_json(path, {key: value})
+                driver = self.driver(stage_input=path)
+                with self.assertRaisesRegex(DRIVER.ReleaseError, key):
+                    driver.stage_values()
+                self.assertEqual(self.git("rev-parse", "HEAD"), self.initial)
+
+    def test_carried_runtime_stage_values_accept_equal_identity_and_clean_client(self) -> None:
+        runtime = self.previous["components"]["ninfer"]
+        runtime["upstream_commit"] = "1" * 40
+        atomic_write_json(self.root / "releases" / PREDECESSOR / "manifest.json", self.previous)
+        values = self.driver().stage_values()
+        supplied = {**values, "upstream_commit": runtime["upstream_commit"], "require_clean_client": True}
+        path = self.private / "stage-input.json"
+        atomic_write_json(path, supplied)
+        self.assertEqual(self.driver(stage_input=path).stage_values(), supplied)
+
+    def test_null_stage_values_refuse_before_carried_or_recut_checks(self) -> None:
+        path = self.private / "stage-input.json"
+        for disposition in ("carried", "recut"):
+            for field in sorted(DRIVER.STAGE_VALUE_OPTIONS | {"keep_deployment_profile", "require_clean_client"}):
+                with self.subTest(disposition=disposition, field=field):
+                    atomic_write_json(path, {field: None})
+                    driver = self.driver(stage_input=path)
+                    driver.plan["components"][0]["disposition"] = disposition
+                    before = self.worktree_bytes()
+                    with self.assertRaisesRegex(DRIVER.ReleaseError, "null.*" + field):
+                        driver.stage_values()
+                    self.assertEqual(self.worktree_bytes(), before)
+                    self.assertEqual(self.calls(), [])
+
     def test_carried_client_defaults_to_the_predecessor_public_descriptor(self) -> None:
         self.candidate("--no-suite")
         arguments = self.calls("stage_release.py")[0]["arguments"]
@@ -1172,7 +1232,9 @@ class ReleaseDriverTests(unittest.TestCase):
         atomic_write_json(self.private / "runtime-publication.json", {"status": "passed"})
         self.candidate("--no-suite", "--stage-input", str(self.private / "stage.json"),
                        "--lane-receipt", f"rtx5090={self.private / 'lane.json'}",
-                       "--runtime-publication", str(self.private / "runtime-publication.json"))
+                       "--runtime-publication", str(self.private / "runtime-publication.json"),
+                       *(value for name, path in self.runtime_inputs().items()
+                         for value in ("--" + name.replace("_", "-"), str(path))))
         args = self.calls("stage_release.py")[0]["arguments"]
         self.assertEqual(args[args.index("--release-tag") + 1], "v3.0.0-runtime")
         self.assertEqual(args[args.index("--source-commit") + 1], "9" * 40)
@@ -1185,7 +1247,9 @@ class ReleaseDriverTests(unittest.TestCase):
 
     def test_runtime_handoff_expands_the_three_verified_inputs(self) -> None:
         directory, _ = self.runtime_handoff()
-        self.candidate("--no-suite", "--runtime-handoff", str(directory))
+        self.candidate("--no-suite", "--runtime-handoff", str(directory),
+                       *(value for name, path in self.runtime_inputs().items()
+                         for value in ("--" + name.replace("_", "-"), str(path))))
         arguments = self.calls("stage_release.py")[0]["arguments"]
         self.assertEqual(arguments[arguments.index("--lane-receipt") + 1],
                          str((directory / "rtx5090.json").resolve()))
@@ -1286,7 +1350,7 @@ class ReleaseDriverTests(unittest.TestCase):
 
     def test_runtime_handoff_is_revalidated_when_an_attempt_resumes(self) -> None:
         directory, _ = self.runtime_handoff()
-        self.interrupt(runtime_handoff=directory)
+        self.interrupt(runtime_handoff=directory, **self.runtime_inputs())
         path = directory / "source.tar.gz"
         atomic_write(path, b"S" + path.read_bytes()[1:])
         before = self.worktree_bytes()
@@ -1294,6 +1358,18 @@ class ReleaseDriverTests(unittest.TestCase):
         self.assertIn("SHA-256 differs", result.stderr)
         self.assertEqual(len(self.calls("stage_release.py")), 1)
         self.assertEqual(self.worktree_bytes(), before)
+
+    def test_recut_runtime_requires_evidence_beside_the_three_pair_handoff(self) -> None:
+        directory, _ = self.runtime_handoff()
+        result = self.invoke("candidate", "--no-suite", "--runtime-handoff", str(directory), success=False)
+        self.assertIn("--runtime-artifacts", result.stderr)
+        self.assertEqual(self.calls(), [])
+
+    def test_carried_runtime_refuses_new_component_evidence(self) -> None:
+        for name, path in self.runtime_inputs().items():
+            with self.subTest(input=name):
+                self.invoke("candidate", "--no-suite", "--" + name.replace("_", "-"), str(path), success=False)
+                self.assertEqual(self.calls(), [])
 
     def test_publish_only_wraps_preflight_with_exact_head(self) -> None:
         script = self.root / "scripts" / "hosts" / "publish-product-release.sh"
