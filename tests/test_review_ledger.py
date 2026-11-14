@@ -208,7 +208,8 @@ class ReviewLedgerTests(unittest.TestCase):
         result = subprocess.run([
             sys.executable, str(script), "--release", self.release, "--candidate", self.candidate,
             "--reviews", str(self.manifest_path.parent), "--values", str(self.out / "values.json"),
-        ], cwd=self.root, text=True, capture_output=True)
+        ], cwd=self.root, text=True, capture_output=True,
+           env=FIXTURES.subprocess_environment(self.root))
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(json.loads(result.stdout)["status"], "closed-by-disposition")
 
@@ -223,13 +224,18 @@ class ReviewLedgerTests(unittest.TestCase):
     def test_history_fixture_skips_shallow_clones_unless_history_is_required(self):
         shallow = self.root / "shallow"
         subprocess.run(["git", "clone", "--quiet", "--depth=1", self.root.as_uri(), str(shallow)],
-                       check=True, capture_output=True)
+                       check=True, capture_output=True, env=FIXTURES.subprocess_environment(self.root))
         with patch.dict(os.environ, {"OMP_NINFER_REQUIRE_HISTORY": "0"}):
             with self.assertRaises(unittest.SkipTest):
                 FIXTURES.public_release_tree(shallow, self.release, self.root / "unused")
         with patch.dict(os.environ, {"OMP_NINFER_REQUIRE_HISTORY": "1"}):
             with self.assertRaisesRegex(AssertionError, "full public history"):
                 FIXTURES.public_release_tree(shallow, self.release, self.root / "unused")
+
+    def test_subprocess_import_root_does_not_inherit_the_callers_pythonpath(self):
+        with patch.dict(os.environ, {"PYTHONPATH": "unrelated-import-root"}):
+            environment = FIXTURES.subprocess_environment(self.root)
+        self.assertEqual(environment["PYTHONPATH"], str(self.root / "tests"))
 
 
 class PrivateReviewGoldenTests(unittest.TestCase):

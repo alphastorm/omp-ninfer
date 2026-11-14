@@ -121,6 +121,7 @@ class CollectorTests(unittest.TestCase):
         self.assertFalse((self.destination.parent / "receipts").exists())
 
     def test_fixture_evidence_round_trips_and_receipts_keep_the_original_bytes(self):
+        self.assertEqual(self.plan["limitations"], list(FIXTURES.FIXTURE_LIMITATIONS))
         evidence, sources = self.collect()
         self.assertEqual(evidence, COLLECT.load(Path(self.outputs["evidence"])))
         result = COLLECT.write_evidence(self.root, self.release, self.candidate,
@@ -345,7 +346,8 @@ class CollectorTests(unittest.TestCase):
             "--plan", str(self.windows / "plan.json"), "--output", str(self.destination),
             "--receipts-dir", str(self.destination.parent / "route-inputs"),
             "--lane-dir", "rtx3090=" + str(self.windows / "rtx3090"),
-        ], cwd=self.root, text=True, capture_output=True)
+        ], cwd=self.root, text=True, capture_output=True,
+           env=FIXTURES.subprocess_environment(self.root))
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         outputs = json.loads(result.stdout)
         self.assertEqual(len(outputs["routes"]), 5)
@@ -358,7 +360,7 @@ class PrivateCollectorGoldenTests(unittest.TestCase):
     def test_retained_window_outputs_match_except_the_enumerated_historical_prose(self):
         locations = COLLECT.load(Path(os.environ["OMP_NINFER_PRIVATE_FIXTURES"]).expanduser())["v0.19.0"]
         plan = {"artifact_type": "omp_ninfer_release_plan", "schema_version": 1, "release": "v0.19.0",
-                "platforms": FIXTURES.ACCEPTED}
+                "platforms": FIXTURES.ACCEPTED, "limitations": list(FIXTURES.FIXTURE_LIMITATIONS)}
         with tempfile.TemporaryDirectory() as temporary:
             public_tree = Path(temporary) / "public-tag"
             FIXTURES.public_release_tree(ROOT, "v0.19.0", public_tree)
