@@ -40,13 +40,13 @@ SEAT_FIELDS = ("reviewer_id", "selectionClass", "role", "independence_class", "a
                "model", "model_family")
 SECTIONS = ("native_runtime", "native_component_delta", "product_tooling")
 # Private paths and synthetic identifiers, applied to string leaves, never to source bytes.
-# Where a path ends inside prose is not decidable, so the patterns err toward removing too much:
-# a path runs to whitespace or a quote, and following words that still contain a path separator
-# go with it. Brackets do not end a path; a directory name may contain them.
-_PATH_REST = r"""[^\s"'`]*(?:[ \t]+[^\s"'`]*[\\/][^\s"'`]*)*"""
+# Where a private path ends inside reviewer prose cannot be decided (spaces, brackets, quotes
+# and separators all occur in real paths), so a statement that names a user-profile path is
+# removed whole. Only the schema-fixed prefix of a finding (id, severity, confidence) is kept.
+USER_PATH = re.compile(r"[A-Z]:[\\/]+(?:Users|Home)[\\/]|/(?:Users|home)/", re.I)
+FINDING_PREFIX = re.compile(r"[RU][1-9][0-9]*\|P[0-3]\|conf=(?:0(?:\.[0-9]{1,2})?|1(?:\.0{1,2})?)\|")
+REMOVED_STATEMENT = "the rest of this statement named a user-profile path and was removed"
 SANITIZE = (
-    (re.compile(r"[A-Z]:[\\/]+Users[\\/]+" + _PATH_REST, re.I), "a Windows user-profile path"),
-    (re.compile(r"/(?:Users|home)/" + _PATH_REST), "a POSIX user-profile path"),
     (re.compile(r"GPU-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"),
      "a synthetic GPU-identifier sentinel"),
 )
@@ -170,6 +170,10 @@ def sanitize(value: Any, counts: dict[str, int]) -> Any:
             value, hits = pattern.subn(replacement, value)
             if hits:
                 counts[replacement] = counts.get(replacement, 0) + hits
+        if USER_PATH.search(value):
+            prefix = FINDING_PREFIX.match(value)
+            value = (prefix[0] if prefix else "") + REMOVED_STATEMENT
+            counts[REMOVED_STATEMENT] = counts.get(REMOVED_STATEMENT, 0) + 1
         return value
     if isinstance(value, list):
         return [sanitize(child, counts) for child in value]
