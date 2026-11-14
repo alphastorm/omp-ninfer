@@ -11,6 +11,9 @@ import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
+# Explicit immutable evidence fixtures, never the working tree's current authority.
+FIXTURE_RELEASE = "v0.19.0"
+FIXTURE_PREDECESSOR = "v0.18.0"
 sys.path.insert(0, str(ROOT / "scripts"))
 SPEC = importlib.util.spec_from_file_location("qualification_bundle", ROOT / "scripts/qualification_bundle.py")
 assert SPEC is not None and SPEC.loader is not None
@@ -35,14 +38,15 @@ def seal_directory(directory):
 class SyntheticBundle:
     """Real public policy metadata, synthetic package bytes and isolated authorities."""
 
-    release = "v0.19.0"
+    release = FIXTURE_RELEASE
     lane = "rtx3090"
 
     def __init__(self, root):
         self.root = root
         self.directory = root / "bundle"
         self.directory.mkdir()
-        self.manifest = load(ROOT / "releases/v0.19.0/manifest.json")
+        evidence = ROOT / "releases" / FIXTURE_RELEASE
+        self.manifest = load(evidence / "manifest.json")
         self.manifest["status"] = "draft"
         self.row = next(row for row in self.manifest["components"]["ninfer_variants"] if row["id"] == "rtx3090-windows-native")
         self.row["package_sha256"] = BUNDLE.sha(b"synthetic archive")
@@ -61,9 +65,9 @@ class SyntheticBundle:
         atomic_write_json(self.assets / "package-build-receipt.json", receipt)
         seal_directory(self.assets)
         self.row["checksums_sha256"] = BUNDLE.sha((self.assets / "SHA256SUMS").read_bytes())
-        native = load(ROOT / "releases/v0.19.0/qualification/rtx3090.json")
+        native = load(evidence / "qualification/rtx3090.json")
         native["package"]["sha256"] = self.row["package_sha256"]
-        fit = load(ROOT / "releases/v0.19.0/qualification/rtx3090-windows-native.fit.json")
+        fit = load(evidence / "qualification/rtx3090-windows-native.fit.json")
         fit["identity"]["package_sha256"] = self.row["package_sha256"]
         for name, value in {
             "rtx3090.json": native, "fit.json": fit, "speed.json": {"status": "PASS"},
@@ -72,7 +76,7 @@ class SyntheticBundle:
         }.items():
             atomic_write_json(self.directory / name, value)
         for name in ("server-config.json", "release-spec.json"):
-            atomic_write(self.directory / name, (ROOT / "releases/v0.19.0/profiles/rtx3090" / name).read_bytes())
+            atomic_write(self.directory / name, (evidence / "profiles/rtx3090" / name).read_bytes())
         tooling = self.directory / "tooling"
         tooling.mkdir()
         for name in ("compose_native_qualification.py", "speed_gate.py", "verify_release.py"):
@@ -88,11 +92,11 @@ class SyntheticBundle:
         self.declare("assets", self.assets / "SHA256SUMS")
         self.declare("tooling", tooling / "SHA256SUMS")
         self.reseal()
-        previous = load(ROOT / "releases/v0.18.0/manifest.json")
-        atomic_write_json(root / "releases/v0.18.0/manifest.json", previous)
+        previous = load(ROOT / "releases" / FIXTURE_PREDECESSOR / "manifest.json")
+        atomic_write_json(root / "releases" / FIXTURE_PREDECESSOR / "manifest.json", previous)
         self.plan = {
             "artifact_type": "omp_ninfer_release_plan", "schema_version": 1, "release": self.release,
-            "predecessor": "v0.18.0",
+            "predecessor": FIXTURE_PREDECESSOR,
             "components": [
                 {"id": "rtx5090-container", "disposition": "recut",
                  **{key: self.manifest["components"]["ninfer"][key] for key in ("release_tag", "source_commit")}},
