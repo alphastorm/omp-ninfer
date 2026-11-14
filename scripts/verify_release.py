@@ -1733,6 +1733,20 @@ def validate_route_provenance(root: Path, release: str, qualification: dict, rou
             "documented routes current_block_addresses must match the re-derived guide blocks", errors)
 
 
+def runtime_contract_lanes(manifest: dict[str, Any]) -> dict[str, str]:
+    """Derive display labels without changing the manifest's component identities."""
+    components = manifest.get("components", {})
+    tag = components.get("ninfer", {}).get("release_tag", "")
+    match = re.fullmatch(r"v\d+\.\d+\.\d+-qwen38-5090-(beta\.\d+)", tag)
+    lanes = {"rtx5090-container": f"RTX 5090 {match[1]} container"} if match else {}
+    for variant in components.get("ninfer_variants", []):
+        match = re.fullmatch(r"(v\d+\.\d+\.\d+)-qwen38-(3090|4090)-(beta\.\d+)",
+                            variant.get("release_tag", ""))
+        if match:
+            lanes[variant["id"]] = f"RTX {match[2]} native Windows {match[1]}-{match[3]}"
+    return lanes
+
+
 def validate_exact_lane_set(
     manifest: dict[str, Any],
     compatibility: dict[str, Any],
@@ -1773,15 +1787,7 @@ def validate_exact_lane_set(
         errors,
     )
     if (product_version(str(manifest.get("release"))) or (0, 0, 0)) >= (0, 18, 0):
-        components = manifest.get("components", {})
-        tag = components.get("ninfer", {}).get("release_tag", "")
-        match = re.fullmatch(r"v\d+\.\d+\.\d+-qwen38-5090-(beta\.\d+)", tag)
-        expected = {f"RTX 5090 {match[1]} container"} if match else set()
-        for variant in components.get("ninfer_variants", []):
-            match = re.fullmatch(r"(v\d+\.\d+\.\d+)-qwen38-(3090|4090)-(beta\.\d+)",
-                                variant.get("release_tag", ""))
-            if match:
-                expected.add(f"RTX {match[2]} native Windows {match[1]}-{match[3]}")
+        expected = set(runtime_contract_lanes(manifest).values())
         rows = compatibility.get("runtime_contracts")
         require(isinstance(rows, list) and len(rows) == len(expected)
                 and {row.get("lane") for row in rows if isinstance(row, dict)} == expected
@@ -3046,6 +3052,15 @@ def configuration_identity(profile: dict[str, Any]) -> str:
     return hashlib.sha256(encoded).hexdigest()
 
 
+def checkpoint_host_directory(release: str) -> str:
+    """The release-specific host store; the container mount remains stable."""
+    version = product_version(release) or (0, 0, 0)
+    if version[:2] < (0, 17):
+        return "checkpoints-v013"
+    major, minor, patch = version
+    return f"checkpoints-v{major}{minor:02d}" + (f"-{patch}" if patch else "")
+
+
 def validate_profile_contract(
     profile: dict[str, Any],
     label: str,
@@ -3086,11 +3101,7 @@ def validate_profile_contract(
     require(server.get("checkpoint_mount_target") == checkpoint_target,
             f"{label}: checkpoint mount target must be {checkpoint_target}", errors)
     if server.get("status_schema_version") == 2:
-        version = product_version(release) or (0, 0, 0)
-        checkpoint_host = "checkpoints-v013"
-        if version[:2] >= (0, 17):
-            major, minor, patch = version
-            checkpoint_host = f"checkpoints-v{major}{minor:02d}" + (f"-{patch}" if patch else "")
+        checkpoint_host = checkpoint_host_directory(release)
         require(server.get("checkpoint_host_directory") == checkpoint_host,
                 f"{label}: checkpoint host directory must be {checkpoint_host}", errors)
     seccomp_path = server.get("checkpoint_seccomp_profile")
