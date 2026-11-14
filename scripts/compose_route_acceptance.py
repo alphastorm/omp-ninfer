@@ -1122,8 +1122,7 @@ def main() -> int:
     # first producer to record that candidate; bind only current, hash-verified waivers.
     from verify_release import bound_file, validate_gate_waivers
     waiver_errors: list[str] = []
-    staged_qualification = deepcopy(qualification)
-    staged_qualification["documented_route_acceptance"] = {"status": "pending"}
+    staged_qualification = {**qualification, "documented_route_acceptance": {"status": "pending"}}
     validate_gate_waivers(ROOT, args.release, manifest, staged_qualification, waiver_errors)
     require(not waiver_errors, "; ".join(waiver_errors))
     parity_waivers = []

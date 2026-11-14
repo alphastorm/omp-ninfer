@@ -463,8 +463,15 @@ class RetargetGuideTest(unittest.TestCase):
                 self.guide = self.root / "docs" / "QUICKSTART.md"
                 self.before = release_documents(OLD)
                 self.after = release_documents(NEW, successor=True)
-                for documents, path in ((self.before, before), (self.after, after)):
-                    documents.setdefault(source, {})["review"] = {"repository_path": path}
+                for release, documents, path in ((OLD, self.before, before), (NEW, self.after, after)):
+                    atomic_write_json(self.root / path, {"status": "passed", "release": release})
+                    documents.setdefault(source, {})["review"] = {
+                        "repository_path": path, "sha256": GUIDE.sha256_file(self.root / path)}
+                    if source not in ("manifest.json", "qualification.json"):
+                        atomic_write_json(self.root / "releases" / release / source, documents[source])
+                        documents["manifest.json"]["evidence"] = {
+                            "repository_path": f"releases/{release}/{source}",
+                            "sha256": GUIDE.sha256_file(self.root / "releases" / release / source)}
                 self.write_releases()
                 atomic_write(self.guide, route_guide() + f"[client review]({before[5:]})\n")
                 self.run_retarget()

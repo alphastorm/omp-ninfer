@@ -41,7 +41,9 @@ class PrivateRecutReplayTests(unittest.TestCase):
             git(root, "config", "user.name", "Release replay")
             git(root, "config", "user.email", "release@example.invalid")
             git(root, "config", "core.autocrlf", "false")
-            git(root, "checkout", "--quiet", "--detach", before)
+            checked = subprocess.run(["git", "checkout", "--quiet", "--detach", before], cwd=root,
+                                     env=environment, capture_output=True, text=True, encoding="utf-8")
+            self.assertEqual(checked.returncode, 0, checked.stdout + checked.stderr)
             git(root, "remote", "remove", "origin")
             shutil.copytree(ROOT / "scripts", root / "scripts", dirs_exist_ok=True,
                             ignore=shutil.ignore_patterns("__pycache__"))

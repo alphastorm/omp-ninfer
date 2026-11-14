@@ -25,7 +25,8 @@ from urllib.parse import urlsplit
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import documented_route
 from release_io import atomic_write
-from verify_release import COMPONENT_TAG_RE, MARKDOWN_LINK_RE, checkpoint_host_directory
+from verify_release import (COMPONENT_TAG_RE, MARKDOWN_LINK_RE, PRODUCT_RAW_URL_RE,
+                            bound_file, checkpoint_host_directory, pinned_evidence, sha256_file)
 
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE_RE = re.compile(r"v\d+\.\d+\.\d+\Z")
@@ -296,7 +297,7 @@ def string_leaves(file: Path, *, projections: bool = False) -> dict[str, Leaf]:
 
 
 def release_leaves(root: Path, release: str, *, projections: bool = False) -> dict[tuple[str, str], Leaf]:
-    directory = root / "releases" / release
+    directory = (root / "releases" / release).resolve()
     files = [directory / "manifest.json", directory / "compatibility.json",
              *sorted((directory / "profiles").rglob("*.json"))]
     leaves = {(file.relative_to(directory).as_posix(), pointer): leaf
@@ -310,16 +311,65 @@ def release_leaves(root: Path, release: str, *, projections: bool = False) -> di
 
 
 def evidence_sources(directory: Path) -> list[Path]:
-    return [file for file in [directory / "manifest.json", directory / "qualification.json",
-                             *sorted((directory / "qualification").rglob("*.json")),
-                             *sorted((directory / "acceptance").rglob("*.json")),
-                             *sorted((directory / "profiles").rglob("*.json"))] if file.is_file()]
+    directory = directory.resolve()
+    root = directory.parent.parent
+    sources = [file for file in [directory / "manifest.json", directory / "compatibility.json",
+                                directory / "qualification.json",
+                                *sorted((directory / "profiles").rglob("*.json"))] if file.is_file()]
+    seen = set(sources)
+    documents = [json.loads(file.read_text(encoding="utf-8")) if file.is_file() else {}
+                 for file in (directory / "manifest.json", directory / "compatibility.json",
+                              directory / "qualification.json")]
+    # The verifier owns URL pin shapes; recursively follow only authenticated local
+    # file edges from those authorities, never orphan receipts copied by staging.
+    references = [(url, digest) for _, url, digest in pinned_evidence(*documents)]
+    for source in sources:
+        references.extend(_evidence_bindings(json.loads(source.read_text(encoding="utf-8"))))
+        while references:
+            reference, digest = references.pop()
+            path = _bound_reference(root, reference, digest)
+            if path is not None and path not in seen and path.is_relative_to(directory.resolve()) \
+                    and path.suffix == ".json":
+                seen.add(path)
+                sources.append(path)
+    return sources
+
+
+def _evidence_bindings(value: Any):
+    if isinstance(value, dict):
+        for field, hash_field in (("repository_path", "sha256"), ("path", "sha256"),
+                                  ("summary", "sha256"), ("evidence_path", "evidence_sha256"),
+                                  ("url", "sha256"), ("public_url", "sha256")):
+            if field in value and hash_field in value:
+                yield value[field], value[hash_field]
+        for child in value.values():
+            yield from _evidence_bindings(child)
+    elif isinstance(value, list):
+        for child in value:
+            yield from _evidence_bindings(child)
+
+
+def _bound_reference(root: Path, reference: Any, digest: Any) -> Path | None:
+    if not isinstance(reference, str) or not isinstance(digest, str):
+        return None
+    match = PRODUCT_RAW_URL_RE.fullmatch(reference)
+    name = match[2] if match else reference
+    path = bound_file(root, name)
+    return path if path is not None and sha256_file(path) == digest else None
 
 
 def bound_evidence(root: Path, release: str) -> set[str]:
-    return {reference for file in evidence_sources(root / "releases" / release)
-            for leaf in string_leaves(file).values()
-            if (reference := evidence_reference(leaf.value)) is not None}
+    result = set()
+    for file in evidence_sources(root / "releases" / release):
+        for reference, digest in _evidence_bindings(json.loads(file.read_text(encoding="utf-8"))):
+            path = _bound_reference(root, reference, digest)
+            if path is not None:
+                evidence = evidence_reference(path.relative_to(root.resolve()).as_posix())
+                if evidence:
+                    result.add(evidence)
+                    if urlsplit(reference).scheme:
+                        result.add(reference)
+    return result
 
 
 def boundary_pattern(values: Any) -> re.Pattern[str]:

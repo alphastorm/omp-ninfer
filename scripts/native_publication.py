@@ -19,12 +19,15 @@ import argparse
 from copy import deepcopy
 from datetime import date, datetime, timezone
 import hashlib
+import http.client
 import ipaddress
 import json
 import math
 from pathlib import Path
 import re
 import sys
+import socket
+import threading
 import time
 from typing import Any, Iterator
 import urllib.error
@@ -43,6 +46,28 @@ REPOSITORY_URL = "https://github.com/" + REPOSITORY
 EVIDENCE_CLASS = "anonymous-public-byte-downloads-and-matching-github-asset-digests"
 CHUNK_BYTES = 256 * 1024
 API_BYTES = 4 * 1024 * 1024
+RELEASE_HOSTS = frozenset(("github.com", "api.github.com", "release-assets.githubusercontent.com"))
+
+
+class _DeadlineResponse(http.client.HTTPResponse):
+    """Interrupt header acquisition as well as body reads at the absolute deadline."""
+
+    def __init__(self, sock, *, deadline: float, **kwargs):
+        super().__init__(sock, **kwargs)
+
+        def expire():
+            try:
+                sock.shutdown(socket.SHUT_RDWR)
+            except OSError:
+                pass  # The response may have closed concurrently.
+
+        self._timer = threading.Timer(max(0, deadline - time.monotonic()), expire)
+        self._timer.daemon = True
+        self._timer.start()
+
+    def close(self):
+        self._timer.cancel()
+        super().close()
 
 
 class HTTPTransport:
@@ -66,9 +91,38 @@ class HTTPTransport:
         class AnonymousRedirect(urllib.request.HTTPRedirectHandler):
             def redirect_request(self, request, response, code, message, headers, new_url):
                 transport.validate_url(new_url)
-                return super().redirect_request(request, response, code, message, headers, new_url)
+                redirected = super().redirect_request(request, response, code, message, headers, new_url)
+                if redirected is not None:
+                    redirected.deadline = request.deadline
+                    redirected.deadline_label = request.deadline_label
+                return redirected
 
-        self.opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), AnonymousRedirect())
+        class DeadlineHandler(urllib.request.HTTPHandler, urllib.request.HTTPSHandler):
+            def http_request(self, request):
+                remaining = request.deadline - time.monotonic()
+                require(remaining > 0, request.deadline_label, "/timeout",
+                        "public read exceeded its deadline")
+                request.timeout = min(transport.socket_timeout, remaining)
+                return request
+
+            https_request = http_request
+
+            def _open(self, request, connection_type):
+                def connection(host, **kwargs):
+                    instance = connection_type(host, **kwargs)
+                    instance.response_class = lambda sock, **options: _DeadlineResponse(
+                        sock, deadline=request.deadline, **options)
+                    return instance
+                return self.do_open(connection, request)
+
+            def http_open(self, request):
+                return self._open(request, http.client.HTTPConnection)
+
+            def https_open(self, request):
+                return self._open(request, http.client.HTTPSConnection)
+
+        self.opener = urllib.request.build_opener(
+            urllib.request.ProxyHandler({}), AnonymousRedirect(), DeadlineHandler())
         self.opener.addheaders = []
 
     def validate_url(self, url: str) -> None:
@@ -78,6 +132,8 @@ class HTTPTransport:
         require(parsed.hostname is not None and parsed.username is None and parsed.password is None
                 and not parsed.fragment, "transport", "/url", "credentials and fragments are forbidden")
         if parsed.scheme == "https":
+            require(parsed.hostname in RELEASE_HOSTS and parsed.port in (None, 443),
+                    "transport", "/url", "expected a GitHub release host on HTTPS")
             return
         try:
             loopback = ipaddress.ip_address(parsed.hostname).is_loopback
@@ -94,6 +150,8 @@ class HTTPTransport:
         request = urllib.request.Request(url, headers={
             "User-Agent": "omp-ninfer-public-authentication", "Accept": accept,
             "Accept-Encoding": "identity"})
+        request.deadline = deadline
+        request.deadline_label = label
         try:
             with self.opener.open(request, timeout=min(self.socket_timeout, timeout)) as response:
                 length = response.headers.get("Content-Length")
@@ -116,6 +174,7 @@ class HTTPTransport:
             error.close()
             raise BundleError(f"{label}#/http_status: public request returned {error.code}") from error
         except (OSError, urllib.error.URLError) as error:
+            require(time.monotonic() < deadline, label, "/timeout", "public read exceeded its deadline")
             raise BundleError(f"{label}#/transport: anonymous public read failed ({type(error).__name__})") from error
 
     def api(self, path: str) -> dict[str, Any]:
