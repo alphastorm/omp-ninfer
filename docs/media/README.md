@@ -9,9 +9,19 @@ demonstrates the end-to-end interactive flow on one machine; **qualified product
 claims are bound by the release receipts under `releases/v0.14.0/` and `docs/BENCHMARKS.md`, not
 timed from this clip.**
 
-The current GIF/MP4 files and changed poster frames were regenerated on **2026-10-30** from
-the path-normalized public casts (P15-R12). This is a presentation-only correction, not a new
-recording or runtime qualification. Published `releases/` records are unchanged.
+The GIF and MP4 files and the changed poster frames were regenerated on **2026-10-30** from the
+path-normalized public casts. This is a presentation-only correction, not a new recording or
+runtime qualification. Published `releases/` records are unchanged.
+
+## Canonical files
+
+| File | SHA-256 | Provenance |
+| --- | --- | --- |
+| `omp-ninfer-demo-v14.cast` | `e01935efe16ec1cd7a48948991eb39fbb4fc42a4e972aced7b508944e83e00d8` | Path-normalized asciinema capture (`653,405` bytes, `100×30`, `1,345` events, `76.64 s`); capture-only command/environment headers removed. |
+| `omp-ninfer-demo-v14-render.cast` | `3bdf99428470638ac96cee12186f2ddaf9fe7530e1e9990e1d7f6ce7c8574b5d` | Path-normalized render cast (`624,604` bytes, `1,315` kept events, `35.159 s`): payloads match the normalized capture; the `36.158 s` restart wait (`632..1084`) is scaled by `0.066375` to `2.4 s` and the `/exit` tail after event `1315` is dropped. |
+| `omp-ninfer-demo-v14.gif` | `e2e6e2864102741ce137f558d02077fd76d05e9ace9ef53ba80e123d9dcc96e8` | `1714×1215`, `285` frames, `31.83 s` (including a `3 s` final hold), `2,215,462` bytes; re-rendered from `omp-ninfer-demo-v14-render.cast` with `agg` (JetBrains Mono `28 px`, `--fps-cap 20`, `--idle-time-limit 1.75`, `--last-frame-duration 3`) and lossless `gifsicle -O3`. The README embed. |
+| `omp-ninfer-demo-v14.mp4` | `65fcb60362ce6cf9063c15608eb9a574936cad5dcf00d580e32c8a88ec85e673` | `1714×1216` (one row of `#060809` ground color padded for an even height), `30 fps` CFR (`955` frames), `31.83 s`, `1,822,674` bytes; re-encoded H.264 `yuv420p` faststart, silent. |
+| `omp-ninfer-demo-v14-poster.png` | `f6c6389648f4c0e16c4a21d580b59efd6f04ffb839efd0a5300239a232ef6bdd` | Regenerated final frame (GIF frame `285` of `285`, zero-based `284`), `1714×1215`, `196,303` bytes: the passing test run, the `!ninfer-restart` recovery line, and the post-restart follow-up answer. |
 
 ## Canonical recording (v0.14)
 
@@ -89,16 +99,6 @@ store. Without a graceful stop, the same turn would have been replayed from Oh M
 transcript. This status read is a maintainer observation, not a qualification receipt; product
 claims stay bound by `releases/v0.14.0/`.
 
-## Canonical files
-
-| File | SHA-256 | Provenance |
-| --- | --- | --- |
-| `omp-ninfer-demo-v14.cast` | `e01935efe16ec1cd7a48948991eb39fbb4fc42a4e972aced7b508944e83e00d8` | Path-normalized asciinema capture (`653,405` bytes, `100×30`, `1,345` events, `76.64 s`); capture-only command/environment headers removed. |
-| `omp-ninfer-demo-v14-render.cast` | `3bdf99428470638ac96cee12186f2ddaf9fe7530e1e9990e1d7f6ce7c8574b5d` | Path-normalized render cast (`624,604` bytes, `1,315` kept events, `35.159 s`): payloads match the normalized capture; the `36.158 s` restart wait (`632..1084`) is scaled by `0.066375` to `2.4 s` and the `/exit` tail after event `1315` is dropped. |
-| `omp-ninfer-demo-v14.gif` | `e2e6e2864102741ce137f558d02077fd76d05e9ace9ef53ba80e123d9dcc96e8` | `1714×1215`, `285` frames, `31.83 s` (including a `3 s` final hold), `2,215,462` bytes; re-rendered from `omp-ninfer-demo-v14-render.cast` with `agg` (JetBrains Mono `28 px`, `--fps-cap 20`, `--idle-time-limit 1.75`, `--last-frame-duration 3`) and lossless `gifsicle -O3`. The README embed. |
-| `omp-ninfer-demo-v14.mp4` | `65fcb60362ce6cf9063c15608eb9a574936cad5dcf00d580e32c8a88ec85e673` | `1714×1216` (one row of `#060809` ground color padded for an even height), `30 fps` CFR (`955` frames), `31.83 s`, `1,822,674` bytes; re-encoded H.264 `yuv420p` faststart, silent. |
-| `omp-ninfer-demo-v14-poster.png` | `f6c6389648f4c0e16c4a21d580b59efd6f04ffb839efd0a5300239a232ef6bdd` | Regenerated final frame (GIF frame `285` of `285`, zero-based `284`), `1714×1215`, `196,303` bytes: the passing test run, the `!ninfer-restart` recovery line, and the post-restart follow-up answer. |
-
 ## Render cast and render
 
 `omp-ninfer-demo-v14-render.cast` is derived from `omp-ninfer-demo-v14.cast` with byte-identical
@@ -136,9 +136,9 @@ The recorded environment used a neutral shared home directory outside any user a
 scrub removes command/environment metadata from every public cast header and normalizes displayed
 home-path prefixes to `/demo-home`. Event order, timing, and all other event bytes are retained.
 The release verifier scans both raw and decoded `.cast` text, including headers, for private
-markers. The v14 streams retain their `5,522` truecolor sequences. The current rendered
-representations now use those normalized casts too; neither the scrub nor the re-render is
-a new recording or runtime qualification.
+markers. The v14 streams retain their `5,522` truecolor sequences. The rendered GIF and MP4 files
+use those normalized casts too; neither the scrub nor the re-render is a new recording or runtime
+qualification.
 
 ## Historical media (v0.3-era recording)
 
@@ -167,7 +167,7 @@ with a fresh temporary key and restored the incumbent container afterward.
 
 ## Historical media (v0.2-era recording)
 
-The previous recording and its launch derivatives were also re-rendered from the normalized
+The v0.2-era recording and its launch derivatives were also re-rendered from the normalized
 public cast. They were recorded against the identical runtime image during the
 `v0.2.0-beta.1` window, when the client displayed a beta-suffixed provider name and the RTX 3090
 lane was still preview-only.

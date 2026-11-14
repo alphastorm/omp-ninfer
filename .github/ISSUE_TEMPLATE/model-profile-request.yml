@@ -40,7 +40,7 @@ body:
         - label: Tools
         - label: Stateful Responses
         - label: Long context
-        - label: MTP speculative decoding
+        - label: Speculative decoding
   - type: textarea
     id: identity
     attributes:

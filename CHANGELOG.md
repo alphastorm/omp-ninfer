@@ -12,6 +12,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mark v0.19.0 as the published release across the README, facts, roadmap, release history,
   upstream watch, reference docs, site, and brand assets; front-door install links point to
   `v0.19.0` and `docs/QUICKSTART.md` on `main`.
+- Rewrite the README and the documentation set for their readers. Each fact class has one owner:
+  `docs/FACTS.md` holds the current release's identities and per-lane limits as tables,
+  `docs/BENCHMARKS.md` the measured results and how to read them, and `docs/RELEASES.md` the
+  current release, the upgrade steps and the cut procedure. The other pages link to the owner
+  instead of restating it.
+- In `docs/BENCHMARKS.md`, `docs/PERFORMANCE.md`, `docs/RELEASES.md`, `docs/UPSTREAM.md` and
+  `ROADMAP.md`, the living sections come first and every dated record follows a `## Records`
+  heading, unchanged. The upgrade steps moved from the README to `docs/RELEASES.md`.
+- The reference pages (`docs/ARCHITECTURE.md`, `docs/SECURITY.md`, `SECURITY.md`,
+  `docs/DECISION_GUIDE.md`, `docs/RELATED_WORK.md`, `docs/TROUBLESHOOTING.md`, `CONTRIBUTING.md`,
+  `examples/fleet/README.md`) name no current release, client version or component tag, so
+  publishing a release does not edit them. `docs/RELEASES.md` lists the pages that are edited.
+  `docs/QUICKSTART.md` is unchanged: its bytes are bound to the release's acceptance evidence.
+- `docs/TROUBLESHOOTING.md` entries start from the symptom and end with the action; the dated
+  incident notes behind them sit in a section at the end of the page.
+
+### Added
+
+- `tests/test_docs.py`: every Markdown link must name a heading or anchor that exists in its
+  target, including links from release notes, the site, `llms.txt` and the issue forms
+  ([#176](https://github.com/alphastorm/omp-ninfer/issues/176), item 5), and the reference
+  pages must not name the current release, client version or a component tag.
+
+### Fixed
+
+- Issue forms: remove a benchmark command that stock Oh My Pi does not have, stop marking
+  restart continuation as native-lane-only, cover the native Windows lanes in the
+  installation-failure form, and replace placeholders from early releases.
+- `docs/UPSTREAM.md` linked a quickstart anchor the guide no longer has; the record now names
+  the tagged guide that has it.
+- `docs/RELEASES.md` said that completing a partial publication waits for the push-to-`main` and
+  tag CI runs. `scripts/hosts/publish-product-release.sh` reads only the pull request's check
+  rollup; the page now says so. It also said the changelog is dated at cut time, while the tagged
+  tree keeps `[Unreleased]` and the version heading is dated after publication.
+- `docs/TROUBLESHOOTING.md` named the obsolete `--host-kv-mib` flag (profiles use
+  `--host-context-mib`), and `docs/SECURITY.md` called the native CycloneDX dependency pins
+  optional (components at `v0.7.0` or later require them).
+- `ROADMAP.md` still described the `rk4v4` token-32 restore mismatch as unexplained after
+  `EXP-116` classified it, and listed closed trackers as open.
+- `examples/fleet/README.md` pointed to a roadmap item that does not exist and did not say that
+  `open-tunnels.sh` forwards the RTX 5090 lane to port `18088` while the quickstart container
+  publishes `18089`.
 
 ## [0.19.0] - 2026-11-13
 

@@ -1,53 +1,75 @@
 # Fleet: two model-bound agents, one per qualified lane
 
-Run up to two concurrent OMP agents, each statically pinned to one qualified NInfer lane. Every
-endpoint stays loopback-only on its own machine; reach remote lanes through authenticated SSH
-local forwards (the managed route), never by exposing a listener.
+Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release layer) → NInfer
+(inference engine) → Qwen3.8 27B (served model).
 
-| Role | Lane | OMP model | Notes |
+Run up to two concurrent Oh My Pi (OMP) agents from one POSIX client, each pinned to one NInfer
+lane. Every endpoint stays loopback-only on its own machine; the client reaches each lane through
+an authenticated SSH local forward, never an exposed listener.
+
+This two-lane recipe is not qualified on the current release: the quickstart keeps it as a
+[legacy configuration](../../docs/QUICKSTART.md#fleet-legacy-multi-lane-configuration). Install
+and verify each lane on its own first, from the [quickstart](../../docs/QUICKSTART.md) and the
+[current release](../../docs/FACTS.md#current-release).
+
+## Roles
+
+| Role | Lane | OMP model | Scope |
 | --- | --- | --- | --- |
-| `main` | RTX 5090 container | `ninfer-main/q38-ninfer` | 131,072-token ceiling; durable checkpoints as of v0.4.0 |
-| `heavy` | RTX 4090 native Windows | `ninfer-heavy/qwen3.8-27b` | DFlash2 K=7 profile (v0.16.0–v0.19.0; MTP3 in v0.3.1–v0.15.0); durable DirectStorage checkpoints |
+| `main` | RTX 5090 container | `ninfer-main/q38-ninfer` | Interactive lead session (131,072-token context, text, vision, tools, two requests in flight) |
+| `heavy` | RTX 4090 native Windows | `ninfer-heavy/qwen3.8-27b` | Long-context background worker (131,072-token context, text and tools, one request at a time) |
 
-The RTX 3090 scout role stays deferred: v0.12.0 targets the RTX 3090 as a standalone native
-lane, not as an unattended fleet role, so no scout fragment ships here. Its three-lane form and
-the legacy OMP 18.0.9 instructions for that lane stay at the immutable v0.7.2 tag.
+## Files
 
-The current fragments target **v0.19.0 / OMP 18.20.0**.
-The RTX 5090 profile uses `v0.7.0-qwen38-5090-beta.8` (source `41f89b31` on `64d10fbf`, image
-`c3ec151b`, server `147da36b`), profile `qwen38-5090-v0.13.0` (`751d22dc`), model container version
-3 `81f924d4`, and host directory `checkpoints-v019` mounted at `/checkpoints-v013` with mandatory
-`--session-checkpoint-require-origin-auth` and a 6-retry / 10 s cap on retryable memory-pressure
-checkpoint-save refusals ([ninfer#122](https://github.com/alphastorm/ninfer/pull/122)); prior server sessions replay from OMP transcripts, never
-from an older checkpoint root. Native RTX 4090 carries `v0.8.0-qwen38-4090-beta.3` unchanged from `v0.18.0` (source `48c8ac46` on
-`64d10fbf`, profile `qwen38-4090-native-v0.8.0-beta.3`, build profile `native-v0.8.0-beta.3-rtx4090`,
-public config `b71a2cff`, package `ac41700a`, server `a5266ae6`, without bounded pressure-save retries until rebuilt at the next engine freeze), the same published model container
-version 3 `81f924d4` (`qwen3_8_27b-v3.ninfer`), and release-isolated schema 3 checkpoint directory
-`cache/<release-instance-id>/session-checkpoints-v3` (where `<release-instance-id>` is the installed
-release ID such as `qwen38-4090-native-v0.8.0-beta.3-48c8ac464432`) with mandatory
-`--session-checkpoint-require-origin-auth`. Enforced JSON-schema output and 128-character
-Chat/Responses tool names are qualified on both the RTX 5090 container and native lanes. No
-multi-machine fleet completed-work qualification is claimed for v0.19.0; per-lane installation
-eligibility follows the exact manifest ready gate. The release uses the
-checksummed binary from the [quickstart](../../docs/QUICKSTART.md). Merge the installed lanes from `models.fragment.yml` into
-`~/.omp/agent/models.yml`; it uses the exact server model ids, per-lane forwards, and key files.
-`models.yml` and `provider-5090.json` / `provider-4090.json` are role and deployment metadata, not
-OMP configuration. Fill their `<...>` placeholders from your own deployment. The exact package,
-image digest, and receipt for every lane live in the current release manifest; install lanes only
-from those pinned identities.
+- `open-tunnels.sh`: opens SSH local forwards (`ExitOnForwardFailure=yes`; `-` skips a lane).
+- `models.fragment.yml`: Oh My Pi provider configuration for `~/.omp/agent/models.yml`.
+- `agents/fleet-heavy.md`: Oh My Pi worker agent prompt (`ninfer-heavy/qwen3.8-27b:medium`).
+- `models.yml`: role-to-lane metadata (`main` and `heavy`), not Oh My Pi configuration.
+- `provider-5090.json`: RTX 5090 metadata with `<...>` placeholders, not Oh My Pi configuration.
+- `provider-4090.json`: RTX 4090 metadata with `<...>` placeholders, not Oh My Pi configuration.
 
-Each model in the current fragment sets `compat.statefulResponses: true`. Remove the old
-`PI_OPENAI_STATEFUL` export from launch scripts and shell profiles, and unset it in the launching
-shell; an inherited environment value still overrides per-model compatibility.
+## Wire it
 
-Stock OMP names each session with `prompt_cache_key`; with API authentication configured, the
-server hashes that key into the session identity without storing the raw key, enabling automatic
-checkpoints and restore. Per-model `compat.statefulResponses` chains turns with `previous_response_id`. The
-fragment disables encrypted reasoning and reasoning summaries because the server refuses fields
-it does not implement. Its thinking efforts match the template's `low`, `medium`, and `xhigh`
-levels (`off` clamps to `low`, `high` to `medium`). Launch the lead with
-`omp --model ninfer-main/q38-ninfer`; `agents/fleet-heavy.md` selects the RTX 4090 model.
+1. Run `examples/fleet/open-tunnels.sh` in its own shell
+   (`open-tunnels.sh user@main-host|- user@heavy-host|-`). It forwards local `127.0.0.1:18191` to
+   remote `127.0.0.1:18088` for the RTX 5090 lane and local `127.0.0.1:18192` to remote
+   `127.0.0.1:18082` for the RTX 4090 lane. The quickstart's RTX 5090 container publishes `18089`,
+   not `18088`. Against that install, pass `-` as the first argument and open the forward yourself:
+   `ssh -NT -o ExitOnForwardFailure=yes -L 127.0.0.1:18191:127.0.0.1:18089 user@main-host`.
+2. Place mode `600` bearer keys where `models.fragment.yml` reads them via `!cat`
+   ([provider setup](../../docs/QUICKSTART.md#7-add-the-omp-provider)):
+   `$HOME/.omp/agent/ninfer-5090.key` (`ninfer-main`) and
+   `$HOME/.omp/agent/ninfer-4090.key` (`ninfer-heavy`).
+3. Merge the `providers` entries from `models.fragment.yml` into `~/.omp/agent/models.yml` without
+   overwriting existing providers.
+4. Merge [`examples/manual-tunnel/fail-closed.yml`](../manual-tunnel/fail-closed.yml) into
+   `~/.omp/agent/config.yml` to keep `providers.maxInFlightRequests` (`ninfer-main: 2`,
+   `ninfer-heavy: 1`) and fail-closed settings.
+5. Run `unset PI_OPENAI_STATEFUL` and launch the lead with `omp --model ninfer-main/q38-ninfer`;
+   `agents/fleet-heavy.md` selects the RTX 4090 model (`ninfer-heavy/qwen3.8-27b:medium`).
 
-Warm-start tip (all lanes): checkpoint a session right after your system prompt and repository
-context have prefetched, then fork subagents from that generation — each fork starts hot instead
-of re-prefilling. See the roadmap's template-fork warm-start item for the receipted pattern.
+## Stateful sessions
+
+- Each model in `models.fragment.yml` sets `compat.statefulResponses: true` to chain turns via
+  `previous_response_id`. Remove `PI_OPENAI_STATEFUL` exports from launch scripts and shell
+  profiles and unset `PI_OPENAI_STATEFUL` in the launching shell so an environment value cannot
+  override per-model compatibility.
+- Stock OMP names each session with `prompt_cache_key`; under bearer authentication, the server
+  hashes that key into the session identity without storing the raw key, enabling automatic
+  checkpoints and restore.
+- The fragment disables encrypted reasoning and reasoning summaries (`includeEncryptedReasoning: false`,
+  `supportsReasoningSummary: false`) because NInfer rejects unimplemented fields, and maps thinking
+  efforts to `low`, `medium`, and `xhigh` (`off` clamps to `low`, `high` to `medium`).
+
+## Limits
+
+- No RTX 3090 role or provider fragment ships here; the RTX 3090 is qualified only as a standalone
+  native Windows lane.
+- No multi-machine completed-work qualification is claimed; per-lane installation eligibility
+  follows the release manifest's `ready` gate, and listeners remain loopback-only behind SSH.
+- Warm-start tip: checkpoint a session right after your system prompt and repository context
+  finish prefilling, then fork subagents from that generation so each fork can reuse the shared
+  prefix. How much a fork reuses depends on the lane and is not guaranteed; the measured pattern
+  is the template-fork entry in the [ideas backlog](../../docs/PERFORMANCE.md#ideas-backlog).
+
+Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or NVIDIA.

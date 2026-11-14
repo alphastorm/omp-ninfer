@@ -42,8 +42,8 @@ stay retired. Do not reuse them.
   the better choice (breadth, GUI, portability, multi-user throughput). The narrow target
   is what makes the recommendation credible; never publish a self-assigned score.
 - Status grammar: when lane status is stated, write **"Qualified on RTX 5090 · 4090 · 3090"**.
-  When install authority matters, bind it to the current ready release (`v0.19.0`) instead of
-  restating per-lane caveats inline; per-lane evidence lives in the manifest and benchmarks.
+  When install authority matters, bind it to the current ready release instead of restating
+  per-lane caveats inline; per-lane evidence lives in the manifest and benchmarks.
 - Primary conversion action: **Get started**, linked to `docs/QUICKSTART.md`. Put it before
   documentation links whenever the surface has room for only one action. The GitHub `Latest`
   release card is the secondary conversion surface; never add a third competing action.

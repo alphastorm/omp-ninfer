@@ -34,19 +34,17 @@ three client platforms, both native lanes
 
 ## What it does
 
-A long coding session is 100K tokens of transcript, thinking, tool calls, and images. Sent to a
-cloud provider, every token is metered and every file leaves your machine. Sent to a stateless
-local server, every turn re-sends the whole transcript. A live NInfer, llama.cpp, or vLLM process
-already avoids recomputing an unchanged prefix while it stays up; that is prior art, and this
-project does not claim it. What OMP NInfer adds is continuation you can rely on:
+Long coding sessions reach 100K tokens of transcript, thinking, tool calls, and images. Cloud
+providers meter every token and receive every file; stateless local servers re-send the whole
+transcript each turn. Live NInfer, llama.cpp, and vLLM processes already reuse an unchanged prefix;
+that is prior art, not this project's claim. OMP NInfer adds continuation you can rely on:
 
 - **Explicit and durable.** Oh My Pi drives NInfer through stateful OpenAI Responses
-  (`previous_response_id`); forks and rollback are qualified, and checkpoints restore after a server
-  restart. Oh My Pi commits the transcript first, so losing retained state degrades to a replay,
-  never a broken session.
-- **Private and fail-closed.** Both endpoints bind loopback only, every request is
+  (`previous_response_id`), with qualified forks, rollback, and checkpoint restore across restarts.
+  Oh My Pi writes the transcript first, so lost state falls back to replay, never a broken session.
+- **Private and fail-closed.** Runtime listeners bind loopback only, every request is
   bearer-authenticated, and model fallback is off: an unreachable GPU fails the turn instead of
-  answering from a cloud model. This is acceptance-tested, not configured.
+  answering from a cloud model. This is acceptance-tested, not only configured.
 - **Exact and verifiable.** Model SHA-256, container digest and SBOM, native package and client
   checksums, and every qualification receipt are bound in one manifest;
   `python3 scripts/verify_release.py --require-ready` proves your clone is the qualified release.
@@ -63,8 +61,8 @@ mid-session, follow-up answered reusing 10,375 retained prompt tokens. 32 s, idl
 
 ## Is it for you
 
-**Use OMP NInfer when** you run Oh My Pi, own an RTX 5090, 4090, or 3090 on Windows 11, want
-Qwen3.8 27B, and care about long private sessions that survive a server restart.
+**Use OMP NInfer when** you run Oh My Pi, own an RTX 5090, 4090, or 3090 on Windows 11, and want
+long private Qwen3.8 27B sessions that survive server restarts.
 
 **Use something else when** you want a broad model catalog ([Ollama](https://ollama.com)), a
 desktop GUI ([LM Studio](https://lmstudio.ai)), the widest hardware reach or Apple silicon
@@ -83,63 +81,28 @@ JSON-schema output, and the same 20.4 GB Qwen3.8 27B artifact (`81f924d4`).
 | **RTX&nbsp;3090** | Native Windows 11 package; Windows client (local) | Two requests in flight over one shared 131,072-token pool, under a 350 W serving cap; text and tools | [227.19&nbsp;tok/s](releases/v0.19.0/qualification/rtx3090.json) | [188.45&nbsp;s](releases/v0.19.0/qualification/rtx3090.json) |
 
 Each number links to its qualification receipt. RTX 5090 retrieval is from a cold start; native
-decode is measured with one request at a time (`C1`).
+decode is measured with one request at a time.
 
 Both native lanes install on one two-GPU host, each bound to its GPU UUID, and run one at a time on
-port 18082. Checkpoints are best effort and restore only on the same runtime, model, profile, and
-credentials. In `v0.19.0`, the RTX 5090 (`v0.7.0-qwen38-5090-beta.8`) and RTX 3090
-(`v0.8.0-qwen38-3090-beta.4`) runtimes cap retryable refusals of memory-pressure checkpoint saves
-at six retries or 10 seconds; the RTX 4090 package (`v0.8.0-qwen38-4090-beta.3`) is carried
-unchanged from `v0.18.0` without bounded pressure saves and will be re-cut (rebuilt) at the next
-engine freeze. Exact component, source, and model identities: [facts](docs/FACTS.md#current-release) ·
-[glossary](docs/FACTS.md#glossary) · [manifest](releases/v0.19.0/manifest.json).
+port `18082`. Checkpoints are best effort and restore only on the same runtime, model, profile, and
+credentials. In `v0.19.0`, the RTX 5090 and RTX 3090 runtimes stop retrying a refused
+memory-pressure checkpoint save after six retries or 10 seconds; the RTX 4090 package does not
+include that bound. Exact component, source, and model identities:
+[facts](docs/FACTS.md#current-release) · [glossary](docs/FACTS.md#glossary) ·
+[manifest](releases/v0.19.0/manifest.json).
 
 ## Get started
 
 1. **[Choose your lane](docs/QUICKSTART.md#choose-your-lane)** and check its prerequisites.
 2. **Clone tag `v0.19.0`** and run `python3 scripts/verify_release.py --require-ready`.
-3. **[Install the stock Oh My Pi 18.20.0 client](docs/QUICKSTART.md#omp-18186-client)** with the
-   fail-closed config and per-model fragment.
+3. **[Install the stock Oh My Pi client](docs/QUICKSTART.md#omp-18186-client)** with the fail-closed
+   config and per-model fragment.
 4. **Run the acceptance checks** at the end of your lane's route: tool turn, continuation, restart
    survival, fail closed.
 
-### Upgrading from v0.18.0
-
-`v0.19.0` updates the client to Oh My Pi 18.20.0, updates the RTX 5090 container and RTX 3090
-native Windows runtimes, and carries the `v0.18.0` RTX 4090 native Windows package unchanged. The
-Qwen3.8 27B model artifact and the reviewed model and config fragments are unchanged.
-
-- **Client.** [Install the stock Oh My Pi 18.20.0 client](docs/QUICKSTART.md#omp-18186-client) with
-  this release's unchanged fail-closed config and per-model fragment
-  ([18.20.0 review](docs/measurements/2026-11-13-omp-18200-client-upgrade-review.json)).
-- **RTX 5090.** Stop an existing `v0.18.0` RTX 5090 container with
-  `examples/manual-tunnel/stop-ninfer.sh` from your `v0.18.0` checkout before
-  [starting `v0.7.0-qwen38-5090-beta.8`](docs/QUICKSTART.md#4-start-ninfer-on-the-inference-host)
-  with `examples/manual-tunnel/start-ninfer.sh` from your `v0.19.0` checkout. The new runtime writes
-  checkpoints to its own host directory, `checkpoints-v019`; keep the prior `checkpoints-v018`,
-  `checkpoints-v017`, and `checkpoints-v013` stores untouched for rollback.
-- **RTX 4090 and RTX 3090.** On RTX 3090, follow the
-  [RTX 3090](docs/QUICKSTART.md#native-windows-rtx-3090-release-lane) route to stage and run
-  `Install-Release.ps1` for `v0.8.0-qwen38-3090-beta.4`, which stops a running `beta.3` lane
-  through that lane's `Control-Release.ps1` and keeps it for
-  `Control-Release.ps1 -Action Rollback`; keep at least 40 GiB free on the checkpoint drive so
-  durable saves are not refused for disk capacity. On RTX 4090, an existing `v0.18.0` install of
-  `v0.8.0-qwen38-4090-beta.3` already matches this release and needs no runtime reinstall (for a
-  new install, follow the [RTX 4090](docs/QUICKSTART.md#native-windows-rtx-4090-release-lane)
-  route).
-- **Sessions.** After upgrading the RTX 5090 or RTX 3090 runtime, Oh My Pi replays its
-  authoritative transcripts for a fresh prefill; an unchanged RTX 4090 `beta.3` install keeps its
-  existing checkpoint store.
-
-What the updated runtimes change: on RTX 5090 and RTX 3090, a memory-pressure checkpoint save
-refused for disk capacity, an I/O outage, or a superseded session checkpoint tag stops retrying
-after six attempts or 10 seconds and releases the session's continuation instead of holding new
-requests behind the unsettled save ([ninfer#122](https://github.com/alphastorm/ninfer/pull/122);
-store-quota refusals settle on the first refusal without retries, and the carried RTX 4090 package
-re-cuts — is rebuilt — with the next engine freeze). Everything else:
-[release notes](releases/v0.19.0/NINFER_RELEASE_NOTES.md) · [changelog](CHANGELOG.md).
-
-Native owners staying on `v0.10.0` keep the
+<a id="upgrading-from-v0180"></a>Already running an earlier release? Follow the
+[upgrade steps](docs/RELEASES.md#upgrading-from-the-previous-release). Native owners staying on
+`v0.10.0` keep the
 [v0.10.0 guide](https://github.com/alphastorm/omp-ninfer/blob/v0.10.0/docs/QUICKSTART.md).
 
 ## How it works
@@ -153,9 +116,10 @@ Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release l
   durable transcript write.
 - **NInfer owns inference and retained state.** The C++/CUDA engine from
   [Neroued/ninfer](https://github.com/Neroued/ninfer) and its GPU ports, plus this project's
-  explicit Responses state and checkpoints. Retained state accelerates; it is never the source of truth.
-- **The manifest owns identity.** [`releases/v0.19.0/manifest.json`](releases/v0.19.0/manifest.json)
-  binds client, runtime, model, profile, and receipts; `ready` requires composed external acceptance.
+  explicit Responses state and checkpoints. Retained state accelerates; it is never the source of
+  truth.
+- **The manifest owns identity.** One manifest binds client, runtime, model, profile, and receipts;
+  `ready` status requires end-to-end acceptance of every documented route.
 
 [Architecture](docs/ARCHITECTURE.md) · [Security model](docs/SECURITY.md) ·
 [Release lifecycle](docs/RELEASES.md)
@@ -175,57 +139,53 @@ python3 scripts/verify_release.py --require-ready
 python3 -m unittest discover -s tests -v
 ```
 
-Both pass on a tagged release. A `ready` manifest binds the upstream Oh My Pi binaries,
-compatibility matrix, container digest and SBOM or native package checksums, lane-specific model
-SHA-256, per-lane qualification receipts, and owner-operated acceptance of every documented route.
-Lifecycle and cut rules: [releases](docs/RELEASES.md).
+Both pass on a tagged release. A `ready` manifest binds the upstream Oh My Pi binaries, the model
+SHA-256, the compatibility matrix, the container digest and SBOM or the native package checksums,
+per-lane qualification receipts, and owner-operated acceptance of every documented route.
+Lifecycle and cut rules: [releases](docs/RELEASES.md#how-a-release-is-cut).
 
 ## Documentation
 
 | Document | What it answers |
 | --- | --- |
-| [Quickstart](docs/QUICKSTART.md) | Which lane, prerequisites, exact install, acceptance checks |
-| [Facts](docs/FACTS.md) | Current identities, limits, and non-claims in one place |
+| [Quickstart](docs/QUICKSTART.md) | Which lane, prerequisites, install steps, acceptance checks, operation |
+| [Facts](docs/FACTS.md) | Current release identities, limits, non-claims, glossary |
 | [Decision guide](docs/DECISION_GUIDE.md) | This versus Ollama, LM Studio, llama.cpp, vLLM |
 | [Compatibility](docs/COMPATIBILITY.md) | Qualified client and runtime combinations (generated) |
-| [Architecture](docs/ARCHITECTURE.md) | State ownership, loopback topology, identity chain |
-| [Benchmarks](docs/BENCHMARKS.md) | Receipts, method, charts, model quality, community results |
-| [Performance](docs/PERFORMANCE.md) | Kernel and schedule experiment ledger |
-| [Security](docs/SECURITY.md) | Threat model and boundaries |
-| [Troubleshooting](docs/TROUBLESHOOTING.md) | Failure signatures and recovery |
-| [Related work](docs/RELATED_WORK.md) | Prior art and the NInfer port family |
-| [Upstream](docs/UPSTREAM.md) | Upstream watch and fork points |
-| [Releases](docs/RELEASES.md) | Version history and how a release is cut |
-| [Roadmap](ROADMAP.md) | Remaining work and explicit non-promises |
+| [Architecture](docs/ARCHITECTURE.md) | Topology, state ownership, identity chain, component boundaries |
+| [Benchmarks](docs/BENCHMARKS.md) | Current results, how to read them, method, past measurements |
+| [Performance](docs/PERFORMANCE.md) | Kernel program: baseline, open ideas, experiment ledger |
+| [Security](docs/SECURITY.md) | Trust boundary, invariants, key handling, retention, verification |
+| [Troubleshooting](docs/TROUBLESHOOTING.md) | Failure symptoms, causes, and recovery actions |
+| [Related work](docs/RELATED_WORK.md) | Credits, prior-art survey, NInfer lineage, direct-route rationale |
+| [Upstream](docs/UPSTREAM.md) | Upstream positions, watch procedure, fork-point rationale |
+| [Releases](docs/RELEASES.md) | Current release, upgrade steps, how a release is cut, release records |
+| [Roadmap](ROADMAP.md) | Scope, open work, v1.0 criteria, decision records, shipped table |
 | [Changelog](CHANGELOG.md) | What changed, per release |
 | [Media provenance](docs/media/README.md) | Checksums and capture notes for every recording |
 
 ## Help make it better
 
-- **Ran a clean install?** Report
-  [time-to-first-turn and every manual step](https://github.com/alphastorm/omp-ninfer/issues/new?template=clean-install-report.yml);
-  install friction is a bug.
-- **Measured your card?** Submit the
-  [performance result form](https://github.com/alphastorm/omp-ninfer/issues/new?template=benchmark-report.yml)
-  after the acceptance checks pass.
+- **Ran a clean install?** Friction is a bug; report time-to-first-turn and every manual step:
+  [clean-install report](https://github.com/alphastorm/omp-ninfer/issues/new?template=clean-install-report.yml).
+- **Measured your card?** After the acceptance checks pass, submit the
+  [performance result form](https://github.com/alphastorm/omp-ninfer/issues/new?template=benchmark-report.yml).
 - **Work on CUDA kernels?** Pick a bottleneck from the [performance program](docs/PERFORMANCE.md)
   and send before/after receipts.
 - **Need another model or profile?** File a
   [model/profile request](https://github.com/alphastorm/omp-ninfer/issues/new?template=model-profile-request.yml).
-- **Contributing without a GPU?** No GPU is needed for
-  [contributor acceptance and doctor](docs/QUICKSTART.md#contributor-acceptance-and-preflight),
-  which run in rehearsal/offline mode; rehearsal receipts never qualify a release.
+- **Contributing without a GPU?** Offline rehearsal needs no GPU and never qualifies a release:
+  [contributor acceptance and doctor](docs/QUICKSTART.md#contributor-acceptance-and-preflight).
 
 Routing rules: [CONTRIBUTING.md](CONTRIBUTING.md). Strip keys, hostnames, prompts, outputs, and raw
-logs before filing. Support covers `v0.19.0` and its exact profiles for a single local owner; no SLA.
-Vulnerabilities: [private reporting](SECURITY.md), never a public issue.
+logs before filing. Support covers `v0.19.0` and its exact profiles for a single local owner; no
+SLA. Vulnerabilities: [private reporting](SECURITY.md), never a public issue.
 
 ## Credits
 
 - **[Oh My Pi](https://github.com/can1357/oh-my-pi)** by [can1357](https://x.com/_can1357), built
-  on [Pi](https://github.com/badlogic/pi-mono) by Mario Zechner (MIT). The coding agent this
-  appliance serves; since v0.8.0 the client is the unmodified upstream binary and this project
-  publishes no client.
+  on [Pi](https://github.com/badlogic/pi-mono) by Mario Zechner (MIT). The client is the unmodified
+  upstream binary, and this project publishes no client.
 - **[NInfer](https://github.com/Neroued/ninfer)** by Neroued (Apache-2.0). The C++/CUDA engine,
   `.ninfer` format, MTP and DFlash2 speculative decoding, and evaluation campaigns. Public runtime
   source for all three lanes: [alphastorm/ninfer](https://github.com/alphastorm/ninfer).
