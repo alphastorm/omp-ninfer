@@ -166,7 +166,7 @@ def historical_records(path: Path, heading: str | None):
     if heading is None:
         yield
         return
-    original = path.read_text()
+    original = path.read_text(encoding="utf-8")
     marker = heading + "\n"
     if original.count(marker) != 1 or "## Records\n" in original:
         raise AssertionError("historical record boundary must be exact and unique")
@@ -176,13 +176,22 @@ def historical_records(path: Path, heading: str | None):
     try:
         yield
     finally:
-        changed = path.read_text()
+        changed = path.read_text(encoding="utf-8")
         if changed.count("## Records\n") != 1:
             raise AssertionError("exactly one historical Records line must be removed")
         before, separator, after = changed.partition("## Records\n")
         if not separator or after != tail:
             raise AssertionError("historical record bytes changed")
         atomic_write(path, before + after)
+
+
+def declared_release() -> str:
+    """The release the living pages describe; it trails the authority while a release is staged."""
+    text = (ROOT / "docs" / "RELEASES.md").read_text(encoding="utf-8")
+    section = text.split("\n## Current release\n", 1)[1].split("\n## ", 1)[0]
+    match = re.search(r"(?<![\w.-])v\d+\.\d+\.\d+(?![\w-]|\.\d)", section)
+    assert match is not None, "docs/RELEASES.md must name its current release"
+    return match[0]
 
 
 def manifest(release: str, successor: bool = False) -> dict:
@@ -263,7 +272,7 @@ class FlipDocsTests(unittest.TestCase):
         self.assertEqual({path.relative_to(self.root).as_posix() for path in FLIP.publication_pages(self.root)},
                          {"README.md", "BRAND.md", "site/index.html", "site/nested/index.html"})
         self.flip()
-        self.assertEqual((self.root / "ignored.md").read_text(), f"Version {OLD}.\n")
+        self.assertEqual((self.root / "ignored.md").read_text(encoding="utf-8"), f"Version {OLD}.\n")
 
     def test_missing_declaration_is_a_refusal_not_a_fallback_list(self) -> None:
         self.write("docs/RELEASES.md", "# Releases\n")
@@ -285,7 +294,7 @@ class FlipDocsTests(unittest.TestCase):
                    "| Client | client-old.zip | dddddddd | dddddddddddd | 30000000 | 30,000,000 | 440000000 | 440,000,000 |\n")
         result = self.flip()
         self.assertEqual(result.issues, ())
-        value = (self.root / "docs/FACTS.md").read_text()
+        value = (self.root / "docs/FACTS.md").read_text(encoding="utf-8")
         self.assertIn(f"`{TAG[:-1]}2` | `{'b' * 40}` | `{'b' * 8}` | `{'b' * 12}`", value)
         self.assertIn(f"`{NATIVE[:-1]}2` | `{'c' * 8}` | native-new", value)
         self.assertIn("client-new.zip | eeeeeeee | eeeeeeeeeeee | 31000000 | 31,000,000 | 441000000 | 441,000,000", value)
@@ -320,7 +329,7 @@ class FlipDocsTests(unittest.TestCase):
         self.assertEqual(self.flip().issues[0].kind, "refused")
         self.write("docs/FACTS.md", f"Version {OLD}.\n\n| RTX 5090 | deadbeef |\n| Client | client-old.zip | deadbeef |\n")
         self.assertEqual(self.flip().issues, ())
-        text = (self.root / "docs/FACTS.md").read_text()
+        text = (self.root / "docs/FACTS.md").read_text(encoding="utf-8")
         self.assertIn("| RTX 5090 | container-new |", text)
         self.assertIn("| Client | client-new.zip | 12345678 |", text)
 
@@ -328,7 +337,7 @@ class FlipDocsTests(unittest.TestCase):
         self.write("docs/FACTS.md", f"Version {OLD}.\n\n"
                    "| Client | client-old.zip | ddddddd | ddddddddf | dddddddd.suffix | xdddddddd | 300000001 | 30,000,000,001 |\n")
         self.assertEqual(self.flip().issues, ())
-        value = (self.root / "docs/FACTS.md").read_text()
+        value = (self.root / "docs/FACTS.md").read_text(encoding="utf-8")
         self.assertIn("ddddddd | ddddddddf | dddddddd.suffix | xdddddddd | 300000001 | 30,000,000,001", value)
 
     def test_small_integers_and_measured_counts_are_not_projected(self) -> None:
@@ -339,7 +348,7 @@ class FlipDocsTests(unittest.TestCase):
                    "\nMeasured 30000000 prompts at 181.71 tok/s.\n")
         result = self.flip()
         self.assertTrue(any(issue.kind == "needs authoring" for issue in result.issues))
-        value = (self.root / "docs/FACTS.md").read_text()
+        value = (self.root / "docs/FACTS.md").read_text(encoding="utf-8")
         self.assertIn("| client-new.zip | 999999 |", value)
         self.assertIn("Measured 30000000 prompts at 181.71 tok/s.", value)
 
@@ -348,14 +357,14 @@ class FlipDocsTests(unittest.TestCase):
         self.write("docs/FACTS.md", f"Version {OLD}.\n\n" + body)
         result = self.flip()
         self.assertTrue(any(issue.kind == "needs authoring" for issue in result.issues))
-        self.assertIn(body, (self.root / "docs/FACTS.md").read_text())
+        self.assertIn(body, (self.root / "docs/FACTS.md").read_text(encoding="utf-8"))
 
     def test_release_state_and_results_stay_byte_identical_while_tables_flip(self) -> None:
         state = f"Published {OLD}; all 31 blocks passed on 2026-01-01.\n"
         self.write("docs/FACTS.md", "# Facts\n\n" + state + f"\n| RTX 5090 | {TAG} |\n")
         result = self.flip()
         self.assertEqual([(issue.line, issue.kind) for issue in result.issues], [(3, "needs authoring")])
-        value = (self.root / "docs/FACTS.md").read_text()
+        value = (self.root / "docs/FACTS.md").read_text(encoding="utf-8")
         self.assertIn(state, value)
         self.assertIn(TAG[:-1] + "2", value)
         self.assertEqual(self.flip().changed, ())
@@ -366,16 +375,16 @@ class FlipDocsTests(unittest.TestCase):
         self.write("docs/FACTS.md", f"Version {OLD}.\n\n" + records)
         result = self.flip()
         self.assertEqual(result.issues, ())
-        self.assertTrue((self.root / "docs/FACTS.md").read_text().endswith(records))
+        self.assertTrue((self.root / "docs/FACTS.md").read_text(encoding="utf-8").endswith(records))
 
     def test_reviewed_historical_boundary_inserts_and_removes_exactly_one_line(self) -> None:
         heading = "## Prior release record"
         tail = f"{heading}\n\nPublished {OLD}; RTX 5090 {TAG}.\n"
         self.write("docs/FACTS.md", f"Version {OLD}.\n\n" + tail)
         with historical_records(self.root / "docs/FACTS.md", heading):
-            self.assertEqual((self.root / "docs/FACTS.md").read_text().count("## Records\n"), 1)
+            self.assertEqual((self.root / "docs/FACTS.md").read_text(encoding="utf-8").count("## Records\n"), 1)
             self.flip()
-        result = (self.root / "docs/FACTS.md").read_text()
+        result = (self.root / "docs/FACTS.md").read_text(encoding="utf-8")
         self.assertEqual(result.count("## Records\n"), 0)
         self.assertTrue(result.endswith(tail))
         self.assertIn(NEW, result.split(heading)[0])
@@ -386,7 +395,7 @@ class FlipDocsTests(unittest.TestCase):
         self.write("CHANGELOG.md", "# Changelog\n\n## [Unreleased]\n\nA neutral entry.\n\n" + released
                    + f"\n[Unreleased]: https://example.invalid/compare/{OLD}...HEAD\n")
         self.flip()
-        value = (self.root / "CHANGELOG.md").read_text()
+        value = (self.root / "CHANGELOG.md").read_text(encoding="utf-8")
         self.assertIn(released, value)
         self.assertIn(f"[Unreleased]: https://example.invalid/compare/{NEW}...HEAD", value)
 
@@ -412,7 +421,7 @@ class FlipDocsTests(unittest.TestCase):
         self.write("docs/FACTS.md", f"Version {OLD}.\n\nRTX 5090 qwen38-old-aaaaaaaaaaaa.\n")
         result = self.flip()
         self.assertTrue(any("unbound compound identity" in issue.detail for issue in result.issues))
-        self.assertIn("qwen38-old-aaaaaaaaaaaa", (self.root / "docs/FACTS.md").read_text())
+        self.assertIn("qwen38-old-aaaaaaaaaaaa", (self.root / "docs/FACTS.md").read_text(encoding="utf-8"))
 
     def test_living_evidence_links_are_advisory_and_do_not_block_other_identities(self) -> None:
         self.pages("README.md", "docs/FACTS.md")
@@ -421,8 +430,8 @@ class FlipDocsTests(unittest.TestCase):
         self.write("README.md", f"Version {OLD}.\n")
         result = self.flip()
         self.assertTrue(any(issue.kind == "review: evidence link" for issue in result.issues))
-        self.assertEqual((self.root / "docs/FACTS.md").read_text(), bad.replace(OLD, NEW))
-        self.assertEqual((self.root / "README.md").read_text(), f"Version {NEW}.\n")
+        self.assertEqual((self.root / "docs/FACTS.md").read_text(encoding="utf-8"), bad.replace(OLD, NEW))
+        self.assertEqual((self.root / "README.md").read_text(encoding="utf-8"), f"Version {NEW}.\n")
         with mock.patch.object(FLIP, "ROOT", self.root), contextlib.redirect_stdout(io.StringIO()), \
                 contextlib.redirect_stderr(io.StringIO()):
             self.assertEqual(FLIP.main(["--from", OLD, "--to", NEW, "--check"]), 0)
@@ -440,7 +449,7 @@ class FlipDocsTests(unittest.TestCase):
         self.write_releases()
         self.write("docs/FACTS.md", f"Version {OLD}.\n\n[record](measurements/2026-01-01-review.json)\n")
         self.assertEqual(self.flip().issues, ())
-        self.assertIn("measurements/2026-02-01-review.json", (self.root / "docs/FACTS.md").read_text())
+        self.assertIn("measurements/2026-02-01-review.json", (self.root / "docs/FACTS.md").read_text(encoding="utf-8"))
 
     def test_html_rows_use_scope_and_html_measurements_need_authoring(self) -> None:
         self.pages("site/index.html")
@@ -450,7 +459,7 @@ class FlipDocsTests(unittest.TestCase):
                    "<p>Measured 181.71 tok/s, all 31 blocks passed.</p>\n")
         result = self.flip()
         self.assertTrue(any(issue.kind == "needs authoring" for issue in result.issues))
-        text = (self.root / "site/index.html").read_text()
+        text = (self.root / "site/index.html").read_text(encoding="utf-8")
         self.assertIn("<td>bbbbbbbb</td>", text)
         self.assertIn("<td>cccccccc</td>", text)
         self.assertIn("<p>Measured 181.71 tok/s, all 31 blocks passed.</p>", text)
@@ -461,7 +470,7 @@ class FlipDocsTests(unittest.TestCase):
         second = f"<!-- records -->\n<p>RTX 5090 {TAG}</p>\n<!-- /records -->\n"
         self.write("site/index.html", first + f"<p>Version {OLD}</p>\n" + second + f"<p>Version {OLD}</p>\n")
         self.assertEqual(self.flip().issues, ())
-        value = (self.root / "site/index.html").read_text()
+        value = (self.root / "site/index.html").read_text(encoding="utf-8")
         self.assertIn(first, value)
         self.assertIn(second, value)
         self.assertEqual(value.count(f"<p>Version {NEW}</p>"), 2)
@@ -471,7 +480,7 @@ class FlipDocsTests(unittest.TestCase):
         example = "\n```html\n<!-- records -->\n```\n\n`<!-- /records -->` is literal code.\n"
         self.write("docs/FACTS.md", record + f"\nVersion {OLD}.\n" + example)
         self.assertEqual(self.flip().issues, ())
-        value = (self.root / "docs/FACTS.md").read_text()
+        value = (self.root / "docs/FACTS.md").read_text(encoding="utf-8")
         self.assertTrue(value.startswith(record))
         self.assertIn(f"Version {NEW}.", value)
         self.assertIn(example, value)
@@ -491,7 +500,7 @@ class FlipDocsTests(unittest.TestCase):
                 result = self.flip()
                 self.assertEqual((result.issues[0].page, result.issues[0].line, result.issues[0].kind),
                                  ("site/index.html", line, "refused"))
-                self.assertEqual((self.root / "site/index.html").read_text(), text)
+                self.assertEqual((self.root / "site/index.html").read_text(encoding="utf-8"), text)
 
     def test_check_reports_precise_drift_and_never_writes(self) -> None:
         before = (self.root / "docs/FACTS.md").read_bytes()
@@ -529,7 +538,7 @@ class FlipDocsTests(unittest.TestCase):
 
 class PublicDocumentationTests(unittest.TestCase):
     def test_current_record_layout_cannot_silently_add_old_release_headings(self) -> None:
-        release = json.loads((ROOT / "compatibility.json").read_text())["product_release"]
+        release = declared_release()
         predecessor = ENGINE.ready_history(ROOT, release)[0][0]
         previous_distinct = ENGINE.ready_history(ROOT, predecessor)[0][0]
         versions = re.compile(r"(?<![\w.-])v\d+\.\d+\.\d+(?![\w-]|\.\d)")
@@ -540,7 +549,7 @@ class PublicDocumentationTests(unittest.TestCase):
         failures = []
         html_results = {}
         for page in FLIP.publication_pages(ROOT):
-            text = page.read_text()
+            text = page.read_text(encoding="utf-8")
             visible = ENGINE.records_mask(text, page)
             page_failures = []
             if page.suffix == ".html":
@@ -571,9 +580,9 @@ class PublicDocumentationTests(unittest.TestCase):
             ["git", "rev-parse", "--verify", "1d154a6ee697e053f469cc1b78ba771abb29e05f^{commit}"],
             cwd=ROOT, check=True, capture_output=True, text=True).stdout.strip()
         published = subprocess.run(["git", "show", f"{commit}:site/benchmarks/index.html"],
-                                   cwd=ROOT, check=True, capture_output=True, text=True).stdout
+                                   cwd=ROOT, check=True, capture_output=True).stdout.decode("utf-8")
         page = ROOT / "site" / "benchmarks" / "index.html"
-        current = page.read_text()
+        current = page.read_text(encoding="utf-8")
         regions = ENGINE.immutable_regions(current, page)
         self.assertEqual(len(regions), 1)
         region = current[slice(*regions[0])]
@@ -589,8 +598,7 @@ class PublicDocumentationTests(unittest.TestCase):
         self.assertEqual((ROOT / "llms.txt").read_bytes(), (ROOT / "site/llms.txt").read_bytes())
 
     def test_current_tree_checks_every_owned_page_without_writing(self) -> None:
-        authority = json.loads((ROOT / "compatibility.json").read_text())
-        release = authority["product_release"]
+        release = declared_release()
         previous = max((path.parent.name for path in (ROOT / "releases").glob("*/manifest.json")
                         if ENGINE.RELEASE_RE.fullmatch(path.parent.name)
                         and ENGINE.release_version(path.parent.name) < ENGINE.release_version(release)),
@@ -648,7 +656,7 @@ class PublicDocumentationTests(unittest.TestCase):
             # The tag predates the page declaration; the current, single owner is applied
             # as data to both trees. No legacy-record heuristics or input masks are used.
             for page, (record, later_living) in INTERLEAVED_HISTORY.items():
-                original = (root / page).read_text()
+                original = (root / page).read_text(encoding="utf-8")
                 self.assertLess(original.index(record + "\n"), original.index(later_living + "\n"))
             with contextlib.ExitStack() as stack:
                 for page in paths:
@@ -667,7 +675,7 @@ class PublicDocumentationTests(unittest.TestCase):
             differences = {}
             differing_lines = {}
             for page in paths:
-                actual = FLIP.records_mask((root / page).read_text(), page)
+                actual = FLIP.records_mask((root / page).read_text(encoding="utf-8"), page)
                 expected = FLIP.records_mask(git("show", f"{published}:{page}").decode(), page)
                 left, right = set(inventory.findall(actual)), set(inventory.findall(expected))
                 if left != right:

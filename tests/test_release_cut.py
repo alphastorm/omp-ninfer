@@ -149,9 +149,9 @@ class ReleaseCutTests(unittest.TestCase):
         cls.prepared_bundle = FIXTURES.SyntheticBundle(root)
         bundle = cls.prepared_bundle
         receipt_path = bundle.assets / "package-build-receipt.json"
-        receipt = json.loads(receipt_path.read_text())
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
         receipt["upstream_base_sha"] = json.loads(
-            (bundle.directory / "rtx3090.json").read_text())["identity"]["upstream_base_sha"]
+            (bundle.directory / "rtx3090.json").read_text(encoding="utf-8"))["identity"]["upstream_base_sha"]
         atomic_write_json(receipt_path, receipt)
         bundle.reseal_assets()
         cls.release = bundle.release
@@ -231,16 +231,16 @@ class ReleaseCutTests(unittest.TestCase):
 
     def control(self, **values):
         path = self.private / "control.json"
-        current = json.loads(path.read_text())
+        current = json.loads(path.read_text(encoding="utf-8"))
         current.update(values)
         atomic_write_json(path, current)
 
     def calls(self):
         path = self.private / "commands.json"
-        return json.loads(path.read_text()) if path.exists() else []
+        return json.loads(path.read_text(encoding="utf-8")) if path.exists() else []
 
     def state(self):
-        return json.loads((self.root / ".release-state" / (self.release + ".json")).read_text())
+        return json.loads((self.root / ".release-state" / (self.release + ".json")).read_text(encoding="utf-8"))
 
     def commit_plan(self):
         atomic_write_json(self.plan_path, self.plan)
@@ -263,7 +263,7 @@ class ReleaseCutTests(unittest.TestCase):
         self.assertEqual(arguments, expected)
         self.assertEqual(calls[0]["runtime_dir"], str(self.runtime.resolve()))
         self.assertNotIn("native_publications", self.state()["private"])
-        self.assertNotIn(str(self.private), self.plan_path.read_text())
+        self.assertNotIn(str(self.private), self.plan_path.read_text(encoding="utf-8"))
         self.assertEqual(self.git("rev-parse", "HEAD"), self.head)
 
     def test_authorized_publish_runs_dry_then_publish_then_authenticates(self):
@@ -295,7 +295,7 @@ class ReleaseCutTests(unittest.TestCase):
         self.assertEqual(self.calls(), [])
 
     def test_carried_lane_refuses_without_tools_or_state(self):
-        previous = json.loads((self.root / "releases" / self.plan["predecessor"] / "manifest.json").read_text())
+        previous = json.loads((self.root / "releases" / self.plan["predecessor"] / "manifest.json").read_text(encoding="utf-8"))
         carried = next(row for row in previous["components"]["ninfer_variants"]
                        if row["id"] == "rtx3090-windows-native")
         row = next(row for row in self.plan["components"] if row["id"] == carried["id"])
@@ -419,7 +419,7 @@ class ReleaseCutTests(unittest.TestCase):
 
 class RecordedCutVectorTests(unittest.TestCase):
     def test_historical_public_argv_differs_only_in_private_locations(self):
-        manifest = json.loads((ROOT / "releases/v0.19.0/manifest.json").read_text())
+        manifest = json.loads((ROOT / "releases/v0.19.0/manifest.json").read_text(encoding="utf-8"))
         row = next(row for row in manifest["components"]["ninfer_variants"]
                    if row["id"] == "rtx3090-windows-native")
         component = {key: row[key] for key in ("id", "release_tag", "source_commit")}
