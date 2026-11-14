@@ -9,7 +9,7 @@ import json
 import re
 import subprocess
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any
 from urllib.parse import urlsplit
 
@@ -147,7 +147,9 @@ class ReleaseDriver:
         for name in PATH_INPUTS:
             value = getattr(options, name, None)
             if value is not None:
-                private[name] = str(Path(value).resolve())
+                key = ("compose_notes" if name == "notes"
+                       and getattr(options, "command", None) == "finalize" else name)
+                private[key] = str(Path(value).resolve())
         for name in MAPPED_INPUTS:
             values = getattr(options, name, None)
             if values is not None:
@@ -211,10 +213,13 @@ class ReleaseDriver:
 
     def check_dirty(self, group: str | None) -> set[str]:
         paths = dirty_paths(self.root)
-        foreign = sorted(path for path in paths if group is None or not self.declared(group, path))
+        guide_input = ({"docs/QUICKSTART.md"} if group in ("stage", "lane-pin")
+                       and "guide" not in self.records else set())
+        foreign = sorted(path for path in paths if path not in guide_input
+                         and (group is None or not self.declared(group, path)))
         if foreign:
             raise ReleaseError("dirty file outside declared paths: " + ", ".join(foreign))
-        return paths
+        return paths - guide_input
 
     def restore(self, group: str, dirty: set[str]) -> None:
         """Restore only this group's paths, retaining the operator's current plan."""
@@ -313,7 +318,7 @@ class ReleaseDriver:
     def inputs_digest(self, group: str, head: str) -> str:
         names = ({"stage_input", "notes", "client_component", "runtime_publication", "bundles",
                   "lane_receipts", "assets", "native_publications"} if group == "stage" else
-                 {"window_root", "reviews", "values"} if group == "compose" else set())
+                 {"window_root", "reviews", "values", "compose_notes"} if group == "compose" else set())
         private = {}
         for name in sorted(names & self.state["private"].keys()):
             value = self.state["private"][name]
@@ -325,6 +330,8 @@ class ReleaseDriver:
             values = self.stage_values()
             private["stage_files"] = {key: input_hash(Path(values[key]))
                                       for key in sorted(STAGE_FILE_OPTIONS & values.keys())}
+        elif group == "guide":
+            private["guide_sha256"] = file_sha(self.root / "docs" / "QUICKSTART.md")
         payload = {"plan_sha256": self.plan_sha, "HEAD": head, "private": private,
                    "options": self.state["options"],
                    "tools": {name: file_sha(self.require_tool(name)) for name in self.tools(group)}}
@@ -459,6 +466,74 @@ class ReleaseDriver:
             arguments += ["--as-of", self.state["options"]["as_of"]]
         self.tool("receipt_audit.py", *arguments)
 
+    def _window_attempt_arguments(self) -> list[str]:
+        root = self.private_path("window_root").resolve()
+        index = root / "window-state.json"
+        if not index.exists():
+            return []
+        state = read_json(index)
+
+        def refuse(message: str) -> None:
+            raise ReleaseError(f"window-state.json: {message}")
+
+        if type(state.get("schema")) is not int or state["schema"] != 1:
+            refuse("schema must be 1")
+        if state.get("release") != self.release:
+            refuse("release must match the selected release")
+        if state.get("candidate") != self.records["guide"]["commit"]:
+            refuse("candidate must equal the guide commit")
+        components = manifest_components(read_json(self.plan_path.parent / "manifest.json"))
+        expected = [component.split("-", 1)[0] for component in COMPONENT_IDS if component in components]
+        lanes = state.get("lanes")
+        if not isinstance(lanes, dict) or set(lanes) != set(expected):
+            refuse("lanes must equal the manifest's declared lanes")
+        arguments: list[str] = []
+        for lane in expected:
+            record = lanes[lane]
+            if not isinstance(record, dict):
+                refuse(f"{lane} must be an object")
+            accepted = record.get("accepted")
+            if type(accepted) is not int or accepted <= 0:
+                refuse(f"{lane} accepted attempt must be a positive integer")
+            attempts = record.get("attempts")
+            if not isinstance(attempts, list):
+                refuse(f"{lane} attempts must be an array")
+            entries: dict[int, tuple[Path, str]] = {}
+            for position, entry in enumerate(attempts):
+                label = f"{lane}.attempts[{position}]"
+                if not isinstance(entry, dict):
+                    refuse(f"{label} must be an object")
+                attempt = entry.get("attempt")
+                if type(attempt) is not int or attempt <= 0 or attempt in entries:
+                    refuse(f"{label} attempt must be a unique positive integer")
+                status = entry.get("status")
+                if status not in ("planned", "spent-failed", "passed", "retired"):
+                    refuse(f"{label} status is invalid")
+                directory = entry.get("directory")
+                if (not isinstance(directory, str) or not directory or "\\" in directory
+                        or PurePosixPath(directory).is_absolute()
+                        or PureWindowsPath(directory).drive or PureWindowsPath(directory).root):
+                    refuse(f"{label} directory must be a relative POSIX path")
+                try:
+                    path = (root / directory).resolve()
+                except (OSError, RuntimeError) as error:
+                    raise ReleaseError(f"window-state.json: {label} directory cannot be resolved") from error
+                if not path.is_relative_to(root):
+                    refuse(f"{label} directory escapes the window root")
+                if not path.is_dir():
+                    refuse(f"{label} directory must exist and be a directory")
+                entries[attempt] = (path, status)
+            if accepted not in entries:
+                refuse(f"{lane} accepted attempt has no matching entry")
+            path, status = entries[accepted]
+            if status not in ("passed", "retired"):
+                refuse(f"{lane} accepted attempt must be passed or retired")
+            arguments += ["--lane-dir", f"{lane}={path}"]
+            for attempt, (path, status) in sorted(entries.items()):
+                if attempt < accepted and status == "spent-failed":
+                    arguments += ["--corrected-attempt", f"{lane}={path}"]
+        return arguments
+
     def compose(self) -> None:
         self.check_ledger()
         date = self.state["options"].get("as_of")
@@ -467,10 +542,14 @@ class ReleaseDriver:
         candidate = self.records["guide"]["commit"]
         evidence = self.local / "composition-evidence.json"
         receipts = self.local / "receipts"
+        window_arguments = self._window_attempt_arguments()
+        if "compose_notes" in self.state["private"]:
+            atomic_write(self.plan_path.parent / "NINFER_RELEASE_NOTES.md",
+                         Path(self.state["private"]["compose_notes"]).read_bytes())
         self.tool("collect_route_evidence.py", "--release", self.release, "--candidate", candidate,
                   "--window-root", str(self.private_path("window_root")), "--plan",
                   str(self.plan_path.relative_to(self.root)), "--output", str(evidence),
-                  "--receipts-dir", str(receipts))
+                  "--receipts-dir", str(receipts), *window_arguments)
         self.tool("review_ledger.py", "--release", self.release, "--candidate", candidate,
                   "--reviews", str(self.private_path("reviews")), "--values", str(self.private_path("values")))
         self.check_ledger()
@@ -512,9 +591,13 @@ class ReleaseDriver:
             self.save()
             return
         dirty = self.check_dirty(group)
+        cached = self.state["groups"].get(group, {})
+        if group in ("stage", "compose") and not cached and dirty:
+            raise ReleaseError(f"first {group} run refuses dirty declared paths: "
+                               + ", ".join(sorted(dirty))
+                               + "; supply release notes with --notes, or commit or discard these edits explicitly")
         head = git(self.root, "rev-parse", "HEAD").strip()
         digest = self.inputs_digest(group, head)
-        cached = self.state["groups"].get(group, {})
         if group == "compose" and cached.get("tools_complete") is not False:
             self.check_ledger()
         complete = (bool(dirty) and cached.get("tools_complete") is True
@@ -522,7 +605,8 @@ class ReleaseDriver:
                     and cached.get("outputs") == self.outputs(group)
                     and all(path.is_file() for path in self.required_outputs(group)))
         if not complete:
-            self.restore(group, dirty)
+            if group != "guide":
+                self.restore(group, dirty)
             self.check_plan()
             cached = {"inputs_sha256": digest, "attempts": cached.get("attempts", 0) + 1,
                       "tools_complete": False}
@@ -534,6 +618,9 @@ class ReleaseDriver:
             if missing:
                 raise ReleaseError(f"{group} did not produce declared outputs: {', '.join(missing)}")
             self.check_dirty(group)
+            if group == "guide":
+                # An idempotent retarget's output is the authored input on a resumed attempt.
+                cached["inputs_sha256"] = self.inputs_digest(group, head)
             cached.update(tools_complete=True, outputs=self.outputs(group))
             self.save()
         if group == "compose":

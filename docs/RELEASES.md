@@ -374,16 +374,32 @@ Supply private inputs as arguments to `candidate`, not as plan fields:
 - An updated client requires `--client-component JSON`, passed to the stager's
   `--omp-component`. Optional `--notes PATH` supplies the release's completed publication notes;
   optional profile/deployment options belong in the stage-input object.
+- `finalize --notes PATH` replaces those notes in the compose commit when acceptance results
+  complete them. Without this argument, finalization keeps the staged notes. A resumed compose
+  attempt reuses its recorded notes input and hashes its bytes before deciding whether to rerun.
 - `--measurement-prefix PREFIX` selects public measurement filenames; it must contain no private
   identifiers. `--as-of DATE` is the acceptance completion date, not an inferred current date.
+
+When the window root contains `window-state.json`, finalization selects each manifest-declared
+lane's accepted attempt from that index. The index must bind this release and the guide candidate;
+every accepted entry must be `passed` or `retired`. All attempt directories must exist, use relative
+POSIX paths and stay inside the window root, including after symlink resolution. The collector
+receives explicit `--lane-dir` arguments for accepted attempts and `--corrected-attempt` arguments
+for every earlier `spent-failed` attempt of that lane. The input fingerprint hashes the index
+alongside the window evidence. Older windows without an index keep their original root layout.
 
 The driver remembers private input paths only in ignored `.release-state/<version>.json`, written
 atomically. That file is a cache, not authority: first-parent commits with `Release:` and
 `Release-Step:` trailers determine completed groups, and `Pins:` trailers bind the earlier group
 commits. Rerunning a completed group makes no commit. An interrupted group's complete outputs are
 committed without rerunning tools only when the plan, HEAD and private input hashes are unchanged;
-otherwise only that group's declared paths are restored and its tools rerun. Foreign dirty paths
-and rewritten recorded history are refused. Keep operator work outside those declared output paths.
+otherwise only that group's declared paths are restored and its tools rerun, except for the guide,
+which is always retargeted in place. A first `stage` or `compose` attempt refuses dirty declared
+paths: supply notes through `--notes`, or commit or discard other edits explicitly. Only an attempt
+the driver already started may restore its partial outputs on resume. Authored guide edits are
+inputs, hash-bound into the guide group's fingerprint, and ride only the guide commit; they are
+never restored away, even after interruption. Foreign dirty paths and rewritten recorded history
+are refused.
 
 Both commands run their verifier gates and the contract suite. `--no-suite` skips only the suite,
 never installability, lint, ready or pin checks. A missing tool is an error, never a skipped step.
@@ -481,7 +497,8 @@ evidence. It also rejects stale release-state wording in tracked Markdown outsid
 Keep that prose neutral before freezing the candidate; the whole guide remains hash-bound through
 acceptance. CI repeats the ready/pin gate on the release tag with full history. Living
 CHANGELOG/RELEASES/BENCHMARKS/FACTS/README pages change once, [after publication](#after-publication),
-not during staging or finalization. Release-local notes are completed before the candidate.
+not during staging or finalization. Release-local notes are checked at the candidate and may gain
+acceptance results through `finalize --notes` before the compose commit.
 
 ### Guarded completion of a partial product publication
 
