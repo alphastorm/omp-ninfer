@@ -68,7 +68,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from render_compatibility import OMP_PROFILE_PLATFORMS
-from rebind_release import stamp_profile, save as save_profile
+from release_profiles import stamp_profile
+from rebind_release import save as save_profile
 from verify_release import (
     ContractError,
     NINFER_VARIANT_IDS,
@@ -750,16 +751,6 @@ def main() -> int:
     )
     report = json.loads(verify.stdout)
     errors = report.get("errors", [])
-    if omp_descriptor is not None:
-        # The lead rewrites copied notes after staging has removed client acceptance.
-        # Only dangling links into this deliberately cleared directory are draft residue.
-        for error in errors:
-            document, separator, target = error.partition(" has missing local link: ")
-            document_path = (ROOT / document).resolve()
-            if separator and document_path.is_relative_to(dst_dir):
-                target_path = (document_path.parent / target).resolve()
-                if target_path.is_relative_to(dst_dir / "acceptance"):
-                    draft_residue.add(error)
     for warning in report.get("warnings", []):
         if warning.removeprefix(f"releases/{args.release}/") not in leftovers:
             print(f"warning: {warning}", file=sys.stderr)

@@ -13,13 +13,20 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DESCRIPTOR = ROOT / "tests" / "fixtures" / "upstream-omp-component.json"
 SOURCE = "v0.7.4"
-# A release that is never checked in, so the staged tree cannot collide with a real one.
-TARGET = "v0.99.0"
+# Legacy component lineages exercise their historical contract, not future admission.
+TARGET = "v0.17.2"
 # Staging mechanics start from an immutable accepted source, not an unqualified restage.
 CURRENT = "v0.12.2"
 ACCEPTED_PROFILES = ROOT / "tests/fixtures/profiles-v0.12.2"
 sys.path.insert(0, str(ROOT / "scripts"))
-from verify_release import configuration_identity, product_version
+from verify_release import checkpoint_host_directory, configuration_identity, product_version
+from render_compatibility import render
+from release_io import atomic_write, atomic_write_json
+
+HISTORY_SPEC = importlib.util.spec_from_file_location("staging_history", ROOT / "tests/history.py")
+assert HISTORY_SPEC is not None and HISTORY_SPEC.loader is not None
+HISTORY = importlib.util.module_from_spec(HISTORY_SPEC)
+HISTORY_SPEC.loader.exec_module(HISTORY)
 
 
 class StageReleaseTests(unittest.TestCase):
@@ -29,7 +36,12 @@ class StageReleaseTests(unittest.TestCase):
 
     @staticmethod
     def save(path: Path, value: dict) -> None:
-        path.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
+        atomic_write_json(path, value)
+
+    def mirror_predecessor(self, root: Path, source: Path) -> None:
+        atomic_write(source / "COMPATIBILITY.md", render(self.load(source / "compatibility.json")))
+        atomic_write(root / "compatibility.json", (source / "compatibility.json").read_bytes())
+        atomic_write(root / "docs/COMPATIBILITY.md", (source / "COMPATIBILITY.md").read_bytes())
 
     @staticmethod
     def runtime_checksums(runtime: dict) -> bytes:
@@ -68,15 +80,28 @@ class StageReleaseTests(unittest.TestCase):
                 if source_release == "v0.10.0":
                     profile["client"] = clients[profile_ids[profile["installation_mode"]]]
                 self.save(path, profile)
-        shutil.copy2(ROOT / "releases" / CURRENT / "compatibility.json",
-                     root / "compatibility.json")
         shutil.copytree(ROOT / "docs" / "measurements", root / "docs" / "measurements")
-        shutil.copy2(ROOT / "releases" / CURRENT / "COMPATIBILITY.md",
-                     root / "docs" / "COMPATIBILITY.md")
         for document in ("QUICKSTART.md", "SECURITY.md", "BENCHMARKS.md"):
             (root / "docs" / document).write_text("# Staging fixture\n", encoding="utf-8")
         source = root / "releases" / source_release
+        if not list((source / "profiles").glob("*.json")):
+            # Older release trees predate snapshots; recover the real launch shape instead
+            # of projecting whichever unrelated profile happens to be live today.
+            commit = HISTORY.resolve_commits(source_release)[0]
+            for profile in (root / "profiles").glob("*.json"):
+                data = ((ACCEPTED_PROFILES / profile.name).read_bytes()
+                        if source_release == CURRENT else subprocess.run(
+                            ["git", "show", f"{commit}:profiles/{profile.name}"], cwd=ROOT,
+                            capture_output=True, check=True,
+                        ).stdout)
+                snapshot = json.loads(data)
+                if source_release in (SOURCE, "v0.10.0"):
+                    snapshot["omp_provider"].pop("compat", None)
+                    snapshot["omp_provider"].pop("ninfer_stateful_responses", None)
+                    snapshot["omp_provider"]["stateful_responses_environment"] = {"PI_OPENAI_STATEFUL": "1"}
+                self.save(source / "profiles" / profile.name, snapshot)
         if not prepare_client_evidence:
+            self.mirror_predecessor(root, source)
             return root
         manifest = self.load(source / "manifest.json")
         pins = set()
@@ -115,6 +140,7 @@ class StageReleaseTests(unittest.TestCase):
         for profile in compatibility["profiles"]:
             profile["limitations"] = []
         self.save(source / "compatibility.json", compatibility)
+        self.mirror_predecessor(root, source)
         return root
 
     def native_staging_copy(self) -> Path:
@@ -126,6 +152,7 @@ class StageReleaseTests(unittest.TestCase):
             shutil.copy2(profile, root / "profiles" / profile.name)
         for path in source.glob("*.md"):
             path.write_text("# Staging fixture\n", encoding="utf-8")
+        self.mirror_predecessor(root, source)
         return root
 
     def stage(self, root: Path, descriptor: Path | None = DESCRIPTOR,
@@ -221,7 +248,8 @@ class StageReleaseTests(unittest.TestCase):
         self.assertEqual((target / "NINFER_RELEASE_NOTES.md").read_text(), notes)
         self.assertEqual({path: path.read_bytes() for path in live}, original)
         for path in (target / "profiles").glob("*.json"):
-            self.assertEqual(self.load(path)["server"]["checkpoint_host_directory"], "checkpoints-v099")
+            self.assertEqual(self.load(path)["server"]["checkpoint_host_directory"],
+                             checkpoint_host_directory(TARGET))
         qualification = self.load(target / "qualification.json")
         self.assertEqual(qualification["observed_gates"], {"fresh_runtime": {"status": "pending"}})
         self.assertEqual(qualification["composition"]["local_release_packaging"]["status"], "pending")
@@ -245,7 +273,8 @@ class StageReleaseTests(unittest.TestCase):
             self.assertEqual(profile["release"], TARGET)
             self.assertEqual(profile["server"]["status_schema_version"], 2)
             self.assertEqual(profile["server"]["checkpoint_mount_target"], "/checkpoints-v013")
-            self.assertEqual(profile["server"]["checkpoint_host_directory"], "checkpoints-v099")
+            self.assertEqual(profile["server"]["checkpoint_host_directory"],
+                             checkpoint_host_directory(TARGET))
             args = profile["server"]["arguments"]
             self.assertEqual(args[args.index("--binary-sha256") + 1],
                              manifest["components"]["ninfer"]["server_binary_sha256"])
@@ -588,13 +617,25 @@ class StageReleaseTests(unittest.TestCase):
             profile = self.load(path)
             profile["status"] = "public"
             self.save(path, profile)
+        original = {path: path.read_bytes() for path in (root / "profiles").glob("*.json")}
         result = self.stage(root)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("[draft-posture] profile: client archive must match windows-x64 compatibility distribution", result.stdout)
-        self.assertIn("[draft-posture] profiles/qwen38-rtx5090-manual-tunnel.json: client archive must match darwin-arm64 compatibility distribution", result.stdout)
+        self.assertEqual({path: path.read_bytes() for path in original}, original)
+        descriptor = self.load(DESCRIPTOR)
+        for path in (root / "releases" / TARGET / "profiles").glob("*.json"):
+            profile = self.load(path)
+            platform = {"manual-ssh-tunnel": "darwin-arm64",
+                        "native-windows-docker-local": "windows-x64"}[profile["installation_mode"]]
+            self.assertEqual(profile["client"], descriptor["platforms"][platform])
 
-    def test_unmodified_predecessor_stages_before_notes_and_evidence_are_rewritten(self) -> None:
+    def test_predecessor_notes_stage_before_client_evidence_is_rewritten(self) -> None:
         root = self.staging_copy(prepare_client_evidence=False)
+        path = root / "releases" / SOURCE / "manifest.json"
+        manifest = self.load(path)
+        # A stock-client target cannot retain a fork component tag; notes remain untouched
+        # so this test still exercises the diagnostic sweep over predecessor client prose.
+        manifest["publication"]["targets"] = ["Public product and stock client release"]
+        self.save(path, manifest)
         result = self.stage(root)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertRegex(result.stderr, r"NINFER_RELEASE_NOTES\.md:\d+: retains predecessor OMP identity")
@@ -612,6 +653,7 @@ class StageReleaseTests(unittest.TestCase):
             "fit": {"device_state_slots": 0, "admission_headroom_mib": 640,
                     "draft_mlp_device_format": "Q4_G64_FP16", "token_embedding_residency": "host-mapped"}}
         self.save(later / "manifest.json", manifest)
+        self.mirror_predecessor(root, later)
         result = self.stage(root)
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("rtx4090-windows-native.qualification.quality_screen is required", result.stdout)
@@ -779,10 +821,8 @@ class StageReleaseTests(unittest.TestCase):
             args = staged["server"]["arguments"]
             self.assertEqual(args[args.index("--config-sha256") + 1], config)
 
-    def test_staged_checkpoint_stores_allow_only_valid_root_draft_residue(self) -> None:
-        for store, expected_status in (("checkpoints-v013", 0),
-                                       ("checkpoints-v099", 0),
-                                       ("checkpoints-v098", 1)):
+    def test_staged_checkpoint_stores_validate_the_snapshot_not_the_unpromoted_root(self) -> None:
+        for store in ("checkpoints-v013", checkpoint_host_directory(TARGET), "checkpoints-v098"):
             with self.subTest(root_store=store):
                 root = self.native_staging_copy()
                 profiles = sorted((root / "profiles").glob("*.json"))
@@ -792,32 +832,42 @@ class StageReleaseTests(unittest.TestCase):
                     self.save(path, profile)
                 original = {path: path.read_bytes() for path in profiles}
                 result = self.stage(root, None, source_release="v0.16.0")
-                self.assertEqual(result.returncode, expected_status, result.stdout + result.stderr)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
                 self.assertEqual({path: path.read_bytes() for path in profiles}, original)
                 target = root / "releases" / TARGET / "profiles"
                 for path in profiles:
                     staged = self.load(target / path.name)
-                    self.assertEqual(staged["server"]["checkpoint_host_directory"], "checkpoints-v099")
+                    self.assertEqual(staged["server"]["checkpoint_host_directory"],
+                                     checkpoint_host_directory(TARGET))
                     self.assertEqual(staged["server"]["checkpoint_mount_target"], "/checkpoints-v013")
                     self.assertEqual(configuration_identity(staged), configuration_identity(self.load(path)))
-                errors = ["profile", "profiles/qwen38-rtx5090-manual-tunnel.json"]
-                if expected_status:
-                    for label in errors:
-                        self.assertIn(
-                            f"[UNEXPECTED] {label}: checkpoint host directory must be checkpoints-v099",
-                            result.stdout)
-                if store == "checkpoints-v013":
-                    for mode in ("--require-installable", "--require-ready"):
-                        strict = subprocess.run(
-                            [sys.executable, str(root / "scripts/verify_release.py"),
-                             "--release", TARGET, mode, "--json"],
-                            cwd=root, capture_output=True, text=True)
-                        self.assertEqual(strict.returncode, 1, strict.stdout + strict.stderr)
-                        report = json.loads(strict.stdout)
-                        for label in errors:
-                            self.assertIn(
-                                f"{label}: checkpoint host directory must be checkpoints-v099",
-                                report["errors"])
+                # Draft validation owns the prospective snapshot, not the unpromoted root.
+                snapshot = target / profiles[0].name
+                damaged = self.load(snapshot)
+                damaged["server"]["checkpoint_host_directory"] = "checkpoints-v098"
+                self.save(snapshot, damaged)
+                check = subprocess.run(
+                    [sys.executable, str(root / "scripts/verify_release.py"),
+                     "--release", TARGET, "--json"], cwd=root, capture_output=True, text=True)
+                self.assertEqual(check.returncode, 1, check.stdout + check.stderr)
+                self.assertTrue(any("checkpoint host directory must be "
+                                    + checkpoint_host_directory(TARGET) in error
+                                    for error in json.loads(check.stdout)["errors"]))
+
+    def test_modern_successor_uses_the_real_phase_posture(self) -> None:
+        from test_verify_lint_ready import stage_successor
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        root = Path(temporary.name) / "modern"
+        subprocess.run(["git", "clone", "--quiet", "--shared", str(ROOT), str(root)],
+                       check=True, capture_output=True)
+        shutil.copytree(ROOT / "scripts", root / "scripts", dirs_exist_ok=True,
+                        ignore=shutil.ignore_patterns("__pycache__"))
+        release = stage_successor(root)
+        result = subprocess.run(
+            [sys.executable, str(root / "scripts/verify_release.py"), "--release", release,
+             "--lint-ready", "--check-pins", "--json"], cwd=root, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_staged_native_manifest_refuses_removed_quality_and_fit_bindings(self) -> None:
         root = self.native_staging_copy()

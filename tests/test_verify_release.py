@@ -11,6 +11,7 @@ from copy import deepcopy
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+CURRENT = json.loads((ROOT / "compatibility.json").read_text(encoding="utf-8"))["product_release"]
 # Immutable ready fixture; root authority may legitimately be a newer candidate.
 PUBLIC_RELEASE = "v0.10.0"
 ACCEPTED_PROFILES = ROOT / "tests/fixtures/profiles-v0.12.2"
@@ -28,6 +29,10 @@ REBIND_SPEC = importlib.util.spec_from_file_location("rebind_release", ROOT / "s
 assert REBIND_SPEC is not None and REBIND_SPEC.loader is not None
 REBIND_RELEASE = importlib.util.module_from_spec(REBIND_SPEC)
 REBIND_SPEC.loader.exec_module(REBIND_RELEASE)
+HISTORY_SPEC = importlib.util.spec_from_file_location("verification_history", ROOT / "tests/history.py")
+assert HISTORY_SPEC is not None and HISTORY_SPEC.loader is not None
+HISTORY = importlib.util.module_from_spec(HISTORY_SPEC)
+HISTORY_SPEC.loader.exec_module(HISTORY)
 
 
 class ReleaseIdentitySnapshotTests(unittest.TestCase):
@@ -56,8 +61,7 @@ class ReleaseIdentitySnapshotTests(unittest.TestCase):
             self.assertIsNone(VERIFY_RELEASE.predecessor_manifest(root, "v0.15.0"))
 
     def test_current_release_identity_snapshots_match(self) -> None:
-        release = json.loads((ROOT / "compatibility.json").read_text(encoding="utf-8"))[
-            "product_release"]
+        release = CURRENT
         manifest = json.loads((ROOT / "releases" / release / "manifest.json").read_text(
             encoding="utf-8"))
         errors = []
@@ -128,6 +132,39 @@ class ReleaseIdentitySnapshotTests(unittest.TestCase):
 
 
 class RuntimeContractLabelTests(unittest.TestCase):
+    def test_published_lane_derivations_match_the_authorities(self):
+        for release in ("v0.18.0", "v0.19.0"):
+            with self.subTest(release=release):
+                directory = ROOT / "releases" / release
+                manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
+                authority = json.loads((directory / "compatibility.json").read_text(encoding="utf-8"))
+                self.assertEqual(set(VERIFY_RELEASE.runtime_contract_lanes(manifest).values()),
+                                 {row["lane"] for row in authority["runtime_contracts"]})
+
+    def test_current_checkpoint_directory_comes_from_the_release(self):
+        for path in (ROOT / "profiles").glob("*.json"):
+            profile = json.loads(path.read_text(encoding="utf-8"))
+            if profile["server"].get("status_schema_version") == 2:
+                self.assertEqual(profile["server"]["checkpoint_host_directory"],
+                                 VERIFY_RELEASE.checkpoint_host_directory(CURRENT))
+
+    def test_root_release_ready(self):
+        manifest = json.loads((ROOT / "releases" / CURRENT / "manifest.json").read_text(encoding="utf-8"))
+        if manifest["status"] != "ready":
+            self.skipTest("root release is not ready")
+        directory = ROOT / "releases" / CURRENT
+        authority = json.loads((directory / "compatibility.json").read_text(encoding="utf-8"))
+        qualification = json.loads((directory / "qualification.json").read_text(encoding="utf-8"))
+        commits = []
+        for _, url, _ in VERIFY_RELEASE.pinned_evidence(manifest, authority, qualification):
+            match = VERIFY_RELEASE.PRODUCT_RAW_URL_RE.fullmatch(url) if isinstance(url, str) else None
+            if match is not None:
+                commits.append(match[1])
+        HISTORY.require_commits(*commits)
+        _, errors = VERIFY_RELEASE.validate(ROOT, require_ready=True, product_release=CURRENT,
+                                           check_pins=True)
+        self.assertEqual(errors, [])
+
     def validate(self, release="v0.18.0", labels=None):
         manifest = {"release": release, "components": {
             "ninfer": {"release_tag": "v0.7.0-qwen38-5090-beta.7"},
@@ -1031,19 +1068,19 @@ class ReleaseContractTest(unittest.TestCase):
                             for error in errors), errors)
 
     def test_runtime_tag_allowlist_accepts_only_the_new_component_version(self) -> None:
-        self.assertIsNotNone(VERIFY_RELEASE.NINFER_RELEASE_TAG_RE.fullmatch(
+        self.assertIsNotNone(VERIFY_RELEASE.HISTORICAL_NINFER_RELEASE_TAG_RE.fullmatch(
             "v0.6.16-qwen38-5090-beta.1"))
-        self.assertIsNotNone(VERIFY_RELEASE.NINFER_RELEASE_TAG_RE.fullmatch(
+        self.assertIsNotNone(VERIFY_RELEASE.HISTORICAL_NINFER_RELEASE_TAG_RE.fullmatch(
             "v0.6.15-qwen38-5090-beta.1"))
-        self.assertIsNotNone(VERIFY_RELEASE.NINFER_RELEASE_TAG_RE.fullmatch(
+        self.assertIsNotNone(VERIFY_RELEASE.HISTORICAL_NINFER_RELEASE_TAG_RE.fullmatch(
             "v0.7.0-qwen38-5090-beta.1"))
-        self.assertIsNotNone(VERIFY_RELEASE.NINFER_RELEASE_TAG_RE.fullmatch(
+        self.assertIsNotNone(VERIFY_RELEASE.HISTORICAL_NINFER_RELEASE_TAG_RE.fullmatch(
             "v0.7.0-qwen38-5090-beta.2"))
         for tag in ("v0.6.17-qwen38-5090-beta.1", "v0.7.1-qwen38-5090-beta.1",
                     "v0.6.16-qwen38-5090-beta.0", "v0.6.16-qwen38-5090-beta.01",
                     "v0.6.16-qwen38-4090-beta.1", "v0.6.16-qwen38-5090-beta.1-extra"):
             with self.subTest(tag=tag):
-                self.assertIsNone(VERIFY_RELEASE.NINFER_RELEASE_TAG_RE.fullmatch(tag))
+                self.assertIsNone(VERIFY_RELEASE.HISTORICAL_NINFER_RELEASE_TAG_RE.fullmatch(tag))
 
     def test_historical_manifests_keep_their_native_model_contract(self) -> None:
         for path in sorted((ROOT / "releases").glob("*/manifest.json")):
