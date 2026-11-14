@@ -152,8 +152,8 @@ def _carried(tree: _Tree, release: str, predecessor: str, manifest: dict[str, An
         tag = row["release_tag"]
         reason_prefix = f"Carried component, unchanged since {predecessor}"
         reason = (f"{reason_prefix}: {tag} (source {row['source_commit'][:8]}) keeps its "
-                  "byte-identical published row and qualification; no fresh hardware qualification, "
-                  "bounded pressure saves or new-client/product-route acceptance is claimed.")
+                  "byte-identical published row and qualification; no fresh hardware qualification "
+                  "or new-client/product-route acceptance is claimed.")
         old_references = dict(_references(old.get("qualification", {})))
         references = [(old_references[field], value) for field, value in _references(qualification)]
         if row.get("checksums_sha256") is not None:

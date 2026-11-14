@@ -325,7 +325,20 @@ class PublicHistoryGoldenTest(unittest.TestCase):
                               check=True, capture_output=True).stdout
 
     def assert_audit_bytes(self, actual: dict, expected: bytes) -> None:
+        legacy = (b"no fresh hardware qualification, bounded pressure saves or "
+                  b"new-client/product-route acceptance is claimed.")
+        neutral = (b"no fresh hardware qualification or "
+                   b"new-client/product-route acceptance is claimed.")
+        published = json.loads(expected)
+        carried_reasons = [row["reason"] for row in published["files"]
+                           if row["disposition"] == "kept"
+                           and row["reason"].startswith("Carried component, unchanged since ")]
+        self.assertGreater(len(carried_reasons), 0)
+        self.assertTrue(all(reason.count(legacy.decode()) == 1 for reason in carried_reasons))
+        self.assertEqual(expected.count(legacy), len(carried_reasons))
+        expected = expected.replace(legacy, neutral)
         data = json_bytes(actual)
+        self.assertNotIn(legacy, data)
         if data == expected:
             return
         wanted = json.loads(expected)
