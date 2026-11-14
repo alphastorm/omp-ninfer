@@ -27,6 +27,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `docs/QUICKSTART.md` is unchanged: its bytes are bound to the release's acceptance evidence.
 - `docs/TROUBLESHOOTING.md` entries start from the symptom and end with the action; the dated
   incident notes behind them sit in a section at the end of the page.
+- Component provenance has one source. The verifier derives, from a release's manifest and its
+  predecessor, which components were re-cut and which are carried; the aggregate and the
+  composer write that generated statement, and the verifier refuses release evidence that makes
+  a provenance claim in any other words. Release-level limitation sentences are authored in the
+  plan and no longer inherited from the previous release.
+- Lane labels, runtime contract lanes, publication target tags and component tag shapes are
+  derived from the manifest instead of being edited for each release.
+- The cut procedure in `docs/RELEASES.md` describes the plan and the driver; living documents
+  change once, after publication.
+- From v0.20.0 the ready gate, under `--check-pins`, refuses a review ledger whose product review
+  subject lies outside the release's own history or after its route candidate, and a runtime or
+  native component review of a source commit the release does not ship.
 
 ### Added
 
@@ -34,9 +46,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   target, including links from release notes, the site, `llms.txt` and the issue forms
   ([#176](https://github.com/alphastorm/omp-ninfer/issues/176), item 5), and the reference
   pages must not name the current release, client version or a component tag.
+- `scripts/release.py`: one resumable driver for everything a release does after its hardware
+  runs. A committed `releases/<version>/plan.json` (`scripts/release_plan.py`) names the
+  predecessor, each component as re-cut or carried, the client, platform statuses, the release's
+  authored limitation sentences and hash-bound decisions. `candidate` stages, binds, pins and
+  retargets the guide; `finalize` composes acceptance and creates the ordered pins and the
+  final audit; `publish --preflight` runs the publisher's no-effect checks. Each step is one
+  commit whose trailers are the driver's only memory, so a rerun continues where it stopped and
+  never rewrites history. `rehearse` cuts a synthetic successor to the ready gate in a
+  disposable clone with no private input; CI runs it on every change.
+- `scripts/qualification_bundle.py` and `scripts/aggregate_qualification.py`: a closed,
+  hash-bound bundle is the contract between a native qualification run and the release tree.
+  `admit` validates it and installs decisions and proofs before the binder; `compose` derives
+  the aggregate qualification afterwards. A carried lane takes no bundle and keeps its
+  published rows.
+- `scripts/receipt_audit.py` generates the lane-stage and final receipt audits and removes
+  predecessor copies no row binds, logging each one; the verifier recomputes the audit from its
+  own commit under `--check-pins`.
+- `scripts/collect_route_evidence.py`, `scripts/review_ledger.py`, `scripts/native_publication.py`
+  and `scripts/retarget_guide.py`: acceptance evidence collection, the public review ledger,
+  anonymous authentication of a published native component, and identity retargeting of the
+  Quick Start from the release manifests. Each reproduces the published v0.19.0 result in its
+  tests.
+- `scripts/verify_release.py --lint-ready`: a staged release is held to everything the ready
+  gate will require except evidence its remaining phases have not produced, so defects surface
+  when the draft is staged instead of after acceptance.
+- `scripts/run_tests.py`: the contract suite runs one isolated process per module, splits
+  oversized modules into fixed chunks and can run a shard. CI uses it on every platform, runs
+  native Windows in four shards and now also runs on `release/**` branches.
 
 ### Fixed
 
+- `docs/RELEASES.md` records an erratum for v0.19.0: five descriptive strings in its acceptance
+  evidence describe the RTX 4090 component as newly cut or promoted, or the three components as
+  built from one source. The manifest, receipts, hashes and pins are correct and unchanged.
 - Issue forms: remove a benchmark command that stock Oh My Pi does not have, stop marking
   restart continuation as native-lane-only, cover the native Windows lanes in the
   installation-failure form, and replace placeholders from early releases.

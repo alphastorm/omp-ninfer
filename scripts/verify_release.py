@@ -30,11 +30,12 @@ import subprocess
 import sys
 from collections.abc import Iterator
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable, Literal, NamedTuple
 from urllib.parse import unquote, urlparse
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from omp_client_environment import uses_per_model_stateful
+from release_profiles import stamp_profile
 from compose_native_qualification import (
     bidirectional_rollback,
     first_release_rollback,
@@ -47,11 +48,11 @@ from compose_native_qualification import (
 )
 from render_compatibility import (  # pyright: ignore[reportMissingImports]
     OMP_PROFILE_PLATFORMS,
-    RUNTIME_VARIANT_PACKAGE_NAME_RES,
-    RUNTIME_VARIANT_RELEASE_TAG_RES,
+    RUNTIME_COMPONENT_TAG_RES,
     UPSTREAM_OMP_REPOSITORY,
     load_authority,
     render as render_compatibility_matrix,
+    runtime_variant_patterns,
     upstream_omp_asset_name,
     validate_client_distribution,
     validate_upstream_omp_identity,
@@ -599,10 +600,19 @@ def validate_pinned_evidence(
     compatibility: dict[str, Any],
     qualification: dict[str, Any],
     errors: list[str],
+    *,
+    lane_only: bool = False,
 ) -> None:
     cache: dict[tuple[str, str], str | None] = {}
     ancestors: dict[str, bool] = {}
     for label, url, expected in pinned_evidence(manifest, compatibility, qualification):
+        if lane_only and not (
+            label.startswith("compatibility ")
+            and label.endswith("gpu_qualification.receipt.url")
+            or label.startswith("compatibility.runtime_variants[")
+            and label.endswith("qualification_receipt.url")
+        ):
+            continue
         require_pinned_bytes(root, url, expected, label, errors, cache)
         match = PRODUCT_RAW_URL_RE.fullmatch(url) if isinstance(url, str) else None
         if match is not None:
@@ -705,6 +715,8 @@ def validate_ga_evidence_bindings(
     compatibility: dict[str, Any],
     qualification: dict[str, Any],
     errors: list[str],
+    *,
+    pinned: bool = True,
 ) -> None:
     """A ready GA release's derived records must name the manifest's exact components.
 
@@ -753,7 +765,7 @@ def validate_ga_evidence_bindings(
         require(receipt.get("sha256") == qual.get("sha256"),
                 f"{prefix}.qualification_receipt.sha256 must equal the manifest qualification hash",
                 errors)
-        if isinstance(qual.get("summary"), str):
+        if pinned and isinstance(qual.get("summary"), str):
             require_product_raw_url(receipt.get("url"),
                                     f"{prefix}.qualification_receipt.url", qual["summary"], errors)
 
@@ -782,9 +794,10 @@ def validate_ga_evidence_bindings(
         require(gpu.get("profile") == runtime.get("deployment_profile"),
                 f"compatibility {profile_id} gpu_qualification.profile must equal the manifest deployment profile",
                 errors)
-        require_product_raw_url(gpu.get("receipt", {}).get("url"),
-                                f"compatibility {profile_id} gpu_qualification.receipt.url",
-                                f"releases/{release}/qualification/rtx5090.json", errors)
+        if pinned:
+            require_product_raw_url(gpu.get("receipt", {}).get("url"),
+                                    f"compatibility {profile_id} gpu_qualification.receipt.url",
+                                    f"releases/{release}/qualification/rtx5090.json", errors)
 
 
 def walk_string_fields(value: Any, path: str) -> Iterator[tuple[str, str]]:
@@ -822,11 +835,25 @@ def walk_object_fields(
             yield from walk_object_fields(child, f"{path}[{index}]")
 
 
+# Fields the acceptance phase writes: the composer's results and the review ledger's closure.
+COMPOSER_OWNED = tuple(re.compile(pattern + r"(?:$|[.\[])") for pattern in (
+    r"manifest\.status",
+    r"manifest\.publication\.(?:blockers|external_installation_qualified)",
+    r"manifest\.qualification\.external_installation_passed",
+    r"qualification\.(?:documented_route_acceptance|remaining_release_gates|as_of|external_installation_qualified)",
+    r"qualification\.composition\.(?:external_installation_acceptance|documented_route_acceptance|review)",
+    r"compatibility\.composition\.(?:status|blockers)",
+    r"compatibility\.profiles\[\d+\]\.(?:status|installable|blockers|acceptance_receipt)",
+))
+
+
 def validate_ready_state_consistency(
     manifest: dict[str, Any],
     compatibility: dict[str, Any],
     qualification: dict[str, Any],
     errors: list[str],
+    *,
+    exclude: tuple[re.Pattern[str], ...] = (),
 ) -> None:
     forbidden_markers = ("draft", "pending")
     stale_phrases = (
@@ -841,6 +868,8 @@ def validate_ready_state_consistency(
         ("qualification", qualification),
     ):
         for path, field, value in walk_object_fields(document, label):
+            if any(pattern.match(path) for pattern in exclude):
+                continue
             if field == "status" and isinstance(value, str):
                 normalized = value.casefold()
                 require(
@@ -871,6 +900,8 @@ def validate_ready_state_consistency(
                     errors,
                 )
         for path, text in walk_string_fields(document, label):
+            if any(pattern.match(path) for pattern in exclude):
+                continue
             normalized = text.casefold()
             stale = [phrase for phrase in stale_phrases if phrase in normalized]
             stale += [match.group(0) for match in pending_release_state(text)]
@@ -1176,6 +1207,110 @@ def validate_review_ledger(
     for field, source in restated.items():
         require(gate.get(field) == ledger.get(source),
                 f"{label}.{field} must equal the review ledger's {source}", errors)
+
+
+def review_subject_errors(root: Path, release: str, ledger: dict[str, Any],
+                          manifest: dict[str, Any]) -> list[str]:
+    """Bind product subjects to the plan/candidate interval and runtime subjects to components."""
+    errors: list[str] = []
+    components = manifest.get("components", {})
+    variant_sources = [row.get("source_commit") for row in components.get("ninfer_variants", [])
+                       if isinstance(row, dict)]
+    component_sources = {
+        # A runtime council reviews the container source or, when only native lanes are
+        # re-cut, a native lane's source. Either is a source this release ships.
+        "native_runtime": [components.get("ninfer", {}).get("source_commit"), *variant_sources],
+        "native_component_delta": variant_sources,
+    }
+    for section, sources in component_sources.items():
+        if section not in ledger:
+            continue
+        record = ledger[section]
+        source = record.get("source_commit") if isinstance(record, dict) else None
+        require(isinstance(source, str) and GIT_SHA_RE.fullmatch(source) is not None
+                and source in sources,
+                f"{section}.source_commit {source!r} must match a released component source "
+                f"commit in {sources!r}", errors)
+    tooling = ledger.get("product_tooling")
+    if not isinstance(tooling, dict):
+        errors.append("review ledger product_tooling must identify its reviewed and stage commits")
+        return errors
+    stage = tooling.get("stage_commit")
+    if not isinstance(stage, str) or GIT_SHA_RE.fullmatch(stage) is None:
+        errors.append(f"product_tooling.stage_commit {stage!r} must be a full commit")
+        return errors
+    known: dict[str, bool] = {}
+
+    def in_history(commit: str) -> bool:
+        if commit not in known:
+            known[commit] = subprocess.run(
+                ["git", "-C", str(root), "cat-file", "-e", f"{commit}^{{commit}}"],
+                capture_output=True,
+            ).returncode == 0
+        return known[commit]
+
+    if not in_history(stage):
+        errors.append(f"product_tooling.stage_commit {stage} is not in local git history "
+                      "(full history is required to verify review subjects)")
+        return errors
+    plan = f"releases/{release}/plan.json"
+    plan_start = None
+    if subprocess.run(["git", "-C", str(root), "cat-file", "-e", f"{stage}:{plan}"],
+                      capture_output=True).returncode == 0:
+        added = subprocess.run(
+            ["git", "-C", str(root), "log", "--reverse", "--diff-filter=A", "--format=%H",
+             stage, "--", plan], capture_output=True, text=True, encoding="utf-8",
+        )
+        commits = added.stdout.splitlines()
+        if added.returncode != 0 or not commits:
+            errors.append(f"release plan addition for stage_commit {stage} is not in local git "
+                          "history (full history is required to verify review subjects)")
+            return errors
+        plan_start = commits[0]
+    subjects = [("product_tooling.reviewed_commit", tooling.get("reviewed_commit"))]
+    epochs = tooling.get("epochs", [])
+    if not isinstance(epochs, list):
+        errors.append("product_tooling.epochs must be an array of reviewed subjects")
+    else:
+        subjects.extend((f"product_tooling.epochs[{index}].reviewed_commit",
+                         epoch.get("reviewed_commit") if isinstance(epoch, dict) else None)
+                        for index, epoch in enumerate(epochs))
+    ancestry: dict[tuple[str, str], bool] = {}
+    for label, reviewed in subjects:
+        if not isinstance(reviewed, str) or GIT_SHA_RE.fullmatch(reviewed) is None:
+            errors.append(f"{label} {reviewed!r} for stage_commit {stage} must be a full commit")
+            continue
+        if not in_history(reviewed):
+            errors.append(f"{label} {reviewed} for stage_commit {stage} is not in local git "
+                          "history (full history is required to verify review subjects)")
+            continue
+        bounds = [(reviewed, stage,
+                   f"{label} {reviewed} must be the stage_commit {stage} or its ancestor")]
+        if plan_start is not None:
+            bounds.append((plan_start, reviewed,
+                           f"{label} {reviewed} for stage_commit {stage} must be the plan addition "
+                           f"{plan_start} or its descendant"))
+        for ancestor, descendant, message in bounds:
+            pair = (ancestor, descendant)
+            if pair not in ancestry:
+                ancestry[pair] = subprocess.run(
+                    ["git", "-C", str(root), "merge-base", "--is-ancestor", ancestor, descendant],
+                    capture_output=True,
+                ).returncode == 0
+            require(ancestry[pair], message, errors)
+    return errors
+
+
+def validate_review_subjects(root: Path, release: str, manifest: dict[str, Any],
+                             qualification: dict[str, Any], errors: list[str]) -> None:
+    """History-dependent ready check; published releases retain their original review contract."""
+    if (product_version(release) or (0, 0, 0)) < (0, 20, 0):
+        return
+    gates = qualification.get("observed_gates")
+    gate = gates.get("g4_review") if isinstance(gates, dict) else None
+    path = bound_file(root, gate.get("repository_path")) if isinstance(gate, dict) else None
+    if path is not None:
+        errors.extend(review_subject_errors(root, release, load_json(path), manifest))
 
 
 def validate_native_lead_recovery(summary: Any, stopped_owner_power: Any,
@@ -1733,6 +1868,20 @@ def validate_route_provenance(root: Path, release: str, qualification: dict, rou
             "documented routes current_block_addresses must match the re-derived guide blocks", errors)
 
 
+def runtime_contract_lanes(manifest: dict[str, Any]) -> dict[str, str]:
+    """Derive display labels without changing the manifest's component identities."""
+    components = manifest.get("components", {})
+    tag = components.get("ninfer", {}).get("release_tag", "")
+    match = re.fullmatch(r"v\d+\.\d+\.\d+-qwen38-5090-(beta\.\d+)", tag)
+    lanes = {"rtx5090-container": f"RTX 5090 {match[1]} container"} if match else {}
+    for variant in components.get("ninfer_variants", []):
+        match = re.fullmatch(r"(v\d+\.\d+\.\d+)-qwen38-(3090|4090)-(beta\.\d+)",
+                            variant.get("release_tag", ""))
+        if match:
+            lanes[variant["id"]] = f"RTX {match[2]} native Windows {match[1]}-{match[3]}"
+    return lanes
+
+
 def validate_exact_lane_set(
     manifest: dict[str, Any],
     compatibility: dict[str, Any],
@@ -1773,15 +1922,7 @@ def validate_exact_lane_set(
         errors,
     )
     if (product_version(str(manifest.get("release"))) or (0, 0, 0)) >= (0, 18, 0):
-        components = manifest.get("components", {})
-        tag = components.get("ninfer", {}).get("release_tag", "")
-        match = re.fullmatch(r"v\d+\.\d+\.\d+-qwen38-5090-(beta\.\d+)", tag)
-        expected = {f"RTX 5090 {match[1]} container"} if match else set()
-        for variant in components.get("ninfer_variants", []):
-            match = re.fullmatch(r"(v\d+\.\d+\.\d+)-qwen38-(3090|4090)-(beta\.\d+)",
-                                variant.get("release_tag", ""))
-            if match:
-                expected.add(f"RTX {match[2]} native Windows {match[1]}-{match[3]}")
+        expected = set(runtime_contract_lanes(manifest).values())
         rows = compatibility.get("runtime_contracts")
         require(isinstance(rows, list) and len(rows) == len(expected)
                 and {row.get("lane") for row in rows if isinstance(row, dict)} == expected
@@ -2022,7 +2163,7 @@ REQUIRED_TUNING_VALUES = (
 )
 REQUIRED_SERVER_FLAGS = ("--lm-head-draft", "--vision", "--preserve-thinking")
 NINFER_VARIANT_IDS = ("rtx3090-windows-native", "rtx4090-windows-native")
-NINFER_RELEASE_TAG_RE = re.compile(
+HISTORICAL_NINFER_RELEASE_TAG_RE = re.compile(
     r"^v(?:0\.2\.0|0\.3\.0|0\.4\.0|0\.4\.1|0\.4\.3|0\.4\.4|0\.4\.5|0\.5\.1|0\.6\.2|0\.6\.3|0\.6\.4"
     r"|0\.6\.5|0\.6\.6|0\.6\.7|0\.6\.8|0\.6\.9|0\.6\.10|0\.6\.11|0\.6\.12|0\.6\.13|0\.6\.14|0\.6\.15|0\.6\.16|0\.7\.0)-qwen38-5090-beta\.[1-9][0-9]*$"
 )
@@ -2302,8 +2443,9 @@ def validate_ninfer_variants(
             require(compatibility_item.get("runtime_shape") == item.get("runtime_shape"),
                     f"{prefix}.runtime_shape must match compatibility", errors)
         release_tag = item.get("release_tag")
+        tag_pattern, package_pattern = runtime_variant_patterns(release, variant_id)
         require(isinstance(release_tag, str)
-                and RUNTIME_VARIANT_RELEASE_TAG_RES[variant_id].fullmatch(release_tag) is not None,
+                and tag_pattern.fullmatch(release_tag) is not None,
                 f"{prefix}.release_tag is invalid", errors)
         asset_prefix = (
             "https://github.com/alphastorm/ninfer/releases/download/"
@@ -2330,7 +2472,7 @@ def validate_ninfer_variants(
         if package_name is None and isinstance(package_url, str):
             package_name = Path(urlparse(package_url).path).name
         require(isinstance(package_name, str)
-                and RUNTIME_VARIANT_PACKAGE_NAME_RES[variant_id].fullmatch(package_name) is not None,
+                and package_pattern.fullmatch(package_name) is not None,
                 f"{prefix}.package_name is invalid", errors)
         if isinstance(package_url, str) and isinstance(package_name, str):
             require(package_url == asset_prefix + package_name,
@@ -2705,6 +2847,163 @@ def unchanged_native_variant(variant: dict[str, Any], predecessor: dict[str, Any
         "release_tag", "package_sha256", *NATIVE_IDENTITY_FIELDS, "maximum_context_tokens", "runtime_shape"))
 
 
+PROVENANCE_CLAIM_RE = re.compile(
+    r"\b(?:re-?cut|newly[- ]cut|fresh(?:ly)?[- ]cut|re-?built|rebuild|carried|carry-over"
+    r"|(?:same|identical|single|one)[-\s]+(?:\w+[-\s]+){0,2}(?:source|revision|commit)"
+    r"|derive[sd]?\s+from)\b", re.IGNORECASE)
+
+
+def validate_component_tag_bindings(root: Path, release: str, manifest: dict[str, Any],
+                                    errors: list[str]) -> None:
+    """New tags may advance without code edits, but published artifact bindings never change."""
+    current = product_version(release) or (0, 0, 0)
+    if current < (0, 20, 0):
+        return
+    components = manifest.get("components", {})
+    runtime = components.get("ninfer", {})
+    tag = runtime.get("release_tag")
+    require(isinstance(tag, str) and RUNTIME_COMPONENT_TAG_RES["rtx5090-container"].fullmatch(tag) is not None,
+            "components.ninfer.release_tag is invalid", errors)
+    if isinstance(tag, str):
+        source_tag = tag.replace("-beta.", "-source.")
+        for field, tags in (("sbom_url", (tag,)), ("source_archive_url", (tag, source_tag))):
+            url = runtime.get(field)
+            parsed = urlparse(url) if isinstance(url, str) else None
+            path = unquote(parsed.path) if parsed is not None else ""
+            bound = (parsed is not None and parsed.scheme == "https" and parsed.netloc == "github.com"
+                     and not parsed.params and not parsed.query and not parsed.fragment
+                     and not any(part in (".", "..") for part in path.split("/"))
+                     and any(path.startswith(f"/alphastorm/ninfer/releases/download/{bound_tag}/")
+                             and len(path) > len(f"/alphastorm/ninfer/releases/download/{bound_tag}/")
+                             for bound_tag in tags))
+            require(bound, f"components.ninfer.{field} must bind its component release", errors)
+    bindings = [(runtime.get("release_tag"), "oci_manifest_digest", runtime.get("oci_manifest_digest"))]
+    bindings.extend((item.get("release_tag"), "package_sha256", item.get("package_sha256"))
+                    for item in components.get("ninfer_variants", []) if isinstance(item, dict))
+    for path in sorted((root / "releases").glob("*/manifest.json")):
+        version = product_version(path.parent.name)
+        if version is None or version >= current:
+            continue
+        previous = load_json(path).get("components", {})
+        earlier = [previous.get("ninfer", {}), *previous.get("ninfer_variants", [])]
+        for old in earlier:
+            for bound_tag, field, digest in bindings:
+                if isinstance(bound_tag, str) and old.get("release_tag") == bound_tag:
+                    require(old.get(field) == digest,
+                            f"component tag {bound_tag} is rebound to a different {field} "
+                            f"than {path.parent.name}", errors)
+
+
+def provenance_clause(label: str, tag: str, carried_from: str | None) -> str:
+    action = f"carried unchanged from {carried_from}" if carried_from else "re-cut for this release"
+    return f"{label} `{tag}` {action}"
+
+
+def component_provenance_parts(
+    root: Path, release: str, manifest: dict[str, Any],
+) -> tuple[dict[str, Any], dict[str, str]]:
+    """Derive runtime cut/carry facts solely from this manifest and its ready predecessor.
+
+    Returns the provenance record and, per component id, the one generated clause that
+    describes it. Tools that describe a single component use its clause verbatim.
+    """
+    predecessor = predecessor_manifest(root, release)
+    components = manifest.get("components", {})
+    previous = (predecessor or {}).get("components", {})
+    previous_variants = {row["id"]: row for row in previous.get("ninfer_variants", [])}
+    variants = {row["id"]: row for row in components.get("ninfer_variants", [])}
+    runtime = components.get("ninfer", {})
+    previous_runtime = previous.get("ninfer", {})
+    carried_runtime = predecessor is not None and all(
+        runtime.get(key) == previous_runtime.get(key) for key in (
+            "release_tag", "oci_manifest_digest", "server_binary_sha256", "source_commit"))
+    identities = [("rtx5090-container", "RTX 5090 container", runtime, carried_runtime)]
+    for component_id in NINFER_VARIANT_IDS:
+        if component_id in variants:
+            variant = variants[component_id]
+            label = f"RTX {component_id.split('-')[0].removeprefix('rtx')} native Windows"
+            identities.append((component_id, label, variant,
+                               unchanged_native_variant(variant, previous_variants.get(component_id))))
+    rows, clauses = [], {}
+    for component_id, label, identity, carried in identities:
+        tag, source = identity.get("release_tag"), identity.get("source_commit")
+        if not isinstance(tag, str) or not tag or not isinstance(source, str) or not GIT_SHA_RE.fullmatch(source):
+            raise ContractError(f"component provenance {component_id} requires a release tag and source commit")
+        carried_from = predecessor["release"] if carried else None
+        rows.append({"id": component_id, "release_tag": tag, "source_commit": source,
+                     "disposition": "carried" if carried else "recut", "carried_from": carried_from})
+        clauses[component_id] = provenance_clause(label, tag, carried_from)
+    distinct = len({row["source_commit"] for row in rows})
+    record = {
+        "components": rows,
+        "distinct_source_commits": distinct,
+        "statement": "Runtime components: " + "; ".join(clauses.values())
+                     + f". They were built from {distinct} distinct NInfer source commits.",
+    }
+    return record, clauses
+
+
+def component_provenance(root: Path, release: str, manifest: dict[str, Any]) -> dict[str, Any]:
+    return component_provenance_parts(root, release, manifest)[0]
+
+
+def provenance_claim_errors(value: Any, label: str, *, statement: str = "",
+                            clauses: tuple[str, ...] = ()) -> list[str]:
+    """Generated statements and clauses are the only admitted provenance vocabulary in public prose."""
+    errors = []
+    for path, text in walk_string_fields(value, label):
+        if not any(character.isspace() for character in text):
+            continue
+        prose = text
+        for generated in (statement, *clauses):
+            if generated:
+                prose = prose.replace(generated, "")
+        match = PROVENANCE_CLAIM_RE.search(prose)
+        if match is not None:
+            errors.append(f"{path} makes an ungenerated component provenance claim: {match[0]!r}")
+    return errors
+
+
+def validate_component_provenance(
+    root: Path, release: str, manifest: dict[str, Any], compatibility: dict[str, Any],
+    qualification: dict[str, Any], errors: list[str], *, acceptance: bool = False,
+) -> None:
+    if (product_version(release) or (0, 0, 0)) < (0, 20, 0):
+        return
+    provenance, component_clauses = component_provenance_parts(root, release, manifest)
+    statement = provenance["statement"]
+    clauses = tuple(component_clauses.values())
+    release_root = root / "releases" / release
+    external_path = release_root / "acceptance/composed-external-installation.json"
+    external = load_json(external_path) if external_path.is_file() else {}
+    if not acceptance:
+        documents = [("manifest", manifest), ("compatibility", compatibility),
+                     ("qualification", qualification)]
+        for name in ("composed-external-installation", "documented-routes"):
+            path = release_root / "acceptance" / f"{name}.json"
+            if path.is_file():
+                documents.append((f"acceptance/{name}.json",
+                                  external if path == external_path else load_json(path)))
+        for label, document in documents:
+            errors.extend(provenance_claim_errors(document, label, statement=statement, clauses=clauses))
+        return
+    require(external.get("component_provenance") == provenance,
+            "composed acceptance component_provenance must equal the manifest-derived record", errors)
+    note = qualification.get("composition", {}).get("external_installation_acceptance", {}).get("note")
+    scope = qualification.get("documented_route_acceptance", {}).get("scope")
+    for label, value in (("qualification composition acceptance note", note),
+                         ("qualification documented route scope", scope)):
+        require(isinstance(value, str) and value.startswith(statement),
+                f"{label} must start with the generated component provenance statement", errors)
+    plan_path = release_root / "plan.json"
+    if plan_path.is_file():
+        plan = load_json(plan_path)
+        planned = {row.get("id"): row.get("disposition") for row in plan.get("components", [])
+                   if isinstance(row, dict)}
+        require(planned == {row["id"]: row["disposition"] for row in provenance["components"]},
+                "plan component dispositions must equal the manifest-derived component provenance", errors)
+
+
 def native_shape(root: Path, variant: dict[str, Any]) -> dict[str, Any] | None:
     shape = variant.get("runtime_shape")
     if isinstance(shape, dict):
@@ -3046,6 +3345,15 @@ def configuration_identity(profile: dict[str, Any]) -> str:
     return hashlib.sha256(encoded).hexdigest()
 
 
+def checkpoint_host_directory(release: str) -> str:
+    """The release-specific host store; the container mount remains stable."""
+    version = product_version(release) or (0, 0, 0)
+    if version[:2] < (0, 17):
+        return "checkpoints-v013"
+    major, minor, patch = version
+    return f"checkpoints-v{major}{minor:02d}" + (f"-{patch}" if patch else "")
+
+
 def validate_profile_contract(
     profile: dict[str, Any],
     label: str,
@@ -3086,11 +3394,7 @@ def validate_profile_contract(
     require(server.get("checkpoint_mount_target") == checkpoint_target,
             f"{label}: checkpoint mount target must be {checkpoint_target}", errors)
     if server.get("status_schema_version") == 2:
-        version = product_version(release) or (0, 0, 0)
-        checkpoint_host = "checkpoints-v013"
-        if version[:2] >= (0, 17):
-            major, minor, patch = version
-            checkpoint_host = f"checkpoints-v{major}{minor:02d}" + (f"-{patch}" if patch else "")
+        checkpoint_host = checkpoint_host_directory(release)
         require(server.get("checkpoint_host_directory") == checkpoint_host,
                 f"{label}: checkpoint host directory must be {checkpoint_host}", errors)
     seccomp_path = server.get("checkpoint_seccomp_profile")
@@ -3162,7 +3466,20 @@ def repository_files(
     return sorted(path for path in paths if path.suffix in suffixes and path.is_file())
 
 
-def validate_markdown_links(root: Path, errors: list[str]) -> None:
+def deferred_acceptance_link(root: Path, release: str, document: Path, target: str) -> bool:
+    """Only this release's own future acceptance outputs may be absent before ready."""
+    release_root = (root / "releases" / release).resolve()
+    parsed = urlparse(target)
+    if parsed.scheme or target.startswith(("#", "//")):
+        return False
+    relative = unquote(target.split("#", 1)[0].split("?", 1)[0])
+    linked = (document.parent / relative).resolve()
+    return (bool(relative) and document.resolve().is_relative_to(release_root)
+            and linked.is_relative_to(release_root / "acceptance"))
+
+
+def validate_markdown_links(root: Path, errors: list[str], *,
+                            pending_release: str | None = None) -> None:
     resolved_root = root.resolve()
     for document in repository_files(root, (".md",)):
         source = document.read_text(encoding="utf-8")
@@ -3179,6 +3496,9 @@ def validate_markdown_links(root: Path, errors: list[str]) -> None:
             require(linked.is_relative_to(resolved_root),
                     f"{document.relative_to(root).as_posix()} link escapes repository: {target}", errors)
             if linked.is_relative_to(resolved_root):
+                if pending_release is not None and deferred_acceptance_link(
+                        root, pending_release, document, target):
+                    continue
                 require(linked.exists(),
                         f"{document.relative_to(root).as_posix()} has missing local link: {target}", errors)
 
@@ -3237,6 +3557,41 @@ def validate_release_markdown_tokens(root: Path, release: str, errors: list[str]
                           f"{token.group()}")
 
 
+def release_notes_errors(text: str, release: str, label: str) -> list[str]:
+    """The publication title and prose must describe a finished release."""
+    errors: list[str] = []
+    lines = text.splitlines()
+    title = lines[0] if lines else ""
+    release_re = re.compile(r"(?<![\w.-])" + re.escape(release) + r"(?![\w.-])")
+    require(title.startswith("# ") and release_re.search(title) is not None,
+            f"{label}: first line must be a Markdown title naming {release}", errors)
+    token = RELEASE_TOKEN_RE.search(text)
+    if token is not None:
+        errors.append(f"{label}: contains unresolved release token {token[0]}")
+    without_autolinks = re.sub(r"<https?://[^>\s]+>", "", text)
+    placeholder = PLACEHOLDER_RE.search(without_autolinks)
+    if placeholder is not None:
+        errors.append(f"{label}: contains placeholder {placeholder[0]!r}")
+    for first, paragraph in prose_paragraphs(lines):
+        unfinished = pending_release_state(paragraph)
+        unfinished += list(re.finditer(r"\b(?:draft|prepared|unreleased)\b", paragraph, re.IGNORECASE))
+        for match in unfinished:
+            number = first + paragraph.count("\n", 0, match.start())
+            errors.append(f"{label}:{number}: contains unfinished release wording {match[0]!r}")
+    return errors
+
+
+def validate_release_notes(root: Path, release: str, errors: list[str]) -> None:
+    if (product_version(release) or (0, 0, 0)) < (0, 20, 0):
+        return
+    path = root / "releases" / release / "NINFER_RELEASE_NOTES.md"
+    label = path.relative_to(root).as_posix()
+    if not path.is_file():
+        errors.append(f"{label}: release notes are required")
+        return
+    errors.extend(release_notes_errors(path.read_text(encoding="utf-8"), release, label))
+
+
 def validate_public_text(root: Path, errors: list[str]) -> None:
     documents = set(repository_files(root, (".md", ".ps1", ".sh")))
     # Every shipped script counts, including extensionless helpers and non-host Python tools.
@@ -3293,6 +3648,157 @@ def validate_public_text(root: Path, errors: list[str]) -> None:
                     f"{document.relative_to(root).as_posix()} contains private marker {marker!r}", errors)
 
 
+ReadyPhase = Literal["draft", "candidate", "acceptance"]
+READY_PHASES = ("draft", "candidate", "acceptance")
+
+
+class ReadyContext(NamedTuple):
+    root: Path
+    release: str
+    manifest: dict[str, Any]
+    compatibility: dict[str, Any]
+    qualification: dict[str, Any]
+    blocker_items: list[Any]
+    check_pins: bool
+    upstream_omp: bool
+    through: ReadyPhase
+
+
+class ReadyCheck(NamedTuple):
+    name: str
+    phase: ReadyPhase
+    run: Callable[[ReadyContext, list[str]], None]
+    ga_only: bool = True
+    flag_only: bool = False
+    pin_only: bool = False
+    upstream_only: bool = False
+    legacy: bool = True
+
+
+def ready_qualification_public_url(ctx: ReadyContext, errors: list[str]) -> None:
+    qualification = ctx.manifest.get("qualification", {})
+    require(qualification.get("public_url") is not None,
+            "ready release requires qualification.public_url", errors)
+    require_product_raw_url(
+        qualification.get("public_url"), "qualification.public_url",
+        f"releases/{ctx.release}/{qualification.get('summary')}", errors,
+    )
+
+
+def ready_external_installation(ctx: ReadyContext, errors: list[str]) -> None:
+    require(ctx.manifest.get("qualification", {}).get("external_installation_passed") is True,
+            "ready release requires a passing external installation", errors)
+    require(ctx.qualification.get("external_installation_qualified") is True,
+            "ready qualification must record the passing external installation", errors)
+
+
+def ready_upstream_client_leftovers(ctx: ReadyContext, errors: list[str]) -> None:
+    errors.extend(f"releases/{ctx.release}/{location}" for location in client_pin_locations(
+        ctx.root / "releases" / ctx.release, historical_fork_client_pins(ctx.root, ctx.release)))
+
+
+def ready_receipt_audit(ctx: ReadyContext, errors: list[str], *, final: bool = False) -> None:
+    # Imported here: receipt_audit reads this module's predecessor and carried-row rules.
+    from receipt_audit import ready_errors
+    errors.extend(ready_errors(ctx.root, ctx.release, phase="acceptance" if final else "candidate",
+                               check_pins=ctx.check_pins))
+
+
+# Ready runs the complete legacy checks. Earlier phases use the same validators with only
+# the inputs not yet produced excluded; no acceptance requirement becomes a warning.
+READY_CHECKS = (
+    ReadyCheck("ready_status", "acceptance",
+               lambda c, e: require(c.manifest.get("status") == "ready",
+                                    "release manifest is not ready", e), ga_only=False),
+    ReadyCheck("qualification_summary", "draft",
+               lambda c, e: require(c.manifest.get("qualification", {}).get("summary_sha256") is not None,
+                                    "ready release requires qualification.summary_sha256", e), ga_only=False),
+    ReadyCheck("qualification_public_url", "acceptance", ready_qualification_public_url, ga_only=False),
+    ReadyCheck("external_installation", "acceptance", ready_external_installation, ga_only=False),
+    ReadyCheck("publication_blockers", "acceptance",
+               lambda c, e: require(c.blocker_items == [],
+                                    "ready release must have no publication blockers", e), ga_only=False),
+    ReadyCheck("validate_release_markdown_tokens", "draft",
+               lambda c, e: validate_release_markdown_tokens(c.root, c.release, e)),
+    ReadyCheck("validate_release_notes", "candidate",
+               lambda c, e: validate_release_notes(c.root, c.release, e), legacy=False),
+    ReadyCheck("validate_exact_lane_set", "draft",
+               lambda c, e: validate_exact_lane_set(c.manifest, c.compatibility, c.qualification, e)),
+    ReadyCheck("validate_ready_state_consistency", "draft",
+               lambda c, e: validate_ready_state_consistency(
+                   c.manifest, c.compatibility, c.qualification, e,
+                   exclude=() if c.through == "acceptance" else COMPOSER_OWNED)),
+    ReadyCheck("validate_review_ledger", "acceptance",
+               lambda c, e: validate_review_ledger(c.root, c.release, c.qualification, e)),
+    ReadyCheck("validate_review_subjects", "acceptance",
+               lambda c, e: validate_review_subjects(
+                   c.root, c.release, c.manifest, c.qualification, e), pin_only=True, legacy=False),
+    ReadyCheck("validate_documented_route_acceptance", "acceptance",
+               lambda c, e: validate_documented_route_acceptance(c.root, c.qualification, e)),
+    ReadyCheck("validate_frozen_native_pins", "acceptance",
+               lambda c, e: validate_frozen_native_pins(c.root, c.release, c.manifest, c.qualification, e)),
+    ReadyCheck("validate_native_route_policy", "acceptance",
+               lambda c, e: validate_native_route_policy(c.root, c.release, c.manifest, c.qualification, e)),
+    ReadyCheck("validate_ga_evidence_bindings", "draft",
+               lambda c, e: validate_ga_evidence_bindings(
+                   c.release, c.manifest, c.compatibility, c.qualification, e,
+                   pinned=c.through != "draft")),
+    ReadyCheck("validate_continuation_capability", "acceptance",
+               lambda c, e: validate_continuation_capability(c.root, c.release, c.compatibility, e)),
+    ReadyCheck("validate_aggregate_as_of", "draft",
+               lambda c, e: validate_aggregate_as_of(c.root, c.release, c.compatibility, c.qualification, e)),
+    ReadyCheck("validate_manifest_tag_prose", "draft",
+               lambda c, e: validate_manifest_tag_prose(c.manifest, e)),
+    ReadyCheck("validate_component_provenance", "draft",
+               lambda c, e: validate_component_provenance(
+                   c.root, c.release, c.manifest, c.compatibility, c.qualification, e), legacy=False),
+    ReadyCheck("validate_composed_component_provenance", "acceptance",
+               lambda c, e: validate_component_provenance(
+                   c.root, c.release, c.manifest, c.compatibility, c.qualification, e,
+                   acceptance=True), legacy=False),
+    ReadyCheck("validate_pinned_evidence", "candidate",
+               lambda c, e: validate_pinned_evidence(
+                   c.root, c.manifest, c.compatibility, c.qualification, e,
+                   lane_only=c.through != "acceptance"), pin_only=True),
+    # A staged audit is required from the candidate on. Composition and its two pins come
+    # before the final audit, so only the explicit ready gate demands the composed-final one.
+    ReadyCheck("receipt_audit", "candidate", ready_receipt_audit, legacy=False),
+    ReadyCheck("receipt_audit_final", "acceptance",
+               lambda c, e: ready_receipt_audit(c, e, final=True), flag_only=True, legacy=False),
+    ReadyCheck("upstream_client_leftovers", "draft", ready_upstream_client_leftovers,
+               ga_only=False, upstream_only=True),
+    # Before acceptance the generated matrix and the prepared guide legitimately say what is
+    # still pending; this is a statement about the finished release.
+    ReadyCheck("validate_release_documentation", "acceptance",
+               lambda c, e: validate_release_documentation(c.root, c.release, e),
+               ga_only=False, flag_only=True),
+    ReadyCheck("validate_markdown_links", "draft",
+               lambda c, e: validate_markdown_links(
+                   c.root, e, pending_release=c.release if c.through != "acceptance" else None),
+               ga_only=False, legacy=False),
+)
+
+
+def selected_ready_checks(ctx: ReadyContext, *, flagged: bool) -> tuple[ReadyCheck, ...]:
+    return tuple(row for row in READY_CHECKS
+                 if (not row.ga_only or ga_release(ctx.release))
+                 and (not row.flag_only or flagged)
+                 and (not row.pin_only or ctx.check_pins)
+                 and (not row.upstream_only or ctx.upstream_omp)
+                 and READY_PHASES.index(row.phase) <= READY_PHASES.index(ctx.through))
+
+
+def run_ready_checks(ctx: ReadyContext, errors: list[str], *, flagged: bool,
+                     lint: bool = False) -> list[str]:
+    for row in selected_ready_checks(ctx, flagged=flagged):
+        first = len(errors)
+        row.run(ctx, errors)
+        if lint:
+            errors[first:] = [f"[{row.name}] {message}" for message in errors[first:]]
+    return [row.name for row in READY_CHECKS
+            if READY_PHASES.index(row.phase) > READY_PHASES.index(ctx.through)]
+
+
 def validate(
     root: Path,
     require_ready: bool,
@@ -3301,6 +3807,8 @@ def validate(
     check_pins: bool = False,
     *,
     warnings: list[str] | None = None,
+    lint_ready: bool = False,
+    lint_metadata: dict[str, Any] | None = None,
 ) -> tuple[dict[str, Any], list[str]]:
     selected_release = resolve_product_release(root, product_release)
     manifest_path = root / "releases" / selected_release / "manifest.json"
@@ -3339,6 +3847,10 @@ def validate(
     require(status in {"draft", "candidate", "ready"},
             "manifest status must be draft, candidate, or ready", errors)
     validate_release_identity_snapshots(root, selected_release, manifest, errors)
+    root_authority_path = root / "compatibility.json"
+    root_release = (load_json(root_authority_path).get("product_release")
+                    if root_authority_path.is_file() else None)
+    draft_posture = status == "draft" and root_release != selected_release
     pending_allowed = status == "draft" and not require_installable and not require_ready
     release_posture = (manifest.get("channel"), manifest.get("audience"))
     require(
@@ -3355,6 +3867,11 @@ def validate(
     profile_ref = product.get("profile") if isinstance(product, dict) else None
     require(isinstance(profile_ref, str), "manifest product.profile must be a path", errors)
     profile_path = (manifest_path.parent / profile_ref).resolve() if isinstance(profile_ref, str) else root
+    if draft_posture and isinstance(profile_ref, str):
+        require(profile_path.is_relative_to(root.resolve()),
+                "manifest profile must stay inside the repository", errors)
+        require(profile_path.is_file(), "manifest profile path must exist", errors)
+        profile_path = (manifest_path.parent / "profiles" / profile_path.name).resolve()
     require(profile_path.is_relative_to(root.resolve()), "manifest profile must stay inside the repository", errors)
     require(profile_path.is_file(), "manifest profile path must exist", errors)
 
@@ -3391,6 +3908,15 @@ def validate(
         require(components["native_model"] != model,
                 "components.native_model must be omitted when it equals components.model", errors)
     native_model = effective_native_model(manifest)
+    draft_clients = {}
+    if draft_posture:
+        snapshot_authority = load_json(manifest_path.parent / "compatibility.json")
+        draft_clients = {row["id"]: row["client_distribution"]
+                         for row in snapshot_authority.get("profiles", [])}
+        try:
+            stamp_profile(profile, selected_release, manifest, draft_clients)
+        except (KeyError, ValueError, TypeError) as error:
+            errors.append(f"draft posture profile projection: {error}")
 
     expected_profile_id = product.get("primary_profile_id") if isinstance(product, dict) else None
     installation_mode = manifest.get("installation", {}).get("mode")
@@ -3405,7 +3931,7 @@ def validate(
                               per_model_stateful=per_model_stateful)
     profiles: list[tuple[str, dict[str, Any]]] = [("profile", profile)]
 
-    profiles_dir = root / "profiles"
+    profiles_dir = manifest_path.parent / "profiles" if draft_posture else root / "profiles"
     if profiles_dir.is_dir():
         for extra_path in sorted(profiles_dir.glob("*.json")):
             if extra_path.resolve() == profile_path:
@@ -3415,6 +3941,11 @@ def validate(
             except ContractError as error:
                 errors.append(str(error))
                 continue
+            if draft_posture:
+                try:
+                    stamp_profile(extra_profile, selected_release, manifest, draft_clients)
+                except (KeyError, ValueError, TypeError) as error:
+                    errors.append(f"draft posture profiles/{extra_path.name} projection: {error}")
             validate_profile_contract(extra_profile, f"profiles/{extra_path.name}", release,
                                       model, runtime.get("public_model_id"),
                                       runtime.get("deployment_profile"), errors, upstream_omp,
@@ -3481,12 +4012,26 @@ def validate(
     if compatibility:
         root_compatibility_path = root / "compatibility.json"
         if release_compatibility_path.is_file() and root_compatibility_path.is_file():
-            require(sha256_file(release_compatibility_path) == sha256_file(root_compatibility_path),
-                    "root and release compatibility authorities must be byte-identical", errors)
             root_matrix_path = root / "docs" / "COMPATIBILITY.md"
-            require(root_matrix_path.is_file()
-                    and compatibility_matrix_path.read_bytes() == root_matrix_path.read_bytes(),
-                    "root and release compatibility matrices must be byte-identical", errors)
+            if draft_posture:
+                predecessor = predecessor_manifest(root, selected_release)
+                predecessor_root = root / "releases" / str((predecessor or {}).get("release"))
+                previous_authority = predecessor_root / "compatibility.json"
+                require(previous_authority.is_file()
+                        and previous_authority.read_bytes() == root_compatibility_path.read_bytes(),
+                        "draft posture root compatibility authority must byte-equal the ready predecessor",
+                        errors)
+                previous_matrix = predecessor_root / "COMPATIBILITY.md"
+                require(root_matrix_path.is_file() and previous_matrix.is_file()
+                        and previous_matrix.read_bytes() == root_matrix_path.read_bytes(),
+                        "draft posture root compatibility matrix must byte-equal the ready predecessor",
+                        errors)
+            else:
+                require(sha256_file(release_compatibility_path) == sha256_file(root_compatibility_path),
+                        "root and release compatibility authorities must be byte-identical", errors)
+                require(root_matrix_path.is_file()
+                        and compatibility_matrix_path.read_bytes() == root_matrix_path.read_bytes(),
+                        "root and release compatibility matrices must be byte-identical", errors)
         require(compatibility.get("product_release") == release,
                 "compatibility product_release must match the manifest", errors)
         try:
@@ -3712,9 +4257,12 @@ def validate(
     for key in ("source_archive_sha256", "server_binary_sha256"):
         require_sha(ninfer.get(key), f"components.ninfer.{key}", errors,
                     nullable=pending_allowed)
-    require(isinstance(ninfer.get("release_tag"), str)
-            and NINFER_RELEASE_TAG_RE.fullmatch(ninfer["release_tag"]) is not None,
-            "components.ninfer.release_tag is invalid", errors)
+    if (product_version(release) or (0, 0, 0)) >= (0, 20, 0):
+        validate_component_tag_bindings(root, release, manifest, errors)
+    else:
+        require(isinstance(ninfer.get("release_tag"), str)
+                and HISTORICAL_NINFER_RELEASE_TAG_RE.fullmatch(ninfer["release_tag"]) is not None,
+                "components.ninfer.release_tag is invalid", errors)
     require_sha(runtime.get("configuration_sha256"),
                 "runtime_identity.configuration_sha256", errors,
                 nullable=pending_allowed)
@@ -3950,57 +4498,21 @@ def validate(
         require(qualification.get("external_installation_qualified") is False,
                 "candidate qualification must not claim external installation passed", errors)
 
-    if status == "ready" or require_ready:
-        require(status == "ready", "release manifest is not ready", errors)
-        require(expected_summary_sha is not None,
-                "ready release requires qualification.summary_sha256", errors)
-        require(manifest_qualification.get("public_url") is not None,
-                "ready release requires qualification.public_url", errors)
-        require_product_raw_url(
-            manifest_qualification.get("public_url"),
-            "qualification.public_url",
-            f"releases/{release}/{manifest_qualification.get('summary')}",
-            errors,
-        )
-        require(manifest_qualification.get("external_installation_passed") is True,
-                "ready release requires a passing external installation", errors)
-        require(qualification.get("external_installation_qualified") is True,
-                "ready qualification must record the passing external installation", errors)
-        require(blocker_items == [], "ready release must have no publication blockers", errors)
+    through: ReadyPhase = ("acceptance" if status == "ready" or require_ready
+                           else "candidate" if status == "candidate" else "draft")
+    context = ReadyContext(root, selected_release, manifest, compatibility, qualification,
+                           blocker_items, check_pins, upstream_omp, through)
+    if status == "ready" or require_ready or lint_ready:
+        skipped = run_ready_checks(context, errors, flagged=require_ready or lint_ready, lint=lint_ready)
+        if lint_metadata is not None:
+            lint_metadata.update(lint_phase=through, skipped_checks=skipped)
+    else:
+        next(row for row in READY_CHECKS if row.name == "validate_markdown_links").run(context, errors)
+        if upstream_omp and warnings is not None:
+            ready_upstream_client_leftovers(context, warnings)
 
-        if ga_release(release):
-            validate_release_markdown_tokens(root, release, errors)
-            validate_exact_lane_set(manifest, compatibility, qualification, errors)
-            validate_ready_state_consistency(
-                manifest, compatibility, qualification, errors
-            )
-            validate_review_ledger(root, release, qualification, errors)
-            validate_documented_route_acceptance(root, qualification, errors)
-            validate_frozen_native_pins(root, release, manifest, qualification, errors)
-            validate_native_route_policy(root, release, manifest, qualification, errors)
-            validate_ga_evidence_bindings(
-                release, manifest, compatibility, qualification, errors
-            )
-            validate_continuation_capability(root, release, compatibility, errors)
-            validate_aggregate_as_of(root, release, compatibility, qualification, errors)
-            validate_manifest_tag_prose(manifest, errors)
-            if check_pins:
-                validate_pinned_evidence(root, manifest, compatibility, qualification, errors)
-
-    if upstream_omp:
-        leftovers = [f"releases/{release}/{location}" for location in client_pin_locations(
-            manifest_path.parent, historical_fork_client_pins(root, selected_release)
-        )]
-        if require_ready or status == "ready":
-            errors.extend(leftovers)
-        elif warnings is not None:
-            warnings.extend(leftovers)
-
-    if require_ready:
-        validate_release_documentation(root, selected_release, errors)
     validate_receipt_classes(root, manifest_path.parent,
                             [manifest, qualification, compatibility], errors)
-    validate_markdown_links(root, errors)
     validate_public_text(root, errors)
 
     return manifest, errors
@@ -4013,17 +4525,20 @@ def main() -> int:
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--require-installable", action="store_true")
     mode.add_argument("--require-ready", action="store_true")
+    mode.add_argument("--lint-ready", action="store_true",
+                      help="run ready checks whose inputs exist at the manifest's current phase")
     parser.add_argument("--check-pins", action="store_true",
-                        help="with --require-ready: every pinned raw evidence URL whose commit is "
+                        help="with --require-ready or --lint-ready: every pinned raw evidence URL whose commit is "
                              "in local git history must serve exactly its recorded SHA-256 "
                              "and be an ancestor of HEAD "
                              "(the final gate of the pin dance; needs full history)")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
-    if args.check_pins and not args.require_ready:
-        parser.error("--check-pins requires --require-ready")
+    if args.check_pins and not (args.require_ready or args.lint_ready):
+        parser.error("--check-pins requires --require-ready or --lint-ready")
 
     warnings: list[str] = []
+    lint_metadata: dict[str, Any] = {}
     try:
         manifest, errors = validate(
             args.root.resolve(),
@@ -4032,6 +4547,8 @@ def main() -> int:
             args.release,
             check_pins=args.check_pins,
             warnings=warnings,
+            lint_ready=args.lint_ready,
+            lint_metadata=lint_metadata,
         )
     except ContractError as error:
         errors = [str(error)]
@@ -4043,6 +4560,8 @@ def main() -> int:
         "valid": not errors,
         "errors": errors,
     }
+    if args.lint_ready:
+        result.update(lint_metadata)
     if warnings:
         result["warnings"] = warnings
     if args.json:

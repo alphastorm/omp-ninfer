@@ -61,6 +61,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -68,7 +69,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from render_compatibility import OMP_PROFILE_PLATFORMS
-from rebind_release import stamp_profile, save as save_profile
+from release_profiles import stamp_profile
+from rebind_release import save as save_profile
 from verify_release import (
     ContractError,
     NINFER_VARIANT_IDS,
@@ -164,6 +166,13 @@ def load_omp_component(path: Path) -> dict:
     return descriptor
 
 
+# Every release accepts its client platforms afresh. The sentence is generated from the selected
+# client instead of being inherited with its version substituted.
+CLIENT_ACCEPTANCE_LIMITATION_RE = re.compile(
+    r"Fresh stock OMP \S+ platform and candidate-bound documented-route acceptance is required; "
+    r"no predecessor client execution (?:is carried|transfers)\.")
+
+
 def bind_upstream_client(compatibility: dict, descriptor: dict, release: str) -> None:
     omp = descriptor["omp"]
     composition = compatibility["composition"]
@@ -186,6 +195,11 @@ def bind_upstream_client(compatibility: dict, descriptor: dict, release: str) ->
         if profile["status"] == "qualified":
             profile["status"] = "preview"
         profile["blockers"] = [f"upstream OMP {omp['upstream_tag']} client acceptance is pending"]
+        profile["limitations"] = [
+            f"Fresh stock OMP {omp['upstream_tag'].removeprefix('v')} platform and candidate-bound "
+            "documented-route acceptance is required; no predecessor client execution transfers.",
+            *(value for value in profile.get("limitations", [])
+              if CLIENT_ACCEPTANCE_LIMITATION_RE.fullmatch(value) is None)]
 
 
 def main() -> int:
@@ -750,16 +764,6 @@ def main() -> int:
     )
     report = json.loads(verify.stdout)
     errors = report.get("errors", [])
-    if omp_descriptor is not None:
-        # The lead rewrites copied notes after staging has removed client acceptance.
-        # Only dangling links into this deliberately cleared directory are draft residue.
-        for error in errors:
-            document, separator, target = error.partition(" has missing local link: ")
-            document_path = (ROOT / document).resolve()
-            if separator and document_path.is_relative_to(dst_dir):
-                target_path = (document_path.parent / target).resolve()
-                if target_path.is_relative_to(dst_dir / "acceptance"):
-                    draft_residue.add(error)
     for warning in report.get("warnings", []):
         if warning.removeprefix(f"releases/{args.release}/") not in leftovers:
             print(f"warning: {warning}", file=sys.stderr)
@@ -790,18 +794,15 @@ def main() -> int:
               file=sys.stderr)
         return 1
     print("remaining work, in order:")
-    print("  1. [allowlist] add the new tag to NINFER_RELEASE_TAG_RE in "
-          "scripts/verify_release.py (deliberate per-release act)")
-    print("  2. author the release evidence by hand - lane-receipt arcs/gates, the composed "
-          "acceptance receipt, CHANGELOG, RELEASES/BENCHMARKS/FACTS/README, and the "
-          f"drift-test pins; rerun scripts/rebind_release.py --release {args.release} --draft "
-          "after every edit and commit in the draft posture")
-    print(f"  3. cut: scripts/rebind_release.py --release {args.release} --pin <commit that "
-          "contains the final lane receipts> --stage lane promotes the root authority, "
-          "profiles, and launcher pins, then commit")
-    print(f"  4. scripts/rebind_release.py --release {args.release} --pin <commit> "
-          "--stage acceptance | manifest (two more commits; the manifest stage runs the "
-          "ready verifier with --check-pins)")
+    print(f"  1. check releases/{args.release}/plan.json with "
+          f"scripts/release.py plan check --release {args.release}")
+    print(f"  2. use scripts/release.py candidate --release {args.release} with the plan's "
+          "private inputs to bind lane receipts, pin them, and retarget the guide once")
+    print("  3. run reviews and documented-route acceptance from that guide candidate")
+    print(f"  4. use scripts/release.py finalize --release {args.release} with the window, "
+          "review, values, and completion-date inputs; the driver composes evidence, creates "
+          "the ordered pins and audit, and runs the ready/pin gates")
+    print("  Living release documents change only after publication; see docs/RELEASES.md.")
     return 0
 
 

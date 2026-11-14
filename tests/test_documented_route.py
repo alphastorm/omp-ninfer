@@ -425,11 +425,15 @@ class RunnerTests(unittest.TestCase):
         listener.chmod(0o755)
 
     def run_bundle(self, root: Path, bundle: Path, stdin: int | None = None,
-                   timeout: float | None = None) -> tuple[int, dict]:
+                   timeout: float | None = None, tunnel_attempts: int | None = None) -> tuple[int, dict]:
         receipt = root / "receipt.json"
+        environment = dict(os.environ, ROUTE_TUNNEL_PORT=str(self.port))
+        environment.pop("ROUTE_TEST_TUNNEL_ATTEMPTS", None)
+        if tunnel_attempts is not None:
+            environment["ROUTE_TEST_TUNNEL_ATTEMPTS"] = str(tunnel_attempts)
         completed = subprocess.run(["bash", str(RUNNER), str(bundle), str(root / "clone"), str(receipt)],
                                    stdin=stdin, capture_output=True, text=True, check=False,
-                                   timeout=timeout, env=dict(os.environ, ROUTE_TUNNEL_PORT=str(self.port)))
+                                   timeout=timeout, env=environment)
         return completed.returncode, json.loads(receipt.read_text())
 
     def test_blocks_share_one_shell_and_the_first_failure_ends_the_run(self) -> None:
@@ -542,9 +546,35 @@ class RunnerTests(unittest.TestCase):
                                              "s = socket.socket()\n"
                                              "s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n"
                                              "s.bind((\"127.0.0.1\", {port})); s.listen(64); time.sleep(600)'\n")
-            code, receipt = self.run_bundle(root, bundle)
+            code, receipt = self.run_bundle(root, bundle, timeout=20, tunnel_attempts=1)
             self.assertEqual(code, 1, receipt)
             self.assertEqual([s["status"] for s in receipt["steps"]], ["failed", "skipped"])
+            self.assertEqual(receipt["test_overrides"], {"ROUTE_TEST_TUNNEL_ATTEMPTS": 1})
+
+    def test_a_test_only_readiness_limit_is_recorded_even_at_the_default(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            bundle = self.write_bundle(root, [("tunnel", "./open-tunnel.sh\n")])
+            self.write_tunnel_listener(root)
+            code, receipt = self.run_bundle(root, bundle, tunnel_attempts=30)
+            self.assertEqual(code, 0, receipt)
+            self.assertEqual(receipt["test_overrides"], {"ROUTE_TEST_TUNNEL_ATTEMPTS": 30})
+
+    def test_a_malformed_test_only_readiness_limit_is_refused_before_effects(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            bundle = self.write_bundle(root, [("mark", 'touch "$PWD/../ran"\n')])
+            for attempts in ("", "0", "31", "01", "-1", "1.0", "attempts"):
+                with self.subTest(attempts=attempts):
+                    completed = subprocess.run(
+                        ["bash", str(RUNNER), str(bundle), str(root / "clone"), str(root / "receipt.json")],
+                        capture_output=True, text=True, check=False, timeout=30,
+                        env=dict(os.environ, ROUTE_TUNNEL_PORT=str(self.port),
+                                 ROUTE_TEST_TUNNEL_ATTEMPTS=attempts))
+                    self.assertEqual(completed.returncode, 2, completed.stderr)
+                    self.assertIn("ROUTE_TEST_TUNNEL_ATTEMPTS", completed.stderr)
+                    self.assertFalse((root / "ran").exists())
+                    self.assertFalse((root / "receipt.json").exists())
 
     def test_a_tunnel_checked_off_the_documented_port_says_so_in_its_receipt(self) -> None:
         """Only tests move the runner's tunnel checks off 18089, the port the documented forward
@@ -556,6 +586,7 @@ class RunnerTests(unittest.TestCase):
             code, receipt = self.run_bundle(root, bundle)
             self.assertEqual(code, 0, receipt)
             self.assertIn(str(self.port), receipt["steps"][0]["substitution"])
+            self.assertNotIn("test_overrides", receipt)
 
     def test_a_malformed_tunnel_port_is_refused_before_any_step_runs(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

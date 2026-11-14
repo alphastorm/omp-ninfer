@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, "v013/**", release/v0.13.0, program/p15, "p15/**", program/p16, "p16/**"]
+    branches: [main, "release/**"]
     tags: ["v*"]
   pull_request:
 
@@ -12,6 +12,10 @@ permissions:
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: ${{ github.ref_type != 'tag' }}
+
+# Every job checks out full history: goldens that replay published releases must run, not skip.
+env:
+  OMP_NINFER_REQUIRE_HISTORY: "1"
 
 jobs:
   release-contract:
@@ -31,13 +35,42 @@ jobs:
       - name: Require the ready contract on release tags
         if: github.ref_type == 'tag'
         run: python3 scripts/verify_release.py --require-ready --check-pins
+      - name: Check the newest release at its own phase
+        # Branch and pull-request runs hold the newest release to the strictest contract its
+        # state allows: the full ready gate once it is ready, and before that everything the
+        # ready gate will require except evidence its remaining phases have not produced.
+        if: github.ref_type != 'tag'
+        run: |
+          python3 - <<'PY'
+          import json
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          sys.path.insert(0, "scripts")
+          from verify_release import ga_release, product_version
+
+          rows = [(product_version(path.parent.name), path.parent.name,
+                   json.loads(path.read_text(encoding="utf-8")).get("status"))
+                  for path in Path("releases").glob("*/manifest.json") if ga_release(path.parent.name)]
+          _, release, status = max(rows)
+          mode = "--require-ready" if status == "ready" else "--lint-ready"
+          print(f"{release} is {status}: verify_release.py {mode} --check-pins", flush=True)
+          raise SystemExit(subprocess.run([sys.executable, "scripts/verify_release.py", "--release", release,
+                                           mode, "--check-pins"]).returncode)
+          PY
       - name: Run contract tests
-        run: python3 -m unittest discover -s tests -v
+        run: python3 scripts/run_tests.py
       - name: Parse shell launchers
         run: bash -n examples/manual-tunnel/*.sh
 
-  windows-contract:
+  windows-contract-shards:
+    name: windows-contract-shard-${{ matrix.shard }}
     runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -58,39 +91,18 @@ jobs:
             $null = [ScriptBlock]::Create((Get-Content -Raw -LiteralPath $f.FullName))
           }
       - name: Run portable contract suite on native Windows
-        shell: python
-        run: |
-          import importlib
-          import unittest
+        run: python scripts/run_tests.py --windows-skips --shard ${{ matrix.shard }}/4
 
-          suite = unittest.defaultTestLoader.discover("tests")
-          # These fixtures execute POSIX shell launchers, fake executables and uid/mode APIs.
-          # Ubuntu and macOS run them in full; all other discovered tests run here.
-          posix = (
-              ("test_cut_native_component", "NativeCutterTests"),
-              ("test_documented_route", "RunnerTests"),
-              ("test_fleet_example", "FleetExampleTests"),
-              ("test_manual_tunnel_scripts", "ManualTunnelScriptsTest"),
-          )
-          for module, name in posix:
-              cls = getattr(importlib.import_module(module), name)
-              cls.__unittest_skip__ = True
-              cls.__unittest_skip_why__ = "POSIX executable/path/permission fixtures; covered on Ubuntu and macOS"
-          extraction = importlib.import_module("test_documented_route").ExtractionTests
-          for name in (
-              "test_restart_seed_never_contains_the_planted_nonce",
-              "test_restart_seed_stays_between_the_checkpoint_gate_and_client_compaction",
-          ):
-              setattr(extraction, name, unittest.skip("executes the documented POSIX seed pipeline")(getattr(extraction, name)))
-          native = importlib.import_module("test_accept_rtx4090_route").NativeLaneTests
-          # These two fixtures create a scratch PSDrive named C:, already the system drive here.
-          for name in (
-              "test_powershell_baseline_enforces_lane_power_and_operator_holds",
-              "test_optional_native_directories_preserve_presence_in_both_lineage_modes",
-          ):
-              setattr(native, name, unittest.skip("scratch C: PSDrive fixture runs on Ubuntu and macOS")(getattr(native, name)))
-          result = unittest.TextTestRunner(verbosity=2).run(suite)
-          raise SystemExit(not result.wasSuccessful())
+  # Retain the original check name while requiring every matrix child to succeed.
+  windows-contract:
+    if: ${{ always() }}
+    needs: windows-contract-shards
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every native Windows shard
+        env:
+          SHARD_RESULT: ${{ needs.windows-contract-shards.result }}
+        run: test "$SHARD_RESULT" = success
 
   macos-contract:
     runs-on: macos-latest
@@ -103,13 +115,7 @@ jobs:
         with:
           python-version: "3.13"
       - name: Run contract tests
-        shell: python
-        run: |
-          import unittest
-
-          suite = unittest.defaultTestLoader.discover("tests")
-          result = unittest.TextTestRunner(verbosity=2).run(suite)
-          raise SystemExit(not result.wasSuccessful())
+        run: python3 scripts/run_tests.py
 
   acceptance-dry-run:
     runs-on: ubuntu-latest
@@ -123,7 +129,7 @@ jobs:
           python-version: "3.13"
       - name: Compose acceptance against disposable host-free evidence
         # The composer has no dry-run mode: its fixtures redirect every write to a temp tree.
-        run: python3 -m unittest discover -s tests -p test_compose_route_acceptance.py -v
+        run: python3 scripts/run_tests.py --pattern test_compose_route_acceptance.py
       - name: Plan both native routes without contacting hosts
         env:
           CANDIDATE: ${{ github.sha }}
@@ -138,3 +144,20 @@ jobs:
               --temporary-previous ci-predecessor --mode dry-run
             test ! -e "$workspace"
           done
+
+  # Cut a synthetic successor of the latest ready release all the way to the ready gate, with
+  # the real tools and no private input, then run the contract suite at that state. This is
+  # where a change that would break the next release, or a test that depends on which
+  # release is current, fails: before a release, not during one.
+  release-rehearsal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: Rehearse the release after hardware qualification
+        run: python3 scripts/release.py rehearse --suite

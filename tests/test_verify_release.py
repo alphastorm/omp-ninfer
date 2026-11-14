@@ -11,6 +11,7 @@ from copy import deepcopy
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+CURRENT = json.loads((ROOT / "compatibility.json").read_text(encoding="utf-8"))["product_release"]
 # Immutable ready fixture; root authority may legitimately be a newer candidate.
 PUBLIC_RELEASE = "v0.10.0"
 ACCEPTED_PROFILES = ROOT / "tests/fixtures/profiles-v0.12.2"
@@ -28,6 +29,10 @@ REBIND_SPEC = importlib.util.spec_from_file_location("rebind_release", ROOT / "s
 assert REBIND_SPEC is not None and REBIND_SPEC.loader is not None
 REBIND_RELEASE = importlib.util.module_from_spec(REBIND_SPEC)
 REBIND_SPEC.loader.exec_module(REBIND_RELEASE)
+HISTORY_SPEC = importlib.util.spec_from_file_location("verification_history", ROOT / "tests/history.py")
+assert HISTORY_SPEC is not None and HISTORY_SPEC.loader is not None
+HISTORY = importlib.util.module_from_spec(HISTORY_SPEC)
+HISTORY_SPEC.loader.exec_module(HISTORY)
 
 
 class ReleaseIdentitySnapshotTests(unittest.TestCase):
@@ -56,8 +61,7 @@ class ReleaseIdentitySnapshotTests(unittest.TestCase):
             self.assertIsNone(VERIFY_RELEASE.predecessor_manifest(root, "v0.15.0"))
 
     def test_current_release_identity_snapshots_match(self) -> None:
-        release = json.loads((ROOT / "compatibility.json").read_text(encoding="utf-8"))[
-            "product_release"]
+        release = CURRENT
         manifest = json.loads((ROOT / "releases" / release / "manifest.json").read_text(
             encoding="utf-8"))
         errors = []
@@ -128,6 +132,39 @@ class ReleaseIdentitySnapshotTests(unittest.TestCase):
 
 
 class RuntimeContractLabelTests(unittest.TestCase):
+    def test_published_lane_derivations_match_the_authorities(self):
+        for release in ("v0.18.0", "v0.19.0"):
+            with self.subTest(release=release):
+                directory = ROOT / "releases" / release
+                manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
+                authority = json.loads((directory / "compatibility.json").read_text(encoding="utf-8"))
+                self.assertEqual(set(VERIFY_RELEASE.runtime_contract_lanes(manifest).values()),
+                                 {row["lane"] for row in authority["runtime_contracts"]})
+
+    def test_current_checkpoint_directory_comes_from_the_release(self):
+        for path in (ROOT / "profiles").glob("*.json"):
+            profile = json.loads(path.read_text(encoding="utf-8"))
+            if profile["server"].get("status_schema_version") == 2:
+                self.assertEqual(profile["server"]["checkpoint_host_directory"],
+                                 VERIFY_RELEASE.checkpoint_host_directory(CURRENT))
+
+    def test_root_release_ready(self):
+        manifest = json.loads((ROOT / "releases" / CURRENT / "manifest.json").read_text(encoding="utf-8"))
+        if manifest["status"] != "ready":
+            self.skipTest("root release is not ready")
+        directory = ROOT / "releases" / CURRENT
+        authority = json.loads((directory / "compatibility.json").read_text(encoding="utf-8"))
+        qualification = json.loads((directory / "qualification.json").read_text(encoding="utf-8"))
+        commits = []
+        for _, url, _ in VERIFY_RELEASE.pinned_evidence(manifest, authority, qualification):
+            match = VERIFY_RELEASE.PRODUCT_RAW_URL_RE.fullmatch(url) if isinstance(url, str) else None
+            if match is not None:
+                commits.append(match[1])
+        HISTORY.require_commits(*commits)
+        _, errors = VERIFY_RELEASE.validate(ROOT, require_ready=True, product_release=CURRENT,
+                                           check_pins=True)
+        self.assertEqual(errors, [])
+
     def validate(self, release="v0.18.0", labels=None):
         manifest = {"release": release, "components": {
             "ninfer": {"release_tag": "v0.7.0-qwen38-5090-beta.7"},
@@ -885,6 +922,122 @@ class GateWaiverContractTests(unittest.TestCase):
                 self.assertTrue(any("exact historical waiver scope" in error for error in errors), errors)
 
 
+class ReviewSubjectBindingTests(unittest.TestCase):
+    def setUp(self):
+        from release_io import atomic_write_json, git
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        self.git = lambda *arguments: git(self.root, *arguments).strip()
+        self.save = atomic_write_json
+        self.git("init", "--quiet")
+        for key, value in (("user.name", "Synthetic Test"), ("user.email", "test@example.invalid"),
+                           ("commit.gpgsign", "false")):
+            self.git("config", key, value)
+        self.release = "v0.20.0"
+        self.manifest = {"release": self.release, "components": {
+            "ninfer": {"source_commit": "1" * 40},
+            "ninfer_variants": [{"source_commit": "2" * 40}],
+        }}
+        self.save(self.root / "releases" / self.release / "manifest.json", self.manifest)
+        self.git("add", "releases")
+        self.git("commit", "--quiet", "-m", "test: initialize release history")
+        self.previous = self.git("rev-parse", "HEAD")
+        self.save(self.root / "releases" / self.release / "plan.json", {"release": self.release})
+        self.git("add", "releases")
+        self.git("commit", "--quiet", "-m", "test: add release plan")
+        self.planned = self.git("rev-parse", "HEAD")
+        self.git("commit", "--quiet", "--allow-empty", "-m", "test: stage release candidate")
+        self.stage = self.git("rev-parse", "HEAD")
+        self.ledger = {
+            "artifact_type": "omp_ninfer_review_ledger", "release": self.release,
+            "status": "closed-by-disposition", "approval_granted": True,
+            "product_tooling": {"review_id": "synthetic-product", "status": "closed-by-disposition",
+                                "stage_commit": self.stage, "reviewed_commit": self.planned,
+                                "epochs": [{"reviewed_commit": self.planned},
+                                           {"reviewed_commit": self.stage}]},
+            "native_runtime": {"source_commit": "1" * 40},
+            "native_component_delta": {"source_commit": "2" * 40},
+        }
+
+    def ready_history_errors(self, *, check_pins=True):
+        reference = f"releases/{self.release}/review/runtime-ledger.json"
+        path = self.root / reference
+        self.ledger["release"] = self.release
+        self.save(path, self.ledger)
+        qualification = {"observed_gates": {"g4_review": {
+            "status": "passed", "repository_path": reference,
+            "sha256": VERIFY_RELEASE.sha256_file(path),
+            "ledger_status": self.ledger["status"], "approval_granted": True,
+        }}}
+        context = VERIFY_RELEASE.ReadyContext(self.root, self.release, self.manifest, {},
+                                             qualification, [], check_pins, False, "acceptance")
+        errors = []
+        for row in VERIFY_RELEASE.selected_ready_checks(context, flagged=True):
+            if row.pin_only:
+                row.run(context, errors)
+        return errors
+
+    def test_ready_history_accepts_plan_and_candidate_subjects_in_all_epochs(self):
+        self.assertEqual(self.ready_history_errors(), [])
+
+    def test_ready_history_rejects_unrelated_unknown_and_later_product_subjects(self):
+        tree = self.git("rev-parse", "HEAD^{tree}")
+        unrelated = self.git("commit-tree", tree, "-m", "test: unrelated review")
+        self.git("commit", "--quiet", "--allow-empty", "-m", "test: later review")
+        descendant = self.git("rev-parse", "HEAD")
+        for reviewed in (unrelated, "f" * 40, descendant):
+            with self.subTest(reviewed=reviewed):
+                self.ledger["product_tooling"]["reviewed_commit"] = reviewed
+                errors = self.ready_history_errors()
+                self.assertTrue(any(reviewed in error and self.stage in error for error in errors), errors)
+
+    def test_ready_history_rejects_product_and_epoch_subjects_before_the_plan(self):
+        for product in (True, False):
+            with self.subTest(product=product):
+                tooling = self.ledger["product_tooling"]
+                tooling["reviewed_commit"] = self.previous if product else self.planned
+                tooling["epochs"][1]["reviewed_commit"] = self.planned if product else self.previous
+                errors = self.ready_history_errors()
+                self.assertTrue(any(self.previous in error and self.planned in error
+                                    for error in errors), errors)
+
+    def test_ready_history_rejects_an_unknown_epoch_or_stage_instead_of_skipping(self):
+        for field in ("epoch", "stage_commit"):
+            with self.subTest(field=field):
+                tooling = self.ledger["product_tooling"]
+                tooling["stage_commit"] = "f" * 40 if field == "stage_commit" else self.stage
+                tooling["epochs"][1]["reviewed_commit"] = "f" * 40 if field == "epoch" else self.stage
+                errors = self.ready_history_errors()
+                self.assertTrue(any("local git history" in error for error in errors), errors)
+                self.assertEqual(self.ready_history_errors(check_pins=False), [])
+
+    def test_ready_history_checks_plan_existence_at_the_stage_not_in_the_worktree(self):
+        tooling = self.ledger["product_tooling"]
+        tooling.update(stage_commit=self.previous, reviewed_commit=self.previous,
+                       epochs=[{"reviewed_commit": self.previous}])
+        self.assertEqual(self.ready_history_errors(), [])
+
+    def test_ready_history_binds_runtime_and_delta_reviews_to_released_sources(self):
+        for section in ("native_runtime", "native_component_delta"):
+            with self.subTest(section=section):
+                original = self.ledger[section]["source_commit"]
+                self.ledger[section]["source_commit"] = "e" * 40
+                errors = self.ready_history_errors()
+                self.assertTrue(any(section in error and "e" * 40 in error for error in errors), errors)
+                self.ledger[section]["source_commit"] = original
+
+    def test_a_runtime_council_may_review_a_released_native_lane_source(self):
+        self.ledger["native_runtime"]["source_commit"] = "2" * 40
+        self.assertEqual(self.ready_history_errors(), [])
+
+    def test_ready_history_keeps_published_release_contracts_unchanged(self):
+        self.release = "v0.19.0"
+        self.ledger["product_tooling"]["reviewed_commit"] = "f" * 40
+        self.ledger["native_runtime"]["source_commit"] = "e" * 40
+        self.assertEqual(self.ready_history_errors(), [])
+
+
 class ReleaseContractTest(unittest.TestCase):
     def test_demo_cast_headers_publish_only_playback_metadata(self):
         receipt = self.load(ROOT / "docs/measurements/2026-10-28-readme-demo-v14.json")
@@ -1031,19 +1184,19 @@ class ReleaseContractTest(unittest.TestCase):
                             for error in errors), errors)
 
     def test_runtime_tag_allowlist_accepts_only_the_new_component_version(self) -> None:
-        self.assertIsNotNone(VERIFY_RELEASE.NINFER_RELEASE_TAG_RE.fullmatch(
+        self.assertIsNotNone(VERIFY_RELEASE.HISTORICAL_NINFER_RELEASE_TAG_RE.fullmatch(
             "v0.6.16-qwen38-5090-beta.1"))
-        self.assertIsNotNone(VERIFY_RELEASE.NINFER_RELEASE_TAG_RE.fullmatch(
+        self.assertIsNotNone(VERIFY_RELEASE.HISTORICAL_NINFER_RELEASE_TAG_RE.fullmatch(
             "v0.6.15-qwen38-5090-beta.1"))
-        self.assertIsNotNone(VERIFY_RELEASE.NINFER_RELEASE_TAG_RE.fullmatch(
+        self.assertIsNotNone(VERIFY_RELEASE.HISTORICAL_NINFER_RELEASE_TAG_RE.fullmatch(
             "v0.7.0-qwen38-5090-beta.1"))
-        self.assertIsNotNone(VERIFY_RELEASE.NINFER_RELEASE_TAG_RE.fullmatch(
+        self.assertIsNotNone(VERIFY_RELEASE.HISTORICAL_NINFER_RELEASE_TAG_RE.fullmatch(
             "v0.7.0-qwen38-5090-beta.2"))
         for tag in ("v0.6.17-qwen38-5090-beta.1", "v0.7.1-qwen38-5090-beta.1",
                     "v0.6.16-qwen38-5090-beta.0", "v0.6.16-qwen38-5090-beta.01",
                     "v0.6.16-qwen38-4090-beta.1", "v0.6.16-qwen38-5090-beta.1-extra"):
             with self.subTest(tag=tag):
-                self.assertIsNone(VERIFY_RELEASE.NINFER_RELEASE_TAG_RE.fullmatch(tag))
+                self.assertIsNone(VERIFY_RELEASE.HISTORICAL_NINFER_RELEASE_TAG_RE.fullmatch(tag))
 
     def test_historical_manifests_keep_their_native_model_contract(self) -> None:
         for path in sorted((ROOT / "releases").glob("*/manifest.json")):
@@ -2489,7 +2642,7 @@ class ReleaseContractTest(unittest.TestCase):
     def bind_failed_native_campaign(self, root: Path,
                                     *, failed_phase: str = "structured-outage") -> tuple[Path, Path, Path]:
         """Admit the campaign separately; retain the original passed documented blocks."""
-        from test_compose_route_acceptance import campaign_waiver, waived_campaign_evidence
+        from acceptance_fixtures import campaign_waiver, waived_campaign_evidence
         release_root = root / "releases" / PUBLIC_RELEASE
         routes_path = release_root / "acceptance/documented-routes.json"
         routes = self.load(routes_path)
@@ -2573,7 +2726,7 @@ class ReleaseContractTest(unittest.TestCase):
     def native_probe_waiver_copy(self) -> tuple[tempfile.TemporaryDirectory[str], Path, Path, Path, Path]:
         """Exercise the ready gate with v0.16.2's authenticated C2 policy and other real probes."""
         from compose_native_qualification import native_probe_summary
-        from test_compose_route_acceptance import campaign_waiver, waived_campaign_evidence
+        from acceptance_fixtures import campaign_waiver, waived_campaign_evidence
         temporary, root = self.current_release_copy()
         release_root = root / "releases/v0.16.2"
         routes_path = release_root / "acceptance/documented-routes.json"
@@ -2707,7 +2860,7 @@ class ReleaseContractTest(unittest.TestCase):
                 self.assertTrue(any("composed limitations" in error for error in errors), errors)
 
     def test_native_probe_waiver_requires_bound_failure_details_and_graceful_recovery(self) -> None:
-        from test_compose_route_acceptance import campaign_waiver, waived_campaign_evidence
+        from acceptance_fixtures import campaign_waiver, waived_campaign_evidence
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             path = root / "releases/v0.17.0/qualification/rtx3090-route-waiver.json"
