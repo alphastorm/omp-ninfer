@@ -13,11 +13,13 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE = "v0.19.0"
 SPEC = importlib.util.spec_from_file_location("rebind_derivations", ROOT / "scripts/rebind_release.py")
 assert SPEC is not None and SPEC.loader is not None
 REBIND = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(REBIND)
+from release_plan import latest_ready_manifest
+
+RELEASE = latest_ready_manifest(ROOT)["release"]
 
 
 class RebindDerivationTests(unittest.TestCase):
@@ -25,13 +27,16 @@ class RebindDerivationTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
-        for directory in ("scripts", "profiles", "examples/manual-tunnel", f"releases/{RELEASE}"):
+        for directory in ("scripts", "examples/manual-tunnel", f"releases/{RELEASE}"):
             shutil.copytree(ROOT / directory, self.root / directory,
                             ignore=shutil.ignore_patterns("__pycache__"))
         (self.root / "docs").mkdir()
-        shutil.copy2(ROOT / "compatibility.json", self.root / "compatibility.json")
-        shutil.copy2(ROOT / "docs/COMPATIBILITY.md", self.root / "docs/COMPATIBILITY.md")
         self.release = self.root / "releases" / RELEASE
+        # A published fixture is one coherent snapshot, even when the live root advances
+        # to a candidate or to a client-only, all-carried successor.
+        shutil.copytree(self.release / "profiles", self.root / "profiles")
+        shutil.copy2(self.release / "compatibility.json", self.root / "compatibility.json")
+        shutil.copy2(self.release / "COMPATIBILITY.md", self.root / "docs/COMPATIBILITY.md")
         self.manifest = REBIND.load(self.release / "manifest.json")
         self.authority = REBIND.load(self.release / "compatibility.json")
 
