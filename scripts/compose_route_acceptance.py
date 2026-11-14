@@ -1129,7 +1129,7 @@ def main() -> int:
     for name, edge in qualification.get("observed_gates", {}).items():
         if re.fullmatch(r"rtx(?:5090|4090|3090)_(?:restore|sibling)_waiver", name) is None:
             continue
-        path = bound_file(ROOT, edge["repository_path"])
+        path = ROOT / bound_file(ROOT, edge["repository_path"]).relative_to(ROOT.resolve())
         waiver = load(path)
         if waiver.get("artifact_type") != "omp_ninfer_founder_gate_waiver":
             continue

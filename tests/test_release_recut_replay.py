@@ -59,6 +59,62 @@ class PrivateRecutReplayTests(unittest.TestCase):
                                       check=True, capture_output=True, env=environment).stdout
 
             base = "releases/v0.19.0/"
+            report = {"published": published, "predecessor": before, "comparisons": {}}
+
+            def fields(left, right, path=""):
+                if type(left) is not type(right):
+                    return [path or "/"]
+                if isinstance(left, dict):
+                    return [item for key in sorted(left.keys() | right.keys())
+                            for item in (fields(left[key], right[key], path + "/" + key)
+                                         if key in left and key in right else [path + "/" + key])]
+                if isinstance(left, list):
+                    return [item for index in range(max(len(left), len(right)))
+                            for item in (fields(left[index], right[index], path + "/" + str(index))
+                                         if index < min(len(left), len(right)) else [path + "/" + str(index)])]
+                return [] if left == right else [path or "/"]
+
+            def compare(phase):
+                published_files = set(git(ROOT, "ls-tree", "-r", "--name-only", published, "--", base).splitlines())
+                replay_files = {path.relative_to(root).as_posix() for path in (root / base).rglob("*")
+                                if path.is_file()}
+                differences = []
+                for name in sorted(published_files | replay_files):
+                    old = historical(published, name) if name in published_files else None
+                    new = (root / name).read_bytes() if name in replay_files else None
+                    if old == new:
+                        continue
+                    relative = name.removeprefix(base)
+                    if relative == "plan.json":
+                        reason = "New driver plan records the real re-cut dispositions, decisions and authored limitations."
+                    elif relative == "NINFER_RELEASE_NOTES.md":
+                        reason = ("Retained runtime-stage notes precede the published acceptance notes."
+                                  if phase == "candidate" else "Explicitly synthetic replay notes replace publication claims.")
+                    elif relative.startswith(("acceptance/", "review/")):
+                        reason = ("No historical candidate acceptance or product council transfers to this new candidate."
+                                  if phase == "candidate" else
+                                  "Synthetic acceptance and closed-review fixtures bind this replay's new candidate.")
+                    elif relative == "qualification/receipt-audit.json":
+                        reason = "The real audit inventories this newly composed tree and its new provenance and hashes."
+                    elif relative in ("manifest.json", "qualification.json", "compatibility.json", "COMPATIBILITY.md"):
+                        reason = ("Candidate posture clears historical acceptance; generated provenance, authored limitations "
+                                  "and current evidence hashes replace manually composed historical prose."
+                                  if phase == "candidate" else
+                                  "Synthetic acceptance/review identity and generated provenance, limitations and hashes.")
+                    else:
+                        reason = ("Current aggregate/rebind producers emit component-local provenance and hashes; "
+                                  "the audit removes predecessor-only acceptance or qualification evidence.")
+                    differences.append({
+                        "file": relative, "explanation": reason,
+                        "published_sha256": hashlib.sha256(old).hexdigest() if old is not None else None,
+                        "replayed_sha256": hashlib.sha256(new).hexdigest() if new is not None else None,
+                        "changed_fields": fields(json.loads(old), json.loads(new))
+                        if relative.endswith(".json") and old is not None and new is not None else ["/"],
+                    })
+                report["comparisons"][phase] = differences
+                if destination := os.environ.get("OMP_NINFER_REPLAY_REPORT"):
+                    atomic_write_json(Path(destination).expanduser(), report)
+
             manifest = json.loads(historical(published, base + "manifest.json"))
             runtime = manifest["components"]["ninfer"]
             native = next(row for row in manifest["components"]["ninfer_variants"]
@@ -135,6 +191,7 @@ class PrivateRecutReplayTests(unittest.TestCase):
             result = command("scripts/verify_release.py", "--release", "v0.19.0", "--lint-ready", "--check-pins")
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             self.assertEqual(load(root / base / "manifest.json")["status"], "candidate")
+            self.assertEqual(load(root / base / "manifest.json")["components"]["ninfer"], runtime)
             self.assertEqual((root / base / "qualification/runtime-publication.json").read_bytes(),
                              (private / "runtime-publication.json").read_bytes())
             for name in ("runtime-artifacts.json", "runtime-build-identity.json", "runtime-rc.json",
@@ -143,6 +200,8 @@ class PrivateRecutReplayTests(unittest.TestCase):
                                  historical(published, base + "qualification/" + name), name)
             candidate = git(root, "rev-parse", "HEAD").strip()
             self.assertNotEqual(candidate, locations["candidate"])
+            report["candidate"] = candidate
+            compare("candidate")
             reviews = locations["reviews"]
             constants = load(Path(reviews["ledger_token_sources"]).expanduser())["constants"]
             review_manifest = {
@@ -164,6 +223,8 @@ class PrivateRecutReplayTests(unittest.TestCase):
             self.assertNotEqual(retained.returncode, 0, "retained observations cannot transfer to a new candidate")
             self.assertIn("candidate", retained.stdout + retained.stderr)
             self.assertEqual(git(root, "rev-parse", "HEAD").strip(), candidate)
+            report["retained_finalize"] = {"exit": retained.returncode,
+                                           "output": retained.stdout + retained.stderr}
 
             # Separately exercise the real finalize path with explicitly synthetic, newly
             # candidate-bound windows and reviews, exactly as release.py rehearse does.
@@ -184,6 +245,9 @@ class PrivateRecutReplayTests(unittest.TestCase):
             ready = command("scripts/verify_release.py", "--release", "v0.19.0", "--require-ready", "--check-pins")
             self.assertEqual(ready.returncode, 0, ready.stdout + ready.stderr)
             self.assertEqual(load(root / base / "manifest.json")["status"], "ready")
+            report["synthetic_finalize"] = {"exit": finalized.returncode, "verification_exit": ready.returncode,
+                                            "commit": git(root, "rev-parse", "HEAD").strip()}
+            compare("synthetic-ready")
 
 
 if __name__ == "__main__":

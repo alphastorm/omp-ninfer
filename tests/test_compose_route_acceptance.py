@@ -1518,6 +1518,12 @@ class AcceptanceFixtureCommandTests(unittest.TestCase):
             atomic_write_json(root / "compatibility.json", authority)
             atomic_write_json(directory / "compatibility.json", authority)
             prefix = "synthetic-" + release.replace(".", "")
+            subprocess.run(["git", "add", "--", str((directory / "plan.json").relative_to(root))],
+                           cwd=root, check=True, capture_output=True, env=environment)
+            subprocess.run(["git", "-c", "user.name=Release fixture", "-c",
+                            "user.email=fixture@example.invalid", "-c", "commit.gpgsign=false",
+                            "commit", "--quiet", "-m", "test(release): freeze the synthetic release plan"],
+                           cwd=root, check=True, capture_output=True, env=environment)
             candidate = subprocess.check_output(
                 ["git", "rev-parse", "HEAD"], cwd=root, text=True, env=environment).strip()
             result = subprocess.run([
