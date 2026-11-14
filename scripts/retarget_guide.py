@@ -8,6 +8,7 @@ snapshots. A shared identity that splits between components needs an unambiguous
 anchor in its original Markdown block. Previous-distinct identities come from older ready
 manifests, not from prose guesses. Immutable predecessor links remain untouched. The whole
 guide remains the acceptance document; this tool does not grant release readiness.
+A completed guide is checked for stale scoped component identities, never rewritten.
 """
 from __future__ import annotations
 
@@ -18,13 +19,13 @@ import re
 import sys
 import tempfile
 from pathlib import Path
-from typing import Any, NamedTuple
+from typing import Any, Callable, NamedTuple
 from urllib.parse import urlsplit
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import documented_route
 from release_io import atomic_write
-from verify_release import COMPONENT_TAG_RE, MARKDOWN_LINK_RE
+from verify_release import COMPONENT_TAG_RE, MARKDOWN_LINK_RE, checkpoint_host_directory
 
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE_RE = re.compile(r"v\d+\.\d+\.\d+\Z")
@@ -34,6 +35,19 @@ DIGEST_RE = re.compile(r"sha256:[0-9a-fA-F]{64}\Z")
 IMAGE_RE = re.compile(r"[^\s@]+@sha256:[0-9a-fA-F]{64}\Z")
 PACKAGE_KEYS = {"package_name", "artifact_name", "asset_name", "filename"}
 CONTAINER = "rtx5090-container"
+PROJECTIONS = {
+    "hex": ("full", "prefix8", "prefix12"),
+    "integer": ("full", "grouped"),
+}
+INTEGER_IDENTITY_KEYS = {
+    "artifact_bytes", "asset_bytes", "binary_archive_bytes", "package_bytes",
+    "source_archive_bytes", "bytes", "release_id", "artifact_release_id",
+    "asset_id", "artifact_asset_id",
+}
+NAME_IDENTITY_KEYS = {
+    "deployment_profile", "build_profile", "release_id", "release_instance_id",
+    "checkpoint_mount_target",
+}
 
 
 class Refusal(ValueError):
@@ -46,11 +60,14 @@ class Leaf(NamedTuple):
     line: int
     value: str
     scope: str
+    kind: str = ""
 
 
 class Replacement(NamedTuple):
     value: str | None
     tier: int
+    origin: str = ""
+    projection: str = ""
 
 
 IdentityMap = dict[str, dict[str, set[Replacement]]]
@@ -61,6 +78,90 @@ class MarkdownBlock(NamedTuple):
     end: int
     line: int
     fenced: bool
+
+
+def immutable_regions(text: str, document: Path | str) -> tuple[tuple[int, int], ...]:
+    """Every page supports balanced, non-nested record comment pairs.
+
+    Markdown additionally supports Records to EOF and released changelog sections, including
+    their tag definitions; the Unreleased comparison reference remains living.
+    """
+    document = Path(document)
+    regions: list[tuple[int, int]] = []
+    offset = 0
+    html = document.suffix == ".html"
+    opened: tuple[int, int] | None = None
+    fence: str | None = None
+    for number, line in enumerate(text.splitlines(keepends=True), 1):
+        fenced = re.match(r"^\s*(`{3,}|~{3,})", line) if not html else None
+        if fenced:
+            if fence is None:
+                fence = fenced[1]
+            elif fenced[1][0] == fence[0] and len(fenced[1]) >= len(fence):
+                fence = None
+        if not fenced and fence is None:
+            visible = line if html else re.sub(r"(`+)(?!`).*?(?<!`)\1(?!`)", "", line)
+            marker = visible.strip()
+            if (any(value in visible for value in ("<!-- records -->", "<!-- /records -->"))
+                    and line.strip() not in {"<!-- records -->", "<!-- /records -->"}):
+                raise Refusal(f"{document}:{number}: records marker must occupy its own line")
+            if marker == "<!-- records -->":
+                if opened is not None:
+                    raise Refusal(f"{document}:{number}: nested or duplicated records marker")
+                opened = (offset, number)
+            elif marker == "<!-- /records -->":
+                if opened is None:
+                    raise Refusal(f"{document}:{number}: records closing marker has no opener")
+                regions.append((opened[0], offset + len(line)))
+                opened = None
+        offset += len(line)
+    if opened is not None:
+        raise Refusal(f"{document}:{opened[1]}: unclosed records marker")
+    if html:
+        return tuple(regions)
+    records = False
+    released = False
+    fence = None
+    offset = 0
+    start: int | None = None
+    for line in text.splitlines(keepends=True):
+        marker = re.match(r"^\s*(`{3,}|~{3,})", line)
+        if marker:
+            if fence is None:
+                fence = marker[1]
+            elif marker[1][0] == fence[0] and len(marker[1]) >= len(fence):
+                fence = None
+        if fence is None and not marker:
+            if re.fullmatch(r" {0,3}##\s+Records(?:\s+#+)?\s*", line):
+                records = True
+            if document.name == "CHANGELOG.md" and re.match(r"^##\s+\[(?:v)?\d+\.\d+\.\d+\]", line):
+                released = True
+        comparison = document.name == "CHANGELOG.md" and re.match(r"^\[Unreleased\]:\s*", line)
+        marked = records or (released and not comparison)
+        if marked and start is None:
+            start = offset
+        elif not marked and start is not None:
+            regions.append((start, offset))
+            start = None
+        offset += len(line)
+    if start is not None:
+        regions.append((start, len(text)))
+    merged: list[tuple[int, int]] = []
+    for start, end in sorted(regions):
+        if merged and start <= merged[-1][1]:
+            merged[-1] = (merged[-1][0], max(merged[-1][1], end))
+        else:
+            merged.append((start, end))
+    return tuple(merged)
+
+
+def records_mask(text: str, document: Path | str) -> str:
+    pieces = []
+    cursor = 0
+    for start, end in immutable_regions(text, document):
+        pieces.extend((text[cursor:start], re.sub(r"[^\r\n]", " ", text[start:end])))
+        cursor = end
+    return "".join([*pieces, text[cursor:]])
 
 
 def evidence_reference(value: str) -> str | None:
@@ -101,7 +202,7 @@ def identity_class(pointer: str, value: str) -> str | None:
 
 def leaf_scope(file: Path, pointer: str) -> str:
     parts = pointer.strip("/").split("/")
-    if parts[0] in {"release", "product_release"}:
+    if parts[0] in {"release", "product_release"} or parts[-1] == "checkpoint_host_directory":
         return "release"
     profile_parts = file.parts[file.parts.index("profiles") + 1:] if "profiles" in file.parts else ()
     native = next((part for part in profile_parts if re.fullmatch(r"rtx\d+", part)), None)
@@ -124,7 +225,7 @@ def leaf_scope(file: Path, pointer: str) -> str:
     return "release"
 
 
-def string_leaves(file: Path) -> dict[str, Leaf]:
+def string_leaves(file: Path, *, projections: bool = False) -> dict[str, Leaf]:
     """Flatten JSON with stable id-keyed lists and exact source locations."""
     try:
         text = file.read_text(encoding="utf-8")
@@ -158,7 +259,7 @@ def string_leaves(file: Path) -> dict[str, Leaf]:
                 position = scan(position, (*parts, key))
                 index += 1
         value, end = decoder.raw_decode(text, position)
-        if isinstance(value, str):
+        if isinstance(value, str) or (projections and isinstance(value, int) and not isinstance(value, bool)):
             locations[parts] = text.count("\n", 0, position) + 1
         return end
 
@@ -177,21 +278,29 @@ def string_leaves(file: Path) -> dict[str, Leaf]:
                     raise Refusal(f"{file}:1: duplicate list identity {key!r}")
                 seen.add(key)
                 flatten(child, (*parts, key), (*source, str(index)))
-        elif isinstance(value, str):
+        elif isinstance(value, (str, int)) and not isinstance(value, bool):
             pointer = "/" + "/".join(part.replace("~", "~0").replace("/", "~1") for part in parts)
-            if identity_class(pointer, value):
-                leaves[pointer] = Leaf(file, pointer, locations[source], value, leaf_scope(file, pointer))
+            key = parts[-1] if parts else ""
+            kind = identity_class(pointer, value) if isinstance(value, str) else None
+            if projections and isinstance(value, int) and value >= 1_000_000 and key in INTEGER_IDENTITY_KEYS:
+                kind = "integer"
+            if (projections and isinstance(value, str)
+                    and (key in NAME_IDENTITY_KEYS or "build_profiles" in parts)):
+                kind = kind or "name"
+            if kind:
+                leaves[pointer] = Leaf(file, pointer, locations[source], str(value),
+                                       leaf_scope(file, pointer), kind)
 
     flatten(document, (), ())
     return leaves
 
 
-def release_leaves(root: Path, release: str) -> dict[tuple[str, str], Leaf]:
+def release_leaves(root: Path, release: str, *, projections: bool = False) -> dict[tuple[str, str], Leaf]:
     directory = root / "releases" / release
     files = [directory / "manifest.json", directory / "compatibility.json",
              *sorted((directory / "profiles").rglob("*.json"))]
     leaves = {(file.relative_to(directory).as_posix(), pointer): leaf
-              for file in files for pointer, leaf in string_leaves(file).items()}
+              for file in files for pointer, leaf in string_leaves(file, projections=projections).items()}
     for file in evidence_sources(directory):
         if file not in files:
             leaves.update({(file.relative_to(directory).as_posix(), pointer): leaf
@@ -223,34 +332,52 @@ def release_version(release: str) -> tuple[int, ...]:
 
 
 def checkpoint_name(release: str) -> str:
-    major, minor, patch = release_version(release)
-    if (major, minor) < (0, 17):
-        return "checkpoints-v013"
-    return f"checkpoints-v{major}{minor:02d}" + (f"-{patch}" if patch else "")
+    return checkpoint_host_directory(release)
 
 
-def ready_history(root: Path, release: str) -> list[tuple[str, dict[str, Leaf]]]:
+def ready_history(root: Path, release: str, *, projections: bool = False) -> list[tuple[str, dict[str, Leaf]]]:
     history = []
     for file in (root / "releases").glob("*/manifest.json"):
         tag = file.parent.name
         if RELEASE_RE.fullmatch(tag) and release_version(tag) < release_version(release):
-            leaves = string_leaves(file)
+            leaves = string_leaves(file, projections=projections)
             if json.loads(file.read_text(encoding="utf-8")).get("status") == "ready":
                 history.append((tag, leaves))
     return sorted(history, key=lambda item: release_version(item[0]), reverse=True)
 
 
-def identity_map(root: Path, predecessor: str, release: str) -> tuple[IdentityMap, dict[str, str]]:
-    before, after = release_leaves(root, predecessor), release_leaves(root, release)
+def project(value: str, form: str) -> str:
+    if form == "prefix8":
+        return value[:8]
+    if form == "prefix12":
+        return value[:12]
+    if form == "grouped":
+        return f"{int(value):,}"
+    return value
+
+
+def identity_map(root: Path, predecessor: str, release: str, *,
+                 projections: bool = False) -> tuple[IdentityMap, dict[str, str]]:
+    before = release_leaves(root, predecessor, projections=projections)
+    after = release_leaves(root, release, projections=projections)
     mappings: IdentityMap = {}
     anchors: dict[str, set[str]] = {}
 
     def add(value: str, scope: str, target: str | None, tier: int) -> None:
         mappings.setdefault(value, {}).setdefault(scope, set()).add(Replacement(target, tier))
 
+    def add_leaf(old: Leaf, new: Leaf | None, tier: int) -> None:
+        forms = PROJECTIONS.get(old.kind, ("full",)) if projections else ("full",)
+        for form in forms:
+            projected = projections and old.kind in PROJECTIONS
+            origin = f"{old.file.name}:{old.pointer}" if projected else ""
+            option = Replacement(project(new.value, form) if new else None, tier,
+                                 origin, form if projected else "")
+            mappings.setdefault(project(old.value, form), {}).setdefault(old.scope, set()).add(option)
+
     for key in before.keys() & after.keys():
         old, new = before[key], after[key]
-        add(old.value, old.scope, new.value, 1)
+        add_leaf(old, new, 1)
         if identity_class(old.pointer, old.value) == identity_class(new.pointer, new.value) == "evidence":
             old_reference, new_reference = evidence_reference(old.value), evidence_reference(new.value)
             assert old_reference is not None and new_reference is not None
@@ -260,10 +387,12 @@ def identity_map(root: Path, predecessor: str, release: str) -> tuple[IdentityMa
     if not any(old != option.value for old, scopes in mappings.items()
                for options in scopes.values() for option in options):
         raise Refusal(f"{root / 'releases' / release / 'manifest.json'}:1: refusal (b): identity map is empty")
-    if mappings.get(predecessor) != {"release": {Replacement(release, 1)}}:
+    release_mapping = mappings.get(predecessor, {})
+    if (set(release_mapping) != {"release"}
+            or {option.value for option in release_mapping.get("release", ())} != {release}):
         raise Refusal(f"{root / 'releases' / release / 'manifest.json'}:1: refusal (b): identity map must map {predecessor} to {release}")
 
-    history = ready_history(root, release)
+    history = ready_history(root, release, projections=projections)
     anchor_leaves = [*before.values(), *after.values()]
 
     def previous_distinct(tag: str, pointer: str, value: str) -> Leaf | None:
@@ -278,7 +407,7 @@ def identity_map(root: Path, predecessor: str, release: str) -> tuple[IdentityMa
         prior = previous_distinct(predecessor, old.pointer, old.value)
         if prior is not None:
             target = previous_distinct(release, new.pointer, new.value)
-            add(prior.value, old.scope, target.value if target else None, 2)
+            add_leaf(prior, target, 2)
             anchor_leaves.append(prior)
             if target:
                 anchor_leaves.append(target)
@@ -312,6 +441,7 @@ def markdown_blocks(text: str) -> list[MarkdownBlock]:
     while index < len(lines):
         start = index
         opening = fence.match(lines[index])
+        html = re.match(r"^\s*<(tr|li|p)\b", lines[index], re.IGNORECASE)
         index += 1
         if opening:
             while index < len(lines):
@@ -319,16 +449,22 @@ def markdown_blocks(text: str) -> list[MarkdownBlock]:
                 index += 1
                 if closing and closing[1][0] == opening[1][0] and len(closing[1]) >= len(opening[1]):
                     break
+        elif html:
+            closing = re.compile(r"</" + html[1] + r"\s*>", re.IGNORECASE)
+            while not closing.search("".join(lines[start:index])) and index < len(lines):
+                index += 1
         elif lines[start].strip() and not lines[start].lstrip().startswith(("|", "#")):
             while index < len(lines) and lines[index].strip():
-                if fence.match(lines[index]) or item.match(lines[index]) or lines[index].lstrip().startswith(("|", "#")):
+                if (fence.match(lines[index]) or item.match(lines[index])
+                        or re.match(r"^\s*<(?:tr|li|p)\b", lines[index], re.IGNORECASE)
+                        or lines[index].lstrip().startswith(("|", "#"))):
                     break
                 index += 1
         blocks.append(MarkdownBlock(offsets[start], offsets[index], start + 1, opening is not None))
     return blocks
 
 
-def masked_text(text: str, predecessor: str) -> str:
+def masked_text(text: str, predecessor: str, *, release_links: bool = True) -> str:
     """Hide immutable predecessor Markdown links, preserving offsets and line numbers."""
     blocks = markdown_blocks(text)
     starts = [block.start for block in blocks]
@@ -342,9 +478,10 @@ def masked_text(text: str, predecessor: str) -> str:
         target = urlsplit(match[1].strip("<>"))
         pinned_raw = (target.netloc == "raw.githubusercontent.com"
                       and re.match(r"^/[^/]+/[^/]+/[0-9a-fA-F]{40}/", target.path) is not None)
-        immutable = (re.search(r"(?:^|/)releases/" + old + r"(?:/|$)", target.path)
-                     or re.search(r"/releases/tag/" + old + r"/?$", target.path)
-                     or re.search(r"/blob/" + old + r"/docs/QUICKSTART\.md$", target.path))
+        immutable = release_links and (
+            re.search(r"(?:^|/)releases/" + old + r"(?:/|$)", target.path)
+            or re.search(r"/releases/tag/" + old + r"/?$", target.path)
+            or re.search(r"/blob/" + old + r"/docs/QUICKSTART\.md$", target.path))
         if immutable or pinned_raw:
             pieces.extend((text[cursor:match.start()], re.sub(r"[^\r\n]", " ", match[0])))
             cursor = match.end()
@@ -357,16 +494,99 @@ def residual_versions(predecessor: str) -> set[str]:
     return {predecessor, predecessor[1:], compact, f"checkpoints-{compact}"}
 
 
+def identity_pattern(mappings: IdentityMap, *, projections: bool = False) -> re.Pattern[str]:
+    if not projections:
+        return boundary_pattern(mappings)
+    alternatives = []
+    for value in sorted(mappings, key=lambda item: (-len(item), item)):
+        if value.replace(",", "").isdigit() and len(value.replace(",", "")) >= 7:
+            guard = r"(?<![\w.,-])" + re.escape(value) + r"(?![\w-]|[.,]\d)"
+        else:
+            guard = r"(?<![\w.-])" + re.escape(value) + r"(?![\w-]|\.\w)"
+        alternatives.append(guard)
+    return re.compile("(?:" + "|".join(alternatives) + ")")
+
+
+def unbound_evidence_links(text: str, bindings: set[str], *, masked: str | None = None) -> list[tuple[int, str]]:
+    """Markdown, reference and HTML link targets share one evidence-binding rule."""
+    view = text if masked is None else masked
+    links = [(match.start(), match.end(), match[1]) for match in MARKDOWN_LINK_RE.finditer(text)]
+    html_link = re.compile(r"""(?:href|src)\s*=\s*["']([^"']+)["']""", re.IGNORECASE)
+    reference_link = re.compile(r"^\s{0,3}\[[^]]+\]:\s*<?(\S+?)>?(?:\s|$)", re.MULTILINE)
+    links.extend((match.start(), match.end(), match[1]) for match in html_link.finditer(text))
+    links.extend((match.start(), match.end(), match[1]) for match in reference_link.finditer(text))
+    failures = []
+    for start, end, target in sorted(links):
+        reference = evidence_reference(target.strip("<>"))
+        if reference is not None and reference not in bindings and view[start:end] == text[start:end]:
+            failures.append((text.count("\n", 0, start) + 1, target))
+    return failures
+
+
+def evidence_diagnostics(text: str, bindings: set[str], document: Path, *,
+                         mode: str, masked: str | None = None) -> list[tuple[int, str]]:
+    """A candidate guide refuses unbound evidence; living pages send it to author review."""
+    found = unbound_evidence_links(text, bindings, masked=masked)
+    if mode == "guide":
+        for line, target in found:
+            raise Refusal(f"{document}:{line}: unbound evidence link: {target}")
+    elif mode != "living":
+        raise ValueError(f"unknown evidence mode: {mode}")
+    return found
+
+
 def retarget_text(text: str, guide: Path, predecessor: str, release: str,
-                  mappings: IdentityMap, anchors: dict[str, str]) -> str:
-    masked = masked_text(text, predecessor)
+                  mappings: IdentityMap, anchors: dict[str, str], *,
+                  projections: bool = False, release_links: bool = True,
+                  protected: Callable[[str], str] | None = None,
+                  completed: bool | None = None,
+                  edits: list[tuple[int, str, str]] | None = None) -> str:
+    def view(value: str) -> str:
+        masked = masked_text(value, predecessor, release_links=release_links)
+        return protected(masked) if protected else masked
+
+    masked = view(text)
     blocks = markdown_blocks(text)
     starts = [block.start for block in blocks]
     anchor_pattern = boundary_pattern(anchors) if anchors else None
     scopes_by_block: dict[int, set[str]] = {}
-    residual_pattern = boundary_pattern(residual_versions(predecessor))
+    pattern = identity_pattern(mappings, projections=projections)
+    residual_keys = {value: scopes for value, scopes in mappings.items()
+                     if any(option.value != value for options in scopes.values() for option in options)}
+    residual_pattern = (identity_pattern(residual_keys, projections=True) if projections
+                        else boundary_pattern(residual_versions(predecessor)))
     allowed: set[tuple[int, int]] = set()
     delta = 0
+    if completed is None:
+        # Published and prepared guides declare their subject explicitly. A rollback
+        # sentence before that declaration does not make a completed guide a first pass.
+        declarations = re.finditer(
+            r"^ {0,3}>[ \t]+\*\*(?:Prepared|Versioned) guide:[ \t]+(v\d+\.\d+\.\d+)(?![\w.-])",
+            masked, re.MULTILINE)
+        current = next((match[1] for match in declarations
+                        if not blocks[bisect.bisect_right(starts, match.start()) - 1].fenced), None)
+        if current is None:
+            literal = boundary_pattern([predecessor, release]).search(masked)
+            current = literal[0] if literal else None
+        completed = current == release
+    previous_outputs: dict[str, set[str]] = {}
+    target_outputs: dict[str, set[str]] = {}
+    if projections or completed:
+        for candidates in mappings.values():
+            for scope, options in candidates.items():
+                target_outputs.setdefault(scope, set()).update(
+                    option.value for option in options
+                    if option.value is not None and (projections or option.tier == 1))
+                previous_outputs.setdefault(scope, set()).update(
+                    option.value for option in options if option.tier == 2 and option.value is not None)
+
+    def block_scopes(position: int) -> tuple[set[str], str]:
+        index = bisect.bisect_right(starts, position) - 1
+        block = blocks[index]
+        if index not in scopes_by_block:
+            scopes_by_block[index] = ({anchors[anchor[0]] for anchor in anchor_pattern.finditer(masked[block.start:block.end])}
+                                      if anchor_pattern else set())
+        return scopes_by_block[index], masked[block.start:block.end]
 
     def substitute(match: re.Match[str]) -> str:
         nonlocal delta
@@ -376,13 +596,53 @@ def retarget_text(text: str, guide: Path, predecessor: str, release: str,
         options = set().union(*candidates.values())
         mixed_roles = len(candidates) > 1 and len({option.tier for option in options}) > 1
         scopes: set[str] = set()
-        if len({option.value for option in options}) != 1 or mixed_roles:
-            index = bisect.bisect_right(starts, match.start()) - 1
-            block = blocks[index]
-            if index not in scopes_by_block:
-                scopes_by_block[index] = ({anchors[anchor[0]] for anchor in anchor_pattern.finditer(masked[block.start:block.end])}
-                                          if anchor_pattern else set())
-            scopes = scopes_by_block[index]
+        targets = {option.value for option in options}
+        if targets == {match[0]}:
+            start = match.start() + delta
+            allowed.update((start + item.start(), start + item.end())
+                           for item in residual_pattern.finditer(match[0]))
+            return match[0]
+        if completed and not projections:
+            # Product versions and their derived store names keep the residual checks.
+            component_asset = (any(scope != "release" for scope in candidates)
+                               and identity_class("/package_name", match[0]) in {"url", "package"})
+            if (identity_class("", match[0]) not in {"hex", "digest", "image", "component-tag"}
+                    and not component_asset
+                    or not any(option.tier == 1 and option.value != match[0] for option in options)):
+                return match[0]
+            scopes, block_text = block_scopes(match.start())
+            selected = ("release" if set(candidates) == {"release"} else
+                        next(iter(scopes)) if len(scopes) == 1 else
+                        next(iter(candidates)) if len(candidates) == 1 else None)
+            block = blocks[bisect.bisect_right(starts, match.start()) - 1]
+            prefix = re.split(r"[,;]|[.!?](?=\s)", block_text[:match.start() - block.start])[-1]
+            roles = re.findall(r"\b(current|rollback)\b", prefix, re.IGNORECASE)
+            rollback = bool(roles and roles[-1].lower() == "rollback")
+            if (selected is not None
+                    and (match[0] in target_outputs.get(selected, set())
+                         or (rollback and match[0] in previous_outputs.get(selected, set())))):
+                return match[0]
+        collision = projections and (
+            len({option.origin for option in options if option.origin}) > 1
+            or any(option.projection in {"prefix8", "prefix12", "grouped"} for option in options)
+            or match[0].replace(",", "").isdigit())
+        if projections and completed:
+            scopes, block_text = block_scopes(match.start())
+            selected = ("release" if set(candidates) == {"release"} else
+                        next(iter(scopes)) if len(scopes) == 1 else
+                        next(iter(candidates)) if len(candidates) == 1 else None)
+            explicit_previous = re.search(
+                r"\b(?:previous|predecessor|rollback|retained|incumbent|supersed\w*|upgrad\w*\s+from)\b",
+                block_text, re.IGNORECASE)
+            if (selected is not None
+                    and ((match[0] in previous_outputs.get(selected, set()) and explicit_previous)
+                         or (selected not in candidates and match[0] in target_outputs.get(selected, set())))):
+                start = match.start() + delta
+                allowed.update((start + item.start(), start + item.end())
+                               for item in residual_pattern.finditer(match[0]))
+                return match[0]
+        if len(targets) != 1 or mixed_roles or collision:
+            scopes, _ = block_scopes(match.start())
             options = candidates.get(next(iter(scopes)), set()) if len(scopes) == 1 else set()
         targets = {option.value for option in options}
         if len(targets) != 1 or None in targets:
@@ -392,26 +652,28 @@ def retarget_text(text: str, guide: Path, predecessor: str, release: str,
                           f"block anchors: {', '.join(sorted(scopes)) or 'none'}")
         target = next(iter(targets))
         assert target is not None
-        if any(option.tier == 2 for option in options) or target == match[0]:
+        if completed and not projections:
+            line = text.count("\n", 0, match.start()) + 1
+            raise Refusal(f"{guide}:{line}: refusal (c): guide still names a predecessor identity {match[0]!r}")
+        if projections or any(option.tier == 2 for option in options) or target == match[0]:
             start = match.start() + delta
             allowed.update((start + item.start(), start + item.end())
                            for item in residual_pattern.finditer(target))
+        if edits is not None and target != match[0]:
+            edits.append((text.count("\n", 0, match.start()) + 1, match[0], target))
         delta += len(target) - len(match[0])
         return target
 
-    # The first unmasked product-release literal identifies the guide's current release.
-    # Later predecessor references may be legitimate tier-2 outputs, including on a rerun.
-    current = boundary_pattern([predecessor, release]).search(masked)
-    completed = current is not None and current[0] == release
-    result = text if completed else boundary_pattern(mappings).sub(substitute, text)
-    if completed:
+    # Substitute original spans once; rollback references may be legitimate tier-2 outputs.
+    result = pattern.sub(substitute, text)
+    if completed and not projections:
         tier_two = {option.value for scopes in mappings.values() for options in scopes.values()
                     for option in options if option.tier == 2 and option.value is not None}
         if tier_two:
             for match in boundary_pattern(tier_two).finditer(masked):
                 allowed.update((match.start() + item.start(), match.start() + item.end())
                                for item in residual_pattern.finditer(match[0]))
-    for residual in residual_pattern.finditer(masked_text(result, predecessor)):
+    for residual in residual_pattern.finditer(view(result)):
         if residual.span() not in allowed:
             line = result.count("\n", 0, residual.start()) + 1
             raise Refusal(f"{guide}:{line}: refusal (c): residual predecessor identity {residual[0]!r}")
@@ -428,13 +690,7 @@ def retarget(root: Path, predecessor: str, release: str, guide: Path, *, check: 
         raise Refusal(f"{guide}:1: cannot read guide: {error}") from error
     result = retarget_text(text, guide, predecessor, release, mappings, anchors)
     bindings = bound_evidence(root, release)
-    masked = masked_text(result, predecessor)
-    for link in MARKDOWN_LINK_RE.finditer(result):
-        reference = evidence_reference(link[1].strip("<>"))
-        if (reference is not None and reference not in bindings
-                and masked[link.start():link.end()] == link[0]):
-            line = result.count("\n", 0, link.start()) + 1
-            raise Refusal(f"{guide}:{line}: unbound evidence link: {link[1]}")
+    evidence_diagnostics(result, bindings, guide, mode="guide", masked=masked_text(result, predecessor))
     with tempfile.TemporaryDirectory() as directory:
         candidate = Path(directory) / guide.name
         atomic_write(candidate, result)

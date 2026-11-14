@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Create resumable product-release commits without publishing or rewriting history."""
+"""Drive resumable product-release commits and explicitly authorized component cuts."""
 
 from __future__ import annotations
 
 import argparse
+import contextlib
+import hashlib
 import json
 import os
 import re
@@ -16,8 +18,8 @@ from typing import Any
 from urllib.parse import urlsplit
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from release_io import atomic_write, atomic_write_json, git
-from release_plan import (COMPONENT_IDS, initial_plan, latest_ready_manifest, load_plan,
+from release_io import atomic_copy, atomic_write, atomic_write_json, git
+from release_plan import (COMPONENT_IDS, SHA256_RE, initial_plan, latest_ready_manifest, load_plan,
                           manifest_components, plan_errors)
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -58,6 +60,29 @@ def read_json(path: Path) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise ReleaseError(f"{path.name} must contain a JSON object")
     return value
+
+
+def file_sha(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def _native_cut_arguments(component: dict[str, Any], assets: Path, checksums_sha: str,
+                          notes: Path, *, publish: bool = False) -> list[str]:
+    from verify_release import RUNTIME_COMPONENT_TAG_RES
+
+    identity, tag = component["id"], component["release_tag"]
+    if identity not in COMPONENT_IDS[1:] or not RUNTIME_COMPONENT_TAG_RES[identity].fullmatch(tag):
+        raise ReleaseError("component cut requires the verifier's native beta component tag")
+    lane = identity.split("-", 1)[0]
+    version, beta = tag.split(f"-qwen38-{lane[3:]}-beta.", 1)
+    return ["--lane", lane, "--version", version, "--beta", beta,
+            "--commit", component["source_commit"], "--assets", str(assets),
+            "--checksums-sha", checksums_sha, "--notes-file", str(notes),
+            "--publish" if publish else "--dry-run"]
 
 
 def dirty_paths(root: Path) -> set[str]:
@@ -176,6 +201,15 @@ class ReleaseDriver:
 
     def set_options(self, options: argparse.Namespace) -> None:
         private = self.state["private"]
+        handoff = getattr(options, "runtime_handoff", None)
+        raw_runtime = any(getattr(options, name, None) is not None
+                          for name in ("stage_input", "lane_receipts", "runtime_publication"))
+        if handoff is not None and raw_runtime:
+            raise ReleaseError("--runtime-handoff cannot be combined with --stage-input, "
+                               "--lane-receipt or --runtime-publication")
+        expanded = self._runtime_handoff_inputs(Path(handoff)) if handoff is not None else None
+        if handoff is None and raw_runtime:
+            private.pop("runtime_handoff", None)
         for name in PATH_INPUTS:
             value = getattr(options, name, None)
             if value is not None:
@@ -192,6 +226,8 @@ class ReleaseDriver:
                         raise ReleaseError(f"--{name.replace('_', '-')} requires unique NAME=PATH entries")
                     parsed[key] = str(Path(value).resolve())
                 private[name] = parsed
+        if expanded is not None:
+            private.update(expanded)
         for name in ("as_of", "measurement_prefix"):
             value = getattr(options, name, None)
             if value is not None:
@@ -208,6 +244,79 @@ class ReleaseDriver:
                 calendar_date.fromisoformat(date)
             except ValueError as error:
                 raise ReleaseError("--as-of must be an ISO calendar date") from error
+
+    def _runtime_handoff_inputs(self, directory: Path) -> dict[str, Any]:
+        runtime = next(row for row in self.plan["components"] if row["id"] == COMPONENT_IDS[0])
+        if runtime["disposition"] != "recut":
+            raise ReleaseError("--runtime-handoff requires a re-cut rtx5090-container")
+        directory = directory.resolve()
+        if not directory.is_dir():
+            raise ReleaseError("runtime handoff must be an existing directory")
+        manifest = directory / "handoff.json"
+        if not manifest.is_file() or manifest.is_symlink():
+            raise ReleaseError("runtime handoff requires a regular handoff.json")
+        handoff = read_json(manifest)
+        if handoff.get("schema") != "omp-ninfer.rtx5090-handoff/1":
+            raise ReleaseError("runtime handoff schema must be omp-ninfer.rtx5090-handoff/1")
+        for name, expected in (("source_commit", runtime["source_commit"]),
+                               ("component_tag", runtime["release_tag"])):
+            if handoff.get(name) != expected:
+                raise ReleaseError(f"runtime handoff {name} differs from the plan")
+        baseline = handoff.get("baseline")
+        baseline_release = baseline.get("release") if isinstance(baseline, dict) else None
+        if baseline_release != self.plan["predecessor"]:
+            raise ReleaseError(f"runtime handoff baseline release {baseline_release!r} differs from "
+                               f"plan predecessor {self.plan['predecessor']!r}")
+        files = handoff.get("files")
+        if not isinstance(files, dict) or not files:
+            raise ReleaseError("runtime handoff files must be a nonempty object")
+        for name, binding in files.items():
+            if (not name or name in (".", "..", "handoff.json")
+                    or any(separator in name for separator in ("/", "\\", ":"))):
+                raise ReleaseError("runtime handoff files must use separator-free relative file names")
+            if (not isinstance(binding, dict) or type(binding.get("bytes")) is not int
+                    or binding["bytes"] < 0 or not isinstance(binding.get("sha256"), str)
+                    or SHA256_RE.fullmatch(binding["sha256"]) is None):
+                raise ReleaseError(f"runtime handoff {name} requires bytes and a lowercase SHA-256")
+        actual = {path.name for path in directory.iterdir()}
+        if actual != set(files) | {"handoff.json"}:
+            raise ReleaseError("runtime handoff file set differs from handoff.json")
+        for name, binding in files.items():
+            path = directory / name
+            if not path.is_file() or path.is_symlink():
+                raise ReleaseError(f"runtime handoff {name} must be a regular file")
+            if path.stat().st_size != binding["bytes"]:
+                raise ReleaseError(f"runtime handoff {name} byte size differs from handoff.json")
+            observed = file_sha(path)
+            if observed != binding["sha256"]:
+                raise ReleaseError(f"runtime handoff {name} SHA-256 differs: "
+                                   f"observed {observed}, declared {binding['sha256']}")
+        arguments = handoff.get("driver_arguments")
+        expected_flags = {"--stage-input", "--lane-receipt", "--runtime-publication"}
+        if (not isinstance(arguments, list) or len(arguments) != 6
+                or not all(isinstance(value, str) for value in arguments)):
+            raise ReleaseError("runtime handoff driver_arguments must contain exactly three flag/value pairs")
+        selected = {}
+        for index in range(0, len(arguments), 2):
+            flag, name = arguments[index:index + 2]
+            if flag not in expected_flags or flag in selected:
+                raise ReleaseError("runtime handoff driver_arguments have duplicate or unknown flags")
+            if flag == "--lane-receipt":
+                lane, separator, name = name.partition("=")
+                if not separator or lane != "rtx5090":
+                    raise ReleaseError("runtime handoff --lane-receipt must name rtx5090")
+            if name not in files:
+                raise ReleaseError("runtime handoff driver_arguments must name files in the handoff")
+            selected[flag] = str(directory / name)
+        # Stage options must stay inside the same hash-verified file set as driver inputs.
+        stage_input = read_json(Path(selected["--stage-input"]))
+        for field in STAGE_FILE_OPTIONS & stage_input.keys():
+            name = stage_input[field]
+            if not isinstance(name, str) or name not in files:
+                raise ReleaseError(f"runtime handoff stage-input {field} must name a file in handoff.json")
+        return {"runtime_handoff": str(directory), "stage_input": selected["--stage-input"],
+                "lane_receipts": {"rtx5090": selected["--lane-receipt"]},
+                "runtime_publication": selected["--runtime-publication"]}
 
     @property
     def prefix(self) -> str:
@@ -300,7 +409,7 @@ class ReleaseDriver:
         path = self.require_tool(name)
         result = subprocess.run([sys.executable, str(path), *map(str, arguments)], cwd=self.root,
                                 stdout=subprocess.PIPE if capture else None, text=True,
-                                encoding="utf-8")
+                                encoding="utf-8", env={**os.environ, "PYTHONIOENCODING": "utf-8"})
         if result.returncode:
             raise ReleaseError(f"{name} failed (exit {result.returncode})")
         return result.stdout or ""
@@ -308,6 +417,136 @@ class ReleaseDriver:
     def recut_native(self) -> list[dict[str, Any]]:
         return [row for row in self.plan["components"]
                 if row["id"] != COMPONENT_IDS[0] and row["disposition"] == "recut"]
+
+    def _cut_recorded(self, lane: str) -> bool:
+        path = self.state["private"].get("native_publications", {}).get(lane)
+        return isinstance(path, str) and Path(path).is_file()
+
+    def _cut_authorization(self, lane: str, path: Path | None) -> Path:
+        identity = "cut-" + lane
+        decision = next((row for row in self.plan["decisions"]
+                         if row["kind"] == "component-cut" and row["id"] == identity), None)
+        if path is None or decision is None:
+            raise ReleaseError(f"cut {lane} --publish requires --authorization FILE matching a committed "
+                               f"plan decision kind=component-cut id={identity}")
+        path = path.resolve()
+        if not path.is_file():
+            raise ReleaseError(f"cut {lane} authorization must be an existing file")
+        observed = file_sha(path)
+        if observed != decision["sha256"]:
+            raise ReleaseError(f"cut {lane} authorization SHA-256 differs: "
+                               f"observed {observed}, plan {decision['sha256']}")
+        return path
+
+    def cut(self, options: argparse.Namespace) -> None:
+        from native_publication import load_bundle
+        from qualification_bundle import Inputs
+
+        self.check_plan()
+        plan_name = self.plan_path.relative_to(self.root).as_posix()
+        if plan_name in dirty_paths(self.root) or not git(self.root, "ls-files", "--", plan_name).strip():
+            raise ReleaseError("cut requires a committed plan; run plan commit before cutting")
+        lane = options.lane
+        component = next(row for row in self.plan["components"] if row["id"] == lane + "-windows-native")
+        if component["disposition"] != "recut":
+            raise ReleaseError(f"cut {lane} refuses a carried lane")
+        authorization = self._cut_authorization(lane, options.authorization) if options.publish else None
+        runtime, notes, directory = (options.runtime_dir.resolve(), options.notes_file.resolve(),
+                                     options.bundle.resolve())
+        if not runtime.is_dir() or not notes.is_file():
+            raise ReleaseError("cut requires an existing --runtime-dir directory and --notes-file")
+        assets = {key: Path(value) for key, value in self.state["private"].get("assets", {}).items()}
+        supplied = set()
+        for item in options.assets:
+            role, separator, value = item.partition("=")
+            if not separator or not role or not value or role in supplied:
+                raise ReleaseError("--asset requires unique ROLE=PATH values")
+            supplied.add(role)
+            assets[role] = Path(value).resolve()
+        inputs = Inputs()
+        _, bundle = load_bundle(self.plan, lane, directory, inputs, assets)
+        inputs.read(notes)
+        self.require_tool("hosts/cut-ninfer-4090-component.sh")
+        self.require_tool("native_publication.py")
+        record = self.local / f"native-publication-{lane}-{component['release_tag']}.json"
+
+        def snapshot() -> None:
+            inputs.check()
+            if self.plan_path.read_bytes() != self.plan_bytes:
+                raise ReleaseError("plan changed during the component cut")
+            if authorization is not None:
+                self._cut_authorization(lane, authorization)
+
+        def save_inputs(publication: bool = False) -> None:
+            private = self.state["private"]
+            private.setdefault("bundles", {})[lane] = str(directory)
+            private["assets"] = {key: str(path) for key, path in assets.items()}
+            private.setdefault("native_cuts", {})[lane] = {
+                "component_tag": component["release_tag"], "source_commit": component["source_commit"],
+                "runtime_dir": str(runtime), "notes_file": str(notes)}
+            if publication:
+                private.setdefault("native_publications", {})[lane] = str(record)
+            self.save()
+
+        if bundle.external:
+            record.parent.mkdir(parents=True, exist_ok=True)
+        temporary = (tempfile.TemporaryDirectory(prefix=lane + "-cut-", dir=record.parent)
+                     if bundle.external else contextlib.nullcontext(None))
+        with temporary as staged:
+            asset_directory = Path(staged) if staged is not None else bundle.assets
+            if staged is not None:
+                files = {**bundle.asset_paths, "SHA256SUMS": bundle.assets / "SHA256SUMS"}
+                for name, source in files.items():
+                    atomic_copy(source, asset_directory / name)
+            snapshot()
+            environment = {**os.environ, "NINFER_RUNTIME_DIR": str(runtime),
+                           "PYTHONIOENCODING": "utf-8"}
+
+            def cutter(*, publish: bool = False) -> subprocess.CompletedProcess[str]:
+                arguments = _native_cut_arguments(component, asset_directory,
+                                                  bundle.row["checksums_sha256"], notes, publish=publish)
+                result = subprocess.run(["bash", "scripts/hosts/cut-ninfer-4090-component.sh", *arguments],
+                                        cwd=self.root, env=environment, capture_output=True,
+                                        text=True, encoding="utf-8")
+                print(result.stdout, end="")
+                print(result.stderr, end="", file=sys.stderr)
+                return result
+
+            dry = cutter()
+            collision_messages = {f"tag already exists: {component['release_tag']}",
+                                  f"release already exists: {component['release_tag']}"}
+            existing = dry.returncode == 1 and any(
+                line.strip() in collision_messages for line in (dry.stdout + "\n" + dry.stderr).splitlines())
+            if dry.returncode and not existing:
+                raise ReleaseError(f"component cut dry-run failed (exit {dry.returncode})")
+            snapshot()
+            if not options.publish and not existing and not record.is_file():
+                save_inputs()
+                print(f"cut {lane}: dry-run passed; --publish would publish "
+                      f"{component['release_tag']} at {component['source_commit']}")
+                print(f"founder authorization required: --publish --authorization FILE; commit its SHA-256 "
+                      f"as plan decision kind=component-cut id=cut-{lane}")
+                decision = next((row for row in self.plan["decisions"]
+                                 if row["kind"] == "component-cut" and row["id"] == "cut-" + lane), None)
+                if decision is not None:
+                    print(f"planned authorization SHA-256: {decision['sha256']}")
+                return
+            if options.publish and not existing and not record.is_file():
+                published = cutter(publish=True)
+                if published.returncode:
+                    raise ReleaseError(f"component publication failed (exit {published.returncode})")
+                snapshot()
+            arguments = ["--plan", str(self.plan_path), "--lane", lane, "--bundle", str(directory),
+                         "--out", str(record)]
+            for role, path in sorted(assets.items()):
+                arguments += ["--asset", f"{role}={path}"]
+            if record.is_file():
+                arguments.append("--check")
+            self.tool("native_publication.py", *arguments)
+            if not record.is_file():
+                raise ReleaseError("native publication authentication produced no record")
+            save_inputs(publication=True)
+            print(f"cut {lane}: publication recorded; no product publication was authorized")
 
     def client_component_path(self) -> Path:
         if "client_component" in self.state["private"]:
@@ -358,6 +597,10 @@ class ReleaseDriver:
 
     def validate_stage_inputs(self) -> None:
         private = self.state["private"]
+        if "runtime_handoff" in private:
+            expected_inputs = self._runtime_handoff_inputs(Path(private["runtime_handoff"]))
+            if any(private.get(name) != value for name, value in expected_inputs.items()):
+                raise ReleaseError("recorded runtime inputs differ from their runtime handoff")
         expected = {row["id"].split("-", 1)[0] for row in self.recut_native()}
         supplied = set(private.get("bundles", {}))
         if expected != supplied:
@@ -689,7 +932,8 @@ def required_input(driver: ReleaseDriver, group: str) -> str:
         if driver.recut_native():
             items += ["--bundle LANE=DIR", "--native-publication LANE=JSON", "--asset ROLE=PATH when external"]
         if any(row["id"] == COMPONENT_IDS[0] and row["disposition"] == "recut" for row in driver.plan["components"]):
-            items += ["--stage-input JSON", "--lane-receipt rtx5090=PATH", "--runtime-publication JSON"]
+            items += ["--runtime-handoff DIR (or --stage-input JSON, --lane-receipt rtx5090=PATH, "
+                      "--runtime-publication JSON)"]
         if driver.plan["client"]["disposition"] == "updated":
             items += ["--client-component JSON"]
         return ", ".join(items)
@@ -895,6 +1139,15 @@ def main(argv: list[str] | None = None, *, root: Path = ROOT) -> int:
     rehearsal = subcommands.add_parser("rehearse", help="prove the real release tail without hosts or network")
     rehearsal.add_argument("--keep", type=Path, help="retain the clone in an absent or empty directory")
     rehearsal.add_argument("--suite", action="store_true", help="also run the contract suite at the ready state")
+    cut = subcommands.add_parser("cut", help="dry-run a native cut; publish only with explicit founder authorization")
+    cut.add_argument("--release", required=True)
+    cut.add_argument("--lane", required=True, choices=("rtx3090", "rtx4090"))
+    cut.add_argument("--bundle", required=True, type=Path)
+    cut.add_argument("--runtime-dir", required=True, type=Path)
+    cut.add_argument("--notes-file", required=True, type=Path)
+    cut.add_argument("--asset", dest="assets", action="append", default=[], metavar="ROLE=PATH")
+    cut.add_argument("--publish", action="store_true")
+    cut.add_argument("--authorization", type=Path)
     for name in ("status", "next", "candidate", "finalize", "publish"):
         command = subcommands.add_parser(name)
         command.add_argument("--release", required=True)
@@ -907,6 +1160,9 @@ def main(argv: list[str] | None = None, *, root: Path = ROOT) -> int:
                 command.add_argument("--" + flag, dest=option, action="append", metavar="NAME=PATH")
             command.add_argument("--as-of")
             command.add_argument("--measurement-prefix")
+            if name == "candidate":
+                command.add_argument("--runtime-handoff", type=Path,
+                                     help="verify a closed runtime handoff and expand its three inputs")
         if name == "publish":
             command.add_argument("--preflight", action="store_true", required=True)
             command.add_argument("--pr", type=int, required=True)
@@ -933,15 +1189,36 @@ def main(argv: list[str] | None = None, *, root: Path = ROOT) -> int:
                 raise ReleaseError("\n".join(errors))
             print(f"release plan {args.release}: valid")
             return 0
-        driver = ReleaseDriver(root, args.release, args)
+        driver = ReleaseDriver(root, args.release, None if args.command == "cut" else args)
         if args.command == "status":
+            for component in driver.recut_native():
+                lane = component["id"].split("-", 1)[0]
+                print(f"cut-{lane}\t{'recorded' if driver._cut_recorded(lane) else 'pending'}\t"
+                      f"{component['release_tag']}")
             for group in GROUPS:
                 record = driver.records.get(group)
                 print(f"{group}\t{'done' if record else 'pending'}\t"
                       f"{record['commit'] if record else '-'}\t{record['pins'] if record else '-'}")
         elif args.command == "next":
+            pending = False
+            for component in driver.recut_native():
+                lane = component["id"].split("-", 1)[0]
+                if driver._cut_recorded(lane):
+                    print(f"cut-{lane}: recorded; re-verify with scripts/native_publication.py "
+                          f"--plan releases/{args.release}/plan.json --lane {lane} --bundle DIR "
+                          "--out FILE --check and the recorded --asset inputs "
+                          "(--check re-reads public bytes)")
+                else:
+                    pending = True
+                    print(f"cut-{lane}: scripts/release.py cut --release {args.release} --lane {lane} "
+                          "--bundle DIR --runtime-dir DIR --notes-file FILE "
+                          "(dry-run; --publish requires founder authorization)")
+            if pending:
+                return 0
             group = next((group for group in GROUPS if group not in driver.records), None)
             print(f"{group}: {required_input(driver, group)}" if group else "complete: publication preflight")
+        elif args.command == "cut":
+            driver.cut(args)
         elif args.command in ("candidate", "finalize"):
             run_pipeline(driver, finalize=args.command == "finalize", no_suite=args.no_suite)
         else:

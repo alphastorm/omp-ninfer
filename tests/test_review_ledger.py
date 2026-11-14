@@ -287,7 +287,7 @@ class ReviewLedgerTests(unittest.TestCase):
                  "C:\\\\" + "Users\\\\UNIQUE_NAME\\\\private\\\\file.txt",
                  "/" + "Users/UNIQUE_NAME/private/file.txt",
                  "/" + "home/UNIQUE_NAME/private/file.txt"]
-        atomic_write_json(source, {"summary": " ".join(f"`{path}`" for path in paths) + " " + sentinel,
+        atomic_write_json(source, {"summary": "|".join([*(f"`{path}`" for path in paths), sentinel]),
                                    "evidence": [], "unresolved": []})
         before = source.read_bytes()
         result = self.write()
@@ -295,8 +295,7 @@ class ReviewLedgerTests(unittest.TestCase):
         for private in ("UNIQUE_NAME", "private", "file.txt", sentinel):
             self.assertNotIn(private, output)
         self.assertEqual(result["sanitized"], {
-            "a Windows user-profile path": 3, "a POSIX user-profile path": 2,
-            "a synthetic GPU-identifier sentinel": 1})
+            LEDGER.REMOVED_STATEMENT: 1, "a synthetic GPU-identifier sentinel": 1})
         self.assertEqual(source.read_bytes(), before)
 
     def test_each_private_path_is_consumed_including_its_username_and_final_segment(self):
@@ -317,20 +316,18 @@ class ReviewLedgerTests(unittest.TestCase):
                 self.assertEqual(sum(counts.values()), 1)
                 self.assertEqual(source.read_bytes(), before)
 
-    def test_private_paths_stop_at_quotes_and_whitespace_without_consuming_the_surrounding_text(self):
+    def test_a_statement_naming_a_private_path_is_removed_whole(self):
         source = self.out / "reviews/product_tooling/critic.json"
         for opening, closing in (("'", "'"), ('"', '"'), ("`", "`"), ("", " ")):
             with self.subTest(delimiter=closing):
                 path = "/" + "home/UNIQUE_NAME/private/file.txt"
-                atomic_write_json(source, {"summary": opening + path + closing + "Retained prose.",
+                atomic_write_json(source, {"summary": opening + path + closing + "Private prose.\nMore prose.",
                                            "evidence": [], "unresolved": []})
                 before = source.read_bytes()
                 ledger, counts = LEDGER.build(self.root, self.release, self.candidate,
                                               self.manifest_path, self.values)
                 summary = ledger["product_tooling"]["reviewer_results"]["critic"]["summary"]
-                self.assertNotIn("UNIQUE_NAME", summary)
-                self.assertNotIn("file.txt", summary)
-                self.assertTrue(summary.endswith(closing + "Retained prose."), summary)
+                self.assertEqual(summary, LEDGER.REMOVED_STATEMENT)
                 self.assertEqual(sum(counts.values()), 1)
                 self.assertEqual(source.read_bytes(), before)
 
@@ -342,6 +339,10 @@ class ReviewLedgerTests(unittest.TestCase):
             ("C:/" + "Users/First Last/AppData/private.txt", ("First", "Last", "AppData", "private.txt")),
             ("C:\\" + "Users\\First Last\\AppData\\private.txt", ("First", "Last", "AppData", "private.txt")),
             ("/" + "Users/UNIQUE_NAME/My Project/notes.txt", ("UNIQUE_NAME", "Project", "notes.txt")),
+            ("/" + "Users/alice/My Project for release/docs/file", ("alice", "Project", "release/docs/file")),
+            ("/" + "Users/example/Private Team Folder/report.txt", ("example", "Team", "Folder/report.txt")),
+            ("C:\\\\" + "Users\\\\First Last\\\\Private Team Folder\\\\report.txt",
+             ("First", "Last", "Team", "Folder", "report.txt")),
         ):
             with self.subTest(path=path):
                 atomic_write_json(source, {"summary": f"Observed {path} Retained prose.",
@@ -351,7 +352,24 @@ class ReviewLedgerTests(unittest.TestCase):
                 summary = ledger["product_tooling"]["reviewer_results"]["critic"]["summary"]
                 for fragment in fragments:
                     self.assertNotIn(fragment, summary)
-                self.assertTrue(summary.endswith(" Retained prose."), summary)
+                self.assertNotIn("Retained prose.", summary)
+
+    def test_a_finding_keeps_its_id_and_severity_and_loses_the_rest(self):
+        source = self.out / "reviews/product_tooling/critic.json"
+        for path in ("/" + "Users/alice/My Project for release/docs/file",
+                     "C:\\" + "Users\\First Last\\Private Team Folder\\report.txt",
+                     "/" + "Users/alice/client|archive/secret.txt",
+                     "/" + "Users/alice/escaped\\|pipe/secret.txt"):
+            with self.subTest(path=path):
+                item = f"R1|P1|conf=0.9|claim=public claim|evidence=Observed {path} private detail|impact=public impact"
+                public = "R2|P2|conf=0.5|claim=other|evidence=scripts/release.py:1|impact=none|verify=none"
+                atomic_write_json(source, {"summary": "Public summary.", "evidence": [item, public], "unresolved": []})
+                ledger, counts = LEDGER.build(self.root, self.release, self.candidate,
+                                              self.manifest_path, self.values)
+                evidence = ledger["product_tooling"]["reviewer_results"]["critic"]["evidence"]
+                self.assertEqual(evidence, ["R1|P1|conf=0.9|" + LEDGER.REMOVED_STATEMENT, public])
+                self.assertEqual(sum(counts.values()), 1)
+                LEDGER.public_text(ledger)
 
     def test_verifier_self_check_happens_before_either_public_write(self):
         before = self.qualification.read_bytes()

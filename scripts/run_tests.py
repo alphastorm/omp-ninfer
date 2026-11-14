@@ -87,6 +87,24 @@ WINDOWS_METHOD_SKIPS = (
         ),
         "runs the POSIX publication preflight script",
     ),
+    (
+        "test_release_cut",
+        "ReleaseCutTests",
+        (
+            "test_default_is_only_dry_run_with_derived_arguments_and_private_state",
+            "test_authorized_publish_runs_dry_then_publish_then_authenticates",
+            "test_dry_run_failure_never_publishes_or_saves_inputs",
+            "test_authorization_is_rechecked_after_dry_run",
+            "test_failed_publication_never_authenticates_or_records",
+            "test_existing_public_tag_is_authenticated_without_republishing",
+            "test_authenticated_publish_rerun_never_publishes_twice",
+            "test_differing_public_bytes_names_both_digests_and_records_nothing",
+            "test_failed_reauthentication_preserves_the_prior_record_and_state",
+            "test_status_and_next_report_recorded_without_network_or_tool_calls",
+            "test_external_package_is_streamed_to_a_closed_nonaliasing_asset_directory",
+        ),
+        "runs the POSIX component cut recording script",
+    ),
 )
 
 
