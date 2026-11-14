@@ -68,6 +68,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   anonymous authentication of a published native component, and identity retargeting of the
   Quick Start from the release manifests. Each reproduces the published v0.19.0 result in its
   tests.
+- `scripts/release.py cut`: the component cut for a re-cut native lane. It runs the publisher's
+  dry run by default; `--publish` needs an authorization file whose SHA-256 the committed plan
+  records, then authenticates the published bytes anonymously and keeps that record for
+  `candidate`. `candidate --runtime-handoff` takes the RTX 5090 runtime's publication inputs as
+  one hash-checked directory.
+- `scripts/flip_docs.py`: after publication, moves the release, client and component identities
+  in the living pages from the previous release's manifest to the new one and lists what still
+  needs an author. It never edits a record.
+- `scripts/retarget_guide.py` refuses a guide that already names the target release but still
+  carries a predecessor component identity outside a rollback reference.
 - `scripts/verify_release.py --lint-ready`: a staged release is held to everything the ready
   gate will require except evidence its remaining phases have not produced, so defects surface
   when the draft is staged instead of after acceptance.

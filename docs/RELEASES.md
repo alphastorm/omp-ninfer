@@ -714,6 +714,11 @@ page names a release.
 
 Publication tools preserve regions between balanced, non-nested `<!-- records -->` and `<!-- /records -->` comment lines in every page, plus Markdown from `## Records` to the end of the page.
 
+`python3 scripts/flip_docs.py --from <previous> --to <release>` makes the identity edits in these
+pages from the two releases' manifests: the release, the client version, component tags and
+digests. It then lists what still needs an author: results paragraphs, the new records, and any
+evidence link the new release does not bind. `--check` reports drift without writing.
+
 Then search the living pages for the previous release, client version, and component tags. Only
 records and links pinned to an earlier tag may keep them.
 
