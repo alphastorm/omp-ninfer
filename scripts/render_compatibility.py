@@ -6,9 +6,13 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from release_io import atomic_write
 
 PROFILE_IDS = (
     "darwin-remote-ssh",
@@ -503,8 +507,7 @@ def main() -> int:
                 "generated compatibility matrix is stale")
         print(f"verified {args.output}")
         return 0
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(rendered, encoding="utf-8")
+    atomic_write(args.output, rendered)
     print(f"wrote {args.output}")
     return 0
 

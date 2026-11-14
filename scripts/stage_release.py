@@ -68,7 +68,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from render_compatibility import OMP_PROFILE_PLATFORMS
-from rebind_release import stamp_profile, save as save_profile
+from release_profiles import stamp_profile
+from rebind_release import save as save_profile
 from verify_release import (
     ContractError,
     NINFER_VARIANT_IDS,

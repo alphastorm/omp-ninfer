@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import os
 import shutil
 import subprocess
@@ -42,9 +43,46 @@ class ReleasePinReplayTests(unittest.TestCase):
                       "143a9bc", "57526ad", "v0.19.0")
         cls.commits = dict(zip(references, HISTORY.resolve_commits(*references)))
 
+    @staticmethod
+    def snapshot(root: Path) -> dict[str, bytes]:
+        paths = []
+        for name in BOUND_PATHS:
+            path = root / name
+            paths.extend(path.rglob("*") if path.is_dir() else [path])
+        return {path.relative_to(root).as_posix(): path.read_bytes()
+                for path in paths if path.is_file()}
+
+    def lane_golden(self, root: Path) -> dict[str, bytes]:
+        subprocess.run(["git", "clone", "--quiet", "--shared", "--no-checkout",
+                        str(ROOT), str(root)], check=True, capture_output=True)
+        subprocess.run(["git", "checkout", "--quiet", "--detach", self.commits["fc15ffc"]],
+                       cwd=root, check=True, capture_output=True)
+        published = json.loads(subprocess.run(
+            ["git", "show", f"{self.commits['v0.19.0']}:compatibility.json"],
+            cwd=root, capture_output=True, check=True,
+        ).stdout)
+        path = root / "compatibility.json"
+        authority = json.loads(path.read_text(encoding="utf-8"))
+        # One historical defect is allowed, with its deterministic hash/render closure.
+        # The historical rebind computes that closure, not the implementation under test.
+        rows = [row for row in authority["runtime_contracts"] if row["lane"].startswith("RTX 3090 ")]
+        final = next(row["lane"] for row in published["runtime_contracts"]
+                     if row["lane"].startswith("RTX 3090 "))
+        self.assertEqual(len(rows), 1)
+        self.assertNotEqual(rows[0]["lane"], final)
+        rows[0]["lane"] = final
+        path.write_text(json.dumps(authority, indent=2) + "\n", encoding="utf-8")
+        result = subprocess.run(
+            [sys.executable, str(root / "scripts/rebind_release.py"), "--release", "v0.19.0"],
+            cwd=root, capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        return self.snapshot(root)
+
     def replay(self, before: str, stage: str, after: str) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary) / "replay"
+            expected = self.lane_golden(Path(temporary) / "golden") if stage == "lane" else None
             subprocess.run(["git", "clone", "--quiet", "--shared", "--no-checkout",
                             str(ROOT), str(root)], check=True, capture_output=True)
             subprocess.run(["git", "checkout", "--quiet", "--detach", self.commits[before]],
@@ -57,6 +95,9 @@ class ReleasePinReplayTests(unittest.TestCase):
                 cwd=root, capture_output=True, text=True,
             )
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            if expected is not None:
+                self.assertEqual(self.snapshot(root), expected)
+                return
             difference = subprocess.run(
                 ["git", "diff", "--exit-code", self.commits[after], "--", *BOUND_PATHS],
                 cwd=root, capture_output=True, text=True,
