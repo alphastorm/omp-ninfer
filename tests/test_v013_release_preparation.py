@@ -191,7 +191,7 @@ class V013PreparationTests(unittest.TestCase):
 
     def test_rebased_native_tag_shapes_are_bounded_not_a_future_version_wildcard(self):
         for lane in ("rtx3090", "rtx4090"):
-            pattern = render_compatibility.RUNTIME_VARIANT_RELEASE_TAG_RES[f"{lane}-windows-native"]
+            pattern = render_compatibility.HISTORICAL_RUNTIME_VARIANT_RELEASE_TAG_RES[f"{lane}-windows-native"]
             self.assertIsNotNone(pattern.fullmatch(f"v0.7.0-qwen38-{lane[3:]}-beta.1"))
             self.assertIsNone(pattern.fullmatch(f"v0.7.1-qwen38-{lane[3:]}-beta.1"))
 

@@ -19,6 +19,7 @@
 # The runner checks its tunnel on 127.0.0.1:18089, the port open-tunnel.sh forwards. Tests set
 # ROUTE_TUNNEL_PORT to an ephemeral port so they never take the port a live route on the same
 # Mac binds between steps (omp-ninfer#97); a tunnel step checked on another port records it.
+# ROUTE_TEST_TUNNEL_ATTEMPTS shortens only test runs; every receipt records it when set.
 set -eE -o pipefail
 (( $# == 3 )) || { echo "usage: run-documented-route.sh BUNDLE CLONE RECEIPT" >&2; exit 2; }
 BUNDLE=$1; CLONE=$2; RECEIPT=$3
@@ -38,6 +39,16 @@ if [[ ! $TUNNEL_PORT =~ ^[1-9][0-9]{0,4}$ ]] || (( TUNNEL_PORT > 65535 )); then
   echo "ROUTE_TUNNEL_PORT must be a TCP port from 1 through 65535" >&2
   exit 2
 fi
+TUNNEL_ATTEMPTS=30
+TUNNEL_ATTEMPTS_OVERRIDE=${ROUTE_TEST_TUNNEL_ATTEMPTS-}
+if [[ ${ROUTE_TEST_TUNNEL_ATTEMPTS+x} ]]; then
+  TUNNEL_ATTEMPTS=$TUNNEL_ATTEMPTS_OVERRIDE
+  if [[ ! $TUNNEL_ATTEMPTS =~ ^[1-9][0-9]?$ ]] || (( TUNNEL_ATTEMPTS > 30 )); then
+    echo "ROUTE_TEST_TUNNEL_ATTEMPTS must be an integer from 1 through 30" >&2
+    exit 2
+  fi
+fi
+ROUTE_RUNNER_SCRIPTS=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 TUNNEL_PID=""
 SUBSTITUTIONS=()
 MANIFEST="$BUNDLE/manifest.json"
@@ -53,9 +64,12 @@ record() {  # position slug heading index expected actual status elapsed error [
 }
 
 write_receipt() {
-  python3 - "$RECEIPT" "$MANIFEST" "$CLONE_COMMIT" "$STARTED" "$STATUS" "${RECORDS[@]}" <<'PY'
+  python3 - "$ROUTE_RUNNER_SCRIPTS" "$TUNNEL_ATTEMPTS_OVERRIDE" "$RECEIPT" "$MANIFEST" "$CLONE_COMMIT" "$STARTED" "$STATUS" "${RECORDS[@]}" <<'PY'
 import json, sys, datetime, pathlib, platform
-receipt, manifest_path, commit, started, status, *records = sys.argv[1:]
+scripts, attempts_override, receipt, manifest_path, commit, started, status, *records = sys.argv[1:]
+sys.path.insert(0, scripts)
+from release_io import atomic_write_json
+
 manifest = json.load(open(manifest_path, encoding="utf-8"))
 release = pathlib.Path("/etc/os-release")
 host_os = ""
@@ -73,8 +87,9 @@ out = {
     "host_os": host_os, "clone_commit": commit,
     "steps": [json.loads(r) for r in records], "status": status,
 }
-with open(receipt, "w", encoding="utf-8") as handle:
-    json.dump(out, handle, indent=2); handle.write("\n")
+if attempts_override:
+    out["test_overrides"] = {"ROUTE_TEST_TUNNEL_ATTEMPTS": int(attempts_override)}
+atomic_write_json(pathlib.Path(receipt), out)
 PY
 }
 
@@ -175,7 +190,7 @@ for line in "${STEP_LINES[@]}"; do
     fi
     ( trap - ERR; set +eE; cd "$CLONE" && eval "$text" ) </dev/null & TUNNEL_PID=$!
     tunnel_ready=0
-    for _ in $(seq 1 30); do
+    for _ in $(seq 1 "$TUNNEL_ATTEMPTS"); do
       sleep 1
       kill -0 "$TUNNEL_PID" 2>/dev/null || break
       if route_reachable; then tunnel_ready=1; break; fi

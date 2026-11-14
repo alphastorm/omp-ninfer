@@ -76,7 +76,9 @@ from verify_release import (  # pyright: ignore[reportMissingImports]
     public_native_failure_summary,
     NATIVE_ROUTE_LANES as NATIVE_LANES,
     NATIVE_WAIVER_NON_CLAIM,
+    ContractError, component_provenance, provenance_claim_errors,
 )
+from release_io import atomic_write, atomic_write_json
 from rebind_release import RAW  # pyright: ignore[reportMissingImports]
 from compose_native_qualification import (
     first_release_rollback, native_probe_acceptance_errors, matches_native_configuration,
@@ -131,8 +133,25 @@ def load(path: Path) -> Any:
 
 
 def save(path: Path, document: Any) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(document, indent=2) + "\n", encoding="utf-8")
+    atomic_write_json(path, document)
+
+
+def evidence_provenance_claim_errors(evidence: dict) -> list[str]:
+    """Scan free prose before route validation or output staging can begin."""
+    prose = {
+        "documented_routes": {key: value for key, value in evidence.get("documented_routes", {}).items()
+                              if key in ("scope", "mode", "document_change", "deferred_routes",
+                                         "qualification_environment")},
+        "composed": {key: value for key, value in evidence.get("composed", {}).items()
+                     if key in ("qualification_note", "client_note", "limitations",
+                                "runtime_qualification", "vision_scope", "mode")},
+        "platforms": {key: {"limitations": value.get("limitations", [])}
+                      for key, value in evidence.get("platforms", {}).items()},
+    }
+    for key in ("rtx3090", "rtx4090"):
+        if key in evidence:
+            prose[key] = {"limitations": evidence[key].get("limitations", [])}
+    return provenance_claim_errors(prose, "evidence")
 
 
 def relative(path: Path) -> str:
@@ -646,6 +665,14 @@ def main() -> int:
     qualification_path = release_root / "qualification.json"
     authority_path = ROOT / "compatibility.json"
     manifest = load(manifest_path)
+    provenance = None
+    if (product_version(args.release) or (0, 0, 0)) >= (0, 20, 0):
+        claims = evidence_provenance_claim_errors(evidence)
+        require(not claims, "; ".join(claims))
+        try:
+            provenance = component_provenance(ROOT, args.release, manifest)
+        except ContractError as error:
+            require(False, str(error))
     variant_ids = {v["id"] for v in manifest["components"].get("ninfer_variants", [])}
     lanes = LANES + tuple(lane for lane, variant in NATIVE_LANES.items() if variant in variant_ids)
     require(sorted(routes) == sorted(lanes), f"need one --route for each of {', '.join(lanes)}")
@@ -783,6 +810,8 @@ def main() -> int:
     scope = evidence["documented_routes"].get("scope")
     require(isinstance(scope, str) and bool(scope.strip()),
             "evidence documented_routes needs the scope the accepted routes cover")
+    if provenance is not None:
+        scope = provenance["statement"] + " " + scope
     waiver_limitations = [
         (f"{lane}: documented blocks passed, but the post-route native-probes compaction probe "
          if row["failed_phase"] == "native-probes" else
@@ -997,6 +1026,7 @@ def main() -> int:
         "release": args.release,
         "as_of": args.as_of,
         "status": acceptance_status,
+        **({"component_provenance": provenance} if provenance is not None else {}),
         "operator_class": "owner-operated tester-equivalent",
         "mode": composed["mode"],
         "client": {
@@ -1052,7 +1082,8 @@ def main() -> int:
         "compatibility_authority": omp["compatibility_authority"],
         "compatibility_sha256": compatibility_sha,
         "platform_receipts": platform_rows,
-        "note": " ".join([composed["qualification_note"], *waiver_limitations]),
+        "note": " ".join([*([provenance["statement"]] if provenance is not None else []),
+                          composed["qualification_note"], *waiver_limitations]),
     }
     routes_ref = {"repository_path": relative(routes_path), "sha256": staged_sha(routes_path)}
     composition["documented_route_acceptance"] = {"status": "passed", **routes_ref}
@@ -1098,8 +1129,7 @@ def main() -> int:
     stage(manifest_path, manifest)
     # No refusal checks, parsing, projection or serialization occur after this boundary.
     for path, data in pending.items():
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(data)
+        atomic_write(path, data)
     print(f"composed {args.release} acceptance: {len(lanes)} routes, {len(platform_rows)} client "
           f"receipts; commit, then rebind_release.py --pin <commit> --stage platform")
     return 0

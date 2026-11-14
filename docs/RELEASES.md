@@ -81,15 +81,17 @@ Prereleases never take GitHub `Latest`; `Latest` always points at the current pu
 
 ## How a release is cut
 
-Cutting a release advances `releases/<version>/manifest.json` from `draft` to GitHub `Latest`
-(maintainer terms are defined below and in the [glossary](FACTS.md#glossary)):
+The committed `releases/<version>/plan.json` declares the release identities, carried or re-cut
+components, support posture and decisions. `scripts/release.py` validates the plan and creates
+the ordered commits that advance the manifest from `draft` through `candidate` to `ready`.
+It does not publish. Maintainer terms are defined below and in the [glossary](FACTS.md#glossary):
 
 1. [Release state transition](#release-state-transition) — `draft`, `candidate`, and `ready` rules.
 2. [Candidate freeze](#candidate-freeze) — freeze client, runtime, model, and receipt bytes.
 3. [Next native release sequencing](#next-native-release-sequencing) — native gates and SBOM.
 4. [External-install acceptance](#external-install-acceptance) — clean client and route smoke.
-5. [Cut procedure](#cut-procedure) — stage the draft, bind waivers, and run the four
-   [cut stages](#cut-stages).
+5. [Cut procedure](#cut-procedure) — check the plan, run `candidate`, collect fresh acceptance,
+   then run `finalize` through the [cut stages](#cut-stages).
 6. [Release notes](#release-notes) — pin the client, cut native components,
    [add a lane](#adding-a-lane), and what notes may claim.
 7. [After publication](#after-publication) — date the changelog, update the living pages, and
@@ -334,9 +336,108 @@ acceptance.
 
 ## Cut procedure
 
-The release tree is staged as a draft and cut with the pin dance, the four `rebind_release.py`
-stages listed under [cut stages](#cut-stages). Every step is a script and the verifier decides what
-remains.
+Use the driver rather than copying release-specific scripts or choosing pin SHAs by hand:
+
+```sh
+python3 scripts/release.py plan init --release "$release"
+python3 scripts/release.py plan check --release "$release"
+python3 scripts/release.py status --release "$release"
+python3 scripts/release.py next --release "$release"
+python3 scripts/release.py candidate --release "$release"
+# Run the reviews and acceptance windows from the guide candidate printed by status.
+python3 scripts/release.py finalize --release "$release" \
+  --window-root "$window_root" --reviews "$reviews" --values "$values" --as-of "$date"
+python3 scripts/release.py publish --release "$release" --preflight --pr "$pr"
+```
+
+Before starting a live cut, `python3 scripts/release.py rehearse` proves the full post-hardware
+path with synthetic, host-free evidence in a disposable local clone of HEAD. It refuses dirty or
+shallow repositories, removes the clone's origin and uses no network. `--keep DIR` retains the
+clone outside the source repository for inspection; otherwise it is removed. `--suite` additionally
+runs the contract suite inside the ready clone, checking that tests do not assume which release
+is current.
+
+The rehearsal initializes a carry-all next-minor plan, creates valid notes, runs the same candidate
+and finalization pipeline as a real cut, and supplies the shared acceptance fixtures. If the real
+guide retarget tool identifies an unbound evidence link, the rehearsal reports replacing just that
+Markdown link with its label, in the clone only. Success requires all eight groups, the strict
+ready/pin gate and two negative byte-change probes (audit and pinned evidence), each restored
+afterwards. Every step reports elapsed seconds and the first failing step stops the run.
+
+The plan is the release's first commit. `plan init` derives a carry-all plan from the latest ready
+GA release and the root authority's platform postures, validates it, then creates
+`chore(release): plan <version>` with a `Release:` trailer. This opening commit is not one of the
+eight step groups. Initialization refuses an existing plan or any dirty tree.
+For author review before that opening commit, use `plan init --release "$release" --no-commit`,
+edit the seeded JSON non-interactively, then run `plan commit --release "$release"`. The latter
+validates the author's edits and refuses any other dirty path. Plain `plan init` performs these
+same two steps without pausing; the rehearsal uses that unattended path.
+Use repeatable `--recut COMPONENT=TAG@COMMIT40` and `--decision ID:KIND:SHA256`, or
+`--client-tag TAG` for an updated client, to declare changes at initialization. Any later authored
+plan changes must be committed explicitly before `candidate`; untracked or modified plans refuse
+with `plan commit` guidance. Schema 1 has artifact type
+`omp_ninfer_release_plan`, the GA `release` and `predecessor`, a `client` with `upstream_tag`
+and disposition `carried` or `updated`, and a `components` array. Component ids are the closed set
+`rtx5090-container`, `rtx4090-windows-native`, `rtx3090-windows-native`; each binds disposition
+`recut` or `carried`, `release_tag` and a full `source_commit`. `platforms` maps exactly the
+authority's profile ids to `qualified` or `preview`. `decisions` binds each decision's `id`,
+`kind` (`component-cut`, `scope` or `waiver`) and SHA-256. Carried identities must match the ready
+predecessor, re-cut tags must be new, and an existing manifest must agree with the plan.
+Required `limitations` is a possibly empty list of unique, nonempty, trimmed release-level
+limitation sentences. The author reviews this list before the opening commit. Initialization
+seeds predecessor sentences, printing each dropped provenance claim or generated component sentence;
+the aggregate owns the generated provenance and neutral evidence sentence, not the author.
+No absolute paths or private markers belong in a plan.
+
+Supply private inputs as arguments to `candidate`, not as plan fields:
+
+- A re-cut container requires `--stage-input JSON`, `--lane-receipt rtx5090=PATH` and
+  `--runtime-publication JSON`. The stage-input object uses `stage_release.py` option names with
+  underscores instead of hyphens; source/archive/SBOM/image metadata and local source/checksum
+  files come from the cut. The driver always takes the release tag and source commit from the
+  plan. Relative file options resolve beside this JSON. A carried container derives its staging
+  arguments from the predecessor and refuses a new runtime-publication record.
+- Each re-cut native lane requires `--bundle LANE=DIR` and
+  `--native-publication LANE=JSON`; repeat per lane. External package files use
+  `--asset ROLE=PATH` when the bundle declares them. Carried native lanes take neither bundle
+  nor publication input.
+- An updated client requires `--client-component JSON`, passed to the stager's
+  `--omp-component`. Optional `--notes PATH` supplies the release's completed publication notes;
+  optional profile/deployment options belong in the stage-input object.
+- A carried client defaults to the predecessor's public `qualification/client-components.json`
+  when no explicit descriptor is supplied. This resets every platform for fresh acceptance;
+  a missing predecessor descriptor refuses instead of preserving accepted platform state.
+- `finalize --notes PATH` replaces those notes in the compose commit when acceptance results
+  complete them. Without this argument, finalization keeps the staged notes. A resumed compose
+  attempt reuses its recorded notes input and hashes its bytes before deciding whether to rerun.
+- `--measurement-prefix PREFIX` selects public measurement filenames; it must contain no private
+  identifiers. `--as-of DATE` is the acceptance completion date, not an inferred current date.
+
+When the window root contains `window-state.json`, finalization selects each manifest-declared
+lane's accepted attempt from that index. The index must bind this release and the guide candidate;
+every accepted entry must be `passed` or `retired`. All attempt directories must exist, use relative
+POSIX paths and stay inside the window root, including after symlink resolution. The collector
+receives explicit `--lane-dir` arguments for accepted attempts and `--corrected-attempt` arguments
+for every earlier `spent-failed` attempt of that lane. The input fingerprint hashes the index
+alongside the window evidence. Older windows without an index keep their original root layout.
+
+The driver remembers private input paths only in ignored `.release-state/<version>.json`, written
+atomically. That file is a cache, not authority: first-parent commits with `Release:` and
+`Release-Step:` trailers determine completed groups, and `Pins:` trailers bind the earlier group
+commits. Rerunning a completed group makes no commit. An interrupted group's complete outputs are
+committed without rerunning tools only when the plan, HEAD and private input hashes are unchanged;
+otherwise only that group's declared paths are restored and its tools rerun, except for the guide,
+which is always retargeted in place. A first `stage` or `compose` attempt refuses dirty declared
+paths: supply notes through `--notes`, or commit or discard other edits explicitly. Only an attempt
+the driver already started may restore its partial outputs on resume. Authored guide edits are
+inputs, hash-bound into the guide group's fingerprint, and ride only the guide commit; they are
+never restored away, even after interruption. Foreign dirty paths and rewritten recorded history
+are refused.
+
+Both commands run their verifier gates and the contract suite. `--no-suite` skips only the suite,
+never installability, lint, ready or pin checks. A missing tool is an error, never a skipped step.
+`publish --preflight` wraps the publication script without its live flag: it does not authorize or
+perform publication. `ready` remains a technical state, not an external-effect grant.
 
 The verifier resolves predecessors from **ready GA manifests**, not the newest
 GA-named directory. Published product releases use `status: ready`; neither
@@ -349,8 +450,8 @@ When the RTX 5090 source archive URL changes, staging requires both
 those local bytes, and requires exactly one matching SHA256SUMS entry each for
 the binary archive (`--archive-sha`) and its SPDX SBOM (`--sbom-sha`). Current
 published RTX 5090 sets list those two assets, not the separately published source
-archive. If a `runtime-source-<source-commit8>.tar.gz` entry is present, as in the
-v0.14.0 format, it must match `--source-archive-sha`. Missing required entries,
+archive. If a `runtime-source-<source-commit8>.tar.gz` entry is present in an older
+combined checksum set, it must match `--source-archive-sha`. Missing required entries,
 malformed or duplicate entries, mismatched hashes and stale predecessor metadata
 are refused before copying the release tree. An unchanged source URL keeps its
 metadata when those arguments are omitted. Profile templates retain checkpoint
@@ -399,31 +500,38 @@ Supported new waiver shapes are deliberately narrow:
 
 ### Cut stages
 
-1. `scripts/stage_release.py --from <previous> --release <new> ...` copies the tree, rewrites
-   the component and identity pins (including `--config-sha`, the lifecycle configuration
-   identity of the new deployment profile), and recomputes the chain with
-   `scripts/rebind_release.py --draft`. The root authority and profiles stay on the previous
-   release: that is the checked-in draft posture.
-2. Author the evidence: install the lane receipt, write the composed acceptance, rewrite the
-   qualification summary's gates and prose, CHANGELOG/RELEASES/BENCHMARKS/FACTS/README, and the
-   drift-test pins. Rerun `--draft` after every edit; commit.
-3. Cut: `scripts/rebind_release.py --release <new> --pin <commit containing the final lane
-   receipts> --stage lane` promotes the release's compatibility copy to the root authority,
-   rewrites the root profiles and launcher examples from the manifest, pins the authority's
-   receipt URLs, and reruns the chain. A draft manifest becomes `candidate`, not `ready`.
-   An upstream-release client is copied wholesale from its platform row before consuming
-   a root `status:candidate` marker (which means client-unbound-by-named-release). Fork
-   and non-promoted markers remain. Verify `--require-installable`; commit the candidate
-   for the release's published-image acceptance window. Do not hand-clear guards.
-4. Only after fresh platform/documented-route acceptance, bind the real receipts and
-   ready/external-acceptance transition. `--pin <that commit> --stage acceptance`; commit.
-   `--pin <that commit> --stage manifest`;
-   commit. The manifest stage runs `verify_release.py --require-ready --check-pins`, which
-   reads every pinned evidence URL out of local git history and requires it to serve exactly
-   the recorded SHA-256 and every pinned commit to be an ancestor of the checked-out head.
-   A locally resolvable side-branch pin is not publication evidence. It also rejects stale unpublished/ready-candidate wording in tracked
-   Markdown outside `releases/`; use release-neutral wording before freezing the tag. CI repeats the gate on
-   the release tag with full history.
+Each row is one commit with a fixed Conventional Commit subject and release/step trailers.
+`candidate` runs the first three rows; `finalize` requires the guide commit and runs the rest.
+
+| Group | Tools and binding |
+| --- | --- |
+| `stage` | Stage from the ready predecessor; aggregate `admit` validates bundles and derives release-decision-bound proofs; bind each re-cut native lane; draft rebind; aggregate `compose`; draft rebind; receipt audit `lane-stage --prune-unbound` removes and logs unbound predecessor copies. Root authority and profiles remain on the predecessor. |
+| `lane-pin` | `rebind_release.py --stage lane` pins to the **stage commit** holding final lane receipts, promotes the root authority, profiles and launcher pins, and changes `draft` to `candidate`, not `ready`. |
+| `guide` | `retarget_guide.py` retargets the guide once from predecessor identities to plan identities. This commit is the **candidate** for every review and acceptance window. Run installability, lint-ready with pins, and the suite before the windows. |
+| `compose` | Collect window evidence, build the review ledger naming the guide candidate, compose real route/platform acceptance, then rebind. Only the composer makes the release `ready` and clears its blockers. |
+| `platform-pin` | Pin to the **compose commit** containing platform receipt bytes, then rebind. This changes the compatibility hash and therefore the composed acceptance bytes. |
+| `acceptance-pin` | Pin to the **platform-pin commit**, the first commit containing those final composed acceptance bytes. |
+| `audit` | Generate the `composed-final` receipt audit **after the acceptance pin**, updating its qualification binding before that summary is pinned. |
+| `manifest-pin` | Pin to the **audit commit** holding final qualification, compatibility and variant receipts. Run ready with pins during this step and again at HEAD, then the suite. |
+
+An upstream-release client is copied wholesale from its platform row at the lane pin before
+consuming a root `status:candidate` marker (client-unbound-by-named-release). Fork and non-promoted
+markers remain; never hand-clear guards.
+
+Four separate pins are necessary because writing a commit-pinned URL changes the referring
+file's bytes: a file cannot name its own not-yet-created commit. Every pin argument comes from
+the earlier group's trailers, never an operator-provided SHA. The driver uses explicit
+`git add -- <paths>` and never squashes, rebases, pushes or publishes. Do not rewrite these commits
+when landing the release: publication fast-forwards them intact.
+
+The ready/pin gate reads every pinned URL from local git history, checks its recorded SHA-256 and
+requires each pin to be an ancestor of HEAD. A locally resolvable side-branch pin is not publication
+evidence. It also rejects stale release-state wording in tracked Markdown outside `releases/`.
+Keep that prose neutral before freezing the candidate; the whole guide remains hash-bound through
+acceptance. CI repeats the ready/pin gate on the release tag with full history. Living
+CHANGELOG/RELEASES/BENCHMARKS/FACTS/README pages change once, [after publication](#after-publication),
+not during staging or finalization. Release-local notes are checked at the candidate and may gain
+acceptance results through `finalize --notes` before the compose commit.
 
 ### Guarded completion of a partial product publication
 
@@ -782,6 +890,31 @@ python3 scripts/verify_release.py --release v0.9.1 --require-ready --check-pins
 Everything below this heading is a dated record, preserved as published. Records are append-only:
 a new record is added and an old one is not edited. For what is true today, read the sections
 above and the [canonical facts](FACTS.md#current-release).
+
+## v0.19.0 erratum, 2026-11-14 — component provenance wording in five acceptance strings
+
+Five descriptive strings in the published `v0.19.0` evidence describe the runtime components
+incorrectly. The manifest, the receipts, every hash and every pin are correct and unaffected; the
+tagged tree is not edited.
+
+| File | Field | Published wording | Fact (`releases/v0.19.0/manifest.json`) |
+| --- | --- | --- | --- |
+| `releases/v0.19.0/qualification.json` | `documented_route_acceptance.scope` | "both newly cut beta.4 native public installs"; "the current one-source N cuts" | Only the RTX 3090 native was cut for this release (`v0.8.0-qwen38-3090-beta.4`). The RTX 4090 native is `v0.8.0-qwen38-4090-beta.3`, carried unchanged from v0.18.0. |
+| `releases/v0.19.0/acceptance/composed-external-installation.json` | `client.note` | "all three runtime components were rebuilt from one N source" | The three components bind three source commits: RTX 5090 `41f89b31`, RTX 3090 `15c3e395`, RTX 4090 `48c8ac46`. |
+| `releases/v0.19.0/acceptance/composed-external-installation.json` | `mode` | "new beta.4 native packages" | One new native package (RTX 3090 beta.4). |
+| `releases/v0.19.0/acceptance/composed-external-installation.json` | `runtime_qualification.rtx4090-windows-native.scope` | "Current exact-source published beta.4 component qualification"; "restored promoted canonical instance" | The RTX 4090 component is the carried beta.3 with its v0.18.0 qualification; it was not promoted in this release. |
+| `releases/v0.19.0/acceptance/documented-routes.json` | `mode` | "both promoted beta.4 native lanes" | Both native lanes were restored after their windows; only the RTX 3090 lane is beta.4. |
+
+The [v0.19.0 release notes](../releases/v0.19.0/NINFER_RELEASE_NOTES.md) and the v0.19.0 record
+below state the carried RTX 4090 component and the two cut sources correctly. One review
+disposition in `releases/v0.19.0/review/runtime-ledger.json` also mentions
+`v0.8.0-qwen38-{3090,4090}-beta.4` component notes; it was written before the RTX 4090 cut was
+withdrawn, and no RTX 4090 beta.4 component was published.
+
+The five strings were written by a private evidence collector copied from the previous release
+with its identifiers substituted; no check read them. From the next release the composer
+generates each component's provenance from the manifests, the collector writes no provenance
+prose, and the verifier refuses evidence prose that makes a provenance claim of its own.
 
 ## v0.19.0 — bounded pressure saves, RTX 3090 beta.4, and stock OMP 18.20.0
 
