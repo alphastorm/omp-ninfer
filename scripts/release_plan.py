@@ -55,6 +55,64 @@ def manifest_components(manifest: dict[str, Any]) -> dict[str, dict[str, Any]]:
                if isinstance(row, dict) and isinstance(row.get("id"), str)}}
 
 
+def latest_ready_manifest(root: Path) -> dict[str, Any]:
+    """Select the latest ready GA release, including when a later candidate exists."""
+    candidates = []
+    for path in (Path(root) / "releases").glob("*/manifest.json"):
+        version = GA_RELEASE_RE.fullmatch(path.parent.name)
+        if version is None:
+            continue
+        manifest = json.loads(path.read_text(encoding="utf-8"))
+        if manifest.get("status") == "ready":
+            candidates.append((tuple(map(int, version.groups())), manifest))
+    if not candidates:
+        raise ValueError("plan init requires a ready GA predecessor")
+    return max(candidates, key=lambda item: item[0])[1]
+
+
+def initial_plan(root: Path, release: str, *, recut: list[str] | tuple[str, ...] = (),
+                 client_tag: str | None = None,
+                 decisions: list[str] | tuple[str, ...] = ()) -> dict[str, Any]:
+    """Construct public plan inputs; the caller validates before committing them."""
+    if GA_RELEASE_RE.fullmatch(release) is None:
+        raise ValueError("plan release must be a GA version (vX.Y.Z)")
+    predecessor = latest_ready_manifest(root)
+    overrides = {}
+    for value in recut:
+        component, separator, identity = value.partition("=")
+        tag, at, commit = identity.rpartition("@")
+        if (not separator or component not in COMPONENT_IDS or component in overrides
+                or not at or not tag or COMMIT_RE.fullmatch(commit) is None):
+            raise ValueError("--recut requires unique COMPONENT=TAG@COMMIT40 entries from the closed component set")
+        overrides[component] = {"id": component, "disposition": "recut",
+                                "release_tag": tag, "source_commit": commit}
+    previous = manifest_components(predecessor)
+    components = []
+    for component in COMPONENT_IDS:
+        if component in overrides:
+            components.append(overrides[component])
+        elif component in previous:
+            components.append({"id": component, "disposition": "carried",
+                               **{key: previous[component][key] for key in ("release_tag", "source_commit")}})
+    decision_rows = []
+    for value in decisions:
+        fields = value.split(":")
+        if len(fields) != 3:
+            raise ValueError("--decision requires ID:KIND:SHA256")
+        decision_rows.append(dict(zip(("id", "kind", "sha256"), fields)))
+    authority = json.loads((Path(root) / "compatibility.json").read_text(encoding="utf-8"))
+    return {
+        "artifact_type": PLAN_SCHEMA["artifact_type"], "schema_version": 1, "release": release,
+        "predecessor": predecessor["release"],
+        "client": {"upstream_tag": client_tag if client_tag is not None else
+                   predecessor["components"]["omp"]["upstream_tag"],
+                   "disposition": "updated" if client_tag is not None else "carried"},
+        "components": components,
+        "platforms": {row["id"]: row["status"] for row in authority["profiles"]},
+        "decisions": decision_rows,
+    }
+
+
 def plan_errors(root: Path, release: str) -> list[str]:
     """Return every schema or authority disagreement without writing any files."""
     # Lazy import avoids a cycle when the verifier checks a plan during validate().

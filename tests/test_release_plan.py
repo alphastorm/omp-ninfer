@@ -42,7 +42,7 @@ def plan_fixture(root: Path) -> tuple[dict, dict, dict]:
                 "components": {"ninfer": runtime, "ninfer_variants": natives,
                                "omp": {"upstream_tag": "v2.0.0"}}}
     authority = {"product_release": PREDECESSOR,
-                 "profiles": [{"id": name} for name in (
+                 "profiles": [{"id": name, "status": "preview" if name.startswith("darwin") else "qualified"} for name in (
                      "windows-docker-local", "darwin-remote-ssh", "linux-docker-local")]}
     plan = {
         "artifact_type": "omp_ninfer_release_plan", "schema_version": 1, "release": RELEASE,
@@ -86,6 +86,39 @@ class ReleasePlanTests(unittest.TestCase):
         self.assertEqual(self.errors(), [])
         self.manifest()
         self.assertEqual(self.errors(), [])
+
+    def test_initial_plan_uses_the_latest_ready_release_and_authority_postures(self) -> None:
+        held = copy.deepcopy(self.previous)
+        held.update(release="v1.0.5", status="candidate")
+        atomic_write_json(self.root / "releases" / held["release"] / "manifest.json", held)
+        plan = PLAN.initial_plan(self.root, RELEASE)
+        self.assertEqual(plan["predecessor"], PREDECESSOR)
+        self.assertEqual(plan["platforms"], self.plan["platforms"])
+        self.assertTrue(all(row["disposition"] == "carried" for row in plan["components"]))
+        self.assertEqual(plan["decisions"], [])
+        self.assertEqual(plan["client"], self.plan["client"])
+        held["status"] = "ready"
+        atomic_write_json(self.root / "releases" / held["release"] / "manifest.json", held)
+        self.assertEqual(PLAN.initial_plan(self.root, RELEASE)["predecessor"], held["release"])
+
+    def test_initial_plan_applies_explicit_component_client_and_decision_inputs(self) -> None:
+        plan = PLAN.initial_plan(
+            self.root, RELEASE,
+            recut=["rtx5090-container=v3.0.0-runtime@" + "9" * 40],
+            client_tag="v3.0.0", decisions=["scope:scope:" + "8" * 64],
+        )
+        self.assertEqual(plan["components"][0], {"id": "rtx5090-container", "disposition": "recut",
+                                                "release_tag": "v3.0.0-runtime", "source_commit": "9" * 40})
+        self.assertEqual(plan["client"], {"upstream_tag": "v3.0.0", "disposition": "updated"})
+        self.assertEqual(plan["decisions"], [{"id": "scope", "kind": "scope", "sha256": "8" * 64}])
+
+    def test_initial_plan_rejects_malformed_or_duplicate_recut_arguments(self) -> None:
+        valid = "rtx5090-container=v3.0.0-runtime@" + "9" * 40
+        for recut in (["unknown=tag@" + "9" * 40], ["rtx5090-container=tag@short"], [valid, valid]):
+            with self.subTest(recut=recut), self.assertRaisesRegex(ValueError, "--recut"):
+                PLAN.initial_plan(self.root, RELEASE, recut=recut)
+        with self.assertRaisesRegex(ValueError, "--decision"):
+            PLAN.initial_plan(self.root, RELEASE, decisions=["missing-fields"])
 
     def test_release_must_be_ga(self) -> None:
         self.assertIn("GA version", PLAN.plan_errors(self.root, RELEASE + "-rc.1")[0])

@@ -339,6 +339,7 @@ acceptance.
 Use the driver rather than copying release-specific scripts or choosing pin SHAs by hand:
 
 ```sh
+python3 scripts/release.py plan init --release "$release"
 python3 scripts/release.py plan check --release "$release"
 python3 scripts/release.py status --release "$release"
 python3 scripts/release.py next --release "$release"
@@ -349,7 +350,14 @@ python3 scripts/release.py finalize --release "$release" \
 python3 scripts/release.py publish --release "$release" --preflight --pr "$pr"
 ```
 
-Author and commit the plan before running `candidate`. Schema 1 has artifact type
+The plan is the release's first commit. `plan init` derives a carry-all plan from the latest ready
+GA release and the root authority's platform postures, validates it, then creates
+`chore(release): plan <version>` with a `Release:` trailer. This opening commit is not one of the
+eight step groups. Initialization refuses an existing plan or any dirty tree.
+Use repeatable `--recut COMPONENT=TAG@COMMIT40` and `--decision ID:KIND:SHA256`, or
+`--client-tag TAG` for an updated client, to declare changes at initialization. Any later authored
+plan changes must be committed explicitly before `candidate`; untracked or modified plans refuse
+with opening-commit guidance. Schema 1 has artifact type
 `omp_ninfer_release_plan`, the GA `release` and `predecessor`, a `client` with `upstream_tag`
 and disposition `carried` or `updated`, and a `components` array. Component ids are the closed set
 `rtx5090-container`, `rtx4090-windows-native`, `rtx3090-windows-native`; each binds disposition
@@ -472,7 +480,7 @@ Each row is one commit with a fixed Conventional Commit subject and release/step
 
 | Group | Tools and binding |
 | --- | --- |
-| `stage` | Stage from the ready predecessor; aggregate `admit` validates bundles and derives release-decision-bound proofs; bind each re-cut native lane; draft rebind; aggregate `compose`; draft rebind; receipt audit `lane-stage`. Root authority and profiles remain on the predecessor. |
+| `stage` | Stage from the ready predecessor; aggregate `admit` validates bundles and derives release-decision-bound proofs; bind each re-cut native lane; draft rebind; aggregate `compose`; draft rebind; receipt audit `lane-stage --prune-unbound` removes and logs unbound predecessor copies. Root authority and profiles remain on the predecessor. |
 | `lane-pin` | `rebind_release.py --stage lane` pins to the **stage commit** holding final lane receipts, promotes the root authority, profiles and launcher pins, and changes `draft` to `candidate`, not `ready`. |
 | `guide` | `retarget_guide.py` retargets the guide once from predecessor identities to plan identities. This commit is the **candidate** for every review and acceptance window. Run installability, lint-ready with pins, and the suite before the windows. |
 | `compose` | Collect window evidence, build the review ledger naming the guide candidate, compose real route/platform acceptance, then rebind. Only the composer makes the release `ready` and clears its blockers. |

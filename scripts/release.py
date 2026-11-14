@@ -15,7 +15,7 @@ from urllib.parse import urlsplit
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from release_io import atomic_write, atomic_write_json, git
-from release_plan import COMPONENT_IDS, load_plan, manifest_components, plan_errors
+from release_plan import COMPONENT_IDS, initial_plan, load_plan, manifest_components, plan_errors
 
 ROOT = Path(__file__).resolve().parents[1]
 GROUPS = ("stage", "lane-pin", "guide", "compose", "platform-pin", "acceptance-pin",
@@ -104,6 +104,9 @@ def group_commits(root: Path, release: str) -> dict[str, dict[str, str]]:
                 trailers.setdefault(key, []).append(value.strip())
         if release not in trailers.get("Release", []):
             continue
+        if (subject == f"chore(release): plan {release}"
+                and trailers == {"Release": [release]}):
+            continue
         if trailers.get("Release") != [release] or len(trailers.get("Release-Step", [])) != 1:
             raise ReleaseError(f"invalid release trailers at {commit}")
         group = trailers["Release-Step"][0]
@@ -117,6 +120,28 @@ def group_commits(root: Path, release: str) -> dict[str, dict[str, str]]:
             raise ReleaseError(f"{group} Pins trailer does not name its {source or 'absent'} input")
         records[group] = {"commit": commit, "pins": expected[0] if expected else ""}
     return records
+
+
+def init_plan(root: Path, release: str, *, recut: list[str] | tuple[str, ...] = (),
+              client_tag: str | None = None, decisions: list[str] | tuple[str, ...] = ()) -> str:
+    plan = initial_plan(root, release, recut=recut, client_tag=client_tag, decisions=decisions)
+    path = Path(root) / "releases" / release / "plan.json"
+    if path.exists():
+        raise ReleaseError(f"plan init refuses an existing plan: releases/{release}/plan.json")
+    dirty = dirty_paths(root)
+    if dirty:
+        raise ReleaseError("plan init requires a clean tree: " + ", ".join(sorted(dirty)))
+    created = not path.parent.exists()
+    atomic_write_json(path, plan)
+    errors = plan_errors(root, release)
+    if errors:
+        path.unlink()
+        if created:
+            path.parent.rmdir()
+        raise ReleaseError("plan init result failed plan check:\n" + "\n".join(errors))
+    git(root, "add", "--", path.relative_to(root).as_posix())
+    git(root, "commit", "-m", f"chore(release): plan {release}", "-m", f"Release: {release}")
+    return git(root, "rev-parse", "HEAD").strip()
 
 
 class ReleaseDriver:
@@ -651,6 +676,10 @@ class ReleaseDriver:
 def run_pipeline(driver: ReleaseDriver, *, finalize: bool, no_suite: bool = False,
                  through: str | None = None) -> None:
     """One execution path for CLI cuts and a disposable-clone rehearsal."""
+    plan_path = driver.plan_path.relative_to(driver.root).as_posix()
+    if not finalize and plan_path in dirty_paths(driver.root):
+        raise ReleaseError(f"candidate requires a committed plan: {plan_path}; "
+                           "use plan init for a new release, or commit the modified plan explicitly")
     if finalize and "guide" not in driver.records:
         raise ReleaseError("finalize requires the guide candidate commit")
     interrupted_stage = not finalize and "stage" not in driver.records and driver.state["groups"].get("stage")
@@ -688,6 +717,11 @@ def main(argv: list[str] | None = None, *, root: Path = ROOT) -> int:
     subcommands = parser.add_subparsers(dest="command", required=True)
     plan = subcommands.add_parser("plan").add_subparsers(dest="plan_command", required=True)
     plan.add_parser("check").add_argument("--release", required=True)
+    initialize = plan.add_parser("init", help="write and commit the release's opening plan")
+    initialize.add_argument("--release", required=True)
+    initialize.add_argument("--recut", action="append", default=[], metavar="COMPONENT=TAG@COMMIT40")
+    initialize.add_argument("--client-tag")
+    initialize.add_argument("--decision", action="append", default=[], metavar="ID:KIND:SHA256")
     for name in ("status", "next", "candidate", "finalize", "publish"):
         command = subcommands.add_parser(name)
         command.add_argument("--release", required=True)
@@ -706,6 +740,11 @@ def main(argv: list[str] | None = None, *, root: Path = ROOT) -> int:
     args = parser.parse_args(argv)
     try:
         if args.command == "plan":
+            if args.plan_command == "init":
+                commit = init_plan(root, args.release, recut=args.recut, client_tag=args.client_tag,
+                                   decisions=args.decision)
+                print(f"release plan {args.release}: initialized at {commit}")
+                return 0
             errors = plan_errors(root, args.release)
             if errors:
                 raise ReleaseError("\n".join(errors))

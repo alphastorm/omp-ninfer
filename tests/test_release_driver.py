@@ -231,7 +231,7 @@ class ReleaseDriverTests(unittest.TestCase):
                               check=True, capture_output=True, text=True, encoding="utf-8").stdout.strip()
 
     def invoke(self, command: str, *arguments: str, success: bool = True) -> subprocess.CompletedProcess:
-        result = subprocess.run([sys.executable, str(self.root / "scripts" / "release.py"), command,
+        result = subprocess.run([sys.executable, str(self.root / "scripts" / "release.py"), *command.split(),
                                  "--release", RELEASE, *map(str, arguments)],
                                 cwd=self.root, env=self.environment, capture_output=True,
                                 text=True, encoding="utf-8")
@@ -278,6 +278,69 @@ class ReleaseDriverTests(unittest.TestCase):
     def driver(self, **values) -> Any:
         options = argparse.Namespace(**{"notes": self.private / "notes.md", **values})
         return DRIVER.ReleaseDriver(self.root, RELEASE, options)
+
+    def remove_plan(self) -> None:
+        (self.root / "releases" / RELEASE / "plan.json").unlink()
+        self.git("add", "--", f"releases/{RELEASE}/plan.json")
+        self.git("commit", "-qm", "test(release): start without a release plan")
+
+    def test_plan_init_commits_the_opening_plan_without_completing_a_group(self) -> None:
+        self.remove_plan()
+        self.invoke("plan init")
+        self.assertEqual(self.git("log", "-1", "--format=%s"), f"chore(release): plan {RELEASE}")
+        self.assertEqual(self.git("log", "-1", "--format=%(trailers:only)").strip(), f"Release: {RELEASE}")
+        self.assertEqual(DRIVER.group_commits(self.root, RELEASE), {})
+        plan = json.loads((self.root / "releases" / RELEASE / "plan.json").read_text())
+        self.assertTrue(all(row["disposition"] == "carried" for row in plan["components"]))
+        self.assertEqual(plan["decisions"], [])
+        self.assertEqual(self.git("status", "--porcelain"), "")
+        self.candidate("--no-suite")
+        self.assertEqual(len(DRIVER.group_commits(self.root, RELEASE)), 3)
+
+    def test_plan_init_accepts_explicit_public_inputs(self) -> None:
+        self.remove_plan()
+        self.invoke("plan init", "--recut", "rtx5090-container=v3.0.0-runtime@" + "9" * 40,
+                    "--client-tag", "v3.0.0", "--decision", "scope:scope:" + "8" * 64)
+        plan = json.loads((self.root / "releases" / RELEASE / "plan.json").read_text())
+        self.assertEqual(plan["components"][0]["disposition"], "recut")
+        self.assertEqual(plan["client"]["disposition"], "updated")
+        self.assertEqual(plan["decisions"][0]["id"], "scope")
+        self.invoke("plan check")
+
+    def test_plan_init_refuses_existing_plan_without_mutation(self) -> None:
+        before = self.worktree_bytes()
+        self.invoke("plan init", success=False)
+        self.assertEqual(self.worktree_bytes(), before)
+        self.assertEqual(self.git("rev-parse", "HEAD"), self.initial)
+
+    def test_plan_init_refuses_dirty_tree_without_mutation(self) -> None:
+        self.remove_plan()
+        atomic_write(self.root / "operator.txt", "Authored input.\n")
+        before = self.worktree_bytes()
+        head = self.git("rev-parse", "HEAD")
+        result = self.invoke("plan init", success=False)
+        self.assertIn("plan init requires a clean tree", result.stderr)
+        self.assertEqual(self.worktree_bytes(), before)
+        self.assertEqual(self.git("rev-parse", "HEAD"), head)
+
+    def test_plan_init_rejects_an_invalid_result_without_leaving_a_plan(self) -> None:
+        self.remove_plan()
+        before = self.worktree_bytes()
+        head = self.git("rev-parse", "HEAD")
+        tag = self.previous["components"]["ninfer"]["release_tag"]
+        result = self.invoke("plan init", "--recut", f"rtx5090-container={tag}@" + "9" * 40, success=False)
+        self.assertIn("failed plan check", result.stderr)
+        self.assertEqual(self.worktree_bytes(), before)
+        self.assertEqual(self.git("rev-parse", "HEAD"), head)
+
+    def test_candidate_refuses_an_untracked_plan_with_opening_commit_guidance(self) -> None:
+        self.remove_plan()
+        atomic_write_json(self.root / "releases" / RELEASE / "plan.json", self.plan)
+        before = self.worktree_bytes()
+        result = self.invoke("candidate", "--no-suite", success=False)
+        self.assertIn("plan init", result.stderr)
+        self.assertIn("commit", result.stderr)
+        self.assertEqual(self.worktree_bytes(), before)
 
     def interrupt(self, *, finalize: bool = False, **values) -> None:
         driver = self.driver(**values)
@@ -389,6 +452,12 @@ class ReleaseDriverTests(unittest.TestCase):
         self.interrupt()
         self.plan["platforms"]["darwin-remote-ssh"] = "qualified"
         atomic_write_json(self.root / "releases" / RELEASE / "plan.json", self.plan)
+        before = self.worktree_bytes()
+        result = self.invoke("candidate", "--no-suite", success=False)
+        self.assertIn("commit the modified plan", result.stderr)
+        self.assertEqual(self.worktree_bytes(), before)
+        self.git("add", "--", f"releases/{RELEASE}/plan.json")
+        self.git("commit", "-qm", "test(release): commit the revised support posture")
         self.candidate("--no-suite")
         self.assertEqual(len(self.calls("stage_release.py")), 2)
 
@@ -428,9 +497,13 @@ class ReleaseDriverTests(unittest.TestCase):
                 before = self.worktree_bytes()
                 index = self.git("diff", "--cached", "--binary")
                 result = self.invoke("candidate", "--no-suite", success=False)
-                self.assertIn("first stage run refuses dirty declared paths: " + relative, result.stderr)
-                for guidance in ("--notes", "commit", "discard"):
-                    self.assertIn(guidance, result.stderr)
+                if relative.endswith("/plan.json"):
+                    self.assertIn("candidate requires a committed plan: " + relative, result.stderr)
+                    self.assertIn("plan init", result.stderr)
+                else:
+                    self.assertIn("first stage run refuses dirty declared paths: " + relative, result.stderr)
+                    for guidance in ("--notes", "commit", "discard"):
+                        self.assertIn(guidance, result.stderr)
                 self.assertEqual(self.worktree_bytes(), before)
                 self.assertEqual(self.git("diff", "--cached", "--binary"), index)
                 self.assertEqual(self.git("rev-parse", "HEAD"), self.initial)
