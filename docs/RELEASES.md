@@ -380,6 +380,14 @@ Supply private inputs as arguments to `candidate`, not as plan fields:
 - `--measurement-prefix PREFIX` selects public measurement filenames; it must contain no private
   identifiers. `--as-of DATE` is the acceptance completion date, not an inferred current date.
 
+When the window root contains `window-state.json`, finalization selects each manifest-declared
+lane's accepted attempt from that index. The index must bind this release and the guide candidate;
+every accepted entry must be `passed` or `retired`. All attempt directories must exist, use relative
+POSIX paths and stay inside the window root, including after symlink resolution. The collector
+receives explicit `--lane-dir` arguments for accepted attempts and `--corrected-attempt` arguments
+for every earlier `spent-failed` attempt of that lane. The input fingerprint hashes the index
+alongside the window evidence. Older windows without an index keep their original root layout.
+
 The driver remembers private input paths only in ignored `.release-state/<version>.json`, written
 atomically. That file is a cache, not authority: first-parent commits with `Release:` and
 `Release-Step:` trailers determine completed groups, and `Pins:` trailers bind the earlier group

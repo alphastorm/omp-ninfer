@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import importlib.util
 import json
 import os
@@ -143,8 +144,17 @@ def run(name, args):
     elif name == "collect_route_evidence.py":
         assert Path(value("--window-root")).is_dir()
         assert load(ROOT / value("--plan"))["release"] == release
+        declared = {row["id"] for row in load(manifest)["components"]["ninfer_variants"]}
+        lanes = [lane for lane in ROUTES if not lane.endswith("-native")
+                 or lane.removesuffix("-native") + "-windows-native" in declared]
+        if values("--lane-dir"):
+            runtime_lanes = {"rtx5090", *(lane.removesuffix("-native") for lane in lanes if lane.endswith("-native"))}
+            assert {item.partition("=")[0] for item in values("--lane-dir")} == runtime_lanes
+        for item in values("--lane-dir") + values("--corrected-attempt"):
+            path = Path(item.partition("=")[2])
+            assert path.is_absolute() and path.is_dir()
         atomic_write_json(Path(value("--output")), {"candidate": value("--candidate")})
-        for lane in ROUTES:
+        for lane in lanes:
             atomic_write_json(Path(value("--receipts-dir")) / (lane + "-run.json"),
                               {"candidate": value("--candidate"), "lane": lane})
     elif name == "review_ledger.py":
@@ -153,7 +163,10 @@ def run(name, args):
         atomic_write_json(directory / "review" / "runtime-ledger.json", {"product_tooling": {"stage_commit": candidate}})
     elif name == "compose_route_acceptance.py":
         assert load(Path(value("--evidence")))["candidate"] == value("--candidate")
-        assert set(item.partition("=")[0] for item in values("--route")) == set(ROUTES)
+        declared = {row["id"] for row in load(manifest)["components"]["ninfer_variants"]}
+        lanes = {lane for lane in ROUTES if not lane.endswith("-native")
+                 or lane.removesuffix("-native") + "-windows-native" in declared}
+        assert set(item.partition("=")[0] for item in values("--route")) == lanes
         for item in values("--route"):
             assert load(Path(item.partition("=")[2]))["candidate"] == value("--candidate")
         for filename in ("composed-external-installation.json", "documented-routes.json"):
@@ -244,6 +257,23 @@ class ReleaseDriverTests(unittest.TestCase):
     def worktree_bytes(self) -> dict[str, bytes]:
         listed = self.git("ls-files", "-z", "--cached", "--others", "--exclude-standard")
         return {name: (self.root / name).read_bytes() for name in listed.split("\0") if name}
+
+    def window_state(self) -> dict:
+        candidate = DRIVER.group_commits(self.root, RELEASE)["guide"]["commit"]
+        manifest = json.loads((self.root / "releases" / RELEASE / "manifest.json").read_text())
+        state = {"schema": 1, "release": RELEASE, "candidate": candidate, "lanes": {},
+                 "other_field": "ignored"}
+        for component in DRIVER.manifest_components(manifest):
+            lane = component.split("-", 1)[0]
+            directory = f"{lane}/attempt-1"
+            (self.private / "windows" / directory).mkdir(parents=True)
+            state["lanes"][lane] = {
+                "accepted": 1, "other_field": "ignored",
+                "attempts": [{"attempt": 1, "directory": directory, "status": "passed",
+                              "other_field": "ignored"}],
+            }
+        atomic_write_json(self.private / "windows" / "window-state.json", state)
+        return state
 
     def driver(self, **values) -> Any:
         options = argparse.Namespace(**{"notes": self.private / "notes.md", **values})
@@ -493,6 +523,160 @@ class ReleaseDriverTests(unittest.TestCase):
         self.candidate("--no-suite")
         self.assertEqual(path.read_bytes(), expected)
         self.assertEqual(len(self.calls("retarget_guide.py")), 2)
+
+    def test_clean_window_index_passes_accepted_lane_directories(self) -> None:
+        self.candidate("--no-suite")
+        state = self.window_state()
+        state["lanes"]["rtx3090"]["attempts"][0]["status"] = "retired"
+        atomic_write_json(self.private / "windows" / "window-state.json", state)
+        self.finalize("--no-suite")
+        arguments = self.calls("collect_route_evidence.py")[0]["arguments"]
+        actual = {arguments[position + 1] for position, argument in enumerate(arguments) if argument == "--lane-dir"}
+        expected = {f"{lane}={(self.private / 'windows' / row['attempts'][0]['directory']).resolve()}"
+                    for lane, row in state["lanes"].items()}
+        self.assertEqual(actual, expected)
+        self.assertNotIn("--corrected-attempt", arguments)
+
+    def test_corrected_container_attempt_passes_each_earlier_spent_attempt(self) -> None:
+        self.candidate("--no-suite")
+        state = self.window_state()
+        attempts = []
+        for number, status in ((1, "spent-failed"), (2, "spent-failed"), (3, "passed"), (4, "spent-failed")):
+            directory = f"rtx5090/attempt-{number}"
+            (self.private / "windows" / directory).mkdir(parents=True, exist_ok=True)
+            attempts.append({"attempt": number, "directory": directory, "status": status})
+        state["lanes"]["rtx5090"] = {"accepted": 3, "attempts": attempts}
+        atomic_write_json(self.private / "windows" / "window-state.json", state)
+        self.finalize("--no-suite")
+        arguments = self.calls("collect_route_evidence.py")[0]["arguments"]
+        self.assertIn(f"rtx5090={(self.private / 'windows' / 'rtx5090/attempt-3').resolve()}", arguments)
+        corrected = [arguments[position + 1] for position, argument in enumerate(arguments)
+                     if argument == "--corrected-attempt"]
+        self.assertEqual(corrected, [f"rtx5090={(self.private / 'windows' / f'rtx5090/attempt-{number}').resolve()}"
+                                     for number in (1, 2)])
+
+    def test_unindexed_window_keeps_the_recorded_layout(self) -> None:
+        self.candidate("--no-suite")
+        self.finalize("--no-suite")
+        arguments = self.calls("collect_route_evidence.py")[0]["arguments"]
+        self.assertIn("--window-root", arguments)
+        self.assertNotIn("--lane-dir", arguments)
+        self.assertNotIn("--corrected-attempt", arguments)
+
+    def test_index_lane_set_follows_the_manifest_not_a_fixed_lane_count(self) -> None:
+        self.previous["components"]["ninfer_variants"] = []
+        self.plan["components"] = self.plan["components"][:1]
+        atomic_write_json(self.root / "releases" / PREDECESSOR / "manifest.json", self.previous)
+        atomic_write_json(self.root / "releases" / RELEASE / "plan.json", self.plan)
+        self.git("add", "--", f"releases/{PREDECESSOR}/manifest.json", f"releases/{RELEASE}/plan.json")
+        self.git("commit", "-qm", "test(release): declare only the container runtime")
+        self.candidate("--no-suite")
+        self.window_state()
+        self.finalize("--no-suite")
+        arguments = self.calls("collect_route_evidence.py")[0]["arguments"]
+        actual = [arguments[position + 1].partition("=")[0] for position, argument in enumerate(arguments)
+                  if argument == "--lane-dir"]
+        self.assertEqual(actual, ["rtx5090"])
+
+    def test_window_index_refusals_do_not_run_tools_or_change_product_bytes(self) -> None:
+        self.candidate("--no-suite")
+        baseline = self.window_state()
+        (self.private / "outside").mkdir()
+        atomic_write(self.private / "windows" / "not-a-directory", "file\n")
+        mutations = [
+            ("schema", lambda state: state.update(schema=2), "schema must be 1"),
+            ("schema-type", lambda state: state.update(schema=True), "schema must be 1"),
+            ("release", lambda state: state.update(release=PREDECESSOR), "release must match"),
+            ("candidate", lambda state: state.update(candidate=self.initial), "candidate must equal"),
+            ("lanes-type", lambda state: state.update(lanes=[]), "lanes must equal"),
+            ("missing-lane", lambda state: state["lanes"].pop("rtx4090"), "lanes must equal"),
+            ("extra-lane", lambda state: state["lanes"].update(extra={}), "lanes must equal"),
+            ("lane-type", lambda state: state["lanes"].update(rtx5090=[]), "rtx5090 must be an object"),
+            ("unaccepted", lambda state: state["lanes"]["rtx5090"].update(accepted=None), "positive integer"),
+            ("accepted-type", lambda state: state["lanes"]["rtx5090"].update(accepted=True), "positive integer"),
+            ("accepted-zero", lambda state: state["lanes"]["rtx5090"].update(accepted=0), "positive integer"),
+            ("accepted-missing", lambda state: state["lanes"]["rtx5090"].update(accepted=2), "no matching entry"),
+            ("attempts-type", lambda state: state["lanes"]["rtx5090"].update(attempts={}), "attempts must be an array"),
+            ("entry-type", lambda state: state["lanes"]["rtx5090"]["attempts"].__setitem__(0, []), "must be an object"),
+            ("attempt-type", lambda state: state["lanes"]["rtx5090"]["attempts"][0].update(attempt=True),
+             "unique positive integer"),
+            ("duplicate", lambda state: state["lanes"]["rtx5090"]["attempts"].append(
+                copy.deepcopy(state["lanes"]["rtx5090"]["attempts"][0])), "unique positive integer"),
+            ("planned", lambda state: state["lanes"]["rtx5090"]["attempts"][0].update(status="planned"),
+             "accepted attempt must be passed or retired"),
+            ("failed", lambda state: state["lanes"]["rtx5090"]["attempts"][0].update(status="spent-failed"),
+             "accepted attempt must be passed or retired"),
+            ("invalid-status", lambda state: state["lanes"]["rtx5090"]["attempts"][0].update(status="other"),
+             "status is invalid"),
+            ("directory-type", lambda state: state["lanes"]["rtx5090"]["attempts"][0].update(directory=[]),
+             "relative POSIX path"),
+            ("absolute", lambda state: state["lanes"]["rtx5090"]["attempts"][0].update(
+                directory=(self.private / "outside").resolve().as_posix()), "relative POSIX path"),
+            ("drive", lambda state: state["lanes"]["rtx5090"]["attempts"][0].update(directory="D:/outside"),
+             "relative POSIX path"),
+            ("backslash", lambda state: state["lanes"]["rtx5090"]["attempts"][0].update(directory=r"rtx5090\attempt-1"),
+             "relative POSIX path"),
+            ("escape", lambda state: state["lanes"]["rtx5090"]["attempts"][0].update(directory="../outside"),
+             "escapes the window root"),
+            ("missing", lambda state: state["lanes"]["rtx5090"]["attempts"][0].update(directory="missing"),
+             "directory must exist"),
+            ("file", lambda state: state["lanes"]["rtx5090"]["attempts"][0].update(directory="not-a-directory"),
+             "directory must exist"),
+            ("unselected-directory", lambda state: state["lanes"]["rtx5090"]["attempts"].append(
+                {"attempt": 2, "directory": "../outside", "status": "planned"}), "escapes the window root"),
+        ]
+        before = self.worktree_bytes()
+        candidate = self.git("rev-parse", "HEAD")
+        for name, mutate, message in mutations:
+            with self.subTest(rule=name):
+                state = copy.deepcopy(baseline)
+                mutate(state)
+                atomic_write_json(self.private / "windows" / "window-state.json", state)
+                result = self.finalize("--no-suite", success=False)
+                self.assertIn("window-state.json:", result.stderr)
+                self.assertIn(message, result.stderr)
+                self.assertEqual(self.calls("collect_route_evidence.py"), [])
+                self.assertEqual(self.worktree_bytes(), before)
+                self.assertEqual(self.git("rev-parse", "HEAD"), candidate)
+
+    def test_window_index_rejects_malformed_json(self) -> None:
+        self.candidate("--no-suite")
+        for content in ("[]", "{"):
+            with self.subTest(content=content):
+                atomic_write(self.private / "windows" / "window-state.json", content)
+                self.finalize("--no-suite", success=False)
+                self.assertEqual(self.calls("collect_route_evidence.py"), [])
+
+    def test_window_index_rejects_a_symlink_escape(self) -> None:
+        self.candidate("--no-suite")
+        state = self.window_state()
+        outside = self.private / "outside"
+        outside.mkdir()
+        try:
+            (self.private / "windows" / "escape").symlink_to(outside, target_is_directory=True)
+        except OSError:
+            self.skipTest("directory symlinks are not available")
+        state["lanes"]["rtx5090"]["attempts"][0]["directory"] = "escape"
+        atomic_write_json(self.private / "windows" / "window-state.json", state)
+        result = self.finalize("--no-suite", success=False)
+        self.assertIn("directory escapes the window root", result.stderr)
+        self.assertEqual(self.calls("collect_route_evidence.py"), [])
+
+    def test_changed_index_reruns_interrupted_compose_with_the_new_accepted_attempt(self) -> None:
+        self.candidate("--no-suite")
+        state = self.window_state()
+        directory = "rtx5090/attempt-2"
+        (self.private / "windows" / directory).mkdir()
+        state["lanes"]["rtx5090"]["attempts"].append({"attempt": 2, "directory": directory, "status": "passed"})
+        atomic_write_json(self.private / "windows" / "window-state.json", state)
+        self.interrupt(finalize=True, command="finalize", window_root=self.private / "windows",
+                       reviews=self.private / "reviews", values=self.private / "values.json", as_of="2026-01-02")
+        state["lanes"]["rtx5090"]["accepted"] = 2
+        atomic_write_json(self.private / "windows" / "window-state.json", state)
+        self.finalize("--no-suite")
+        calls = self.calls("collect_route_evidence.py")
+        self.assertEqual(len(calls), 2)
+        self.assertIn(f"rtx5090={(self.private / 'windows' / directory).resolve()}", calls[1]["arguments"])
 
     def test_rewritten_recorded_history_is_refused(self) -> None:
         self.candidate("--no-suite")
