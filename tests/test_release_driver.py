@@ -10,7 +10,6 @@ import io
 import json
 import os
 import shlex
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -220,6 +219,7 @@ class ReleaseDriverTests(unittest.TestCase):
         self.private = base / "inputs"
         self.private.mkdir()
         self.environment = {**os.environ, "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": os.devnull,
+                            "PYTHONIOENCODING": "utf-8",
                             "GIT_AUTHOR_NAME": "Release fixture", "GIT_COMMITTER_NAME": "Release fixture",
                             "GIT_AUTHOR_EMAIL": "release@example.invalid",
                             "GIT_COMMITTER_EMAIL": "release@example.invalid"}
@@ -1134,8 +1134,6 @@ class ReleaseDriverTests(unittest.TestCase):
         self.assertEqual(self.worktree_bytes(), before)
 
     def test_publish_only_wraps_preflight_with_exact_head(self) -> None:
-        if shutil.which("bash") is None:
-            self.skipTest("publication shell preflight needs bash")
         script = self.root / "scripts" / "hosts" / "publish-product-release.sh"
         atomic_write(script, "#!/usr/bin/env bash\nexec " + shlex.quote(sys.executable)
                      + " scripts/stub_support.py publish \"$@\"\n")
