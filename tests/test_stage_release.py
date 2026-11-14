@@ -864,6 +864,8 @@ class StageReleaseTests(unittest.TestCase):
         shutil.copytree(ROOT / "scripts", root / "scripts", dirs_exist_ok=True,
                         ignore=shutil.ignore_patterns("__pycache__"))
         release = stage_successor(root)
+        self.assertGreaterEqual(product_version(release), (0, 20, 0))
+        self.assertEqual(self.load(root / "releases" / release / "manifest.json")["status"], "draft")
         result = subprocess.run(
             [sys.executable, str(root / "scripts/verify_release.py"), "--release", release,
              "--lint-ready", "--check-pins", "--json"], cwd=root, capture_output=True, text=True)

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import importlib.util
 import json
 import shutil
@@ -22,17 +23,35 @@ HISTORY_SPEC = importlib.util.spec_from_file_location("lint_history", ROOT / "te
 assert HISTORY_SPEC is not None and HISTORY_SPEC.loader is not None
 HISTORY = importlib.util.module_from_spec(HISTORY_SPEC)
 HISTORY_SPEC.loader.exec_module(HISTORY)
+DRIVER_SPEC = importlib.util.spec_from_file_location("lint_driver", ROOT / "scripts/release.py")
+assert DRIVER_SPEC is not None and DRIVER_SPEC.loader is not None
+DRIVER = importlib.util.module_from_spec(DRIVER_SPEC)
+DRIVER_SPEC.loader.exec_module(DRIVER)
 
 
-def stage_successor(root: Path, *, release: str | None = None) -> str:
-    """Carry the latest published runtime and client through the real staging CLI."""
-    manifests = [json.loads(path.read_text(encoding="utf-8"))
-                 for path in (root / "releases").glob("*/manifest.json")]
-    source = max((item for item in manifests
-                  if item.get("status") == "ready" and VERIFY.ga_release(item.get("release"))),
-                 key=lambda item: VERIFY.product_version(item["release"]))
-    major, minor, patch = VERIFY.product_version(source["release"])
-    release = release or f"v{major}.{minor}.{patch + 1}"
+def stage_successor(root: Path) -> str:
+    """Build the complete carry-all stage group, not the raw stager's intermediate output."""
+    source = DRIVER.latest_ready_manifest(root)
+    major, minor, _ = VERIFY.product_version(source["release"])
+    release = f"v{major}.{minor + 1}.0"
+    for key, value in (("user.name", "Release fixture"), ("user.email", "release@example.invalid"),
+                       ("commit.gpgsign", "false")):
+        DRIVER.git(root, "config", key, value)
+    DRIVER.init_plan(root, release)
+    notes = root / ".release-state" / "lint-notes.md"
+    atomic_write(notes, f"# OMP NInfer {release}\n\nQualification is limited to documented routes.\n")
+    driver = DRIVER.ReleaseDriver(root, release, argparse.Namespace(
+        command="candidate", notes=notes,
+        client_component=root / "releases" / source["release"] / "qualification/client-components.json"))
+    DRIVER.run_pipeline(driver, finalize=False, no_suite=True, through="stage")
+    if set(driver.records) != {"stage"}:
+        raise AssertionError("draft fixture must stop after the driver's stage group")
+    return release
+
+
+def _stage_raw_successor(root: Path, *, release: str) -> str:
+    """Historical audit-threshold fixture; its candidate prose is authored separately."""
+    source = DRIVER.latest_ready_manifest(root)
     runtime = source["components"]["ninfer"]
     command = [
         sys.executable, str(root / "scripts/stage_release.py"), "--from", source["release"],
@@ -83,12 +102,23 @@ class ReadyTableTests(unittest.TestCase):
         self.assertEqual(row.phase, "candidate")
         self.assertTrue(row.ga_only)
         self.assertFalse(row.legacy)
+        self.assertFalse(row.flag_only)
         self.assertIs(row.run, VERIFY.ready_receipt_audit)
+        final_rows = [item for item in VERIFY.READY_CHECKS if item.name == "receipt_audit_final"]
+        self.assertEqual(len(final_rows), 1)
+        final = final_rows[0]
+        self.assertEqual(final.phase, "acceptance")
+        self.assertTrue(final.ga_only)
+        self.assertTrue(final.flag_only)
+        self.assertFalse(final.legacy)
         context = VERIFY.ReadyContext(ROOT, "v0.20.0", {}, {}, {}, [], True, True, "draft")
         for phase in VERIFY.READY_PHASES:
             with self.subTest(phase=phase):
                 selected = VERIFY.selected_ready_checks(context._replace(through=phase), flagged=True)
                 self.assertEqual(row in selected, phase != "draft")
+                self.assertEqual(final in selected, phase == "acceptance")
+                self.assertNotIn(final, VERIFY.selected_ready_checks(
+                    context._replace(through=phase), flagged=False))
         self.assertNotIn(row, VERIFY.selected_ready_checks(
             context._replace(release="v0.20.0-rc.1", through="candidate"), flagged=True))
 
@@ -117,6 +147,10 @@ class LintDraftTests(unittest.TestCase):
         shutil.copytree(ROOT / "scripts", cls.staged / "scripts", dirs_exist_ok=True,
                         ignore=shutil.ignore_patterns("__pycache__"))
         cls.release = stage_successor(cls.staged)
+        cls.predecessor = VERIFY.load_json(
+            cls.staged / "releases" / cls.release / "plan.json")["predecessor"]
+        if VERIFY.product_version(cls.release) < (0, 20, 0):
+            raise AssertionError("draft fixtures must exercise the v0.20.0 rules")
 
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()
@@ -149,7 +183,17 @@ class LintDraftTests(unittest.TestCase):
     def test_acceptance_links_are_deferred_only_for_the_owning_release(self):
         release_root = self.root / "releases" / self.release
         notes = release_root / "NINFER_RELEASE_NOTES.md"
-        # The real stager copies predecessor notes, including three not-yet-authored receipts.
+        # Stage-group notes may be newly authored rather than copied from the predecessor.
+        manifest = VERIFY.load_json(release_root / "manifest.json")
+        authority = VERIFY.load_json(release_root / "compatibility.json")
+        targets = [
+            f"acceptance/{VERIFY.OMP_PROFILE_PLATFORMS[row['id']]}-"
+            f"{manifest['components']['omp']['distribution_version']}.json"
+            for row in authority["profiles"]]
+        atomic_write(notes, notes.read_bytes() + b"\n" + "".join(
+            f"[Acceptance]({target})\n" for target in targets).encode("utf-8"))
+        code, report = self.lint()
+        self.assertEqual(code, 0, report)
         strict = subprocess.run([
             sys.executable, str(self.root / "scripts/verify_release.py"),
             "--release", self.release, "--require-ready", "--json",
@@ -162,7 +206,7 @@ class LintDraftTests(unittest.TestCase):
         original = notes.read_bytes()
         for source, target in (
             (notes, "missing-evidence.json"),
-            (notes, "../v0.19.0/acceptance/missing-evidence.json"),
+            (notes, f"../{self.predecessor}/acceptance/missing-evidence.json"),
             (self.root / "docs/extra.md", f"../releases/{self.release}/acceptance/missing-evidence.json"),
         ):
             with self.subTest(source=source, target=target):
@@ -226,7 +270,7 @@ class LintDraftTests(unittest.TestCase):
                                cwd=root, capture_output=True, check=True)
                 shutil.copytree(ROOT / "scripts", root / "scripts", dirs_exist_ok=True,
                                 ignore=shutil.ignore_patterns("__pycache__"))
-                self.assertEqual(stage_successor(root, release=release), release)
+                self.assertEqual(_stage_raw_successor(root, release=release), release)
                 directory = root / "releases" / release
                 manifest = VERIFY.load_json(directory / "manifest.json")
                 statement = VERIFY.component_provenance(root, release, manifest)["statement"]
