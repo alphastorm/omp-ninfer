@@ -2741,6 +2741,101 @@ def unchanged_native_variant(variant: dict[str, Any], predecessor: dict[str, Any
         "release_tag", "package_sha256", *NATIVE_IDENTITY_FIELDS, "maximum_context_tokens", "runtime_shape"))
 
 
+PROVENANCE_CLAIM_RE = re.compile(
+    r"\b(?:re-?cut|newly[- ]cut|fresh(?:ly)?[- ]cut|re-?built|rebuild|carried|carry-over"
+    r"|one[- ](?:\w+[- ])?source|single[- ]source|same[- ]source)\b", re.IGNORECASE)
+
+
+def component_provenance(root: Path, release: str, manifest: dict[str, Any]) -> dict[str, Any]:
+    """Derive runtime cut/carry facts solely from this manifest and its ready predecessor."""
+    predecessor = predecessor_manifest(root, release)
+    components = manifest.get("components", {})
+    previous = (predecessor or {}).get("components", {})
+    previous_variants = {row["id"]: row for row in previous.get("ninfer_variants", [])}
+    variants = {row["id"]: row for row in components.get("ninfer_variants", [])}
+    runtime = components.get("ninfer", {})
+    previous_runtime = previous.get("ninfer", {})
+    carried_runtime = predecessor is not None and all(
+        runtime.get(key) == previous_runtime.get(key) for key in (
+            "release_tag", "oci_manifest_digest", "server_binary_sha256", "source_commit"))
+    identities = [("rtx5090-container", "RTX 5090 container", runtime, carried_runtime)]
+    for component_id in NINFER_VARIANT_IDS:
+        if component_id in variants:
+            variant = variants[component_id]
+            label = f"RTX {component_id.split('-')[0].removeprefix('rtx')} native Windows"
+            identities.append((component_id, label, variant,
+                               unchanged_native_variant(variant, previous_variants.get(component_id))))
+    rows, clauses = [], []
+    for component_id, label, identity, carried in identities:
+        tag, source = identity.get("release_tag"), identity.get("source_commit")
+        if not isinstance(tag, str) or not tag or not isinstance(source, str) or not GIT_SHA_RE.fullmatch(source):
+            raise ContractError(f"component provenance {component_id} requires a release tag and source commit")
+        carried_from = predecessor["release"] if carried else None
+        rows.append({"id": component_id, "release_tag": tag, "source_commit": source,
+                     "disposition": "carried" if carried else "recut", "carried_from": carried_from})
+        action = f"carried unchanged from {carried_from}" if carried else "re-cut for this release"
+        clauses.append(f"{label} `{tag}` {action}")
+    distinct = len({row["source_commit"] for row in rows})
+    return {
+        "components": rows,
+        "distinct_source_commits": distinct,
+        "statement": "Runtime components: " + "; ".join(clauses)
+                     + f". They were built from {distinct} distinct NInfer source commits.",
+    }
+
+
+def provenance_claim_errors(value: Any, label: str, *, statement: str = "") -> list[str]:
+    """The generated statement is the only admitted provenance vocabulary in public prose."""
+    errors = []
+    for path, text in walk_string_fields(value, label):
+        if not any(character.isspace() for character in text):
+            continue
+        prose = text.replace(statement, "") if statement else text
+        match = PROVENANCE_CLAIM_RE.search(prose)
+        if match is not None:
+            errors.append(f"{path} makes an ungenerated component provenance claim: {match[0]!r}")
+    return errors
+
+
+def validate_component_provenance(
+    root: Path, release: str, manifest: dict[str, Any], compatibility: dict[str, Any],
+    qualification: dict[str, Any], errors: list[str], *, acceptance: bool = False,
+) -> None:
+    if (product_version(release) or (0, 0, 0)) < (0, 20, 0):
+        return
+    provenance = component_provenance(root, release, manifest)
+    statement = provenance["statement"]
+    release_root = root / "releases" / release
+    external_path = release_root / "acceptance/composed-external-installation.json"
+    external = load_json(external_path) if external_path.is_file() else {}
+    if not acceptance:
+        documents = [("manifest", manifest), ("compatibility", compatibility),
+                     ("qualification", qualification)]
+        for name in ("composed-external-installation", "documented-routes"):
+            path = release_root / "acceptance" / f"{name}.json"
+            if path.is_file():
+                documents.append((f"acceptance/{name}.json",
+                                  external if path == external_path else load_json(path)))
+        for label, document in documents:
+            errors.extend(provenance_claim_errors(document, label, statement=statement))
+        return
+    require(external.get("component_provenance") == provenance,
+            "composed acceptance component_provenance must equal the manifest-derived record", errors)
+    note = qualification.get("composition", {}).get("external_installation_acceptance", {}).get("note")
+    scope = qualification.get("documented_route_acceptance", {}).get("scope")
+    for label, value in (("qualification composition acceptance note", note),
+                         ("qualification documented route scope", scope)):
+        require(isinstance(value, str) and value.startswith(statement),
+                f"{label} must start with the generated component provenance statement", errors)
+    plan_path = release_root / "plan.json"
+    if plan_path.is_file():
+        plan = load_json(plan_path)
+        planned = {row.get("id"): row.get("disposition") for row in plan.get("components", [])
+                   if isinstance(row, dict)}
+        require(planned == {row["id"]: row["disposition"] for row in provenance["components"]},
+                "plan component dispositions must equal the manifest-derived component provenance", errors)
+
+
 def native_shape(root: Path, variant: dict[str, Any]) -> dict[str, Any] | None:
     shape = variant.get("runtime_shape")
     if isinstance(shape, dict):
@@ -3476,6 +3571,13 @@ READY_CHECKS = (
                lambda c, e: validate_aggregate_as_of(c.root, c.release, c.compatibility, c.qualification, e)),
     ReadyCheck("validate_manifest_tag_prose", "draft",
                lambda c, e: validate_manifest_tag_prose(c.manifest, e)),
+    ReadyCheck("validate_component_provenance", "draft",
+               lambda c, e: validate_component_provenance(
+                   c.root, c.release, c.manifest, c.compatibility, c.qualification, e), legacy=False),
+    ReadyCheck("validate_composed_component_provenance", "acceptance",
+               lambda c, e: validate_component_provenance(
+                   c.root, c.release, c.manifest, c.compatibility, c.qualification, e,
+                   acceptance=True), legacy=False),
     ReadyCheck("validate_pinned_evidence", "candidate",
                lambda c, e: validate_pinned_evidence(
                    c.root, c.manifest, c.compatibility, c.qualification, e,

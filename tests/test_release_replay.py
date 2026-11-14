@@ -18,6 +18,10 @@ SPEC = importlib.util.spec_from_file_location("release_history", ROOT / "tests/h
 assert SPEC is not None and SPEC.loader is not None
 HISTORY = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(HISTORY)
+IO_SPEC = importlib.util.spec_from_file_location("replay_io", ROOT / "scripts/release_io.py")
+assert IO_SPEC is not None and IO_SPEC.loader is not None
+IO = importlib.util.module_from_spec(IO_SPEC)
+IO_SPEC.loader.exec_module(IO)
 BOUND_PATHS = (
     "compatibility.json", "docs/COMPATIBILITY.md", "profiles", "releases/v0.19.0",
     "examples/manual-tunnel/start-ninfer.sh", "examples/manual-tunnel/stop-ninfer.sh",
@@ -53,7 +57,8 @@ class ReleasePinReplayTests(unittest.TestCase):
                 for path in paths if path.is_file()}
 
     def lane_golden(self, root: Path) -> dict[str, bytes]:
-        subprocess.run(["git", "clone", "--quiet", "--shared", "--no-checkout",
+        subprocess.run(["git", "clone", "--quiet", "--config", "core.autocrlf=false",
+                        "--shared", "--no-checkout",
                         str(ROOT), str(root)], check=True, capture_output=True)
         subprocess.run(["git", "checkout", "--quiet", "--detach", self.commits["fc15ffc"]],
                        cwd=root, check=True, capture_output=True)
@@ -71,9 +76,26 @@ class ReleasePinReplayTests(unittest.TestCase):
         self.assertEqual(len(rows), 1)
         self.assertNotEqual(rows[0]["lane"], final)
         rows[0]["lane"] = final
-        path.write_text(json.dumps(authority, indent=2) + "\n", encoding="utf-8")
+        IO.atomic_write_json(path, authority)
+        # Keep the historical derivation and renderer, but use the shared byte writer:
+        # historical text-mode output would otherwise translate LF on Windows.
+        historical = """
+import sys
+from pathlib import Path
+root, helpers = map(Path, sys.argv[1:])
+sys.path.insert(0, str(root / "scripts"))
+import rebind_release
+import render_compatibility
+sys.path.insert(0, str(helpers))
+from release_io import atomic_write, atomic_write_json
+rebind_release.save = atomic_write_json
+rebind_release.render = lambda authority, output: atomic_write(
+    output, render_compatibility.render(render_compatibility.load_authority(authority)))
+sys.argv = ["rebind_release.py", "--release", "v0.19.0"]
+raise SystemExit(rebind_release.main())
+"""
         result = subprocess.run(
-            [sys.executable, str(root / "scripts/rebind_release.py"), "--release", "v0.19.0"],
+            [sys.executable, "-c", historical, str(root), str(ROOT / "scripts")],
             cwd=root, capture_output=True, text=True,
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
@@ -83,7 +105,8 @@ class ReleasePinReplayTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary) / "replay"
             expected = self.lane_golden(Path(temporary) / "golden") if stage == "lane" else None
-            subprocess.run(["git", "clone", "--quiet", "--shared", "--no-checkout",
+            subprocess.run(["git", "clone", "--quiet", "--config", "core.autocrlf=false",
+                            "--shared", "--no-checkout",
                             str(ROOT), str(root)], check=True, capture_output=True)
             subprocess.run(["git", "checkout", "--quiet", "--detach", self.commits[before]],
                            cwd=root, check=True, capture_output=True)
