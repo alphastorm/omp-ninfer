@@ -61,6 +61,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -165,6 +166,13 @@ def load_omp_component(path: Path) -> dict:
     return descriptor
 
 
+# Every release accepts its client platforms afresh. The sentence is generated from the selected
+# client instead of being inherited with its version substituted.
+CLIENT_ACCEPTANCE_LIMITATION_RE = re.compile(
+    r"Fresh stock OMP \S+ platform and candidate-bound documented-route acceptance is required; "
+    r"no predecessor client execution (?:is carried|transfers)\.")
+
+
 def bind_upstream_client(compatibility: dict, descriptor: dict, release: str) -> None:
     omp = descriptor["omp"]
     composition = compatibility["composition"]
@@ -187,6 +195,11 @@ def bind_upstream_client(compatibility: dict, descriptor: dict, release: str) ->
         if profile["status"] == "qualified":
             profile["status"] = "preview"
         profile["blockers"] = [f"upstream OMP {omp['upstream_tag']} client acceptance is pending"]
+        profile["limitations"] = [
+            f"Fresh stock OMP {omp['upstream_tag'].removeprefix('v')} platform and candidate-bound "
+            "documented-route acceptance is required; no predecessor client execution transfers.",
+            *(value for value in profile.get("limitations", [])
+              if CLIENT_ACCEPTANCE_LIMITATION_RE.fullmatch(value) is None)]
 
 
 def main() -> int:

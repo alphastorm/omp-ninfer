@@ -6,6 +6,8 @@ writes; without it, the audit and its qualification binding are replaced atomica
 The audit inventories its own path without hashing its output, and omits the
 qualification receipt_audit edge from the scalar inventory. ``unadmitted_kept``
 returns every unbound predecessor copy for staging tools without writing.
+``--prune-unbound`` plans lane-stage deletions and the resulting audit together,
+never removes release notes or currently referenced files, and logs each removal.
 """
 
 from __future__ import annotations
@@ -14,11 +16,13 @@ import argparse
 import datetime
 import hashlib
 import json
+import posixpath
 import re
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any, Iterator
+from urllib.parse import unquote, urlsplit
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from release_io import atomic_write, atomic_write_json, git
@@ -110,7 +114,8 @@ def _references(value: Any, pointer: str = "") -> Iterator[tuple[str, tuple[str,
     if isinstance(value, dict):
         for field in ("summary", "path", "repository_path"):
             path = value.get(field)
-            if isinstance(path, str) and path.startswith("releases/"):
+            if isinstance(path, str) and (path.startswith("releases/")
+                                          or isinstance(value.get("sha256"), str)):
                 digest = value.get("sha256")
                 if not isinstance(digest, str):
                     raise Refusal(f"component reference must bind sha256: {path}")
@@ -120,6 +125,18 @@ def _references(value: Any, pointer: str = "") -> Iterator[tuple[str, tuple[str,
     elif isinstance(value, list):
         for index, child in enumerate(value):
             yield from _references(child, pointer + "/" + str(index))
+
+
+def _reference_path(value: str, directory: str) -> str | None:
+    parsed = urlsplit(value.replace("\\", "/"))
+    if parsed.scheme or parsed.netloc:
+        return None
+    path = posixpath.normpath(unquote(parsed.path))
+    if not path.startswith("releases/"):
+        path = posixpath.normpath(directory + "/" + path)
+    if not path.startswith("releases/"):
+        raise Refusal(f"component file reference must stay inside releases: {value}")
+    return path
 
 
 def _component_rows(manifest: dict[str, Any]) -> dict[str, tuple[dict[str, Any], bool]]:
@@ -174,7 +191,12 @@ def _component_references(tree: _Tree, prefix: str, name: str,
         composition = tree.document(prefix + "qualification.json").get("composition", {})
         for field in ("behavioral_qualification", "local_release_packaging"):
             references.update(_references(composition.get(field), "/composition/" + field))
-    return references
+    result = {}
+    for field, (path, digest) in references.items():
+        local = _reference_path(path, prefix.rstrip("/"))
+        if local is not None:
+            result[field] = local, digest
+    return result
 
 
 def _carried(tree: _Tree, release: str, predecessor: str, manifest: dict[str, Any],
@@ -222,10 +244,17 @@ def _carried(tree: _Tree, release: str, predecessor: str, manifest: dict[str, An
             references.append(((old_prefix + checksum, old["checksums_sha256"]),
                                (new_prefix + checksum, row["checksums_sha256"])))
         local_binding = False
-        for (old_path, old_sha), (path, digest) in references:
+        # Forward reachability is a least fixpoint seeded only by unchanged
+        # component rows. References in unadmitted copies never become roots.
+        visited = set()
+        while references:
+            (old_path, old_sha), (path, digest) = references.pop()
             data = tree.read(path)
             if _sha(data) != digest or old_sha != digest or data != tree.read(old_path):
                 raise Refusal(f"carried file is not byte-identical to {predecessor}: {path}")
+            if (old_path, path) in visited:
+                continue
+            visited.add((old_path, path))
             if path.startswith(new_prefix):
                 carried[path.removeprefix(new_prefix)] = reason
                 local_binding = True
@@ -233,6 +262,12 @@ def _carried(tree: _Tree, release: str, predecessor: str, manifest: dict[str, An
                 in_place[path.removeprefix(old_prefix)] = (
                     f"{reason_prefix}: bound in place at {path} by the carried {tag} "
                     "row (hash unchanged); not copied into this release.")
+            if path.endswith(".json"):
+                for _, (reference, sha) in _references(json.loads(data)):
+                    old_child = _reference_path(reference, posixpath.dirname(old_path))
+                    child = _reference_path(reference, posixpath.dirname(path))
+                    if old_child is not None and child is not None:
+                        references.append(((old_child, sha), (child, sha)))
         if native:
             lane = name.removesuffix("-windows-native")
             label = re.sub(r"([a-zA-Z]+)([0-9]+)", lambda m: m[1].upper() + " " + m[2], lane)
@@ -302,12 +337,10 @@ def _date(value: str | None) -> str:
     return value
 
 
-def generate_audit(root: Path, release: str, *, phase: str, as_of: str | None = None,
-                   at: str | None = None) -> dict[str, Any]:
-    """Recompute an inventory without writing either authority."""
+def _generate_audit(tree: _Tree, release: str, *, phase: str,
+                    as_of: str | None = None) -> dict[str, Any]:
     if phase not in PHASES:
         raise Refusal("audit phase must be lane-stage or composed-final")
-    tree = _Tree(root, at)
     predecessor, carried, in_place, policies, before, after, runtime_carried = _inventory(tree, release)
     old_prefix, new_prefix = f"releases/{predecessor}/", f"releases/{release}/"
     unadmitted = _unadmitted(before, after, carried, runtime_carried)
@@ -360,6 +393,78 @@ def generate_audit(root: Path, release: str, *, phase: str, as_of: str | None = 
             "as_of": _date(as_of), "policy": " ".join(policy), "files": rows, "bindings": bindings}
 
 
+def generate_audit(root: Path, release: str, *, phase: str, as_of: str | None = None,
+                   at: str | None = None) -> dict[str, Any]:
+    """Recompute an inventory without writing either authority."""
+    return _generate_audit(_Tree(root, at), release, phase=phase, as_of=as_of)
+
+
+def _prune_references(tree: _Tree, release: str, names: list[str]) -> list[str]:
+    prefix = f"releases/{release}/"
+    targets = {prefix + name for name in names}
+    references = []
+    for name in ("manifest.json", "qualification.json", "compatibility.json"):
+        document = prefix + name
+        for pointer, value in _leaves(tree.document(document)):
+            if not isinstance(value, str):
+                continue
+            parsed = urlsplit(value.replace("\\", "/"))
+            if parsed.scheme or parsed.netloc:
+                path = unquote(parsed.path)
+                matches = [target for target in targets if path.endswith("/" + target)]
+            else:
+                path = posixpath.normpath(unquote(parsed.path))
+                if not path.startswith("releases/"):
+                    path = posixpath.normpath(prefix + path)
+                matches = [path] if path in targets else []
+            for target in targets:
+                if target in matches:
+                    continue
+                relative = target.removeprefix(prefix)
+                if re.search(r"(?<![\w./-])(?:" + re.escape(target) + "|" + re.escape(relative)
+                             + r")(?![\w./-])", value):
+                    matches.append(target)
+            for target in matches:
+                references.append(f"{target} referenced by {document}#{pointer}")
+    return sorted(references)
+
+
+def _plan_pruning(tree: _Tree, release: str, as_of: str | None) -> tuple[
+    dict[str, Any], list[tuple[str, str]],
+]:
+    _, carried, _, _, before, after, runtime_carried = _inventory(tree, release)
+    names = [name for name in _unadmitted(before, after, carried, runtime_carried)
+             if name != "NINFER_RELEASE_NOTES.md"]
+    references = _prune_references(tree, release, names)
+    if references:
+        raise Refusal("cannot prune referenced files: " + "; ".join(references))
+    excluded = {f"releases/{release}/{name}" for name in names}
+    tree.paths = [path for path in tree.paths if path not in excluded]
+    for path in excluded:
+        tree.cache.pop(path, None)
+    # Complete the audit, including dates and scalar inventories, against the
+    # planned tree before the first filesystem effect. Notes still refuse here.
+    audit = _generate_audit(tree, release, phase="lane-stage", as_of=as_of)
+    reasons = {row["file"]: row["reason"] for row in audit["files"]}
+    return audit, [(name, reasons[name]) for name in names]
+
+
+def _apply_pruning(root: Path, release: str, deletions: list[tuple[str, str]]) -> None:
+    directory = Path(root) / "releases" / release
+    parents = set()
+    for name, reason in deletions:
+        path = directory / name
+        path.unlink()
+        print(f"pruned releases/{release}/{name}: {reason}")
+        parent = path.parent
+        while parent != directory:
+            parents.add(parent)
+            parent = parent.parent
+    for parent in sorted(parents, key=lambda path: (-len(path.parts), path.as_posix())):
+        if not any(parent.iterdir()):
+            parent.rmdir()
+
+
 def ready_errors(root: Path, release: str, *, phase: str, check_pins: bool) -> list[str]:
     """Require a staged audit, and with pins prove its exact committed input tree."""
     from verify_release import product_version
@@ -408,14 +513,22 @@ def main(argv: list[str] | None = None, *, root: Path = ROOT) -> int:
     parser.add_argument("--as-of")
     parser.add_argument("--at")
     parser.add_argument("--check", action="store_true")
+    parser.add_argument("--prune-unbound", action="store_true",
+                        help="plan and log removal of unbound lane-stage copies; never remove notes")
     args = parser.parse_args(argv)
     try:
+        if args.prune_unbound and (args.check or args.at is not None or args.phase != "lane-stage"):
+            raise Refusal("--prune-unbound requires lane-stage without --check or --at")
         tree = _Tree(root, args.at)
         path = f"releases/{args.release}/{AUDIT}"
         as_of = args.as_of
         if args.check and as_of is None:
             as_of = tree.document(path).get("as_of")
-        audit = generate_audit(root, args.release, phase=args.phase, as_of=as_of, at=tree.at)
+        deletions = []
+        if args.prune_unbound:
+            audit, deletions = _plan_pruning(tree, args.release, as_of)
+        else:
+            audit = _generate_audit(tree, args.release, phase=args.phase, as_of=as_of)
         data = _bytes(audit)
         if args.check:
             if tree.read(path) != data:
@@ -424,6 +537,9 @@ def main(argv: list[str] | None = None, *, root: Path = ROOT) -> int:
             qualification_path = f"releases/{args.release}/qualification.json"
             qualification = tree.document(qualification_path)
             qualification["receipt_audit"] = {"repository_path": path, "sha256": _sha(data)}
+            # Finish serializing both writes before deleting any planned copy.
+            _bytes(qualification)
+            _apply_pruning(root, args.release, deletions)
             atomic_write(Path(root) / path, data)
             atomic_write_json(Path(root) / qualification_path, qualification)
         print(json.dumps({"release": args.release, "phase": args.phase,

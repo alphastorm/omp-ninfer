@@ -1,11 +1,17 @@
 #!/usr/bin/env python3
-"""Publish a content-safe ledger and G4 binding from closed review directories.
+"""Publish a content-safe ledger, G4 binding and composition review from closed directories.
 
 ``--reviews`` names a manifest, or a directory containing ``manifest.json``. Its
 native_runtime, native_component_delta and product_tooling entries name directories
 (relative to the manifest), closed statuses and lead closure statements. ``--values``
 supplies ledger_status, as_of and product_council {status, closure, scope_sentence};
-approval_granted defaults to true. This records review closure, never publication.
+approval_granted defaults to true. Only product_tooling is required: unchanged runtime
+components need no new runtime reviews. Optional values.composition_review fields
+native_runtime_summary, native_component_delta_subject and native_component_delta_summary
+provide lead-authored result clauses; otherwise the closed ledger's closure text is used.
+The product residuals_sentence, or its scope_sentence, completes that summary. Only a
+pending composition.review or the identical generated value may be replaced.
+This records review closure, never publication.
 ``--check`` validates the inputs and refuses if either checked-in output differs.
 """
 from __future__ import annotations
@@ -190,11 +196,14 @@ def build(root: Path, release: str, candidate: str, reviews: Path,
         raise SystemExit("review_ledger: candidate is not an ancestor of HEAD") from error
     manifest_path = reviews / "manifest.json" if reviews.is_dir() else reviews
     entries = load(manifest_path)
-    require(set(entries) == set(SECTIONS), "review manifest must name all three review sections")
+    require("product_tooling" in entries and set(entries) <= set(SECTIONS),
+            "review manifest must name product_tooling and only known review sections")
     product = values["product_council"]
     require(product.get("stage_commit", candidate) == candidate, "stage_commit must equal candidate")
     sections = {}
     for name in SECTIONS:
+        if name not in entries:
+            continue
         entry = entries[name]
         require(isinstance(entry, dict), f"{name} manifest entry must be an object")
         directory = Path(entry["directory"]).expanduser()
@@ -205,11 +214,13 @@ def build(root: Path, release: str, candidate: str, reviews: Path,
         status, closure = lead["status"], lead["closure"]
         closed(status, name)
         if name == "native_component_delta":
-            sections[name] = focused(directory, status, closure,
-                                     entry.get("base_commit", sections["native_runtime"]["source_commit"]))
+            base = entry.get("base_commit") or sections.get("native_runtime", {}).get("source_commit")
+            require(isinstance(base, str) and re.fullmatch(r"[0-9a-f]{40}", base),
+                    "native component delta must identify its base commit")
+            sections[name] = focused(directory, status, closure, base)
         else:
             sections[name] = council(directory, status, closure, product=name == "product_tooling")
-    runtime, delta, tooling = (sections[name] for name in SECTIONS)
+    tooling = sections["product_tooling"]
     require(entries["product_tooling"].get("stage_commit", candidate) == candidate,
             "stage_commit must equal candidate")
     tooling["stage_commit"] = candidate
@@ -235,15 +246,24 @@ def build(root: Path, release: str, candidate: str, reviews: Path,
     require(values.get("approval_granted", True) is True, "closed ledger must grant G4 approval")
     stamp = as_of or values.get("as_of") or date.today().isoformat()
     date.fromisoformat(stamp)
+    subjects = []
+    if "native_runtime" in sections:
+        runtime = sections["native_runtime"]
+        subjects.append(f"exact-source runtime full council {runtime['review_id']} on N "
+                        f"{runtime['source_commit']} ({runtime['status']})")
+    if "native_component_delta" in sections:
+        delta = sections["native_component_delta"]
+        subjects.append(f"the focused review of the native component delta to N' "
+                        f"{delta['source_commit']} ({delta['status']})")
+    subjects.append(f"product full council {tooling['review_id']} ({tooling['status']})")
+    subject_scope = (", ".join(subjects[:-1]) + ", and " + subjects[-1]
+                     if len(subjects) > 1 else subjects[0])
     ledger = {
         "artifact_type": "omp_ninfer_review_ledger", "schema_version": 1, "release": release,
         "as_of": stamp, "status": status, "approval_granted": True,
         "publication_authorized": False, "public_route_acceptance_granted": False,
         "scope": (
-            f"Closed exact-source runtime full council {runtime['review_id']} on N "
-            f"{runtime['source_commit']} ({runtime['status']}), the focused review of the native "
-            f"component delta to N' {delta['source_commit']} ({delta['status']}), and product full "
-            f"council {tooling['review_id']} ({tooling['status']}) with route stage candidate "
+            f"Closed {subject_scope} with route stage candidate "
             f"{candidate}. {product['scope_sentence']} This is not approval of a later executable "
             "subject, publication, or independent public-user acceptance; no human waivers are recorded."),
         **sections,
@@ -254,6 +274,35 @@ def build(root: Path, release: str, candidate: str, reviews: Path,
     return ledger, counts
 
 
+def composition_review(ledger: dict, values: dict, reference: str) -> dict:
+    """Restate only the reviews actually present; result clauses remain lead-owned inputs."""
+    details = values.get("composition_review", {})
+    require(isinstance(details, dict) and all(isinstance(text, str) and text.strip()
+                                             for text in details.values()),
+            "values.composition_review must contain nonempty text clauses")
+    sentences = []
+    runtime = ledger.get("native_runtime")
+    if runtime is not None:
+        result = details.get("native_runtime_summary",
+                             f"closed ({runtime['status']}). {runtime['closure']}")
+        sentences.append(f"Runtime full council {runtime['review_id']} on "
+                         f"{runtime['source_commit']} {result}")
+    delta = ledger.get("native_component_delta")
+    if delta is not None:
+        subject = details.get("native_component_delta_subject", "the native component delta")
+        result = details.get("native_component_delta_summary",
+                             f"closed ({delta['status']}). {delta['closure']}")
+        sentences.append(f"The focused review of {subject} at {delta['source_commit']} {result}")
+    product = ledger["product_tooling"]
+    sentences.append(f"Product full council {product['review_id']} closed ({product['status']}) "
+                     f"with route candidate {product['stage_commit']}.")
+    lead = values["product_council"]
+    sentences.append(lead.get("residuals_sentence", lead["scope_sentence"]))
+    sentences.append(f"The combined content-safe ledger is {reference}.")
+    sentences.append("Review approval authorizes neither product publication nor production promotion.")
+    return {"status": ledger["status"], "scope": " ".join(sentences)}
+
+
 def write_ledger(root: Path, release: str, candidate: str, reviews: Path, values: dict,
                  *, check: bool = False, as_of: str | None = None) -> dict:
     ledger, counts = build(root, release, candidate, reviews, values, as_of=as_of)
@@ -261,6 +310,15 @@ def write_ledger(root: Path, release: str, candidate: str, reviews: Path, values
     payload = (json.dumps(ledger, indent=2) + "\n").encode("utf-8")
     qualification_path = root / "releases" / release / "qualification.json"
     qualification = deepcopy(load(qualification_path))
+    review = sanitize(composition_review(ledger, values, reference), counts)
+    public_text(review)
+    composition = qualification.get("composition")
+    require(isinstance(composition, dict), "qualification.composition must contain the staged review")
+    staged_review = composition.get("review")
+    require(staged_review == review
+            or isinstance(staged_review, dict) and staged_review.get("status") == "pending",
+            "qualification.composition.review is neither pending nor the generated closed review")
+    composition["review"] = review
     qualification.setdefault("observed_gates", {})["g4_review"] = {
         "status": "passed", "repository_path": reference, "sha256": hashlib.sha256(payload).hexdigest(),
         "ledger_status": ledger["status"], "approval_granted": True,
@@ -277,7 +335,8 @@ def write_ledger(root: Path, release: str, candidate: str, reviews: Path, values
     if check:
         require((root / reference).is_file() and (root / reference).read_bytes() == payload,
                 "review ledger is not up to date")
-        require(qualification_path.read_bytes() == qualification_bytes, "G4 binding is not up to date")
+        require(qualification_path.read_bytes() == qualification_bytes,
+                "G4 binding or composition review is not up to date")
     else:
         atomic_write(root / reference, payload)
         atomic_write(qualification_path, qualification_bytes)

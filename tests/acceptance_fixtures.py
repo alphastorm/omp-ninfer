@@ -9,8 +9,10 @@ import argparse
 from copy import deepcopy
 import importlib.util
 import json
+import os
 from pathlib import Path
 import re
+import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -21,11 +23,18 @@ assert SPEC and SPEC.loader
 COMPOSER = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = COMPOSER
 SPEC.loader.exec_module(COMPOSER)
+HISTORY_SPEC = importlib.util.spec_from_file_location(
+    "acceptance_fixture_history", ROOT / "tests" / "history.py")
+assert HISTORY_SPEC and HISTORY_SPEC.loader
+HISTORY = importlib.util.module_from_spec(HISTORY_SPEC)
+sys.modules[HISTORY_SPEC.name] = HISTORY
+HISTORY_SPEC.loader.exec_module(HISTORY)
 from release_io import atomic_write_json, git
 
 # v0.7.4's accepted posture: the macOS SSH profile stays preview, the Docker-local ones install.
 ACCEPTED = {"darwin-remote-ssh": "preview", "windows-docker-local": "qualified",
             "linux-docker-local": "qualified"}
+FIXTURE_LIMITATIONS = ("Acceptance covers only the documented routes and recorded client operations.",)
 
 DESCRIPTOR = json.loads(
     (ROOT / "tests" / "fixtures" / "upstream-omp-component.json").read_text(encoding="utf-8")
@@ -166,15 +175,31 @@ def load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def predecessor(root: Path, release: str) -> dict:
-    version = COMPOSER.product_version(release)
+def subprocess_environment(root: Path) -> dict[str, str]:
+    """Give child interpreters their own test import root, not the caller's Python path."""
+    return {**os.environ, "PYTHONPATH": str(root / "tests")}
+
+
+def predecessor(root: Path, release: str | None = None) -> dict:
+    """Latest ready GA predecessor, optionally bounded by an already-selected successor."""
+    version = COMPOSER.product_version(release) if release is not None else None
     manifests = [load(path) for path in (root / "releases").glob("*/manifest.json")]
     ready = [item for item in manifests if item.get("status") == "ready"
              and COMPOSER.ga_release(item["release"])
-             and COMPOSER.product_version(item["release"]) < version]
+             and (version is None or COMPOSER.product_version(item["release"]) < version)]
     if not ready:
         raise ValueError("a staged successor needs a ready predecessor")
     return max(ready, key=lambda item: COMPOSER.product_version(item["release"]))
+
+
+def public_release_tree(root: Path, release: str, destination: Path) -> str:
+    """Materialize the public tag's exact tree and history, never the current authority."""
+    (commit,) = HISTORY.resolve_commits(f"refs/tags/{release}", root=root)
+    subprocess.run(["git", "clone", "--quiet", "--no-hardlinks", "--no-checkout",
+                    str(root), str(destination)], check=True, capture_output=True,
+                   env=subprocess_environment(root))
+    git(destination, "checkout", "--quiet", "--detach", commit)
+    return commit
 
 
 def fixture_evidence(root: Path, release: str, candidate: str) -> tuple[dict, dict]:
@@ -188,6 +213,10 @@ def fixture_evidence(root: Path, release: str, candidate: str) -> tuple[dict, di
     if authority["product_release"] != release:
         raise ValueError("the staged successor must be lane-pinned before fixtures are written")
     previous = predecessor(root, release)
+    plan_path = root / "releases" / release / "plan.json"
+    statuses = (load(plan_path)["platforms"] if plan_path.is_file() else {
+        profile["id"]: (profile["status"] if profile.get("status") in ("qualified", "preview")
+                        else ACCEPTED[profile["id"]]) for profile in authority["profiles"]})
     omp = manifest["components"]["omp"]
     client = {"version": f"omp/{omp['distribution_version']}", "binary_sha256": omp["binary_sha256"]}
     live = deepcopy(LIVE)
@@ -205,7 +234,7 @@ def fixture_evidence(root: Path, release: str, candidate: str) -> tuple[dict, di
     }
     evidence = {
         "platforms": {profile["id"]: {
-            "status": ACCEPTED[profile["id"]], "candidate": candidate, "release": release,
+            "status": statuses[profile["id"]], "candidate": candidate, "release": release,
             "binary_sha256": profile["client_distribution"]["binary_sha256"],
             "live_acceptance": deepcopy(live), "limitations": [],
         } for profile in authority["profiles"]},
@@ -283,7 +312,8 @@ def fixture_evidence(root: Path, release: str, candidate: str) -> tuple[dict, di
     return evidence, routes
 
 
-def write_reviews(out: Path, release: str, candidate: str, manifest: dict) -> dict:
+def write_reviews(out: Path, release: str, candidate: str, manifest: dict,
+                  *, product_only: bool = False) -> dict:
     """A tiny closed directory set in the same wire shapes as the retained reviews."""
     source = manifest["components"]["ninfer"]["source_commit"]
     variants = manifest["components"].get("ninfer_variants", [])
@@ -292,8 +322,9 @@ def write_reviews(out: Path, release: str, candidate: str, manifest: dict) -> di
             "independence_class": "cross_family", "authority": "independent_evidence",
             "model": "synthetic", "model_family": "synthetic"}
     entries = {}
-    for key, commit in (("native_runtime", source), ("native_component_delta", delta),
-                        ("product_tooling", candidate)):
+    subjects = (("product_tooling", candidate),) if product_only else (
+        ("native_runtime", source), ("native_component_delta", delta), ("product_tooling", candidate))
+    for key, commit in subjects:
         directory = out / "reviews" / key
         focused = key == "native_component_delta"
         subject = {"subjectCommit": commit, "subjectDigest": "1" * 64, "files": []}
@@ -330,7 +361,14 @@ def write_reviews(out: Path, release: str, candidate: str, manifest: dict) -> di
     values = {"as_of": "2000-01-01", "ledger_status": "closed-by-disposition",
               "approval_granted": True, "product_council": {
                   "stage_commit": candidate, "status": "closed-by-disposition",
-                  "closure": "Closed synthetic review.", "scope_sentence": "Synthetic rehearsal only."}}
+                  "closure": "Closed synthetic review.", "scope_sentence": "Synthetic rehearsal only.",
+                  "residuals_sentence": "Synthetic review findings are fully dispositioned."}}
+    if not product_only:
+        values["composition_review"] = {
+            "native_runtime_summary": "closed with synthetic findings fully dispositioned.",
+            "native_component_delta_subject": "the synthetic native delta",
+            "native_component_delta_summary": "closed with synthetic findings fully dispositioned.",
+        }
     atomic_write_json(out / "values.json", values)
     return entries
 
@@ -447,7 +485,8 @@ def write_fixtures(root: Path, release: str, candidate: str, out: Path) -> dict:
     evidence, routes = fixture_evidence(root, release, candidate)
     write_windows(out, release, candidate, evidence, routes)
     plan = {"artifact_type": "omp_ninfer_release_plan", "schema_version": 1, "release": release,
-            "platforms": {profile: row["status"] for profile, row in evidence["platforms"].items()}}
+            "platforms": {profile: row["status"] for profile, row in evidence["platforms"].items()},
+            "limitations": list(FIXTURE_LIMITATIONS)}
     atomic_write_json(out / "plan.json", plan)
     from collect_route_evidence import collect
     evidence, _ = collect(root, release, candidate, out, plan)
@@ -458,7 +497,17 @@ def write_fixtures(root: Path, release: str, candidate: str, out: Path) -> dict:
         path = out / "receipts" / (lane + "-run.json")
         atomic_write_json(path, receipt)
         paths[lane] = str(path.resolve())
-    write_reviews(out, release, candidate, load(root / "releases" / release / "manifest.json"))
+    from verify_release import unchanged_native_variant
+    manifest = load(root / "releases" / release / "manifest.json")
+    previous = predecessor(root, release)
+    current_components, previous_components = manifest["components"], previous["components"]
+    unchanged_runtime = all(current_components["ninfer"].get(key) == previous_components["ninfer"].get(key)
+                            for key in ("release_tag", "source_commit", "oci_manifest_digest", "server_binary_sha256"))
+    native = {row["id"]: row for row in current_components.get("ninfer_variants", [])}
+    previous_native = {row["id"]: row for row in previous_components.get("ninfer_variants", [])}
+    product_only = (unchanged_runtime and native.keys() == previous_native.keys()
+                    and all(unchanged_native_variant(row, previous_native[name]) for name, row in native.items()))
+    write_reviews(out, release, candidate, manifest, product_only=product_only)
     return {"evidence": str((out / "composition-evidence.json").resolve()), "routes": paths,
             "reviews": str((out / "reviews/manifest.json").resolve()),
             "values": str((out / "values.json").resolve()), "window_root": str(out.resolve())}

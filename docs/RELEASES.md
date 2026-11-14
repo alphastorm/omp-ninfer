@@ -339,6 +339,7 @@ acceptance.
 Use the driver rather than copying release-specific scripts or choosing pin SHAs by hand:
 
 ```sh
+python3 scripts/release.py plan init --release "$release"
 python3 scripts/release.py plan check --release "$release"
 python3 scripts/release.py status --release "$release"
 python3 scripts/release.py next --release "$release"
@@ -349,7 +350,32 @@ python3 scripts/release.py finalize --release "$release" \
 python3 scripts/release.py publish --release "$release" --preflight --pr "$pr"
 ```
 
-Author and commit the plan before running `candidate`. Schema 1 has artifact type
+Before starting a live cut, `python3 scripts/release.py rehearse` proves the full post-hardware
+path with synthetic, host-free evidence in a disposable local clone of HEAD. It refuses dirty or
+shallow repositories, removes the clone's origin and uses no network. `--keep DIR` retains the
+clone outside the source repository for inspection; otherwise it is removed. `--suite` additionally
+runs the contract suite inside the ready clone, checking that tests do not assume which release
+is current.
+
+The rehearsal initializes a carry-all next-minor plan, creates valid notes, runs the same candidate
+and finalization pipeline as a real cut, and supplies the shared acceptance fixtures. If the real
+guide retarget tool identifies an unbound evidence link, the rehearsal reports replacing just that
+Markdown link with its label, in the clone only. Success requires all eight groups, the strict
+ready/pin gate and two negative byte-change probes (audit and pinned evidence), each restored
+afterwards. Every step reports elapsed seconds and the first failing step stops the run.
+
+The plan is the release's first commit. `plan init` derives a carry-all plan from the latest ready
+GA release and the root authority's platform postures, validates it, then creates
+`chore(release): plan <version>` with a `Release:` trailer. This opening commit is not one of the
+eight step groups. Initialization refuses an existing plan or any dirty tree.
+For author review before that opening commit, use `plan init --release "$release" --no-commit`,
+edit the seeded JSON non-interactively, then run `plan commit --release "$release"`. The latter
+validates the author's edits and refuses any other dirty path. Plain `plan init` performs these
+same two steps without pausing; the rehearsal uses that unattended path.
+Use repeatable `--recut COMPONENT=TAG@COMMIT40` and `--decision ID:KIND:SHA256`, or
+`--client-tag TAG` for an updated client, to declare changes at initialization. Any later authored
+plan changes must be committed explicitly before `candidate`; untracked or modified plans refuse
+with `plan commit` guidance. Schema 1 has artifact type
 `omp_ninfer_release_plan`, the GA `release` and `predecessor`, a `client` with `upstream_tag`
 and disposition `carried` or `updated`, and a `components` array. Component ids are the closed set
 `rtx5090-container`, `rtx4090-windows-native`, `rtx3090-windows-native`; each binds disposition
@@ -357,6 +383,10 @@ and disposition `carried` or `updated`, and a `components` array. Component ids 
 authority's profile ids to `qualified` or `preview`. `decisions` binds each decision's `id`,
 `kind` (`component-cut`, `scope` or `waiver`) and SHA-256. Carried identities must match the ready
 predecessor, re-cut tags must be new, and an existing manifest must agree with the plan.
+Required `limitations` is a possibly empty list of unique, nonempty, trimmed release-level
+limitation sentences. The author reviews this list before the opening commit. Initialization
+seeds predecessor sentences, printing each dropped provenance claim or generated component sentence;
+the aggregate owns the generated provenance and neutral evidence sentence, not the author.
 No absolute paths or private markers belong in a plan.
 
 Supply private inputs as arguments to `candidate`, not as plan fields:
@@ -374,6 +404,9 @@ Supply private inputs as arguments to `candidate`, not as plan fields:
 - An updated client requires `--client-component JSON`, passed to the stager's
   `--omp-component`. Optional `--notes PATH` supplies the release's completed publication notes;
   optional profile/deployment options belong in the stage-input object.
+- A carried client defaults to the predecessor's public `qualification/client-components.json`
+  when no explicit descriptor is supplied. This resets every platform for fresh acceptance;
+  a missing predecessor descriptor refuses instead of preserving accepted platform state.
 - `finalize --notes PATH` replaces those notes in the compose commit when acceptance results
   complete them. Without this argument, finalization keeps the staged notes. A resumed compose
   attempt reuses its recorded notes input and hashes its bytes before deciding whether to rerun.
@@ -472,7 +505,7 @@ Each row is one commit with a fixed Conventional Commit subject and release/step
 
 | Group | Tools and binding |
 | --- | --- |
-| `stage` | Stage from the ready predecessor; aggregate `admit` validates bundles and derives release-decision-bound proofs; bind each re-cut native lane; draft rebind; aggregate `compose`; draft rebind; receipt audit `lane-stage`. Root authority and profiles remain on the predecessor. |
+| `stage` | Stage from the ready predecessor; aggregate `admit` validates bundles and derives release-decision-bound proofs; bind each re-cut native lane; draft rebind; aggregate `compose`; draft rebind; receipt audit `lane-stage --prune-unbound` removes and logs unbound predecessor copies. Root authority and profiles remain on the predecessor. |
 | `lane-pin` | `rebind_release.py --stage lane` pins to the **stage commit** holding final lane receipts, promotes the root authority, profiles and launcher pins, and changes `draft` to `candidate`, not `ready`. |
 | `guide` | `retarget_guide.py` retargets the guide once from predecessor identities to plan identities. This commit is the **candidate** for every review and acceptance window. Run installability, lint-ready with pins, and the suite before the windows. |
 | `compose` | Collect window evidence, build the review ledger naming the guide candidate, compose real route/platform acceptance, then rebind. Only the composer makes the release `ready` and clears its blockers. |

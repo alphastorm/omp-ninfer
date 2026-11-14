@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 COMPONENT_IDS = ("rtx5090-container", "rtx4090-windows-native", "rtx3090-windows-native")
 PLAN_KEYS = {"artifact_type", "schema_version", "release", "predecessor", "client",
-             "components", "platforms", "decisions"}
+             "components", "platforms", "limitations", "decisions"}
 GA_RELEASE_RE = re.compile(r"v(\d+)\.(\d+)\.(\d+)")
 COMMIT_RE = re.compile(r"[0-9a-f]{40}")
 SHA256_RE = re.compile(r"[0-9a-f]{64}")
@@ -29,6 +29,9 @@ PLAN_SCHEMA = {
     "components": {"id": COMPONENT_IDS, "disposition": ("recut", "carried"),
                    "release_tag": "string", "source_commit": "40 lowercase hex"},
     "platforms": {"profile id": ("qualified", "preview")},
+    # Release-level limitation sentences are authored here and nowhere else; the aggregate
+    # adds the generated component-provenance statement and inherits none from the predecessor.
+    "limitations": ["sentence"],
     "decisions": {"id": "string", "kind": ("component-cut", "scope", "waiver"),
                   "sha256": "64 lowercase hex"},
 }
@@ -55,10 +58,83 @@ def manifest_components(manifest: dict[str, Any]) -> dict[str, dict[str, Any]]:
                if isinstance(row, dict) and isinstance(row.get("id"), str)}}
 
 
+def latest_ready_manifest(root: Path) -> dict[str, Any]:
+    """Select the latest ready GA release, including when a later candidate exists."""
+    candidates = []
+    for path in (Path(root) / "releases").glob("*/manifest.json"):
+        version = GA_RELEASE_RE.fullmatch(path.parent.name)
+        if version is None:
+            continue
+        manifest = json.loads(path.read_text(encoding="utf-8"))
+        if manifest.get("status") == "ready":
+            candidates.append((tuple(map(int, version.groups())), manifest))
+    if not candidates:
+        raise ValueError("plan init requires a ready GA predecessor")
+    return max(candidates, key=lambda item: item[0])[1]
+
+
+def initial_plan(root: Path, release: str, *, recut: list[str] | tuple[str, ...] = (),
+                 client_tag: str | None = None,
+                 decisions: list[str] | tuple[str, ...] = ()) -> dict[str, Any]:
+    """Construct public plan inputs; the caller validates before committing them."""
+    from verify_release import provenance_claim_errors
+
+    if GA_RELEASE_RE.fullmatch(release) is None:
+        raise ValueError("plan release must be a GA version (vX.Y.Z)")
+    predecessor = latest_ready_manifest(root)
+    overrides = {}
+    for value in recut:
+        component, separator, identity = value.partition("=")
+        tag, at, commit = identity.rpartition("@")
+        if (not separator or component not in COMPONENT_IDS or component in overrides
+                or not at or not tag or COMMIT_RE.fullmatch(commit) is None):
+            raise ValueError("--recut requires unique COMPONENT=TAG@COMMIT40 entries from the closed component set")
+        overrides[component] = {"id": component, "disposition": "recut",
+                                "release_tag": tag, "source_commit": commit}
+    previous = manifest_components(predecessor)
+    components = []
+    for component in COMPONENT_IDS:
+        if component in overrides:
+            components.append(overrides[component])
+        elif component in previous:
+            components.append({"id": component, "disposition": "carried",
+                               **{key: previous[component][key] for key in ("release_tag", "source_commit")}})
+    decision_rows = []
+    for value in decisions:
+        fields = value.split(":")
+        if len(fields) != 3:
+            raise ValueError("--decision requires ID:KIND:SHA256")
+        decision_rows.append(dict(zip(("id", "kind", "sha256"), fields)))
+    authority = json.loads((Path(root) / "compatibility.json").read_text(encoding="utf-8"))
+    limitations = []
+    generated_neutral = (
+        "Current component evidence does not transfer predecessor review approval or authorize production promotion."
+    )
+    for sentence in predecessor.get("limitations", []):
+        generated = isinstance(sentence, str) and (
+            sentence.startswith("Runtime components: ") or sentence == generated_neutral)
+        if generated or provenance_claim_errors([sentence], "plan.limitations"):
+            print(f"plan init: dropped predecessor limitation: {sentence}")
+        else:
+            limitations.append(sentence)
+    return {
+        "artifact_type": PLAN_SCHEMA["artifact_type"], "schema_version": 1, "release": release,
+        "predecessor": predecessor["release"],
+        "client": {"upstream_tag": client_tag if client_tag is not None else
+                   predecessor["components"]["omp"]["upstream_tag"],
+                   "disposition": "updated" if client_tag is not None else "carried"},
+        "components": components,
+        "platforms": {row["id"]: row["status"] for row in authority["profiles"]},
+        "limitations": limitations,
+        "decisions": decision_rows,
+    }
+
+
 def plan_errors(root: Path, release: str) -> list[str]:
     """Return every schema or authority disagreement without writing any files."""
     # Lazy import avoids a cycle when the verifier checks a plan during validate().
-    from verify_release import PRIVATE_MARKERS, predecessor_manifest, unchanged_native_variant
+    from verify_release import (PRIVATE_MARKERS, predecessor_manifest, provenance_claim_errors,
+                                unchanged_native_variant)
 
     root = Path(root)
     try:
@@ -174,6 +250,16 @@ def plan_errors(root: Path, release: str) -> list[str]:
                 "platforms keys must equal authority profile ids")
     except (OSError, ValueError, KeyError, TypeError) as error:
         errors.append(f"plan.platforms authority cannot be read: {error}")
+
+    limitations = plan.get("limitations")
+    require(isinstance(limitations, list), "limitations must be an array")
+    if isinstance(limitations, list):
+        require(all(isinstance(value, str) and value and value == value.strip() for value in limitations),
+                "limitations must be nonempty trimmed sentences")
+        require(len({value for value in limitations if isinstance(value, str)}) == len(limitations),
+                "limitations must be unique")
+        errors.extend(provenance_claim_errors(
+            [value for value in limitations if isinstance(value, str)], "plan.limitations"))
 
     decisions = plan.get("decisions")
     require(isinstance(decisions, list), "decisions must be an array")

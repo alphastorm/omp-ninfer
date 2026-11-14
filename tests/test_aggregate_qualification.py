@@ -20,6 +20,10 @@ SPEC = importlib.util.spec_from_file_location("aggregate_qualification", ROOT / 
 assert SPEC is not None and SPEC.loader is not None
 AGGREGATE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(AGGREGATE)
+HISTORY_SPEC = importlib.util.spec_from_file_location("release_history", ROOT / "tests/history.py")
+assert HISTORY_SPEC is not None and HISTORY_SPEC.loader is not None
+HISTORY = importlib.util.module_from_spec(HISTORY_SPEC)
+HISTORY_SPEC.loader.exec_module(HISTORY)
 from release_io import atomic_write, atomic_write_json
 
 
@@ -47,7 +51,58 @@ def carry_plan(root, release):
                **{key: row[key] for key in ("release_tag", "source_commit")}}
               for row in components["ninfer_variants"]]],
         "platforms": {row["id"]: "qualified" for row in load(root / "releases" / release / "compatibility.json")["profiles"]},
+        "limitations": ["Fixture limitation: no general performance guarantee is implied."],
         "decisions": []}
+
+
+def staging_versions(root):
+    ready = []
+    for path in (root / "releases").glob("*/manifest.json"):
+        if AGGREGATE.verifier.GA_PRODUCT_RELEASE_RE.fullmatch(path.parent.name):
+            manifest = load(path)
+            if manifest.get("status") == "ready":
+                ready.append((AGGREGATE.verifier.product_version(path.parent.name), path.parent.name))
+    if not ready:
+        raise AssertionError("carry-all fixture requires a ready public predecessor")
+    version, predecessor = max(ready)
+    major, minor, _ = version
+    minor += 1
+    while (root / "releases" / f"v{major}.{minor}.0").exists():
+        minor += 1
+    return predecessor, f"v{major}.{minor}.0"
+
+
+def restore_predecessor_authority(root, release):
+    source = root / "releases" / release
+    atomic_write(root / "compatibility.json", (source / "compatibility.json").read_bytes())
+    atomic_write(root / "docs/COMPATIBILITY.md", (source / "COMPATIBILITY.md").read_bytes())
+    profiles = {path.name: path for path in (source / "profiles").glob("*.json")}
+    if not profiles:
+        raise AssertionError("ready predecessor must retain its profile snapshots")
+    for path in (root / "profiles").glob("*.json"):
+        if path.name not in profiles:
+            path.unlink()
+    for name, path in profiles.items():
+        atomic_write(root / "profiles" / name, path.read_bytes())
+
+
+class StagingVersionTests(unittest.TestCase):
+    def test_latest_ready_and_absent_successor_ignore_current_root_authority(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            for release, status in (("v0.19.0", "ready"), ("v0.20.0", "ready"),
+                                    ("v0.21.0", "draft"), ("v0.22.0", "candidate")):
+                atomic_write_json(root / "releases" / release / "manifest.json",
+                                  {"release": release, "status": status})
+            atomic_write_json(root / "compatibility.json", {"product_release": "v0.22.0"})
+            self.assertEqual(staging_versions(root), ("v0.20.0", "v0.23.0"))
+
+    def test_existing_draft_does_not_collide_with_the_behaviour_fixture(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            atomic_write_json(root / "releases/v0.19.0/manifest.json", {"status": "ready"})
+            atomic_write_json(root / "releases/v0.20.0/manifest.json", {"status": "draft"})
+            self.assertEqual(staging_versions(root), ("v0.19.0", "v0.21.0"))
 
 
 class CarriedAggregateTests(unittest.TestCase):
@@ -56,65 +111,95 @@ class CarriedAggregateTests(unittest.TestCase):
         cls.temporary = tempfile.TemporaryDirectory()
         cls.addClassCleanup(cls.temporary.cleanup)
         cls.staged = Path(cls.temporary.name) / "staged"
-        shutil.copytree(ROOT, cls.staged, ignore=shutil.ignore_patterns(".git", "__pycache__", "tests"))
-        runtime = load(cls.staged / "releases/v0.19.0/manifest.json")["components"]["ninfer"]
+        shutil.copytree(ROOT, cls.staged, ignore=shutil.ignore_patterns(".git", "__pycache__", "tests", ".release-state"))
+        cls.source_release, cls.release = staging_versions(cls.staged)
+        restore_predecessor_authority(cls.staged, cls.source_release)
+        source = cls.staged / "releases" / cls.source_release
+        cls.source_manifest = load(source / "manifest.json")
+        runtime = cls.source_manifest["components"]["ninfer"]
         args = [
-            "scripts/stage_release.py", "--from", "v0.19.0", "--release", "v0.20.0",
+            "scripts/stage_release.py", "--from", cls.source_release, "--release", cls.release,
             "--release-tag", runtime["release_tag"], "--source-tag", runtime["source_archive_url"].split("/")[-2],
             "--source-commit", runtime["source_commit"], "--binary-sha", runtime["server_binary_sha256"],
             "--archive-sha", runtime["binary_archive_sha256"], "--source-archive-sha", runtime["source_archive_sha256"],
             "--sbom-sha", runtime["sbom_sha256"], "--image-digest", runtime["oci_manifest_digest"],
             "--runtime-receipt-release", runtime["runtime_receipt_release"],
             "--archive-name", runtime["binary_archive_url"].rsplit("/", 1)[-1], "--keep-deployment-profile",
-            "--omp-component", "releases/v0.19.0/qualification/client-components.json"]
+            "--omp-component", f"releases/{cls.source_release}/qualification/client-components.json"]
         staged = command(cls.staged, *args)
         if staged.returncode != 0:
             raise AssertionError(f"carry-all staging exited {staged.returncode}\n{staged.stdout}\n{staged.stderr}")
-        cls.plan = carry_plan(cls.staged, "v0.20.0")
-        atomic_write_json(cls.staged / "releases/v0.20.0/plan.json", cls.plan)
+        cls.plan = carry_plan(cls.staged, cls.release)
+        atomic_write_json(cls.staged / "releases" / cls.release / "plan.json", cls.plan)
 
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
         shutil.copytree(self.staged, self.root, dirs_exist_ok=True)
-        self.plan_path = self.root / "releases/v0.20.0/plan.json"
+        self.release_root = self.root / "releases" / self.release
+        self.plan_path = self.release_root / "plan.json"
 
     def compose(self, *, check=False):
-        return AGGREGATE.aggregate(self.root, "v0.20.0", self.plan_path, {}, None, check=check)
+        return AGGREGATE.aggregate(self.root, self.release, self.plan_path, {}, None, check=check)
 
     def test_all_carried_admit_is_no_write_and_emits_empty_binder_map(self):
-        before = {path: path.read_bytes() for path in (self.root / "releases/v0.20.0").rglob("*") if path.is_file()}
-        result = AGGREGATE.admit(self.root, "v0.20.0", self.plan_path, {})
+        before = {path: path.read_bytes() for path in self.release_root.rglob("*") if path.is_file()}
+        result = AGGREGATE.admit(self.root, self.release, self.plan_path, {})
         self.assertEqual(result, {"schema": 1, "lanes": {}})
         self.assertEqual(before, {path: path.read_bytes() for path in before})
 
     def test_all_carried_compose_is_idempotent_and_has_fact_derived_prose(self):
-        before = json.loads(command(self.root, "scripts/verify_release.py", "--release", "v0.20.0", "--json").stdout)
+        before = json.loads(command(self.root, "scripts/verify_release.py", "--release", self.release, "--json").stdout)
         self.compose()
         self.assertEqual(self.compose(check=True), [])
-        rebound = command(self.root, "scripts/rebind_release.py", "--release", "v0.20.0", "--draft")
+        rebound = command(self.root, "scripts/rebind_release.py", "--release", self.release, "--draft")
         self.assertEqual(rebound.returncode, 0, rebound.stdout + rebound.stderr)
-        after = json.loads(command(self.root, "scripts/verify_release.py", "--release", "v0.20.0", "--json").stdout)
+        after = json.loads(command(self.root, "scripts/verify_release.py", "--release", self.release, "--json").stdout)
         self.assertFalse(set(after["errors"]) - set(before["errors"]), "aggregate introduced a draft verifier refusal")
-        q = load(self.root / "releases/v0.20.0/qualification.json")
+        q = load(self.release_root / "qualification.json")
         self.assertEqual(q["status"], "runtime-release-eligible")
-        self.assertEqual(q["scope"].count("carried unchanged from v0.19.0"), 3)
-        self.assertIn("3 distinct NInfer source commits", q["scope"])
+        components = self.source_manifest["components"]
+        sources = {components["ninfer"]["source_commit"],
+                   *(row["source_commit"] for row in components["ninfer_variants"])}
+        self.assertEqual(q["scope"].count("carried unchanged from " + self.source_release),
+                         1 + len(components["ninfer_variants"]))
+        self.assertIn(f"{len(sources)} distinct NInfer source commits", q["scope"])
         self.assertNotIn("re-cut for this release", q["scope"])
         self.assertFalse(q["publication_authorized"])
         self.assertFalse(q["external_installation_qualified"])
         self.assertEqual(q["observed_gates"], {})
-        pub = load(self.root / "releases/v0.20.0/qualification/native-publication.json")
-        self.assertEqual({row["lane"] for row in pub["lanes"]}, {"rtx3090", "rtx4090"})
+        manifest = load(self.release_root / "manifest.json")
+        statement = AGGREGATE.verifier.component_provenance(self.root, self.release, manifest)["statement"]
+        # Authored sentences come from the plan; nothing is inherited from the predecessor.
+        self.assertEqual(manifest["limitations"][:-1], [*self.plan["limitations"], statement])
+        self.assertFalse(set(manifest["limitations"]) & set(self.source_manifest["limitations"]))
+        self.assertFalse([target for target in manifest["publication"]["targets"] if "carried" in target])
+        compatibility = load(self.release_root / "compatibility.json")
+        self.assertEqual(AGGREGATE.verifier.provenance_claim_errors(
+            [manifest, compatibility, q], "staged", statement=statement,
+            clauses=tuple(AGGREGATE.verifier.component_provenance_parts(self.root, self.release, manifest)[1].values())),
+            [])
+        pub = load(self.release_root / "qualification/native-publication.json")
+        self.assertEqual({row["lane"] for row in pub["lanes"]},
+                         {row["id"].split("-")[0] for row in components["ninfer_variants"]})
 
     def test_carried_lane_changed_bytes_refuse_before_any_write(self):
-        path = self.root / "releases/v0.20.0/qualification/rtx3090.json"
+        path = self.release_root / "qualification/rtx3090.json"
         atomic_write(path, path.read_bytes() + b" ")
-        before = (self.root / "releases/v0.20.0/qualification.json").read_bytes()
+        before = (self.release_root / "qualification.json").read_bytes()
         with self.assertRaisesRegex(AGGREGATE.BundleError, "carried bytes differ"):
             self.compose()
-        self.assertEqual((self.root / "releases/v0.20.0/qualification.json").read_bytes(), before)
+        self.assertEqual((self.release_root / "qualification.json").read_bytes(), before)
+
+    def test_plan_limitation_with_a_provenance_claim_refuses_before_any_write(self):
+        plan = deepcopy(self.plan)
+        plan["limitations"] = ["The native component is carried unchanged from the previous release."]
+        atomic_write_json(self.plan_path, plan)
+        before = (self.release_root / "manifest.json").read_bytes()
+        with self.assertRaisesRegex(AGGREGATE.BundleError, "ungenerated component provenance claim"):
+            self.compose()
+        self.assertEqual((self.release_root / "manifest.json").read_bytes(), before)
 
     def test_missing_decision_refuses(self):
         plan = deepcopy(self.plan)
@@ -125,26 +210,26 @@ class CarriedAggregateTests(unittest.TestCase):
 
     def test_check_cli_exits_one_on_tampered_tree_and_writes_nothing(self):
         self.compose()
-        path = self.root / "releases/v0.20.0/qualification.json"
+        path = self.release_root / "qualification.json"
         value = load(path)
         value["interpretation"] = "Tampered summary."
         atomic_write_json(path, value)
         before = path.read_bytes()
-        result = command(self.root, "scripts/aggregate_qualification.py", "compose", "--release", "v0.20.0",
-                         "--plan", "releases/v0.20.0/plan.json", "--check")
+        result = command(self.root, "scripts/aggregate_qualification.py", "compose", "--release", self.release,
+                         "--plan", self.plan_path, "--check")
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("generated files differ", result.stderr)
         self.assertEqual(path.read_bytes(), before)
 
     def test_runtime_publication_is_refused_for_carried_runtime(self):
         with self.assertRaisesRegex(AGGREGATE.BundleError, "required exactly"):
-            AGGREGATE.aggregate(self.root, "v0.20.0", self.plan_path, {}, Path("unused.json"))
+            AGGREGATE.aggregate(self.root, self.release, self.plan_path, {}, Path("unused.json"))
 
     def test_native_publication_and_bundle_are_refused_for_carried_lane(self):
         with self.assertRaisesRegex(AGGREGATE.BundleError, "re-cut native lanes"):
-            AGGREGATE.aggregate(self.root, "v0.20.0", self.plan_path, {"rtx3090": Path("unused")}, None)
+            AGGREGATE.aggregate(self.root, self.release, self.plan_path, {"rtx3090": Path("unused")}, None)
         with self.assertRaisesRegex(AGGREGATE.BundleError, "publication lanes"):
-            AGGREGATE.aggregate(self.root, "v0.20.0", self.plan_path, {}, None,
+            AGGREGATE.aggregate(self.root, self.release, self.plan_path, {}, None,
                                 native_publications={"rtx3090": Path("unused")})
 
     def test_deployment_keep_and_advance_are_bound_to_configuration(self):
@@ -355,8 +440,15 @@ class PrivateAggregateGoldenTests(unittest.TestCase):
             changed = set(git("diff", "--name-only", stage_parent, after).decode().splitlines())
             self.assertEqual(changed, {*(f"releases/v0.19.0/{name}" for name in files), *OTHER_STAGE_FILES})
             upgrade_sha = AGGREGATE.sha((root / "releases/v0.19.0/qualification/rtx3090-upgrade.json").read_bytes())
+            # rebind now derives the RTX 3090 lane label at stage; history corrected it only at
+            # the compose commit. Compare against the stage commit with exactly that one label
+            # advanced and its hash closure recomputed by the historical tools.
+            corrected, allowed = HISTORY.corrected_lane_snapshot(
+                after, "releases/v0.19.0/compatibility.json", True)
+            self.assertEqual({name for name, pointer in allowed if pointer.endswith("/lane")},
+                             {"releases/v0.19.0/compatibility.json"})
             for name in files:
-                expected_bytes = git("show", f"{after}:releases/v0.19.0/{name}")
+                expected_bytes = corrected[f"releases/v0.19.0/{name}"]
                 observed_bytes = (root / "releases/v0.19.0" / name).read_bytes()
                 if name not in PROSE_POINTERS:
                     self.assertEqual(observed_bytes, expected_bytes, name)
@@ -371,6 +463,12 @@ class PrivateAggregateGoldenTests(unittest.TestCase):
                     # rebind owns these hashes; generated qualification prose
                     # necessarily changes the summary's content digest.
                     expected["qualification"]["summary_sha256"] = observed["qualification"]["summary_sha256"]
+                    # Targets now carry identity only. The published list marked its one
+                    # carried lane in prose; that marker is the only admitted difference.
+                    targets = expected["publication"]["targets"]
+                    marked = [index for index, target in enumerate(targets) if " (carried unchanged)" in target]
+                    self.assertEqual(len(marked), 1, targets)
+                    targets[marked[0]] = targets[marked[0]].replace(" (carried unchanged)", "")
                 self.assertFalse(first_difference(observed, expected), name + first_difference(observed, expected))
                 self.assertEqual(AGGREGATE.json_bytes(observed), AGGREGATE.json_bytes(expected),
                                  name + ": non-prose byte ordering differs")
