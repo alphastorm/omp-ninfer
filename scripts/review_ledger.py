@@ -40,11 +40,13 @@ SEAT_FIELDS = ("reviewer_id", "selectionClass", "role", "independence_class", "a
                "model", "model_family")
 SECTIONS = ("native_runtime", "native_component_delta", "product_tooling")
 # Private paths and synthetic identifiers, applied to string leaves, never to source bytes.
-# A private path's end is undecidable in prose. Remove the rest of its pipe-separated
-# field, never guessing at quotes, brackets, spaces or the remaining directory names.
+# Where a private path ends inside reviewer prose cannot be decided (spaces, brackets, quotes
+# and separators all occur in real paths), so a statement that names a user-profile path is
+# removed whole. Only the schema-fixed prefix of a finding (id, severity, confidence) is kept.
+USER_PATH = re.compile(r"[A-Z]:[\\/]+(?:Users|Home)[\\/]|/(?:Users|home)/", re.I)
+FINDING_PREFIX = re.compile(r"[RU][1-9][0-9]*\|P[0-3]\|conf=(?:0(?:\.[0-9]{1,2})?|1(?:\.0{1,2})?)\|")
+REMOVED_STATEMENT = "the rest of this statement named a user-profile path and was removed"
 SANITIZE = (
-    (re.compile(r"(?:[A-Z]:[\\/]+(?:Users|Home)[\\/]+|/(?:Users|home)/+)[^|\r\n]*", re.I),
-     "a user-profile path and the rest of its field were removed"),
     (re.compile(r"GPU-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"),
      "a synthetic GPU-identifier sentinel"),
 )
@@ -168,6 +170,10 @@ def sanitize(value: Any, counts: dict[str, int]) -> Any:
             value, hits = pattern.subn(replacement, value)
             if hits:
                 counts[replacement] = counts.get(replacement, 0) + hits
+        if USER_PATH.search(value):
+            prefix = FINDING_PREFIX.match(value)
+            value = (prefix[0] if prefix else "") + REMOVED_STATEMENT
+            counts[REMOVED_STATEMENT] = counts.get(REMOVED_STATEMENT, 0) + 1
         return value
     if isinstance(value, list):
         return [sanitize(child, counts) for child in value]

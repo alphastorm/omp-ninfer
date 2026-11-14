@@ -295,8 +295,7 @@ class ReviewLedgerTests(unittest.TestCase):
         for private in ("UNIQUE_NAME", "private", "file.txt", sentinel):
             self.assertNotIn(private, output)
         self.assertEqual(result["sanitized"], {
-            "a user-profile path and the rest of its field were removed": 5,
-            "a synthetic GPU-identifier sentinel": 1})
+            LEDGER.REMOVED_STATEMENT: 1, "a synthetic GPU-identifier sentinel": 1})
         self.assertEqual(source.read_bytes(), before)
 
     def test_each_private_path_is_consumed_including_its_username_and_final_segment(self):
@@ -317,21 +316,18 @@ class ReviewLedgerTests(unittest.TestCase):
                 self.assertEqual(sum(counts.values()), 1)
                 self.assertEqual(source.read_bytes(), before)
 
-    def test_private_paths_consume_quotes_and_prose_but_stop_at_the_end_of_the_line(self):
+    def test_a_statement_naming_a_private_path_is_removed_whole(self):
         source = self.out / "reviews/product_tooling/critic.json"
         for opening, closing in (("'", "'"), ('"', '"'), ("`", "`"), ("", " ")):
             with self.subTest(delimiter=closing):
                 path = "/" + "home/UNIQUE_NAME/private/file.txt"
-                atomic_write_json(source, {"summary": opening + path + closing + "Private prose.\nPublic prose.",
+                atomic_write_json(source, {"summary": opening + path + closing + "Private prose.\nMore prose.",
                                            "evidence": [], "unresolved": []})
                 before = source.read_bytes()
                 ledger, counts = LEDGER.build(self.root, self.release, self.candidate,
                                               self.manifest_path, self.values)
                 summary = ledger["product_tooling"]["reviewer_results"]["critic"]["summary"]
-                self.assertNotIn("UNIQUE_NAME", summary)
-                self.assertNotIn("file.txt", summary)
-                self.assertNotIn("Private prose.", summary)
-                self.assertTrue(summary.endswith("\nPublic prose."), summary)
+                self.assertEqual(summary, LEDGER.REMOVED_STATEMENT)
                 self.assertEqual(sum(counts.values()), 1)
                 self.assertEqual(source.read_bytes(), before)
 
@@ -358,22 +354,20 @@ class ReviewLedgerTests(unittest.TestCase):
                     self.assertNotIn(fragment, summary)
                 self.assertNotIn("Retained prose.", summary)
 
-    def test_only_the_private_evidence_field_is_removed_from_a_review_item(self):
+    def test_a_finding_keeps_its_id_and_severity_and_loses_the_rest(self):
         source = self.out / "reviews/product_tooling/critic.json"
         for path in ("/" + "Users/alice/My Project for release/docs/file",
-                     "C:\\" + "Users\\First Last\\Private Team Folder\\report.txt"):
+                     "C:\\" + "Users\\First Last\\Private Team Folder\\report.txt",
+                     "/" + "Users/alice/client|archive/secret.txt",
+                     "/" + "Users/alice/escaped\\|pipe/secret.txt"):
             with self.subTest(path=path):
-                item = f"claim=public claim|evidence=Observed {path} private detail|impact=public impact"
-                atomic_write_json(source, {"summary": "Public summary.", "evidence": [item], "unresolved": []})
+                item = f"R1|P1|conf=0.9|claim=public claim|evidence=Observed {path} private detail|impact=public impact"
+                public = "R2|P2|conf=0.5|claim=other|evidence=scripts/release.py:1|impact=none|verify=none"
+                atomic_write_json(source, {"summary": "Public summary.", "evidence": [item, public], "unresolved": []})
                 ledger, counts = LEDGER.build(self.root, self.release, self.candidate,
                                               self.manifest_path, self.values)
-                evidence = ledger["product_tooling"]["reviewer_results"]["critic"]["evidence"][0]
-                fields = evidence.split("|")
-                self.assertEqual(fields[0], "claim=public claim")
-                self.assertEqual(fields[2], "impact=public impact")
-                self.assertTrue(fields[1].startswith("evidence=Observed "))
-                for fragment in ("release/docs/file", "Team", "report.txt", "private detail"):
-                    self.assertNotIn(fragment, fields[1])
+                evidence = ledger["product_tooling"]["reviewer_results"]["critic"]["evidence"]
+                self.assertEqual(evidence, ["R1|P1|conf=0.9|" + LEDGER.REMOVED_STATEMENT, public])
                 self.assertEqual(sum(counts.values()), 1)
                 LEDGER.public_text(ledger)
 
