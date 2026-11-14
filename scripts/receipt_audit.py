@@ -4,13 +4,13 @@
 ``--at`` reads immutable git inputs instead of the working tree. ``--check`` never
 writes; without it, the audit and its qualification binding are replaced atomically.
 The audit inventories its own path without hashing its output, and omits the
-qualification receipt_audit edge from the scalar inventory.
+qualification receipt_audit edge from the scalar inventory. ``unadmitted_kept``
+returns every unbound predecessor copy for staging tools without writing.
 """
 
 from __future__ import annotations
 
 import argparse
-import copy
 import datetime
 import hashlib
 import json
@@ -106,77 +106,180 @@ def _predecessor(tree: _Tree, release: str) -> tuple[str, dict[str, Any]]:
     return name, manifest
 
 
-def _references(qualification: dict[str, Any]) -> Iterator[tuple[str, tuple[str, str]]]:
-    if isinstance(qualification.get("summary"), str):
-        yield "summary", (qualification["summary"], qualification["sha256"])
-    for field, value in qualification.items():
-        if isinstance(value, dict) and isinstance(value.get("path"), str):
-            yield field, (value["path"], value["sha256"])
+def _references(value: Any, pointer: str = "") -> Iterator[tuple[str, tuple[str, str]]]:
+    if isinstance(value, dict):
+        for field in ("summary", "path", "repository_path"):
+            path = value.get(field)
+            if isinstance(path, str) and path.startswith("releases/"):
+                digest = value.get("sha256")
+                if not isinstance(digest, str):
+                    raise Refusal(f"component reference must bind sha256: {path}")
+                yield pointer + "/" + field, (path, digest)
+        for field, child in value.items():
+            yield from _references(child, pointer + "/" + field)
+    elif isinstance(value, list):
+        for index, child in enumerate(value):
+            yield from _references(child, pointer + "/" + str(index))
+
+
+def _component_rows(manifest: dict[str, Any]) -> dict[str, tuple[dict[str, Any], bool]]:
+    rows = {}
+    for component, value in manifest.get("components", {}).items():
+        candidates = value if isinstance(value, list) else [value]
+        for row in candidates:
+            if not isinstance(row, dict):
+                continue
+            name = row["id"] if isinstance(value, list) else component
+            if name in rows:
+                raise Refusal(f"ambiguous component row: {name}")
+            rows[name] = row, component == "ninfer_variants"
+    return rows
+
+
+def _relocated(before: Any, after: Any, old_prefix: str, new_prefix: str) -> Any:
+    """Allow only release-local path movement and its matching immutable URL."""
+    from verify_release import PRODUCT_RAW_URL_RE
+
+    if isinstance(before, dict) and isinstance(after, dict):
+        expected = {}
+        for key, value in before.items():
+            current = after.get(key)
+            if key in ("summary", "path", "repository_path") and isinstance(value, str) \
+                    and value.startswith(old_prefix) \
+                    and current == new_prefix + value.removeprefix(old_prefix):
+                expected[key] = current
+            elif key in ("public_url", "url") and isinstance(current, str):
+                match = PRODUCT_RAW_URL_RE.fullmatch(current)
+                target = next((after.get(field) for field in ("summary", "path", "repository_path")
+                               if isinstance(after.get(field), str)), None)
+                old_target = next((before.get(field) for field in ("summary", "path", "repository_path")
+                                   if isinstance(before.get(field), str)), None)
+                allowed = (old_target, new_prefix + old_target.removeprefix(old_prefix)) \
+                    if isinstance(old_target, str) and old_target.startswith(old_prefix) else ()
+                expected[key] = current if match and match[2] == target and target in allowed else value
+            else:
+                expected[key] = _relocated(value, current, old_prefix, new_prefix)
+        return expected
+    if isinstance(before, list) and isinstance(after, list) and len(before) == len(after):
+        return [_relocated(old, new, old_prefix, new_prefix) for old, new in zip(before, after)]
+    return before
+
+
+def _component_references(tree: _Tree, prefix: str, name: str,
+                          row: dict[str, Any]) -> dict[str, tuple[str, str]]:
+    references = dict(_references(row))
+    if name == "ninfer":
+        # The container component predates row-local qualification bindings. Its
+        # behavioral and packaging evidence live in these schema-owned sections.
+        composition = tree.document(prefix + "qualification.json").get("composition", {})
+        for field in ("behavioral_qualification", "local_release_packaging"):
+            references.update(_references(composition.get(field), "/composition/" + field))
+    return references
 
 
 def _carried(tree: _Tree, release: str, predecessor: str, manifest: dict[str, Any],
-             previous: dict[str, Any]) -> tuple[dict[str, str], dict[str, str], list[str]]:
+             previous: dict[str, Any]) -> tuple[dict[str, str], dict[str, str], list[str], bool]:
     from verify_release import PRODUCT_RAW_URL_RE, unchanged_native_variant
 
     old_prefix, new_prefix = f"releases/{predecessor}/", f"releases/{release}/"
-    old_rows = {row["id"]: row for row in previous.get("components", {}).get("ninfer_variants", [])}
+    old_rows = _component_rows(previous)
     carried, in_place, policies = {}, {}, []
-    for row in manifest.get("components", {}).get("ninfer_variants", []):
-        old = old_rows.get(row["id"])
-        if not unchanged_native_variant(row, old):
+    runtime_carried = False
+    for name, (row, native) in _component_rows(manifest).items():
+        old = old_rows.get(name, (None, False))[0]
+        if old is None or native and not unchanged_native_variant(row, old):
             continue
-        expected = copy.deepcopy(old)
+        expected = _relocated(old, row, old_prefix, new_prefix)
         qualification = row.get("qualification", {})
-        expected_qualification = expected.get("qualification", {})
-        for field in ("summary", "release_spec", "server_config"):
-            before = expected_qualification.get(field)
-            after = qualification.get(field)
-            if field != "summary" and isinstance(before, dict) and isinstance(after, dict):
-                before, after = before.get("path"), after.get("path")
-            if isinstance(before, str) and before.startswith(old_prefix):
-                relocated = new_prefix + before.removeprefix(old_prefix)
-                if after == relocated:
-                    if field == "summary":
-                        expected_qualification[field] = after
-                    else:
-                        expected_qualification[field]["path"] = after
-        if qualification.get("public_url") is not None:
+        if native and qualification.get("public_url") is not None:
             url = qualification.get("public_url")
             match = PRODUCT_RAW_URL_RE.fullmatch(url) if isinstance(url, str) else None
             if match is None or match[2] != qualification.get("summary"):
-                raise Refusal(f"{row['id']}: carried summary URL must bind its summary")
-            expected_qualification["public_url"] = url
+                raise Refusal(f"{name}: carried summary URL must bind its summary")
         if row != expected:
-            raise Refusal(f"{row['id']}: carried manifest row must remain byte-identical except relocation")
-
-        tag = row["release_tag"]
+            if native:
+                raise Refusal(f"{name}: carried manifest row must remain byte-identical except relocation")
+            continue
+        runtime_carried |= name == "ninfer"
+        old_references = _component_references(tree, old_prefix, name, old)
+        new_references = _component_references(tree, new_prefix, name, row)
+        if not new_references:
+            continue
+        tag = row.get("release_tag") or row.get("upstream_tag") or row.get("revision") or name
+        source = row.get("source_commit") or row.get("upstream_commit") or row.get("revision")
+        subject = tag + (f" (source {source[:8]})" if source else "")
         reason_prefix = f"Carried component, unchanged since {predecessor}"
-        reason = (f"{reason_prefix}: {tag} (source {row['source_commit'][:8]}) keeps its "
+        reason = (f"{reason_prefix}: {subject} keeps its "
                   "byte-identical published row and qualification; no fresh hardware qualification "
                   "or new-client/product-route acceptance is claimed.")
-        old_references = dict(_references(old.get("qualification", {})))
-        references = [(old_references[field], value) for field, value in _references(qualification)]
-        if row.get("checksums_sha256") is not None:
-            name = f"qualification/{row['id']}.SHA256SUMS"
-            references.append(((old_prefix + name, old["checksums_sha256"]),
-                               (new_prefix + name, row["checksums_sha256"])))
+        references = []
+        for field, value in new_references.items():
+            if field not in old_references:
+                raise Refusal(f"{name}: carried binding has no predecessor: {field}")
+            references.append((old_references[field], value))
+        if native and row.get("checksums_sha256") is not None:
+            checksum = f"qualification/{name}.SHA256SUMS"
+            references.append(((old_prefix + checksum, old["checksums_sha256"]),
+                               (new_prefix + checksum, row["checksums_sha256"])))
+        local_binding = False
         for (old_path, old_sha), (path, digest) in references:
             data = tree.read(path)
             if _sha(data) != digest or old_sha != digest or data != tree.read(old_path):
                 raise Refusal(f"carried file is not byte-identical to {predecessor}: {path}")
             if path.startswith(new_prefix):
                 carried[path.removeprefix(new_prefix)] = reason
+                local_binding = True
             elif path.startswith(old_prefix):
                 in_place[path.removeprefix(old_prefix)] = (
                     f"{reason_prefix}: bound in place at {path} by the carried {tag} "
                     "row (hash unchanged); not copied into this release.")
-        lane = row["id"].removesuffix("-windows-native")
-        label = re.sub(r"([a-zA-Z]+)([0-9]+)", lambda m: m[1].upper() + " " + m[2], lane)
-        channel = re.search(r"-(beta\.[0-9]+|preview\.[0-9]+)$", tag)
-        label += " " + (channel[1] if channel else tag)
+        if native:
+            lane = name.removesuffix("-windows-native")
+            label = re.sub(r"([a-zA-Z]+)([0-9]+)", lambda m: m[1].upper() + " " + m[2], lane)
+            channel = re.search(r"-(beta\.[0-9]+|preview\.[0-9]+)$", tag)
+            label += " " + (channel[1] if channel else tag)
+        else:
+            label = name + " " + tag
+        binding = "as kept files." if local_binding else "bound in place."
         policies.append(f"The carried {label} component keeps its byte-identical {predecessor} "
-                        "row and qualification as kept files.")
-    return carried, in_place, policies
+                        f"row and qualification {binding}")
+    return carried, in_place, policies, runtime_carried
+
+
+def _inventory(tree: _Tree, release: str) -> tuple[
+    str, dict[str, str], dict[str, str], list[str], dict[str, str], dict[str, str], bool,
+]:
+    if not re.fullmatch(r"v\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?", release):
+        raise Refusal(f"invalid product release: {release}")
+    predecessor, previous = _predecessor(tree, release)
+    old_prefix, new_prefix = f"releases/{predecessor}/", f"releases/{release}/"
+    manifest = tree.document(new_prefix + "manifest.json")
+    if manifest.get("release") != release:
+        raise Refusal("manifest release must match the requested release")
+    carried, in_place, policies, runtime_carried = _carried(tree, release, predecessor, manifest, previous)
+    before, after = tree.files(predecessor), tree.files(release)
+    if old_prefix + AUDIT in tree.paths:
+        before[AUDIT] = _sha(tree.read(old_prefix + AUDIT))
+    # Its path is inventoried, but the output cannot compare or bind its own bytes.
+    after[AUDIT] = ""
+    return predecessor, carried, in_place, policies, before, after, runtime_carried
+
+
+def _unadmitted(before: dict[str, str], after: dict[str, str], carried: dict[str, str],
+                runtime_carried: bool) -> list[str]:
+    return sorted(name for name in before.keys() & after.keys()
+                  if before[name] == after[name] and name not in GENERATED and name not in carried
+                  and (name != "qualification/runtime-base.json" or runtime_carried))
+
+
+def unadmitted_kept(root: Path, release: str) -> list[str]:
+    """Return all unbound predecessor copies, release-relative, without writing.
+
+    A re-cut runtime may reuse the independently admitted immutable base receipt.
+    A fully carried runtime must bind its retained files like any other component.
+    """
+    _, carried, _, _, before, after, runtime_carried = _inventory(_Tree(root), release)
+    return _unadmitted(before, after, carried, runtime_carried)
 
 
 def _leaves(value: Any, pointer: str = "") -> Iterator[tuple[str, Any]]:
@@ -204,27 +307,17 @@ def generate_audit(root: Path, release: str, *, phase: str, as_of: str | None = 
     """Recompute an inventory without writing either authority."""
     if phase not in PHASES:
         raise Refusal("audit phase must be lane-stage or composed-final")
-    if not re.fullmatch(r"v\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?", release):
-        raise Refusal(f"invalid product release: {release}")
     tree = _Tree(root, at)
-    predecessor, previous = _predecessor(tree, release)
+    predecessor, carried, in_place, policies, before, after, runtime_carried = _inventory(tree, release)
     old_prefix, new_prefix = f"releases/{predecessor}/", f"releases/{release}/"
-    manifest = tree.document(new_prefix + "manifest.json")
-    if manifest.get("release") != release:
-        raise Refusal("manifest release must match the requested release")
-    carried, in_place, policies = _carried(tree, release, predecessor, manifest, previous)
-    before, after = tree.files(predecessor), tree.files(release)
-    # Its path is inventoried, but the output cannot compare or bind its own bytes.
-    if old_prefix + AUDIT in tree.paths:
-        before[AUDIT] = _sha(tree.read(old_prefix + AUDIT))
-    after[AUDIT] = ""
+    unadmitted = _unadmitted(before, after, carried, runtime_carried)
+    if unadmitted:
+        raise Refusal("unadmitted predecessor bytes: " + ", ".join(unadmitted))
     rows = []
     for name in sorted(before.keys() | after.keys()):
         disposition = ("added" if name not in before else "dropped" if name not in after else
                        "kept" if before[name] == after[name] else "replaced")
         if disposition == "kept" and name not in GENERATED:
-            if name != "qualification/runtime-base.json" and name not in carried:
-                raise Refusal(f"unadmitted predecessor bytes: {name}")
             reason = carried.get(name, "Same immutable base receipt; current component-cut ancestry "
                                  "and image binding admit reuse, not prior runtime execution.")
         elif name in carried:
