@@ -25,7 +25,7 @@ RUNTIME_VARIANT_IDS = (
 )
 # Component tag and package-name shapes per native lane. The exact values a release binds live
 # in its manifest; the verifier requires the authority's rows to equal that manifest.
-RUNTIME_VARIANT_RELEASE_TAG_RES = {
+HISTORICAL_RUNTIME_VARIANT_RELEASE_TAG_RES = {
     "rtx3090-windows-native": re.compile(
         r"^v(?:0\.2\.0-qwen38-3090-beta\.[1-9][0-9]*|0\.3\.0-qwen38-3090\.1|0\.2\.2-qwen38-3090-beta\.[1-9][0-9]*|0\.2\.[345]-qwen38-3090-beta\.[1-9][0-9]*|0\.6\.[0123]-qwen38-3090-beta\.[1-9][0-9]*|0\.[78]\.0-qwen38-3090-beta\.[1-9][0-9]*)$"
     ),
@@ -33,7 +33,7 @@ RUNTIME_VARIANT_RELEASE_TAG_RES = {
         r"^v(?:0\.2\.0-qwen38-4090-beta\.[1-9][0-9]*|0\.3\.1-qwen38-4090-mtp3\.[1-9][0-9]*|0\.2\.[0-3]-qwen38-4090-durable\.[1-9][0-9]*|0\.6\.(?:[0-9]|10|11)-qwen38-4090-beta\.[1-9][0-9]*|0\.[78]\.0-qwen38-4090-beta\.[1-9][0-9]*)$"
     ),
 }
-RUNTIME_VARIANT_PACKAGE_NAME_RES = {
+HISTORICAL_RUNTIME_VARIANT_PACKAGE_NAME_RES = {
     "rtx3090-windows-native": re.compile(
         r"^ninfer-rtx3090-omp-v(?:0\.2\.0-windows-x86_64-cuda12\.8|"
         r"0\.2\.1-beta\.1-windows-x86_64-cuda13\.3|"
@@ -46,6 +46,31 @@ RUNTIME_VARIANT_PACKAGE_NAME_RES = {
         r"|^ninfer-rtx4090-native-v(?:0\.6\.(?:[0-9]|10|11)|0\.[78]\.0)-beta\.[1-9][0-9]*-windows-x86_64-cuda13\.3-rtx4090\.tar\.gz$"
     ),
 }
+RUNTIME_COMPONENT_TAG_RES = {
+    component: re.compile(
+        rf"^v[0-9]+\.[0-9]+\.[0-9]+-qwen38-{gpu}-beta\.[1-9][0-9]*$")
+    for component, gpu in (("rtx5090-container", "5090"),
+                           ("rtx3090-windows-native", "3090"),
+                           ("rtx4090-windows-native", "4090"))
+}
+RUNTIME_VARIANT_PACKAGE_SHAPES = {
+    component: re.compile(
+        rf"^ninfer-rtx{gpu}-native-v[0-9]+\.[0-9]+\.[0-9]+-beta\.[1-9][0-9]*"
+        rf"-windows-x86_64-cuda13\.3-rtx{gpu}\.tar\.gz$")
+    for component, gpu in (("rtx3090-windows-native", "3090"),
+                           ("rtx4090-windows-native", "4090"))
+}
+
+
+def runtime_variant_patterns(release: str, component: str) -> tuple[re.Pattern[str], re.Pattern[str]]:
+    """Published historical lineages stay frozen; new releases bind generic component shapes."""
+    version = re.match(r"^v([0-9]+)\.([0-9]+)\.([0-9]+)(?:$|-)", release)
+    if version is not None and tuple(map(int, version.groups())) >= (0, 20, 0):
+        return RUNTIME_COMPONENT_TAG_RES[component], RUNTIME_VARIANT_PACKAGE_SHAPES[component]
+    return (HISTORICAL_RUNTIME_VARIANT_RELEASE_TAG_RES[component],
+            HISTORICAL_RUNTIME_VARIANT_PACKAGE_NAME_RES[component])
+
+
 STATUSES = {"qualified", "preview", "blocked", "unsupported"}
 TRANSPORTS = {"ssh-loopback", "local-loopback"}
 COMMANDS = {
@@ -319,12 +344,13 @@ def load_authority(path: Path, *, allow_prepared: bool = False) -> dict[str, Any
                 f"{variant_id} qualification receipt SHA-256 is invalid")
         if "release_tag" in variant:
             release_tag = variant.get("release_tag")
+            tag_pattern, package_pattern = runtime_variant_patterns(product_release, variant_id)
             require(isinstance(release_tag, str)
-                    and RUNTIME_VARIANT_RELEASE_TAG_RES[variant_id].fullmatch(release_tag) is not None,
+                    and tag_pattern.fullmatch(release_tag) is not None,
                     f"{variant_id} component release tag is invalid")
             package_name = variant.get("package_name")
             require(isinstance(package_name, str)
-                    and RUNTIME_VARIANT_PACKAGE_NAME_RES[variant_id].fullmatch(package_name) is not None,
+                    and package_pattern.fullmatch(package_name) is not None,
                     f"{variant_id} package name is invalid")
             require(isinstance(variant.get("source_commit"), str)
                     and re.fullmatch(r"[0-9a-f]{40}", variant["source_commit"]) is not None,

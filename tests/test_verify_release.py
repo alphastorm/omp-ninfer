@@ -29,6 +29,10 @@ REBIND_SPEC = importlib.util.spec_from_file_location("rebind_release", ROOT / "s
 assert REBIND_SPEC is not None and REBIND_SPEC.loader is not None
 REBIND_RELEASE = importlib.util.module_from_spec(REBIND_SPEC)
 REBIND_SPEC.loader.exec_module(REBIND_RELEASE)
+HISTORY_SPEC = importlib.util.spec_from_file_location("verification_history", ROOT / "tests/history.py")
+assert HISTORY_SPEC is not None and HISTORY_SPEC.loader is not None
+HISTORY = importlib.util.module_from_spec(HISTORY_SPEC)
+HISTORY_SPEC.loader.exec_module(HISTORY)
 
 
 class ReleaseIdentitySnapshotTests(unittest.TestCase):
@@ -148,6 +152,15 @@ class RuntimeContractLabelTests(unittest.TestCase):
         manifest = json.loads((ROOT / "releases" / CURRENT / "manifest.json").read_text(encoding="utf-8"))
         if manifest["status"] != "ready":
             self.skipTest("root release is not ready")
+        directory = ROOT / "releases" / CURRENT
+        authority = json.loads((directory / "compatibility.json").read_text(encoding="utf-8"))
+        qualification = json.loads((directory / "qualification.json").read_text(encoding="utf-8"))
+        commits = []
+        for _, url, _ in VERIFY_RELEASE.pinned_evidence(manifest, authority, qualification):
+            match = VERIFY_RELEASE.PRODUCT_RAW_URL_RE.fullmatch(url) if isinstance(url, str) else None
+            if match is not None:
+                commits.append(match[1])
+        HISTORY.require_commits(*commits)
         _, errors = VERIFY_RELEASE.validate(ROOT, require_ready=True, product_release=CURRENT,
                                            check_pins=True)
         self.assertEqual(errors, [])
@@ -1055,19 +1068,19 @@ class ReleaseContractTest(unittest.TestCase):
                             for error in errors), errors)
 
     def test_runtime_tag_allowlist_accepts_only_the_new_component_version(self) -> None:
-        self.assertIsNotNone(VERIFY_RELEASE.NINFER_RELEASE_TAG_RE.fullmatch(
+        self.assertIsNotNone(VERIFY_RELEASE.HISTORICAL_NINFER_RELEASE_TAG_RE.fullmatch(
             "v0.6.16-qwen38-5090-beta.1"))
-        self.assertIsNotNone(VERIFY_RELEASE.NINFER_RELEASE_TAG_RE.fullmatch(
+        self.assertIsNotNone(VERIFY_RELEASE.HISTORICAL_NINFER_RELEASE_TAG_RE.fullmatch(
             "v0.6.15-qwen38-5090-beta.1"))
-        self.assertIsNotNone(VERIFY_RELEASE.NINFER_RELEASE_TAG_RE.fullmatch(
+        self.assertIsNotNone(VERIFY_RELEASE.HISTORICAL_NINFER_RELEASE_TAG_RE.fullmatch(
             "v0.7.0-qwen38-5090-beta.1"))
-        self.assertIsNotNone(VERIFY_RELEASE.NINFER_RELEASE_TAG_RE.fullmatch(
+        self.assertIsNotNone(VERIFY_RELEASE.HISTORICAL_NINFER_RELEASE_TAG_RE.fullmatch(
             "v0.7.0-qwen38-5090-beta.2"))
         for tag in ("v0.6.17-qwen38-5090-beta.1", "v0.7.1-qwen38-5090-beta.1",
                     "v0.6.16-qwen38-5090-beta.0", "v0.6.16-qwen38-5090-beta.01",
                     "v0.6.16-qwen38-4090-beta.1", "v0.6.16-qwen38-5090-beta.1-extra"):
             with self.subTest(tag=tag):
-                self.assertIsNone(VERIFY_RELEASE.NINFER_RELEASE_TAG_RE.fullmatch(tag))
+                self.assertIsNone(VERIFY_RELEASE.HISTORICAL_NINFER_RELEASE_TAG_RE.fullmatch(tag))
 
     def test_historical_manifests_keep_their_native_model_contract(self) -> None:
         for path in sorted((ROOT / "releases").glob("*/manifest.json")):

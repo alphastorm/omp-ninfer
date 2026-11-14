@@ -48,11 +48,11 @@ from compose_native_qualification import (
 )
 from render_compatibility import (  # pyright: ignore[reportMissingImports]
     OMP_PROFILE_PLATFORMS,
-    RUNTIME_VARIANT_PACKAGE_NAME_RES,
-    RUNTIME_VARIANT_RELEASE_TAG_RES,
+    RUNTIME_COMPONENT_TAG_RES,
     UPSTREAM_OMP_REPOSITORY,
     load_authority,
     render as render_compatibility_matrix,
+    runtime_variant_patterns,
     upstream_omp_asset_name,
     validate_client_distribution,
     validate_upstream_omp_identity,
@@ -2058,7 +2058,7 @@ REQUIRED_TUNING_VALUES = (
 )
 REQUIRED_SERVER_FLAGS = ("--lm-head-draft", "--vision", "--preserve-thinking")
 NINFER_VARIANT_IDS = ("rtx3090-windows-native", "rtx4090-windows-native")
-NINFER_RELEASE_TAG_RE = re.compile(
+HISTORICAL_NINFER_RELEASE_TAG_RE = re.compile(
     r"^v(?:0\.2\.0|0\.3\.0|0\.4\.0|0\.4\.1|0\.4\.3|0\.4\.4|0\.4\.5|0\.5\.1|0\.6\.2|0\.6\.3|0\.6\.4"
     r"|0\.6\.5|0\.6\.6|0\.6\.7|0\.6\.8|0\.6\.9|0\.6\.10|0\.6\.11|0\.6\.12|0\.6\.13|0\.6\.14|0\.6\.15|0\.6\.16|0\.7\.0)-qwen38-5090-beta\.[1-9][0-9]*$"
 )
@@ -2338,8 +2338,9 @@ def validate_ninfer_variants(
             require(compatibility_item.get("runtime_shape") == item.get("runtime_shape"),
                     f"{prefix}.runtime_shape must match compatibility", errors)
         release_tag = item.get("release_tag")
+        tag_pattern, package_pattern = runtime_variant_patterns(release, variant_id)
         require(isinstance(release_tag, str)
-                and RUNTIME_VARIANT_RELEASE_TAG_RES[variant_id].fullmatch(release_tag) is not None,
+                and tag_pattern.fullmatch(release_tag) is not None,
                 f"{prefix}.release_tag is invalid", errors)
         asset_prefix = (
             "https://github.com/alphastorm/ninfer/releases/download/"
@@ -2366,7 +2367,7 @@ def validate_ninfer_variants(
         if package_name is None and isinstance(package_url, str):
             package_name = Path(urlparse(package_url).path).name
         require(isinstance(package_name, str)
-                and RUNTIME_VARIANT_PACKAGE_NAME_RES[variant_id].fullmatch(package_name) is not None,
+                and package_pattern.fullmatch(package_name) is not None,
                 f"{prefix}.package_name is invalid", errors)
         if isinstance(package_url, str) and isinstance(package_name, str):
             require(package_url == asset_prefix + package_name,
@@ -2744,6 +2745,47 @@ def unchanged_native_variant(variant: dict[str, Any], predecessor: dict[str, Any
 PROVENANCE_CLAIM_RE = re.compile(
     r"\b(?:re-?cut|newly[- ]cut|fresh(?:ly)?[- ]cut|re-?built|rebuild|carried|carry-over"
     r"|one[- ](?:\w+[- ])?source|single[- ]source|same[- ]source)\b", re.IGNORECASE)
+
+
+def validate_component_tag_bindings(root: Path, release: str, manifest: dict[str, Any],
+                                    errors: list[str]) -> None:
+    """New tags may advance without code edits, but published artifact bindings never change."""
+    current = product_version(release) or (0, 0, 0)
+    if current < (0, 20, 0):
+        return
+    components = manifest.get("components", {})
+    runtime = components.get("ninfer", {})
+    tag = runtime.get("release_tag")
+    require(isinstance(tag, str) and RUNTIME_COMPONENT_TAG_RES["rtx5090-container"].fullmatch(tag) is not None,
+            "components.ninfer.release_tag is invalid", errors)
+    if isinstance(tag, str):
+        source_tag = tag.replace("-beta.", "-source.")
+        for field, tags in (("sbom_url", (tag,)), ("source_archive_url", (tag, source_tag))):
+            url = runtime.get(field)
+            parsed = urlparse(url) if isinstance(url, str) else None
+            path = unquote(parsed.path) if parsed is not None else ""
+            bound = (parsed is not None and parsed.scheme == "https" and parsed.netloc == "github.com"
+                     and not parsed.params and not parsed.query and not parsed.fragment
+                     and not any(part in (".", "..") for part in path.split("/"))
+                     and any(path.startswith(f"/alphastorm/ninfer/releases/download/{bound_tag}/")
+                             and len(path) > len(f"/alphastorm/ninfer/releases/download/{bound_tag}/")
+                             for bound_tag in tags))
+            require(bound, f"components.ninfer.{field} must bind its component release", errors)
+    bindings = [(runtime.get("release_tag"), "oci_manifest_digest", runtime.get("oci_manifest_digest"))]
+    bindings.extend((item.get("release_tag"), "package_sha256", item.get("package_sha256"))
+                    for item in components.get("ninfer_variants", []) if isinstance(item, dict))
+    for path in sorted((root / "releases").glob("*/manifest.json")):
+        version = product_version(path.parent.name)
+        if version is None or version >= current:
+            continue
+        previous = load_json(path).get("components", {})
+        earlier = [previous.get("ninfer", {}), *previous.get("ninfer_variants", [])]
+        for old in earlier:
+            for bound_tag, field, digest in bindings:
+                if isinstance(bound_tag, str) and old.get("release_tag") == bound_tag:
+                    require(old.get(field) == digest,
+                            f"component tag {bound_tag} is rebound to a different {field} "
+                            f"than {path.parent.name}", errors)
 
 
 def component_provenance(root: Path, release: str, manifest: dict[str, Any]) -> dict[str, Any]:
@@ -4072,9 +4114,12 @@ def validate(
     for key in ("source_archive_sha256", "server_binary_sha256"):
         require_sha(ninfer.get(key), f"components.ninfer.{key}", errors,
                     nullable=pending_allowed)
-    require(isinstance(ninfer.get("release_tag"), str)
-            and NINFER_RELEASE_TAG_RE.fullmatch(ninfer["release_tag"]) is not None,
-            "components.ninfer.release_tag is invalid", errors)
+    if (product_version(release) or (0, 0, 0)) >= (0, 20, 0):
+        validate_component_tag_bindings(root, release, manifest, errors)
+    else:
+        require(isinstance(ninfer.get("release_tag"), str)
+                and HISTORICAL_NINFER_RELEASE_TAG_RE.fullmatch(ninfer["release_tag"]) is not None,
+                "components.ninfer.release_tag is invalid", errors)
     require_sha(runtime.get("configuration_sha256"),
                 "runtime_identity.configuration_sha256", errors,
                 nullable=pending_allowed)
