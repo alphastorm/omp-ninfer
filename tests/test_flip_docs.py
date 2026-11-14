@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import contextlib
 import difflib
+import hashlib
 import importlib.util
 import io
 import json
@@ -444,8 +445,12 @@ class FlipDocsTests(unittest.TestCase):
                          [(1, "measurements/2026-01-01-record.json")])
 
     def test_bound_evidence_link_uses_the_normal_map(self) -> None:
-        self.before["review"] = "docs/measurements/2026-01-01-review.json"
-        self.after["review"] = "docs/measurements/2026-02-01-review.json"
+        for document, name in ((self.before, "2026-01-01-review.json"),
+                               (self.after, "2026-02-01-review.json")):
+            path = "docs/measurements/" + name
+            self.write(path, "{}\n")
+            document["review"] = {"repository_path": path,
+                                  "sha256": hashlib.sha256(b"{}\n").hexdigest()}
         self.write_releases()
         self.write("docs/FACTS.md", f"Version {OLD}.\n\n[record](measurements/2026-01-01-review.json)\n")
         self.assertEqual(self.flip().issues, ())

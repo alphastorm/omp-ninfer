@@ -180,7 +180,7 @@ class PrivateRecutReplayTests(unittest.TestCase):
                 "[18.18.6→18.18.7 review](measurements/2026-11-11-omp-18187-client-upgrade-review.json)",
                 "18.18.6→18.18.7 review")
             atomic_write(guide, text)
-            result = command(
+            candidate_arguments = (
                 "scripts/release.py", "candidate", "--release", "v0.19.0", "--no-suite",
                 "--stage-input", private / "stage-input.json", "--lane-receipt", f"rtx5090={private / 'rtx5090.json'}",
                 "--runtime-publication", private / "runtime-publication.json",
@@ -191,6 +191,22 @@ class PrivateRecutReplayTests(unittest.TestCase):
                 "--bundle", f"rtx3090={bundle}",
                 "--native-publication", f"rtx3090={bundle_root / 'native-publication-rtx3090.json'}",
                 "--notes", private / "notes.md", "--as-of", "2026-11-13")
+            artifact_path = private / "runtime-artifacts.json"
+            authentic = artifact_path.read_bytes()
+            invalid = json.loads(authentic)
+            invalid["source_commit"] = "0" * 40
+            atomic_write_json(artifact_path, invalid)
+            before_attempt = git(root, "rev-parse", "HEAD").strip()
+            refused = command(*candidate_arguments)
+            self.assertNotEqual(refused.returncode, 0, refused.stdout + refused.stderr)
+            self.assertIn("runtime artifact authentication differs", refused.stdout + refused.stderr)
+            self.assertEqual(git(root, "rev-parse", "HEAD").strip(), before_attempt)
+            report["invalid_runtime_retry"] = {
+                "exit": refused.returncode, "commit_unchanged": True,
+                "refusal": refused.stdout + refused.stderr,
+            }
+            atomic_write(artifact_path, authentic)
+            result = command(*candidate_arguments)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             result = command("scripts/verify_release.py", "--release", "v0.19.0", "--lint-ready", "--check-pins")
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

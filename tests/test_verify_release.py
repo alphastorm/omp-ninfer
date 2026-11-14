@@ -1016,7 +1016,8 @@ class ReviewSubjectBindingTests(unittest.TestCase):
         tooling = self.ledger["product_tooling"]
         tooling.update(stage_commit=self.previous, reviewed_commit=self.previous,
                        epochs=[{"reviewed_commit": self.previous}])
-        self.assertEqual(self.ready_history_errors(), [])
+        errors = self.ready_history_errors()
+        self.assertTrue(any(self.previous in error and "plan.json" in error for error in errors), errors)
 
     def test_ready_history_binds_runtime_and_delta_reviews_to_released_sources(self):
         for section in ("native_runtime", "native_component_delta"):
