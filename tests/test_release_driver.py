@@ -19,14 +19,18 @@ from pathlib import Path
 from typing import Any
 from unittest import mock
 
-from tests.test_release_plan import PREDECESSOR, RELEASE, plan_fixture
-
 ROOT = Path(__file__).resolve().parents[1]
+FIXTURE_SPEC = importlib.util.spec_from_file_location("release_driver_plan_fixture", ROOT / "tests" / "test_release_plan.py")
+assert FIXTURE_SPEC is not None and FIXTURE_SPEC.loader is not None
+FIXTURES = importlib.util.module_from_spec(FIXTURE_SPEC)
+FIXTURE_SPEC.loader.exec_module(FIXTURES)
+PREDECESSOR, RELEASE, plan_fixture = FIXTURES.PREDECESSOR, FIXTURES.RELEASE, FIXTURES.plan_fixture
 SPEC = importlib.util.spec_from_file_location("release_driver_test", ROOT / "scripts" / "release.py")
 assert SPEC is not None and SPEC.loader is not None
 DRIVER = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(DRIVER)
 from release_io import atomic_write, atomic_write_json
+from verify_release import PROVENANCE_CLAIM_RE
 
 TOOLS = ("stage_release.py", "aggregate_qualification.py", "bind_native_variant.py",
          "rebind_release.py", "receipt_audit.py", "retarget_guide.py", "verify_release.py",
@@ -45,6 +49,22 @@ ROOT = Path(__file__).resolve().parents[1]
 PRIVATE_MARKERS = ("nonpublic-fixture-marker",)
 ROUTES = ("rtx5090-container-host", "rtx5090-macos-client", "rtx5090-windows-client",
           "rtx4090-native", "rtx3090-native")
+
+def provenance_claim_errors(value, label, *, statement="", clauses=()):
+    if isinstance(value, list):
+        return [error for index, child in enumerate(value)
+                for error in provenance_claim_errors(child, f"{label}[{index}]", statement=statement, clauses=clauses)]
+    if isinstance(value, dict):
+        return [error for key, child in value.items()
+                for error in provenance_claim_errors(child, f"{label}.{key}", statement=statement, clauses=clauses)]
+    if isinstance(value, str) and any(character.isspace() for character in value):
+        prose = value.replace(statement, "") if statement else value
+        for clause in clauses:
+            prose = prose.replace(clause, "")
+        match = re.search(PROVENANCE_PATTERN, prose, re.IGNORECASE)
+        if match:
+            return [f"{label} makes an ungenerated component provenance claim: {match[0]!r}"]
+    return []
 
 def predecessor_manifest(root, release):
     version = lambda name: tuple(map(int, name[1:].split(".")))
@@ -206,9 +226,11 @@ class ReleaseDriverTests(unittest.TestCase):
         self.plan, self.previous, self.authority = plan_fixture(self.root)
         for name in ("release.py", "release_plan.py", "release_io.py"):
             atomic_write(self.root / "scripts" / name, (ROOT / "scripts" / name).read_bytes())
-        atomic_write(self.root / "scripts" / "stub_support.py", SUPPORT)
+        atomic_write(self.root / "scripts" / "stub_support.py",
+                     f"PROVENANCE_PATTERN = {PROVENANCE_CLAIM_RE.pattern!r}\n" + SUPPORT)
         for name in TOOLS:
-            source = ("from stub_support import PRIVATE_MARKERS, predecessor_manifest, unchanged_native_variant, run\n"
+            source = ("from stub_support import PRIVATE_MARKERS, predecessor_manifest, "
+                      "provenance_claim_errors, unchanged_native_variant, run\n"
                       "import sys\n"
                       f"if __name__ == '__main__': run({name!r}, sys.argv[1:])\n")
             atomic_write(self.root / "scripts" / name, source)
@@ -308,6 +330,47 @@ class ReleaseDriverTests(unittest.TestCase):
         self.assertEqual(plan["client"]["disposition"], "updated")
         self.assertEqual(plan["decisions"][0]["id"], "scope")
         self.invoke("plan check")
+
+    def test_plan_init_no_commit_then_authored_plan_commit(self) -> None:
+        self.remove_plan()
+        head = self.git("rev-parse", "HEAD")
+        result = self.invoke("plan init", "--no-commit")
+        self.assertIn("plan commit", result.stdout)
+        self.assertEqual(self.git("rev-parse", "HEAD"), head)
+        path = self.root / "releases" / RELEASE / "plan.json"
+        plan = json.loads(path.read_text())
+        plan["limitations"] = ["Only the documented transport topology is supported."]
+        atomic_write_json(path, plan)
+        self.invoke("plan commit")
+        self.assertEqual(self.git("log", "-1", "--format=%s"), f"chore(release): plan {RELEASE}")
+        self.assertEqual(json.loads(path.read_text())["limitations"], plan["limitations"])
+        self.assertEqual(DRIVER.group_commits(self.root, RELEASE), {})
+        self.assertEqual(self.git("status", "--porcelain"), "")
+
+    def test_plan_commit_refuses_other_dirty_paths_without_mutation(self) -> None:
+        self.remove_plan()
+        self.invoke("plan init", "--no-commit")
+        atomic_write(self.root / "operator.txt", "Authored work.\n")
+        before = self.worktree_bytes()
+        head = self.git("rev-parse", "HEAD")
+        result = self.invoke("plan commit", success=False)
+        self.assertIn("plan commit refuses other dirty paths: operator.txt", result.stderr)
+        self.assertEqual(self.worktree_bytes(), before)
+        self.assertEqual(self.git("rev-parse", "HEAD"), head)
+
+    def test_plan_commit_validates_authored_limitations_without_mutation(self) -> None:
+        self.remove_plan()
+        self.invoke("plan init", "--no-commit")
+        path = self.root / "releases" / RELEASE / "plan.json"
+        plan = json.loads(path.read_text())
+        plan["limitations"] = ["All runtime packages were rebuilt together."]
+        atomic_write_json(path, plan)
+        before = self.worktree_bytes()
+        head = self.git("rev-parse", "HEAD")
+        result = self.invoke("plan commit", success=False)
+        self.assertIn("ungenerated component provenance claim", result.stderr)
+        self.assertEqual(self.worktree_bytes(), before)
+        self.assertEqual(self.git("rev-parse", "HEAD"), head)
 
     def test_plan_init_refuses_existing_plan_without_mutation(self) -> None:
         before = self.worktree_bytes()
@@ -477,7 +540,7 @@ class ReleaseDriverTests(unittest.TestCase):
         atomic_write_json(self.root / "releases" / RELEASE / "plan.json", self.plan)
         before = self.worktree_bytes()
         result = self.invoke("candidate", "--no-suite", success=False)
-        self.assertIn("commit the modified plan", result.stderr)
+        self.assertIn("plan commit", result.stderr)
         self.assertEqual(self.worktree_bytes(), before)
         self.git("add", "--", f"releases/{RELEASE}/plan.json")
         self.git("commit", "-qm", "test(release): commit the revised support posture")
@@ -876,6 +939,28 @@ class ReleaseDriverTests(unittest.TestCase):
         result = self.invoke("candidate", "--no-suite", "--runtime-publication", str(publication), success=False)
         self.assertIn("carried rtx5090-container refuses", result.stderr)
         self.assertEqual(self.calls(), [])
+
+    def test_carried_client_defaults_to_the_predecessor_public_descriptor(self) -> None:
+        self.candidate("--no-suite")
+        arguments = self.calls("stage_release.py")[0]["arguments"]
+        expected = self.root / "releases" / PREDECESSOR / "qualification" / "client-components.json"
+        self.assertEqual(arguments[arguments.index("--omp-component") + 1], str(expected.resolve()))
+
+    def test_carried_client_refuses_a_missing_predecessor_descriptor(self) -> None:
+        relative = f"releases/{PREDECESSOR}/qualification/client-components.json"
+        (self.root / relative).unlink()
+        self.git("add", "--", relative)
+        self.git("commit", "-qm", "test(release): remove the predecessor client descriptor")
+        result = self.invoke("candidate", "--no-suite", success=False)
+        self.assertIn("carried client requires predecessor descriptor: " + relative, result.stderr)
+        self.assertEqual(self.calls(), [])
+
+    def test_carried_client_can_use_an_explicit_descriptor(self) -> None:
+        descriptor = self.private / "client-components.json"
+        atomic_write_json(descriptor, {"omp": self.previous["components"]["omp"]})
+        self.candidate("--no-suite", "--client-component", str(descriptor))
+        arguments = self.calls("stage_release.py")[0]["arguments"]
+        self.assertEqual(arguments[arguments.index("--omp-component") + 1], str(descriptor.resolve()))
 
     def test_native_missing_bundle_and_publication_name_the_lane(self) -> None:
         self.plan["components"][1].update(disposition="recut", release_tag="v3.0.0-native")

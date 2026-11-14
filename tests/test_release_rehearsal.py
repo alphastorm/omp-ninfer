@@ -13,9 +13,12 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tests.history import require_commits
-
 ROOT = Path(__file__).resolve().parents[1]
+HISTORY_SPEC = importlib.util.spec_from_file_location("release_rehearsal_history", ROOT / "tests" / "history.py")
+assert HISTORY_SPEC is not None and HISTORY_SPEC.loader is not None
+HISTORY = importlib.util.module_from_spec(HISTORY_SPEC)
+HISTORY_SPEC.loader.exec_module(HISTORY)
+require_commits = HISTORY.require_commits
 SPEC = importlib.util.spec_from_file_location("release_rehearsal_test", ROOT / "scripts" / "release.py")
 assert SPEC is not None and SPEC.loader is not None
 DRIVER = importlib.util.module_from_spec(SPEC)

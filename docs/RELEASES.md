@@ -368,10 +368,14 @@ The plan is the release's first commit. `plan init` derives a carry-all plan fro
 GA release and the root authority's platform postures, validates it, then creates
 `chore(release): plan <version>` with a `Release:` trailer. This opening commit is not one of the
 eight step groups. Initialization refuses an existing plan or any dirty tree.
+For author review before that opening commit, use `plan init --release "$release" --no-commit`,
+edit the seeded JSON non-interactively, then run `plan commit --release "$release"`. The latter
+validates the author's edits and refuses any other dirty path. Plain `plan init` performs these
+same two steps without pausing; the rehearsal uses that unattended path.
 Use repeatable `--recut COMPONENT=TAG@COMMIT40` and `--decision ID:KIND:SHA256`, or
 `--client-tag TAG` for an updated client, to declare changes at initialization. Any later authored
 plan changes must be committed explicitly before `candidate`; untracked or modified plans refuse
-with opening-commit guidance. Schema 1 has artifact type
+with `plan commit` guidance. Schema 1 has artifact type
 `omp_ninfer_release_plan`, the GA `release` and `predecessor`, a `client` with `upstream_tag`
 and disposition `carried` or `updated`, and a `components` array. Component ids are the closed set
 `rtx5090-container`, `rtx4090-windows-native`, `rtx3090-windows-native`; each binds disposition
@@ -379,6 +383,10 @@ and disposition `carried` or `updated`, and a `components` array. Component ids 
 authority's profile ids to `qualified` or `preview`. `decisions` binds each decision's `id`,
 `kind` (`component-cut`, `scope` or `waiver`) and SHA-256. Carried identities must match the ready
 predecessor, re-cut tags must be new, and an existing manifest must agree with the plan.
+Required `limitations` is a possibly empty list of unique, nonempty, trimmed release-level
+limitation sentences. The author reviews this list before the opening commit. Initialization
+seeds predecessor sentences, printing each dropped provenance claim or generated component sentence;
+the aggregate owns the generated provenance and neutral evidence sentence, not the author.
 No absolute paths or private markers belong in a plan.
 
 Supply private inputs as arguments to `candidate`, not as plan fields:
@@ -396,6 +404,9 @@ Supply private inputs as arguments to `candidate`, not as plan fields:
 - An updated client requires `--client-component JSON`, passed to the stager's
   `--omp-component`. Optional `--notes PATH` supplies the release's completed publication notes;
   optional profile/deployment options belong in the stage-input object.
+- A carried client defaults to the predecessor's public `qualification/client-components.json`
+  when no explicit descriptor is supplied. This resets every platform for fresh acceptance;
+  a missing predecessor descriptor refuses instead of preserving accepted platform state.
 - `finalize --notes PATH` replaces those notes in the compose commit when acceptance results
   complete them. Without this argument, finalization keeps the staged notes. A resumed compose
   attempt reuses its recorded notes input and hashes its bytes before deciding whether to rerun.

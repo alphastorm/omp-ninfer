@@ -127,7 +127,8 @@ def group_commits(root: Path, release: str) -> dict[str, dict[str, str]]:
 
 
 def init_plan(root: Path, release: str, *, recut: list[str] | tuple[str, ...] = (),
-              client_tag: str | None = None, decisions: list[str] | tuple[str, ...] = ()) -> str:
+              client_tag: str | None = None, decisions: list[str] | tuple[str, ...] = (),
+              no_commit: bool = False) -> str | None:
     plan = initial_plan(root, release, recut=recut, client_tag=client_tag, decisions=decisions)
     path = Path(root) / "releases" / release / "plan.json"
     if path.exists():
@@ -143,7 +144,21 @@ def init_plan(root: Path, release: str, *, recut: list[str] | tuple[str, ...] = 
         if created:
             path.parent.rmdir()
         raise ReleaseError("plan init result failed plan check:\n" + "\n".join(errors))
-    git(root, "add", "--", path.relative_to(root).as_posix())
+    if no_commit:
+        return None
+    return commit_plan(root, release)
+
+
+def commit_plan(root: Path, release: str) -> str:
+    load_plan(root, release)
+    path = f"releases/{release}/plan.json"
+    foreign = dirty_paths(root) - {path}
+    if foreign:
+        raise ReleaseError("plan commit refuses other dirty paths: " + ", ".join(sorted(foreign)))
+    errors = plan_errors(root, release)
+    if errors:
+        raise ReleaseError("plan commit failed plan check:\n" + "\n".join(errors))
+    git(root, "add", "--", path)
     git(root, "commit", "-m", f"chore(release): plan {release}", "-m", f"Release: {release}")
     return git(root, "rev-parse", "HEAD").strip()
 
@@ -307,6 +322,16 @@ class ReleaseDriver:
         return [row for row in self.plan["components"]
                 if row["id"] != COMPONENT_IDS[0] and row["disposition"] == "recut"]
 
+    def client_component_path(self) -> Path:
+        if "client_component" in self.state["private"]:
+            return self.private_path("client_component")
+        if self.plan["client"]["disposition"] == "updated":
+            raise ReleaseError("updated client requires --client-component")
+        path = (self.root / "releases" / self.plan["predecessor"] / "qualification" / "client-components.json")
+        if not path.is_file():
+            raise ReleaseError("carried client requires predecessor descriptor: " + path.relative_to(self.root).as_posix())
+        return path
+
     def stage_values(self) -> dict[str, Any]:
         runtime = read_json(self.root / "releases" / self.plan["predecessor"] / "manifest.json")[
             "components"]["ninfer"]
@@ -359,6 +384,7 @@ class ReleaseDriver:
             values = self.stage_values()
             private["stage_files"] = {key: input_hash(Path(values[key]))
                                       for key in sorted(STAGE_FILE_OPTIONS & values.keys())}
+            private["client_descriptor_sha256"] = file_sha(self.client_component_path())
         elif group == "guide":
             private["guide_sha256"] = file_sha(self.root / "docs" / "QUICKSTART.md")
         payload = {"plan_sha256": self.plan_sha, "HEAD": head, "private": private,
@@ -390,8 +416,7 @@ class ReleaseDriver:
             raise ReleaseError("carried rtx5090-container refuses --runtime-publication")
         if set(private.get("lane_receipts", {})) - {"rtx5090"}:
             raise ReleaseError("--lane-receipt accepts only rtx5090; native receipts belong in bundles")
-        if self.plan["client"]["disposition"] == "updated":
-            self.private_path("client_component")
+        self.client_component_path()
 
     def outputs(self, group: str) -> dict[str, str]:
         names = git(self.root, "ls-files", "-z", "--cached", "--others", "--exclude-standard").split("\0")
@@ -430,10 +455,7 @@ class ReleaseDriver:
         receipts = self.state["private"].get("lane_receipts", {})
         if "rtx5090" in receipts:
             arguments += ["--lane-receipt", receipts["rtx5090"]]
-        if "client_component" in self.state["private"]:
-            arguments += ["--omp-component", str(self.private_path("client_component"))]
-        if self.plan["client"]["disposition"] == "updated" and "client_component" not in self.state["private"]:
-            raise ReleaseError("updated client requires --client-component")
+        arguments += ["--omp-component", str(self.client_component_path())]
         if next(row for row in self.plan["components"] if row["id"] == COMPONENT_IDS[0])["disposition"] == "recut" and "rtx5090" not in receipts:
             raise ReleaseError("re-cut runtime requires --lane-receipt rtx5090=PATH")
         # The stager requires an absent directory. The plan is an input, not draft residue.
@@ -683,7 +705,7 @@ def run_pipeline(driver: ReleaseDriver, *, finalize: bool, no_suite: bool = Fals
     plan_path = driver.plan_path.relative_to(driver.root).as_posix()
     if not finalize and plan_path in dirty_paths(driver.root):
         raise ReleaseError(f"candidate requires a committed plan: {plan_path}; "
-                           "use plan init for a new release, or commit the modified plan explicitly")
+                           "use plan init for a new release, then plan commit for its authored inputs")
     if finalize and "guide" not in driver.records:
         raise ReleaseError("finalize requires the guide candidate commit")
     interrupted_stage = not finalize and "stage" not in driver.records and driver.state["groups"].get("stage")
@@ -896,6 +918,8 @@ def main(argv: list[str] | None = None, *, root: Path = ROOT) -> int:
     initialize.add_argument("--recut", action="append", default=[], metavar="COMPONENT=TAG@COMMIT40")
     initialize.add_argument("--client-tag")
     initialize.add_argument("--decision", action="append", default=[], metavar="ID:KIND:SHA256")
+    initialize.add_argument("--no-commit", action="store_true", help="leave the seeded plan for non-interactive author edits")
+    plan.add_parser("commit", help="validate and commit an authored opening plan").add_argument("--release", required=True)
     rehearsal = subcommands.add_parser("rehearse", help="prove the real release tail without hosts or network")
     rehearsal.add_argument("--keep", type=Path, help="retain the clone in an absent or empty directory")
     rehearsal.add_argument("--suite", action="store_true", help="also run the contract suite at the ready state")
@@ -921,8 +945,16 @@ def main(argv: list[str] | None = None, *, root: Path = ROOT) -> int:
         if args.command == "plan":
             if args.plan_command == "init":
                 commit = init_plan(root, args.release, recut=args.recut, client_tag=args.client_tag,
-                                   decisions=args.decision)
-                print(f"release plan {args.release}: initialized at {commit}")
+                                   decisions=args.decision, no_commit=args.no_commit)
+                if commit is None:
+                    print(f"release plan {args.release}: seeded; edit releases/{args.release}/plan.json, "
+                          f"then run scripts/release.py plan commit --release {args.release}")
+                else:
+                    print(f"release plan {args.release}: initialized at {commit}")
+                return 0
+            if args.plan_command == "commit":
+                commit = commit_plan(root, args.release)
+                print(f"release plan {args.release}: committed at {commit}")
                 return 0
             errors = plan_errors(root, args.release)
             if errors:

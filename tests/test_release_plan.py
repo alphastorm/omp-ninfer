@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import copy
+import contextlib
 import importlib.util
+import io
 import tempfile
 import unittest
 from pathlib import Path
@@ -39,6 +41,7 @@ def plan_fixture(root: Path) -> tuple[dict, dict, dict]:
         for lane in PLAN.COMPONENT_IDS[1:]
     ]
     manifest = {"release": PREDECESSOR, "status": "ready",
+                "limitations": ["No general performance guarantee is implied."],
                 "components": {"ninfer": runtime, "ninfer_variants": natives,
                                "omp": {"upstream_tag": "v2.0.0"}}}
     authority = {"product_release": PREDECESSOR,
@@ -56,6 +59,8 @@ def plan_fixture(root: Path) -> tuple[dict, dict, dict]:
         "decisions": [{"id": "support", "kind": "scope", "sha256": "5" * 64}],
     }
     atomic_write_json(root / "releases" / PREDECESSOR / "manifest.json", manifest)
+    atomic_write_json(root / "releases" / PREDECESSOR / "qualification" / "client-components.json",
+                      {"omp": manifest["components"]["omp"]})
     atomic_write_json(root / "compatibility.json", authority)
     atomic_write_json(root / "releases" / RELEASE / "plan.json", plan)
     return plan, manifest, authority
@@ -98,9 +103,26 @@ class ReleasePlanTests(unittest.TestCase):
         self.assertTrue(all(row["disposition"] == "carried" for row in plan["components"]))
         self.assertEqual(plan["decisions"], [])
         self.assertEqual(plan["client"], self.plan["client"])
+        self.assertEqual(plan["limitations"], self.previous["limitations"])
         held["status"] = "ready"
         atomic_write_json(self.root / "releases" / held["release"] / "manifest.json", held)
         self.assertEqual(PLAN.initial_plan(self.root, RELEASE)["predecessor"], held["release"])
+
+    def test_initial_plan_prints_and_drops_provenance_and_generated_limitations(self) -> None:
+        kept = "Manual transport setup is required."
+        dropped = [
+            "All runtime packages were rebuilt together.",
+            "Runtime components: generated details.",
+            "Current component evidence does not transfer predecessor review approval or authorize production promotion.",
+        ]
+        self.previous["limitations"] = [kept, *dropped]
+        atomic_write_json(self.root / "releases" / PREDECESSOR / "manifest.json", self.previous)
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            plan = PLAN.initial_plan(self.root, RELEASE)
+        self.assertEqual(plan["limitations"], [kept])
+        for sentence in dropped:
+            self.assertIn("dropped predecessor limitation: " + sentence, output.getvalue())
 
     def test_initial_plan_applies_explicit_component_client_and_decision_inputs(self) -> None:
         plan = PLAN.initial_plan(

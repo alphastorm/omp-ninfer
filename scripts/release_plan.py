@@ -77,6 +77,8 @@ def initial_plan(root: Path, release: str, *, recut: list[str] | tuple[str, ...]
                  client_tag: str | None = None,
                  decisions: list[str] | tuple[str, ...] = ()) -> dict[str, Any]:
     """Construct public plan inputs; the caller validates before committing them."""
+    from verify_release import provenance_claim_errors
+
     if GA_RELEASE_RE.fullmatch(release) is None:
         raise ValueError("plan release must be a GA version (vX.Y.Z)")
     predecessor = latest_ready_manifest(root)
@@ -104,6 +106,17 @@ def initial_plan(root: Path, release: str, *, recut: list[str] | tuple[str, ...]
             raise ValueError("--decision requires ID:KIND:SHA256")
         decision_rows.append(dict(zip(("id", "kind", "sha256"), fields)))
     authority = json.loads((Path(root) / "compatibility.json").read_text(encoding="utf-8"))
+    limitations = []
+    generated_neutral = (
+        "Current component evidence does not transfer predecessor review approval or authorize production promotion."
+    )
+    for sentence in predecessor.get("limitations", []):
+        generated = isinstance(sentence, str) and (
+            sentence.startswith("Runtime components: ") or sentence == generated_neutral)
+        if generated or provenance_claim_errors([sentence], "plan.limitations"):
+            print(f"plan init: dropped predecessor limitation: {sentence}")
+        else:
+            limitations.append(sentence)
     return {
         "artifact_type": PLAN_SCHEMA["artifact_type"], "schema_version": 1, "release": release,
         "predecessor": predecessor["release"],
@@ -112,6 +125,7 @@ def initial_plan(root: Path, release: str, *, recut: list[str] | tuple[str, ...]
                    "disposition": "updated" if client_tag is not None else "carried"},
         "components": components,
         "platforms": {row["id"]: row["status"] for row in authority["profiles"]},
+        "limitations": limitations,
         "decisions": decision_rows,
     }
 
