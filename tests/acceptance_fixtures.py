@@ -55,7 +55,8 @@ MANIFEST = {
                 "artifact_release_id": 42, "artifact_asset_id": 43, "artifact_published": True,
                 "artifact_sha256": WINDOWS["asset_sha256"], "binary_sha256": WINDOWS["binary_sha256"],
                 "compatibility_authority": "https://example.invalid/compatibility.json"},
-        "ninfer": {"oci_manifest_digest": "sha256:" + "a" * 64, "server_binary_sha256": "b" * 64},
+        "ninfer": {"release_tag": "v9.9.9-qwen38-5090-beta.1", "source_commit": "4" * 40,
+                   "oci_manifest_digest": "sha256:" + "a" * 64, "server_binary_sha256": "b" * 64},
         "model": {"artifact_sha256": "c" * 64},
     },
     "runtime_identity": {"configuration_sha256": "d" * 64},
@@ -91,9 +92,8 @@ FIRST_RELEASE = {"rollback": {"status": "not_applicable", "directions": 0,
 STAGED_ROUTE_ACCEPTANCE = {
     "status": "pending",
     "fresh_product_acceptance": False,
-    "scope": "Fresh candidate-bound external-install acceptance of all five routes, three unchanged "
-             "stock OMP 18.12.6 clients and both beta.3 native public installs is required. No "
-             "predecessor product acceptance is carried.",
+    "scope": "Fresh candidate-bound external-install acceptance of all five routes, stock clients "
+             "and both native public installs is required. Every route must be accepted fresh.",
     "document_change": "Published QUICKSTART blocks remain on v0.13.1 at this stage.",
 }
 
@@ -335,6 +335,109 @@ def write_reviews(out: Path, release: str, candidate: str, manifest: dict) -> di
     return entries
 
 
+def write_windows(out: Path, release: str, candidate: str, evidence: dict, routes: dict) -> None:
+    """Write the acceptance drivers' wire shapes, including their collection bindings."""
+    timestamp = "2000-01-01T00:00:00+00:00"
+    restored = evidence["restoration"]["rtx5090"]
+    rr = {
+        "running": True, "health": {"status": "ok"}, "same_image": True,
+        "image": restored["original_image"], "restart": "unless-stopped",
+        "checkpoint_mount_retained": True, "documented_key_restored": True,
+        "checkout_restored": True, "beta_absent": True, "windows_release": True,
+        "windows_markers_tasks_unchanged": True, "documented_directories_restored": True,
+        "retained_window_created_parents": [], "windows_health": {"status": "ok"},
+        "completed_utc": timestamp, "window_seconds": 1.0,
+    }
+    runtime = out / "rtx5090"
+    clients = {}
+    for label, profile in (("mac", "darwin-remote-ssh"), ("windows", "windows-docker-local"),
+                           ("linux", "linux-docker-local")):
+        live = deepcopy(evidence["platforms"][profile]["live_acceptance"])
+        live["vision_input_sha256"] = "a" * 64
+        clients[label] = {"release": release, "candidate": candidate, "status": "passed",
+                          "omp_version": live["omp_version"], "live_acceptance": live,
+                          "full_stream_audit": {"vision": {"input_image_records": 1}}}
+    atomic_write_json(runtime / "final-summary.json", {
+        "release": release, "candidate": candidate, "status": "passed",
+        "completed_utc": timestamp, "clients": clients, "restoration": rr, "corrections": [],
+    })
+    atomic_write_json(runtime / "restoration.json", rr)
+    atomic_write_json(runtime / "collection.json", {"completed_utc": timestamp, "missing": []})
+    atomic_write_json(runtime / "preflight.json", {
+        "release": release, "candidate": candidate, "status": "passed",
+        "mac_binary_sha256": evidence["platforms"]["darwin-remote-ssh"]["binary_sha256"]})
+    atomic_write_json(runtime / "windows-preflight.json", {
+        "status": "passed", "candidate": candidate,
+        "binary_sha256": evidence["platforms"]["windows-docker-local"]["binary_sha256"]})
+    atomic_write_json(runtime / "host-preflight.json", {
+        "status": "passed",
+        "client_binary_sha256": evidence["platforms"]["linux-docker-local"]["binary_sha256"]})
+    for lane, name in zip(COMPOSER.LANES, ("host-route.json", "mac-route.json", "windows-route.json")):
+        atomic_write_json(runtime / name, routes[lane])
+    atomic_write_json(out / "production-and-fleet-after.json", {
+        "release": release, "candidate": candidate, "status": "passed", "same_container": True,
+        "same_image": True, "health_http": 200, "restart_policy": "unless-stopped",
+        "checkpoint_mounts_identical_sorted_by_destination": True,
+        "fleet_phase": "Fleet", "fleet_healthy": True,
+    })
+    census = {"lanes": [], "processes": [], "listeners": []}
+    for lane in ("rtx4090", "rtx3090"):
+        if lane not in evidence:
+            continue
+        folder = out / lane
+        body = evidence[lane]
+        observed = body["observations"]
+        restore = evidence["restoration"][lane]
+        census["lanes"].append({
+            "lane": lane, "task_state": "Ready", "lease_entries": [], "power_limit_w": 300,
+            "previous_release": None, "active_release": "synthetic-runtime", "state_sha256": "1" * 64,
+        })
+        atomic_write_json(folder / "evidence/route.json", routes[lane + "-native"])
+        atomic_write_json(folder / "evidence/behavior-evidence.json", {
+            **{key: deepcopy(body[key]) for key in ("candidate_commit", "release", "client", "installed",
+                                                    "runtime_configuration", "probe_acceptance")},
+            "status": "passed",
+            "checks": {
+                "exact_tool_marker": observed["exact_tool_marker"],
+                "linked_tool_history": observed["linked_tool_history"],
+                "exact_continuation_nonce": observed["exact_continuation_nonce"],
+                "offline_failed_without_response": observed["offline_request_failed_without_model_response"],
+                "recovered_healthy": True, "served_identity_bound": True, "only_local_client_responses": True,
+            },
+            "request_summaries": [{"tool_call_count": observed["server_tool_calls"],
+                                   "prefix_reuse_path": observed["continuation_reuse"]}],
+            "local_compatibility_errors": [], "live_acceptance": observed["structured_client"],
+            "documented_marker_bare_line": observed.get("documented_marker_bare_line", True),
+        })
+        for name, key in (("restoration.json", "restoration_checks"), ("final-audit.json", "final_audit_checks")):
+            atomic_write_json(folder / "evidence" / name, {"status": "passed", "checks": restore[key]})
+        atomic_write_json(folder / "evidence/preparation.json", {
+            "release": release, "candidate": candidate, "status": "restored", "attempt": 1,
+            "lineage_mode": body["preparation"]["lineage_mode"],
+            "previous_release_present": body["preparation"]["previous_release_present"],
+            "moves": [{"kind": "lineage-root", "exists": True}, {"kind": "documented-stage", "exists": True}],
+        })
+        atomic_write_json(folder / "public-install.json", observed["public_install"])
+        atomic_write_json(folder / "evidence/window.json", {
+            "release": release, "candidate": candidate, "status": "passed_and_restored",
+            "attempt": 1, "restoration_status": "passed", "first_failing_boundary": None, "route_exit": 0,
+        })
+        atomic_write_json(folder / "driver-window.json", {
+            "plan": {"release": release, "candidate": candidate, "attempt": 1},
+            "status": "passed_and_restored", "elapsed_seconds": 1.0,
+        })
+        atomic_write_json(folder / "driver-collection.json", {
+            "release": release, "candidate": candidate, "status": "collected",
+            **{key: COMPOSER.sha256((folder / "evidence" / name).read_bytes()) for key, name in (
+                ("window_sha256", "window.json"), ("restoration_sha256", "restoration.json"),
+                ("final_audit_sha256", "final-audit.json"))},
+        })
+    for name in ("native-pre-window-census.json", "native-final.json"):
+        atomic_write_json(out / name, census)
+    for name in ("native-pre-window-census-holds-client.json", "native-final-holds-client.json"):
+        atomic_write_json(out / name, {"identical": True})
+
+
 def write_fixtures(root: Path, release: str, candidate: str, out: Path) -> dict:
     if re.fullmatch(r"[0-9a-f]{40}", candidate) is None:
         raise ValueError("candidate must be a full commit")
@@ -342,6 +445,12 @@ def write_fixtures(root: Path, release: str, candidate: str, out: Path) -> dict:
         raise ValueError("candidate must resolve to its full commit")
     git(root, "merge-base", "--is-ancestor", candidate, "HEAD")
     evidence, routes = fixture_evidence(root, release, candidate)
+    write_windows(out, release, candidate, evidence, routes)
+    plan = {"artifact_type": "omp_ninfer_release_plan", "schema_version": 1, "release": release,
+            "platforms": {profile: row["status"] for profile, row in evidence["platforms"].items()}}
+    atomic_write_json(out / "plan.json", plan)
+    from collect_route_evidence import collect
+    evidence, _ = collect(root, release, candidate, out, plan)
     atomic_write_json(out / "composition-evidence.json", evidence)
     atomic_write_json(out / "restoration.json", evidence["restoration"])
     paths = {}
@@ -352,7 +461,7 @@ def write_fixtures(root: Path, release: str, candidate: str, out: Path) -> dict:
     write_reviews(out, release, candidate, load(root / "releases" / release / "manifest.json"))
     return {"evidence": str((out / "composition-evidence.json").resolve()), "routes": paths,
             "reviews": str((out / "reviews/manifest.json").resolve()),
-            "values": str((out / "values.json").resolve())}
+            "values": str((out / "values.json").resolve()), "window_root": str(out.resolve())}
 
 
 def main() -> int:

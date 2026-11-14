@@ -39,8 +39,7 @@ sys.modules[FIXTURE_SPEC.name] = FIXTURES
 FIXTURE_SPEC.loader.exec_module(FIXTURES)
 from acceptance_fixtures import (
     ACCEPTED, CANDIDATE, DESCRIPTOR, FIRST_RELEASE, LIVE, MANIFEST, RESTORATION,
-    STAGED_ROUTE_ACCEPTANCE, UPSTREAM, campaign_waiver, client_distribution,
-    native_evidence, route_receipt, waived_campaign_evidence,
+    STAGED_ROUTE_ACCEPTANCE, UPSTREAM, client_distribution, native_evidence, route_receipt,
 )
 
 def refused(function, *arguments) -> str:
@@ -230,7 +229,7 @@ class UpstreamCompositionTests(unittest.TestCase):
                                   (ROOT / "tests/fixtures/native-quickstart-5861712f.md").read_bytes())
         manifest = deepcopy(MANIFEST)
         manifest["components"]["ninfer_variants"] = [{
-            "id": "rtx4090-windows-native", "release_tag": "native-runtime",
+            "id": "rtx4090-windows-native", "release_tag": "v9.9.9-qwen38-4090-beta.1",
             "source_commit": "9" * 40, "package_bytes": 100, "package_sha256": "9" * 64,
             "server_binary_sha256": "a" * 64, "configuration_sha256": "b" * 64,
             "model_artifact_sha256": "c" * 64,
@@ -273,8 +272,8 @@ class UpstreamCompositionTests(unittest.TestCase):
                             for key in ("candidate_commit", "rtx5090", "rtx4090")},
             "documented_routes": {"mode": "offline-fixture", "qualification_environment": {},
                                   "scope": "Fresh candidate-bound routes, stock clients and the "
-                                           "native public install passed; no predecessor product "
-                                           "acceptance is carried."},
+                                           "native public install passed. Every documented route "
+                                           "was accepted fresh for this candidate."},
             "composed": {"mode": "offline-fixture", "authority_status": "qualified",
                 "public_client_downloads": {"status": "passed", "anonymous": True},
                 "linux_live_client": {"status": "passed"}, "client_note": "Stock binary",
@@ -981,15 +980,15 @@ class UpstreamCompositionTests(unittest.TestCase):
         self.add_3090(evidence=False)
         route = self.root / "rtx3090-native.json"
         path = self.release_root / "qualification/rtx3090-route-waiver.json"
-        waiver = campaign_waiver(self.release, CANDIDATE, MODULE.sha256(route.read_bytes()),
-                                 failed_phase=failed_phase)
+        waiver = FIXTURES.campaign_waiver(self.release, CANDIDATE, MODULE.sha256(route.read_bytes()),
+                                          failed_phase=failed_phase)
         MODULE.save(path, waiver)
         binding = {"repository_path": path.relative_to(self.root).as_posix(),
                    "sha256": MODULE.sha256(path.read_bytes())}
         evidence = MODULE.load(self.root / "evidence.json")
         evidence["rtx3090"] = {
             "status": "failed", "failed_phase": failed_phase, "founder_waiver": binding,
-            **waived_campaign_evidence(waiver),
+            **FIXTURES.waived_campaign_evidence(waiver),
             "preparation": {"lineage_mode": "first_release", "previous_release_present": False},
             "observations": {"rollback": deepcopy(FIRST_RELEASE["rollback"])}}
         evidence["restoration"]["rtx3090"] = {**waiver["restoration_summary"], "founder_waiver": binding}
@@ -1406,6 +1405,7 @@ class AcceptanceFixtureCommandTests(unittest.TestCase):
             subprocess.run(["git", "clone", "--quiet", "--no-hardlinks", str(ROOT), str(root)],
                            check=True, capture_output=True)
             shutil.copy2(ROOT / "tests/acceptance_fixtures.py", root / "tests/acceptance_fixtures.py")
+            shutil.copy2(ROOT / "scripts/collect_route_evidence.py", root / "scripts/collect_route_evidence.py")
             release = "v9.9.9"
             source = FIXTURES.predecessor(root, release)["release"]
             directory = root / "releases" / release
