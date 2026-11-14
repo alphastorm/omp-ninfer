@@ -150,13 +150,6 @@ class ReleaseDriver:
         self.root = Path(root).resolve()
         self.release = release
         self.plan_path = self.root / "releases" / release / "plan.json"
-        if not self.plan_path.exists():
-            committed = subprocess.run(["git", "show", f"HEAD:releases/{release}/plan.json"],
-                                       cwd=self.root, capture_output=True)
-            if committed.returncode == 0:
-                atomic_write(self.plan_path, committed.stdout)
-        self.plan = load_plan(self.root, release)
-        self.plan_bytes = self.plan_path.read_bytes()
         self.local = self.root / ".release-state" / release
         self.state_path = self.root / ".release-state" / f"{release}.json"
         self.state = (read_json(self.state_path) if self.state_path.is_file() else
@@ -169,6 +162,15 @@ class ReleaseDriver:
             commit = cached.get("commit")
             if commit and self.records.get(group, {}).get("commit") != commit:
                 raise ReleaseError(f"rewritten history under recorded {group} commit {commit}")
+        if (not self.plan_path.exists() and "stage" in self.state["groups"]
+                and "stage" not in self.records):
+            # A stage attempt killed while the stager ran left the committed plan out of the tree.
+            committed = subprocess.run(["git", "show", f"HEAD:releases/{release}/plan.json"],
+                                       cwd=self.root, capture_output=True)
+            if committed.returncode == 0:
+                atomic_write(self.plan_path, committed.stdout)
+        self.plan = load_plan(self.root, release)
+        self.plan_bytes = self.plan_path.read_bytes()
         if options is not None:
             self.set_options(options)
 
@@ -600,7 +602,7 @@ class ReleaseDriver:
             for index in range(0, len(changes) - 1, 2):
                 metadata, name = changes[index:index + 2]
                 old, new = metadata[1:].split()[:2]
-                if old != "000000" and new != old:
+                if "000000" not in (old, new) and new != old:
                     modes.append(f"{name} ({old} -> {new})")
             if modes:
                 raise ReleaseError("release step refuses file mode changes: " + ", ".join(modes))

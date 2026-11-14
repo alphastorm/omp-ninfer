@@ -164,6 +164,9 @@ def run(name, args):
             path = ROOT / load(rewrite)["path"]
             atomic_write(path, path.read_bytes() + b"\n# Rewritten by the release tool.\n")
             path.chmod(0o644)
+        remove = local / "remove.json"
+        if remove.exists():
+            (ROOT / load(remove)["path"]).unlink(missing_ok=True)
     elif name == "receipt_audit.py":
         atomic_write_json(directory / "qualification" / "receipt-audit.json", {"status": value("--phase")})
         document = load(qualification)
@@ -619,6 +622,14 @@ class ReleaseDriverTests(unittest.TestCase):
         self.assertEqual(len(self.calls("stage_release.py")), 1)
         self.assertEqual(len(DRIVER.group_commits(self.root, RELEASE)), 3)
 
+    def test_a_plan_removed_outside_a_stage_attempt_is_not_recreated(self) -> None:
+        driver = self.driver()
+        driver.plan_path.unlink()
+        result = self.invoke("candidate", "--no-suite", success=False)
+        self.assertIn("plan.json", result.stderr)
+        self.assertFalse(driver.plan_path.exists())
+        self.assertEqual(self.calls(), [])
+
     def test_foreign_dirty_path_is_refused_without_touching_it(self) -> None:
         path = self.root / "foreign name.txt"
         atomic_write(path, "operator work\n")
@@ -737,6 +748,18 @@ class ReleaseDriverTests(unittest.TestCase):
         self.assertEqual(self.git("rev-parse", "HEAD"), head)
         self.assertEqual(list(DRIVER.group_commits(self.root, RELEASE)), ["stage"])
         self.assertEqual(self.calls("rebind_release.py")[-1]["head"], head)
+
+    def test_a_tool_may_remove_a_tracked_declared_file(self) -> None:
+        driver = self.driver()
+        DRIVER.run_pipeline(driver, finalize=False, no_suite=True, through="stage")
+        relative = f"releases/{RELEASE}/superseded.json"
+        atomic_write_json(self.root / relative, {"superseded": True})
+        self.git("add", "--", relative)
+        self.git("commit", "-qm", "test(release): seed a file the pin step removes")
+        atomic_write_json(self.root / ".release-state" / "remove.json", {"path": relative})
+        self.invoke("candidate", "--no-suite")
+        self.assertEqual(self.git("ls-tree", "HEAD", "--", relative), "")
+        self.assertEqual(len(DRIVER.group_commits(self.root, RELEASE)), 3)
 
     def test_failed_compose_resumes_and_restores_partial_tool_outputs(self) -> None:
         self.candidate("--no-suite")
