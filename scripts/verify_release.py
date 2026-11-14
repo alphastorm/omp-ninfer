@@ -30,11 +30,12 @@ import subprocess
 import sys
 from collections.abc import Iterator
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable, Literal, NamedTuple
 from urllib.parse import unquote, urlparse
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from omp_client_environment import uses_per_model_stateful
+from release_profiles import stamp_profile
 from compose_native_qualification import (
     bidirectional_rollback,
     first_release_rollback,
@@ -599,10 +600,19 @@ def validate_pinned_evidence(
     compatibility: dict[str, Any],
     qualification: dict[str, Any],
     errors: list[str],
+    *,
+    lane_only: bool = False,
 ) -> None:
     cache: dict[tuple[str, str], str | None] = {}
     ancestors: dict[str, bool] = {}
     for label, url, expected in pinned_evidence(manifest, compatibility, qualification):
+        if lane_only and not (
+            label.startswith("compatibility ")
+            and label.endswith("gpu_qualification.receipt.url")
+            or label.startswith("compatibility.runtime_variants[")
+            and label.endswith("qualification_receipt.url")
+        ):
+            continue
         require_pinned_bytes(root, url, expected, label, errors, cache)
         match = PRODUCT_RAW_URL_RE.fullmatch(url) if isinstance(url, str) else None
         if match is not None:
@@ -705,6 +715,8 @@ def validate_ga_evidence_bindings(
     compatibility: dict[str, Any],
     qualification: dict[str, Any],
     errors: list[str],
+    *,
+    pinned: bool = True,
 ) -> None:
     """A ready GA release's derived records must name the manifest's exact components.
 
@@ -753,7 +765,7 @@ def validate_ga_evidence_bindings(
         require(receipt.get("sha256") == qual.get("sha256"),
                 f"{prefix}.qualification_receipt.sha256 must equal the manifest qualification hash",
                 errors)
-        if isinstance(qual.get("summary"), str):
+        if pinned and isinstance(qual.get("summary"), str):
             require_product_raw_url(receipt.get("url"),
                                     f"{prefix}.qualification_receipt.url", qual["summary"], errors)
 
@@ -782,9 +794,10 @@ def validate_ga_evidence_bindings(
         require(gpu.get("profile") == runtime.get("deployment_profile"),
                 f"compatibility {profile_id} gpu_qualification.profile must equal the manifest deployment profile",
                 errors)
-        require_product_raw_url(gpu.get("receipt", {}).get("url"),
-                                f"compatibility {profile_id} gpu_qualification.receipt.url",
-                                f"releases/{release}/qualification/rtx5090.json", errors)
+        if pinned:
+            require_product_raw_url(gpu.get("receipt", {}).get("url"),
+                                    f"compatibility {profile_id} gpu_qualification.receipt.url",
+                                    f"releases/{release}/qualification/rtx5090.json", errors)
 
 
 def walk_string_fields(value: Any, path: str) -> Iterator[tuple[str, str]]:
@@ -822,11 +835,24 @@ def walk_object_fields(
             yield from walk_object_fields(child, f"{path}[{index}]")
 
 
+COMPOSER_OWNED = tuple(re.compile(pattern + r"(?:$|[.\[])") for pattern in (
+    r"manifest\.status",
+    r"manifest\.publication\.(?:blockers|external_installation_qualified)",
+    r"manifest\.qualification\.external_installation_passed",
+    r"qualification\.(?:documented_route_acceptance|remaining_release_gates|as_of|external_installation_qualified)",
+    r"qualification\.composition\.(?:external_installation_acceptance|documented_route_acceptance)",
+    r"compatibility\.composition\.(?:status|blockers)",
+    r"compatibility\.profiles\[\d+\]\.(?:status|installable|blockers|acceptance_receipt)",
+))
+
+
 def validate_ready_state_consistency(
     manifest: dict[str, Any],
     compatibility: dict[str, Any],
     qualification: dict[str, Any],
     errors: list[str],
+    *,
+    exclude: tuple[re.Pattern[str], ...] = (),
 ) -> None:
     forbidden_markers = ("draft", "pending")
     stale_phrases = (
@@ -841,6 +867,8 @@ def validate_ready_state_consistency(
         ("qualification", qualification),
     ):
         for path, field, value in walk_object_fields(document, label):
+            if any(pattern.match(path) for pattern in exclude):
+                continue
             if field == "status" and isinstance(value, str):
                 normalized = value.casefold()
                 require(
@@ -871,6 +899,8 @@ def validate_ready_state_consistency(
                     errors,
                 )
         for path, text in walk_string_fields(document, label):
+            if any(pattern.match(path) for pattern in exclude):
+                continue
             normalized = text.casefold()
             stale = [phrase for phrase in stale_phrases if phrase in normalized]
             stale += [match.group(0) for match in pending_release_state(text)]
@@ -3173,7 +3203,20 @@ def repository_files(
     return sorted(path for path in paths if path.suffix in suffixes and path.is_file())
 
 
-def validate_markdown_links(root: Path, errors: list[str]) -> None:
+def deferred_acceptance_link(root: Path, release: str, document: Path, target: str) -> bool:
+    """Only this release's own future acceptance outputs may be absent before ready."""
+    release_root = (root / "releases" / release).resolve()
+    parsed = urlparse(target)
+    if parsed.scheme or target.startswith(("#", "//")):
+        return False
+    relative = unquote(target.split("#", 1)[0].split("?", 1)[0])
+    linked = (document.parent / relative).resolve()
+    return (bool(relative) and document.resolve().is_relative_to(release_root)
+            and linked.is_relative_to(release_root / "acceptance"))
+
+
+def validate_markdown_links(root: Path, errors: list[str], *,
+                            pending_release: str | None = None) -> None:
     resolved_root = root.resolve()
     for document in repository_files(root, (".md",)):
         source = document.read_text(encoding="utf-8")
@@ -3190,6 +3233,9 @@ def validate_markdown_links(root: Path, errors: list[str]) -> None:
             require(linked.is_relative_to(resolved_root),
                     f"{document.relative_to(root).as_posix()} link escapes repository: {target}", errors)
             if linked.is_relative_to(resolved_root):
+                if pending_release is not None and deferred_acceptance_link(
+                        root, pending_release, document, target):
+                    continue
                 require(linked.exists(),
                         f"{document.relative_to(root).as_posix()} has missing local link: {target}", errors)
 
@@ -3304,6 +3350,131 @@ def validate_public_text(root: Path, errors: list[str]) -> None:
                     f"{document.relative_to(root).as_posix()} contains private marker {marker!r}", errors)
 
 
+ReadyPhase = Literal["draft", "candidate", "acceptance"]
+READY_PHASES = ("draft", "candidate", "acceptance")
+
+
+class ReadyContext(NamedTuple):
+    root: Path
+    release: str
+    manifest: dict[str, Any]
+    compatibility: dict[str, Any]
+    qualification: dict[str, Any]
+    blocker_items: list[Any]
+    check_pins: bool
+    upstream_omp: bool
+    through: ReadyPhase
+
+
+class ReadyCheck(NamedTuple):
+    name: str
+    phase: ReadyPhase
+    run: Callable[[ReadyContext, list[str]], None]
+    ga_only: bool = True
+    flag_only: bool = False
+    pin_only: bool = False
+    upstream_only: bool = False
+    legacy: bool = True
+
+
+def ready_qualification_public_url(ctx: ReadyContext, errors: list[str]) -> None:
+    qualification = ctx.manifest.get("qualification", {})
+    require(qualification.get("public_url") is not None,
+            "ready release requires qualification.public_url", errors)
+    require_product_raw_url(
+        qualification.get("public_url"), "qualification.public_url",
+        f"releases/{ctx.release}/{qualification.get('summary')}", errors,
+    )
+
+
+def ready_external_installation(ctx: ReadyContext, errors: list[str]) -> None:
+    require(ctx.manifest.get("qualification", {}).get("external_installation_passed") is True,
+            "ready release requires a passing external installation", errors)
+    require(ctx.qualification.get("external_installation_qualified") is True,
+            "ready qualification must record the passing external installation", errors)
+
+
+def ready_upstream_client_leftovers(ctx: ReadyContext, errors: list[str]) -> None:
+    errors.extend(f"releases/{ctx.release}/{location}" for location in client_pin_locations(
+        ctx.root / "releases" / ctx.release, historical_fork_client_pins(ctx.root, ctx.release)))
+
+
+# Ready runs the complete legacy checks. Earlier phases use the same validators with only
+# the inputs not yet produced excluded; no acceptance requirement becomes a warning.
+READY_CHECKS = (
+    ReadyCheck("ready_status", "acceptance",
+               lambda c, e: require(c.manifest.get("status") == "ready",
+                                    "release manifest is not ready", e), ga_only=False),
+    ReadyCheck("qualification_summary", "draft",
+               lambda c, e: require(c.manifest.get("qualification", {}).get("summary_sha256") is not None,
+                                    "ready release requires qualification.summary_sha256", e), ga_only=False),
+    ReadyCheck("qualification_public_url", "acceptance", ready_qualification_public_url, ga_only=False),
+    ReadyCheck("external_installation", "acceptance", ready_external_installation, ga_only=False),
+    ReadyCheck("publication_blockers", "acceptance",
+               lambda c, e: require(c.blocker_items == [],
+                                    "ready release must have no publication blockers", e), ga_only=False),
+    ReadyCheck("validate_release_markdown_tokens", "draft",
+               lambda c, e: validate_release_markdown_tokens(c.root, c.release, e)),
+    ReadyCheck("validate_exact_lane_set", "draft",
+               lambda c, e: validate_exact_lane_set(c.manifest, c.compatibility, c.qualification, e)),
+    ReadyCheck("validate_ready_state_consistency", "draft",
+               lambda c, e: validate_ready_state_consistency(
+                   c.manifest, c.compatibility, c.qualification, e,
+                   exclude=() if c.through == "acceptance" else COMPOSER_OWNED)),
+    ReadyCheck("validate_review_ledger", "acceptance",
+               lambda c, e: validate_review_ledger(c.root, c.release, c.qualification, e)),
+    ReadyCheck("validate_documented_route_acceptance", "acceptance",
+               lambda c, e: validate_documented_route_acceptance(c.root, c.qualification, e)),
+    ReadyCheck("validate_frozen_native_pins", "acceptance",
+               lambda c, e: validate_frozen_native_pins(c.root, c.release, c.manifest, c.qualification, e)),
+    ReadyCheck("validate_native_route_policy", "acceptance",
+               lambda c, e: validate_native_route_policy(c.root, c.release, c.manifest, c.qualification, e)),
+    ReadyCheck("validate_ga_evidence_bindings", "draft",
+               lambda c, e: validate_ga_evidence_bindings(
+                   c.release, c.manifest, c.compatibility, c.qualification, e,
+                   pinned=c.through != "draft")),
+    ReadyCheck("validate_continuation_capability", "acceptance",
+               lambda c, e: validate_continuation_capability(c.root, c.release, c.compatibility, e)),
+    ReadyCheck("validate_aggregate_as_of", "draft",
+               lambda c, e: validate_aggregate_as_of(c.root, c.release, c.compatibility, c.qualification, e)),
+    ReadyCheck("validate_manifest_tag_prose", "draft",
+               lambda c, e: validate_manifest_tag_prose(c.manifest, e)),
+    ReadyCheck("validate_pinned_evidence", "candidate",
+               lambda c, e: validate_pinned_evidence(
+                   c.root, c.manifest, c.compatibility, c.qualification, e,
+                   lane_only=c.through != "acceptance"), pin_only=True),
+    ReadyCheck("upstream_client_leftovers", "draft", ready_upstream_client_leftovers,
+               ga_only=False, upstream_only=True),
+    ReadyCheck("validate_release_documentation", "draft",
+               lambda c, e: validate_release_documentation(c.root, c.release, e),
+               ga_only=False, flag_only=True),
+    ReadyCheck("validate_markdown_links", "draft",
+               lambda c, e: validate_markdown_links(
+                   c.root, e, pending_release=c.release if c.through != "acceptance" else None),
+               ga_only=False, legacy=False),
+)
+
+
+def selected_ready_checks(ctx: ReadyContext, *, flagged: bool) -> tuple[ReadyCheck, ...]:
+    return tuple(row for row in READY_CHECKS
+                 if (not row.ga_only or ga_release(ctx.release))
+                 and (not row.flag_only or flagged)
+                 and (not row.pin_only or ctx.check_pins)
+                 and (not row.upstream_only or ctx.upstream_omp)
+                 and READY_PHASES.index(row.phase) <= READY_PHASES.index(ctx.through))
+
+
+def run_ready_checks(ctx: ReadyContext, errors: list[str], *, flagged: bool,
+                     lint: bool = False) -> list[str]:
+    for row in selected_ready_checks(ctx, flagged=flagged):
+        first = len(errors)
+        row.run(ctx, errors)
+        if lint:
+            errors[first:] = [f"[{row.name}] {message}" for message in errors[first:]]
+    return [row.name for row in READY_CHECKS
+            if READY_PHASES.index(row.phase) > READY_PHASES.index(ctx.through)]
+
+
 def validate(
     root: Path,
     require_ready: bool,
@@ -3312,6 +3483,8 @@ def validate(
     check_pins: bool = False,
     *,
     warnings: list[str] | None = None,
+    lint_ready: bool = False,
+    lint_metadata: dict[str, Any] | None = None,
 ) -> tuple[dict[str, Any], list[str]]:
     selected_release = resolve_product_release(root, product_release)
     manifest_path = root / "releases" / selected_release / "manifest.json"
@@ -3350,6 +3523,10 @@ def validate(
     require(status in {"draft", "candidate", "ready"},
             "manifest status must be draft, candidate, or ready", errors)
     validate_release_identity_snapshots(root, selected_release, manifest, errors)
+    root_authority_path = root / "compatibility.json"
+    root_release = (load_json(root_authority_path).get("product_release")
+                    if root_authority_path.is_file() else None)
+    draft_posture = status == "draft" and root_release != selected_release
     pending_allowed = status == "draft" and not require_installable and not require_ready
     release_posture = (manifest.get("channel"), manifest.get("audience"))
     require(
@@ -3366,6 +3543,11 @@ def validate(
     profile_ref = product.get("profile") if isinstance(product, dict) else None
     require(isinstance(profile_ref, str), "manifest product.profile must be a path", errors)
     profile_path = (manifest_path.parent / profile_ref).resolve() if isinstance(profile_ref, str) else root
+    if draft_posture and isinstance(profile_ref, str):
+        require(profile_path.is_relative_to(root.resolve()),
+                "manifest profile must stay inside the repository", errors)
+        require(profile_path.is_file(), "manifest profile path must exist", errors)
+        profile_path = (manifest_path.parent / "profiles" / profile_path.name).resolve()
     require(profile_path.is_relative_to(root.resolve()), "manifest profile must stay inside the repository", errors)
     require(profile_path.is_file(), "manifest profile path must exist", errors)
 
@@ -3402,6 +3584,15 @@ def validate(
         require(components["native_model"] != model,
                 "components.native_model must be omitted when it equals components.model", errors)
     native_model = effective_native_model(manifest)
+    draft_clients = {}
+    if draft_posture:
+        snapshot_authority = load_json(manifest_path.parent / "compatibility.json")
+        draft_clients = {row["id"]: row["client_distribution"]
+                         for row in snapshot_authority.get("profiles", [])}
+        try:
+            stamp_profile(profile, selected_release, manifest, draft_clients)
+        except (KeyError, ValueError, TypeError) as error:
+            errors.append(f"draft posture profile projection: {error}")
 
     expected_profile_id = product.get("primary_profile_id") if isinstance(product, dict) else None
     installation_mode = manifest.get("installation", {}).get("mode")
@@ -3416,7 +3607,7 @@ def validate(
                               per_model_stateful=per_model_stateful)
     profiles: list[tuple[str, dict[str, Any]]] = [("profile", profile)]
 
-    profiles_dir = root / "profiles"
+    profiles_dir = manifest_path.parent / "profiles" if draft_posture else root / "profiles"
     if profiles_dir.is_dir():
         for extra_path in sorted(profiles_dir.glob("*.json")):
             if extra_path.resolve() == profile_path:
@@ -3426,6 +3617,11 @@ def validate(
             except ContractError as error:
                 errors.append(str(error))
                 continue
+            if draft_posture:
+                try:
+                    stamp_profile(extra_profile, selected_release, manifest, draft_clients)
+                except (KeyError, ValueError, TypeError) as error:
+                    errors.append(f"draft posture profiles/{extra_path.name} projection: {error}")
             validate_profile_contract(extra_profile, f"profiles/{extra_path.name}", release,
                                       model, runtime.get("public_model_id"),
                                       runtime.get("deployment_profile"), errors, upstream_omp,
@@ -3492,12 +3688,26 @@ def validate(
     if compatibility:
         root_compatibility_path = root / "compatibility.json"
         if release_compatibility_path.is_file() and root_compatibility_path.is_file():
-            require(sha256_file(release_compatibility_path) == sha256_file(root_compatibility_path),
-                    "root and release compatibility authorities must be byte-identical", errors)
             root_matrix_path = root / "docs" / "COMPATIBILITY.md"
-            require(root_matrix_path.is_file()
-                    and compatibility_matrix_path.read_bytes() == root_matrix_path.read_bytes(),
-                    "root and release compatibility matrices must be byte-identical", errors)
+            if draft_posture:
+                predecessor = predecessor_manifest(root, selected_release)
+                predecessor_root = root / "releases" / str((predecessor or {}).get("release"))
+                previous_authority = predecessor_root / "compatibility.json"
+                require(previous_authority.is_file()
+                        and previous_authority.read_bytes() == root_compatibility_path.read_bytes(),
+                        "draft posture root compatibility authority must byte-equal the ready predecessor",
+                        errors)
+                previous_matrix = predecessor_root / "COMPATIBILITY.md"
+                require(root_matrix_path.is_file() and previous_matrix.is_file()
+                        and previous_matrix.read_bytes() == root_matrix_path.read_bytes(),
+                        "draft posture root compatibility matrix must byte-equal the ready predecessor",
+                        errors)
+            else:
+                require(sha256_file(release_compatibility_path) == sha256_file(root_compatibility_path),
+                        "root and release compatibility authorities must be byte-identical", errors)
+                require(root_matrix_path.is_file()
+                        and compatibility_matrix_path.read_bytes() == root_matrix_path.read_bytes(),
+                        "root and release compatibility matrices must be byte-identical", errors)
         require(compatibility.get("product_release") == release,
                 "compatibility product_release must match the manifest", errors)
         try:
@@ -3961,57 +4171,21 @@ def validate(
         require(qualification.get("external_installation_qualified") is False,
                 "candidate qualification must not claim external installation passed", errors)
 
-    if status == "ready" or require_ready:
-        require(status == "ready", "release manifest is not ready", errors)
-        require(expected_summary_sha is not None,
-                "ready release requires qualification.summary_sha256", errors)
-        require(manifest_qualification.get("public_url") is not None,
-                "ready release requires qualification.public_url", errors)
-        require_product_raw_url(
-            manifest_qualification.get("public_url"),
-            "qualification.public_url",
-            f"releases/{release}/{manifest_qualification.get('summary')}",
-            errors,
-        )
-        require(manifest_qualification.get("external_installation_passed") is True,
-                "ready release requires a passing external installation", errors)
-        require(qualification.get("external_installation_qualified") is True,
-                "ready qualification must record the passing external installation", errors)
-        require(blocker_items == [], "ready release must have no publication blockers", errors)
+    through: ReadyPhase = ("acceptance" if status == "ready" or require_ready
+                           else "candidate" if status == "candidate" else "draft")
+    context = ReadyContext(root, selected_release, manifest, compatibility, qualification,
+                           blocker_items, check_pins, upstream_omp, through)
+    if status == "ready" or require_ready or lint_ready:
+        skipped = run_ready_checks(context, errors, flagged=require_ready or lint_ready, lint=lint_ready)
+        if lint_metadata is not None:
+            lint_metadata.update(lint_phase=through, skipped_checks=skipped)
+    else:
+        next(row for row in READY_CHECKS if row.name == "validate_markdown_links").run(context, errors)
+        if upstream_omp and warnings is not None:
+            ready_upstream_client_leftovers(context, warnings)
 
-        if ga_release(release):
-            validate_release_markdown_tokens(root, release, errors)
-            validate_exact_lane_set(manifest, compatibility, qualification, errors)
-            validate_ready_state_consistency(
-                manifest, compatibility, qualification, errors
-            )
-            validate_review_ledger(root, release, qualification, errors)
-            validate_documented_route_acceptance(root, qualification, errors)
-            validate_frozen_native_pins(root, release, manifest, qualification, errors)
-            validate_native_route_policy(root, release, manifest, qualification, errors)
-            validate_ga_evidence_bindings(
-                release, manifest, compatibility, qualification, errors
-            )
-            validate_continuation_capability(root, release, compatibility, errors)
-            validate_aggregate_as_of(root, release, compatibility, qualification, errors)
-            validate_manifest_tag_prose(manifest, errors)
-            if check_pins:
-                validate_pinned_evidence(root, manifest, compatibility, qualification, errors)
-
-    if upstream_omp:
-        leftovers = [f"releases/{release}/{location}" for location in client_pin_locations(
-            manifest_path.parent, historical_fork_client_pins(root, selected_release)
-        )]
-        if require_ready or status == "ready":
-            errors.extend(leftovers)
-        elif warnings is not None:
-            warnings.extend(leftovers)
-
-    if require_ready:
-        validate_release_documentation(root, selected_release, errors)
     validate_receipt_classes(root, manifest_path.parent,
                             [manifest, qualification, compatibility], errors)
-    validate_markdown_links(root, errors)
     validate_public_text(root, errors)
 
     return manifest, errors
@@ -4024,17 +4198,20 @@ def main() -> int:
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--require-installable", action="store_true")
     mode.add_argument("--require-ready", action="store_true")
+    mode.add_argument("--lint-ready", action="store_true",
+                      help="run ready checks whose inputs exist at the manifest's current phase")
     parser.add_argument("--check-pins", action="store_true",
-                        help="with --require-ready: every pinned raw evidence URL whose commit is "
+                        help="with --require-ready or --lint-ready: every pinned raw evidence URL whose commit is "
                              "in local git history must serve exactly its recorded SHA-256 "
                              "and be an ancestor of HEAD "
                              "(the final gate of the pin dance; needs full history)")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
-    if args.check_pins and not args.require_ready:
-        parser.error("--check-pins requires --require-ready")
+    if args.check_pins and not (args.require_ready or args.lint_ready):
+        parser.error("--check-pins requires --require-ready or --lint-ready")
 
     warnings: list[str] = []
+    lint_metadata: dict[str, Any] = {}
     try:
         manifest, errors = validate(
             args.root.resolve(),
@@ -4043,6 +4220,8 @@ def main() -> int:
             args.release,
             check_pins=args.check_pins,
             warnings=warnings,
+            lint_ready=args.lint_ready,
+            lint_metadata=lint_metadata,
         )
     except ContractError as error:
         errors = [str(error)]
@@ -4054,6 +4233,8 @@ def main() -> int:
         "valid": not errors,
         "errors": errors,
     }
+    if args.lint_ready:
+        result.update(lint_metadata)
     if warnings:
         result["warnings"] = warnings
     if args.json:
