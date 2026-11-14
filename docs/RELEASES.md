@@ -409,7 +409,7 @@ Supply private inputs as arguments to `candidate`, not as plan fields:
   a missing predecessor descriptor refuses instead of preserving accepted platform state.
 - `finalize --notes PATH` replaces those notes in the compose commit when acceptance results
   complete them. Without this argument, finalization keeps the staged notes. A resumed compose
-  attempt reuses its recorded notes input and hashes its bytes before deciding whether to rerun.
+  attempt reuses its recorded notes input and reruns the tools with its current bytes.
 - `--measurement-prefix PREFIX` selects public measurement filenames; it must contain no private
   identifiers. `--as-of DATE` is the acceptance completion date, not an inferred current date.
 
@@ -418,21 +418,22 @@ lane's accepted attempt from that index. The index must bind this release and th
 every accepted entry must be `passed` or `retired`. All attempt directories must exist, use relative
 POSIX paths and stay inside the window root, including after symlink resolution. The collector
 receives explicit `--lane-dir` arguments for accepted attempts and `--corrected-attempt` arguments
-for every earlier `spent-failed` attempt of that lane. The input fingerprint hashes the index
-alongside the window evidence. Older windows without an index keep their original root layout.
+for every earlier `spent-failed` attempt of that lane. Older windows without an index keep their
+original root layout.
 
 The driver remembers private input paths only in ignored `.release-state/<version>.json`, written
 atomically. That file is a cache, not authority: first-parent commits with `Release:` and
 `Release-Step:` trailers determine completed groups, and `Pins:` trailers bind the earlier group
 commits. Rerunning a completed group makes no commit. An interrupted group's complete outputs are
-committed without rerunning tools only when the plan, HEAD and private input hashes are unchanged;
-otherwise only that group's declared paths are restored and its tools rerun, except for the guide,
-which is always retargeted in place. A first `stage` or `compose` attempt refuses dirty declared
-paths: supply notes through `--notes`, or commit or discard other edits explicitly. Only an attempt
-the driver already started may restore its partial outputs on resume. Authored guide edits are
-inputs, hash-bound into the guide group's fingerprint, and ride only the guide commit; they are
-never restored away, even after interruption. Foreign dirty paths and rewritten recorded history
-are refused.
+never committed without rerunning its tools in the current invocation. Only that group's declared
+paths are restored on resume, except for the guide, which is always retargeted in place. Every
+group's first attempt except the guide refuses dirty declared paths: commit or discard those edits
+explicitly; `stage` and `compose` also accept notes through `--notes`. Only an attempt the driver
+already started may restore its partial outputs on resume. Authored guide edits are inputs and
+ride only the guide commit; they are never restored away, even after interruption. If an interrupted
+stage left its committed plan missing, the driver restores HEAD's plan bytes before loading it.
+Before committing a group, the driver refuses file mode changes to existing tracked paths.
+Foreign dirty paths and rewritten recorded history are refused.
 
 Both commands run their verifier gates and the contract suite. `--no-suite` skips only the suite,
 never installability, lint, ready or pin checks. A missing tool is an error, never a skipped step.

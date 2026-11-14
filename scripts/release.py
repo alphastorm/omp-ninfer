@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import os
 import re
@@ -59,23 +58,6 @@ def read_json(path: Path) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise ReleaseError(f"{path.name} must contain a JSON object")
     return value
-
-
-def file_sha(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for block in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
-
-
-def input_hash(path: Path) -> Any:
-    if path.is_file():
-        return file_sha(path)
-    if path.is_dir():
-        return {child.relative_to(path).as_posix(): file_sha(child)
-                for child in sorted(path.rglob("*")) if child.is_file()}
-    raise ReleaseError(f"missing private input: {path}")
 
 
 def dirty_paths(root: Path) -> set[str]:
@@ -167,10 +149,14 @@ class ReleaseDriver:
     def __init__(self, root: Path, release: str, options: argparse.Namespace | None = None):
         self.root = Path(root).resolve()
         self.release = release
-        self.plan = load_plan(self.root, release)
         self.plan_path = self.root / "releases" / release / "plan.json"
+        if not self.plan_path.exists():
+            committed = subprocess.run(["git", "show", f"HEAD:releases/{release}/plan.json"],
+                                       cwd=self.root, capture_output=True)
+            if committed.returncode == 0:
+                atomic_write(self.plan_path, committed.stdout)
+        self.plan = load_plan(self.root, release)
         self.plan_bytes = self.plan_path.read_bytes()
-        self.plan_sha = hashlib.sha256(self.plan_bytes).hexdigest()
         self.local = self.root / ".release-state" / release
         self.state_path = self.root / ".release-state" / f"{release}.json"
         self.state = (read_json(self.state_path) if self.state_path.is_file() else
@@ -226,7 +212,6 @@ class ReleaseDriver:
         return self.state["options"].get("measurement_prefix", self.release.replace(".", ""))
 
     def save(self) -> None:
-        self.state["plan_sha256"] = self.plan_sha
         atomic_write_json(self.state_path, self.state)
 
     def check_plan(self) -> None:
@@ -369,29 +354,6 @@ class ReleaseDriver:
             values[name] = str(path.resolve())
         return values
 
-    def inputs_digest(self, group: str, head: str) -> str:
-        names = ({"stage_input", "notes", "client_component", "runtime_publication", "bundles",
-                  "lane_receipts", "assets", "native_publications"} if group == "stage" else
-                 {"window_root", "reviews", "values", "compose_notes"} if group == "compose" else set())
-        private = {}
-        for name in sorted(names & self.state["private"].keys()):
-            value = self.state["private"][name]
-            paths = value if isinstance(value, dict) else {"input": value}
-            private[name] = {key: {"path": path, "sha256": input_hash(Path(path))}
-                             for key, path in sorted(paths.items())}
-        if group == "stage":
-            self.validate_stage_inputs()
-            values = self.stage_values()
-            private["stage_files"] = {key: input_hash(Path(values[key]))
-                                      for key in sorted(STAGE_FILE_OPTIONS & values.keys())}
-            private["client_descriptor_sha256"] = file_sha(self.client_component_path())
-        elif group == "guide":
-            private["guide_sha256"] = file_sha(self.root / "docs" / "QUICKSTART.md")
-        payload = {"plan_sha256": self.plan_sha, "HEAD": head, "private": private,
-                   "options": self.state["options"],
-                   "tools": {name: file_sha(self.require_tool(name)) for name in self.tools(group)}}
-        return hashlib.sha256(json.dumps(payload, sort_keys=True).encode("utf-8")).hexdigest()
-
     def validate_stage_inputs(self) -> None:
         private = self.state["private"]
         expected = {row["id"].split("-", 1)[0] for row in self.recut_native()}
@@ -417,11 +379,6 @@ class ReleaseDriver:
         if set(private.get("lane_receipts", {})) - {"rtx5090"}:
             raise ReleaseError("--lane-receipt accepts only rtx5090; native receipts belong in bundles")
         self.client_component_path()
-
-    def outputs(self, group: str) -> dict[str, str]:
-        names = git(self.root, "ls-files", "-z", "--cached", "--others", "--exclude-standard").split("\0")
-        return {name: file_sha(self.root / name) for name in sorted(set(names))
-                if name and self.declared(group, name) and (self.root / name).is_file()}
 
     def required_outputs(self, group: str) -> list[Path]:
         release_root = self.root / "releases" / self.release
@@ -637,6 +594,16 @@ class ReleaseDriver:
 
     def commit(self, group: str, paths: set[str]) -> str:
         if paths:
+            changes = git(self.root, "diff", "--raw", "-z", "--no-renames",
+                          "HEAD", "--", *sorted(paths)).split("\0")
+            modes = []
+            for index in range(0, len(changes) - 1, 2):
+                metadata, name = changes[index:index + 2]
+                old, new = metadata[1:].split()[:2]
+                if old != "000000" and new != old:
+                    modes.append(f"{name} ({old} -> {new})")
+            if modes:
+                raise ReleaseError("release step refuses file mode changes: " + ", ".join(modes))
             git(self.root, "add", "--", *sorted(paths))
         body = f"Release: {self.release}\nRelease-Step: {group}"
         if group in PIN_SOURCES:
@@ -650,38 +617,25 @@ class ReleaseDriver:
             self.save()
             return
         dirty = self.check_dirty(group)
-        cached = self.state["groups"].get(group, {})
-        if group in ("stage", "compose") and not cached and dirty:
+        if group != "guide" and group not in self.state["groups"] and dirty:
+            guidance = ("supply release notes with --notes, or " if group in ("stage", "compose") else "")
             raise ReleaseError(f"first {group} run refuses dirty declared paths: "
                                + ", ".join(sorted(dirty))
-                               + "; supply release notes with --notes, or commit or discard these edits explicitly")
+                               + "; " + guidance + "commit or discard these edits explicitly")
         head = git(self.root, "rev-parse", "HEAD").strip()
-        digest = self.inputs_digest(group, head)
-        if group == "compose" and cached.get("tools_complete") is not False:
-            self.check_ledger()
-        complete = (bool(dirty) and cached.get("tools_complete") is True
-                    and cached.get("inputs_sha256") == digest
-                    and cached.get("outputs") == self.outputs(group)
-                    and all(path.is_file() for path in self.required_outputs(group)))
-        if not complete:
-            if group != "guide":
-                self.restore(group, dirty)
-            self.check_plan()
-            cached = {"inputs_sha256": digest, "attempts": cached.get("attempts", 0) + 1,
-                      "tools_complete": False}
-            self.state["groups"][group] = cached
-            self.save()
-            self.run_tools(group)
-            self.check_plan()
-            missing = [str(path.relative_to(self.root)) for path in self.required_outputs(group) if not path.is_file()]
-            if missing:
-                raise ReleaseError(f"{group} did not produce declared outputs: {', '.join(missing)}")
-            self.check_dirty(group)
-            if group == "guide":
-                # An idempotent retarget's output is the authored input on a resumed attempt.
-                cached["inputs_sha256"] = self.inputs_digest(group, head)
-            cached.update(tools_complete=True, outputs=self.outputs(group))
-            self.save()
+        if group == "stage":
+            self.validate_stage_inputs()
+        if group != "guide":
+            self.restore(group, dirty)
+        self.check_plan()
+        cached = {}
+        self.state["groups"][group] = cached
+        self.save()
+        self.run_tools(group)
+        self.check_plan()
+        missing = [str(path.relative_to(self.root)) for path in self.required_outputs(group) if not path.is_file()]
+        if missing:
+            raise ReleaseError(f"{group} did not produce declared outputs: {', '.join(missing)}")
         if group == "compose":
             self.check_ledger()
         if git(self.root, "rev-parse", "HEAD").strip() != head:
@@ -712,7 +666,7 @@ def run_pipeline(driver: ReleaseDriver, *, finalize: bool, no_suite: bool = Fals
                            "use plan init for a new release, then plan commit for its authored inputs")
     if finalize and "guide" not in driver.records:
         raise ReleaseError("finalize requires the guide candidate commit")
-    interrupted_stage = not finalize and "stage" not in driver.records and driver.state["groups"].get("stage")
+    interrupted_stage = not finalize and "stage" not in driver.records and "stage" in driver.state["groups"]
     if not interrupted_stage:
         driver.check_plan()
     groups = GROUPS[3:] if finalize else GROUPS[:3]
