@@ -192,6 +192,9 @@ class PrivateRecutReplayTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             self.assertEqual(load(root / base / "manifest.json")["status"], "candidate")
             self.assertEqual(load(root / base / "manifest.json")["components"]["ninfer"], runtime)
+            targets = load(root / base / "manifest.json")["publication"]["targets"]
+            self.assertEqual(targets[:2], manifest["publication"]["targets"][:2])
+            self.assertEqual(targets[-1], manifest["publication"]["targets"][-1])
             self.assertEqual((root / base / "qualification/runtime-publication.json").read_bytes(),
                              (private / "runtime-publication.json").read_bytes())
             for name in ("runtime-artifacts.json", "runtime-build-identity.json", "runtime-rc.json",
