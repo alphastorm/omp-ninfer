@@ -1214,11 +1214,13 @@ def review_subject_errors(root: Path, release: str, ledger: dict[str, Any],
     """Bind product subjects to the plan/candidate interval and runtime subjects to components."""
     errors: list[str] = []
     components = manifest.get("components", {})
+    variant_sources = [row.get("source_commit") for row in components.get("ninfer_variants", [])
+                       if isinstance(row, dict)]
     component_sources = {
-        "native_runtime": [components.get("ninfer", {}).get("source_commit")],
-        "native_component_delta": [row.get("source_commit")
-                                   for row in components.get("ninfer_variants", [])
-                                   if isinstance(row, dict)],
+        # A runtime council reviews the container source or, when only native lanes are
+        # re-cut, a native lane's source. Either is a source this release ships.
+        "native_runtime": [components.get("ninfer", {}).get("source_commit"), *variant_sources],
+        "native_component_delta": variant_sources,
     }
     for section, sources in component_sources.items():
         if section not in ledger:

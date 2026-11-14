@@ -384,6 +384,7 @@ class ReceiptAuditTest(unittest.TestCase):
             ("NINFER_RELEASE_NOTES.md", f"[Retained receipt](./{name}#evidence)"),
             ("NINFER_RELEASE_NOTES.md", f"Retained receipt: `{prefix}{name}`"),
             ("NINFER_RELEASE_NOTES.md", f"Retained receipt: {name}"),
+            ("NINFER_RELEASE_NOTES.md", f"//[draft] Retained receipt: {name}"),
             ("review/notes.md", f"[Retained receipt](../{name})"),
             ("review/notes.md", "[Retained receipt](https://raw.githubusercontent.com/alphastorm/"
                                 "omp-ninfer/" + "a" * 40 + "/" + prefix + name + ")"),

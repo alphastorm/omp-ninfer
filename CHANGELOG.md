@@ -36,6 +36,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   derived from the manifest instead of being edited for each release.
 - The cut procedure in `docs/RELEASES.md` describes the plan and the driver; living documents
   change once, after publication.
+- From v0.20.0 the ready gate, under `--check-pins`, refuses a review ledger whose product review
+  subject lies outside the release's own history or after its route candidate, and a runtime or
+  native component review of a source commit the release does not ship.
 
 ### Added
 

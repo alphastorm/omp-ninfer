@@ -427,7 +427,11 @@ def _prune_references(tree: _Tree, release: str, names: list[str]) -> list[str]:
         for pointer, value in strings:
             if not isinstance(value, str):
                 continue
-            parsed = urlsplit(value.replace("\\", "/"))
+            try:
+                parsed = urlsplit(value.replace("\\", "/"))
+            except ValueError:
+                # Markdown prose is not always a URL; it can still mention a path below.
+                parsed = urlsplit("")
             if parsed.scheme or parsed.netloc:
                 path = unquote(parsed.path)
                 matches = [target for target in targets if path.endswith("/" + target)]

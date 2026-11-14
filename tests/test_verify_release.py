@@ -1027,6 +1027,10 @@ class ReviewSubjectBindingTests(unittest.TestCase):
                 self.assertTrue(any(section in error and "e" * 40 in error for error in errors), errors)
                 self.ledger[section]["source_commit"] = original
 
+    def test_a_runtime_council_may_review_a_released_native_lane_source(self):
+        self.ledger["native_runtime"]["source_commit"] = "2" * 40
+        self.assertEqual(self.ready_history_errors(), [])
+
     def test_ready_history_keeps_published_release_contracts_unchanged(self):
         self.release = "v0.19.0"
         self.ledger["product_tooling"]["reviewed_commit"] = "f" * 40
