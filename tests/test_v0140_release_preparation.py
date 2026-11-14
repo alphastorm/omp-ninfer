@@ -313,13 +313,13 @@ class V0140PreparationTests(unittest.TestCase):
             self.assertIn(claim, text)
 
     def test_beta3_tags_remain_lane_scoped(self) -> None:
-        self.assertIsNotNone(verify_release.NINFER_RELEASE_TAG_RE.fullmatch(
+        self.assertIsNotNone(verify_release.HISTORICAL_NINFER_RELEASE_TAG_RE.fullmatch(
             "v0.7.0-qwen38-5090-beta.3"))
         for number in NATIVE_SHAPES:
             tag = f"v0.7.0-qwen38-{number}-beta.3"
-            self.assertIsNotNone(render_compatibility.RUNTIME_VARIANT_RELEASE_TAG_RES[
+            self.assertIsNotNone(render_compatibility.HISTORICAL_RUNTIME_VARIANT_RELEASE_TAG_RES[
                 f"rtx{number}-windows-native"].fullmatch(tag))
-            self.assertIsNone(verify_release.NINFER_RELEASE_TAG_RE.fullmatch(tag))
+            self.assertIsNone(verify_release.HISTORICAL_NINFER_RELEASE_TAG_RE.fullmatch(tag))
 
 
 if __name__ == "__main__":

@@ -143,14 +143,14 @@ class V0131PreparationTests(unittest.TestCase):
             variant_id = f"rtx{number}-windows-native"
             tag = f"v0.7.0-qwen38-{number}-beta.2"
             self.assertIsNotNone(
-                render_compatibility.RUNTIME_VARIANT_RELEASE_TAG_RES[variant_id].fullmatch(tag))
-            self.assertIsNone(verify_release.NINFER_RELEASE_TAG_RE.fullmatch(tag))
+                render_compatibility.HISTORICAL_RUNTIME_VARIANT_RELEASE_TAG_RES[variant_id].fullmatch(tag))
+            self.assertIsNone(verify_release.HISTORICAL_NINFER_RELEASE_TAG_RE.fullmatch(tag))
             other = "3090" if number == "4090" else "4090"
             self.assertIsNone(
-                render_compatibility.RUNTIME_VARIANT_RELEASE_TAG_RES[variant_id].fullmatch(
+                render_compatibility.HISTORICAL_RUNTIME_VARIANT_RELEASE_TAG_RES[variant_id].fullmatch(
                     f"v0.7.0-qwen38-{other}-beta.2"))
         self.assertIsNotNone(
-            verify_release.NINFER_RELEASE_TAG_RE.fullmatch("v0.7.0-qwen38-5090-beta.2"))
+            verify_release.HISTORICAL_NINFER_RELEASE_TAG_RE.fullmatch("v0.7.0-qwen38-5090-beta.2"))
 
     def test_receipt_audit_covers_every_staged_file_and_keeps_carried_bytes(self) -> None:
         audit = load(RELEASE / "qualification/receipt-audit.json")

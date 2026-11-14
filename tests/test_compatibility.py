@@ -73,8 +73,8 @@ class CompatibilityAuthorityTests(unittest.TestCase):
     def test_multi_gpu_native_admission_adds_only_the_qualified_versions(self) -> None:
         for lane, version, next_version in (("rtx3090", "0.6.3", "0.6.4"),
                                             ("rtx4090", "0.6.11", "0.6.12")):
-            tag_re = MODULE.RUNTIME_VARIANT_RELEASE_TAG_RES[f"{lane}-windows-native"]
-            package_re = MODULE.RUNTIME_VARIANT_PACKAGE_NAME_RES[f"{lane}-windows-native"]
+            tag_re = MODULE.HISTORICAL_RUNTIME_VARIANT_RELEASE_TAG_RES[f"{lane}-windows-native"]
+            package_re = MODULE.HISTORICAL_RUNTIME_VARIANT_PACKAGE_NAME_RES[f"{lane}-windows-native"]
             for beta in ("1", "2", "11"):
                 tag = f"v{version}-qwen38-{lane[3:]}-beta.{beta}"
                 package = f"ninfer-{lane}-native-v{version}-beta.{beta}-windows-x86_64-cuda13.3-{lane}.tar.gz"
@@ -102,8 +102,8 @@ class CompatibilityAuthorityTests(unittest.TestCase):
         for lane in ("rtx3090", "rtx4090"):
             tag = f"v0.8.0-qwen38-{lane[3:]}-beta.1"
             package = f"ninfer-{lane}-native-v0.8.0-beta.1-windows-x86_64-cuda13.3-{lane}.tar.gz"
-            tag_re = MODULE.RUNTIME_VARIANT_RELEASE_TAG_RES[f"{lane}-windows-native"]
-            package_re = MODULE.RUNTIME_VARIANT_PACKAGE_NAME_RES[f"{lane}-windows-native"]
+            tag_re = MODULE.HISTORICAL_RUNTIME_VARIANT_RELEASE_TAG_RES[f"{lane}-windows-native"]
+            package_re = MODULE.HISTORICAL_RUNTIME_VARIANT_PACKAGE_NAME_RES[f"{lane}-windows-native"]
             self.assertIsNotNone(tag_re.fullmatch(tag))
             self.assertIsNotNone(package_re.fullmatch(package))
             for invalid in ("v0.8.1", "v0.9.0", "v0.7.1", "v0.6.12"):
