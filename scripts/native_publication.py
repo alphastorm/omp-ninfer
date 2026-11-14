@@ -256,7 +256,8 @@ def create_record(plan_path: Path, lane: str, directory: Path, *, assets: dict[s
         require(type(row.get("size")) is int and row["size"] == sizes[name],
                 "public release", pointer + "/size", "differs from bundle asset size: " + name)
         require(row.get("digest") == "sha256:" + expected[name], "public release", pointer + "/digest",
-                "differs from bundle SHA-256: " + name)
+                f"differs from bundle SHA-256: {name}: public {row.get('digest')!r}, "
+                f"bundle 'sha256:{expected[name]}'")
         field(row, "browser_download_url", str, "public release", pointer)
         by_name[name] = row
     require(set(by_name) == set(expected), "public release", "/assets/name", "public asset set differs from bundle")
@@ -271,7 +272,8 @@ def create_record(plan_path: Path, lane: str, directory: Path, *, assets: dict[s
                 outer.extend(chunk)
         require(count == sizes[name], "public asset", "/" + name + "/bytes", "download is truncated")
         require(hashed.hexdigest() == expected[name], "public asset", "/" + name + "/sha256",
-                "anonymous bytes differ from the API and bundle")
+                f"anonymous bytes differ from the API and bundle: public {hashed.hexdigest()}, "
+                f"bundle {expected[name]}")
         if name == "SHA256SUMS":
             require(outer == sums_bytes, "public asset", "/SHA256SUMS", "outer checksum set differs from bundle")
     projected = {

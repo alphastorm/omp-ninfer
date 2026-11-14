@@ -202,6 +202,17 @@ class CarriedAggregateTests(unittest.TestCase):
             self.compose()
         self.assertEqual((self.release_root / "manifest.json").read_bytes(), before)
 
+    def test_cut_authorization_is_not_a_qualification_decision(self):
+        plan = deepcopy(self.plan)
+        plan["decisions"] = [{"id": "cut-rtx3090", "kind": "component-cut", "sha256": "b" * 64}]
+        atomic_write_json(self.plan_path, plan)
+        self.compose()
+        self.assertEqual(load(self.release_root / "qualification.json")["observed_gates"], {})
+        plan["decisions"][0]["sha256"] = "not-a-digest"
+        atomic_write_json(self.plan_path, plan)
+        with self.assertRaises(AGGREGATE.BundleError):
+            self.compose()
+
     def test_missing_decision_refuses(self):
         plan = deepcopy(self.plan)
         plan["decisions"] = [{"id": "scope-decision", "kind": "scope", "sha256": "a" * 64}]
