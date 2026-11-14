@@ -301,7 +301,7 @@ class ReleaseDriver:
         if group == "compose":
             return ["collect_route_evidence.py", "review_ledger.py", "compose_route_acceptance.py",
                     "rebind_release.py"]
-        return ["receipt_audit.py"] if group == "audit" else ["rebind_release.py"]
+        return ["receipt_audit.py", "rebind_release.py"] if group == "audit" else ["rebind_release.py"]
 
     def require_tool(self, name: str) -> Path:
         path = self.root / "scripts" / name
@@ -520,6 +520,10 @@ class ReleaseDriver:
         if self.state["options"].get("as_of"):
             arguments += ["--as-of", self.state["options"]["as_of"]]
         self.tool("receipt_audit.py", *arguments)
+        # The audit binds itself into the qualification summary. Close the hash chain in the
+        # same commit, so every release commit is consistent on its own.
+        self.tool("rebind_release.py", "--release", self.release,
+                  *(("--draft",) if phase == "lane-stage" else ()))
 
     def _window_attempt_arguments(self) -> list[str]:
         root = self.private_path("window_root").resolve()
