@@ -385,8 +385,13 @@ atomically. That file is a cache, not authority: first-parent commits with `Rele
 `Release-Step:` trailers determine completed groups, and `Pins:` trailers bind the earlier group
 commits. Rerunning a completed group makes no commit. An interrupted group's complete outputs are
 committed without rerunning tools only when the plan, HEAD and private input hashes are unchanged;
-otherwise only that group's declared paths are restored and its tools rerun. Foreign dirty paths
-and rewritten recorded history are refused. Keep operator work outside those declared output paths.
+otherwise only that group's declared paths are restored and its tools rerun, except for the guide,
+which is always retargeted in place. A first `stage` or `compose` attempt refuses dirty declared
+paths: supply notes through `--notes`, or commit or discard other edits explicitly. Only an attempt
+the driver already started may restore its partial outputs on resume. Authored guide edits are
+inputs, hash-bound into the guide group's fingerprint, and ride only the guide commit; they are
+never restored away, even after interruption. Foreign dirty paths and rewritten recorded history
+are refused.
 
 Both commands run their verifier gates and the contract suite. `--no-suite` skips only the suite,
 never installability, lint, ready or pin checks. A missing tool is an error, never a skipped step.

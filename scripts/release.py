@@ -213,10 +213,13 @@ class ReleaseDriver:
 
     def check_dirty(self, group: str | None) -> set[str]:
         paths = dirty_paths(self.root)
-        foreign = sorted(path for path in paths if group is None or not self.declared(group, path))
+        guide_input = ({"docs/QUICKSTART.md"} if group in ("stage", "lane-pin")
+                       and "guide" not in self.records else set())
+        foreign = sorted(path for path in paths if path not in guide_input
+                         and (group is None or not self.declared(group, path)))
         if foreign:
             raise ReleaseError("dirty file outside declared paths: " + ", ".join(foreign))
-        return paths
+        return paths - guide_input
 
     def restore(self, group: str, dirty: set[str]) -> None:
         """Restore only this group's paths, retaining the operator's current plan."""
@@ -327,6 +330,8 @@ class ReleaseDriver:
             values = self.stage_values()
             private["stage_files"] = {key: input_hash(Path(values[key]))
                                       for key in sorted(STAGE_FILE_OPTIONS & values.keys())}
+        elif group == "guide":
+            private["guide_sha256"] = file_sha(self.root / "docs" / "QUICKSTART.md")
         payload = {"plan_sha256": self.plan_sha, "HEAD": head, "private": private,
                    "options": self.state["options"],
                    "tools": {name: file_sha(self.require_tool(name)) for name in self.tools(group)}}
@@ -517,9 +522,13 @@ class ReleaseDriver:
             self.save()
             return
         dirty = self.check_dirty(group)
+        cached = self.state["groups"].get(group, {})
+        if group in ("stage", "compose") and not cached and dirty:
+            raise ReleaseError(f"first {group} run refuses dirty declared paths: "
+                               + ", ".join(sorted(dirty))
+                               + "; supply release notes with --notes, or commit or discard these edits explicitly")
         head = git(self.root, "rev-parse", "HEAD").strip()
         digest = self.inputs_digest(group, head)
-        cached = self.state["groups"].get(group, {})
         if group == "compose" and cached.get("tools_complete") is not False:
             self.check_ledger()
         complete = (bool(dirty) and cached.get("tools_complete") is True
@@ -527,7 +536,8 @@ class ReleaseDriver:
                     and cached.get("outputs") == self.outputs(group)
                     and all(path.is_file() for path in self.required_outputs(group)))
         if not complete:
-            self.restore(group, dirty)
+            if group != "guide":
+                self.restore(group, dirty)
             self.check_plan()
             cached = {"inputs_sha256": digest, "attempts": cached.get("attempts", 0) + 1,
                       "tools_complete": False}
@@ -539,6 +549,9 @@ class ReleaseDriver:
             if missing:
                 raise ReleaseError(f"{group} did not produce declared outputs: {', '.join(missing)}")
             self.check_dirty(group)
+            if group == "guide":
+                # An idempotent retarget's output is the authored input on a resumed attempt.
+                cached["inputs_sha256"] = self.inputs_digest(group, head)
             cached.update(tools_complete=True, outputs=self.outputs(group))
             self.save()
         if group == "compose":

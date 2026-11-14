@@ -138,7 +138,8 @@ def run(name, args):
         document["audit_phase"] = value("--phase")
         atomic_write_json(qualification, document)
     elif name == "retarget_guide.py":
-        atomic_write(ROOT / "docs" / "QUICKSTART.md", "# Guide\n" + release + "\n")
+        guide = ROOT / "docs" / "QUICKSTART.md"
+        atomic_write(guide, guide.read_text(encoding="utf-8").replace(value("--from"), value("--to")))
     elif name == "collect_route_evidence.py":
         assert Path(value("--window-root")).is_dir()
         assert load(ROOT / value("--plan"))["release"] == release
@@ -239,6 +240,10 @@ class ReleaseDriverTests(unittest.TestCase):
         path = self.root / ".release-state" / "invocations.json"
         calls = json.loads(path.read_text(encoding="utf-8")) if path.exists() else []
         return [call for call in calls if name is None or call["tool"] == name]
+
+    def worktree_bytes(self) -> dict[str, bytes]:
+        listed = self.git("ls-files", "-z", "--cached", "--others", "--exclude-standard")
+        return {name: (self.root / name).read_bytes() for name in listed.split("\0") if name}
 
     def driver(self, **values) -> Any:
         options = argparse.Namespace(**{"notes": self.private / "notes.md", **values})
@@ -382,6 +387,113 @@ class ReleaseDriverTests(unittest.TestCase):
         self.assertEqual(path.read_text(), "operator work\n")
         self.assertEqual(self.calls(), [])
 
+    def test_first_stage_refuses_authored_declared_paths_without_mutation(self) -> None:
+        for relative in (f"releases/{RELEASE}/NINFER_RELEASE_NOTES.md", f"releases/{RELEASE}/plan.json"):
+            with self.subTest(path=relative):
+                path = self.root / relative
+                original = path.read_bytes() if path.exists() else None
+                atomic_write(path, original + b"\n" if original is not None else b"Authored release notes.\n")
+                if original is not None:
+                    self.git("add", "--", relative)
+                before = self.worktree_bytes()
+                index = self.git("diff", "--cached", "--binary")
+                result = self.invoke("candidate", "--no-suite", success=False)
+                self.assertIn("first stage run refuses dirty declared paths: " + relative, result.stderr)
+                for guidance in ("--notes", "commit", "discard"):
+                    self.assertIn(guidance, result.stderr)
+                self.assertEqual(self.worktree_bytes(), before)
+                self.assertEqual(self.git("diff", "--cached", "--binary"), index)
+                self.assertEqual(self.git("rev-parse", "HEAD"), self.initial)
+                self.assertEqual(self.calls(), [])
+                if original is None:
+                    path.unlink()
+                else:
+                    atomic_write(path, original)
+                    self.git("add", "--", relative)
+
+    def test_first_compose_refuses_authored_declared_paths_without_mutation(self) -> None:
+        self.candidate("--no-suite")
+        head = self.git("rev-parse", "HEAD")
+        for filename in ("NINFER_RELEASE_NOTES.md", "qualification.json", "acceptance/authored.json"):
+            with self.subTest(path=filename):
+                relative = f"releases/{RELEASE}/{filename}"
+                path = self.root / relative
+                original = path.read_bytes() if path.exists() else None
+                atomic_write(path, original + b"\n" if original is not None else b'{"authored":true}\n')
+                before = self.worktree_bytes()
+                result = self.finalize("--no-suite", success=False)
+                self.assertIn("first compose run refuses dirty declared paths: " + relative, result.stderr)
+                for guidance in ("--notes", "commit", "discard"):
+                    self.assertIn(guidance, result.stderr)
+                self.assertEqual(self.worktree_bytes(), before)
+                self.assertEqual(self.git("rev-parse", "HEAD"), head)
+                self.assertEqual(self.calls("collect_route_evidence.py"), [])
+                if original is None:
+                    path.unlink()
+                else:
+                    atomic_write(path, original)
+
+    def test_failed_compose_resumes_and_restores_partial_tool_outputs(self) -> None:
+        self.candidate("--no-suite")
+        failure = self.root / ".release-state" / "fail.json"
+        atomic_write_json(failure, {"tool": "compose_route_acceptance.py"})
+        self.finalize("--no-suite", success=False)
+        orphan = self.root / "releases" / RELEASE / "acceptance" / "partial.json"
+        atomic_write_json(orphan, {"partial": True})
+        failure.unlink()
+        self.finalize("--no-suite")
+        self.assertEqual(len(self.calls("collect_route_evidence.py")), 2)
+        self.assertFalse(orphan.exists())
+
+    def test_authored_guide_rides_only_the_guide_commit(self) -> None:
+        path = self.root / "docs" / "QUICKSTART.md"
+        original = path.read_bytes()
+        authored = original + b"\nOperator-authored release instructions.\n"
+        atomic_write(path, authored)
+        self.candidate("--no-suite")
+        records = DRIVER.group_commits(self.root, RELEASE)
+        for group in ("stage", "lane-pin"):
+            committed = subprocess.run(["git", "show", records[group]["commit"] + ":docs/QUICKSTART.md"],
+                                       cwd=self.root, env=self.environment, check=True, capture_output=True).stdout
+            self.assertEqual(committed, original)
+        self.assertEqual(path.read_bytes(), authored.replace(PREDECESSOR.encode(), RELEASE.encode()))
+        self.assertEqual(len(self.calls("retarget_guide.py")), 1)
+
+    def test_failed_guide_resumes_in_place_without_losing_authored_edits(self) -> None:
+        path = self.root / "docs" / "QUICKSTART.md"
+        atomic_write(path, path.read_bytes() + b"\nAuthored before retarget.\n")
+        failure = self.root / ".release-state" / "fail.json"
+        atomic_write_json(failure, {"tool": "retarget_guide.py"})
+        self.invoke("candidate", "--no-suite", success=False)
+        expected = path.read_bytes() + b"\nAuthored after interruption.\n"
+        atomic_write(path, expected)
+        failure.unlink()
+        self.candidate("--no-suite")
+        self.assertEqual(path.read_bytes(), expected)
+        self.assertEqual(len(self.calls("retarget_guide.py")), 2)
+
+    def test_interrupted_guide_commits_unchanged_output_without_rerunning(self) -> None:
+        driver = self.driver()
+        DRIVER.run_pipeline(driver, finalize=False, no_suite=True, through="lane-pin")
+        with mock.patch.object(driver, "commit", side_effect=DRIVER.ReleaseError("interrupt guide commit")):
+            with self.assertRaisesRegex(DRIVER.ReleaseError, "interrupt guide commit"):
+                DRIVER.run_pipeline(driver, finalize=False, no_suite=True)
+        self.candidate("--no-suite")
+        self.assertEqual(len(self.calls("retarget_guide.py")), 1)
+
+    def test_interrupted_guide_hashes_new_authored_edits_and_retargets_in_place(self) -> None:
+        driver = self.driver()
+        DRIVER.run_pipeline(driver, finalize=False, no_suite=True, through="lane-pin")
+        with mock.patch.object(driver, "commit", side_effect=DRIVER.ReleaseError("interrupt guide commit")):
+            with self.assertRaisesRegex(DRIVER.ReleaseError, "interrupt guide commit"):
+                DRIVER.run_pipeline(driver, finalize=False, no_suite=True)
+        path = self.root / "docs" / "QUICKSTART.md"
+        expected = path.read_bytes() + b"\nNew authored guidance.\n"
+        atomic_write(path, expected)
+        self.candidate("--no-suite")
+        self.assertEqual(path.read_bytes(), expected)
+        self.assertEqual(len(self.calls("retarget_guide.py")), 2)
+
     def test_rewritten_recorded_history_is_refused(self) -> None:
         self.candidate("--no-suite")
         tree = self.git("rev-parse", "HEAD^{tree}")
@@ -408,7 +520,8 @@ class ReleaseDriverTests(unittest.TestCase):
         ledger = self.root / "releases" / RELEASE / "review" / "runtime-ledger.json"
         atomic_write_json(ledger, {"product_tooling": {"stage_commit": self.initial}})
         result = self.finalize("--no-suite", success=False)
-        self.assertIn("ledger stage_commit is not the guide candidate", result.stderr)
+        self.assertIn("first compose run refuses dirty declared paths", result.stderr)
+        self.assertIn("review/runtime-ledger.json", result.stderr)
         self.assertEqual(self.calls("review_ledger.py"), [])
         self.assertEqual(json.loads(ledger.read_text())["product_tooling"]["stage_commit"], self.initial)
 
@@ -487,6 +600,8 @@ class ReleaseDriverTests(unittest.TestCase):
     def test_native_missing_bundle_and_publication_name_the_lane(self) -> None:
         self.plan["components"][1].update(disposition="recut", release_tag="v3.0.0-native")
         atomic_write_json(self.root / "releases" / RELEASE / "plan.json", self.plan)
+        self.git("add", "--", f"releases/{RELEASE}/plan.json")
+        self.git("commit", "-qm", "test(release): commit the native cut plan")
         result = self.invoke("candidate", "--no-suite", success=False)
         self.assertIn("--bundle lanes disagree with plan: missing rtx4090", result.stderr)
         bundle = self.private / "native"
@@ -499,6 +614,8 @@ class ReleaseDriverTests(unittest.TestCase):
         self.plan["components"][0].update(disposition="recut", release_tag="v3.0.0-runtime",
                                            source_commit="9" * 40)
         atomic_write_json(self.root / "releases" / RELEASE / "plan.json", self.plan)
+        self.git("add", "--", f"releases/{RELEASE}/plan.json")
+        self.git("commit", "-qm", "test(release): commit the container cut plan")
         inputs = {
             "release_tag": "ignored-runtime-tag", "source_commit": "8" * 40,
             "source_tag": "v3.0.0-source", "binary_sha": "7" * 64,
