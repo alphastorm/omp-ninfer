@@ -1420,8 +1420,9 @@ class AcceptanceFixtureCommandTests(unittest.TestCase):
         from release_io import atomic_write_json
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary) / "clone"
+            environment = FIXTURES.subprocess_environment(root)
             subprocess.run(["git", "clone", "--quiet", "--no-hardlinks", str(ROOT), str(root)],
-                           check=True, capture_output=True)
+                           check=True, capture_output=True, env=environment)
             shutil.copy2(ROOT / "tests/acceptance_fixtures.py", root / "tests/acceptance_fixtures.py")
             shutil.copy2(ROOT / "scripts/collect_route_evidence.py", root / "scripts/collect_route_evidence.py")
             shutil.copy2(ROOT / "scripts/review_ledger.py", root / "scripts/review_ledger.py")
@@ -1447,16 +1448,18 @@ class AcceptanceFixtureCommandTests(unittest.TestCase):
                 "components": [{"id": name, "disposition": "carried", "release_tag": row["release_tag"],
                                 "source_commit": row["source_commit"]} for name, row in components.items()],
                 "platforms": {row["id"]: row["status"] for row in authority["profiles"]}, "decisions": [],
+                "limitations": list(FIXTURES.FIXTURE_LIMITATIONS),
             })
             authority["product_release"] = release
             atomic_write_json(root / "compatibility.json", authority)
             atomic_write_json(directory / "compatibility.json", authority)
             prefix = "synthetic-" + release.replace(".", "")
-            candidate = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
+            candidate = subprocess.check_output(
+                ["git", "rev-parse", "HEAD"], cwd=root, text=True, env=environment).strip()
             result = subprocess.run([
                 sys.executable, "tests/acceptance_fixtures.py", "write", "--release", release,
                 "--candidate", candidate, "--out", str(Path(temporary) / "inputs"),
-            ], cwd=root, capture_output=True, text=True)
+            ], cwd=root, capture_output=True, text=True, env=environment)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             outputs = json.loads(result.stdout)
             qualification = MODULE.load(directory / "qualification.json")
@@ -1466,7 +1469,7 @@ class AcceptanceFixtureCommandTests(unittest.TestCase):
             result = subprocess.run([
                 sys.executable, "scripts/review_ledger.py", "--release", release, "--candidate", candidate,
                 "--reviews", outputs["reviews"], "--values", outputs["values"],
-            ], cwd=root, capture_output=True, text=True)
+            ], cwd=root, capture_output=True, text=True, env=environment)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             ledger = MODULE.load(directory / "review/runtime-ledger.json")
             self.assertEqual(ledger["product_tooling"]["stage_commit"], candidate)
@@ -1477,7 +1480,7 @@ class AcceptanceFixtureCommandTests(unittest.TestCase):
                 sys.executable, "scripts/collect_route_evidence.py", "--release", release, "--candidate", candidate,
                 "--window-root", outputs["window_root"], "--plan", str(directory / "plan.json"),
                 "--output", str(Path(temporary) / "collected/composition-evidence.json"),
-            ], cwd=root, capture_output=True, text=True)
+            ], cwd=root, capture_output=True, text=True, env=environment)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             collected = json.loads(result.stdout)
             arguments = [
@@ -1487,7 +1490,7 @@ class AcceptanceFixtureCommandTests(unittest.TestCase):
             ]
             for lane, path in collected["routes"].items():
                 arguments += ["--route", f"{lane}={path}"]
-            result = subprocess.run(arguments, cwd=root, capture_output=True, text=True)
+            result = subprocess.run(arguments, cwd=root, capture_output=True, text=True, env=environment)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             self.assertEqual(MODULE.load(directory / "manifest.json")["status"], "ready")
             for filename in ("documented-routes.json", "composed-external-installation.json",
@@ -1498,7 +1501,7 @@ class AcceptanceFixtureCommandTests(unittest.TestCase):
             for mode in ("--require-ready", "--lint-ready"):
                 result = subprocess.run([
                     sys.executable, "scripts/verify_release.py", "--release", release, mode, "--json",
-                ], cwd=root, capture_output=True, text=True)
+                ], cwd=root, capture_output=True, text=True, env=environment)
                 self.assertIn(result.returncode, (0, 1), result.stdout + result.stderr)
                 report = json.loads(result.stdout)
                 # This tool-level fixture deliberately omits the driver's profile migration,
@@ -1509,9 +1512,9 @@ class AcceptanceFixtureCommandTests(unittest.TestCase):
                 self.assertEqual(review_errors, [], result.stdout + result.stderr)
             # Re-run only the historical goldens with the synthetic successor now current.
             result = subprocess.run([
-                sys.executable, "-m", "unittest", "tests.test_review_ledger.PrivateReviewGoldenTests",
-                "tests.test_collect_route_evidence.PrivateCollectorGoldenTests",
-            ], cwd=root, capture_output=True, text=True)
+                sys.executable, "-m", "unittest", "test_review_ledger.PrivateReviewGoldenTests",
+                "test_collect_route_evidence.PrivateCollectorGoldenTests",
+            ], cwd=root, capture_output=True, text=True, env=environment)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
 

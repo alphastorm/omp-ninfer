@@ -9,6 +9,7 @@ import argparse
 from copy import deepcopy
 import importlib.util
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -22,11 +23,18 @@ assert SPEC and SPEC.loader
 COMPOSER = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = COMPOSER
 SPEC.loader.exec_module(COMPOSER)
+HISTORY_SPEC = importlib.util.spec_from_file_location(
+    "acceptance_fixture_history", ROOT / "tests" / "history.py")
+assert HISTORY_SPEC and HISTORY_SPEC.loader
+HISTORY = importlib.util.module_from_spec(HISTORY_SPEC)
+sys.modules[HISTORY_SPEC.name] = HISTORY
+HISTORY_SPEC.loader.exec_module(HISTORY)
 from release_io import atomic_write_json, git
 
 # v0.7.4's accepted posture: the macOS SSH profile stays preview, the Docker-local ones install.
 ACCEPTED = {"darwin-remote-ssh": "preview", "windows-docker-local": "qualified",
             "linux-docker-local": "qualified"}
+FIXTURE_LIMITATIONS = ("Acceptance covers only the documented routes and recorded client operations.",)
 
 DESCRIPTOR = json.loads(
     (ROOT / "tests" / "fixtures" / "upstream-omp-component.json").read_text(encoding="utf-8")
@@ -167,6 +175,11 @@ def load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def subprocess_environment(root: Path) -> dict[str, str]:
+    """Give child interpreters their own test import root, not the caller's Python path."""
+    return {**os.environ, "PYTHONPATH": str(root / "tests")}
+
+
 def predecessor(root: Path, release: str | None = None) -> dict:
     """Latest ready GA predecessor, optionally bounded by an already-selected successor."""
     version = COMPOSER.product_version(release) if release is not None else None
@@ -181,10 +194,10 @@ def predecessor(root: Path, release: str | None = None) -> dict:
 
 def public_release_tree(root: Path, release: str, destination: Path) -> str:
     """Materialize the public tag's exact tree and history, never the current authority."""
-    from history import resolve_commits
-    (commit,) = resolve_commits(f"refs/tags/{release}", root=root)
+    (commit,) = HISTORY.resolve_commits(f"refs/tags/{release}", root=root)
     subprocess.run(["git", "clone", "--quiet", "--no-hardlinks", "--no-checkout",
-                    str(root), str(destination)], check=True, capture_output=True)
+                    str(root), str(destination)], check=True, capture_output=True,
+                   env=subprocess_environment(root))
     git(destination, "checkout", "--quiet", "--detach", commit)
     return commit
 
@@ -472,7 +485,8 @@ def write_fixtures(root: Path, release: str, candidate: str, out: Path) -> dict:
     evidence, routes = fixture_evidence(root, release, candidate)
     write_windows(out, release, candidate, evidence, routes)
     plan = {"artifact_type": "omp_ninfer_release_plan", "schema_version": 1, "release": release,
-            "platforms": {profile: row["status"] for profile, row in evidence["platforms"].items()}}
+            "platforms": {profile: row["status"] for profile, row in evidence["platforms"].items()},
+            "limitations": list(FIXTURE_LIMITATIONS)}
     atomic_write_json(out / "plan.json", plan)
     from collect_route_evidence import collect
     evidence, _ = collect(root, release, candidate, out, plan)
