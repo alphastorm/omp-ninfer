@@ -144,3 +144,20 @@ jobs:
               --temporary-previous ci-predecessor --mode dry-run
             test ! -e "$workspace"
           done
+
+  # Cut a synthetic successor of the latest ready release all the way to the ready gate, with
+  # the real tools and no private input, then run the contract suite at that state. This is
+  # where a change that would break the next release, or a test that depends on which
+  # release is current, fails: before a release, not during one.
+  release-rehearsal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: Rehearse the release after hardware qualification
+        run: python3 scripts/release.py rehearse --suite

@@ -812,10 +812,22 @@ def rehearse(root: Path = ROOT, *, keep: Path | None = None, suite: bool = False
                 raise ReleaseError("--keep must be outside the source repository")
             if destination.exists() and (not destination.is_dir() or any(destination.iterdir())):
                 raise ReleaseError("--keep must name an absent or empty directory")
-        return git(root, "rev-parse", "HEAD").strip(), latest_ready_manifest(root)
+        previous = latest_ready_manifest(root)
+        ready = tuple(map(int, previous["release"][1:].split(".")))
+        versions = {path.name: tuple(map(int, path.name[1:].split(".")))
+                    for path in (root / "releases").iterdir()
+                    if path.is_dir() and re.fullmatch(r"v\d+\.\d+\.\d+", path.name)}
+        later = sorted((name for name, version in versions.items() if version > ready),
+                       key=versions.__getitem__)
+        return git(root, "rev-parse", "HEAD").strip(), previous, later
 
     try:
-        head, previous = step("preflight", preflight)
+        head, previous, later = step("preflight", preflight)
+        if later:
+            # A release newer than the latest ready one is being cut on this tree. Its own
+            # lint and ready checks are the proof here; a synthetic successor would collide.
+            print(f"rehearsal: skipped: release {later[-1]} is in progress on this tree", flush=True)
+            return 0
         version = tuple(map(int, previous["release"][1:].split(".")))
         release = f"v{version[0]}.{version[1] + 1}.0"
         if keep is None:

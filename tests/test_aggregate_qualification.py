@@ -171,9 +171,10 @@ class CarriedAggregateTests(unittest.TestCase):
         self.assertEqual(q["observed_gates"], {})
         manifest = load(self.release_root / "manifest.json")
         statement = AGGREGATE.verifier.component_provenance(self.root, self.release, manifest)["statement"]
-        # Authored sentences come from the plan; nothing is inherited from the predecessor.
+        # Authored sentences come from the plan; the predecessor contributes none. The final
+        # fixed sentence is generated for every release, so a predecessor may carry the same one.
         self.assertEqual(manifest["limitations"][:-1], [*self.plan["limitations"], statement])
-        self.assertFalse(set(manifest["limitations"]) & set(self.source_manifest["limitations"]))
+        self.assertFalse(set(manifest["limitations"][:-1]) & set(self.source_manifest["limitations"]))
         self.assertFalse([target for target in manifest["publication"]["targets"] if "carried" in target])
         compatibility = load(self.release_root / "compatibility.json")
         self.assertEqual(AGGREGATE.verifier.provenance_claim_errors(
