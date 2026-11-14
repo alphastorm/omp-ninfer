@@ -783,6 +783,26 @@ Everything below this heading is a dated record, preserved as published. Records
 a new record is added and an old one is not edited. For what is true today, read the sections
 above and the [canonical facts](FACTS.md#current-release).
 
+## v0.19.0 erratum, 2026-11-14 — component provenance wording in four acceptance strings
+
+Four descriptive strings in the published `v0.19.0` evidence describe the runtime components
+incorrectly. The manifest, the receipts, every hash and every pin are correct and unaffected; the
+tagged tree is not edited.
+
+| File | Field | Published wording | Fact (`releases/v0.19.0/manifest.json`) |
+| --- | --- | --- | --- |
+| `releases/v0.19.0/qualification.json` | `documented_route_acceptance.scope` | "both newly cut beta.4 native public installs"; "the current one-source N cuts" | Only the RTX 3090 native was cut for this release (`v0.8.0-qwen38-3090-beta.4`). The RTX 4090 native is `v0.8.0-qwen38-4090-beta.3`, carried unchanged from v0.18.0. |
+| `releases/v0.19.0/acceptance/composed-external-installation.json` | `client.note` | "all three runtime components were rebuilt from one N source" | The three components bind three source commits: RTX 5090 `41f89b31`, RTX 3090 `15c3e395`, RTX 4090 `48c8ac46`. |
+| `releases/v0.19.0/acceptance/composed-external-installation.json` | `mode` | "new beta.4 native packages" | One new native package (RTX 3090 beta.4). |
+| `releases/v0.19.0/acceptance/documented-routes.json` | `mode` | "both promoted beta.4 native lanes" | Both native lanes were restored after their windows; only the RTX 3090 lane is beta.4. |
+
+The [v0.19.0 release notes](../releases/v0.19.0/NINFER_RELEASE_NOTES.md) and the v0.19.0 record
+below state the carried RTX 4090 component and the two cut sources correctly. The four strings
+were written by a private evidence collector copied from the previous release with its
+identifiers substituted; no check read them. From the next release the composer generates each
+component's provenance from the manifests, and the verifier refuses evidence prose that makes a
+provenance claim of its own.
+
 ## v0.19.0 — bounded pressure saves, RTX 3090 beta.4, and stock OMP 18.20.0
 
 Published **2026-11-13** (annotated tag `v0.19.0` → `571b0789e6e0d38cf09996163da45f46cac1a65d`) as
