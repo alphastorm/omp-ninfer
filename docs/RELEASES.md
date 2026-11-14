@@ -84,7 +84,9 @@ Prereleases never take GitHub `Latest`; `Latest` always points at the current pu
 The committed `releases/<version>/plan.json` declares the release identities, carried or re-cut
 components, support posture and decisions. `scripts/release.py` validates the plan and creates
 the ordered commits that advance the manifest from `draft` through `candidate` to `ready`.
-It does not publish. Maintainer terms are defined below and in the [glossary](FACTS.md#glossary):
+Commit groups do not publish. The separate `cut` command defaults to a native component dry-run;
+its explicit `--publish` requires founder authorization. Product publication remains a different
+founder-run command. Maintainer terms are defined below and in the [glossary](FACTS.md#glossary):
 
 1. [Release state transition](#release-state-transition) — `draft`, `candidate`, and `ready` rules.
 2. [Candidate freeze](#candidate-freeze) — freeze client, runtime, model, and receipt bytes.
@@ -343,6 +345,7 @@ python3 scripts/release.py plan init --release "$release"
 python3 scripts/release.py plan check --release "$release"
 python3 scripts/release.py status --release "$release"
 python3 scripts/release.py next --release "$release"
+# For each re-cut native lane, complete the component cut described below.
 python3 scripts/release.py candidate --release "$release"
 # Run the reviews and acceptance windows from the guide candidate printed by status.
 python3 scripts/release.py finalize --release "$release" \
@@ -389,6 +392,31 @@ seeds predecessor sentences, printing each dropped provenance claim or generated
 the aggregate owns the generated provenance and neutral evidence sentence, not the author.
 No absolute paths or private markers belong in a plan.
 
+For each re-cut native lane, write its component notes and run:
+
+```sh
+python3 scripts/release.py cut --release "$release" --lane "$lane" \
+  --bundle "$bundle" --runtime-dir "$runtime_dir" --notes-file "$component_notes"
+# Only after the founder authorizes this component's publication:
+python3 scripts/release.py cut --release "$release" --lane "$lane" \
+  --bundle "$bundle" --runtime-dir "$runtime_dir" --notes-file "$component_notes" \
+  --publish --authorization "$authorization"
+```
+
+The default command runs only the native cutter's dry-run and prints the publication and grant it
+would require. `--publish` requires the authorization file's SHA-256 in a committed plan decision
+with `kind: component-cut` and id `cut-<lane>` (for example `cut-rtx3090`); it runs dry-run again in
+the same invocation before publishing. Lane, version, beta, source and checksums are derived from
+the plan and validated bundle. Repeat `--asset ROLE=PATH` for an external package; the driver
+materializes closed assets with bounded, atomic copies, not links to mutable source files.
+An existing public tag is never published again: matching bytes are authenticated, differing bytes
+refuse with public and bundle digests. The authenticated publication record and private cut paths
+stay under ignored `.release-state`; `candidate` reuses the lane's bundle, asset and publication
+inputs. `status` says `recorded` from the local file without accessing the network; `next` explains
+re-verification with `native_publication.py --check`, which re-reads the public bytes.
+This component authorization is not product publication authority: the product remains a separate
+founder-run publication after the ready gate and publication preflight.
+
 Supply private inputs as arguments to `candidate`, not as plan fields:
 
 - A re-cut container requires `--stage-input JSON`, `--lane-receipt rtx5090=PATH` and
@@ -397,6 +425,11 @@ Supply private inputs as arguments to `candidate`, not as plan fields:
   files come from the cut. The driver always takes the release tag and source commit from the
   plan. Relative file options resolve beside this JSON. A carried container derives its staging
   arguments from the predecessor and refuses a new runtime-publication record.
+- Instead, `candidate --runtime-handoff DIR` verifies a closed runtime handoff and expands those
+  three inputs to absolute private paths. It refuses mixed raw arguments, mismatched plan identity
+  or predecessor, extra files, and incorrect sizes/hashes. The handoff uses schema
+  `omp-ninfer.rtx5090-handoff/1`, a filename-keyed `files` object and exactly the three parsed
+  `driver_arguments` pairs; arbitrary arguments are never forwarded.
 - Each re-cut native lane requires `--bundle LANE=DIR` and
   `--native-publication LANE=JSON`; repeat per lane. External package files use
   `--asset ROLE=PATH` when the bundle declares them. Carried native lanes take neither bundle
@@ -422,7 +455,8 @@ for every earlier `spent-failed` attempt of that lane. The input fingerprint has
 alongside the window evidence. Older windows without an index keep their original root layout.
 
 The driver remembers private input paths only in ignored `.release-state/<version>.json`, written
-atomically. That file is a cache, not authority: first-parent commits with `Release:` and
+atomically, and keeps authenticated component records under `.release-state/<version>/`.
+The input-state file is a cache, not authority: first-parent commits with `Release:` and
 `Release-Step:` trailers determine completed groups, and `Pins:` trailers bind the earlier group
 commits. Rerunning a completed group makes no commit. An interrupted group's complete outputs are
 committed without rerunning tools only when the plan, HEAD and private input hashes are unchanged;
