@@ -4,6 +4,8 @@ from __future__ import annotations
 import importlib.util
 import io
 import json
+import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -30,144 +32,15 @@ from verify_release import (  # noqa: E402  # pyright: ignore[reportMissingImpor
     validate_documented_route_acceptance, validate_native_route_policy,
 )
 
-# v0.7.4's accepted posture: the macOS SSH profile stays preview, the Docker-local ones install.
-ACCEPTED = {"darwin-remote-ssh": "preview", "windows-docker-local": "qualified",
-            "linux-docker-local": "qualified"}
-
-DESCRIPTOR = json.loads(
-    (ROOT / "tests" / "fixtures" / "upstream-omp-component.json").read_text(encoding="utf-8")
+FIXTURE_SPEC = importlib.util.spec_from_file_location("acceptance_fixtures", ROOT / "tests/acceptance_fixtures.py")
+assert FIXTURE_SPEC and FIXTURE_SPEC.loader
+FIXTURES = importlib.util.module_from_spec(FIXTURE_SPEC)
+sys.modules[FIXTURE_SPEC.name] = FIXTURES
+FIXTURE_SPEC.loader.exec_module(FIXTURES)
+from acceptance_fixtures import (
+    ACCEPTED, CANDIDATE, DESCRIPTOR, FIRST_RELEASE, LIVE, MANIFEST, RESTORATION,
+    STAGED_ROUTE_ACCEPTANCE, UPSTREAM, client_distribution, native_evidence, route_receipt,
 )
-CANDIDATE = "1" * 40
-UPSTREAM = {"distribution_kind": "upstream-release",
-            "upstream_repository": "https://github.com/can1357/oh-my-pi",
-            "upstream_tag": DESCRIPTOR["omp"]["upstream_tag"],
-            "upstream_commit": "5" * 40, "release_id": 42}
-
-
-def client_distribution(platform: str, digest: str = "8" * 64) -> dict:
-    asset = f"omp-{platform}" + (".exe" if platform == "windows-x64" else "")
-    return {**UPSTREAM, "os": platform.split("-")[0], "architecture": platform.rsplit("-", 1)[1],
-            "published": True, "asset_name": asset, "asset_bytes": 123, "asset_id": 43,
-            "asset_url": f"{UPSTREAM['upstream_repository']}/releases/download/{UPSTREAM['upstream_tag']}/{asset}",
-            "asset_sha256": digest, "binary_sha256": digest}
-
-
-WINDOWS = client_distribution("windows-x64")
-MANIFEST = {
-    "components": {
-        "omp": {**UPSTREAM, "upstream_tree": "6" * 40,
-                "distribution_version": DESCRIPTOR["omp"]["distribution_version"],
-                "platform": "windows-x64", "artifact_name": WINDOWS["asset_name"],
-                "artifact_url": WINDOWS["asset_url"], "artifact_bytes": WINDOWS["asset_bytes"],
-                "artifact_release_id": 42, "artifact_asset_id": 43, "artifact_published": True,
-                "artifact_sha256": WINDOWS["asset_sha256"], "binary_sha256": WINDOWS["binary_sha256"],
-                "compatibility_authority": "https://example.invalid/compatibility.json"},
-        "ninfer": {"oci_manifest_digest": "sha256:" + "a" * 64, "server_binary_sha256": "b" * 64},
-        "model": {"artifact_sha256": "c" * 64},
-    },
-    "runtime_identity": {"configuration_sha256": "d" * 64},
-}
-LIVE = {
-    "omp_version": f"omp/{DESCRIPTOR['omp']['distribution_version']}",
-    "event_counts": {"tool_execution_start": 1, "tool_execution_end": 1},
-    "typed_read_tool_calls": 1,
-    "linked_tool_results": 1,
-    "tool_result_marker": True,
-    "exact_visible_final_answer": True,
-    "agent_end": True,
-    "continuation_exact_nonce": True,
-    "runtime_identity_bound": True,
-    "raw_transcript_included": False,
-    "runtime_image_digest": "sha256:" + "a" * 64,
-    "runtime_server_binary_sha256": "b" * 64,
-    "runtime_configuration_sha256": "d" * 64,
-    "model_sha256": "c" * 64,
-    "fail_closed": {"exit_code": 1, "no_model_response": True,
-                    "only_selected_local_provider_observed": True},
-}
-# v0.14.0's restoration evidence: its receipt without the fields the composer writes itself.
-RESTORATION = {key: value for key, value in json.loads(
-    (ROOT / "docs/measurements/2026-10-28-v0140-acceptance-restoration.json").read_text(encoding="utf-8")
-).items() if key not in ("artifact_type", "schema_version", "release", "as_of", "status",
-                         "production_upgrade_activated",
-                         "raw_private_paths_credentials_or_outputs_included")}
-RESTORATION["candidate_commit"] = CANDIDATE
-FIRST_RELEASE = {"rollback": {"status": "not_applicable", "directions": 0,
-                              "reason": "first release of the lineage"}}
-# The route-acceptance summary v0.14.0's staging left for composition to replace.
-STAGED_ROUTE_ACCEPTANCE = {
-    "status": "pending",
-    "fresh_product_acceptance": False,
-    "scope": "Fresh candidate-bound external-install acceptance of all five routes, three unchanged "
-             "stock OMP 18.12.6 clients and both beta.3 native public installs is required. No "
-             "predecessor product acceptance is carried.",
-    "document_change": "Published QUICKSTART blocks remain on v0.13.1 at this stage.",
-}
-
-
-def native_evidence(gpu: str) -> dict:
-    """v0.14.0's first-of-lineage public-install evidence for one native lane."""
-    receipt = json.loads((ROOT / f"releases/v0.14.0/acceptance/{gpu}-public-install.json")
-                         .read_text(encoding="utf-8"))
-    return {key: receipt[key] for key in ("preparation", "observations", "limitations")}
-
-
-
-def route_receipt(lane: str) -> dict:
-    steps = [
-        {"slug": step.slug, "status": "passed", "block_sha256": "e" * 64, "executed_sha256": "e" * 64,
-         "elapsed_seconds": 1.0}
-        for step in MODULE.documented_route.LANES[lane]
-    ]
-    return {"artifact_type": "omp_ninfer_documented_route_run", "lane": lane, "status": "passed",
-            "clone_commit": CANDIDATE, "document_sha256": "f" * 64, "steps": steps}
-
-
-def campaign_waiver(release: str, candidate: str, route_sha256: str,
-                    *, failed_phase: str = "structured-outage") -> dict:
-    waiver = {
-        "artifact_type": "omp_ninfer_founder_gate_waiver", "schema_version": 1,
-        "release": release, "candidate": candidate, "lane": "rtx3090-native",
-        "status": "waived-by-founder", "observed_status": "failed",
-        "documented_route_status": "passed", "failed_phase": "structured-outage",
-        "observed_summary": {
-            "action": "Control-Release.ps1 -Action Stop after structured live and native probes",
-            "outcome": "graceful_incomplete_shutdown", "sessions_saved": 1, "sessions_skipped": 8,
-            "sessions_refused": 1, "shutdown_complete": False,
-            "final_durable_save_reason": "capacity", "reclaimed_host_bytes": 0},
-        "restoration_summary": {
-            "status": "restored-by-lead", "outcome": "graceful", "sessions_refused": 0,
-            "runtime_record_absent": True, "gpu_owner_lease_absent": True, "power_limit_w": 370,
-            "all_native_tasks_ready": True, "server_processes": 0, "port_18082_listeners": 0},
-        "provenance": {"source_sha256": "7" * 64},
-        "evidence_sha256": {"documented-route.json": route_sha256,
-                            "window-failure.json": "8" * 64, "driver-window.json": "9" * 64,
-                            "lead-restoration.out": "a" * 64, "pre-window-census.json": "b" * 64},
-    }
-    if failed_phase == "native-probes":
-        waiver["failed_phase"] = failed_phase
-        waiver["observed_summary"] = {
-            "probe": "compaction", "error": "RuntimeError: timed out after 900 s",
-            "timeout_seconds": 900, "http_status_counts": {"503": 8, "499": 2},
-            "managed_stop": {**waiver["observed_summary"], "sessions_refused": 3},
-        }
-        waiver["evidence_sha256"]["compaction-probe.json"] = "c" * 64
-        waiver["probe_projection_sha256"] = {"compaction": "d" * 64}
-    return waiver
-
-
-def waived_campaign_evidence(waiver: dict) -> dict:
-    """Content-safe collector projections retain their original private source digests."""
-    return {
-        "window_failure": {"evidence_name": "rtx3090/evidence/window-failure.json",
-                           "sha256": waiver["evidence_sha256"]["window-failure.json"],
-                           "boundary": waiver["failed_phase"],
-                           "observed_summary": deepcopy(waiver["observed_summary"])},
-        "stopped_owner_census": {"evidence_name": "native-pre-window-census.json",
-                                 "sha256": waiver["evidence_sha256"]["pre-window-census.json"],
-                                 "lane": "rtx3090", "power_limit_w": 370},
-    }
-
 
 def refused(function, *arguments) -> str:
     with unittest.TestCase().assertRaises(SystemExit) as caught:
@@ -356,7 +229,7 @@ class UpstreamCompositionTests(unittest.TestCase):
                                   (ROOT / "tests/fixtures/native-quickstart-5861712f.md").read_bytes())
         manifest = deepcopy(MANIFEST)
         manifest["components"]["ninfer_variants"] = [{
-            "id": "rtx4090-windows-native", "release_tag": "native-runtime",
+            "id": "rtx4090-windows-native", "release_tag": "v9.9.9-qwen38-4090-beta.1",
             "source_commit": "9" * 40, "package_bytes": 100, "package_sha256": "9" * 64,
             "server_binary_sha256": "a" * 64, "configuration_sha256": "b" * 64,
             "model_artifact_sha256": "c" * 64,
@@ -399,8 +272,8 @@ class UpstreamCompositionTests(unittest.TestCase):
                             for key in ("candidate_commit", "rtx5090", "rtx4090")},
             "documented_routes": {"mode": "offline-fixture", "qualification_environment": {},
                                   "scope": "Fresh candidate-bound routes, stock clients and the "
-                                           "native public install passed; no predecessor product "
-                                           "acceptance is carried."},
+                                           "native public install passed. Every documented route "
+                                           "was accepted fresh for this candidate."},
             "composed": {"mode": "offline-fixture", "authority_status": "qualified",
                 "public_client_downloads": {"status": "passed", "anonymous": True},
                 "linux_live_client": {"status": "passed"}, "client_note": "Stock binary",
@@ -1107,15 +980,15 @@ class UpstreamCompositionTests(unittest.TestCase):
         self.add_3090(evidence=False)
         route = self.root / "rtx3090-native.json"
         path = self.release_root / "qualification/rtx3090-route-waiver.json"
-        waiver = campaign_waiver(self.release, CANDIDATE, MODULE.sha256(route.read_bytes()),
-                                 failed_phase=failed_phase)
+        waiver = FIXTURES.campaign_waiver(self.release, CANDIDATE, MODULE.sha256(route.read_bytes()),
+                                          failed_phase=failed_phase)
         MODULE.save(path, waiver)
         binding = {"repository_path": path.relative_to(self.root).as_posix(),
                    "sha256": MODULE.sha256(path.read_bytes())}
         evidence = MODULE.load(self.root / "evidence.json")
         evidence["rtx3090"] = {
             "status": "failed", "failed_phase": failed_phase, "founder_waiver": binding,
-            **waived_campaign_evidence(waiver),
+            **FIXTURES.waived_campaign_evidence(waiver),
             "preparation": {"lineage_mode": "first_release", "previous_release_present": False},
             "observations": {"rollback": deepcopy(FIRST_RELEASE["rollback"])}}
         evidence["restoration"]["rtx3090"] = {**waiver["restoration_summary"], "founder_waiver": binding}
@@ -1522,6 +1395,63 @@ class UpstreamCompositionTests(unittest.TestCase):
         with self.assertRaisesRegex(SystemExit, "upstream_tag must match"):
             self.compose()
         self.assertFalse((self.release_root / "acceptance").exists())
+
+
+class AcceptanceFixtureCommandTests(unittest.TestCase):
+    def test_write_command_feeds_the_real_composer_in_a_disposable_successor_clone(self):
+        from release_io import atomic_write_json
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "clone"
+            subprocess.run(["git", "clone", "--quiet", "--no-hardlinks", str(ROOT), str(root)],
+                           check=True, capture_output=True)
+            shutil.copy2(ROOT / "tests/acceptance_fixtures.py", root / "tests/acceptance_fixtures.py")
+            shutil.copy2(ROOT / "scripts/collect_route_evidence.py", root / "scripts/collect_route_evidence.py")
+            release = "v9.9.9"
+            source = FIXTURES.predecessor(root, release)["release"]
+            directory = root / "releases" / release
+            shutil.copytree(root / "releases" / source, directory)
+            manifest = json.loads((directory / "manifest.json").read_text().replace(
+                f"releases/{source}/", f"releases/{release}/"))
+            manifest.update(release=release, status="candidate")
+            atomic_write_json(directory / "manifest.json", manifest)
+            authority = MODULE.load(root / "compatibility.json")
+            authority["product_release"] = release
+            atomic_write_json(root / "compatibility.json", authority)
+            atomic_write_json(directory / "compatibility.json", authority)
+            candidate = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
+            result = subprocess.run([
+                sys.executable, "tests/acceptance_fixtures.py", "write", "--release", release,
+                "--candidate", candidate, "--out", str(Path(temporary) / "inputs"),
+            ], cwd=root, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            outputs = json.loads(result.stdout)
+            ledger_path = directory / "review/runtime-ledger.json"
+            atomic_write_json(ledger_path, {
+                "artifact_type": "omp_ninfer_review_ledger", "release": release,
+                "product_tooling": {"stage_commit": candidate},
+            })
+            qualification = MODULE.load(directory / "qualification.json")
+            qualification["release"] = release
+            qualification.setdefault("observed_gates", {})["g4_review"] = {
+                "repository_path": ledger_path.relative_to(root).as_posix(),
+                "sha256": MODULE.sha256(ledger_path.read_bytes()),
+            }
+            atomic_write_json(directory / "qualification.json", qualification)
+            arguments = [
+                sys.executable, "scripts/compose_route_acceptance.py", "--release", release,
+                "--candidate", candidate, "--as-of", "2099-01-01",
+                "--measurement-prefix", "synthetic", "--evidence", outputs["evidence"],
+            ]
+            for lane, path in outputs["routes"].items():
+                arguments += ["--route", f"{lane}={path}"]
+            result = subprocess.run(arguments, cwd=root, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertEqual(MODULE.load(directory / "manifest.json")["status"], "ready")
+            for filename in ("documented-routes.json", "composed-external-installation.json",
+                             "rtx4090-public-install.json", "rtx3090-public-install.json"):
+                self.assertTrue((directory / "acceptance" / filename).is_file(), filename)
+            self.assertTrue((root / "docs/measurements/synthetic-acceptance-restoration.json").is_file())
+            self.assertEqual(len(list((root / "docs/measurements").glob("synthetic-*-run.json"))), 5)
 
 
 if __name__ == "__main__":

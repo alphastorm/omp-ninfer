@@ -1,13 +1,19 @@
+"""A release tool's interrupted write must leave the previous document intact."""
+from __future__ import annotations
+
+import importlib.util
 import json
 import os
-import sys
 import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-import release_io
+ROOT = Path(__file__).resolve().parents[1]
+SPEC = importlib.util.spec_from_file_location("release_io", ROOT / "scripts" / "release_io.py")
+assert SPEC is not None and SPEC.loader is not None
+release_io = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(release_io)
 
 
 class AtomicWriteTests(unittest.TestCase):
@@ -15,9 +21,9 @@ class AtomicWriteTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             target = Path(temporary) / "authority.json"
             target.write_text('{"release": "previous"}\n', encoding="utf-8")
-            with mock.patch.object(os, "replace", side_effect=OSError("disk full")):
-                with self.assertRaises(OSError):
-                    release_io.atomic_write_json(target, {"release": "next"})
+            with (mock.patch.object(os, "replace", side_effect=OSError("disk full")),
+                  self.assertRaises(OSError)):
+                release_io.atomic_write_json(target, {"release": "next"})
             self.assertEqual(json.loads(target.read_text(encoding="utf-8")), {"release": "previous"})
             self.assertEqual([path.name for path in Path(temporary).iterdir()], ["authority.json"])
 
