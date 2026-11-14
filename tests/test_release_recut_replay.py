@@ -102,7 +102,6 @@ class PrivateRecutReplayTests(unittest.TestCase):
                 "image_digest": runtime["oci_manifest_digest"],
                 "runtime_receipt_release": runtime["runtime_receipt_release"],
                 "upstream_commit": runtime["upstream_commit"],
-                "config_sha": manifest["runtime_identity"]["configuration_sha256"],
             }
             atomic_write_json(private / "stage-input.json", stage_input)
             # The predecessor linked an unbound client review. Preserve its label, not its link;

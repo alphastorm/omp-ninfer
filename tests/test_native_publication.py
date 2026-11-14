@@ -438,7 +438,7 @@ class HTTPTransportTests(OfflineTestCase):
             self.origin, socket_timeout=2, api_timeout=0.15, download_timeout=0.15)
         expected = (self.fixture.fixture.assets / "SHA256SUMS").read_bytes()
         started = time.monotonic()
-        with self.assertRaises(PUBLICATION.BundleError):
+        with self.assertRaisesRegex(PUBLICATION.BundleError, "/timeout"):
             list(transport.download(self.origin + "/slow-redirect/5", len(expected)))
         self.assertLess(time.monotonic() - started, 0.4)
         self.assertLess(len(self.requests), 4, "header redirects reused the original socket timeout")
