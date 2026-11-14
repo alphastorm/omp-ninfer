@@ -29,6 +29,9 @@ LEDGER = module("review_ledger", ROOT / "scripts/review_ledger.py")
 FIXTURES = module("acceptance_fixtures", ROOT / "tests/acceptance_fixtures.py")
 from release_io import atomic_write_json, git
 
+HOST_MARKERS = tuple(marker for marker in LEDGER.PRIVATE_MARKERS
+                     if "/" not in marker and "\\" not in marker)
+
 
 class ReviewLedgerTests(unittest.TestCase):
     def setUp(self):
@@ -38,14 +41,20 @@ class ReviewLedgerTests(unittest.TestCase):
         git(self.root, "init", "--quiet")
         git(self.root, "config", "user.name", "Synthetic Test")
         git(self.root, "config", "user.email", "test@example.invalid")
+        git(self.root, "config", "commit.gpgsign", "false")
+        self.release = "v0.20.0"
+        self.release_manifest = {"components": {
+            "ninfer": {"source_commit": "1" * 40},
+            "ninfer_variants": [{"source_commit": "2" * 40}],
+        }}
         atomic_write_json(self.root / "initial.json", {})
-        git(self.root, "add", "initial.json")
+        atomic_write_json(self.root / "releases" / self.release / "manifest.json",
+                          self.release_manifest)
+        git(self.root, "add", "initial.json", "releases")
         git(self.root, "commit", "--quiet", "-m", "test: initialize synthetic subject")
         self.candidate = git(self.root, "rev-parse", "HEAD").strip()
-        self.release = "v0.20.0"
         self.out = self.root / "inputs"
-        FIXTURES.write_reviews(self.out, self.release, self.candidate, {
-            "components": {"ninfer": {"source_commit": "1" * 40}}})
+        FIXTURES.write_reviews(self.out, self.release, self.candidate, self.release_manifest)
         self.manifest_path = self.out / "reviews/manifest.json"
         self.values = LEDGER.load(self.out / "values.json")
         self.qualification = self.root / "releases" / self.release / "qualification.json"
@@ -154,10 +163,12 @@ class ReviewLedgerTests(unittest.TestCase):
         self.assertIn(self.values["product_council"]["scope_sentence"], scope)
 
     def test_private_result_clauses_are_refused_before_public_writes(self):
-        self.values["composition_review"]["native_runtime_summary"] = LEDGER.PRIVATE_MARKERS[0] + "synthetic"
-        with self.assertRaisesRegex(SystemExit, "private marker"):
-            self.write()
-        self.assertFalse((self.qualification.parent / "review").exists())
+        for marker in HOST_MARKERS:
+            with self.subTest(marker=marker):
+                self.values["composition_review"]["native_runtime_summary"] = marker + "synthetic"
+                with self.assertRaisesRegex(SystemExit, "private marker"):
+                    self.write()
+                self.assertFalse((self.qualification.parent / "review").exists())
 
     def test_a_nonancestor_commit_and_a_changed_stage_commit_are_refused(self):
         tree = git(self.root, "rev-parse", "HEAD^{tree}").strip()
@@ -173,24 +184,174 @@ class ReviewLedgerTests(unittest.TestCase):
         with self.assertRaisesRegex(SystemExit, "grant G4 approval"):
             self.write()
         self.values["approval_granted"] = True
-        self.values["product_council"]["closure"] = LEDGER.PRIVATE_MARKERS[0] + "synthetic"
-        with self.assertRaisesRegex(SystemExit, "private marker"):
+        for marker in HOST_MARKERS:
+            with self.subTest(marker=marker):
+                self.values["product_council"]["closure"] = marker + "synthetic"
+                with self.assertRaisesRegex(SystemExit, "private marker"):
+                    self.write()
+
+    def set_reviewed_subject(self, commit):
+        path = self.out / "reviews/product_tooling/frozen-subject.json"
+        subject = LEDGER.load(path)
+        subject["subjectCommit"] = commit
+        atomic_write_json(path, subject)
+
+    def assert_subject_refused_without_writes(self, reviewed, *other_commits):
+        before = {path.relative_to(self.root): path.read_bytes()
+                  for path in self.root.rglob("*")
+                  if path.is_file() and ".git" not in path.relative_to(self.root).parts}
+        with self.assertRaises(SystemExit) as refused:
             self.write()
+        for commit in (reviewed, self.candidate, *other_commits):
+            self.assertIn(commit, str(refused.exception))
+        self.assertEqual({path.relative_to(self.root): path.read_bytes()
+                          for path in self.root.rglob("*")
+                          if path.is_file() and ".git" not in path.relative_to(self.root).parts}, before)
+
+    def add_plan_and_candidate(self):
+        atomic_write_json(self.qualification.parent / "plan.json", {"release": self.release})
+        git(self.root, "add", "releases")
+        git(self.root, "commit", "--quiet", "-m", "test: add release plan")
+        planned = git(self.root, "rev-parse", "HEAD").strip()
+        git(self.root, "commit", "--quiet", "--allow-empty", "-m", "test: stage candidate")
+        self.candidate = git(self.root, "rev-parse", "HEAD").strip()
+        self.values["product_council"]["stage_commit"] = self.candidate
+        return planned
+
+    def test_product_review_must_resolve_to_a_candidate_ancestor(self):
+        tree = git(self.root, "rev-parse", "HEAD^{tree}").strip()
+        unrelated = git(self.root, "commit-tree", tree, "-m", "test: unrelated review").strip()
+        git(self.root, "commit", "--quiet", "--allow-empty", "-m", "test: later subject")
+        descendant = git(self.root, "rev-parse", "HEAD").strip()
+        for reviewed in (unrelated, descendant, "f" * 40):
+            with self.subTest(reviewed=reviewed):
+                self.set_reviewed_subject(reviewed)
+                self.assert_subject_refused_without_writes(reviewed)
+
+    def test_product_review_must_not_predate_the_release_plan(self):
+        stale = self.candidate
+        planned = self.add_plan_and_candidate()
+        self.assert_subject_refused_without_writes(stale, planned)
+
+    def test_every_epoch_must_be_between_the_plan_and_candidate(self):
+        stale = self.candidate
+        planned = self.add_plan_and_candidate()
+        self.set_reviewed_subject(planned)
+        tree = git(self.root, "rev-parse", "HEAD^{tree}").strip()
+        unrelated = git(self.root, "commit-tree", tree, "-m", "test: unrelated epoch").strip()
+        for reviewed in (stale, unrelated, "f" * 40):
+            with self.subTest(reviewed=reviewed):
+                self.values["product_council"]["epochs"] = [{
+                    "directory": "product_tooling", "review_mode": "initial",
+                    "review_class": "full-council", "status": "closed-by-disposition",
+                    "reviewed_commit": reviewed,
+                }]
+                self.assert_subject_refused_without_writes(reviewed)
+
+    def test_plan_subject_and_candidate_epochs_can_close_together(self):
+        planned = self.add_plan_and_candidate()
+        self.set_reviewed_subject(planned)
+        self.values["product_council"]["epochs"] = [{
+            "directory": "product_tooling", "review_mode": "initial",
+            "review_class": "full-council", "status": "closed-by-disposition",
+            "reviewed_commit": reviewed,
+        } for reviewed in (planned, self.candidate)]
+        result = self.write()
+        product = LEDGER.load(self.root / result["repository_path"])["product_tooling"]
+        self.assertEqual(product["reviewed_commit"], planned)
+        self.assertEqual([epoch["reviewed_commit"] for epoch in product["epochs"]],
+                         [planned, self.candidate])
+
+    def test_runtime_and_delta_reviews_must_name_released_component_sources(self):
+        for section, filename in (("native_runtime", "frozen-subject.json"),
+                                  ("native_component_delta", "subject.json")):
+            with self.subTest(section=section):
+                path = self.out / "reviews" / section / filename
+                subject = LEDGER.load(path)
+                original = deepcopy(subject)
+                subject["subjectCommit"] = "e" * 40
+                atomic_write_json(path, subject)
+                before = self.qualification.read_bytes()
+                with self.assertRaisesRegex(SystemExit, section) as refused:
+                    self.write()
+                self.assertIn(subject["subjectCommit"], str(refused.exception))
+                self.assertEqual(self.qualification.read_bytes(), before)
+                self.assertFalse((self.qualification.parent / "review").exists())
+                atomic_write_json(path, original)
 
     def test_known_privacy_rule_examples_are_sanitized_and_counted_without_changing_sources(self):
         source = self.out / "reviews/product_tooling/critic.json"
         sentinel = "GPU-" + "12345678-1234-1234-1234-123456789abc"
-        prefix = "C:/" + "Users/"
-        atomic_write_json(source, {"summary": prefix + "synthetic " + sentinel,
+        paths = ["C:/" + "Users/UNIQUE_NAME/private/file.txt",
+                 "C:\\" + "Users\\UNIQUE_NAME\\private\\file.txt",
+                 "C:\\\\" + "Users\\\\UNIQUE_NAME\\\\private\\\\file.txt",
+                 "/" + "Users/UNIQUE_NAME/private/file.txt",
+                 "/" + "home/UNIQUE_NAME/private/file.txt"]
+        atomic_write_json(source, {"summary": " ".join(f"`{path}`" for path in paths) + " " + sentinel,
                                    "evidence": [], "unresolved": []})
         before = source.read_bytes()
         result = self.write()
-        self.assertEqual(result["sanitized"], {
-            "a forward-slash Windows user-profile prefix": 1, "a synthetic GPU-identifier sentinel": 1})
-        self.assertEqual(source.read_bytes(), before)
         output = (self.root / result["repository_path"]).read_text()
-        self.assertNotIn(prefix, output)
-        self.assertNotIn(sentinel, output)
+        for private in ("UNIQUE_NAME", "private", "file.txt", sentinel):
+            self.assertNotIn(private, output)
+        self.assertEqual(result["sanitized"], {
+            "a Windows user-profile path": 3, "a POSIX user-profile path": 2,
+            "a synthetic GPU-identifier sentinel": 1})
+        self.assertEqual(source.read_bytes(), before)
+
+    def test_each_private_path_is_consumed_including_its_username_and_final_segment(self):
+        source = self.out / "reviews/product_tooling/critic.json"
+        for path in ("C:/" + "Users/UNIQUE_NAME/private/file.txt",
+                     "C:\\" + "Users\\UNIQUE_NAME\\private\\file.txt",
+                     "/" + "Users/UNIQUE_NAME/private/file.txt",
+                     "/" + "home/UNIQUE_NAME/private/file.txt"):
+            with self.subTest(path=path):
+                atomic_write_json(source, {"summary": f"Observed `{path}`.",
+                                           "evidence": [], "unresolved": []})
+                before = source.read_bytes()
+                ledger, counts = LEDGER.build(self.root, self.release, self.candidate,
+                                              self.manifest_path, self.values)
+                summary = ledger["product_tooling"]["reviewer_results"]["critic"]["summary"]
+                for private in ("UNIQUE_NAME", "private", "file.txt"):
+                    self.assertNotIn(private, summary)
+                self.assertEqual(sum(counts.values()), 1)
+                self.assertEqual(source.read_bytes(), before)
+
+    def test_private_paths_stop_at_quotes_and_whitespace_without_consuming_the_surrounding_text(self):
+        source = self.out / "reviews/product_tooling/critic.json"
+        for opening, closing in (("'", "'"), ('"', '"'), ("`", "`"), ("", " ")):
+            with self.subTest(delimiter=closing):
+                path = "/" + "home/UNIQUE_NAME/private/file.txt"
+                atomic_write_json(source, {"summary": opening + path + closing + "Retained prose.",
+                                           "evidence": [], "unresolved": []})
+                before = source.read_bytes()
+                ledger, counts = LEDGER.build(self.root, self.release, self.candidate,
+                                              self.manifest_path, self.values)
+                summary = ledger["product_tooling"]["reviewer_results"]["critic"]["summary"]
+                self.assertNotIn("UNIQUE_NAME", summary)
+                self.assertNotIn("file.txt", summary)
+                self.assertTrue(summary.endswith(closing + "Retained prose."), summary)
+                self.assertEqual(sum(counts.values()), 1)
+                self.assertEqual(source.read_bytes(), before)
+
+    def test_a_private_path_is_removed_through_brackets_and_spaced_segments(self):
+        source = self.out / "reviews/product_tooling/critic.json"
+        for path, fragments in (
+            ("/" + "Users/UNIQUE_NAME/Projects/(client)/result.txt", ("UNIQUE_NAME", "client", "result.txt")),
+            ("/" + "home/UNIQUE_NAME/[drafts]/{old}/result.txt", ("UNIQUE_NAME", "drafts", "old", "result.txt")),
+            ("C:/" + "Users/First Last/AppData/private.txt", ("First", "Last", "AppData", "private.txt")),
+            ("C:\\" + "Users\\First Last\\AppData\\private.txt", ("First", "Last", "AppData", "private.txt")),
+            ("/" + "Users/UNIQUE_NAME/My Project/notes.txt", ("UNIQUE_NAME", "Project", "notes.txt")),
+        ):
+            with self.subTest(path=path):
+                atomic_write_json(source, {"summary": f"Observed {path} Retained prose.",
+                                           "evidence": [], "unresolved": []})
+                ledger, _ = LEDGER.build(self.root, self.release, self.candidate,
+                                         self.manifest_path, self.values)
+                summary = ledger["product_tooling"]["reviewer_results"]["critic"]["summary"]
+                for fragment in fragments:
+                    self.assertNotIn(fragment, summary)
+                self.assertTrue(summary.endswith(" Retained prose."), summary)
 
     def test_verifier_self_check_happens_before_either_public_write(self):
         before = self.qualification.read_bytes()

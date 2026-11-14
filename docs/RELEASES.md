@@ -148,6 +148,10 @@ published evidence under `releases/` is not subject to this living-docs check.
 The qualification's G4 review summary (`observed_gates.g4_review`, the release-review ledger) must
 pin its ledger's bytes and restate the ledger's closed status and approval, and its
 documented-route acceptance summary must restate the routes evidence the composition binds.
+From v0.20.0, `--check-pins` also binds what the ledger says was reviewed: the product review
+subject, and each later epoch's, must lie in this release's own history, from the commit that added
+its plan through the route candidate, and an included runtime council or native component review
+must name the source commit of a component the release ships.
 
 `ready` means the package is technically cuttable. It does not grant authority to create repositories,
 push commits/tags, upload images/assets, publish a GitHub release, or modify the Homebrew tap.

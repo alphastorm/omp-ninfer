@@ -7,7 +7,7 @@ The audit inventories its own path without hashing its output, and omits the
 qualification receipt_audit edge from the scalar inventory. ``unadmitted_kept``
 returns every unbound predecessor copy for staging tools without writing.
 ``--prune-unbound`` plans lane-stage deletions and the resulting audit together,
-never removes release notes or currently referenced files, and logs each removal.
+never removes release notes or files referenced by release JSON or Markdown, and logs each removal.
 """
 
 from __future__ import annotations
@@ -411,20 +411,34 @@ def generate_audit(root: Path, release: str, *, phase: str, as_of: str | None = 
 def _prune_references(tree: _Tree, release: str, names: list[str]) -> list[str]:
     prefix = f"releases/{release}/"
     targets = {prefix + name for name in names}
-    references = []
-    for name in ("manifest.json", "qualification.json", "compatibility.json"):
-        document = prefix + name
-        for pointer, value in _leaves(tree.document(document)):
+    references = set()
+    documents = [prefix + name for name in ("manifest.json", "qualification.json", "compatibility.json")]
+    documents.extend(sorted(path for path in tree.paths
+                            if path.startswith(prefix) and Path(path).suffix.lower() == ".md"))
+    for document in documents:
+        if document.lower().endswith(".md"):
+            # Split Markdown delimiters so relative link targets receive the same URL/path
+            # normalization as JSON strings. Keep each line too for plain prose mentions.
+            strings = ((f"line {number}", value)
+                       for number, line in enumerate(tree.read(document).decode("utf-8").splitlines(), 1)
+                       for value in (line, *re.findall(r"""[^\s`"'<>()\[\]{}]+""", line)))
+        else:
+            strings = _leaves(tree.document(document))
+        for pointer, value in strings:
             if not isinstance(value, str):
                 continue
-            parsed = urlsplit(value.replace("\\", "/"))
+            try:
+                parsed = urlsplit(value.replace("\\", "/"))
+            except ValueError:
+                # Markdown prose is not always a URL; it can still mention a path below.
+                parsed = urlsplit("")
             if parsed.scheme or parsed.netloc:
                 path = unquote(parsed.path)
                 matches = [target for target in targets if path.endswith("/" + target)]
             else:
                 path = posixpath.normpath(unquote(parsed.path))
                 if not path.startswith("releases/"):
-                    path = posixpath.normpath(prefix + path)
+                    path = posixpath.normpath(posixpath.dirname(document) + "/" + path)
                 matches = [path] if path in targets else []
             for target in targets:
                 if target in matches:
@@ -434,12 +448,12 @@ def _prune_references(tree: _Tree, release: str, names: list[str]) -> list[str]:
                              + r")(?![\w./-])", value):
                     matches.append(target)
             for target in matches:
-                references.append(f"{target} referenced by {document}#{pointer}")
+                references.add(f"{target} referenced by {document}#{pointer}")
     return sorted(references)
 
 
 def _plan_pruning(tree: _Tree, release: str, as_of: str | None) -> tuple[
-    dict[str, Any], list[tuple[str, str]],
+    dict[str, Any], list[tuple[str, str, str]],
 ]:
     _, carried, _, _, before, after, runtime_carried = _inventory(tree, release)
     names = [name for name in _unadmitted(before, after, carried, runtime_carried)
@@ -448,6 +462,7 @@ def _plan_pruning(tree: _Tree, release: str, as_of: str | None) -> tuple[
     if references:
         raise Refusal("cannot prune referenced files: " + "; ".join(references))
     excluded = {f"releases/{release}/{name}" for name in names}
+    planned = {name: _sha(tree.read(f"releases/{release}/{name}")) for name in names}
     tree.paths = [path for path in tree.paths if path not in excluded]
     for path in excluded:
         tree.cache.pop(path, None)
@@ -455,13 +470,19 @@ def _plan_pruning(tree: _Tree, release: str, as_of: str | None) -> tuple[
     # planned tree before the first filesystem effect. Notes still refuse here.
     audit = _generate_audit(tree, release, phase="lane-stage", as_of=as_of)
     reasons = {row["file"]: row["reason"] for row in audit["files"]}
-    return audit, [(name, reasons[name]) for name in names]
+    return audit, [(name, reasons[name], planned[name]) for name in names]
 
 
-def _apply_pruning(root: Path, release: str, deletions: list[tuple[str, str]]) -> None:
+def _apply_pruning(root: Path, release: str, deletions: list[tuple[str, str, str]]) -> None:
     directory = Path(root) / "releases" / release
+    # Planning judged these bytes. A file saved since then is someone's edit, not a copy.
+    changed = [name for name, _, digest in deletions
+               if _sha((directory / name).read_bytes()) != digest]
+    if changed:
+        raise Refusal("files changed after pruning was planned: "
+                      + ", ".join(f"releases/{release}/{name}" for name in changed))
     parents = set()
-    for name, reason in deletions:
+    for name, reason, _ in deletions:
         path = directory / name
         path.unlink()
         print(f"pruned releases/{release}/{name}: {reason}")

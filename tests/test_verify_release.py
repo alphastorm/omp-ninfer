@@ -922,6 +922,122 @@ class GateWaiverContractTests(unittest.TestCase):
                 self.assertTrue(any("exact historical waiver scope" in error for error in errors), errors)
 
 
+class ReviewSubjectBindingTests(unittest.TestCase):
+    def setUp(self):
+        from release_io import atomic_write_json, git
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        self.git = lambda *arguments: git(self.root, *arguments).strip()
+        self.save = atomic_write_json
+        self.git("init", "--quiet")
+        for key, value in (("user.name", "Synthetic Test"), ("user.email", "test@example.invalid"),
+                           ("commit.gpgsign", "false")):
+            self.git("config", key, value)
+        self.release = "v0.20.0"
+        self.manifest = {"release": self.release, "components": {
+            "ninfer": {"source_commit": "1" * 40},
+            "ninfer_variants": [{"source_commit": "2" * 40}],
+        }}
+        self.save(self.root / "releases" / self.release / "manifest.json", self.manifest)
+        self.git("add", "releases")
+        self.git("commit", "--quiet", "-m", "test: initialize release history")
+        self.previous = self.git("rev-parse", "HEAD")
+        self.save(self.root / "releases" / self.release / "plan.json", {"release": self.release})
+        self.git("add", "releases")
+        self.git("commit", "--quiet", "-m", "test: add release plan")
+        self.planned = self.git("rev-parse", "HEAD")
+        self.git("commit", "--quiet", "--allow-empty", "-m", "test: stage release candidate")
+        self.stage = self.git("rev-parse", "HEAD")
+        self.ledger = {
+            "artifact_type": "omp_ninfer_review_ledger", "release": self.release,
+            "status": "closed-by-disposition", "approval_granted": True,
+            "product_tooling": {"review_id": "synthetic-product", "status": "closed-by-disposition",
+                                "stage_commit": self.stage, "reviewed_commit": self.planned,
+                                "epochs": [{"reviewed_commit": self.planned},
+                                           {"reviewed_commit": self.stage}]},
+            "native_runtime": {"source_commit": "1" * 40},
+            "native_component_delta": {"source_commit": "2" * 40},
+        }
+
+    def ready_history_errors(self, *, check_pins=True):
+        reference = f"releases/{self.release}/review/runtime-ledger.json"
+        path = self.root / reference
+        self.ledger["release"] = self.release
+        self.save(path, self.ledger)
+        qualification = {"observed_gates": {"g4_review": {
+            "status": "passed", "repository_path": reference,
+            "sha256": VERIFY_RELEASE.sha256_file(path),
+            "ledger_status": self.ledger["status"], "approval_granted": True,
+        }}}
+        context = VERIFY_RELEASE.ReadyContext(self.root, self.release, self.manifest, {},
+                                             qualification, [], check_pins, False, "acceptance")
+        errors = []
+        for row in VERIFY_RELEASE.selected_ready_checks(context, flagged=True):
+            if row.pin_only:
+                row.run(context, errors)
+        return errors
+
+    def test_ready_history_accepts_plan_and_candidate_subjects_in_all_epochs(self):
+        self.assertEqual(self.ready_history_errors(), [])
+
+    def test_ready_history_rejects_unrelated_unknown_and_later_product_subjects(self):
+        tree = self.git("rev-parse", "HEAD^{tree}")
+        unrelated = self.git("commit-tree", tree, "-m", "test: unrelated review")
+        self.git("commit", "--quiet", "--allow-empty", "-m", "test: later review")
+        descendant = self.git("rev-parse", "HEAD")
+        for reviewed in (unrelated, "f" * 40, descendant):
+            with self.subTest(reviewed=reviewed):
+                self.ledger["product_tooling"]["reviewed_commit"] = reviewed
+                errors = self.ready_history_errors()
+                self.assertTrue(any(reviewed in error and self.stage in error for error in errors), errors)
+
+    def test_ready_history_rejects_product_and_epoch_subjects_before_the_plan(self):
+        for product in (True, False):
+            with self.subTest(product=product):
+                tooling = self.ledger["product_tooling"]
+                tooling["reviewed_commit"] = self.previous if product else self.planned
+                tooling["epochs"][1]["reviewed_commit"] = self.planned if product else self.previous
+                errors = self.ready_history_errors()
+                self.assertTrue(any(self.previous in error and self.planned in error
+                                    for error in errors), errors)
+
+    def test_ready_history_rejects_an_unknown_epoch_or_stage_instead_of_skipping(self):
+        for field in ("epoch", "stage_commit"):
+            with self.subTest(field=field):
+                tooling = self.ledger["product_tooling"]
+                tooling["stage_commit"] = "f" * 40 if field == "stage_commit" else self.stage
+                tooling["epochs"][1]["reviewed_commit"] = "f" * 40 if field == "epoch" else self.stage
+                errors = self.ready_history_errors()
+                self.assertTrue(any("local git history" in error for error in errors), errors)
+                self.assertEqual(self.ready_history_errors(check_pins=False), [])
+
+    def test_ready_history_checks_plan_existence_at_the_stage_not_in_the_worktree(self):
+        tooling = self.ledger["product_tooling"]
+        tooling.update(stage_commit=self.previous, reviewed_commit=self.previous,
+                       epochs=[{"reviewed_commit": self.previous}])
+        self.assertEqual(self.ready_history_errors(), [])
+
+    def test_ready_history_binds_runtime_and_delta_reviews_to_released_sources(self):
+        for section in ("native_runtime", "native_component_delta"):
+            with self.subTest(section=section):
+                original = self.ledger[section]["source_commit"]
+                self.ledger[section]["source_commit"] = "e" * 40
+                errors = self.ready_history_errors()
+                self.assertTrue(any(section in error and "e" * 40 in error for error in errors), errors)
+                self.ledger[section]["source_commit"] = original
+
+    def test_a_runtime_council_may_review_a_released_native_lane_source(self):
+        self.ledger["native_runtime"]["source_commit"] = "2" * 40
+        self.assertEqual(self.ready_history_errors(), [])
+
+    def test_ready_history_keeps_published_release_contracts_unchanged(self):
+        self.release = "v0.19.0"
+        self.ledger["product_tooling"]["reviewed_commit"] = "f" * 40
+        self.ledger["native_runtime"]["source_commit"] = "e" * 40
+        self.assertEqual(self.ready_history_errors(), [])
+
+
 class ReleaseContractTest(unittest.TestCase):
     def test_demo_cast_headers_publish_only_playback_metadata(self):
         receipt = self.load(ROOT / "docs/measurements/2026-10-28-readme-demo-v14.json")

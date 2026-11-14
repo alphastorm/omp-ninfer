@@ -1209,6 +1209,110 @@ def validate_review_ledger(
                 f"{label}.{field} must equal the review ledger's {source}", errors)
 
 
+def review_subject_errors(root: Path, release: str, ledger: dict[str, Any],
+                          manifest: dict[str, Any]) -> list[str]:
+    """Bind product subjects to the plan/candidate interval and runtime subjects to components."""
+    errors: list[str] = []
+    components = manifest.get("components", {})
+    variant_sources = [row.get("source_commit") for row in components.get("ninfer_variants", [])
+                       if isinstance(row, dict)]
+    component_sources = {
+        # A runtime council reviews the container source or, when only native lanes are
+        # re-cut, a native lane's source. Either is a source this release ships.
+        "native_runtime": [components.get("ninfer", {}).get("source_commit"), *variant_sources],
+        "native_component_delta": variant_sources,
+    }
+    for section, sources in component_sources.items():
+        if section not in ledger:
+            continue
+        record = ledger[section]
+        source = record.get("source_commit") if isinstance(record, dict) else None
+        require(isinstance(source, str) and GIT_SHA_RE.fullmatch(source) is not None
+                and source in sources,
+                f"{section}.source_commit {source!r} must match a released component source "
+                f"commit in {sources!r}", errors)
+    tooling = ledger.get("product_tooling")
+    if not isinstance(tooling, dict):
+        errors.append("review ledger product_tooling must identify its reviewed and stage commits")
+        return errors
+    stage = tooling.get("stage_commit")
+    if not isinstance(stage, str) or GIT_SHA_RE.fullmatch(stage) is None:
+        errors.append(f"product_tooling.stage_commit {stage!r} must be a full commit")
+        return errors
+    known: dict[str, bool] = {}
+
+    def in_history(commit: str) -> bool:
+        if commit not in known:
+            known[commit] = subprocess.run(
+                ["git", "-C", str(root), "cat-file", "-e", f"{commit}^{{commit}}"],
+                capture_output=True,
+            ).returncode == 0
+        return known[commit]
+
+    if not in_history(stage):
+        errors.append(f"product_tooling.stage_commit {stage} is not in local git history "
+                      "(full history is required to verify review subjects)")
+        return errors
+    plan = f"releases/{release}/plan.json"
+    plan_start = None
+    if subprocess.run(["git", "-C", str(root), "cat-file", "-e", f"{stage}:{plan}"],
+                      capture_output=True).returncode == 0:
+        added = subprocess.run(
+            ["git", "-C", str(root), "log", "--reverse", "--diff-filter=A", "--format=%H",
+             stage, "--", plan], capture_output=True, text=True, encoding="utf-8",
+        )
+        commits = added.stdout.splitlines()
+        if added.returncode != 0 or not commits:
+            errors.append(f"release plan addition for stage_commit {stage} is not in local git "
+                          "history (full history is required to verify review subjects)")
+            return errors
+        plan_start = commits[0]
+    subjects = [("product_tooling.reviewed_commit", tooling.get("reviewed_commit"))]
+    epochs = tooling.get("epochs", [])
+    if not isinstance(epochs, list):
+        errors.append("product_tooling.epochs must be an array of reviewed subjects")
+    else:
+        subjects.extend((f"product_tooling.epochs[{index}].reviewed_commit",
+                         epoch.get("reviewed_commit") if isinstance(epoch, dict) else None)
+                        for index, epoch in enumerate(epochs))
+    ancestry: dict[tuple[str, str], bool] = {}
+    for label, reviewed in subjects:
+        if not isinstance(reviewed, str) or GIT_SHA_RE.fullmatch(reviewed) is None:
+            errors.append(f"{label} {reviewed!r} for stage_commit {stage} must be a full commit")
+            continue
+        if not in_history(reviewed):
+            errors.append(f"{label} {reviewed} for stage_commit {stage} is not in local git "
+                          "history (full history is required to verify review subjects)")
+            continue
+        bounds = [(reviewed, stage,
+                   f"{label} {reviewed} must be the stage_commit {stage} or its ancestor")]
+        if plan_start is not None:
+            bounds.append((plan_start, reviewed,
+                           f"{label} {reviewed} for stage_commit {stage} must be the plan addition "
+                           f"{plan_start} or its descendant"))
+        for ancestor, descendant, message in bounds:
+            pair = (ancestor, descendant)
+            if pair not in ancestry:
+                ancestry[pair] = subprocess.run(
+                    ["git", "-C", str(root), "merge-base", "--is-ancestor", ancestor, descendant],
+                    capture_output=True,
+                ).returncode == 0
+            require(ancestry[pair], message, errors)
+    return errors
+
+
+def validate_review_subjects(root: Path, release: str, manifest: dict[str, Any],
+                             qualification: dict[str, Any], errors: list[str]) -> None:
+    """History-dependent ready check; published releases retain their original review contract."""
+    if (product_version(release) or (0, 0, 0)) < (0, 20, 0):
+        return
+    gates = qualification.get("observed_gates")
+    gate = gates.get("g4_review") if isinstance(gates, dict) else None
+    path = bound_file(root, gate.get("repository_path")) if isinstance(gate, dict) else None
+    if path is not None:
+        errors.extend(review_subject_errors(root, release, load_json(path), manifest))
+
+
 def validate_native_lead_recovery(summary: Any, stopped_owner_power: Any,
                                   label: str, errors: list[str]) -> None:
     """A lead recovery is observed stopped state, not a replacement wrapper-audit pass."""
@@ -2745,7 +2849,8 @@ def unchanged_native_variant(variant: dict[str, Any], predecessor: dict[str, Any
 
 PROVENANCE_CLAIM_RE = re.compile(
     r"\b(?:re-?cut|newly[- ]cut|fresh(?:ly)?[- ]cut|re-?built|rebuild|carried|carry-over"
-    r"|one[- ](?:\w+[- ])?source|single[- ]source|same[- ]source)\b", re.IGNORECASE)
+    r"|(?:same|identical|single|one)[-\s]+(?:\w+[-\s]+){0,2}(?:source|revision|commit)"
+    r"|derive[sd]?\s+from)\b", re.IGNORECASE)
 
 
 def validate_component_tag_bindings(root: Path, release: str, manifest: dict[str, Any],
@@ -3625,6 +3730,9 @@ READY_CHECKS = (
                    exclude=() if c.through == "acceptance" else COMPOSER_OWNED)),
     ReadyCheck("validate_review_ledger", "acceptance",
                lambda c, e: validate_review_ledger(c.root, c.release, c.qualification, e)),
+    ReadyCheck("validate_review_subjects", "acceptance",
+               lambda c, e: validate_review_subjects(
+                   c.root, c.release, c.manifest, c.qualification, e), pin_only=True, legacy=False),
     ReadyCheck("validate_documented_route_acceptance", "acceptance",
                lambda c, e: validate_documented_route_acceptance(c.root, c.qualification, e)),
     ReadyCheck("validate_frozen_native_pins", "acceptance",

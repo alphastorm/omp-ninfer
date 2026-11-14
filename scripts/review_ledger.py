@@ -11,6 +11,8 @@ native_runtime_summary, native_component_delta_subject and native_component_delt
 provide lead-authored result clauses; otherwise the closed ledger's closure text is used.
 The product residuals_sentence, or its scope_sentence, completes that summary. Only a
 pending composition.review or the identical generated value may be replaced.
+Product subjects must lie between this release's plan addition (when present) and
+the candidate. Runtime and native-delta subjects must name released component sources.
 This records review closure, never publication.
 ``--check`` validates the inputs and refuses if either checked-in output differs.
 """
@@ -31,15 +33,20 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from release_io import atomic_write, atomic_write_json, git
-from verify_release import CLOSED_REVIEW_STATUS_RE, PRIVATE_MARKERS, validate_review_ledger
+from verify_release import (CLOSED_REVIEW_STATUS_RE, PRIVATE_MARKERS, review_subject_errors,
+                            validate_review_ledger)
 
 SEAT_FIELDS = ("reviewer_id", "selectionClass", "role", "independence_class", "authority",
                "model", "model_family")
 SECTIONS = ("native_runtime", "native_component_delta", "product_tooling")
-# The published ledger's three substitutions, applied to string leaves, not source bytes.
+# Private paths and synthetic identifiers, applied to string leaves, never to source bytes.
+# Where a path ends inside prose is not decidable, so the patterns err toward removing too much:
+# a path runs to whitespace or a quote, and following words that still contain a path separator
+# go with it. Brackets do not end a path; a directory name may contain them.
+_PATH_REST = r"""[^\s"'`]*(?:[ \t]+[^\s"'`]*[\\/][^\s"'`]*)*"""
 SANITIZE = (
-    (re.compile(r"C:/[U]sers/"), "a forward-slash Windows user-profile prefix"),
-    (re.compile(r"C:\\{1,2}[U]sers\\{1,2}"), "a Windows user-profile prefix"),
+    (re.compile(r"[A-Z]:[\\/]+Users[\\/]+" + _PATH_REST, re.I), "a Windows user-profile path"),
+    (re.compile(r"/(?:Users|home)/" + _PATH_REST), "a POSIX user-profile path"),
     (re.compile(r"GPU-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"),
      "a synthetic GPU-identifier sentinel"),
 )
@@ -241,6 +248,15 @@ def build(root: Path, release: str, candidate: str, reviews: Path,
                        "receipt_digests": {"review-record.json": digest(directory / "review-record.json")}})
     if epochs:
         tooling["epochs"] = epochs
+    manifest = {}
+    if any(name in sections for name in ("native_runtime", "native_component_delta")):
+        try:
+            manifest = json.loads(git(root, "show", f"{candidate}:releases/{release}/manifest.json"))
+        except (subprocess.CalledProcessError, ValueError) as error:
+            raise SystemExit(f"review_ledger: cannot read release manifest at candidate {candidate}") from error
+        require(isinstance(manifest, dict), "candidate release manifest must contain an object")
+    subject_errors = review_subject_errors(root, release, sections, manifest)
+    require(not subject_errors, "; ".join(subject_errors))
     status = values["ledger_status"]
     closed(status, "ledger status")
     require(values.get("approval_granted", True) is True, "closed ledger must grant G4 approval")
