@@ -20,6 +20,10 @@ SPEC = importlib.util.spec_from_file_location("aggregate_qualification", ROOT / 
 assert SPEC is not None and SPEC.loader is not None
 AGGREGATE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(AGGREGATE)
+HISTORY_SPEC = importlib.util.spec_from_file_location("release_history", ROOT / "tests/history.py")
+assert HISTORY_SPEC is not None and HISTORY_SPEC.loader is not None
+HISTORY = importlib.util.module_from_spec(HISTORY_SPEC)
+HISTORY_SPEC.loader.exec_module(HISTORY)
 from release_io import atomic_write, atomic_write_json
 
 
@@ -436,8 +440,15 @@ class PrivateAggregateGoldenTests(unittest.TestCase):
             changed = set(git("diff", "--name-only", stage_parent, after).decode().splitlines())
             self.assertEqual(changed, {*(f"releases/v0.19.0/{name}" for name in files), *OTHER_STAGE_FILES})
             upgrade_sha = AGGREGATE.sha((root / "releases/v0.19.0/qualification/rtx3090-upgrade.json").read_bytes())
+            # rebind now derives the RTX 3090 lane label at stage; history corrected it only at
+            # the compose commit. Compare against the stage commit with exactly that one label
+            # advanced and its hash closure recomputed by the historical tools.
+            corrected, allowed = HISTORY.corrected_lane_snapshot(
+                after, "releases/v0.19.0/compatibility.json", True)
+            self.assertEqual({name for name, pointer in allowed if pointer.endswith("/lane")},
+                             {"releases/v0.19.0/compatibility.json"})
             for name in files:
-                expected_bytes = git("show", f"{after}:releases/v0.19.0/{name}")
+                expected_bytes = corrected[f"releases/v0.19.0/{name}"]
                 observed_bytes = (root / "releases/v0.19.0" / name).read_bytes()
                 if name not in PROSE_POINTERS:
                     self.assertEqual(observed_bytes, expected_bytes, name)
