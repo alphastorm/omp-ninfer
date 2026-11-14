@@ -13,6 +13,10 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: ${{ github.ref_type != 'tag' }}
 
+# Every job checks out full history: goldens that replay published releases must run, not skip.
+env:
+  OMP_NINFER_REQUIRE_HISTORY: "1"
+
 jobs:
   release-contract:
     runs-on: ubuntu-latest
@@ -31,6 +35,30 @@ jobs:
       - name: Require the ready contract on release tags
         if: github.ref_type == 'tag'
         run: python3 scripts/verify_release.py --require-ready --check-pins
+      - name: Check the newest release at its own phase
+        # Branch and pull-request runs hold the newest release to the strictest contract its
+        # state allows: the full ready gate once it is ready, and before that everything the
+        # ready gate will require except evidence its remaining phases have not produced.
+        if: github.ref_type != 'tag'
+        run: |
+          python3 - <<'PY'
+          import json
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          sys.path.insert(0, "scripts")
+          from verify_release import ga_release, product_version
+
+          rows = [(product_version(path.parent.name), path.parent.name,
+                   json.loads(path.read_text(encoding="utf-8")).get("status"))
+                  for path in Path("releases").glob("*/manifest.json") if ga_release(path.parent.name)]
+          _, release, status = max(rows)
+          mode = "--require-ready" if status == "ready" else "--lint-ready"
+          print(f"{release} is {status}: verify_release.py {mode} --check-pins", flush=True)
+          raise SystemExit(subprocess.run([sys.executable, "scripts/verify_release.py", "--release", release,
+                                           mode, "--check-pins"]).returncode)
+          PY
       - name: Run contract tests
         run: python3 scripts/run_tests.py
       - name: Parse shell launchers

@@ -3571,6 +3571,12 @@ def ready_upstream_client_leftovers(ctx: ReadyContext, errors: list[str]) -> Non
         ctx.root / "releases" / ctx.release, historical_fork_client_pins(ctx.root, ctx.release)))
 
 
+def ready_receipt_audit(ctx: ReadyContext, errors: list[str]) -> None:
+    # Imported here: receipt_audit reads this module's predecessor and carried-row rules.
+    from receipt_audit import ready_errors
+    errors.extend(ready_errors(ctx.root, ctx.release, phase=ctx.through, check_pins=ctx.check_pins))
+
+
 # Ready runs the complete legacy checks. Earlier phases use the same validators with only
 # the inputs not yet produced excluded; no acceptance requirement becomes a warning.
 READY_CHECKS = (
@@ -3624,6 +3630,7 @@ READY_CHECKS = (
                lambda c, e: validate_pinned_evidence(
                    c.root, c.manifest, c.compatibility, c.qualification, e,
                    lane_only=c.through != "acceptance"), pin_only=True),
+    ReadyCheck("receipt_audit", "candidate", ready_receipt_audit, legacy=False),
     ReadyCheck("upstream_client_leftovers", "draft", ready_upstream_client_leftovers,
                ga_only=False, upstream_only=True),
     ReadyCheck("validate_release_documentation", "draft",
