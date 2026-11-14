@@ -104,9 +104,14 @@ Do not duplicate implementation across repositories to make a local patch easier
 
    ```sh
    python3 scripts/verify_release.py
-   python3 -m unittest discover -s tests -v
+   python3 scripts/run_tests.py
    bash -n examples/manual-tunnel/*.sh
    ```
+
+The test runner defaults to one worker per CPU and reports the slowest modules. Use `--jobs N`
+to cap concurrency, `--shard I/N` for one stable shard, or `--durations K` to change the timing
+summary. On native Windows, run `python scripts/run_tests.py --windows-skips` to use the same
+fixture exclusions as CI; Linux and macOS still run those POSIX fixtures.
 
 A draft manifest is expected to pass the first command and fail `--require-ready`. A release-cut
 pull request ([how a release is cut](docs/RELEASES.md#how-a-release-is-cut)) must make
