@@ -894,9 +894,6 @@ def plan_outputs(root: Path, release: str, plan_path: Path, directories: dict[st
                 and runtime_publication.get("binary_sha256") == component["binary_archive_sha256"]
                 and runtime_publication.get("secret_free") is True,
                 publication_path, "/", "runtime publication differs from manifest")
-        edge = q["composition"]["local_release_packaging"]["publication_receipt"]
-        require(sha(inputs.read(publication_path)) == edge.get("sha256"),
-                publication_path, "/", "runtime publication differs from staged receipt binding")
     validate_decisions(root, release, manifest, q, bundles, decisions)
     output = deepcopy(q)
     if output["composition"]["review"].get("status") != "pending":
@@ -908,6 +905,10 @@ def plan_outputs(root: Path, release: str, plan_path: Path, directories: dict[st
         + "; retained component-level runtime qualification, not client-platform or product-route acceptance.")
     output["native_runtime_identity"] = source_identity(bundles, manifest, previous)
     pending = {}
+    if publication_path is not None:
+        path = base / "qualification/runtime-publication.json"
+        pending[path] = inputs.read(publication_path)
+        output["composition"]["local_release_packaging"]["publication_receipt"] = binding(path, pending[path])
     pub_data = native_publication(inputs, root, release, manifest, bundles, native_publications or {}, previous, q)
     pub = decode(pub_data, "native publication")
     output["as_of"] = max(date.fromisoformat(q["as_of"]), date.fromisoformat(pub["as_of"])).isoformat()

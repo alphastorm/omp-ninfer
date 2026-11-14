@@ -1120,7 +1120,7 @@ def main() -> int:
     qualification["remaining_release_gates"] = []
     # Component waivers are authored before a product candidate exists. This is the
     # first producer to record that candidate; bind only current, hash-verified waivers.
-    from verify_release import bound_file, validate_gate_waivers
+    from verify_release import validate_gate_waivers
     waiver_errors: list[str] = []
     staged_qualification = {**qualification, "documented_route_acceptance": {"status": "pending"}}
     validate_gate_waivers(ROOT, args.release, manifest, staged_qualification, waiver_errors)

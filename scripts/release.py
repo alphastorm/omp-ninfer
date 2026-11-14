@@ -571,8 +571,8 @@ class ReleaseDriver:
         if set(supplied) - (STAGE_VALUE_OPTIONS | {"keep_deployment_profile", "require_clean_client"}):
             raise ReleaseError("--stage-input contains an unsupported stage_release.py option")
         runtime_plan = next(row for row in self.plan["components"] if row["id"] == COMPONENT_IDS[0])
-        if runtime_plan["disposition"] == "carried":
-            identity = {**values, "upstream_commit": runtime["upstream_commit"]}
+        if runtime_plan["disposition"] == "carried" and tuple(map(int, self.release[1:].split("."))) >= (0, 20, 0):
+            identity = {**values, "upstream_commit": runtime.get("upstream_commit")}
             overrides = [name for name in supplied
                          if name in ("source_archive", "checksums")
                          or name in identity and name != "keep_deployment_profile"

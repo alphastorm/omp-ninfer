@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import os
 from pathlib import Path
 import shutil
@@ -47,8 +48,10 @@ class PrivateRecutReplayTests(unittest.TestCase):
             git(root, "remote", "remove", "origin")
             shutil.copytree(ROOT / "scripts", root / "scripts", dirs_exist_ok=True,
                             ignore=shutil.ignore_patterns("__pycache__"))
+            shutil.copytree(ROOT / "tests", root / "tests", dirs_exist_ok=True,
+                            ignore=shutil.ignore_patterns("__pycache__"))
             atomic_write(root / ".gitignore", (ROOT / ".gitignore").read_bytes())
-            git(root, "add", "scripts", ".gitignore")
+            git(root, "add", "scripts", "tests", ".gitignore")
             git(root, "commit", "--quiet", "-m", "test(release): install current replay tools")
 
             def historical(commit, path):
@@ -70,7 +73,7 @@ class PrivateRecutReplayTests(unittest.TestCase):
                 f"{native['id']}={native['release_tag']}@{native['source_commit']}",
             ], client_tag=manifest["components"]["omp"]["upstream_tag"],
                 decisions=[f"{path.stem}:{'waiver' if 'waiver' in path.stem else 'scope'}:"
-                           + __import__("hashlib").sha256(path.read_bytes()).hexdigest()
+                           + hashlib.sha256(path.read_bytes()).hexdigest()
                            for path in sorted(decisions.glob("*.json"))])
             plan["limitations"] = ["Only the documented deployment topology is supported."]
             atomic_write_json(root / base / "plan.json", plan)
@@ -128,6 +131,49 @@ class PrivateRecutReplayTests(unittest.TestCase):
             self.assertEqual(load(root / base / "manifest.json")["status"], "candidate")
             self.assertEqual((root / base / "qualification/runtime-publication.json").read_bytes(),
                              (private / "runtime-publication.json").read_bytes())
+            candidate = git(root, "rev-parse", "HEAD").strip()
+            self.assertNotEqual(candidate, locations["candidate"])
+            reviews = locations["reviews"]
+            constants = load(Path(reviews["ledger_token_sources"]).expanduser())["constants"]
+            review_manifest = {
+                "native_runtime": {
+                    "directory": reviews["runtime_council"], "status": constants["RUNTIME_COUNCIL_STATUS"],
+                    "closure": constants["RUNTIME_COUNCIL_CLOSURE"]},
+                "native_component_delta": {
+                    "directory": reviews["focused_native_delta"], "status": constants["FOCUSED_REVIEW_STATUS"],
+                    "closure": constants["FOCUSED_REVIEW_CLOSURE"], "base_commit": constants["RUNTIME_SOURCE"]},
+                "product_tooling": {"directory": reviews["product_council"],
+                                   "status": load(Path(reviews["values"]).expanduser())["product_council"]["status"]},
+            }
+            atomic_write_json(private / "reviews.json", review_manifest)
+            retained = command(
+                "scripts/release.py", "finalize", "--release", "v0.19.0", "--no-suite",
+                "--window-root", Path(locations["window_root"]).expanduser(),
+                "--reviews", private / "reviews.json", "--values", Path(reviews["values"]).expanduser(),
+                "--as-of", "2026-11-13")
+            self.assertNotEqual(retained.returncode, 0, "retained observations cannot transfer to a new candidate")
+            self.assertIn("candidate", retained.stdout + retained.stderr)
+            self.assertEqual(git(root, "rev-parse", "HEAD").strip(), candidate)
+
+            # Separately exercise the real finalize path with explicitly synthetic, newly
+            # candidate-bound windows and reviews, exactly as release.py rehearse does.
+            generated = command("tests/acceptance_fixtures.py", "write", "--release", "v0.19.0",
+                                "--candidate", candidate, "--out", private / "synthetic")
+            self.assertEqual(generated.returncode, 0, generated.stdout + generated.stderr)
+            fixture = json.loads(generated.stdout)
+            atomic_write(private / "synthetic-notes.md", "# OMP NInfer v0.19.0\n\n"
+                         "Local re-cut tooling replay using retained component qualification.\n"
+                         "Route acceptance and product review below are synthetic fixtures, not new hardware "
+                         "execution, independent review or publication authority.\n")
+            finalized = command(
+                "scripts/release.py", "finalize", "--release", "v0.19.0", "--no-suite",
+                "--window-root", fixture["window_root"], "--reviews", fixture["reviews"],
+                "--values", fixture["values"], "--notes", private / "synthetic-notes.md",
+                "--as-of", "2026-11-13")
+            self.assertEqual(finalized.returncode, 0, finalized.stdout + finalized.stderr)
+            ready = command("scripts/verify_release.py", "--release", "v0.19.0", "--require-ready", "--check-pins")
+            self.assertEqual(ready.returncode, 0, ready.stdout + ready.stderr)
+            self.assertEqual(load(root / base / "manifest.json")["status"], "ready")
 
 
 if __name__ == "__main__":
