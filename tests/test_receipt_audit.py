@@ -52,20 +52,40 @@ def commit(root: Path, message: str) -> str:
 def stage_carry_all(root: Path) -> subprocess.CompletedProcess[str]:
     subprocess.run(["git", "clone", "--quiet", "--local", "--no-hardlinks", str(ROOT), str(root)],
                    check=True, capture_output=True)
-    previous = root / "releases" / PREVIOUS
-    runtime = json.loads((previous / "manifest.json").read_bytes())["components"]["ninfer"]
-    source_tag = runtime["source_archive_url"].split("/download/", 1)[1].split("/", 1)[0]
-    return subprocess.run([
-        sys.executable, "scripts/stage_release.py", "--from", PREVIOUS, "--release", "v0.19.1",
-        "--release-tag", runtime["release_tag"], "--source-tag", source_tag,
-        "--source-commit", runtime["source_commit"], "--binary-sha", runtime["server_binary_sha256"],
-        "--archive-sha", runtime["binary_archive_sha256"],
-        "--source-archive-sha", runtime["source_archive_sha256"], "--sbom-sha", runtime["sbom_sha256"],
-        "--image-digest", runtime["oci_manifest_digest"],
-        "--runtime-receipt-release", runtime["runtime_receipt_release"],
-        "--archive-name", runtime["binary_archive_url"].rsplit("/", 1)[1], "--keep-deployment-profile",
-        "--omp-component", str(previous / "qualification/client-components.json"),
-    ], cwd=root, capture_output=True, text=True)
+    for key, value in (("user.name", "fixture"), ("user.email", "fixture@example.invalid"),
+                       ("commit.gpgsign", "false"), ("core.autocrlf", "false")):
+        run_git(root, "config", key, value)
+    run_git(root, "remote", "remove", "origin")
+    # Run the same plan/stage path as rehearsal, not a second set of stager flags.
+    code = """
+import argparse
+import importlib.util
+import json
+from pathlib import Path
+
+root = Path.cwd()
+spec = importlib.util.spec_from_file_location("receipt_audit_driver", root / "scripts/release.py")
+driver = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(driver)
+previous = driver.latest_ready_manifest(root)
+major, minor, _ = map(int, previous["release"][1:].split("."))
+minor += 1
+while (root / "releases" / f"v{major}.{minor}.0").exists():
+    minor += 1
+release = f"v{major}.{minor}.0"
+driver.init_plan(root, release)
+notes = root / ".release-state" / "receipt-audit" / "stage-notes.md"
+driver.atomic_write(notes, f"# {release}\\n\\nSynthetic host-free audit fixture.\\n"
+                    "Runtime and native component identities are retained; no new execution is claimed.\\n")
+predecessor = previous["release"]
+qualification = driver.read_json(root / "releases" / predecessor / "qualification.json")
+candidate = driver.ReleaseDriver(root, release, argparse.Namespace(
+    command="candidate", notes=notes, as_of=qualification["as_of"],
+    client_component=root / "releases" / predecessor / "qualification/client-components.json"))
+driver.run_pipeline(candidate, finalize=False, no_suite=True, through="stage")
+print(json.dumps({"release": release, "predecessor": predecessor}))
+"""
+    return subprocess.run([sys.executable, "-c", code], cwd=root, capture_output=True, text=True)
 
 
 class ReceiptAuditTest(unittest.TestCase):
@@ -609,47 +629,54 @@ class StagedCarryAllTest(unittest.TestCase):
             root = Path(temporary) / "copy"
             staged = stage_carry_all(root)
             self.assertEqual(staged.returncode, 0, staged.stdout + staged.stderr)
-            release = "v0.19.1"
+            identities = json.loads(staged.stdout.splitlines()[-1])
+            release, predecessor = identities["release"], identities["predecessor"]
+            version = tuple(map(int, release[1:].split(".")))
+            previous_version = tuple(map(int, predecessor[1:].split(".")))
+            self.assertGreaterEqual(version, (0, 20, 0))
+            self.assertEqual(version[0], previous_version[0])
+            self.assertGreater(version[1], previous_version[1])
+            self.assertEqual(version[2], 0)
             prefix = root / "releases" / release
-            before = root / "releases" / PREVIOUS
+            before = root / "releases" / predecessor
+            plan = json.loads((prefix / "plan.json").read_bytes())
+            self.assertEqual(plan["predecessor"], predecessor)
+            self.assertTrue(all(row["disposition"] == "carried" for row in plan["components"]))
             previous_manifest = json.loads((before / "manifest.json").read_bytes())
             manifest = json.loads((prefix / "manifest.json").read_bytes())
             self.assertEqual(manifest["components"]["ninfer"], previous_manifest["components"]["ninfer"])
-            leftovers = AUDIT.unadmitted_kept(root, release)
-            self.assertEqual(leftovers, sorted(leftovers))
-            AUDIT.atomic_write(prefix / "NINFER_RELEASE_NOTES.md", (
-                f"# {release}\n\nThis successor retains the published runtime and native components; "
-                "acceptance is evaluated separately.\n"))
-            output = io.StringIO()
-            with contextlib.redirect_stdout(output):
-                self.assertEqual(AUDIT.main(["--release", release, "--phase", "lane-stage",
-                                             "--as-of", DATE, "--prune-unbound"], root=root), 0)
             self.assertEqual(AUDIT.unadmitted_kept(root, release), [])
+            snapshot = {path.relative_to(prefix).as_posix(): path.read_bytes()
+                        for path in prefix.rglob("*") if path.is_file()}
             with contextlib.redirect_stdout(io.StringIO()):
                 self.assertEqual(AUDIT.main(["--release", release, "--phase", "lane-stage",
                                              "--check"], root=root), 0)
+            self.assertEqual(snapshot, {path.relative_to(prefix).as_posix(): path.read_bytes()
+                                        for path in prefix.rglob("*") if path.is_file()})
             audit = json.loads((prefix / "qualification/receipt-audit.json").read_bytes())
+            self.assertEqual(audit["status"], "lane-stage")
+            self.assertEqual(audit["source_release"], predecessor)
             rows = {row["file"]: row for row in audit["files"]}
             for row in rows.values():
                 if row["disposition"] == "kept":
                     self.assertTrue(row["reason"].startswith("Carried component, unchanged since "))
-            for name in leftovers:
-                if name != "NINFER_RELEASE_NOTES.md":
-                    self.assertEqual(rows[name]["disposition"], "dropped")
-                    self.assertIn(f"pruned releases/{release}/{name}: {rows[name]['reason']}",
-                                  output.getvalue().splitlines())
-            self.assertEqual(len([line for line in output.getvalue().splitlines()
-                                  if line.startswith("pruned ")]),
-                             len([name for name in leftovers if name != "NINFER_RELEASE_NOTES.md"]))
+            log_prefix = f"pruned releases/{release}/"
+            pruned = [line for line in staged.stdout.splitlines() if line.startswith(log_prefix)]
+            for line in pruned:
+                name = line.removeprefix(log_prefix).split(": ", 1)[0]
+                self.assertEqual(rows[name]["disposition"], "dropped")
+                self.assertEqual(line, log_prefix + name + ": " + rows[name]["reason"])
+            self.assertEqual(len(pruned), len(set(pruned)))
             in_place = []
-            old_prefix = f"releases/{PREVIOUS}/"
+            old_prefix = f"releases/{predecessor}/"
             for variant in manifest["components"]["ninfer_variants"]:
                 for reference in variant["qualification"].values():
                     if isinstance(reference, dict) and reference.get("path", "").startswith(old_prefix):
                         name = reference["path"].removeprefix(old_prefix)
                         if (before / name).is_file():
                             in_place.append(name)
-            self.assertTrue(in_place)
+            # A newer ready predecessor may already have removed every in-place
+            # copy; the isolated carry fixtures always exercise that disposition.
             for name in in_place:
                 self.assertEqual(rows[name]["disposition"], "dropped")
                 self.assertIn("bound in place at " + old_prefix + name, rows[name]["reason"])
