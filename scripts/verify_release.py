@@ -3294,6 +3294,41 @@ def validate_release_markdown_tokens(root: Path, release: str, errors: list[str]
                           f"{token.group()}")
 
 
+def release_notes_errors(text: str, release: str, label: str) -> list[str]:
+    """The publication title and prose must describe a finished release."""
+    errors: list[str] = []
+    lines = text.splitlines()
+    title = lines[0] if lines else ""
+    release_re = re.compile(r"(?<![\w.-])" + re.escape(release) + r"(?![\w.-])")
+    require(title.startswith("# ") and release_re.search(title) is not None,
+            f"{label}: first line must be a Markdown title naming {release}", errors)
+    token = RELEASE_TOKEN_RE.search(text)
+    if token is not None:
+        errors.append(f"{label}: contains unresolved release token {token[0]}")
+    without_autolinks = re.sub(r"<https?://[^>\s]+>", "", text)
+    placeholder = PLACEHOLDER_RE.search(without_autolinks)
+    if placeholder is not None:
+        errors.append(f"{label}: contains placeholder {placeholder[0]!r}")
+    for first, paragraph in prose_paragraphs(lines):
+        unfinished = pending_release_state(paragraph)
+        unfinished += list(re.finditer(r"\b(?:draft|prepared|unreleased)\b", paragraph, re.IGNORECASE))
+        for match in unfinished:
+            number = first + paragraph.count("\n", 0, match.start())
+            errors.append(f"{label}:{number}: contains unfinished release wording {match[0]!r}")
+    return errors
+
+
+def validate_release_notes(root: Path, release: str, errors: list[str]) -> None:
+    if (product_version(release) or (0, 0, 0)) < (0, 20, 0):
+        return
+    path = root / "releases" / release / "NINFER_RELEASE_NOTES.md"
+    label = path.relative_to(root).as_posix()
+    if not path.is_file():
+        errors.append(f"{label}: release notes are required")
+        return
+    errors.extend(release_notes_errors(path.read_text(encoding="utf-8"), release, label))
+
+
 def validate_public_text(root: Path, errors: list[str]) -> None:
     documents = set(repository_files(root, (".md", ".ps1", ".sh")))
     # Every shipped script counts, including extensionless helpers and non-host Python tools.
@@ -3415,6 +3450,8 @@ READY_CHECKS = (
                                     "ready release must have no publication blockers", e), ga_only=False),
     ReadyCheck("validate_release_markdown_tokens", "draft",
                lambda c, e: validate_release_markdown_tokens(c.root, c.release, e)),
+    ReadyCheck("validate_release_notes", "candidate",
+               lambda c, e: validate_release_notes(c.root, c.release, e), legacy=False),
     ReadyCheck("validate_exact_lane_set", "draft",
                lambda c, e: validate_exact_lane_set(c.manifest, c.compatibility, c.qualification, e)),
     ReadyCheck("validate_ready_state_consistency", "draft",
