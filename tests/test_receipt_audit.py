@@ -373,6 +373,33 @@ class ReceiptAuditTest(unittest.TestCase):
                 self.assertEqual(output, "")
                 self.assertEqual(self.snapshot(), before)
 
+    def test_prune_refuses_markdown_links_and_plain_mentions_without_deleting_anything(self) -> None:
+        name = "qualification/unbound.json"
+        for release in (PREVIOUS, RELEASE):
+            self.put(f"releases/{release}/{name}", b'{"subject": "previous"}\n')
+            self.put(f"releases/{release}/qualification/also-unbound.json", b'{}\n')
+        prefix = f"releases/{RELEASE}/"
+        for document, reference in (
+            ("NINFER_RELEASE_NOTES.md", f"[Retained receipt]({name})"),
+            ("NINFER_RELEASE_NOTES.md", f"[Retained receipt](./{name}#evidence)"),
+            ("NINFER_RELEASE_NOTES.md", f"Retained receipt: `{prefix}{name}`"),
+            ("NINFER_RELEASE_NOTES.md", f"Retained receipt: {name}"),
+            ("review/notes.md", f"[Retained receipt](../{name})"),
+            ("review/notes.md", "[Retained receipt](https://raw.githubusercontent.com/alphastorm/"
+                                "omp-ninfer/" + "a" * 40 + "/" + prefix + name + ")"),
+        ):
+            with self.subTest(document=document, reference=reference):
+                path = prefix + document
+                self.put(path, ("# New release evidence\n\n" + reference + "\n").encode("utf-8"))
+                before = self.snapshot()
+                code, output, error = self.invoke("--prune-unbound", "--as-of", DATE)
+                self.assertEqual(code, 1)
+                self.assertIn(prefix + name, error)
+                self.assertIn(path, error)
+                self.assertEqual(output, "")
+                self.assertEqual(self.snapshot(), before)
+                (self.root / path).unlink()
+
     def test_late_audit_planning_refusal_does_not_delete_copies(self) -> None:
         for release in (PREVIOUS, RELEASE):
             self.put(f"releases/{release}/qualification/unbound.json", b'{"subject": "previous"}\n')

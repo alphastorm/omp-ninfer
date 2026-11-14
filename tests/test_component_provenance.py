@@ -75,10 +75,26 @@ class ComponentProvenanceTests(unittest.TestCase):
     def test_claim_vocabulary_matches_each_supported_spelling(self):
         for claim in ("re-cut", "recut", "newly cut", "newly-cut", "fresh cut", "freshly-cut",
                       "rebuilt", "re-built", "rebuild", "carried", "carry-over",
-                      "one source", "one N source", "one-source", "single source", "same-source"):
+                      "one source", "one N source", "one-source", "single source", "same-source",
+                      "same revision", "identical NInfer revision", "single runtime source commit",
+                      "one shared NInfer commit", "derive from", "derives from", "derived from"):
             with self.subTest(claim=claim):
                 self.assertTrue(VERIFY.provenance_claim_errors({"note": f"Runtime {claim}."},
                                                               "evidence"))
+
+    def test_identical_revision_claim_is_refused_in_authored_release_prose(self):
+        sentence = "All runtime components derive from the identical NInfer revision."
+        errors = self.validate({"interpretation": sentence})
+        self.assertTrue(any("qualification.interpretation" in error for error in errors), errors)
+        self.release = "v0.19.0"
+        self.assertEqual(self.validate({"interpretation": sentence}), [])
+
+    def test_unrelated_identity_words_and_more_distant_source_mentions_are_not_claims(self):
+        for sentence in ("All runtime components use identical request settings.",
+                         "One route passed; another source of latency remains.",
+                         "A derived result is shown."):
+            with self.subTest(sentence=sentence):
+                self.assertEqual(VERIFY.provenance_claim_errors(sentence, "evidence"), [])
 
     def test_acceptance_requires_exact_record_note_scope_and_plan_dispositions(self):
         provenance = VERIFY.component_provenance(self.root, self.release, self.manifest)
