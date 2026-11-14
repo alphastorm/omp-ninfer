@@ -109,7 +109,8 @@ class SyntheticBundle:
         atomic_write_json(root / decision_path, decision)
         digest = BUNDLE.sha((root / decision_path).read_bytes())
         self.qualification = {"observed_gates": {"native_speed_decision": {"repository_path": decision_path, "sha256": digest}}}
-        self.plan["decisions"] = [{"id": "native-speed-decision", "kind": "component-cut", "sha256": digest}]
+        # A qualification decision; cut authorizations (kind component-cut) are not bound here.
+        self.plan["decisions"] = [{"id": "native-speed-decision", "kind": "scope", "sha256": digest}]
 
     def declare(self, role, path):
         self.reference["inputs"].append({"role": role, "path": path.relative_to(self.directory).as_posix(),

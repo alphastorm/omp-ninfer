@@ -301,7 +301,7 @@ class ReleaseDriver:
         if group == "compose":
             return ["collect_route_evidence.py", "review_ledger.py", "compose_route_acceptance.py",
                     "rebind_release.py"]
-        return ["receipt_audit.py"] if group == "audit" else ["rebind_release.py"]
+        return ["receipt_audit.py", "rebind_release.py"] if group == "audit" else ["rebind_release.py"]
 
     def require_tool(self, name: str) -> Path:
         path = self.root / "scripts" / name
@@ -520,6 +520,10 @@ class ReleaseDriver:
         if self.state["options"].get("as_of"):
             arguments += ["--as-of", self.state["options"]["as_of"]]
         self.tool("receipt_audit.py", *arguments)
+        # The audit binds itself into the qualification summary. Close the hash chain in the
+        # same commit, so every release commit is consistent on its own.
+        self.tool("rebind_release.py", "--release", self.release,
+                  *(("--draft",) if phase == "lane-stage" else ()))
 
     def _window_attempt_arguments(self) -> list[str]:
         root = self.private_path("window_root").resolve()
@@ -812,10 +816,22 @@ def rehearse(root: Path = ROOT, *, keep: Path | None = None, suite: bool = False
                 raise ReleaseError("--keep must be outside the source repository")
             if destination.exists() and (not destination.is_dir() or any(destination.iterdir())):
                 raise ReleaseError("--keep must name an absent or empty directory")
-        return git(root, "rev-parse", "HEAD").strip(), latest_ready_manifest(root)
+        previous = latest_ready_manifest(root)
+        ready = tuple(map(int, previous["release"][1:].split(".")))
+        versions = {path.name: tuple(map(int, path.name[1:].split(".")))
+                    for path in (root / "releases").iterdir()
+                    if path.is_dir() and re.fullmatch(r"v\d+\.\d+\.\d+", path.name)}
+        later = sorted((name for name, version in versions.items() if version > ready),
+                       key=versions.__getitem__)
+        return git(root, "rev-parse", "HEAD").strip(), previous, later
 
     try:
-        head, previous = step("preflight", preflight)
+        head, previous, later = step("preflight", preflight)
+        if later:
+            # A release newer than the latest ready one is being cut on this tree. Its own
+            # lint and ready checks are the proof here; a synthetic successor would collide.
+            print(f"rehearsal: skipped: release {later[-1]} is in progress on this tree", flush=True)
+            return 0
         version = tuple(map(int, previous["release"][1:].split(".")))
         release = f"v{version[0]}.{version[1] + 1}.0"
         if keep is None:

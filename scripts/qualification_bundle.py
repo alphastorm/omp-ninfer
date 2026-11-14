@@ -257,6 +257,11 @@ def decisions(inputs: Inputs, root: Path, release: str, plan: dict[str, Any],
         seen.add(identifier)
         require(item.get("kind") in ("component-cut", "scope", "waiver"),
                 file, pointer + "/kind", "unknown decision kind")
+        if item["kind"] == "component-cut":
+            # A cut authorization is bound by hash in the plan and checked by the cut step.
+            # It is not qualification evidence and is never installed in the release tree.
+            digest(item.get("sha256"), file, pointer + "/sha256")
+            continue
         name = f"releases/{release}/qualification/{identifier}.json"
         edges = [(gate, edge) for gate, edge in gates.items()
                  if isinstance(edge, dict) and edge.get("repository_path") == name]

@@ -370,10 +370,19 @@ def _generate_audit(tree: _Tree, release: str, *, phase: str,
             row["binding"] = ("Mutable release state/prose: bound by the evidence hash chain and later "
                               "immutable pin stages, not a retained-byte audit snapshot.")
         rows.append(row)
+    # The audit binds itself into qualification.json, so the manifest's hash of that document
+    # is downstream of the audit and cannot be part of what the audit inventories. Audits up to
+    # v0.19.0 recorded it (from the tree before their own binding existed) and stay reproducible
+    # as published; from v0.20.0 it is excluded, like the binding itself, so the hash chain can
+    # be closed in the same commit that carries the audit.
+    from verify_release import product_version
+    self_referential = ({"manifest.json": {"/qualification/summary_sha256"}}
+                        if (product_version(release) or (0, 0, 0)) >= (0, 20, 0) else {})
     bindings = []
     for name in ("manifest.json", "qualification.json", "compatibility.json"):
         old, new = ({key: value for key, value in _leaves(tree.document(prefix + name))
-                     if key != "/receipt_audit" and not key.startswith("/receipt_audit/")}
+                     if key != "/receipt_audit" and not key.startswith("/receipt_audit/")
+                     and key not in self_referential.get(name, ())}
                     for prefix in (old_prefix, new_prefix))
         for pointer in sorted(old.keys() | new.keys()):
             disposition = ("added" if pointer not in old else "dropped" if pointer not in new else

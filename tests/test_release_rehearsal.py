@@ -36,6 +36,10 @@ class ReleaseRehearsalTests(unittest.TestCase):
                 result = DRIVER.rehearse(ROOT, keep=clone)
             transcript = output.getvalue()
             self.assertEqual(result, 0, transcript)
+            skipped = re.search(r"^rehearsal: skipped: .+$", transcript, re.MULTILINE)
+            if skipped is not None:
+                # On a release branch the real release is the subject; see the next test.
+                self.skipTest(skipped[0])
             self.assertTrue(transcript.endswith("rehearsal: passed\n"), transcript)
             timings = {match[1]: float(match[2]) for match in re.finditer(
                 r"^rehearsal: (.+): passed \((\d+\.\d+)s\)$", transcript, re.MULTILINE)}
@@ -64,6 +68,35 @@ class ReleaseRehearsalTests(unittest.TestCase):
             self.assertEqual(DRIVER.git(clone, "status", "--porcelain").strip(), "")
         self.assertEqual(DRIVER.git(ROOT, "rev-parse", "HEAD").strip(), source_head)
         self.assertEqual(DRIVER.git(ROOT, "status", "--porcelain").strip(), "")
+
+    def test_a_release_in_progress_skips_instead_of_colliding(self) -> None:
+        require_commits(root=ROOT)
+        with tempfile.TemporaryDirectory() as temporary:
+            clone = Path(temporary) / "product"
+            subprocess.run(["git", "clone", "--quiet", "--shared", str(ROOT), str(clone)],
+                           check=True, capture_output=True)
+            ready = DRIVER.latest_ready_manifest(clone)["release"]
+            major, minor, _ = map(int, ready[1:].split("."))
+            later = f"v{major}.{minor + 1}.0"
+            plan = clone / "releases" / later / "plan.json"
+            if not plan.parent.exists():
+                plan.parent.mkdir(parents=True)
+                plan.write_text("{}\n", encoding="utf-8")
+                subprocess.run(["git", "add", "--", str(plan)], cwd=clone, check=True, capture_output=True)
+                subprocess.run(["git", "-c", "user.name=Release fixture", "-c",
+                                "user.email=release@example.invalid", "-c", "commit.gpgsign=false",
+                                "commit", "--quiet", "-m", f"chore(release): plan {later}"],
+                               cwd=clone, check=True, capture_output=True)
+            head = DRIVER.git(clone, "rev-parse", "HEAD").strip()
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output), contextlib.redirect_stderr(output):
+                result = DRIVER.rehearse(clone)
+            transcript = output.getvalue()
+            self.assertEqual(result, 0, transcript)
+            self.assertIn(f"rehearsal: skipped: release {later} is in progress", transcript)
+            self.assertNotIn("rehearsal: clone", transcript)
+            self.assertEqual(DRIVER.git(clone, "rev-parse", "HEAD").strip(), head)
+            self.assertEqual(DRIVER.git(clone, "status", "--porcelain").strip(), "")
 
 
 if __name__ == "__main__":
