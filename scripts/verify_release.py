@@ -835,12 +835,13 @@ def walk_object_fields(
             yield from walk_object_fields(child, f"{path}[{index}]")
 
 
+# Fields the acceptance phase writes: the composer's results and the review ledger's closure.
 COMPOSER_OWNED = tuple(re.compile(pattern + r"(?:$|[.\[])") for pattern in (
     r"manifest\.status",
     r"manifest\.publication\.(?:blockers|external_installation_qualified)",
     r"manifest\.qualification\.external_installation_passed",
     r"qualification\.(?:documented_route_acceptance|remaining_release_gates|as_of|external_installation_qualified)",
-    r"qualification\.composition\.(?:external_installation_acceptance|documented_route_acceptance)",
+    r"qualification\.composition\.(?:external_installation_acceptance|documented_route_acceptance|review)",
     r"compatibility\.composition\.(?:status|blockers)",
     r"compatibility\.profiles\[\d+\]\.(?:status|installable|blockers|acceptance_receipt)",
 ))
@@ -2788,8 +2789,19 @@ def validate_component_tag_bindings(root: Path, release: str, manifest: dict[str
                             f"than {path.parent.name}", errors)
 
 
-def component_provenance(root: Path, release: str, manifest: dict[str, Any]) -> dict[str, Any]:
-    """Derive runtime cut/carry facts solely from this manifest and its ready predecessor."""
+def provenance_clause(label: str, tag: str, carried_from: str | None) -> str:
+    action = f"carried unchanged from {carried_from}" if carried_from else "re-cut for this release"
+    return f"{label} `{tag}` {action}"
+
+
+def component_provenance_parts(
+    root: Path, release: str, manifest: dict[str, Any],
+) -> tuple[dict[str, Any], dict[str, str]]:
+    """Derive runtime cut/carry facts solely from this manifest and its ready predecessor.
+
+    Returns the provenance record and, per component id, the one generated clause that
+    describes it. Tools that describe a single component use its clause verbatim.
+    """
     predecessor = predecessor_manifest(root, release)
     components = manifest.get("components", {})
     previous = (predecessor or {}).get("components", {})
@@ -2807,7 +2819,7 @@ def component_provenance(root: Path, release: str, manifest: dict[str, Any]) -> 
             label = f"RTX {component_id.split('-')[0].removeprefix('rtx')} native Windows"
             identities.append((component_id, label, variant,
                                unchanged_native_variant(variant, previous_variants.get(component_id))))
-    rows, clauses = [], []
+    rows, clauses = [], {}
     for component_id, label, identity, carried in identities:
         tag, source = identity.get("release_tag"), identity.get("source_commit")
         if not isinstance(tag, str) or not tag or not isinstance(source, str) or not GIT_SHA_RE.fullmatch(source):
@@ -2815,24 +2827,32 @@ def component_provenance(root: Path, release: str, manifest: dict[str, Any]) -> 
         carried_from = predecessor["release"] if carried else None
         rows.append({"id": component_id, "release_tag": tag, "source_commit": source,
                      "disposition": "carried" if carried else "recut", "carried_from": carried_from})
-        action = f"carried unchanged from {carried_from}" if carried else "re-cut for this release"
-        clauses.append(f"{label} `{tag}` {action}")
+        clauses[component_id] = provenance_clause(label, tag, carried_from)
     distinct = len({row["source_commit"] for row in rows})
-    return {
+    record = {
         "components": rows,
         "distinct_source_commits": distinct,
-        "statement": "Runtime components: " + "; ".join(clauses)
+        "statement": "Runtime components: " + "; ".join(clauses.values())
                      + f". They were built from {distinct} distinct NInfer source commits.",
     }
+    return record, clauses
 
 
-def provenance_claim_errors(value: Any, label: str, *, statement: str = "") -> list[str]:
-    """The generated statement is the only admitted provenance vocabulary in public prose."""
+def component_provenance(root: Path, release: str, manifest: dict[str, Any]) -> dict[str, Any]:
+    return component_provenance_parts(root, release, manifest)[0]
+
+
+def provenance_claim_errors(value: Any, label: str, *, statement: str = "",
+                            clauses: tuple[str, ...] = ()) -> list[str]:
+    """Generated statements and clauses are the only admitted provenance vocabulary in public prose."""
     errors = []
     for path, text in walk_string_fields(value, label):
         if not any(character.isspace() for character in text):
             continue
-        prose = text.replace(statement, "") if statement else text
+        prose = text
+        for generated in (statement, *clauses):
+            if generated:
+                prose = prose.replace(generated, "")
         match = PROVENANCE_CLAIM_RE.search(prose)
         if match is not None:
             errors.append(f"{path} makes an ungenerated component provenance claim: {match[0]!r}")
@@ -2845,8 +2865,9 @@ def validate_component_provenance(
 ) -> None:
     if (product_version(release) or (0, 0, 0)) < (0, 20, 0):
         return
-    provenance = component_provenance(root, release, manifest)
+    provenance, component_clauses = component_provenance_parts(root, release, manifest)
     statement = provenance["statement"]
+    clauses = tuple(component_clauses.values())
     release_root = root / "releases" / release
     external_path = release_root / "acceptance/composed-external-installation.json"
     external = load_json(external_path) if external_path.is_file() else {}
@@ -2859,7 +2880,7 @@ def validate_component_provenance(
                 documents.append((f"acceptance/{name}.json",
                                   external if path == external_path else load_json(path)))
         for label, document in documents:
-            errors.extend(provenance_claim_errors(document, label, statement=statement))
+            errors.extend(provenance_claim_errors(document, label, statement=statement, clauses=clauses))
         return
     require(external.get("component_provenance") == provenance,
             "composed acceptance component_provenance must equal the manifest-derived record", errors)
@@ -3633,7 +3654,9 @@ READY_CHECKS = (
     ReadyCheck("receipt_audit", "candidate", ready_receipt_audit, legacy=False),
     ReadyCheck("upstream_client_leftovers", "draft", ready_upstream_client_leftovers,
                ga_only=False, upstream_only=True),
-    ReadyCheck("validate_release_documentation", "draft",
+    # Before acceptance the generated matrix and the prepared guide legitimately say what is
+    # still pending; this is a statement about the finished release.
+    ReadyCheck("validate_release_documentation", "acceptance",
                lambda c, e: validate_release_documentation(c.root, c.release, e),
                ga_only=False, flag_only=True),
     ReadyCheck("validate_markdown_links", "draft",

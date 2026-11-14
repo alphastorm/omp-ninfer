@@ -47,6 +47,7 @@ def carry_plan(root, release):
                **{key: row[key] for key in ("release_tag", "source_commit")}}
               for row in components["ninfer_variants"]]],
         "platforms": {row["id"]: "qualified" for row in load(root / "releases" / release / "compatibility.json")["profiles"]},
+        "limitations": ["Fixture limitation: no general performance guarantee is implied."],
         "decisions": []}
 
 
@@ -164,6 +165,17 @@ class CarriedAggregateTests(unittest.TestCase):
         self.assertFalse(q["publication_authorized"])
         self.assertFalse(q["external_installation_qualified"])
         self.assertEqual(q["observed_gates"], {})
+        manifest = load(self.release_root / "manifest.json")
+        statement = AGGREGATE.verifier.component_provenance(self.root, self.release, manifest)["statement"]
+        # Authored sentences come from the plan; nothing is inherited from the predecessor.
+        self.assertEqual(manifest["limitations"][:-1], [*self.plan["limitations"], statement])
+        self.assertFalse(set(manifest["limitations"]) & set(self.source_manifest["limitations"]))
+        self.assertFalse([target for target in manifest["publication"]["targets"] if "carried" in target])
+        compatibility = load(self.release_root / "compatibility.json")
+        self.assertEqual(AGGREGATE.verifier.provenance_claim_errors(
+            [manifest, compatibility, q], "staged", statement=statement,
+            clauses=tuple(AGGREGATE.verifier.component_provenance_parts(self.root, self.release, manifest)[1].values())),
+            [])
         pub = load(self.release_root / "qualification/native-publication.json")
         self.assertEqual({row["lane"] for row in pub["lanes"]},
                          {row["id"].split("-")[0] for row in components["ninfer_variants"]})
@@ -175,6 +187,15 @@ class CarriedAggregateTests(unittest.TestCase):
         with self.assertRaisesRegex(AGGREGATE.BundleError, "carried bytes differ"):
             self.compose()
         self.assertEqual((self.release_root / "qualification.json").read_bytes(), before)
+
+    def test_plan_limitation_with_a_provenance_claim_refuses_before_any_write(self):
+        plan = deepcopy(self.plan)
+        plan["limitations"] = ["The native component is carried unchanged from the previous release."]
+        atomic_write_json(self.plan_path, plan)
+        before = (self.release_root / "manifest.json").read_bytes()
+        with self.assertRaisesRegex(AGGREGATE.BundleError, "ungenerated component provenance claim"):
+            self.compose()
+        self.assertEqual((self.release_root / "manifest.json").read_bytes(), before)
 
     def test_missing_decision_refuses(self):
         plan = deepcopy(self.plan)
@@ -431,6 +452,12 @@ class PrivateAggregateGoldenTests(unittest.TestCase):
                     # rebind owns these hashes; generated qualification prose
                     # necessarily changes the summary's content digest.
                     expected["qualification"]["summary_sha256"] = observed["qualification"]["summary_sha256"]
+                    # Targets now carry identity only. The published list marked its one
+                    # carried lane in prose; that marker is the only admitted difference.
+                    targets = expected["publication"]["targets"]
+                    marked = [index for index, target in enumerate(targets) if " (carried unchanged)" in target]
+                    self.assertEqual(len(marked), 1, targets)
+                    targets[marked[0]] = targets[marked[0]].replace(" (carried unchanged)", "")
                 self.assertFalse(first_difference(observed, expected), name + first_difference(observed, expected))
                 self.assertEqual(AGGREGATE.json_bytes(observed), AGGREGATE.json_bytes(expected),
                                  name + ": non-prose byte ordering differs")

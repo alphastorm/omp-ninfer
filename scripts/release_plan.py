@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 COMPONENT_IDS = ("rtx5090-container", "rtx4090-windows-native", "rtx3090-windows-native")
 PLAN_KEYS = {"artifact_type", "schema_version", "release", "predecessor", "client",
-             "components", "platforms", "decisions"}
+             "components", "platforms", "limitations", "decisions"}
 GA_RELEASE_RE = re.compile(r"v(\d+)\.(\d+)\.(\d+)")
 COMMIT_RE = re.compile(r"[0-9a-f]{40}")
 SHA256_RE = re.compile(r"[0-9a-f]{64}")
@@ -29,6 +29,9 @@ PLAN_SCHEMA = {
     "components": {"id": COMPONENT_IDS, "disposition": ("recut", "carried"),
                    "release_tag": "string", "source_commit": "40 lowercase hex"},
     "platforms": {"profile id": ("qualified", "preview")},
+    # Release-level limitation sentences are authored here and nowhere else; the aggregate
+    # adds the generated component-provenance statement and inherits none from the predecessor.
+    "limitations": ["sentence"],
     "decisions": {"id": "string", "kind": ("component-cut", "scope", "waiver"),
                   "sha256": "64 lowercase hex"},
 }
@@ -58,7 +61,8 @@ def manifest_components(manifest: dict[str, Any]) -> dict[str, dict[str, Any]]:
 def plan_errors(root: Path, release: str) -> list[str]:
     """Return every schema or authority disagreement without writing any files."""
     # Lazy import avoids a cycle when the verifier checks a plan during validate().
-    from verify_release import PRIVATE_MARKERS, predecessor_manifest, unchanged_native_variant
+    from verify_release import (PRIVATE_MARKERS, predecessor_manifest, provenance_claim_errors,
+                                unchanged_native_variant)
 
     root = Path(root)
     try:
@@ -174,6 +178,16 @@ def plan_errors(root: Path, release: str) -> list[str]:
                 "platforms keys must equal authority profile ids")
     except (OSError, ValueError, KeyError, TypeError) as error:
         errors.append(f"plan.platforms authority cannot be read: {error}")
+
+    limitations = plan.get("limitations")
+    require(isinstance(limitations, list), "limitations must be an array")
+    if isinstance(limitations, list):
+        require(all(isinstance(value, str) and value and value == value.strip() for value in limitations),
+                "limitations must be nonempty trimmed sentences")
+        require(len({value for value in limitations if isinstance(value, str)}) == len(limitations),
+                "limitations must be unique")
+        errors.extend(provenance_claim_errors(
+            [value for value in limitations if isinstance(value, str)], "plan.limitations"))
 
     decisions = plan.get("decisions")
     require(isinstance(decisions, list), "decisions must be an array")
