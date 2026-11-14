@@ -206,6 +206,66 @@ class RetargetGuideTest(unittest.TestCase):
         self.assertIn(f"RTX 5090 current `{CONTAINER_TAG[:-1]}2`, rollback `{CONTAINER_TAG}`.", result)
         self.assertFalse(self.run_retarget())
 
+    def test_completed_guide_refuses_stale_recut_component_identities(self) -> None:
+        prior = self.write_prior()
+        prior_digest = "8" * 64
+        prior["components"]["omp"]["artifact_sha256"] = prior_digest
+        atomic_write_json(self.root / "releases" / prior["release"] / "manifest.json", prior)
+        old_digest = self.before["manifest.json"]["components"]["omp"]["artifact_sha256"]
+        new_digest = self.after["manifest.json"]["components"]["omp"]["artifact_sha256"]
+        prior_tag = prior["components"]["ninfer"]["release_tag"]
+        new_tag = self.after["manifest.json"]["components"]["ninfer"]["release_tag"]
+        self.append(f"| RTX 5090 current | `{CONTAINER_TAG}` |\n"
+                    f"| RTX 5090 rollback | `{prior_tag}` |\n"
+                    f"| Client current | `{old_digest}` |\n"
+                    f"| Client rollback | `{prior_digest}` |\n"
+                    "| Current store | `checkpoints-v020` |\n"
+                    "| Rollback store | `checkpoints-v019` |\n\n"
+                    f"[{old_digest}](../releases/{OLD}/manifest.json)\n")
+        self.assertTrue(self.run_retarget())
+        completed = self.guide.read_text(encoding="utf-8")
+        self.assertIn(f"| RTX 5090 rollback | `{CONTAINER_TAG}` |", completed)
+        self.assertIn(f"| Client rollback | `{old_digest}` |", completed)
+        self.assertIn("| Rollback store | `checkpoints-v020` |", completed)
+        self.assertFalse(self.run_retarget())
+        self.assertEqual(self.guide.read_text(encoding="utf-8"), completed)
+        for current, predecessor in ((new_digest, old_digest), (new_tag, CONTAINER_TAG)):
+            with self.subTest(identity=predecessor):
+                line = completed.count("\n", 0, completed.index(current)) + 1
+                atomic_write(self.guide, completed.replace(current, predecessor, 1))
+                error = self.assert_refuses("c")
+                self.assertIn(f"{self.guide}:{line}:", error)
+                self.assertIn(predecessor, error)
+
+    def test_completed_guide_refuses_ambiguous_component_identity_at_its_line(self) -> None:
+        self.assertTrue(self.run_retarget())
+        line = len(self.guide.read_text(encoding="utf-8").splitlines()) + 1
+        self.append(f"Source `{SOURCE}`.\n")
+        error = self.assert_refuses("a")
+        self.assertIn(f"{self.guide}:{line}:", error)
+        self.assertIn(SOURCE, error)
+        self.assertIn("rtx5090-container", error)
+        self.assertIn("rtx4090-windows-native", error)
+
+    def test_completed_guide_resolves_current_and_rollback_occurrences_individually(self) -> None:
+        prior = self.write_prior()
+        prior_tag = prior["components"]["ninfer"]["release_tag"]
+        new_tag = self.after["manifest.json"]["components"]["ninfer"]["release_tag"]
+        for references in (f"current `{CONTAINER_TAG}`, rollback `{prior_tag}`",
+                           f"rollback `{prior_tag}`, current `{CONTAINER_TAG}`",
+                           f"rollback `{prior_tag}`; install `{CONTAINER_TAG}`",
+                           f"rollback `{prior_tag}`. Install `{CONTAINER_TAG}`"):
+            with self.subTest(references=references):
+                atomic_write(self.guide, route_guide() + f"RTX 5090 {references}.\n")
+                self.assertTrue(self.run_retarget())
+                completed = self.guide.read_text(encoding="utf-8")
+                self.assertFalse(self.run_retarget())
+                line = completed.count("\n", 0, completed.index(new_tag)) + 1
+                atomic_write(self.guide, completed.replace(new_tag, CONTAINER_TAG, 1))
+                error = self.assert_refuses("c")
+                self.assertIn(f"{self.guide}:{line}:", error)
+                self.assertIn(CONTAINER_TAG, error)
+
     def test_previous_distinct_stays_put_for_a_carried_lane(self) -> None:
         prior = self.write_prior()
         self.after["manifest.json"]["components"]["ninfer_variants"] = deepcopy(
@@ -561,6 +621,7 @@ class HistoryGoldenTest(unittest.TestCase):
                 expected_blocks = GUIDE.documented_route.lane_blocks(expected, lane)
                 self.assertEqual([(step.slug, block.text) for step, block in actual_blocks],
                                  [(step.slug, block.text) for step, block in expected_blocks], lane)
+            self.assertFalse(GUIDE.retarget(root, "v0.18.0", "v0.19.0", guide, check=True))
             self.assertFalse(GUIDE.retarget(root, "v0.18.0", "v0.19.0", guide))
 
 
