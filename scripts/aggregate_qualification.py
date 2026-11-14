@@ -1133,6 +1133,14 @@ def plan_outputs(root: Path, release: str, plan_path: Path, directories: dict[st
     manifest["qualification"]["runtime_release_eligible"] = True
     targets = manifest["publication"]["targets"]
     # Targets carry identity only; which components are carried is the generated statement's job.
+    runtime = manifest["components"]["ninfer"]
+    replacements = {
+        "NInfer RTX 5090 ": f"NInfer RTX 5090 {runtime['release_tag']}; image {runtime['oci_manifest_digest']}",
+        "OMP client: ": ("OMP client: unmodified upstream Oh My Pi "
+                        + manifest["components"]["omp"]["upstream_tag"] + "; no client published here"),
+    }
+    targets = [next((replacement for prefix, replacement in replacements.items()
+                     if isinstance(value, str) and value.startswith(prefix)), value) for value in targets]
     native_targets = [
         f"NInfer native {row['release_tag']}; package sha256:" + row["package_sha256"]
         for lane, row in sorted(rows.items(), key=lambda item: (item[0] not in recut, item[0]))]

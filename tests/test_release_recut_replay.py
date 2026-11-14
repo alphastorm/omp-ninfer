@@ -96,6 +96,10 @@ class PrivateRecutReplayTests(unittest.TestCase):
                                   "Synthetic acceptance and closed-review fixtures bind this replay's new candidate.")
                     elif relative == "qualification/receipt-audit.json":
                         reason = "The real audit inventories this newly composed tree and its new provenance and hashes."
+                    elif relative == "qualification/client-components.json":
+                        reason = "JSON serialization only; the staged client descriptor has identical fields."
+                    elif relative == "qualification/rtx3090-upgrade.json":
+                        reason = "The aggregate generates component-local upgrade scope instead of the historical authored sentence."
                     elif relative in ("manifest.json", "qualification.json", "compatibility.json", "COMPATIBILITY.md"):
                         reason = ("Candidate posture clears historical acceptance; generated provenance, authored limitations "
                                   "and current evidence hashes replace manually composed historical prose."

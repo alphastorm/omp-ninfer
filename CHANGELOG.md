@@ -90,6 +90,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The release driver stages re-cut runtimes with their current publication, artifact
   authentication, build identity and qualification receipts, including the authenticated archive
   size; it stages operator-authored notes before validating the draft.
+  Publication targets describe the selected runtime image and client, not predecessor identities.
 - Route composition binds staged parity waivers to the accepted candidate and refreshes their
   hash chains. Review epochs must match their closed directories' frozen subjects; from v0.20.0
   the candidate must contain its release plan, and a carried runtime refuses staging identity
