@@ -109,6 +109,11 @@ class RouteReceiptTests(unittest.TestCase):
         receipt["clone_commit"] = "2" * 40
         self.assertIn("not candidate", refused(MODULE.check_route, "rtx4090-native", receipt, CANDIDATE))
 
+    def test_a_route_run_under_a_test_override_is_refused(self) -> None:
+        receipt = route_receipt("rtx5090-macos-client")
+        receipt["test_overrides"] = {"ROUTE_TEST_TUNNEL_ATTEMPTS": 1}
+        self.assertIn("test overrides", refused(MODULE.check_route, "rtx5090-macos-client", receipt, CANDIDATE))
+
 
 class RestorationAuditTests(unittest.TestCase):
     def check(self, restoration: dict) -> None:

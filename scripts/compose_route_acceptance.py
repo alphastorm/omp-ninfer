@@ -202,6 +202,9 @@ def check_route(lane: str, receipt: dict, candidate: str) -> None:
             f"{lane}: not a documented-route runner receipt")
     require(receipt.get("lane") == lane, f"{lane}: receipt names lane {receipt.get('lane')!r}")
     require(receipt.get("status") == "passed", f"{lane}: route status is {receipt.get('status')!r}")
+    # The runner records any test-only override it ran under. Such a run is not acceptance.
+    require("test_overrides" not in receipt,
+            f"{lane}: route ran under test overrides {receipt.get('test_overrides')!r}")
     expected = [step.slug for step in documented_route.LANES[lane]]
     steps = receipt.get("steps", [])
     require([step.get("slug") for step in steps] == expected,
