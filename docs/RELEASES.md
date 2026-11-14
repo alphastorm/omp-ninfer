@@ -81,15 +81,17 @@ Prereleases never take GitHub `Latest`; `Latest` always points at the current pu
 
 ## How a release is cut
 
-Cutting a release advances `releases/<version>/manifest.json` from `draft` to GitHub `Latest`
-(maintainer terms are defined below and in the [glossary](FACTS.md#glossary)):
+The committed `releases/<version>/plan.json` declares the release identities, carried or re-cut
+components, support posture and decisions. `scripts/release.py` validates the plan and creates
+the ordered commits that advance the manifest from `draft` through `candidate` to `ready`.
+It does not publish. Maintainer terms are defined below and in the [glossary](FACTS.md#glossary):
 
 1. [Release state transition](#release-state-transition) — `draft`, `candidate`, and `ready` rules.
 2. [Candidate freeze](#candidate-freeze) — freeze client, runtime, model, and receipt bytes.
 3. [Next native release sequencing](#next-native-release-sequencing) — native gates and SBOM.
 4. [External-install acceptance](#external-install-acceptance) — clean client and route smoke.
-5. [Cut procedure](#cut-procedure) — stage the draft, bind waivers, and run the four
-   [cut stages](#cut-stages).
+5. [Cut procedure](#cut-procedure) — check the plan, run `candidate`, collect fresh acceptance,
+   then run `finalize` through the [cut stages](#cut-stages).
 6. [Release notes](#release-notes) — pin the client, cut native components,
    [add a lane](#adding-a-lane), and what notes may claim.
 7. [After publication](#after-publication) — date the changelog, update the living pages, and
@@ -334,9 +336,59 @@ acceptance.
 
 ## Cut procedure
 
-The release tree is staged as a draft and cut with the pin dance, the four `rebind_release.py`
-stages listed under [cut stages](#cut-stages). Every step is a script and the verifier decides what
-remains.
+Use the driver rather than copying release-specific scripts or choosing pin SHAs by hand:
+
+```sh
+python3 scripts/release.py plan check --release "$release"
+python3 scripts/release.py status --release "$release"
+python3 scripts/release.py next --release "$release"
+python3 scripts/release.py candidate --release "$release"
+# Run the reviews and acceptance windows from the guide candidate printed by status.
+python3 scripts/release.py finalize --release "$release" \
+  --window-root "$window_root" --reviews "$reviews" --values "$values" --as-of "$date"
+python3 scripts/release.py publish --release "$release" --preflight --pr "$pr"
+```
+
+Author and commit the plan before running `candidate`. Schema 1 has artifact type
+`omp_ninfer_release_plan`, the GA `release` and `predecessor`, a `client` with `upstream_tag`
+and disposition `carried` or `updated`, and a `components` array. Component ids are the closed set
+`rtx5090-container`, `rtx4090-windows-native`, `rtx3090-windows-native`; each binds disposition
+`recut` or `carried`, `release_tag` and a full `source_commit`. `platforms` maps exactly the
+authority's profile ids to `qualified` or `preview`. `decisions` binds each decision's `id`,
+`kind` (`component-cut`, `scope` or `waiver`) and SHA-256. Carried identities must match the ready
+predecessor, re-cut tags must be new, and an existing manifest must agree with the plan.
+No absolute paths or private markers belong in a plan.
+
+Supply private inputs as arguments to `candidate`, not as plan fields:
+
+- A re-cut container requires `--stage-input JSON`, `--lane-receipt rtx5090=PATH` and
+  `--runtime-publication JSON`. The stage-input object uses `stage_release.py` option names with
+  underscores instead of hyphens; source/archive/SBOM/image metadata and local source/checksum
+  files come from the cut. The driver always takes the release tag and source commit from the
+  plan. Relative file options resolve beside this JSON. A carried container derives its staging
+  arguments from the predecessor and refuses a new runtime-publication record.
+- Each re-cut native lane requires `--bundle LANE=DIR` and
+  `--native-publication LANE=JSON`; repeat per lane. External package files use
+  `--asset ROLE=PATH` when the bundle declares them. Carried native lanes take neither bundle
+  nor publication input.
+- An updated client requires `--client-component JSON`, passed to the stager's
+  `--omp-component`. Optional `--notes PATH` supplies the release's completed publication notes;
+  optional profile/deployment options belong in the stage-input object.
+- `--measurement-prefix PREFIX` selects public measurement filenames; it must contain no private
+  identifiers. `--as-of DATE` is the acceptance completion date, not an inferred current date.
+
+The driver remembers private input paths only in ignored `.release-state/<version>.json`, written
+atomically. That file is a cache, not authority: first-parent commits with `Release:` and
+`Release-Step:` trailers determine completed groups, and `Pins:` trailers bind the earlier group
+commits. Rerunning a completed group makes no commit. An interrupted group's complete outputs are
+committed without rerunning tools only when the plan, HEAD and private input hashes are unchanged;
+otherwise only that group's declared paths are restored and its tools rerun. Foreign dirty paths
+and rewritten recorded history are refused. Keep operator work outside those declared output paths.
+
+Both commands run their verifier gates and the contract suite. `--no-suite` skips only the suite,
+never installability, lint, ready or pin checks. A missing tool is an error, never a skipped step.
+`publish --preflight` wraps the publication script without its live flag: it does not authorize or
+perform publication. `ready` remains a technical state, not an external-effect grant.
 
 The verifier resolves predecessors from **ready GA manifests**, not the newest
 GA-named directory. Published product releases use `status: ready`; neither
@@ -349,8 +401,8 @@ When the RTX 5090 source archive URL changes, staging requires both
 those local bytes, and requires exactly one matching SHA256SUMS entry each for
 the binary archive (`--archive-sha`) and its SPDX SBOM (`--sbom-sha`). Current
 published RTX 5090 sets list those two assets, not the separately published source
-archive. If a `runtime-source-<source-commit8>.tar.gz` entry is present, as in the
-v0.14.0 format, it must match `--source-archive-sha`. Missing required entries,
+archive. If a `runtime-source-<source-commit8>.tar.gz` entry is present in an older
+combined checksum set, it must match `--source-archive-sha`. Missing required entries,
 malformed or duplicate entries, mismatched hashes and stale predecessor metadata
 are refused before copying the release tree. An unchanged source URL keeps its
 metadata when those arguments are omitted. Profile templates retain checkpoint
@@ -399,31 +451,37 @@ Supported new waiver shapes are deliberately narrow:
 
 ### Cut stages
 
-1. `scripts/stage_release.py --from <previous> --release <new> ...` copies the tree, rewrites
-   the component and identity pins (including `--config-sha`, the lifecycle configuration
-   identity of the new deployment profile), and recomputes the chain with
-   `scripts/rebind_release.py --draft`. The root authority and profiles stay on the previous
-   release: that is the checked-in draft posture.
-2. Author the evidence: install the lane receipt, write the composed acceptance, rewrite the
-   qualification summary's gates and prose, CHANGELOG/RELEASES/BENCHMARKS/FACTS/README, and the
-   drift-test pins. Rerun `--draft` after every edit; commit.
-3. Cut: `scripts/rebind_release.py --release <new> --pin <commit containing the final lane
-   receipts> --stage lane` promotes the release's compatibility copy to the root authority,
-   rewrites the root profiles and launcher examples from the manifest, pins the authority's
-   receipt URLs, and reruns the chain. A draft manifest becomes `candidate`, not `ready`.
-   An upstream-release client is copied wholesale from its platform row before consuming
-   a root `status:candidate` marker (which means client-unbound-by-named-release). Fork
-   and non-promoted markers remain. Verify `--require-installable`; commit the candidate
-   for the release's published-image acceptance window. Do not hand-clear guards.
-4. Only after fresh platform/documented-route acceptance, bind the real receipts and
-   ready/external-acceptance transition. `--pin <that commit> --stage acceptance`; commit.
-   `--pin <that commit> --stage manifest`;
-   commit. The manifest stage runs `verify_release.py --require-ready --check-pins`, which
-   reads every pinned evidence URL out of local git history and requires it to serve exactly
-   the recorded SHA-256 and every pinned commit to be an ancestor of the checked-out head.
-   A locally resolvable side-branch pin is not publication evidence. It also rejects stale unpublished/ready-candidate wording in tracked
-   Markdown outside `releases/`; use release-neutral wording before freezing the tag. CI repeats the gate on
-   the release tag with full history.
+Each row is one commit with a fixed Conventional Commit subject and release/step trailers.
+`candidate` runs the first three rows; `finalize` requires the guide commit and runs the rest.
+
+| Group | Tools and binding |
+| --- | --- |
+| `stage` | Stage from the ready predecessor; aggregate `admit` validates bundles and derives release-decision-bound proofs; bind each re-cut native lane; draft rebind; aggregate `compose`; draft rebind; receipt audit `lane-stage`. Root authority and profiles remain on the predecessor. |
+| `lane-pin` | `rebind_release.py --stage lane` pins to the **stage commit** holding final lane receipts, promotes the root authority, profiles and launcher pins, and changes `draft` to `candidate`, not `ready`. |
+| `guide` | `retarget_guide.py` retargets the guide once from predecessor identities to plan identities. This commit is the **candidate** for every review and acceptance window. Run installability, lint-ready with pins, and the suite before the windows. |
+| `compose` | Collect window evidence, build the review ledger naming the guide candidate, compose real route/platform acceptance, then rebind. Only the composer makes the release `ready` and clears its blockers. |
+| `platform-pin` | Pin to the **compose commit** containing platform receipt bytes, then rebind. This changes the compatibility hash and therefore the composed acceptance bytes. |
+| `acceptance-pin` | Pin to the **platform-pin commit**, the first commit containing those final composed acceptance bytes. |
+| `audit` | Generate the `composed-final` receipt audit **after the acceptance pin**, updating its qualification binding before that summary is pinned. |
+| `manifest-pin` | Pin to the **audit commit** holding final qualification, compatibility and variant receipts. Run ready with pins during this step and again at HEAD, then the suite. |
+
+An upstream-release client is copied wholesale from its platform row at the lane pin before
+consuming a root `status:candidate` marker (client-unbound-by-named-release). Fork and non-promoted
+markers remain; never hand-clear guards.
+
+Four separate pins are necessary because writing a commit-pinned URL changes the referring
+file's bytes: a file cannot name its own not-yet-created commit. Every pin argument comes from
+the earlier group's trailers, never an operator-provided SHA. The driver uses explicit
+`git add -- <paths>` and never squashes, rebases, pushes or publishes. Do not rewrite these commits
+when landing the release: publication fast-forwards them intact.
+
+The ready/pin gate reads every pinned URL from local git history, checks its recorded SHA-256 and
+requires each pin to be an ancestor of HEAD. A locally resolvable side-branch pin is not publication
+evidence. It also rejects stale release-state wording in tracked Markdown outside `releases/`.
+Keep that prose neutral before freezing the candidate; the whole guide remains hash-bound through
+acceptance. CI repeats the ready/pin gate on the release tag with full history. Living
+CHANGELOG/RELEASES/BENCHMARKS/FACTS/README pages change once, [after publication](#after-publication),
+not during staging or finalization. Release-local notes are completed before the candidate.
 
 ### Guarded completion of a partial product publication
 
