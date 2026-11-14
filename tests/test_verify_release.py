@@ -2526,7 +2526,7 @@ class ReleaseContractTest(unittest.TestCase):
     def bind_failed_native_campaign(self, root: Path,
                                     *, failed_phase: str = "structured-outage") -> tuple[Path, Path, Path]:
         """Admit the campaign separately; retain the original passed documented blocks."""
-        from test_compose_route_acceptance import campaign_waiver, waived_campaign_evidence
+        from acceptance_fixtures import campaign_waiver, waived_campaign_evidence
         release_root = root / "releases" / PUBLIC_RELEASE
         routes_path = release_root / "acceptance/documented-routes.json"
         routes = self.load(routes_path)
@@ -2610,7 +2610,7 @@ class ReleaseContractTest(unittest.TestCase):
     def native_probe_waiver_copy(self) -> tuple[tempfile.TemporaryDirectory[str], Path, Path, Path, Path]:
         """Exercise the ready gate with v0.16.2's authenticated C2 policy and other real probes."""
         from compose_native_qualification import native_probe_summary
-        from test_compose_route_acceptance import campaign_waiver, waived_campaign_evidence
+        from acceptance_fixtures import campaign_waiver, waived_campaign_evidence
         temporary, root = self.current_release_copy()
         release_root = root / "releases/v0.16.2"
         routes_path = release_root / "acceptance/documented-routes.json"
@@ -2744,7 +2744,7 @@ class ReleaseContractTest(unittest.TestCase):
                 self.assertTrue(any("composed limitations" in error for error in errors), errors)
 
     def test_native_probe_waiver_requires_bound_failure_details_and_graceful_recovery(self) -> None:
-        from test_compose_route_acceptance import campaign_waiver, waived_campaign_evidence
+        from acceptance_fixtures import campaign_waiver, waived_campaign_evidence
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             path = root / "releases/v0.17.0/qualification/rtx3090-route-waiver.json"

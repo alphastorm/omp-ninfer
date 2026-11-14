@@ -781,18 +781,15 @@ def main() -> int:
               file=sys.stderr)
         return 1
     print("remaining work, in order:")
-    print("  1. [allowlist] add the new tag to NINFER_RELEASE_TAG_RE in "
-          "scripts/verify_release.py (deliberate per-release act)")
-    print("  2. author the release evidence by hand - lane-receipt arcs/gates, the composed "
-          "acceptance receipt, CHANGELOG, RELEASES/BENCHMARKS/FACTS/README, and the "
-          f"drift-test pins; rerun scripts/rebind_release.py --release {args.release} --draft "
-          "after every edit and commit in the draft posture")
-    print(f"  3. cut: scripts/rebind_release.py --release {args.release} --pin <commit that "
-          "contains the final lane receipts> --stage lane promotes the root authority, "
-          "profiles, and launcher pins, then commit")
-    print(f"  4. scripts/rebind_release.py --release {args.release} --pin <commit> "
-          "--stage acceptance | manifest (two more commits; the manifest stage runs the "
-          "ready verifier with --check-pins)")
+    print(f"  1. check releases/{args.release}/plan.json with "
+          f"scripts/release.py plan check --release {args.release}")
+    print(f"  2. use scripts/release.py candidate --release {args.release} with the plan's "
+          "private inputs to bind lane receipts, pin them, and retarget the guide once")
+    print("  3. run reviews and documented-route acceptance from that guide candidate")
+    print(f"  4. use scripts/release.py finalize --release {args.release} with the window, "
+          "review, values, and completion-date inputs; the driver composes evidence, creates "
+          "the ordered pins and audit, and runs the ready/pin gates")
+    print("  Living release documents change only after publication; see docs/RELEASES.md.")
     return 0
 
 
