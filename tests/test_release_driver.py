@@ -241,7 +241,7 @@ class ReleaseDriverTests(unittest.TestCase):
         return [call for call in calls if name is None or call["tool"] == name]
 
     def driver(self, **values) -> Any:
-        options = argparse.Namespace(notes=self.private / "notes.md", **values)
+        options = argparse.Namespace(**{"notes": self.private / "notes.md", **values})
         return DRIVER.ReleaseDriver(self.root, RELEASE, options)
 
     def interrupt(self, *, finalize: bool = False, **values) -> None:
@@ -281,6 +281,44 @@ class ReleaseDriverTests(unittest.TestCase):
         self.assertEqual(len(self.calls("run_tests.py")), 2)
         self.assertEqual(self.git("status", "--porcelain"), "")
         self.assertNotIn(str(self.private), self.git("log", "--format=%B", f"{self.initial}..HEAD"))
+
+    def test_finalize_notes_are_committed_by_compose(self) -> None:
+        self.candidate("--no-suite")
+        notes = self.private / "accepted-notes.md"
+        content = f"# {RELEASE}\nDocumented acceptance passed.\n".encode()
+        atomic_write(notes, content)
+        self.finalize("--no-suite", "--notes", str(notes))
+        compose = DRIVER.group_commits(self.root, RELEASE)["compose"]["commit"]
+        path = f"releases/{RELEASE}/NINFER_RELEASE_NOTES.md"
+        committed = subprocess.run(["git", "show", f"{compose}:{path}"], cwd=self.root,
+                                   env=self.environment, check=True, capture_output=True).stdout
+        self.assertEqual(committed, content)
+        self.assertEqual((self.root / path).read_bytes(), content)
+
+    def test_finalize_without_notes_keeps_staged_notes(self) -> None:
+        self.candidate("--no-suite")
+        path = self.root / "releases" / RELEASE / "NINFER_RELEASE_NOTES.md"
+        staged = path.read_bytes()
+        atomic_write(self.private / "notes.md", "Do not reread this stage-only input.\n")
+        self.finalize("--no-suite")
+        compose = DRIVER.group_commits(self.root, RELEASE)["compose"]["commit"]
+        committed = subprocess.run(["git", "show", f"{compose}:{path.relative_to(self.root).as_posix()}"],
+                                   cwd=self.root, env=self.environment, check=True, capture_output=True).stdout
+        self.assertEqual(committed, staged)
+        self.assertEqual(path.read_bytes(), staged)
+
+    def test_changed_finalize_notes_rerun_interrupted_compose(self) -> None:
+        self.candidate("--no-suite")
+        notes = self.private / "accepted-notes.md"
+        atomic_write(notes, f"# {RELEASE}\nInitial acceptance summary.\n")
+        self.interrupt(finalize=True, command="finalize", notes=notes,
+                       window_root=self.private / "windows", reviews=self.private / "reviews",
+                       values=self.private / "values.json", as_of="2026-01-02")
+        content = f"# {RELEASE}\nFinal acceptance summary.\n".encode()
+        atomic_write(notes, content)
+        self.finalize("--no-suite")
+        self.assertEqual(len(self.calls("collect_route_evidence.py")), 2)
+        self.assertEqual((self.root / "releases" / RELEASE / "NINFER_RELEASE_NOTES.md").read_bytes(), content)
 
     def test_completed_groups_create_no_more_commits_or_tool_calls(self) -> None:
         self.candidate("--no-suite")

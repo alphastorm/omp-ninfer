@@ -147,7 +147,9 @@ class ReleaseDriver:
         for name in PATH_INPUTS:
             value = getattr(options, name, None)
             if value is not None:
-                private[name] = str(Path(value).resolve())
+                key = ("compose_notes" if name == "notes"
+                       and getattr(options, "command", None) == "finalize" else name)
+                private[key] = str(Path(value).resolve())
         for name in MAPPED_INPUTS:
             values = getattr(options, name, None)
             if values is not None:
@@ -313,7 +315,7 @@ class ReleaseDriver:
     def inputs_digest(self, group: str, head: str) -> str:
         names = ({"stage_input", "notes", "client_component", "runtime_publication", "bundles",
                   "lane_receipts", "assets", "native_publications"} if group == "stage" else
-                 {"window_root", "reviews", "values"} if group == "compose" else set())
+                 {"window_root", "reviews", "values", "compose_notes"} if group == "compose" else set())
         private = {}
         for name in sorted(names & self.state["private"].keys()):
             value = self.state["private"][name]
@@ -467,6 +469,9 @@ class ReleaseDriver:
         candidate = self.records["guide"]["commit"]
         evidence = self.local / "composition-evidence.json"
         receipts = self.local / "receipts"
+        if "compose_notes" in self.state["private"]:
+            atomic_write(self.plan_path.parent / "NINFER_RELEASE_NOTES.md",
+                         Path(self.state["private"]["compose_notes"]).read_bytes())
         self.tool("collect_route_evidence.py", "--release", self.release, "--candidate", candidate,
                   "--window-root", str(self.private_path("window_root")), "--plan",
                   str(self.plan_path.relative_to(self.root)), "--output", str(evidence),

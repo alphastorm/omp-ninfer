@@ -374,6 +374,9 @@ Supply private inputs as arguments to `candidate`, not as plan fields:
 - An updated client requires `--client-component JSON`, passed to the stager's
   `--omp-component`. Optional `--notes PATH` supplies the release's completed publication notes;
   optional profile/deployment options belong in the stage-input object.
+- `finalize --notes PATH` replaces those notes in the compose commit when acceptance results
+  complete them. Without this argument, finalization keeps the staged notes. A resumed compose
+  attempt reuses its recorded notes input and hashes its bytes before deciding whether to rerun.
 - `--measurement-prefix PREFIX` selects public measurement filenames; it must contain no private
   identifiers. `--as-of DATE` is the acceptance completion date, not an inferred current date.
 
@@ -481,7 +484,8 @@ evidence. It also rejects stale release-state wording in tracked Markdown outsid
 Keep that prose neutral before freezing the candidate; the whole guide remains hash-bound through
 acceptance. CI repeats the ready/pin gate on the release tag with full history. Living
 CHANGELOG/RELEASES/BENCHMARKS/FACTS/README pages change once, [after publication](#after-publication),
-not during staging or finalization. Release-local notes are completed before the candidate.
+not during staging or finalization. Release-local notes are checked at the candidate and may gain
+acceptance results through `finalize --notes` before the compose commit.
 
 ### Guarded completion of a partial product publication
 
