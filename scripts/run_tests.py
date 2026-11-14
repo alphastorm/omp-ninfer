@@ -78,6 +78,12 @@ WINDOWS_METHOD_SKIPS = (
         ),
         "scratch C: PSDrive fixture runs on Ubuntu and macOS",
     ),
+    (
+        "test_release_driver",
+        "ReleaseDriverTests",
+        ("test_publish_only_wraps_preflight_with_exact_head",),
+        "runs the POSIX publication preflight script",
+    ),
 )
 
 
