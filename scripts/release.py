@@ -6,16 +6,20 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
+import tempfile
+import time
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any
 from urllib.parse import urlsplit
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from release_io import atomic_write, atomic_write_json, git
-from release_plan import COMPONENT_IDS, load_plan, manifest_components, plan_errors
+from release_plan import (COMPONENT_IDS, initial_plan, latest_ready_manifest, load_plan,
+                          manifest_components, plan_errors)
 
 ROOT = Path(__file__).resolve().parents[1]
 GROUPS = ("stage", "lane-pin", "guide", "compose", "platform-pin", "acceptance-pin",
@@ -104,6 +108,9 @@ def group_commits(root: Path, release: str) -> dict[str, dict[str, str]]:
                 trailers.setdefault(key, []).append(value.strip())
         if release not in trailers.get("Release", []):
             continue
+        if (subject == f"chore(release): plan {release}"
+                and trailers == {"Release": [release]}):
+            continue
         if trailers.get("Release") != [release] or len(trailers.get("Release-Step", [])) != 1:
             raise ReleaseError(f"invalid release trailers at {commit}")
         group = trailers["Release-Step"][0]
@@ -117,6 +124,43 @@ def group_commits(root: Path, release: str) -> dict[str, dict[str, str]]:
             raise ReleaseError(f"{group} Pins trailer does not name its {source or 'absent'} input")
         records[group] = {"commit": commit, "pins": expected[0] if expected else ""}
     return records
+
+
+def init_plan(root: Path, release: str, *, recut: list[str] | tuple[str, ...] = (),
+              client_tag: str | None = None, decisions: list[str] | tuple[str, ...] = (),
+              no_commit: bool = False) -> str | None:
+    plan = initial_plan(root, release, recut=recut, client_tag=client_tag, decisions=decisions)
+    path = Path(root) / "releases" / release / "plan.json"
+    if path.exists():
+        raise ReleaseError(f"plan init refuses an existing plan: releases/{release}/plan.json")
+    dirty = dirty_paths(root)
+    if dirty:
+        raise ReleaseError("plan init requires a clean tree: " + ", ".join(sorted(dirty)))
+    created = not path.parent.exists()
+    atomic_write_json(path, plan)
+    errors = plan_errors(root, release)
+    if errors:
+        path.unlink()
+        if created:
+            path.parent.rmdir()
+        raise ReleaseError("plan init result failed plan check:\n" + "\n".join(errors))
+    if no_commit:
+        return None
+    return commit_plan(root, release)
+
+
+def commit_plan(root: Path, release: str) -> str:
+    load_plan(root, release)
+    path = f"releases/{release}/plan.json"
+    foreign = dirty_paths(root) - {path}
+    if foreign:
+        raise ReleaseError("plan commit refuses other dirty paths: " + ", ".join(sorted(foreign)))
+    errors = plan_errors(root, release)
+    if errors:
+        raise ReleaseError("plan commit failed plan check:\n" + "\n".join(errors))
+    git(root, "add", "--", path)
+    git(root, "commit", "-m", f"chore(release): plan {release}", "-m", f"Release: {release}")
+    return git(root, "rev-parse", "HEAD").strip()
 
 
 class ReleaseDriver:
@@ -278,6 +322,16 @@ class ReleaseDriver:
         return [row for row in self.plan["components"]
                 if row["id"] != COMPONENT_IDS[0] and row["disposition"] == "recut"]
 
+    def client_component_path(self) -> Path:
+        if "client_component" in self.state["private"]:
+            return self.private_path("client_component")
+        if self.plan["client"]["disposition"] == "updated":
+            raise ReleaseError("updated client requires --client-component")
+        path = (self.root / "releases" / self.plan["predecessor"] / "qualification" / "client-components.json")
+        if not path.is_file():
+            raise ReleaseError("carried client requires predecessor descriptor: " + path.relative_to(self.root).as_posix())
+        return path
+
     def stage_values(self) -> dict[str, Any]:
         runtime = read_json(self.root / "releases" / self.plan["predecessor"] / "manifest.json")[
             "components"]["ninfer"]
@@ -330,6 +384,7 @@ class ReleaseDriver:
             values = self.stage_values()
             private["stage_files"] = {key: input_hash(Path(values[key]))
                                       for key in sorted(STAGE_FILE_OPTIONS & values.keys())}
+            private["client_descriptor_sha256"] = file_sha(self.client_component_path())
         elif group == "guide":
             private["guide_sha256"] = file_sha(self.root / "docs" / "QUICKSTART.md")
         payload = {"plan_sha256": self.plan_sha, "HEAD": head, "private": private,
@@ -361,8 +416,7 @@ class ReleaseDriver:
             raise ReleaseError("carried rtx5090-container refuses --runtime-publication")
         if set(private.get("lane_receipts", {})) - {"rtx5090"}:
             raise ReleaseError("--lane-receipt accepts only rtx5090; native receipts belong in bundles")
-        if self.plan["client"]["disposition"] == "updated":
-            self.private_path("client_component")
+        self.client_component_path()
 
     def outputs(self, group: str) -> dict[str, str]:
         names = git(self.root, "ls-files", "-z", "--cached", "--others", "--exclude-standard").split("\0")
@@ -401,10 +455,7 @@ class ReleaseDriver:
         receipts = self.state["private"].get("lane_receipts", {})
         if "rtx5090" in receipts:
             arguments += ["--lane-receipt", receipts["rtx5090"]]
-        if "client_component" in self.state["private"]:
-            arguments += ["--omp-component", str(self.private_path("client_component"))]
-        if self.plan["client"]["disposition"] == "updated" and "client_component" not in self.state["private"]:
-            raise ReleaseError("updated client requires --client-component")
+        arguments += ["--omp-component", str(self.client_component_path())]
         if next(row for row in self.plan["components"] if row["id"] == COMPONENT_IDS[0])["disposition"] == "recut" and "rtx5090" not in receipts:
             raise ReleaseError("re-cut runtime requires --lane-receipt rtx5090=PATH")
         # The stager requires an absent directory. The plan is an input, not draft residue.
@@ -651,6 +702,10 @@ class ReleaseDriver:
 def run_pipeline(driver: ReleaseDriver, *, finalize: bool, no_suite: bool = False,
                  through: str | None = None) -> None:
     """One execution path for CLI cuts and a disposable-clone rehearsal."""
+    plan_path = driver.plan_path.relative_to(driver.root).as_posix()
+    if not finalize and plan_path in dirty_paths(driver.root):
+        raise ReleaseError(f"candidate requires a committed plan: {plan_path}; "
+                           "use plan init for a new release, then plan commit for its authored inputs")
     if finalize and "guide" not in driver.records:
         raise ReleaseError("finalize requires the guide candidate commit")
     interrupted_stage = not finalize and "stage" not in driver.records and driver.state["groups"].get("stage")
@@ -683,11 +738,191 @@ def required_input(driver: ReleaseDriver, group: str) -> str:
     return "none (identities and pins come from the plan and trailers)"
 
 
+def _rehearsal_guide_edit(root: Path, predecessor: str, release: str) -> None:
+    """Apply only the authored link removals the real retarget tool requests."""
+    from verify_release import MARKDOWN_LINK_RE
+
+    guide = root / "docs" / "QUICKSTART.md"
+    while True:
+        result = subprocess.run(
+            [sys.executable, str(root / "scripts" / "retarget_guide.py"),
+             "--from", predecessor, "--to", release, "--check"],
+            cwd=root, capture_output=True, text=True, encoding="utf-8",
+        )
+        if result.returncode == 0 or (
+                result.returncode == 1 and not result.stderr and result.stdout.rstrip().endswith("would change")):
+            return
+        unbound = re.search(r": unbound evidence link: (.+)$", result.stderr, re.MULTILINE)
+        if unbound is None:
+            raise ReleaseError("retarget_guide.py: " + (result.stderr or result.stdout).strip())
+        target = unbound[1].strip("<>")
+        text = guide.read_text(encoding="utf-8")
+        matches = [match for match in MARKDOWN_LINK_RE.finditer(text) if match[1].strip("<>") == target]
+        if not matches:
+            raise ReleaseError("retarget_guide.py reported a link that cannot be located")
+        for match in reversed(matches):
+            link = match[0]
+            label = link[link.index("[") + 1:link.index("](")]
+            text = text[:match.start()] + label + text[match.end():]
+        atomic_write(guide, text)
+        print(f"rehearsal: guide: removed unbound evidence link {target}; kept its label", flush=True)
+
+
+def _rehearsal_negative_probe(root: Path, release: str, path: Path) -> None:
+    original = path.read_bytes()
+    try:
+        atomic_write(path, original + b" ")
+        result = subprocess.run(
+            [sys.executable, str(root / "scripts" / "verify_release.py"),
+             "--release", release, "--require-ready", "--check-pins"],
+            cwd=root, capture_output=True, text=True, encoding="utf-8",
+        )
+        if result.returncode != 1:
+            raise ReleaseError(f"{path.relative_to(root)} byte-change probe expected exit 1, "
+                               f"got {result.returncode}: {result.stdout}{result.stderr}")
+    finally:
+        atomic_write(path, original)
+
+
+def rehearse(root: Path = ROOT, *, keep: Path | None = None, suite: bool = False) -> int:
+    """Exercise the real product tail at HEAD in an isolated, network-free clone."""
+    root = Path(root).resolve()
+    temporary = None
+
+    def step(name: str, action):
+        started = time.perf_counter()
+        try:
+            result = action()
+        except Exception as error:
+            detail = error.stderr.strip() if isinstance(error, subprocess.CalledProcessError) and error.stderr else str(error)
+            print(f"rehearsal: {name}: failed ({time.perf_counter() - started:.3f}s): {detail}", flush=True)
+            raise
+        print(f"rehearsal: {name}: passed ({time.perf_counter() - started:.3f}s)", flush=True)
+        return result
+
+    def preflight():
+        if git(root, "rev-parse", "--is-shallow-repository").strip() == "true":
+            raise ReleaseError("rehearsal requires a full, non-shallow repository")
+        dirty = dirty_paths(root)
+        if dirty:
+            raise ReleaseError("rehearsal requires a clean repository: " + ", ".join(sorted(dirty)))
+        if keep is not None:
+            destination = Path(keep).resolve()
+            if destination.is_relative_to(root):
+                raise ReleaseError("--keep must be outside the source repository")
+            if destination.exists() and (not destination.is_dir() or any(destination.iterdir())):
+                raise ReleaseError("--keep must name an absent or empty directory")
+        return git(root, "rev-parse", "HEAD").strip(), latest_ready_manifest(root)
+
+    try:
+        head, previous = step("preflight", preflight)
+        version = tuple(map(int, previous["release"][1:].split(".")))
+        release = f"v{version[0]}.{version[1] + 1}.0"
+        if keep is None:
+            temporary = tempfile.TemporaryDirectory(prefix="release-rehearsal-")
+            clone = Path(temporary.name) / "product"
+        else:
+            clone = Path(keep).resolve()
+
+        def clone_head():
+            clone.parent.mkdir(parents=True, exist_ok=True)
+            git(root, "clone", "--quiet", "--no-hardlinks", "--no-checkout", str(root), str(clone))
+            for key, value in (("user.name", "Release rehearsal"), ("user.email", "release@example.invalid"),
+                               ("commit.gpgsign", "false"), ("core.autocrlf", "false")):
+                git(clone, "config", key, value)
+            git(clone, "checkout", "--quiet", "--detach", head)
+            git(clone, "remote", "remove", "origin")
+
+        step("clone", clone_head)
+        step("plan init", lambda: init_plan(clone, release))
+        inputs = clone / ".release-state" / "rehearsal"
+        staged_notes = inputs / "stage-notes.md"
+        final_notes = inputs / "final-notes.md"
+
+        def notes():
+            title = f"# OMP NInfer {release}\n\n"
+            atomic_write(staged_notes, title + "Synthetic host-free release-tooling rehearsal.\n"
+                         "Runtime identities and support limits come from the ready predecessor.\n"
+                         "This exercises tooling, not real hardware qualification or publication authority.\n")
+            atomic_write(final_notes, title + "Synthetic host-free release-tooling rehearsal.\n"
+                         "Documented-route fixture acceptance passed for every declared route.\n"
+                         "This exercises tooling, not real hardware qualification or publication authority.\n")
+
+        step("notes", notes)
+        predecessor = previous["release"]
+        candidate_driver = ReleaseDriver(clone, release, argparse.Namespace(
+            command="candidate", notes=staged_notes,
+            client_component=clone / "releases" / predecessor / "qualification" / "client-components.json"))
+        step("candidate lanes", lambda: run_pipeline(candidate_driver, finalize=False,
+                                                     no_suite=True, through="lane-pin"))
+        step("guide evidence", lambda: _rehearsal_guide_edit(clone, predecessor, release))
+        step("candidate", lambda: run_pipeline(candidate_driver, finalize=False, no_suite=True))
+        candidate = candidate_driver.records["guide"]["commit"]
+        windows = inputs / "windows"
+
+        def fixtures():
+            path = clone / "tests" / "acceptance_fixtures.py"
+            if not path.is_file():
+                raise ReleaseError("missing release tool: tests/acceptance_fixtures.py")
+            result = subprocess.run(
+                [sys.executable, str(path), "write", "--release", release, "--candidate", candidate,
+                 "--out", str(windows)], cwd=clone, check=True, capture_output=True,
+                text=True, encoding="utf-8", env={**os.environ, "PYTHONPATH": str(clone / "tests")},
+            )
+            return json.loads(result.stdout)
+
+        fixture = step("fixtures", fixtures)
+        qualification = read_json(clone / "releases" / predecessor / "qualification.json")
+        final_driver = ReleaseDriver(clone, release, argparse.Namespace(
+            command="finalize", notes=final_notes, window_root=Path(fixture["window_root"]),
+            reviews=Path(fixture["reviews"]), values=Path(fixture["values"]),
+            as_of=qualification["as_of"]))
+        step("finalize", lambda: run_pipeline(final_driver, finalize=True, no_suite=True))
+
+        def ready_gate():
+            final_driver.tool("verify_release.py", "--release", release, "--require-ready", "--check-pins")
+
+        step("ready gate", ready_gate)
+
+        def status():
+            if tuple(group_commits(clone, release)) != GROUPS:
+                raise ReleaseError("rehearsal did not complete all eight commit groups")
+            if main(["status", "--release", release], root=clone) != 0:
+                raise ReleaseError("release status failed")
+
+        step("status", status)
+        release_root = clone / "releases" / release
+        step("negative receipt audit", lambda: _rehearsal_negative_probe(
+            clone, release, release_root / "qualification" / "receipt-audit.json"))
+        step("negative pinned evidence", lambda: _rehearsal_negative_probe(
+            clone, release, release_root / "qualification.json"))
+        step("restored gate", ready_gate)
+        if suite:
+            step("suite", lambda: final_driver.tool("run_tests.py"))
+        print("rehearsal: passed", flush=True)
+        return 0
+    except Exception:
+        return 1
+    finally:
+        if temporary is not None:
+            temporary.cleanup()
+
+
 def main(argv: list[str] | None = None, *, root: Path = ROOT) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     subcommands = parser.add_subparsers(dest="command", required=True)
     plan = subcommands.add_parser("plan").add_subparsers(dest="plan_command", required=True)
     plan.add_parser("check").add_argument("--release", required=True)
+    initialize = plan.add_parser("init", help="write and commit the release's opening plan")
+    initialize.add_argument("--release", required=True)
+    initialize.add_argument("--recut", action="append", default=[], metavar="COMPONENT=TAG@COMMIT40")
+    initialize.add_argument("--client-tag")
+    initialize.add_argument("--decision", action="append", default=[], metavar="ID:KIND:SHA256")
+    initialize.add_argument("--no-commit", action="store_true", help="leave the seeded plan for non-interactive author edits")
+    plan.add_parser("commit", help="validate and commit an authored opening plan").add_argument("--release", required=True)
+    rehearsal = subcommands.add_parser("rehearse", help="prove the real release tail without hosts or network")
+    rehearsal.add_argument("--keep", type=Path, help="retain the clone in an absent or empty directory")
+    rehearsal.add_argument("--suite", action="store_true", help="also run the contract suite at the ready state")
     for name in ("status", "next", "candidate", "finalize", "publish"):
         command = subcommands.add_parser(name)
         command.add_argument("--release", required=True)
@@ -705,7 +940,22 @@ def main(argv: list[str] | None = None, *, root: Path = ROOT) -> int:
             command.add_argument("--pr", type=int, required=True)
     args = parser.parse_args(argv)
     try:
+        if args.command == "rehearse":
+            return rehearse(root, keep=args.keep, suite=args.suite)
         if args.command == "plan":
+            if args.plan_command == "init":
+                commit = init_plan(root, args.release, recut=args.recut, client_tag=args.client_tag,
+                                   decisions=args.decision, no_commit=args.no_commit)
+                if commit is None:
+                    print(f"release plan {args.release}: seeded; edit releases/{args.release}/plan.json, "
+                          f"then run scripts/release.py plan commit --release {args.release}")
+                else:
+                    print(f"release plan {args.release}: initialized at {commit}")
+                return 0
+            if args.plan_command == "commit":
+                commit = commit_plan(root, args.release)
+                print(f"release plan {args.release}: committed at {commit}")
+                return 0
             errors = plan_errors(root, args.release)
             if errors:
                 raise ReleaseError("\n".join(errors))
