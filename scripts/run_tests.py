@@ -81,7 +81,10 @@ WINDOWS_METHOD_SKIPS = (
     (
         "test_release_driver",
         "ReleaseDriverTests",
-        ("test_publish_only_wraps_preflight_with_exact_head",),
+        (
+            "test_publish_only_wraps_preflight_with_exact_head",
+            "test_tool_mode_change_refuses_the_group_without_committing",  # Requires executable bits.
+        ),
         "runs the POSIX publication preflight script",
     ),
     (

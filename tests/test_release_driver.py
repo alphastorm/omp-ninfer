@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import copy
 import contextlib
+import hashlib
 import importlib.util
 import io
 import json
@@ -40,6 +41,7 @@ SUPPORT = r'''
 import copy
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 from release_io import atomic_write, atomic_write_json
@@ -88,7 +90,9 @@ def run(name, args):
     local = ROOT / ".release-state"
     trace = local / "invocations.json"
     invocations = load(trace) if trace.exists() else []
-    invocations.append({"tool": name, "arguments": args})
+    head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, check=True,
+                          capture_output=True, text=True, encoding="utf-8").stdout.strip()
+    invocations.append({"tool": name, "arguments": args, "head": head})
     atomic_write_json(trace, invocations)
     fail = load(local / "fail.json") if (local / "fail.json").exists() else {}
     failure = fail.get("tool") == name and (not fail.get("phase") or value("--phase") == fail["phase"])
@@ -154,6 +158,14 @@ def run(name, args):
         if value("--pin"):
             document[stage + "_pin"] = value("--pin")
         atomic_write_json(manifest, document)
+        rewrite = local / "rewrite-mode.json"
+        if rewrite.exists():
+            path = ROOT / load(rewrite)["path"]
+            atomic_write(path, path.read_bytes() + b"\n# Rewritten by the release tool.\n")
+            path.chmod(0o644)
+        remove = local / "remove.json"
+        if remove.exists():
+            (ROOT / load(remove)["path"]).unlink(missing_ok=True)
     elif name == "receipt_audit.py":
         atomic_write_json(directory / "qualification" / "receipt-audit.json", {"status": value("--phase")})
         document = load(qualification)
@@ -552,12 +564,39 @@ class ReleaseDriverTests(unittest.TestCase):
         self.assertTrue(any("--lint-ready" in call["arguments"] for call in self.calls("verify_release.py")))
         self.assertTrue(any("--require-ready" in call["arguments"] for call in self.calls("verify_release.py")))
 
-    def test_interrupted_unchanged_group_is_commit_only(self) -> None:
+    def test_interrupted_unchanged_group_reruns_tools_before_committing(self) -> None:
         self.interrupt()
         self.assertEqual(self.git("rev-parse", "HEAD"), self.initial)
         self.candidate("--no-suite")
-        self.assertEqual(len(self.calls("stage_release.py")), 1)
+        self.assertEqual(len(self.calls("stage_release.py")), 2)
         self.assertEqual(len(DRIVER.group_commits(self.root, RELEASE)), 3)
+
+    def test_forged_complete_state_runs_tools_before_committing(self) -> None:
+        driver = self.driver()
+        DRIVER.run_pipeline(driver, finalize=False, no_suite=True, through="lane-pin")
+        head = self.git("rev-parse", "HEAD")
+        guide = self.root / "docs" / "QUICKSTART.md"
+        atomic_write(guide, guide.read_bytes().replace(PREDECESSOR.encode(), RELEASE.encode()))
+        guide_sha = hashlib.sha256(guide.read_bytes()).hexdigest()
+        # Reconstruct the old completion fingerprint without trusting driver helpers.
+        payload = {"plan_sha256": hashlib.sha256(driver.plan_path.read_bytes()).hexdigest(),
+                   "HEAD": head, "private": {"guide_sha256": guide_sha},
+                   "options": driver.state["options"],
+                   "tools": {"retarget_guide.py": hashlib.sha256(
+                       (self.root / "scripts" / "retarget_guide.py").read_bytes()).hexdigest()}}
+        driver.state["groups"]["guide"] = {
+            "attempts": 1, "tools_complete": True,
+            "inputs_sha256": hashlib.sha256(json.dumps(payload, sort_keys=True).encode("utf-8")).hexdigest(),
+            "outputs": {"docs/QUICKSTART.md": guide_sha},
+        }
+        driver.save()
+        self.assertEqual(self.calls("retarget_guide.py"), [])
+        self.candidate("--no-suite")
+        calls = self.calls("retarget_guide.py")
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(calls[0]["head"], head)
+        self.assertNotEqual(DRIVER.group_commits(self.root, RELEASE)["guide"]["commit"], head)
+        self.assertEqual(hashlib.sha256(guide.read_bytes()).hexdigest(), guide_sha)
 
     def test_changed_private_input_restores_and_reruns_group(self) -> None:
         self.interrupt()
@@ -598,6 +637,32 @@ class ReleaseDriverTests(unittest.TestCase):
         failure.unlink()
         self.candidate("--no-suite")
         self.assertEqual(len(self.calls("stage_release.py")), 2)
+
+    def test_interrupted_stage_recovers_the_missing_committed_plan(self) -> None:
+        driver = self.driver()
+        driver.state["groups"]["stage"] = {"attempts": 1, "tools_complete": False}
+        driver.save()
+        plan = driver.plan_path.read_bytes()
+        driver.plan_path.unlink()
+        partial = self.root / "releases" / RELEASE / "qualification" / "partial.json"
+        atomic_write_json(partial, {"partial": True})
+        atomic_write_json(driver.plan_path.parent / "manifest.json", {"status": "draft"})
+        self.candidate("--no-suite")
+        self.assertEqual(driver.plan_path.read_bytes(), plan)
+        self.assertEqual(driver.plan_path.read_bytes(), subprocess.run(
+            ["git", "show", f"HEAD:releases/{RELEASE}/plan.json"], cwd=self.root,
+            env=self.environment, check=True, capture_output=True).stdout)
+        self.assertFalse(partial.exists())
+        self.assertEqual(len(self.calls("stage_release.py")), 1)
+        self.assertEqual(len(DRIVER.group_commits(self.root, RELEASE)), 3)
+
+    def test_a_plan_removed_outside_a_stage_attempt_is_not_recreated(self) -> None:
+        driver = self.driver()
+        driver.plan_path.unlink()
+        result = self.invoke("candidate", "--no-suite", success=False)
+        self.assertIn("plan.json", result.stderr)
+        self.assertFalse(driver.plan_path.exists())
+        self.assertEqual(self.calls(), [])
 
     def test_foreign_dirty_path_is_refused_without_touching_it(self) -> None:
         path = self.root / "foreign name.txt"
@@ -657,6 +722,79 @@ class ReleaseDriverTests(unittest.TestCase):
                 else:
                     atomic_write(path, original)
 
+    def assert_first_group_preserves_authored_paths(self, group: str) -> None:
+        driver = self.driver(window_root=self.private / "windows", reviews=self.private / "reviews",
+                             values=self.private / "values.json", as_of="2026-01-02")
+        preceding = DRIVER.GROUPS[DRIVER.GROUPS.index(group) - 1]
+        DRIVER.run_pipeline(driver, finalize=False, no_suite=True,
+                            through="stage" if group == "lane-pin" else "guide")
+        if group != "lane-pin":
+            DRIVER.run_pipeline(driver, finalize=True, no_suite=True, through=preceding)
+        relative = f"releases/{RELEASE}/NINFER_RELEASE_NOTES.md"
+        notes = self.root / relative
+        atomic_write(notes, notes.read_bytes() + b"\nAuthored after the preceding commit.\n")
+        untracked = self.root / "releases" / RELEASE / "authored.txt"
+        atomic_write(untracked, "Uncommitted release input.\n")
+        before = self.worktree_bytes()
+        head = self.git("rev-parse", "HEAD")
+        calls = self.calls()
+        result = (self.invoke("candidate", "--no-suite", success=False) if group == "lane-pin"
+                  else self.finalize("--no-suite", success=False))
+        self.assertIn(relative, result.stderr)
+        self.assertIn(untracked.relative_to(self.root).as_posix(), result.stderr)
+        self.assertEqual(self.worktree_bytes(), before)
+        self.assertEqual(self.git("rev-parse", "HEAD"), head)
+        self.assertEqual(self.calls(), calls)
+
+    def test_first_lane_pin_preserves_authored_declared_paths(self) -> None:
+        self.assert_first_group_preserves_authored_paths("lane-pin")
+
+    def test_first_platform_pin_preserves_authored_declared_paths(self) -> None:
+        self.assert_first_group_preserves_authored_paths("platform-pin")
+
+    def test_first_acceptance_pin_preserves_authored_declared_paths(self) -> None:
+        self.assert_first_group_preserves_authored_paths("acceptance-pin")
+
+    def test_first_audit_preserves_authored_declared_paths(self) -> None:
+        self.assert_first_group_preserves_authored_paths("audit")
+
+    def test_first_manifest_pin_preserves_authored_declared_paths(self) -> None:
+        self.assert_first_group_preserves_authored_paths("manifest-pin")
+
+    def test_tool_mode_change_refuses_the_group_without_committing(self) -> None:
+        driver = self.driver()
+        DRIVER.run_pipeline(driver, finalize=False, no_suite=True, through="stage")
+        self.git("config", "core.filemode", "true")
+        relative = f"releases/{RELEASE}/release-helper.sh"
+        path = self.root / relative
+        atomic_write(path, "#!/bin/sh\nexit 0\n")
+        path.chmod(0o755)
+        self.git("add", "--", relative)
+        self.git("commit", "-qm", "test(release): seed executable release helper")
+        head = self.git("rev-parse", "HEAD")
+        self.assertTrue(self.git("ls-tree", "HEAD", "--", relative).startswith("100755 "))
+        atomic_write_json(self.root / ".release-state" / "rewrite-mode.json", {"path": relative})
+        result = self.invoke("candidate", "--no-suite", success=False)
+        self.assertIn(relative, result.stderr)
+        self.assertIn("100755", result.stderr)
+        self.assertIn("100644", result.stderr)
+        self.assertEqual(path.stat().st_mode & 0o111, 0)
+        self.assertEqual(self.git("rev-parse", "HEAD"), head)
+        self.assertEqual(list(DRIVER.group_commits(self.root, RELEASE)), ["stage"])
+        self.assertEqual(self.calls("rebind_release.py")[-1]["head"], head)
+
+    def test_a_tool_may_remove_a_tracked_declared_file(self) -> None:
+        driver = self.driver()
+        DRIVER.run_pipeline(driver, finalize=False, no_suite=True, through="stage")
+        relative = f"releases/{RELEASE}/superseded.json"
+        atomic_write_json(self.root / relative, {"superseded": True})
+        self.git("add", "--", relative)
+        self.git("commit", "-qm", "test(release): seed a file the pin step removes")
+        atomic_write_json(self.root / ".release-state" / "remove.json", {"path": relative})
+        self.invoke("candidate", "--no-suite")
+        self.assertEqual(self.git("ls-tree", "HEAD", "--", relative), "")
+        self.assertEqual(len(DRIVER.group_commits(self.root, RELEASE)), 3)
+
     def test_failed_compose_resumes_and_restores_partial_tool_outputs(self) -> None:
         self.candidate("--no-suite")
         failure = self.root / ".release-state" / "fail.json"
@@ -696,16 +834,18 @@ class ReleaseDriverTests(unittest.TestCase):
         self.assertEqual(path.read_bytes(), expected)
         self.assertEqual(len(self.calls("retarget_guide.py")), 2)
 
-    def test_interrupted_guide_commits_unchanged_output_without_rerunning(self) -> None:
+    def test_interrupted_guide_reruns_without_changing_its_output(self) -> None:
         driver = self.driver()
         DRIVER.run_pipeline(driver, finalize=False, no_suite=True, through="lane-pin")
         with mock.patch.object(driver, "commit", side_effect=DRIVER.ReleaseError("interrupt guide commit")):
             with self.assertRaisesRegex(DRIVER.ReleaseError, "interrupt guide commit"):
                 DRIVER.run_pipeline(driver, finalize=False, no_suite=True)
+        expected = (self.root / "docs" / "QUICKSTART.md").read_bytes()
         self.candidate("--no-suite")
-        self.assertEqual(len(self.calls("retarget_guide.py")), 1)
+        self.assertEqual(len(self.calls("retarget_guide.py")), 2)
+        self.assertEqual((self.root / "docs" / "QUICKSTART.md").read_bytes(), expected)
 
-    def test_interrupted_guide_hashes_new_authored_edits_and_retargets_in_place(self) -> None:
+    def test_interrupted_guide_preserves_new_authored_edits_and_retargets_in_place(self) -> None:
         driver = self.driver()
         DRIVER.run_pipeline(driver, finalize=False, no_suite=True, through="lane-pin")
         with mock.patch.object(driver, "commit", side_effect=DRIVER.ReleaseError("interrupt guide commit")):
