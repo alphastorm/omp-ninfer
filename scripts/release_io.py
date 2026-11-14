@@ -44,4 +44,4 @@ def atomic_write_json(path: Path, document: Any) -> None:
 def git(root: Path, *arguments: str) -> str:
     """Standard output of ``git`` run in ``root``; a non-zero exit raises ``CalledProcessError``."""
     return subprocess.run(["git", *arguments], cwd=root, check=True, capture_output=True,
-                          text=True).stdout
+                          text=True, encoding="utf-8").stdout
