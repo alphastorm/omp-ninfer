@@ -54,7 +54,10 @@ def atomic_write_json(path: Path, document: Any) -> None:
 
 
 def atomic_copy(source: Path, destination: Path) -> None:
-    """Stream into a sibling temporary file; interruption preserves the destination."""
+    """Stream into a sibling temporary file; interruption preserves the destination.
+
+    The copy carries the source's permission bits, as ``atomic_write`` keeps its target's.
+    """
     destination = Path(destination)
     destination.parent.mkdir(parents=True, exist_ok=True)
     handle, temporary = tempfile.mkstemp(prefix=f".{destination.name}.", suffix=".tmp",
@@ -65,6 +68,7 @@ def atomic_copy(source: Path, destination: Path) -> None:
                 output.write(chunk)
             output.flush()
             os.fsync(output.fileno())
+        os.chmod(temporary, stat.S_IMODE(os.stat(source).st_mode))
         os.replace(temporary, destination)
     except BaseException:
         try:

@@ -58,6 +58,16 @@ class AtomicCopyTests(unittest.TestCase):
             self.assertEqual(source.read_bytes(), payload)
             self.assertEqual([path.name for path in destination.parent.iterdir()], ["copied.bin"])
 
+    def test_a_copy_carries_the_sources_permission_bits(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            source = Path(temporary) / "tool.sh"
+            source.write_text("#!/bin/sh\n", encoding="utf-8")
+            source.chmod(0o755)
+            destination = Path(temporary) / "copied.sh"
+            release_io.atomic_copy(source, destination)
+            self.assertEqual(stat.S_IMODE(destination.stat().st_mode),
+                             stat.S_IMODE(source.stat().st_mode))
+
     def test_interrupted_copy_keeps_existing_or_absent_destination(self) -> None:
         for exists in (False, True):
             with self.subTest(exists=exists), tempfile.TemporaryDirectory() as temporary:
