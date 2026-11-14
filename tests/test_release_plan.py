@@ -93,6 +93,17 @@ class ReleasePlanTests(unittest.TestCase):
         self.manifest()
         self.assertEqual(self.errors(), [])
 
+    def test_identical_revision_claim_in_authored_plan_limitations_is_refused_without_writes(self) -> None:
+        self.plan["limitations"] = [
+            "All runtime components derive from the identical NInfer revision."]
+        atomic_write_json(self.path, self.plan)
+        before = {path.relative_to(self.root): path.read_bytes()
+                  for path in self.root.rglob("*") if path.is_file()}
+        errors = PLAN.plan_errors(self.root, RELEASE)
+        self.assertTrue(any("ungenerated component provenance claim" in error for error in errors), errors)
+        self.assertEqual({path.relative_to(self.root): path.read_bytes()
+                          for path in self.root.rglob("*") if path.is_file()}, before)
+
     def test_initial_plan_uses_the_latest_ready_release_and_authority_postures(self) -> None:
         held = copy.deepcopy(self.previous)
         held.update(release="v1.0.5", status="candidate")
