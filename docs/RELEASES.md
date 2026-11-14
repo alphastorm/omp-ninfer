@@ -707,6 +707,8 @@ page names a release.
 | `site/**/*.html` | Release, date, numbers and tagged links |
 | `assets/benchmarks.html` | The release label and the six numbers, then re-render `assets/benchmarks.png` as `BRAND.md` describes |
 
+Publication tools preserve regions between balanced, non-nested `<!-- records -->` and `<!-- /records -->` comment lines in every page, plus Markdown from `## Records` to the end of the page.
+
 Then search the living pages for the previous release, client version, and component tags. Only
 records and links pinned to an earlier tag may keep them.
 
@@ -739,6 +741,8 @@ Behind [Channels](#channels):
   stock OMP 18.15.0, `v0.17.0` pinned stock OMP 18.18.6, `v0.18.0` pinned stock OMP 18.18.7, and
   current `v0.19.0` pins stock OMP 18.20.0.
 
+<!-- records -->
+
 ### v0.13.0 server shape and profile migration
 
 Behind [Candidate freeze](#candidate-freeze):
@@ -756,6 +760,8 @@ compatibility authority so that container capabilities (such as JSON-schema stru
 128-character tool names on the rebased RTX 5090 lane) remain distinct from carried native package
 limits. Never edit the immutable predecessor to make the root matrix match a candidate: root
 authority, public matrix, and live profiles stay byte-identical until the lane-pin cut.
+
+<!-- /records -->
 
 ### Native sequencing notes
 
@@ -797,6 +803,8 @@ Behind [Release notes](#release-notes):
   v0.12.0 acceptance candidate, not part of that candidate. PR #82's ordering rule required
   publication first: merging it earlier would have changed the exact commit that the completed
   release acceptance names.
+
+<!-- records -->
 
 ### Completed v0.9.1 RTX 3090 addition and future lane procedure
 
@@ -917,6 +925,8 @@ from the commit containing that stage's input evidence. Finish with:
 ```sh
 python3 scripts/verify_release.py --release v0.9.1 --require-ready --check-pins
 ```
+
+<!-- /records -->
 
 <a id="release-records"></a>
 ## Records
