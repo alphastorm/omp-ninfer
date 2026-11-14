@@ -40,6 +40,7 @@ PIN_SOURCES = {"lane-pin": "stage", "platform-pin": "compose",
 ROUTES = ("rtx5090-container-host", "rtx5090-macos-client", "rtx5090-windows-client",
           "rtx4090-native", "rtx3090-native")
 PATH_INPUTS = ("stage_input", "notes", "client_component", "runtime_publication",
+               "runtime_artifacts", "runtime_build_identity", "runtime_rc", "runtime_base",
                "window_root", "reviews", "values")
 MAPPED_INPUTS = ("bundles", "lane_receipts", "assets", "native_publications")
 STAGE_VALUE_OPTIONS = {
@@ -617,13 +618,15 @@ class ReleaseDriver:
                                + ", ".join(sorted(publications - expected)))
         runtime = next(row for row in self.plan["components"] if row["id"] == COMPONENT_IDS[0])
         if runtime["disposition"] == "recut":
-            if "runtime_publication" not in private:
-                raise ReleaseError("re-cut rtx5090-container requires --runtime-publication")
-            self.private_path("runtime_publication")
+            for name in ("runtime_publication", "runtime_artifacts", "runtime_build_identity", "runtime_rc"):
+                if name not in private:
+                    raise ReleaseError("re-cut rtx5090-container requires --" + name.replace("_", "-"))
+                self.private_path(name)
             if "rtx5090" not in private.get("lane_receipts", {}):
                 raise ReleaseError("re-cut rtx5090-container requires --lane-receipt rtx5090=PATH")
-        elif "runtime_publication" in private:
-            raise ReleaseError("carried rtx5090-container refuses --runtime-publication")
+        elif any(name in private for name in (
+                "runtime_publication", "runtime_artifacts", "runtime_build_identity", "runtime_rc", "runtime_base")):
+            raise ReleaseError("carried rtx5090-container refuses runtime publication/evidence inputs")
         if set(private.get("lane_receipts", {})) - {"rtx5090"}:
             raise ReleaseError("--lane-receipt accepts only rtx5090; native receipts belong in bundles")
         self.client_component_path()
@@ -712,6 +715,9 @@ class ReleaseDriver:
         self.tool("rebind_release.py", "--release", self.release, "--draft")
         publication = (["--runtime-publication", str(self.private_path("runtime_publication"))]
                        if "runtime_publication" in self.state["private"] else [])
+        for name in ("runtime_artifacts", "runtime_build_identity", "runtime_rc", "runtime_base"):
+            if name in self.state["private"]:
+                publication += ["--" + name.replace("_", "-"), str(self.private_path(name))]
         for lane, path in self.state["private"].get("native_publications", {}).items():
             publication += ["--native-publication", f"{lane}={path}"]
         self.tool("aggregate_qualification.py", "compose", *aggregate, *publication)
@@ -938,7 +944,8 @@ def required_input(driver: ReleaseDriver, group: str) -> str:
             items += ["--bundle LANE=DIR", "--native-publication LANE=JSON", "--asset ROLE=PATH when external"]
         if any(row["id"] == COMPONENT_IDS[0] and row["disposition"] == "recut" for row in driver.plan["components"]):
             items += ["--runtime-handoff DIR (or --stage-input JSON, --lane-receipt rtx5090=PATH, "
-                      "--runtime-publication JSON)"]
+                      "--runtime-publication JSON), --runtime-artifacts JSON, "
+                      "--runtime-build-identity JSON, --runtime-rc JSON; --runtime-base JSON if changed"]
         if driver.plan["client"]["disposition"] == "updated":
             items += ["--client-component JSON"]
         return ", ".join(items)

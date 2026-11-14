@@ -325,8 +325,9 @@ class HTTPTransportTests(OfflineTestCase):
                     return
                 elif self.path == "/slow-headers":
                     try:
+                        self.connection.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
                         self.connection.sendall(b"HTTP/1.0 200 OK\r\nContent-Length: 0\r\nX-Slow: ")
-                        for _ in range(20):
+                        for _ in range(40):
                             time.sleep(0.04)
                             self.connection.sendall(b"x")
                         self.connection.sendall(b"\r\n\r\n")
@@ -334,7 +335,7 @@ class HTTPTransportTests(OfflineTestCase):
                         pass  # The deadline closes the client while headers are still arriving.
                     return
                 elif self.path.startswith("/slow-redirect/"):
-                    time.sleep(0.08)
+                    time.sleep(0.2)
                     number = int(self.path.rsplit("/", 1)[-1])
                     self.send_response(302)
                     self.send_header("Location", test.origin + (
@@ -446,21 +447,22 @@ class HTTPTransportTests(OfflineTestCase):
 
     def test_redirect_headers_share_one_operation_deadline(self):
         transport = PUBLICATION.HTTPTransport(
-            self.origin, socket_timeout=2, api_timeout=0.15, download_timeout=0.15)
+            self.origin, socket_timeout=2, api_timeout=0.5, download_timeout=0.5)
         expected = (self.fixture.fixture.assets / "SHA256SUMS").read_bytes()
         started = time.monotonic()
         with self.assertRaises(PUBLICATION.BundleError):
             list(transport.download(self.origin + "/slow-redirect/5", len(expected)))
-        self.assertLess(time.monotonic() - started, 0.4)
+        self.assertLess(time.monotonic() - started, 1.0)
         self.assertLess(len(self.requests), 4, "header redirects reused the original socket timeout")
 
     def test_header_trickle_cannot_extend_the_operation_deadline(self):
         transport = PUBLICATION.HTTPTransport(
-            self.origin, socket_timeout=2, api_timeout=0.15, download_timeout=0.15)
+            self.origin, socket_timeout=2, api_timeout=0.5, download_timeout=0.5)
         started = time.monotonic()
         with self.assertRaises(PUBLICATION.BundleError):
             list(transport.download(self.origin + "/slow-headers", 0))
-        self.assertLess(time.monotonic() - started, 0.4)
+        self.assertLess(time.monotonic() - started, 1.2)
+        self.assertEqual(self.requests[0][0], "/slow-headers")
 
 
 class PrivatePublicationGoldenTests(OfflineTestCase):

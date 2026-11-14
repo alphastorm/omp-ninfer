@@ -87,6 +87,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The release driver stages re-cut runtimes with their current publication, artifact
+  authentication, build identity and qualification receipts, including the authenticated archive
+  size; it stages operator-authored notes before validating the draft.
+- Route composition binds staged parity waivers to the accepted candidate and refreshes their
+  hash chains. Review epochs must match their closed directories' frozen subjects; from v0.20.0
+  the candidate must contain its release plan, and a carried runtime refuses staging identity
+  overrides.
+- Guide evidence links must be reachable through the release authorities' hash-bound evidence,
+  not orphan receipts. Anonymous native-publication downloads stay on GitHub release hosts;
+  headers, redirects and streamed bodies share an operation deadline.
+
 - `docs/RELEASES.md` records an erratum for v0.19.0: five descriptive strings in its acceptance
   evidence describe the RTX 4090 component as newly cut or promoted, or the three components as
   built from one source. The manifest, receipts, hashes and pins are correct and unchanged.

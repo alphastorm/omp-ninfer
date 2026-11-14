@@ -864,9 +864,112 @@ def native_publication(inputs: Inputs, root: Path, release: str, manifest: dict[
     return json_bytes(value)
 
 
+def _runtime_outputs(inputs: Inputs, root: Path, release: str, manifest: dict[str, Any],
+                     q: dict[str, Any], publication_path: Path, paths: dict[str, Path]) -> dict[Path, bytes]:
+    required = {"artifacts", "build_identity", "rc"}
+    require(required <= paths.keys() and paths.keys() <= required | {"base"},
+            "arguments", "/runtime-evidence",
+            "re-cut runtime requires --runtime-artifacts, --runtime-build-identity and --runtime-rc")
+    component = manifest["components"]["ninfer"]
+    publication = inputs.load(publication_path)
+    packaging = q["composition"]["local_release_packaging"]
+    base_path = paths.get("base", root / packaging["runtime_base_receipt"]["repository_path"])
+    base_data = inputs.read(base_path)
+    require(sha(base_data) == publication.get("runtime_base_receipt_sha256"),
+            publication_path, "/runtime_base_receipt_sha256",
+            "differs from runtime base receipt; supply --runtime-base when the base changes")
+    build = inputs.load(paths["build_identity"])
+    require(build.get("artifact_type") == "ninfer_release_build_identity"
+            and build.get("schema_version") == 1 and build.get("source_dirty") is False
+            and build.get("patch_stack_sha") == component["source_commit"]
+            and build.get("upstream_base_sha") == component["upstream_commit"]
+            and build.get("binaries", {}).get("ninfer-serve") == component["server_binary_sha256"],
+            paths["build_identity"], "/", "build identity differs from the selected runtime")
+    rc = inputs.load(paths["rc"])
+    require(rc.get("source_commit") == component["source_commit"] and rc.get("phase") == "rc"
+            and rc.get("diagnostic_preview") is False and rc.get("release_qualification") is True
+            and rc.get("passed") is True and type(rc.get("exit")) is int and rc["exit"] == 0
+            and type(rc.get("package_exit")) is int and rc["package_exit"] == 0,
+            paths["rc"], "/", "runtime qualification must pass on the selected source")
+    phases = field(rc, "phases", list, paths["rc"])
+    required_phases = {"host", "host_current", "dense_real", "loader", "shared_mtp_fp8", "overlap",
+                       "four_boot_restart", "product_shape", "exact_release_profile", "product_smokes",
+                       "help_candidate", "help_control"}
+    require(len(phases) == len(required_phases)
+            and {row.get("phase") for row in phases} == required_phases
+            and all(type(row.get("exit")) is int and row["exit"] == 0 for row in phases),
+            paths["rc"], "/phases", "runtime qualification must retain every passing phase")
+    junit = field(rc, "junit", dict, paths["rc"])
+    expected_tests = field(rc, "expected_tests", dict, paths["rc"])
+    require(junit.keys() == expected_tests.keys() == {"host", "real", "overlap"}
+            and all(type(count) is int and count > 0 and junit[name].get("tests") == count
+                    and junit[name].get("failures") == 0 and junit[name].get("skips") == 0
+                    for name, count in expected_tests.items()),
+            paths["rc"], "/junit", "runtime test counts or failures differ")
+    artifacts_path = paths["artifacts"]
+    artifacts = inputs.load(artifacts_path)
+    require(artifacts.get("artifact_type") == "omp_ninfer_component_asset_authentication"
+            and artifacts.get("schema_version") == 1 and artifacts.get("status") == "passed"
+            and artifacts.get("source_commit") == component["source_commit"]
+            and artifacts.get("image_digest") == component["oci_manifest_digest"]
+            and artifacts.get("packaged_server_sha256") == component["server_binary_sha256"]
+            and artifacts.get("runtime_base_receipt_sha256") == sha(base_data)
+            and artifacts.get("raw_prompts_outputs_or_secrets_included") is False,
+            artifacts_path, "/", "runtime artifact authentication differs from the manifest")
+    download = component["repository"] + "/releases/download/"
+    publication_url = (download + component["runtime_receipt_release"] + "/ninfer-runtime-image-"
+                       + component["release_tag"] + ".json")
+    base_url = download + publication["runtime_base_receipt_release"] + "/ninfer-runtime-base.json"
+    checksums_url = component["binary_archive_url"].removesuffix(".tar.gz") + ".SHA256SUMS"
+    expected = {
+        component["binary_archive_url"]: (component["binary_archive_sha256"], None),
+        component["sbom_url"]: (component["sbom_sha256"], None),
+        component["source_archive_url"]: (component["source_archive_sha256"], component["source_archive_bytes"]),
+        checksums_url: (component["checksums_sha256"], None),
+        publication_url: (sha(inputs.read(publication_path)), len(inputs.read(publication_path))),
+        base_url: (sha(base_data), len(base_data)),
+    }
+    assets = field(artifacts, "assets", list, artifacts_path)
+    require(len(assets) == len(expected) and {row.get("url") for row in assets} == expected.keys(),
+            artifacts_path, "/assets", "runtime public asset set differs from the selected component")
+    for row in assets:
+        url = row["url"]
+        digest, size = expected[url]
+        tag, name = url.removeprefix(download).split("/", 1)
+        require(row.get("release") == tag and row.get("asset") == name and row.get("sha256") == digest
+                and type(row.get("bytes")) is int and row["bytes"] > 0
+                and (size is None or row["bytes"] == size)
+                and all(row.get(flag) is True for flag in (
+                    "public_api_size_digest_match", "local_mirror_match", "anonymous_download_match")),
+                artifacts_path, "/assets/" + name, "runtime asset identity, size or authentication differs")
+    inventory = field(artifacts, "package_files_sha256", dict, artifacts_path)
+    for suffix, digest in (("/build-identity.json", sha(inputs.read(paths["build_identity"]))),
+                           ("/bin/ninfer-serve", component["server_binary_sha256"])):
+        require([value for name, value in inventory.items() if name.endswith(suffix)] == [digest],
+                artifacts_path, "/package_files_sha256", "packaged runtime identity differs")
+    package = next(row for row in assets if row["url"] == component["binary_archive_url"])
+    component["binary_archive_bytes"] = packaging["binary_package_bytes"] = package["bytes"]
+    packaging["runtime_base_reference"] = publication["base_image"]
+    packaging["runtime_base_receipt_release"] = publication["runtime_base_receipt_release"]
+    result = {}
+    for name, data, edge in (
+        ("runtime-publication.json", inputs.read(publication_path), "publication_receipt"),
+        ("runtime-artifacts.json", inputs.read(artifacts_path), "artifact_authentication"),
+        ("runtime-base.json", base_data, "runtime_base_receipt"),
+        ("runtime-build-identity.json", inputs.read(paths["build_identity"]), "runtime_build_identity"),
+        ("runtime-rc.json", inputs.read(paths["rc"]), "runtime_rc"),
+    ):
+        path = Path("releases") / release / "qualification" / name
+        result[path] = data
+        target = q["observed_gates"] if edge in ("runtime_build_identity", "runtime_rc") else packaging
+        target[edge] = binding(path, data)
+    return result
+
+
 def plan_outputs(root: Path, release: str, plan_path: Path, directories: dict[str, Path],
                  publication_path: Path | None, assets: dict[str, Path] | None = None,
-                 native_publications: dict[str, Path] | None = None) -> tuple[dict[Path, bytes], Inputs]:
+                 native_publications: dict[str, Path] | None = None,
+                 runtime_inputs: dict[str, Path] | None = None) -> tuple[dict[Path, bytes], Inputs]:
     require(verifier.GA_PRODUCT_RELEASE_RE.fullmatch(release), "arguments", "/release", "expected a GA release")
     inputs = Inputs()
     base = Path("releases") / release
@@ -884,6 +987,8 @@ def plan_outputs(root: Path, release: str, plan_path: Path, directories: dict[st
     runtime_plan = next(item for item in plan["components"] if item["id"] == "rtx5090-container")
     require((publication_path is not None) is (runtime_plan["disposition"] == "recut"),
             "arguments", "/runtime-publication", "required exactly for a re-cut RTX 5090 component")
+    require(publication_path is not None or not runtime_inputs,
+            "arguments", "/runtime-evidence", "carried runtime refuses runtime evidence inputs")
     if publication_path is not None:
         runtime_publication = inputs.load(publication_path)
         component = manifest["components"]["ninfer"]
@@ -906,9 +1011,8 @@ def plan_outputs(root: Path, release: str, plan_path: Path, directories: dict[st
     output["native_runtime_identity"] = source_identity(bundles, manifest, previous)
     pending = {}
     if publication_path is not None:
-        path = base / "qualification/runtime-publication.json"
-        pending[path] = inputs.read(publication_path)
-        output["composition"]["local_release_packaging"]["publication_receipt"] = binding(path, pending[path])
+        pending.update(_runtime_outputs(inputs, root, release, manifest, output,
+                                        publication_path, runtime_inputs or {}))
     pub_data = native_publication(inputs, root, release, manifest, bundles, native_publications or {}, previous, q)
     pub = decode(pub_data, "native publication")
     output["as_of"] = max(date.fromisoformat(q["as_of"]), date.fromisoformat(pub["as_of"])).isoformat()
@@ -1070,8 +1174,10 @@ def assignments(values: list[str], label: str) -> dict[str, Path]:
 def aggregate(root: Path, release: str, plan: Path, bundles: dict[str, Path],
               runtime_publication: Path | None, *, check: bool = False,
               assets: dict[str, Path] | None = None,
-              native_publications: dict[str, Path] | None = None) -> list[str]:
-    pending, inputs = plan_outputs(root, release, plan, bundles, runtime_publication, assets, native_publications)
+              native_publications: dict[str, Path] | None = None,
+              runtime_inputs: dict[str, Path] | None = None) -> list[str]:
+    pending, inputs = plan_outputs(root, release, plan, bundles, runtime_publication, assets,
+                                  native_publications, runtime_inputs)
     changed = [path for path, data in pending.items()
                if not (root / path).is_file() or (root / path).read_bytes() != data]
     if check:
@@ -1109,6 +1215,8 @@ def main(argv: list[str] | None = None) -> int:
         command.add_argument("--check", action="store_true")
         if name == "compose":
             command.add_argument("--runtime-publication", type=Path)
+            for option in ("artifacts", "build-identity", "rc", "base"):
+                command.add_argument("--runtime-" + option, type=Path)
             command.add_argument("--native-publication", action="append", default=[], metavar="LANE=FILE")
     args = parser.parse_args(argv)
     try:
@@ -1118,7 +1226,10 @@ def main(argv: list[str] | None = None) -> int:
         else:
             changed = aggregate(ROOT, args.release, args.plan, assignments(args.bundle, "bundle"),
                                 args.runtime_publication, check=args.check, assets=assignments(args.asset, "asset"),
-                                native_publications=assignments(args.native_publication, "native-publication"))
+                                native_publications=assignments(args.native_publication, "native-publication"),
+                                runtime_inputs={name: getattr(args, "runtime_" + name) for name in (
+                                    "artifacts", "build_identity", "rc", "base")
+                                    if getattr(args, "runtime_" + name) is not None})
             result = {"release": args.release, "status": "checked" if args.check else "aggregated",
                       "changed": changed, "publication_authorized": False}
     except (BundleError, OSError, ValueError, KeyError, TypeError, IndexError, subprocess.CalledProcessError) as error:

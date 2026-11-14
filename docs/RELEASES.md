@@ -429,11 +429,19 @@ Supply private inputs as arguments to `candidate`, not as plan fields:
   files come from the cut. The driver always takes the release tag and source commit from the
   plan. Relative file options resolve beside this JSON. A carried container derives its staging
   arguments from the predecessor and refuses a new runtime-publication record.
+- A re-cut container also requires `--runtime-artifacts JSON`, `--runtime-build-identity JSON`
+  and `--runtime-rc JSON`. Supply the retained anonymous asset-authentication record, the packaged
+  build identity and the completed runtime qualification record. The aggregate verifies their
+  component identity and asset closure before replacing the predecessor copies and binding the
+  new receipts. Archive size comes from the authenticated asset record. A changed base requires
+  `--runtime-base JSON`; otherwise the predecessor's exact base receipt must match the current
+  publication receipt. These inputs are refused for a carried runtime.
 - Instead, `candidate --runtime-handoff DIR` verifies a closed runtime handoff and expands those
   three inputs to absolute private paths. It refuses mixed raw arguments, mismatched plan identity
   or predecessor, extra files, and incorrect sizes/hashes. The handoff uses schema
   `omp-ninfer.rtx5090-handoff/1`, a filename-keyed `files` object and exactly the three parsed
   `driver_arguments` pairs; arbitrary arguments are never forwarded.
+  The additional runtime evidence arguments above remain separate from that three-pair handoff.
 - Each re-cut native lane requires `--bundle LANE=DIR` and
   `--native-publication LANE=JSON`; repeat per lane. External package files use
   `--asset ROLE=PATH` when the bundle declares them. Carried native lanes take neither bundle

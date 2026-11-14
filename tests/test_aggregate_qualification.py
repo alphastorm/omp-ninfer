@@ -258,6 +258,75 @@ class CarriedAggregateTests(unittest.TestCase):
             AGGREGATE.deployment_policy("v0.20.0", {**previous, "deployment_profile": "other"}, previous)
 
 
+class RuntimeEvidenceTests(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        self.release = "v0.19.0"
+        self.source = ROOT / "releases" / self.release
+        self.manifest = load(self.source / "manifest.json")
+        self.qualification = load(self.source / "qualification.json")
+        self.directory = self.root / "releases" / self.release / "qualification"
+        self.paths = {}
+        for role in ("artifacts", "build_identity", "rc", "base", "publication"):
+            name = "runtime-" + role.replace("_", "-") + ".json"
+            self.paths[role] = self.directory / name
+            atomic_write(self.paths[role], (self.source / "qualification" / name).read_bytes())
+        self.publication = self.paths.pop("publication")
+        self.manifest["components"]["ninfer"]["binary_archive_bytes"] = 1
+        self.qualification["composition"]["local_release_packaging"]["binary_package_bytes"] = 1
+
+    def outputs(self):
+        return AGGREGATE._runtime_outputs(
+            AGGREGATE.Inputs(), self.root, self.release, self.manifest,
+            self.qualification, self.publication, self.paths)
+
+    def test_current_receipts_replace_every_runtime_edge_and_archive_size(self):
+        output = self.outputs()
+        expected = load(self.source / "manifest.json")["components"]["ninfer"]["binary_archive_bytes"]
+        self.assertEqual(self.manifest["components"]["ninfer"]["binary_archive_bytes"], expected)
+        packaging = self.qualification["composition"]["local_release_packaging"]
+        self.assertEqual(packaging["binary_package_bytes"], expected)
+        for role, edge in (("artifacts", packaging["artifact_authentication"]),
+                          ("base", packaging["runtime_base_receipt"]),
+                          ("publication", packaging["publication_receipt"]),
+                          ("build_identity", self.qualification["observed_gates"]["runtime_build_identity"]),
+                          ("rc", self.qualification["observed_gates"]["runtime_rc"])):
+            data = output[Path(edge["repository_path"])]
+            self.assertEqual(AGGREGATE.sha(data), edge["sha256"])
+            self.assertEqual(data, (self.publication if role == "publication" else self.paths[role]).read_bytes())
+
+    def test_stale_or_incomplete_runtime_receipts_refuse_without_writes(self):
+        mutations = [
+            ("artifacts", lambda value: value.update(source_commit="0" * 40)),
+            ("artifacts", lambda value: value.update(image_digest="sha256:" + "0" * 64)),
+            ("artifacts", lambda value: value.update(packaged_server_sha256="0" * 64)),
+            ("artifacts", lambda value: value["assets"].pop()),
+            ("artifacts", lambda value: value["assets"][0].update(release="different")),
+            ("artifacts", lambda value: value["assets"][0].update(sha256="0" * 64)),
+            ("artifacts", lambda value: value["assets"][0].update(anonymous_download_match=False)),
+            ("artifacts", lambda value: value["assets"][3].update(bytes=1)),
+            ("build_identity", lambda value: value.update(patch_stack_sha="0" * 40)),
+            ("rc", lambda value: value.update(source_commit="0" * 40)),
+            ("rc", lambda value: value["phases"][0].update(exit=1)),
+            ("rc", lambda value: value["phases"].pop()),
+            ("rc", lambda value: value["junit"]["host"].update(failures=1)),
+        ]
+        for role, change in mutations:
+            with self.subTest(role=role):
+                path = self.paths[role]
+                original = path.read_bytes()
+                value = load(path)
+                change(value)
+                atomic_write_json(path, value)
+                before = {p: p.read_bytes() for p in self.directory.iterdir()}
+                with self.assertRaises(AGGREGATE.BundleError):
+                    self.outputs()
+                self.assertEqual({p: p.read_bytes() for p in self.directory.iterdir()}, before)
+                atomic_write(path, original)
+
+
 class NativePublicationTests(unittest.TestCase):
     def test_each_publication_identity_closure_and_anonymous_read_binding(self):
         from test_qualification_bundle import SyntheticBundle
@@ -429,6 +498,9 @@ class PrivateAggregateGoldenTests(unittest.TestCase):
             composed = command(root, "scripts/aggregate_qualification.py", "compose", "--release", "v0.19.0",
                                "--plan", plan_path, "--bundle", "rtx3090=" + str(bundle_path),
                                "--runtime-publication", root / "releases/v0.19.0/qualification/runtime-publication.json",
+                               "--runtime-artifacts", root / "releases/v0.19.0/qualification/runtime-artifacts.json",
+                               "--runtime-build-identity", root / "releases/v0.19.0/qualification/runtime-build-identity.json",
+                               "--runtime-rc", root / "releases/v0.19.0/qualification/runtime-rc.json",
                                "--native-publication", "rtx3090=" + str(bundle_root / "native-publication-rtx3090.json"))
             self.assertEqual(composed.returncode, 0, composed.stdout + composed.stderr)
             rebound = command(root, "scripts/rebind_release.py", "--release", "v0.19.0", "--draft")

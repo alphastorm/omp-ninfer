@@ -86,6 +86,9 @@ class PrivateRecutReplayTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             for name, source in (("rtx5090.json", "qualification/rtx5090.json"),
                                  ("runtime-publication.json", "qualification/runtime-publication.json"),
+                                 ("runtime-artifacts.json", "qualification/runtime-artifacts.json"),
+                                 ("runtime-build-identity.json", "qualification/runtime-build-identity.json"),
+                                 ("runtime-rc.json", "qualification/runtime-rc.json"),
                                  ("client-components.json", "qualification/client-components.json"),
                                  ("notes.md", "NINFER_RELEASE_NOTES.md")):
                 atomic_write(private / name, historical(staged, base + source))
@@ -121,6 +124,9 @@ class PrivateRecutReplayTests(unittest.TestCase):
                 "scripts/release.py", "candidate", "--release", "v0.19.0", "--no-suite",
                 "--stage-input", private / "stage-input.json", "--lane-receipt", f"rtx5090={private / 'rtx5090.json'}",
                 "--runtime-publication", private / "runtime-publication.json",
+                "--runtime-artifacts", private / "runtime-artifacts.json",
+                "--runtime-build-identity", private / "runtime-build-identity.json",
+                "--runtime-rc", private / "runtime-rc.json",
                 "--client-component", private / "client-components.json",
                 "--bundle", f"rtx3090={bundle}",
                 "--native-publication", f"rtx3090={bundle_root / 'native-publication-rtx3090.json'}",
@@ -131,6 +137,10 @@ class PrivateRecutReplayTests(unittest.TestCase):
             self.assertEqual(load(root / base / "manifest.json")["status"], "candidate")
             self.assertEqual((root / base / "qualification/runtime-publication.json").read_bytes(),
                              (private / "runtime-publication.json").read_bytes())
+            for name in ("runtime-artifacts.json", "runtime-build-identity.json", "runtime-rc.json",
+                         "runtime-base.json", "rtx5090.json"):
+                self.assertEqual((root / base / "qualification" / name).read_bytes(),
+                                 historical(published, base + "qualification/" + name), name)
             candidate = git(root, "rev-parse", "HEAD").strip()
             self.assertNotEqual(candidate, locations["candidate"])
             reviews = locations["reviews"]
