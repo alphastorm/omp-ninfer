@@ -3592,10 +3592,11 @@ def ready_upstream_client_leftovers(ctx: ReadyContext, errors: list[str]) -> Non
         ctx.root / "releases" / ctx.release, historical_fork_client_pins(ctx.root, ctx.release)))
 
 
-def ready_receipt_audit(ctx: ReadyContext, errors: list[str]) -> None:
+def ready_receipt_audit(ctx: ReadyContext, errors: list[str], *, final: bool = False) -> None:
     # Imported here: receipt_audit reads this module's predecessor and carried-row rules.
     from receipt_audit import ready_errors
-    errors.extend(ready_errors(ctx.root, ctx.release, phase=ctx.through, check_pins=ctx.check_pins))
+    errors.extend(ready_errors(ctx.root, ctx.release, phase="acceptance" if final else "candidate",
+                               check_pins=ctx.check_pins))
 
 
 # Ready runs the complete legacy checks. Earlier phases use the same validators with only
@@ -3651,7 +3652,11 @@ READY_CHECKS = (
                lambda c, e: validate_pinned_evidence(
                    c.root, c.manifest, c.compatibility, c.qualification, e,
                    lane_only=c.through != "acceptance"), pin_only=True),
+    # A staged audit is required from the candidate on. Composition and its two pins come
+    # before the final audit, so only the explicit ready gate demands the composed-final one.
     ReadyCheck("receipt_audit", "candidate", ready_receipt_audit, legacy=False),
+    ReadyCheck("receipt_audit_final", "acceptance",
+               lambda c, e: ready_receipt_audit(c, e, final=True), flag_only=True, legacy=False),
     ReadyCheck("upstream_client_leftovers", "draft", ready_upstream_client_leftovers,
                ga_only=False, upstream_only=True),
     # Before acceptance the generated matrix and the prepared guide legitimately say what is
