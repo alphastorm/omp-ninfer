@@ -52,6 +52,10 @@ class ReviewLedgerTests(unittest.TestCase):
                           self.release_manifest)
         git(self.root, "add", "initial.json", "releases")
         git(self.root, "commit", "--quiet", "-m", "test: initialize synthetic subject")
+        self.before_plan = git(self.root, "rev-parse", "HEAD").strip()
+        atomic_write_json(self.root / "releases" / self.release / "plan.json", {"release": self.release})
+        git(self.root, "add", "releases")
+        git(self.root, "commit", "--quiet", "-m", "test: add release plan")
         self.candidate = git(self.root, "rev-parse", "HEAD").strip()
         self.out = self.root / "inputs"
         FIXTURES.write_reviews(self.out, self.release, self.candidate, self.release_manifest)
@@ -209,9 +213,6 @@ class ReviewLedgerTests(unittest.TestCase):
                           if path.is_file() and ".git" not in path.relative_to(self.root).parts}, before)
 
     def add_plan_and_candidate(self):
-        atomic_write_json(self.qualification.parent / "plan.json", {"release": self.release})
-        git(self.root, "add", "releases")
-        git(self.root, "commit", "--quiet", "-m", "test: add release plan")
         planned = git(self.root, "rev-parse", "HEAD").strip()
         git(self.root, "commit", "--quiet", "--allow-empty", "-m", "test: stage candidate")
         self.candidate = git(self.root, "rev-parse", "HEAD").strip()
@@ -229,12 +230,13 @@ class ReviewLedgerTests(unittest.TestCase):
                 self.assert_subject_refused_without_writes(reviewed)
 
     def test_product_review_must_not_predate_the_release_plan(self):
-        stale = self.candidate
+        stale = self.before_plan
         planned = self.add_plan_and_candidate()
+        self.set_reviewed_subject(stale)
         self.assert_subject_refused_without_writes(stale, planned)
 
     def test_every_epoch_must_be_between_the_plan_and_candidate(self):
-        stale = self.candidate
+        stale = self.before_plan
         planned = self.add_plan_and_candidate()
         self.set_reviewed_subject(planned)
         tree = git(self.root, "rev-parse", "HEAD^{tree}").strip()
@@ -251,16 +253,25 @@ class ReviewLedgerTests(unittest.TestCase):
     def test_plan_subject_and_candidate_epochs_can_close_together(self):
         planned = self.add_plan_and_candidate()
         self.set_reviewed_subject(planned)
+        later = self.out / "reviews/later"
+        shutil.copytree(self.out / "reviews/product_tooling", later)
+        subject = LEDGER.load(later / "frozen-subject.json")
+        subject["subjectCommit"] = self.candidate
+        atomic_write_json(later / "frozen-subject.json", subject)
         self.values["product_council"]["epochs"] = [{
-            "directory": "product_tooling", "review_mode": "initial",
+            "directory": directory, "review_mode": "initial",
             "review_class": "full-council", "status": "closed-by-disposition",
             "reviewed_commit": reviewed,
-        } for reviewed in (planned, self.candidate)]
+        } for directory, reviewed in (("product_tooling", planned), ("later", self.candidate))]
         result = self.write()
         product = LEDGER.load(self.root / result["repository_path"])["product_tooling"]
         self.assertEqual(product["reviewed_commit"], planned)
         self.assertEqual([epoch["reviewed_commit"] for epoch in product["epochs"]],
                          [planned, self.candidate])
+        product["epochs"][1]["receipt_digests"]["frozen-subject.json"] = (
+            product["receipt_digests"]["frozen-subject.json"])
+        self.assertTrue(LEDGER.review_subject_errors(
+            self.root, self.release, {"product_tooling": product}, self.release_manifest))
 
     def test_epoch_cannot_claim_a_subject_other_than_its_closed_directory(self):
         planned = self.add_plan_and_candidate()
@@ -289,7 +300,7 @@ class ReviewLedgerTests(unittest.TestCase):
 
     def test_stage_without_plan_cannot_admit_a_new_release_review(self):
         errors = LEDGER.review_subject_errors(self.root, self.release, {
-            "product_tooling": {"stage_commit": self.candidate, "reviewed_commit": self.candidate},
+            "product_tooling": {"stage_commit": self.before_plan, "reviewed_commit": self.before_plan},
         }, self.release_manifest)
         self.assertTrue(any("plan.json" in error for error in errors), errors)
 

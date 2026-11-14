@@ -242,10 +242,16 @@ def build(root: Path, release: str, candidate: str, reviews: Path,
         record = load(directory / "review-record.json")
         if "status" in record:
             closed(record["status"], "epoch review-record status")
+        frozen = load(directory / "frozen-subject.json")
+        require(epoch["reviewed_commit"] == frozen.get("subjectCommit"),
+                f"epoch reviewed_commit {epoch['reviewed_commit']} must equal its frozen subject "
+                f"{frozen.get('subjectCommit')} for candidate {candidate}")
         epochs.append({"epoch": number, "review_id": directory.name,
                        "review_mode": epoch["review_mode"], "review_class": epoch["review_class"],
                        "reviewed_commit": epoch["reviewed_commit"], "status": epoch["status"],
-                       "receipt_digests": {"review-record.json": digest(directory / "review-record.json")}})
+                       "receipt_digests": {
+                           "review-record.json": digest(directory / "review-record.json"),
+                           "frozen-subject.json": digest(directory / "frozen-subject.json")}})
     if epochs:
         tooling["epochs"] = epochs
     manifest = {}

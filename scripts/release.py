@@ -571,6 +571,15 @@ class ReleaseDriver:
         if set(supplied) - (STAGE_VALUE_OPTIONS | {"keep_deployment_profile", "require_clean_client"}):
             raise ReleaseError("--stage-input contains an unsupported stage_release.py option")
         runtime_plan = next(row for row in self.plan["components"] if row["id"] == COMPONENT_IDS[0])
+        if runtime_plan["disposition"] == "carried":
+            identity = {**values, "upstream_commit": runtime["upstream_commit"]}
+            overrides = [name for name in supplied
+                         if name in ("source_archive", "checksums")
+                         or name in identity and name != "keep_deployment_profile"
+                         and supplied[name] != identity[name]]
+            if overrides:
+                raise ReleaseError("carried rtx5090-container refuses identity overrides: "
+                                   + ", ".join(sorted(overrides)))
         if runtime_plan["disposition"] == "recut":
             required = {"source_tag", "binary_sha", "archive_sha", "source_archive_sha", "sbom_sha",
                         "image_digest", "runtime_receipt_release", "source_archive", "checksums"}
@@ -654,21 +663,23 @@ class ReleaseDriver:
         arguments += ["--omp-component", str(self.client_component_path())]
         if next(row for row in self.plan["components"] if row["id"] == COMPONENT_IDS[0])["disposition"] == "recut" and "rtx5090" not in receipts:
             raise ReleaseError("re-cut runtime requires --lane-receipt rtx5090=PATH")
-        # The stager requires an absent directory. The plan is an input, not draft residue.
+        # The plan is an input, not draft residue. Prepared notes are the stager's input.
         try:
             self.plan_path.unlink()
             for directory in sorted(self.plan_path.parent.rglob("*"), reverse=True):
                 if directory.is_dir() and not any(directory.iterdir()):
                     directory.rmdir()
             self.plan_path.parent.rmdir()
+            if "notes" in self.state["private"]:
+                atomic_write(self.plan_path.parent / "NINFER_RELEASE_NOTES.md",
+                             self.private_path("notes").read_bytes())
+                arguments.append("--prepared-draft")
             self.tool("stage_release.py", *arguments)
         finally:
             atomic_write(self.plan_path, self.plan_bytes)
         ledger = self.plan_path.parent / "review" / "runtime-ledger.json"
         if ledger.is_file():
             ledger.unlink()  # A copied predecessor council cannot review this candidate.
-        if "notes" in self.state["private"]:
-            atomic_write(self.plan_path.parent / "NINFER_RELEASE_NOTES.md", self.private_path("notes").read_bytes())
         bundles = self.state["private"].get("bundles", {})
         expected = {row["id"].split("-", 1)[0] for row in self.recut_native()}
         if set(bundles) != expected:

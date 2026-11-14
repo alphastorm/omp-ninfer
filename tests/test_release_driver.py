@@ -102,7 +102,9 @@ def run(name, args):
     qualification = directory / "qualification.json" if directory else None
     authority = directory / "compatibility.json" if directory else None
     if name == "stage_release.py":
-        assert not directory.exists(), "stager requires an absent directory"
+        assert not directory.exists() or (
+            "--prepared-draft" in args and {path.name for path in directory.iterdir()} == {"NINFER_RELEASE_NOTES.md"}
+        ), "stager requires an absent or prepared notes-only directory"
         prior = load(ROOT / "releases" / value("--from") / "manifest.json")
         prior.update(release=release, status="draft")
         runtime = prior["components"]["ninfer"]
@@ -120,7 +122,8 @@ def run(name, args):
         current["product_release"] = release
         atomic_write_json(authority, current)
         atomic_write(directory / "COMPATIBILITY.md", "matrix\n")
-        atomic_write(directory / "NINFER_RELEASE_NOTES.md", "# " + release + "\n")
+        if "--prepared-draft" not in args:
+            atomic_write(directory / "NINFER_RELEASE_NOTES.md", "# " + release + "\n")
     elif name == "aggregate_qualification.py":
         plan = load(ROOT / value("--plan"))
         expected = {row["id"].split("-")[0] for row in plan["components"]
