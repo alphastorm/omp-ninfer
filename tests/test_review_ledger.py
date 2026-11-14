@@ -49,7 +49,10 @@ class ReviewLedgerTests(unittest.TestCase):
         self.manifest_path = self.out / "reviews/manifest.json"
         self.values = LEDGER.load(self.out / "values.json")
         self.qualification = self.root / "releases" / self.release / "qualification.json"
-        atomic_write_json(self.qualification, {"observed_gates": {"other_gate": {"status": "passed"}}})
+        atomic_write_json(self.qualification, {
+            "composition": {"review": {"status": "pending", "scope": "Synthetic staged review."}},
+            "observed_gates": {"other_gate": {"status": "passed"}},
+        })
 
     def write(self, **kwargs):
         return LEDGER.write_ledger(self.root, self.release, self.candidate,
@@ -62,6 +65,11 @@ class ReviewLedgerTests(unittest.TestCase):
         self.assertEqual(ledger["product_tooling"]["stage_commit"], self.candidate)
         self.assertFalse(ledger["publication_authorized"])
         self.assertEqual(qualification["observed_gates"]["other_gate"], {"status": "passed"})
+        review = qualification["composition"]["review"]
+        self.assertEqual(review["status"], ledger["status"])
+        self.assertEqual(review, LEDGER.composition_review(ledger, self.values, result["repository_path"]))
+        self.assertIn(self.candidate, review["scope"])
+        self.assertIn(result["repository_path"], review["scope"])
         errors = []
         LEDGER.validate_review_ledger(self.root, self.release, qualification, errors)
         self.assertEqual(errors, [])
@@ -95,6 +103,61 @@ class ReviewLedgerTests(unittest.TestCase):
         atomic_write_json(record, source)
         with self.assertRaisesRegex(SystemExit, "not closed"):
             self.write()
+
+    def test_another_operators_review_edit_is_never_overwritten(self):
+        original = LEDGER.load(self.qualification)
+        for edited in (None, {}, {"status": "draft"}, {"status": "passed"},
+                       {"status": "closed-by-disposition", "scope": "A different closed review."}):
+            with self.subTest(edited=edited):
+                qualification = deepcopy(original)
+                qualification["composition"]["review"] = edited
+                atomic_write_json(self.qualification, qualification)
+                before = self.qualification.read_bytes()
+                with self.assertRaisesRegex(SystemExit, "neither pending nor the generated"):
+                    self.write()
+                self.assertEqual(self.qualification.read_bytes(), before)
+                self.assertFalse((self.qualification.parent / "review").exists())
+
+    def test_check_detects_a_pending_composition_review_without_writing_either_file(self):
+        result = self.write()
+        ledger_path = self.root / result["repository_path"]
+        qualification = LEDGER.load(self.qualification)
+        qualification["composition"]["review"] = {"status": "pending", "scope": "Restaged review."}
+        atomic_write_json(self.qualification, qualification)
+        before = self.qualification.read_bytes(), ledger_path.read_bytes()
+        with self.assertRaisesRegex(SystemExit, "composition review is not up to date"):
+            self.write(check=True)
+        self.assertEqual((self.qualification.read_bytes(), ledger_path.read_bytes()), before)
+        self.write()
+        self.assertEqual(LEDGER.load(self.qualification)["composition"]["review"]["status"],
+                         "closed-by-disposition")
+
+    def test_only_product_review_is_described_when_no_runtime_review_was_supplied(self):
+        manifest = LEDGER.load(self.manifest_path)
+        atomic_write_json(self.manifest_path, {"product_tooling": manifest["product_tooling"]})
+        result = self.write()
+        ledger = LEDGER.load(self.root / result["repository_path"])
+        self.assertNotIn("native_runtime", ledger)
+        self.assertNotIn("native_component_delta", ledger)
+        scope = LEDGER.load(self.qualification)["composition"]["review"]["scope"]
+        self.assertIn("Product full council product_tooling", scope)
+        self.assertNotIn("Runtime", scope)
+        self.assertNotIn("native", scope)
+        self.assertNotIn(self.values["composition_review"]["native_runtime_summary"], scope)
+
+    def test_scope_defaults_to_closed_source_closures_when_no_result_clauses_are_supplied(self):
+        del self.values["composition_review"]
+        self.values["product_council"].pop("residuals_sentence")
+        result = self.write()
+        scope = LEDGER.load(self.qualification)["composition"]["review"]["scope"]
+        self.assertIn("closed (closed-by-disposition). Closed synthetic review.", scope)
+        self.assertIn(self.values["product_council"]["scope_sentence"], scope)
+
+    def test_private_result_clauses_are_refused_before_public_writes(self):
+        self.values["composition_review"]["native_runtime_summary"] = LEDGER.PRIVATE_MARKERS[0] + "synthetic"
+        with self.assertRaisesRegex(SystemExit, "private marker"):
+            self.write()
+        self.assertFalse((self.qualification.parent / "review").exists())
 
     def test_a_nonancestor_commit_and_a_changed_stage_commit_are_refused(self):
         tree = git(self.root, "rev-parse", "HEAD^{tree}").strip()
@@ -149,21 +212,41 @@ class ReviewLedgerTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(json.loads(result.stdout)["status"], "closed-by-disposition")
 
+    def test_history_fixture_materializes_the_full_public_tag_commit(self):
+        git(self.root, "tag", self.release, self.candidate)
+        tree = self.root / "public-tag"
+        commit = FIXTURES.public_release_tree(self.root, self.release, tree)
+        self.assertEqual(commit, self.candidate)
+        self.assertEqual(git(tree, "rev-parse", "HEAD").strip(), self.candidate)
+        self.assertEqual((tree / "initial.json").read_bytes(), (self.root / "initial.json").read_bytes())
+
+    def test_history_fixture_skips_shallow_clones_unless_history_is_required(self):
+        shallow = self.root / "shallow"
+        subprocess.run(["git", "clone", "--quiet", "--depth=1", self.root.as_uri(), str(shallow)],
+                       check=True, capture_output=True)
+        with patch.dict(os.environ, {"OMP_NINFER_REQUIRE_HISTORY": "0"}):
+            with self.assertRaises(unittest.SkipTest):
+                FIXTURES.public_release_tree(shallow, self.release, self.root / "unused")
+        with patch.dict(os.environ, {"OMP_NINFER_REQUIRE_HISTORY": "1"}):
+            with self.assertRaisesRegex(AssertionError, "full public history"):
+                FIXTURES.public_release_tree(shallow, self.release, self.root / "unused")
+
 
 class PrivateReviewGoldenTests(unittest.TestCase):
     @unittest.skipUnless(os.environ.get("OMP_NINFER_PRIVATE_FIXTURES"),
                          "private fixture locations are not configured")
     def test_retained_closed_directories_reproduce_the_published_ledger_bytes(self):
-        if git(ROOT, "rev-parse", "--is-shallow-repository").strip() == "true":
-            if os.environ.get("OMP_NINFER_REQUIRE_HISTORY") == "1":
-                self.fail("full history is required")
-            self.skipTest("full history is unavailable")
         locations = LEDGER.load(Path(os.environ["OMP_NINFER_PRIVATE_FIXTURES"]).expanduser())["v0.19.0"]
         reviews = locations["reviews"]
         constants = LEDGER.load(Path(reviews["ledger_token_sources"]).expanduser())["constants"]
         values = LEDGER.load(Path(reviews["values"]).expanduser())
-        reference = ROOT / "releases/v0.19.0/review/runtime-ledger.json"
-        expected = LEDGER.load(reference)
+        # These two lead-written result clauses and the subject label are not stated verbatim
+        # in the closed ledger. Preserve the historical scope by supplying them as values.
+        values["composition_review"] = {
+            "native_runtime_summary": "closed with no confirmed in-scope P0 or P1 finding; its residuals are deferred to https://github.com/alphastorm/ninfer/issues/123.",
+            "native_component_delta_subject": "the native power-check delta",
+            "native_component_delta_summary": "found no P0 or P1 finding; its two diagnostic-evidence gaps are deferred to https://github.com/alphastorm/ninfer/issues/127.",
+        }
         manifest = {
             "native_runtime": {
                 "directory": reviews["runtime_council"], "status": constants["RUNTIME_COUNCIL_STATUS"],
@@ -175,12 +258,20 @@ class PrivateReviewGoldenTests(unittest.TestCase):
                                 "status": values["product_council"]["status"]},
         }
         with tempfile.TemporaryDirectory() as temporary:
+            public_tree = Path(temporary) / "public-tag"
+            FIXTURES.public_release_tree(ROOT, "v0.19.0", public_tree)
+            reference = public_tree / "releases/v0.19.0/review/runtime-ledger.json"
+            expected = LEDGER.load(reference)
             path = Path(temporary) / "manifest.json"
             atomic_write_json(path, manifest)
-            ledger, counts = LEDGER.build(ROOT, "v0.19.0", locations["candidate"], path,
+            ledger, counts = LEDGER.build(public_tree, "v0.19.0", locations["candidate"], path,
                                           values, as_of=expected["as_of"])
-        self.assertEqual((json.dumps(ledger, indent=2) + "\n").encode(), reference.read_bytes())
-        self.assertEqual(counts, {})
+            self.assertEqual((json.dumps(ledger, indent=2) + "\n").encode(), reference.read_bytes())
+            self.assertEqual(counts, {})
+            review = LEDGER.composition_review(ledger, values, reference.relative_to(public_tree).as_posix())
+            published = LEDGER.load(public_tree / "releases/v0.19.0/qualification.json")["composition"]["review"]
+            self.assertEqual(review, published)
+            self.assertEqual(json.dumps(review, indent=2), json.dumps(published, indent=2))
 
 
 if __name__ == "__main__":

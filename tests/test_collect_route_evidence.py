@@ -68,8 +68,10 @@ class CollectorTests(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name) / "repository"
         self.root.mkdir()
-        self.release = "v9.9.9"
-        current = COLLECT.load(ROOT / "compatibility.json")["product_release"]
+        previous = FIXTURES.predecessor(ROOT)
+        current = previous["release"]
+        major, minor, _ = COLLECT.composer.product_version(current)
+        self.release = f"v{major}.{minor + 1}.0"
         directory = self.root / "releases" / self.release
         shutil.copytree(ROOT / "releases" / current, directory)
         atomic_write_json(self.root / "releases" / current / "manifest.json",
@@ -78,7 +80,7 @@ class CollectorTests(unittest.TestCase):
             f"releases/{current}/", f"releases/{self.release}/"))
         manifest.update(release=self.release, status="candidate")
         atomic_write_json(directory / "manifest.json", manifest)
-        authority = COLLECT.load(ROOT / "compatibility.json")
+        authority = COLLECT.load(ROOT / "releases" / current / "compatibility.json")
         authority["product_release"] = self.release
         atomic_write_json(self.root / "compatibility.json", authority)
         atomic_write(self.root / "docs/QUICKSTART.md", (ROOT / "docs/QUICKSTART.md").read_bytes())
@@ -130,9 +132,11 @@ class CollectorTests(unittest.TestCase):
             self.assertEqual(Path(path).read_bytes(), sources[lane].read_bytes())
 
     def test_platform_statuses_are_owned_by_the_plan_not_the_old_evidence(self):
-        self.plan["platforms"]["darwin-remote-ssh"] = "qualified"
+        selected = ("qualified" if self.plan["platforms"]["darwin-remote-ssh"] == "preview"
+                    else "preview")
+        self.plan["platforms"]["darwin-remote-ssh"] = selected
         evidence, _ = self.collect()
-        self.assertEqual(evidence["platforms"]["darwin-remote-ssh"]["status"], "qualified")
+        self.assertEqual(evidence["platforms"]["darwin-remote-ssh"]["status"], selected)
         for change in (
             lambda value: value["platforms"].pop("darwin-remote-ssh"),
             lambda value: value["platforms"].update(extra="qualified"),
@@ -355,8 +359,11 @@ class PrivateCollectorGoldenTests(unittest.TestCase):
         locations = COLLECT.load(Path(os.environ["OMP_NINFER_PRIVATE_FIXTURES"]).expanduser())["v0.19.0"]
         plan = {"artifact_type": "omp_ninfer_release_plan", "schema_version": 1, "release": "v0.19.0",
                 "platforms": FIXTURES.ACCEPTED}
-        actual, routes = COLLECT.collect(ROOT, "v0.19.0", locations["candidate"],
-                                         Path(locations["window_root"]).expanduser(), plan)
+        with tempfile.TemporaryDirectory() as temporary:
+            public_tree = Path(temporary) / "public-tag"
+            FIXTURES.public_release_tree(ROOT, "v0.19.0", public_tree)
+            actual, routes = COLLECT.collect(public_tree, "v0.19.0", locations["candidate"],
+                                             Path(locations["window_root"]).expanduser(), plan)
         expected_path = Path(locations["composition_evidence"]).expanduser()
         expected = COLLECT.load(expected_path)
         self.assertEqual((json.dumps(expected, indent=2) + "\n").encode(), expected_path.read_bytes())

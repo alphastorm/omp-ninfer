@@ -29,7 +29,7 @@ sys.modules[STAGE_SPEC.name] = STAGE
 STAGE_SPEC.loader.exec_module(STAGE)
 from verify_release import (  # noqa: E402  # pyright: ignore[reportMissingImports]
     validate_client_profile_predicates, validate_ready_state_consistency,
-    validate_documented_route_acceptance, validate_native_route_policy,
+    validate_documented_route_acceptance, validate_native_route_policy, NINFER_VARIANT_IDS,
 )
 
 FIXTURE_SPEC = importlib.util.spec_from_file_location("acceptance_fixtures", ROOT / "tests/acceptance_fixtures.py")
@@ -902,9 +902,27 @@ class UpstreamCompositionTests(unittest.TestCase):
         qualification = MODULE.load(self.release_root / "qualification.json")
         routes = self.release_root / "acceptance" / "documented-routes.json"
         version = DESCRIPTOR["omp"]["distribution_version"]
+        components = MODULE.load(self.release_root / "manifest.json")["components"]
+        identities = {"rtx5090-container": components["ninfer"],
+                      **{row["id"]: row for row in components["ninfer_variants"]}}
+        component_ids = ("rtx5090-container", *NINFER_VARIANT_IDS)
+        labels = {"rtx5090-container": "RTX 5090 container",
+                  **{name: f"RTX {name.split('-')[0][3:]} native Windows"
+                     for name in NINFER_VARIANT_IDS}}
+        distinct = len({identities[name]["source_commit"] for name in component_ids})
+        statement = "Runtime components: " + "; ".join(
+            f"{labels[name]} `{identities[name]['release_tag']}` re-cut for this release"
+            for name in component_ids) + f". They were built from {distinct} distinct NInfer source commits."
+        external = MODULE.load(self.release_root / "acceptance/composed-external-installation.json")
+        self.assertEqual(external["component_provenance"], {
+            "components": [{"id": name, "release_tag": identities[name]["release_tag"],
+                            "source_commit": identities[name]["source_commit"], "disposition": "recut",
+                            "carried_from": None} for name in component_ids],
+            "distinct_source_commits": distinct, "statement": statement,
+        })
         self.assertEqual(qualification["documented_route_acceptance"], {
             "status": "passed",
-            "scope": MODULE.load(self.root / "evidence.json")["documented_routes"]["scope"],
+            "scope": statement + " " + MODULE.load(self.root / "evidence.json")["documented_routes"]["scope"],
             "candidate_commit": CANDIDATE,
             "evidence_commit_changes_candidate": False,
             "evidence_path": f"releases/{self.release}/acceptance/documented-routes.json",
@@ -1406,18 +1424,34 @@ class AcceptanceFixtureCommandTests(unittest.TestCase):
                            check=True, capture_output=True)
             shutil.copy2(ROOT / "tests/acceptance_fixtures.py", root / "tests/acceptance_fixtures.py")
             shutil.copy2(ROOT / "scripts/collect_route_evidence.py", root / "scripts/collect_route_evidence.py")
-            release = "v9.9.9"
-            source = FIXTURES.predecessor(root, release)["release"]
+            shutil.copy2(ROOT / "scripts/review_ledger.py", root / "scripts/review_ledger.py")
+            for name in ("test_review_ledger.py", "test_collect_route_evidence.py"):
+                shutil.copy2(ROOT / "tests" / name, root / "tests" / name)
+            previous = FIXTURES.predecessor(root)
+            source = previous["release"]
+            major, minor, _ = MODULE.product_version(source)
+            release = f"v{major}.{minor + 1}.0"
             directory = root / "releases" / release
             shutil.copytree(root / "releases" / source, directory)
             manifest = json.loads((directory / "manifest.json").read_text().replace(
                 f"releases/{source}/", f"releases/{release}/"))
             manifest.update(release=release, status="candidate")
             atomic_write_json(directory / "manifest.json", manifest)
-            authority = MODULE.load(root / "compatibility.json")
+            authority = MODULE.load(root / "releases" / source / "compatibility.json")
+            components = {"rtx5090-container": previous["components"]["ninfer"],
+                          **{row["id"]: row for row in previous["components"]["ninfer_variants"]}}
+            atomic_write_json(directory / "plan.json", {
+                "artifact_type": "omp_ninfer_release_plan", "schema_version": 1, "release": release,
+                "predecessor": source,
+                "client": {"upstream_tag": previous["components"]["omp"]["upstream_tag"], "disposition": "carried"},
+                "components": [{"id": name, "disposition": "carried", "release_tag": row["release_tag"],
+                                "source_commit": row["source_commit"]} for name, row in components.items()],
+                "platforms": {row["id"]: row["status"] for row in authority["profiles"]}, "decisions": [],
+            })
             authority["product_release"] = release
             atomic_write_json(root / "compatibility.json", authority)
             atomic_write_json(directory / "compatibility.json", authority)
+            prefix = "synthetic-" + release.replace(".", "")
             candidate = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
             result = subprocess.run([
                 sys.executable, "tests/acceptance_fixtures.py", "write", "--release", release,
@@ -1425,24 +1459,33 @@ class AcceptanceFixtureCommandTests(unittest.TestCase):
             ], cwd=root, capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             outputs = json.loads(result.stdout)
-            ledger_path = directory / "review/runtime-ledger.json"
-            atomic_write_json(ledger_path, {
-                "artifact_type": "omp_ninfer_review_ledger", "release": release,
-                "product_tooling": {"stage_commit": candidate},
-            })
             qualification = MODULE.load(directory / "qualification.json")
             qualification["release"] = release
-            qualification.setdefault("observed_gates", {})["g4_review"] = {
-                "repository_path": ledger_path.relative_to(root).as_posix(),
-                "sha256": MODULE.sha256(ledger_path.read_bytes()),
-            }
+            qualification["composition"]["review"] = {"status": "pending", "scope": "Synthetic staged review."}
             atomic_write_json(directory / "qualification.json", qualification)
+            result = subprocess.run([
+                sys.executable, "scripts/review_ledger.py", "--release", release, "--candidate", candidate,
+                "--reviews", outputs["reviews"], "--values", outputs["values"],
+            ], cwd=root, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            ledger = MODULE.load(directory / "review/runtime-ledger.json")
+            self.assertEqual(ledger["product_tooling"]["stage_commit"], candidate)
+            self.assertNotIn("native_runtime", ledger)
+            self.assertNotIn("native_component_delta", ledger)
+            self.assertNotIn("native", MODULE.load(directory / "qualification.json")["composition"]["review"]["scope"])
+            result = subprocess.run([
+                sys.executable, "scripts/collect_route_evidence.py", "--release", release, "--candidate", candidate,
+                "--window-root", outputs["window_root"], "--plan", str(directory / "plan.json"),
+                "--output", str(Path(temporary) / "collected/composition-evidence.json"),
+            ], cwd=root, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            collected = json.loads(result.stdout)
             arguments = [
                 sys.executable, "scripts/compose_route_acceptance.py", "--release", release,
-                "--candidate", candidate, "--as-of", "2099-01-01",
-                "--measurement-prefix", "synthetic", "--evidence", outputs["evidence"],
+                "--candidate", candidate, "--as-of", "2099-01-01", "--measurement-prefix", prefix,
+                "--evidence", collected["evidence"],
             ]
-            for lane, path in outputs["routes"].items():
+            for lane, path in collected["routes"].items():
                 arguments += ["--route", f"{lane}={path}"]
             result = subprocess.run(arguments, cwd=root, capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
@@ -1450,8 +1493,26 @@ class AcceptanceFixtureCommandTests(unittest.TestCase):
             for filename in ("documented-routes.json", "composed-external-installation.json",
                              "rtx4090-public-install.json", "rtx3090-public-install.json"):
                 self.assertTrue((directory / "acceptance" / filename).is_file(), filename)
-            self.assertTrue((root / "docs/measurements/synthetic-acceptance-restoration.json").is_file())
-            self.assertEqual(len(list((root / "docs/measurements").glob("synthetic-*-run.json"))), 5)
+            self.assertTrue((root / "docs/measurements" / (prefix + "-acceptance-restoration.json")).is_file())
+            self.assertEqual(len(list((root / "docs/measurements").glob(prefix + "-*-run.json"))), 5)
+            for mode in ("--require-ready", "--lint-ready"):
+                result = subprocess.run([
+                    sys.executable, "scripts/verify_release.py", "--release", release, mode, "--json",
+                ], cwd=root, capture_output=True, text=True)
+                self.assertIn(result.returncode, (0, 1), result.stdout + result.stderr)
+                report = json.loads(result.stdout)
+                # This tool-level fixture deliberately omits the driver's profile migration,
+                # receipt audit and immutable pin chain; their refusals remain visible.
+                review_errors = [error for error in report["errors"] if error.startswith((
+                    "qualification.composition.review", "qualification.observed_gates.g4_review",
+                    f"releases/{release}/review/"))]
+                self.assertEqual(review_errors, [], result.stdout + result.stderr)
+            # Re-run only the historical goldens with the synthetic successor now current.
+            result = subprocess.run([
+                sys.executable, "-m", "unittest", "tests.test_review_ledger.PrivateReviewGoldenTests",
+                "tests.test_collect_route_evidence.PrivateCollectorGoldenTests",
+            ], cwd=root, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
 
 if __name__ == "__main__":
