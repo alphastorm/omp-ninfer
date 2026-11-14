@@ -16,6 +16,7 @@ import socket
 import sys
 import tempfile
 import threading
+import time
 import unittest
 from unittest import mock
 import urllib.error
@@ -317,6 +318,19 @@ class HTTPTransportTests(OfflineTestCase):
                     self.send_header("Location", test.origin + "/assets/SHA256SUMS")
                     self.end_headers()
                     return
+                elif self.path == "/foreign-redirect":
+                    self.send_response(302)
+                    self.send_header("Location", "https://untrusted.example.invalid/asset")
+                    self.end_headers()
+                    return
+                elif self.path.startswith("/slow-redirect/"):
+                    time.sleep(0.08)
+                    number = int(self.path.rsplit("/", 1)[-1])
+                    self.send_response(302)
+                    self.send_header("Location", test.origin + (
+                        f"/slow-redirect/{number - 1}" if number else "/assets/SHA256SUMS"))
+                    self.end_headers()
+                    return
                 elif self.path == "/oversize":
                     self.send_response(200)
                     self.end_headers()
@@ -408,6 +422,26 @@ class HTTPTransportTests(OfflineTestCase):
             with self.assertRaisesRegex(PUBLICATION.BundleError, "/http_status"):
                 self.transport.api("missing")
         self.assertTrue(response.closed)
+
+    def test_initial_and_redirect_hosts_are_confined_to_github(self):
+        for url in ("https://untrusted.example.invalid/asset",
+                    "https://github.com.untrusted.example.invalid/asset",
+                    "https://release-assets.githubusercontent.com.untrusted.example.invalid/asset",
+                    "https://127.0.0.1/asset", self.origin + "/foreign-redirect"):
+            with self.subTest(url=url), self.assertRaisesRegex(PUBLICATION.BundleError, "/url"):
+                list(self.transport.download(url, 1))
+        for host in ("github.com", "api.github.com", "release-assets.githubusercontent.com"):
+            self.transport.validate_url("https://" + host + "/asset")
+
+    def test_redirect_headers_share_one_operation_deadline(self):
+        transport = PUBLICATION.HTTPTransport(
+            self.origin, socket_timeout=2, api_timeout=0.15, download_timeout=0.15)
+        expected = (self.fixture.fixture.assets / "SHA256SUMS").read_bytes()
+        started = time.monotonic()
+        with self.assertRaises(PUBLICATION.BundleError):
+            list(transport.download(self.origin + "/slow-redirect/5", len(expected)))
+        self.assertLess(time.monotonic() - started, 0.4)
+        self.assertLess(len(self.requests), 4, "header redirects reused the original socket timeout")
 
 
 class PrivatePublicationGoldenTests(OfflineTestCase):

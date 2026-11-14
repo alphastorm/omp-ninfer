@@ -1116,6 +1116,16 @@ class ReleaseDriverTests(unittest.TestCase):
         self.assertIn("carried rtx5090-container refuses", result.stderr)
         self.assertEqual(self.calls(), [])
 
+    def test_carried_runtime_refuses_changed_archive_and_sbom_before_staging(self) -> None:
+        for field in ("archive_sha", "sbom_sha"):
+            with self.subTest(field=field):
+                path = self.private / "stage-input.json"
+                atomic_write_json(path, {field: "0" * 64})
+                result = self.invoke("candidate", "--no-suite", "--stage-input", str(path), success=False)
+                self.assertIn("carried rtx5090-container", result.stderr)
+                self.assertEqual(self.calls(), [])
+                self.assertEqual(self.git("rev-parse", "HEAD"), self.initial)
+
     def test_carried_client_defaults_to_the_predecessor_public_descriptor(self) -> None:
         self.candidate("--no-suite")
         arguments = self.calls("stage_release.py")[0]["arguments"]

@@ -475,6 +475,17 @@ class RetargetGuideTest(unittest.TestCase):
         self.assertTrue(self.run_retarget())
         self.assertFalse(self.run_retarget())
 
+    def test_orphan_receipt_cannot_admit_its_measurement_link(self) -> None:
+        target = "docs/measurements/orphan.json"
+        for release in (OLD, NEW):
+            atomic_write_json(self.root / "releases" / release / "qualification/orphan.json",
+                              {"review": {"repository_path": target, "sha256": "1" * 64}})
+        self.append(f"[unbound observation]({target[5:]})\n")
+        before = self.guide.read_bytes()
+        with self.assertRaisesRegex(GUIDE.Refusal, "unbound evidence link"):
+            self.run_retarget()
+        self.assertEqual(self.guide.read_bytes(), before)
+
     def test_check_reports_drift_without_writing_and_then_accepts_a_rerun(self) -> None:
         argv = ["--from", OLD, "--to", NEW, "--guide", str(self.guide)]
         original = self.guide.read_bytes()

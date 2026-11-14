@@ -397,6 +397,65 @@ class UpstreamCompositionTests(unittest.TestCase):
         self.assertFalse((acceptance / "rtx4090-public-install.json").exists())
         self.assertEqual(MODULE.load(self.release_root / "manifest.json")["status"], "ready")
 
+    def test_staged_parity_waiver_binds_the_route_candidate_and_hash_chain(self) -> None:
+        from agent_parity import judge_comparison
+        from verify_release import validate_gate_waivers, validate_repository_bindings
+        manifest = MODULE.load(self.release_root / "manifest.json")
+        row = manifest["components"]["ninfer_variants"][0]
+        row["package_name"] = "native-fixture.tar.gz"
+        MODULE.save(self.release_root / "manifest.json", manifest)
+        position = {
+            "position": 3, "label": "restore_0",
+            "incumbent_server_ttft_seconds": 1.0, "candidate_server_ttft_seconds": 2.0,
+            "incumbent_prompt_tokens": 100, "candidate_prompt_tokens": 100,
+            "incumbent_cached_tokens": 90, "candidate_cached_tokens": 90,
+        }
+        verdict = judge_comparison({"contract_version": 2, "rule": "p16-agent-parity/2",
+                                    "jobs": {"restore": {"positions": [position]}}},
+                                   self.release_root, "comparison.json")
+        verdict_path = self.release_root / "qualification/agent-verdict.json"
+        MODULE.save(verdict_path, verdict)
+        verdict_sha = MODULE.sha256(verdict_path.read_bytes())
+        waiver = {
+            "artifact_type": "omp_ninfer_founder_gate_waiver", "schema_version": 1,
+            "release": self.release, "lane": "rtx4090",
+            "subject": {key: row[field] for key, field in (
+                ("source", "source_commit"), ("component", "release_tag"),
+                ("package", "package_name"), ("package_sha256", "package_sha256"),
+                ("server_sha256", "server_binary_sha256"))},
+            "waived": [{"job": "restore", "probe": "two-restart restore", "position": 3,
+                        "label": "restore_0",
+                        "rule": "p16-agent-parity/2 candidate TTFT <= incumbent + max(0.25 s, 25%)",
+                        "incumbent_ttft_s": 1.0, "candidate_ttft_s": 2.0,
+                        "incumbent_prompt_tokens": 100, "candidate_prompt_tokens": 100,
+                        "incumbent_cached_tokens": 90, "candidate_cached_tokens": 90}],
+            "raw_verdict": {"passed": False, "evidence_sha256": {"agent-verdict.json": verdict_sha}},
+        }
+        path = self.release_root / "qualification/rtx4090-restore-waiver.json"
+        MODULE.save(path, waiver)
+        qualification = MODULE.load(self.release_root / "qualification.json")
+        qualification["observed_gates"].update({
+            "rtx4090_agent_parity": {
+                "repository_path": verdict_path.relative_to(self.root).as_posix(), "sha256": verdict_sha,
+                "status": "failed-founder-waived", "raw_passed": False, "accepted_under_exact_waiver": True},
+            "rtx4090_restore_waiver": {
+                "repository_path": path.relative_to(self.root).as_posix(),
+                "sha256": MODULE.sha256(path.read_bytes()), "status": "waived-by-founder"},
+        })
+        MODULE.save(self.release_root / "qualification.json", qualification)
+        errors = []
+        validate_gate_waivers(self.root, self.release, manifest, qualification, errors)
+        self.assertEqual(errors, [])
+        self.assertEqual(self.compose(), 0)
+        qualification = MODULE.load(self.release_root / "qualification.json")
+        errors = []
+        validate_gate_waivers(self.root, self.release, manifest, qualification, errors)
+        validate_repository_bindings(self.root, qualification, errors)
+        self.assertEqual(errors, [])
+        self.assertEqual(MODULE.load(path), {**waiver, "candidate": CANDIDATE})
+        self.assertEqual(MODULE.load(self.release_root / "manifest.json")["qualification"]["summary_sha256"],
+                         MODULE.sha256((self.release_root / "qualification.json").read_bytes()))
+
     def test_declared_4090_without_its_route_is_refused(self) -> None:
         del self.argv[-2:]
         with self.assertRaisesRegex(SystemExit, "need one --route"):

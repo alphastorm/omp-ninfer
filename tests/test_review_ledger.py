@@ -262,6 +262,37 @@ class ReviewLedgerTests(unittest.TestCase):
         self.assertEqual([epoch["reviewed_commit"] for epoch in product["epochs"]],
                          [planned, self.candidate])
 
+    def test_epoch_cannot_claim_a_subject_other_than_its_closed_directory(self):
+        planned = self.add_plan_and_candidate()
+        self.set_reviewed_subject(planned)
+        self.values["product_council"]["epochs"] = [{
+            "directory": "product_tooling", "review_mode": "initial",
+            "review_class": "full-council", "status": "closed-by-disposition",
+            "reviewed_commit": self.candidate,
+        }]
+        before = self.qualification.read_bytes()
+        with self.assertRaisesRegex(SystemExit, "frozen subject"):
+            self.write()
+        self.assertEqual(self.qualification.read_bytes(), before)
+        self.assertFalse((self.qualification.parent / "review").exists())
+
+    def test_epoch_without_frozen_subject_refuses_values_only_approval(self):
+        directory = self.out / "reviews/epoch"
+        atomic_write_json(directory / "review-record.json", {"status": "closed-by-disposition"})
+        self.values["product_council"]["epochs"] = [{
+            "directory": "epoch", "review_mode": "initial", "review_class": "full-council",
+            "status": "closed-by-disposition", "reviewed_commit": self.candidate,
+        }]
+        with self.assertRaisesRegex(SystemExit, "frozen-subject"):
+            self.write()
+        self.assertFalse((self.qualification.parent / "review").exists())
+
+    def test_stage_without_plan_cannot_admit_a_new_release_review(self):
+        errors = LEDGER.review_subject_errors(self.root, self.release, {
+            "product_tooling": {"stage_commit": self.candidate, "reviewed_commit": self.candidate},
+        }, self.release_manifest)
+        self.assertTrue(any("plan.json" in error for error in errors), errors)
+
     def test_runtime_and_delta_reviews_must_name_released_component_sources(self):
         for section, filename in (("native_runtime", "frozen-subject.json"),
                                   ("native_component_delta", "subject.json")):
