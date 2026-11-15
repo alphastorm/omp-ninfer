@@ -2875,7 +2875,8 @@ ROLLBACK_LOCATIONS: frozenset[MarkdownLocation] = frozenset({
     ("docs/QUICKSTART.md", ("Shared native operation and fallback", "Package selection and fallback")),
 })
 TIER_TWO_LOCATIONS: frozenset[tuple[MarkdownLocation, str]] = frozenset({
-    (("docs/QUICKSTART.md", ()), "> Use the [immutable "),
+    (("docs/QUICKSTART.md", ()), "> **Prepared guide:"),
+    (("docs/QUICKSTART.md", ()), "> **Versioned guide:"),
     (("docs/QUICKSTART.md", ("Current release at a glance",)), "- **Checkpoint boundary:**"),
     (("docs/QUICKSTART.md", ("3. Prepare the model and key on the inference host",)), "Release "),
     (("docs/QUICKSTART.md", ("4. Start NInfer on the inference host",)), "For an upgrade from "),
@@ -2910,14 +2911,23 @@ def guide_reference_location(location: MarkdownLocation, block: str, *, tier_two
     allowed = location in ROLLBACK_LOCATIONS or (
         tier_two and any(location == section and block.lstrip().startswith(prefix)
                          for section, prefix in TIER_TWO_LOCATIONS))
-    if not allowed or position is None:
-        return allowed
+    if not allowed:
+        return False
+    if not location[1]:
+        # Only the immutable predecessor-guide link is historical in the banner;
+        # its subject and publication instruction still describe the current release.
+        return position is not None and any(
+            match.start() <= position < match.end() for match in re.finditer(
+                r"\[immutable (v\d+\.\d+\.\d+) guide\]"
+                r"\(https://github\.com/alphastorm/omp-ninfer/blob/\1/docs/QUICKSTART\.md\)", block))
+    if position is None:
+        return True
     # A predecessor reference does not exempt the current identity in the same
     # paragraph or table row. Roles are considered only inside the closed locations.
     prefix = re.split(r"[,;]|[.!?](?=\s)", block[:position])[-1]
     roles = re.findall(
         r"\b(?:current|rollback|predecessor|retained|incumbent|upgrade\s+from"
-        r"|matching\s+published|keeping\s+a|immutable)\b", prefix, re.IGNORECASE)
+        r"|matching\s+published|keeping\s+a)\b", prefix, re.IGNORECASE)
     return bool(roles and roles[-1].lower() != "current")
 
 

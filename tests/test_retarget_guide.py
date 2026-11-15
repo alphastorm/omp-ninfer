@@ -339,6 +339,22 @@ class RetargetGuideTest(unittest.TestCase):
                 self.assertFalse(self.run_retarget())
                 self.assertEqual(self.guide.read_bytes(), text.encode("utf-8"))
 
+    def test_banner_previous_guide_link_advances_without_exempting_current_instructions(self) -> None:
+        self.write_prior()
+        for kind in ("Prepared", "Versioned"):
+            with self.subTest(kind=kind):
+                banner = (f"> **{kind} guide: {OLD} · documented routes**\n>\n"
+                          "> Use the [immutable v0.19.0 guide]"
+                          "(https://github.com/alphastorm/omp-ninfer/blob/v0.19.0/docs/QUICKSTART.md) "
+                          f"until {OLD} is published.\n\n")
+                atomic_write(self.guide, "# Quickstart\n\n" + banner + route_guide())
+                self.assertTrue(self.run_retarget())
+                completed = self.guide.read_text(encoding="utf-8")
+                self.assertIn(f"immutable {OLD} guide", completed)
+                self.assertFalse(self.run_retarget())
+                atomic_write(self.guide, completed.replace(f"until {NEW}", f"until {OLD}"))
+                self.assert_refuses("c")
+
     def test_completed_guide_resolves_current_and_rollback_occurrences_individually(self) -> None:
         prior = self.write_prior()
         prior_tag = prior["components"]["ninfer"]["release_tag"]
