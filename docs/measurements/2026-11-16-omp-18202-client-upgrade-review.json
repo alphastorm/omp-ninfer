@@ -1,0 +1,361 @@
+{
+  "artifact_type": "omp_ninfer_client_upgrade_review",
+  "schema_version": 1,
+  "as_of": "2026-11-15",
+  "product_release": "v0.20.0",
+  "provenance": {
+    "review": "Tagged 18.20.0..18.20.2 source review, incorporating the complete 552-commit/676-path source-analysis census and route-sensitive recommendations, followed by published macOS arm64 executable probes in owned isolated homes against a loopback Responses stub derived from scripts/client_acceptance.py. Both compared macOS executables and checksum files were downloaded and independently hashed against release metadata and checksum rows. Five model fragments, containing six model rows, and the fail-closed configuration were resolved without modification. Six fresh-turn error cases, four retained-history error cases, all five provider concurrency caps and a rendered prompt comparison were exercised. No inference host, GPU, cloud credential, model inference, release staging or profile mutation was involved. This is not an exhaustive audit of unrelated upstream code or a replacement for fresh documented-route acceptance.",
+    "implementation_commits": [],
+    "ci": null,
+    "ci_conclusion": "not-claimed",
+    "ci_head": null
+  },
+  "client_upgrade": {
+    "from": "18.20.0",
+    "to": "18.20.2",
+    "reason": "Prepare the selected stock client for v0.20.0. Source review and host-free executable probes find no blocker to retaining the existing behavioral fragments. The complete current context_length_exceeded HTTP 400 body is already recognized as overflow through the rendered structured-code suffix; the proposed OpenAI-style wording is additionally recognized without that code. Fail-closed means no provider/model switch or cloud fallback: compactable-history overflow and 413 correctly recover through same-local-model compaction and continuation, while an irreducible fresh turn fails visibly. It does not mean disabling automatic compaction or forbidding its requests. Client identities and compatibility still require release integration and fresh live acceptance.",
+    "upstream_commit": "7c49c11aa5bbaf3f418406583096168ad5b8c6dc",
+    "upstream_tree": "bc176229265a781c3b502673566328bcb473466c",
+    "release_id": 445558988,
+    "published_at": "2026-11-14T20:08:51Z",
+    "stable_releases_reviewed": [
+      "18.20.0",
+      "18.20.1",
+      "18.20.2"
+    ]
+  },
+  "descriptor_inputs": "releases/v0.19.0/qualification/client-components.json",
+  "host_free_checks": {
+    "asset_identity": {
+      "method": "Downloaded the published raw macOS arm64 executable and SHA256SUMS.txt for both compared versions. Independently counted bytes and hashed the complete files; each file matches its release API size/digest, and each executable matches its checksum row. shasum -a 256 -c --ignore-missing SHA256SUMS.txt reports omp-darwin-arm64: OK for both. The selected tag resolves to the recorded commit/tree; release target_commitish is main, not an immutable source identity. Windows and Linux assets were not downloaded or executed in this intake.",
+      "release_checksum_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.20.2/SHA256SUMS.txt",
+      "release_checksum_sha256": "e0e6a635e7bc94d6b8a81c1f64898dc837c0f9c43e4f07d27acab3b57767513c",
+      "release_checksum_asset_id": 748638305,
+      "release_checksum_bytes": 844,
+      "release_checksum_api_digest": "sha256:e0e6a635e7bc94d6b8a81c1f64898dc837c0f9c43e4f07d27acab3b57767513c",
+      "release_checksum_api_bytes_match": true,
+      "release_checksum_api_digest_match": true,
+      "assets": [
+        {
+          "name": "omp-darwin-arm64",
+          "asset_id": 748638313,
+          "bytes": 224277648,
+          "sha256": "e2de0974ce581bfcf2044ea795c712fa240fdf8304f7bdb4b3d81b154d2b57fc",
+          "api_digest": "sha256:e2de0974ce581bfcf2044ea795c712fa240fdf8304f7bdb4b3d81b154d2b57fc",
+          "api_bytes_match": true,
+          "api_digest_match": true,
+          "download_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.20.2/omp-darwin-arm64",
+          "sha256sums_match": true
+        }
+      ],
+      "comparison_asset": {
+        "version": "18.20.0",
+        "name": "omp-darwin-arm64",
+        "asset_id": 741515219,
+        "bytes": 223369360,
+        "sha256": "2b1309b06a743ae939708f939b63f75c7a436ed08c7953309f0e387e0c793ead",
+        "release_checksum_sha256": "eb25eb06cc07d57eeb654c4e41cd0b05d19c49d1fe24d6851ed213e5d1f0614a",
+        "api_bytes_match": true,
+        "api_digest_match": true,
+        "sha256sums_match": true
+      }
+    },
+    "semantic_rehearsals": {
+      "execution_kind": "published stock macOS arm64 binaries against an owned loopback Responses mock; synthetic traffic, not inference qualification",
+      "guide_sha256": "99c792c499957b1c4d47833d60fb506ecd0c0087ec58a2c389987e646c58d096",
+      "binary_version": "omp/18.20.2",
+      "binary_sha256": "e2de0974ce581bfcf2044ea795c712fa240fdf8304f7bdb4b3d81b154d2b57fc",
+      "checks": [
+        {
+          "id": "all-model-fragments-and-fail-closed-resolve",
+          "passed": true,
+          "command": "omp models ls ninfer --json --no-extensions; omp config list --scope global --json",
+          "method": "Each model fragment was copied byte-for-byte into a fresh isolated HOME alongside the unchanged fail-closed.yml as config.yml. Only synthetic key files/environment variables were supplied. Both command exits were zero for every home. The six resolved model rows retain 131072/32768, reasoning=true, zero prices, text or text/image as declared and [low,medium,xhigh]. The listing does not expose every compat/tokenizer field; those fields are not claimed as independently dumped runtime values.",
+          "warnings": [],
+          "fragments": [
+            {
+              "path": "examples/fleet/models.fragment.yml",
+              "sha256": "1d938f10b7c54c67d5f2c96456ce8d05989ada2aa221703789ffb2a2c1859241",
+              "selectors": ["ninfer-heavy/qwen3.8-27b", "ninfer-main/q38-ninfer"]
+            },
+            {
+              "path": "examples/manual-tunnel/models.fragment.yml",
+              "sha256": "32ffdc288e64755d3965cdf90cbc8504d0632c3c80791a14d80846fe7af49100",
+              "selectors": ["ninfer-beta/q38-ninfer"]
+            },
+            {
+              "path": "examples/windows-docker-local/models.fragment.yml",
+              "sha256": "19f94d721a1319f8c00090068cdf03650663619644758bf0355fe3ba7065be6e",
+              "selectors": ["ninfer-beta/q38-ninfer"]
+            },
+            {
+              "path": "examples/windows-native/models-rtx3090.fragment.yml",
+              "sha256": "8082a5947d1a7ffabdfec6ff84af55eac596a202403dbae1a38a11c55d610954",
+              "selectors": ["ninfer-native-3090/q38-ninfer"]
+            },
+            {
+              "path": "examples/windows-native/models.fragment.yml",
+              "sha256": "18ebe34e7d11fc87cc42fcff85adfec5bde8ef18c4e7b7f184d17bcc0ab81a5f",
+              "selectors": ["ninfer-native-4090/qwen3.8-27b"]
+            }
+          ],
+          "config_fragment": {
+            "path": "examples/manual-tunnel/fail-closed.yml",
+            "sha256": "b2c04ec77d9b29a9f4e12a0041b165135519cb387ed60277a4732b3b21fed396",
+            "resolved_pins": {
+              "retry.enabled": false,
+              "retry.modelFallback": false,
+              "retry.fallbackRevertPolicy": "never",
+              "update.auto": false,
+              "startup.checkUpdate": false,
+              "startup.setupWizard": false,
+              "providers.maxInFlightRequests": {
+                "ninfer-beta": 2,
+                "ninfer-native-4090": 1,
+                "ninfer-native-3090": 2,
+                "ninfer-main": 2,
+                "ninfer-heavy": 1
+              }
+            }
+          }
+        },
+        {
+          "id": "overflow-classification-and-fresh-turn-fail-closed",
+          "passed": true,
+          "method": "The real binary issued Responses POSTs to a recording loopback mock using the unchanged fail-closed settings. Each case began in a new home with one synthetic user turn, no compactable prior history and an available synthetic local alternative provider. Every case made exactly one request to /v1/responses for q38-ninfer, emitted an error, had no assistant text, exited 1 and retained only ninfer-beta/q38-ninfer. No fallback chain was added.",
+          "cases": [
+            {
+              "id": "current-full-body",
+              "status": 400,
+              "message": "prepared prompt exceeds Engine max_context 131072",
+              "error_code": "context_length_exceeded",
+              "error_type": "invalid_request_error",
+              "error_param": "messages",
+              "error_id": 8392704,
+              "context_overflow": true,
+              "payload_rejection": false
+            },
+            {
+              "id": "openai-full-body",
+              "status": 400,
+              "message": "maximum context length is 131072 tokens, but the prepared prompt has 131073 tokens",
+              "error_code": "context_length_exceeded",
+              "error_type": "invalid_request_error",
+              "error_param": "messages",
+              "error_id": 8392704,
+              "context_overflow": true,
+              "payload_rejection": false
+            },
+            {
+              "id": "current-message-only-control",
+              "status": 400,
+              "message": "prepared prompt exceeds Engine max_context 131072",
+              "error_code": null,
+              "error_id": 400,
+              "context_overflow": false,
+              "payload_rejection": false
+            },
+            {
+              "id": "openai-message-only-control",
+              "status": 400,
+              "message": "maximum context length is 131072 tokens, but the prepared prompt has 131073 tokens",
+              "error_code": null,
+              "error_id": 8392704,
+              "context_overflow": true,
+              "payload_rejection": false
+            },
+            {
+              "id": "payload-413",
+              "status": 413,
+              "message": "request body exceeds the configured payload limit",
+              "error_type": "invalid_request_error",
+              "error_param": "request_too_large",
+              "error_id": -2147479552,
+              "context_overflow": false,
+              "payload_rejection": true
+            },
+            {
+              "id": "bare-413",
+              "status": 413,
+              "message": null,
+              "error_id": -2139090944,
+              "context_overflow": true,
+              "payload_rejection": true
+            }
+          ],
+          "maintenance": "Recognized fresh-turn token overflows emitted skipped shake/context-full events and a visible no-progress notice, but no summary or continuation request. Bare 413 is deliberately dual-flagged; explicit payload-only 413 is not token overflow."
+        },
+        {
+          "id": "retained-history-overflow-and-413-fail-closed",
+          "passed": true,
+          "evidence": "history-results.json",
+          "method": "Four independent stock-client sessions each accumulated six successful synthetic user turns under the unchanged fail-closed config, then encountered one forced rejection. Each seed prompt repeated a synthetic four-word record 2500 times. The mock accepted subsequent requests so automatic recovery could be observed. The current-body run reported 61990 counted tokens before compaction. Complete current and proposed HTTP 400 envelopes, explicit payload 413 and bare 413 all followed the same recovery shape.",
+          "cases": [
+            {"id": "current-full-body", "status": 400, "seed_requests": 6, "recovery_turn_requests": 5, "exit_code": 0},
+            {"id": "openai-full-body", "status": 400, "seed_requests": 6, "recovery_turn_requests": 5, "exit_code": 0},
+            {"id": "payload-413", "status": 413, "seed_requests": 6, "recovery_turn_requests": 5, "exit_code": 0},
+            {"id": "bare-413", "status": 413, "seed_requests": 6, "recovery_turn_requests": 5, "exit_code": 0}
+          ],
+          "request_attribution": "For every case: one rejected user request, three summary requests, then one successful user continuation; all five POST /v1/responses requests used q38-ninfer. Client events contained only ninfer-beta/q38-ninfer, no alternative-provider path, and final synthetic assistant text OK. This passes provider/model isolation. It intentionally does not satisfy a zero-extra-requests assertion, which is not the overflow/413 oracle.",
+          "scope_limit": "Synthetic summary text proves recovery control flow and request attribution, not useful summaries, control recall, real automatic-compaction quality, persistent-cache behavior or inference correctness."
+        },
+        {
+          "id": "provider-caps-queue-before-http-dispatch",
+          "passed": true,
+          "method": "For each configured provider, cap active requests were held open at the unconstrained threaded mock. A further stock process shared the same isolated config root. Before release, the server had exactly cap requests, the extra process was alive and its own debug log said Provider in-flight limit blocked request. It reached the server only after a held request was released. Every process exited zero. These are cross-process client-admission checks, not server queueing or throughput measurements.",
+          "providers": [
+            {"id": "ninfer-beta", "limit": 2, "processes": 3, "requests_before_release": 2, "total_requests": 3, "client_wait_log_observed": true},
+            {"id": "ninfer-native-4090", "limit": 1, "processes": 2, "requests_before_release": 1, "total_requests": 2, "client_wait_log_observed": true},
+            {"id": "ninfer-native-3090", "limit": 2, "processes": 3, "requests_before_release": 2, "total_requests": 3, "client_wait_log_observed": true},
+            {"id": "ninfer-main", "limit": 2, "processes": 3, "requests_before_release": 2, "total_requests": 3, "client_wait_log_observed": true},
+            {"id": "ninfer-heavy", "limit": 1, "processes": 2, "requests_before_release": 1, "total_requests": 2, "client_wait_log_observed": true}
+          ]
+        },
+        {
+          "id": "rendered-system-prompt-and-read-tool-fingerprints",
+          "passed": true,
+          "method": "Both published binaries issued one successful --tools read print-mode request from the same synthetic work directory, HOME, model and environment. UTF-8 system text is the joined instructions plus system/developer input text, separated by two newlines when multiple blocks exist; each capture contained one block. The canonical system projection separately hashes sorted-key compact JSON of instructions and system/developer messages with ensure_ascii=false. Tool hashes use the same canonical JSON serialization of the complete captured tools array. No private prompt content is published here.",
+          "versions": [
+            {
+              "version": "18.20.0",
+              "rendered_system_text_bytes": 6068,
+              "rendered_system_text_sha256": "116b0ea6e21386b74aeeeb3f67ce6b33565a963d663d1d446408390a85366ff3",
+              "canonical_system_bytes": 6216,
+              "canonical_system_sha256": "7451dad3ef9d37ab5c60b0740e8e07b420f28edb17ca7485f1c2ee1e747f6d3e",
+              "canonical_tools_bytes": 1736,
+              "canonical_tools_sha256": "2b83b9bd4abf14bb7aa480ee5d577f9b7ef41236dfa29a41ee62048a4393501a"
+            },
+            {
+              "version": "18.20.2",
+              "rendered_system_text_bytes": 5949,
+              "rendered_system_text_sha256": "64def6ec8b12170846350cfd7968c5e9938fb29270abdc6ed8bf690a070377fb",
+              "canonical_system_bytes": 6095,
+              "canonical_system_sha256": "c2272c7d8ed62b240e79bf4c0ee524b357a19819d3842a73488c5fcba9380b22",
+              "canonical_tools_bytes": 1736,
+              "canonical_tools_sha256": "2b83b9bd4abf14bb7aa480ee5d577f9b7ef41236dfa29a41ee62048a4393501a"
+            }
+          ],
+          "interpretation": "The rendered system prompt changed and was 119 UTF-8 bytes shorter in this controlled comparison; the advertised read-tool surface was equal. Hashes bind this environment, not a universal prompt across hosts or dates. No token-count, warm-prefix, bash/task/wait/edit-tool or model-quality equivalence is inferred."
+        }
+      ],
+      "runs": [
+        {"evidence": "probe-results.json", "sha256": "8b8c8527880d5a0cbe3800940ad4be8d7b4a4a2cece1b0f3a5997ba85314165f", "kind": "retained local raw receipts, request captures and command-output bindings"},
+        {"evidence": "run_probes.py", "sha256": "bdfba76a1dcb90e968ad21c80bf52a37604baf9468c330a1d284cf9da91680b5", "kind": "retained host-free probe driver"},
+        {"evidence": "history-results.json", "sha256": "3dfcdf7a5aac4697f537806e769cdbdec36583d7e63d1ddf8da7c4f9fd7279c9", "kind": "retained local four-case compactable-history receipts; referenced by the recovery oracle"},
+        {"evidence": "history_probe.py", "sha256": "80da4c7fffe327f4f05ef39321e7d3dc34af3b7715dda6e6309e18e90c4a067a", "kind": "retained compactable-history probe driver"},
+        {"evidence": "history-request-analysis.json", "sha256": "b76b9f6ce615b12ba3f476bc29343ff0980da14186f058907aef04b6983cd2ee", "kind": "retained local attribution of rejected, summary and continuation requests"},
+        {"evidence": "public-probe-summary.json", "sha256": "cb0b77fad98823734b526f52369eba23ff5be931368af8480f0235d2ba089987", "kind": "shareable projection with rendered-text fingerprints"}
+      ],
+      "scope_limit": "No live documented route, Windows/Linux executable, Windows shell fixture, real inference, warm-prefix timing, powered quality screen, preserved predecessor session or two-real-compaction/control-recall proof ran. Mock output and synthetic usage are not inference evidence. No qualification, acceptance transfer, client re-pin or compatibility authority is created by this review."
+    }
+  },
+  "behavior_review": [
+    {
+      "id": "responses-wire-carried-surrounding-paths-gated",
+      "predicate": "The tagged Responses wire/session/state sources, openai-http.ts, system-prompt.ts builder and retry-fallback-chains.ts have equal Git blobs across the two tags. The surrounding openai-responses.ts adds encrypted-reasoning refusal recovery, gated on replayed encrypted_content; the fragments retain includeEncryptedReasoning=false. Shared stream options add stop/frequency forwarding, neither configured by these fragments. Demoted-thinking replay source changes matter for cross-model history, not a claim of complete request-content equality.",
+      "lane_effect": "[INFERENCE; source-derived] No new local Responses protocol is required. Common prompt and recovery changes still affect every route, and cross-provider continuation is not covered by these single-provider mock turns.",
+      "action": "Keep explicit openai-responses, statefulResponses=true, includeEncryptedReasoning=false and supportsReasoningSummary=false. Re-read actual live Responses fields and linked tool-call/result IDs in fresh acceptance.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/compare/v18.20.0...v18.20.2",
+        "https://github.com/can1357/oh-my-pi/blob/7c49c11aa5bbaf3f418406583096168ad5b8c6dc/packages/ai/src/providers/openai-responses.ts",
+        "https://github.com/can1357/oh-my-pi/blob/7c49c11aa5bbaf3f418406583096168ad5b8c6dc/packages/ai/src/providers/openai-shared.ts"
+      ]
+    },
+    {
+      "id": "complete-envelope-overflow-classification",
+      "predicate": "Observed: both complete HTTP 400 bodies produce errorId=8392704 (ContextOverflow plus Class). captureOpenAIHttpError parses the human message and code separately; the provider catch calls AIError.finalize with its raw request dump and captured response. formatMessage routes through finalizeErrorMessage, whose formatCapturedHttpErrorParts/mergeCapturedBody append (type=invalid_request_error param=messages code=context_length_exceeded). classifyMessage then matches /context[_ ]length[_ ]exceeded/i in that finalized text. The original human message alone does not match: the message-only control retains raw status id 400. The proposed message independently matches /maximum context length is \\d+ tokens/i even when all structured fields are omitted. isContextOverflow accepts the resulting flag or matching error text, subject to the rate-limit veto.",
+      "lane_effect": "The current complete engine envelope already reaches stock 18.20.2's overflow-maintenance path. This is not direct recognition of arbitrary error.code by the classifier and not recognition of the current human sentence. The OpenAI-style sentence remains independently recognizable if a proxy strips structured fields.",
+      "action": "Retain the structured error code. Treat the proposed wording as a portability improvement, not a newly necessary stock-18.20.2 classification fix. Do not confuse a message-only unit input with the real complete HTTP envelope.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/7c49c11aa5bbaf3f418406583096168ad5b8c6dc/packages/ai/src/utils/openai-http.ts#L185-L211",
+        "https://github.com/can1357/oh-my-pi/blob/7c49c11aa5bbaf3f418406583096168ad5b8c6dc/packages/ai/src/providers/openai-responses.ts#L1579-L1590",
+        "https://github.com/can1357/oh-my-pi/blob/7c49c11aa5bbaf3f418406583096168ad5b8c6dc/packages/ai/src/error/finalize.ts#L47-L77",
+        "https://github.com/can1357/oh-my-pi/blob/7c49c11aa5bbaf3f418406583096168ad5b8c6dc/packages/ai/src/error/format.ts#L34-L38",
+        "https://github.com/can1357/oh-my-pi/blob/7c49c11aa5bbaf3f418406583096168ad5b8c6dc/packages/ai/src/utils/http-inspector.ts#L164-L198",
+        "https://github.com/can1357/oh-my-pi/blob/7c49c11aa5bbaf3f418406583096168ad5b8c6dc/packages/ai/src/utils/http-inspector.ts#L317-L345",
+        "https://github.com/can1357/oh-my-pi/blob/7c49c11aa5bbaf3f418406583096168ad5b8c6dc/packages/ai/src/error/flags.ts#L90-L120",
+        "https://github.com/can1357/oh-my-pi/blob/7c49c11aa5bbaf3f418406583096168ad5b8c6dc/packages/ai/src/error/flags.ts#L1066-L1110",
+        "https://github.com/can1357/oh-my-pi/blob/7c49c11aa5bbaf3f418406583096168ad5b8c6dc/packages/ai/src/error/flags.ts#L1141-L1152"
+      ]
+    },
+    {
+      "id": "trigger-specific-fail-closed-oracles",
+      "predicate": "Observed: fresh-turn overflow/413 has one request, visible error, no assistant answer and exit 1; compactable-history overflow/413 has five same-local-model requests and successful exit 0. retry.enabled=false and retry.modelFallback=false suppress retry-chain fallback, not the separate automatic-maintenance path. isHardErrorFallbackEligible checks both retry settings; agent-session still calls checkCompaction. Maintenance can compact reclaimable history and schedule same-model continuation. No configured provider/model switch or alternative-provider request was observed in either history class.",
+      "lane_effect": "Both history classes PASS the fail-closed contract: no provider/model switch and no cloud fallback. Treating any compaction request as a fail-closed violation would contradict the intended local recovery path and the stock async-compaction settings.",
+      "action": "Use an oracle per trigger: overflow/413 permits attributed same-local-provider/model compaction and continuation, or visible terminal failure if no progress is possible; provider outage requires its separate visible-failure/nonzero-exit and zero-extra-request oracle. The provider-outage block was not executed by this intake and still needs fresh route acceptance. Do not disable compaction, change vendor code or alter the behavioral fragments to force a universal one-request rule.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/7c49c11aa5bbaf3f418406583096168ad5b8c6dc/packages/coding-agent/src/session/turn-recovery.ts#L2517-L2555",
+        "https://github.com/can1357/oh-my-pi/blob/7c49c11aa5bbaf3f418406583096168ad5b8c6dc/packages/coding-agent/src/session/agent-session.ts#L5358-L5383",
+        "https://github.com/can1357/oh-my-pi/blob/7c49c11aa5bbaf3f418406583096168ad5b8c6dc/packages/coding-agent/src/session/session-maintenance.ts#L3079-L3119",
+        "https://github.com/can1357/oh-my-pi/blob/7c49c11aa5bbaf3f418406583096168ad5b8c6dc/packages/coding-agent/src/session/session-maintenance.ts#L3226-L3254"
+      ]
+    },
+    {
+      "id": "schema-warnings-settings-and-client-admission",
+      "predicate": "Observed: all five model files and fail-closed configuration resolve with zero warnings and unchanged configured caps/retry/update/setup values. Every configured cap queues its excess process before HTTP dispatch. Source: providers.maxInFlightRequests remains registered, is copied into per-request stream options and acquires a filesystem-coordinated provider lease before dispatch. The models.yml input normalizer and warning publication change, but all configured text/image modalities remain legal.",
+      "lane_effect": "The settings-registry changes do not drop our provider caps or opt-outs on the tested macOS binary. A third C2 request waits in the client; C1 likewise holds its second request client-side. This does not establish Windows filesystem or server pending-timeout behavior.",
+      "action": "Keep all six configuration/model files unchanged, including alias qwen3 tokenizers, explicit limits, capabilities and compat keys. Re-prove client admission and warning output on the accepted platforms.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/7c49c11aa5bbaf3f418406583096168ad5b8c6dc/packages/coding-agent/src/session/settings.ts#L196-L220",
+        "https://github.com/can1357/oh-my-pi/blob/7c49c11aa5bbaf3f418406583096168ad5b8c6dc/packages/coding-agent/src/session/settings-stream-fn.ts#L154-L182",
+        "https://github.com/can1357/oh-my-pi/blob/7c49c11aa5bbaf3f418406583096168ad5b8c6dc/packages/ai/src/stream.ts#L599-L615",
+        "https://github.com/can1357/oh-my-pi/blob/7c49c11aa5bbaf3f418406583096168ad5b8c6dc/packages/ai/src/stream.ts#L684-L725",
+        "https://github.com/can1357/oh-my-pi/blob/7c49c11aa5bbaf3f418406583096168ad5b8c6dc/packages/coding-agent/src/cli/models-cli.ts#L368-L379"
+      ]
+    },
+    {
+      "id": "prompt-prefix-changes-not-token-or-quality-equivalence",
+      "predicate": "Observed: the rendered system prompt fingerprint changes and its UTF-8 text shrinks by 119 bytes in the controlled read-only comparison; the captured read-tool schema/description array is equal. Tagged source removes the RFC-2119 preamble and Role heading and moves the XML-tag sentence. wait.md and task-spawn-feedback.md also change; bash/read/task/edit prompt templates are carried in this range.",
+      "lane_effect": "Every platform can see a cold prefix after the upgrade. A read-only equal tool hash does not cover wait/task-spawn text, shell execution, tool selection or quality.",
+      "action": "Use the stock prompt without a local template override. Retain rendered surfaces and warm-prefix observations in live acceptance; do not transfer predecessor prompt/cache measurements.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/blob/7c49c11aa5bbaf3f418406583096168ad5b8c6dc/packages/coding-agent/src/prompts/system/system-prompt.md",
+        "https://github.com/can1357/oh-my-pi/blob/7c49c11aa5bbaf3f418406583096168ad5b8c6dc/packages/coding-agent/src/prompts/tools/wait.md",
+        "https://github.com/can1357/oh-my-pi/blob/7c49c11aa5bbaf3f418406583096168ad5b8c6dc/packages/coding-agent/src/prompts/tools/task-spawn-feedback.md"
+      ]
+    },
+    {
+      "id": "windows-execution-session-and-accounting-residuals",
+      "predicate": "The source-analysis census identifies Windows .exe dispatch for find -exec/xargs/env, drive-root and pipe handling, timeout-retained shell state, session-header/storage/loading changes, turn-recovery changes and reasoning/context-estimate changes in packages/agent/src/tokenizer.ts. A carried bash description is not carried shell execution. Provider usage parsing being carried is not equivalence of every client-side counted-context estimate. None of those live platform behaviors is established by a macOS read-only mock.",
+      "lane_effect": "[INFERENCE; source-derived] Windows native and Windows-client routes need fresh shell/session proofs; every lane needs the actual compaction trigger and useful control recall re-observed. The six model rows resolved here do not prove the entire generated Qwen catalog unchanged or establish Qwen4 readiness.",
+      "action": "Retain the source review's Windows find -exec/xargs/env, drive-root, pipe/process-substitution and timeout-preserves-state probes; preserved-session/restart proof; two real automatic compactions with control recall; C1/C2 attribution; and fresh five-route/31-block acceptance. No model/profile/engine acceptance or powered-quality waiver follows from these mocks.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/compare/v18.20.0...v18.20.2",
+        "https://github.com/can1357/oh-my-pi/blob/7c49c11aa5bbaf3f418406583096168ad5b8c6dc/packages/agent/src/tokenizer.ts",
+        "https://github.com/can1357/oh-my-pi/blob/7c49c11aa5bbaf3f418406583096168ad5b8c6dc/packages/coding-agent/src/session/turn-recovery.ts",
+        "https://github.com/can1357/oh-my-pi/blob/7c49c11aa5bbaf3f418406583096168ad5b8c6dc/packages/coding-agent/CHANGELOG.md"
+      ]
+    },
+    {
+      "id": "adopt-selected-client-without-optional-feature-expansion",
+      "predicate": "18.20.2 includes the 18.20.1 changes; its additive antigravity-cli provider and other optional flags, auth, spotlight, commit/todo and shell-policy features are not configured by the product fragments. The source review recommends the selected stable client, unchanged behavioral fragments, fresh identity/compatibility bindings and route acceptance, not adoption of those optional surfaces.",
+      "lane_effect": "This intake is a product/client artifact review, not an engine or model change and not a declaration that v0.20.0 is ready.",
+      "action": "Integrate the selected client commit/tree/release/assets and compatibility binding in the release lane, update the client documentation there, and perform fresh acceptance. Do not introduce optional settings or infer acceptance from the predecessor or this measurement.",
+      "sources": [
+        "https://github.com/can1357/oh-my-pi/releases/tag/v18.20.1",
+        "https://github.com/can1357/oh-my-pi/releases/tag/v18.20.2",
+        "https://github.com/can1357/oh-my-pi/blob/7c49c11aa5bbaf3f418406583096168ad5b8c6dc/packages/coding-agent/CHANGELOG.md"
+      ]
+    }
+  ],
+  "verdict": {
+    "host_free_blocker_found": false,
+    "qualification_claimed": false,
+    "new_client_inference_qualification_claimed": false,
+    "predecessor_acceptance_transferred": false,
+    "scope_limit": "Host-free source and published macOS executable evidence supports the selected 18.20.2 upgrade with unchanged behavioral fragments. Both current and proposed complete overflow envelopes are classified; only the proposed human wording is independently sufficient without structured fields. Fresh-turn and retained-history overflow/413 pass their respective fail-closed oracles: visible terminal failure when irreducible, or same-local-provider/model compaction and continuation when reclaimable. Zero additional requests is not the overflow/413 contract. Provider-outage request counts, platform-specific tools, real compaction semantics, live route acceptance, powered quality, warm-prefix behavior and release bindings remain outside this intake. No release, compatibility, profile, vendor or launcher bytes changed."
+  },
+  "sources": [
+    "https://api.github.com/repos/can1357/oh-my-pi/releases/tags/v18.20.2",
+    "https://github.com/can1357/oh-my-pi/releases/tag/v18.20.2",
+    "https://github.com/can1357/oh-my-pi/compare/v18.20.0...v18.20.2",
+    "https://github.com/can1357/oh-my-pi/releases/download/v18.20.2/SHA256SUMS.txt",
+    "https://github.com/can1357/oh-my-pi/releases/download/v18.20.2/omp-darwin-arm64",
+    "https://github.com/can1357/oh-my-pi/releases/download/v18.20.0/SHA256SUMS.txt",
+    "https://github.com/can1357/oh-my-pi/releases/download/v18.20.0/omp-darwin-arm64",
+    "https://github.com/alphastorm/omp-ninfer/blob/3eb0107/docs/measurements/2026-11-13-omp-18200-client-upgrade-review.json",
+    "https://github.com/alphastorm/omp-ninfer/blob/3eb0107/scripts/client_acceptance.py",
+    "https://github.com/alphastorm/omp-ninfer/blob/3eb0107/tests/test_client_acceptance.py",
+    "https://github.com/alphastorm/omp-ninfer/blob/3eb0107/examples/manual-tunnel/fail-closed.yml"
+  ]
+}
