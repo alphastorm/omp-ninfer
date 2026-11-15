@@ -965,10 +965,34 @@ def required_input(driver: ReleaseDriver, group: str) -> str:
 
 
 def _rehearsal_guide_edit(root: Path, predecessor: str, release: str) -> None:
-    """Apply only the authored link removals the real retarget tool requests."""
-    from verify_release import MARKDOWN_LINK_RE
+    """Author synthetic provenance and remove only links the real retarget tool refuses."""
+    from retarget_guide import markdown_blocks
+    from verify_release import (MARKDOWN_LINK_RE, component_provenance, guide_reference_location,
+                                markdown_heading_paths, markdown_prose, markdown_units,
+                                provenance_claim_errors)
 
     guide = root / "docs" / "QUICKSTART.md"
+    text = guide.read_text(encoding="utf-8")
+    manifest = read_json(root / "releases" / release / "manifest.json")
+    statement = component_provenance(root, release, manifest)["statement"]
+    headings = markdown_heading_paths(text)
+    authored = 0
+    for block in reversed(markdown_blocks(text)):
+        body = text[block.start:block.end]
+        location = ("docs/QUICKSTART.md", headings[block.line - 1])
+        if block.fenced or guide_reference_location(location, body, tier_two=True):
+            continue
+        for _, _, sentence in reversed(list(markdown_units(body, location[0], generated=(statement,)))):
+            if provenance_claim_errors(markdown_prose(sentence), "guide"):
+                body = body.replace(sentence, statement, 1)
+                authored += 1
+        if body.strip() == statement:
+            body = "\n" + statement + "\n\n"
+        text = text[:block.start] + body + text[block.end:]
+    if authored:
+        atomic_write(guide, text)
+        print(f"rehearsal: guide: replaced {authored} copied provenance claims with the generated statement",
+              flush=True)
     while True:
         result = subprocess.run(
             [sys.executable, str(root / "scripts" / "retarget_guide.py"),

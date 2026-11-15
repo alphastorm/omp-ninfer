@@ -39,6 +39,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - From v0.20.0 the ready gate, under `--check-pins`, refuses a review ledger whose product review
   subject lies outside the release's own history or after its route candidate, and a runtime or
   native component review of a source commit the release does not ship.
+- From v0.20.0 guide rollback identities are admitted only in the native package fallback
+  section, and older product/store identities only in its predecessor-reference blocks.
+  A rollback word or tier-two identity elsewhere cannot exempt a current instruction.
+- From v0.20.0 installable, lint-ready and ready checks scan release notes and the targeted
+  guide for component provenance claims, reporting the file and line. Use the complete
+  manifest-derived provenance statement verbatim; ordinary claim-free prose and code
+  examples remain valid, and published releases retain their original contract.
 
 ### Added
 

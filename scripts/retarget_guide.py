@@ -28,7 +28,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import documented_route
 from release_io import atomic_write
 from verify_release import (COMPONENT_TAG_RE, MARKDOWN_LINK_RE, PRODUCT_RAW_URL_RE,
-                            bound_file, checkpoint_host_directory, pinned_evidence, sha256_file)
+                            bound_file, checkpoint_host_directory, component_provenance,
+                            guide_reference_location, markdown_heading_paths,
+                            mask_generated_sentences, pinned_evidence, sha256_file)
 
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE_RE = re.compile(r"v\d+\.\d+\.\d+\Z")
@@ -615,6 +617,8 @@ def retarget_text(text: str, guide: Path, predecessor: str, release: str,
     masked = view(text)
     blocks = markdown_blocks(text)
     starts = [block.start for block in blocks]
+    located_references = release_version(release) >= (0, 20, 0) and not projections
+    headings = markdown_heading_paths(text) if located_references else []
     anchor_pattern = boundary_pattern(anchors) if anchors else None
     scopes_by_block: dict[int, set[str]] = {}
     pattern = identity_pattern(mappings, projections=projections)
@@ -655,6 +659,14 @@ def retarget_text(text: str, guide: Path, predecessor: str, release: str,
                                       if anchor_pattern else set())
         return scopes_by_block[index], masked[block.start:block.end]
 
+    def reference_location(position: int, *, tier_two: bool = False) -> bool:
+        if not located_references:
+            return True
+        block = blocks[bisect.bisect_right(starts, position) - 1]
+        return (not block.fenced and guide_reference_location(
+            ("docs/QUICKSTART.md", headings[block.line - 1]), text[block.start:block.end],
+            tier_two=tier_two, position=position - block.start))
+
     def substitute(match: re.Match[str]) -> str:
         nonlocal delta
         if masked[match.start():match.end()] != match[0]:
@@ -665,6 +677,11 @@ def retarget_text(text: str, guide: Path, predecessor: str, release: str,
         scopes: set[str] = set()
         targets = {option.value for option in options}
         if targets == {match[0]}:
+            if (located_references and all(option.tier == 2 for option in options)
+                    and not reference_location(match.start(), tier_two=True)):
+                line = text.count("\n", 0, match.start()) + 1
+                raise Refusal(f"{guide}:{line}: refusal (c): predecessor reference outside its guide location "
+                              f"{match[0]!r}")
             start = match.start() + delta
             allowed.update((start + item.start(), start + item.end())
                            for item in residual_pattern.finditer(match[0]))
@@ -675,7 +692,8 @@ def retarget_text(text: str, guide: Path, predecessor: str, release: str,
                                and identity_class("/package_name", match[0]) in {"url", "package"})
             if (identity_class("", match[0]) not in {"hex", "digest", "image", "component-tag"}
                     and not component_asset
-                    or not any(option.tier == 1 and option.value != match[0] for option in options)):
+                    or not any((located_references or option.tier == 1)
+                               and option.value != match[0] for option in options)):
                 return match[0]
             scopes, block_text = block_scopes(match.start())
             selected = ("release" if set(candidates) == {"release"} else
@@ -684,7 +702,8 @@ def retarget_text(text: str, guide: Path, predecessor: str, release: str,
             block = blocks[bisect.bisect_right(starts, match.start()) - 1]
             prefix = re.split(r"[,;]|[.!?](?=\s)", block_text[:match.start() - block.start])[-1]
             roles = re.findall(r"\b(current|rollback)\b", prefix, re.IGNORECASE)
-            rollback = bool(roles and roles[-1].lower() == "rollback")
+            rollback = (reference_location(match.start()) if located_references
+                        else bool(roles and roles[-1].lower() == "rollback"))
             if (selected is not None
                     and (match[0] in target_outputs.get(selected, set())
                          or (rollback and match[0] in previous_outputs.get(selected, set())))):
@@ -717,6 +736,11 @@ def retarget_text(text: str, guide: Path, predecessor: str, release: str,
             raise Refusal(f"{guide}:{line}: refusal (a): ambiguous identity {match[0]!r}; "
                           f"candidate scopes: {', '.join(sorted(candidates))}; "
                           f"block anchors: {', '.join(sorted(scopes)) or 'none'}")
+        if (located_references and any(option.tier == 2 for option in options)
+                and not reference_location(match.start(), tier_two=True)):
+            line = text.count("\n", 0, match.start()) + 1
+            raise Refusal(f"{guide}:{line}: refusal (c): predecessor reference outside its guide location "
+                          f"{match[0]!r}")
         target = next(iter(targets))
         assert target is not None
         if completed and not projections:
@@ -738,8 +762,9 @@ def retarget_text(text: str, guide: Path, predecessor: str, release: str,
                     for option in options if option.tier == 2 and option.value is not None}
         if tier_two:
             for match in boundary_pattern(tier_two).finditer(masked):
-                allowed.update((match.start() + item.start(), match.start() + item.end())
-                               for item in residual_pattern.finditer(match[0]))
+                if reference_location(match.start(), tier_two=True):
+                    allowed.update((match.start() + item.start(), match.start() + item.end())
+                                   for item in residual_pattern.finditer(match[0]))
     for residual in residual_pattern.finditer(view(result)):
         if residual.span() not in allowed:
             line = result.count("\n", 0, residual.start()) + 1
@@ -755,7 +780,12 @@ def retarget(root: Path, predecessor: str, release: str, guide: Path, *, check: 
         text = original.decode("utf-8")
     except (OSError, UnicodeError) as error:
         raise Refusal(f"{guide}:1: cannot read guide: {error}") from error
-    result = retarget_text(text, guide, predecessor, release, mappings, anchors)
+    generated = ()
+    if release_version(release) >= (0, 20, 0):
+        manifest = json.loads((root / "releases" / release / "manifest.json").read_text(encoding="utf-8"))
+        generated = (component_provenance(root, release, manifest)["statement"],)
+    result = retarget_text(text, guide, predecessor, release, mappings, anchors,
+                           protected=lambda value: mask_generated_sentences(value, generated))
     bindings = bound_evidence(root, release)
     evidence_diagnostics(result, bindings, guide, mode="guide",
                          masked=masked_text(result, predecessor, evidence_release=release))

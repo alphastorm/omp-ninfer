@@ -257,6 +257,28 @@ class LintDraftTests(unittest.TestCase):
         self.assertTrue(any("draft posture" in error and "byte" in error
                             for error in report["errors"]), report)
 
+    def test_authored_markdown_provenance_is_checked_in_every_requested_mode(self):
+        claim = "All runtime components derive from the identical NInfer revision."
+        paths = (self.root / "releases" / self.release / "NINFER_RELEASE_NOTES.md",
+                 self.root / "docs/QUICKSTART.md")
+        for path in paths:
+            original = path.read_bytes()
+            try:
+                atomic_write(path, f"# Release\n\n> **Versioned guide: {self.release}**\n\n{claim}\n")
+                for mode in ("--require-installable", "--lint-ready", "--require-ready"):
+                    with self.subTest(document=path.name, mode=mode):
+                        result = subprocess.run([
+                            sys.executable, str(self.root / "scripts/verify_release.py"),
+                            "--release", self.release, mode, "--json",
+                        ], cwd=self.root, capture_output=True, text=True)
+                        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                        errors = json.loads(result.stdout)["errors"]
+                        label = f"{path.relative_to(self.root).as_posix()}:5"
+                        self.assertTrue(any(label in error and "ungenerated" in error
+                                            for error in errors), errors)
+            finally:
+                atomic_write(path, original)
+
     def test_candidate_lint_requires_the_audit_only_from_v0200(self):
         # The historical boundary is fixed even after the live root advances.
         source = HISTORY.resolve_commits("v0.19.0")[0]
