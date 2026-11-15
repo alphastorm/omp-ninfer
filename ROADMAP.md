@@ -184,6 +184,51 @@ Everything below this heading is a dated record, preserved as published. Records
 a new record is added and an old one is not edited. For what is true today, read the sections
 above and the [canonical facts](docs/FACTS.md#current-release).
 
+## 2026-11-15 `Qwen4` dense adoption — deferred
+
+**Decision: prepare the watch, not an artifact or engine cutover.** The official
+[Qwen Hugging Face search](https://huggingface.co/api/models?author=Qwen&search=Qwen4) lists no
+`Qwen4` models. Upstream
+[`master` `d9ad9dea4`](https://github.com/Neroued/ninfer/commit/d9ad9dea4cdbc64ec44b5b18704b46b5db2613dc)
+now contains the RTX 5090 dense geometry ops from 2026-11-11..14, but still lacks a dense model
+layer and converter recipe. `qwen4_exp` implements **Qwen3.8-Flash-Next MoE+PLE**, not dense
+`Qwen4-27B`. Earlier records below describe their observation dates; this record supersedes the
+old assertion that the dense ops exist only on the feature branch.
+
+**Fit policy:** candidate **`Qwen4-27B` dense fits only the 32 GB RTX 5090 lane on upstream's
+proposed recipe**, not either 24 GB native lane. This is a design-budget conclusion, not measured
+hardware qualification: the
+[upstream design](https://github.com/Neroued/ninfer/blob/d9ad9dea4cdbc64ec44b5b18704b46b5db2613dc/docs/designs/qwen4-27b-rtx5090.md)
+assumes 17.286 GiB main weights, 0.629 GiB draft head and 4.156 GiB FP8 KV at 131,072 tokens
+(about 22.1 GiB before workspace/vision), or about 25.60 GiB main weights plus KV at 262,144.
+Actual geometry, license and source weights remain unconfirmed. Its NVFP4 activation route is
+Blackwell-only; Ampere also lacks the required FP8 activation route. **RTX 3090 and RTX 4090
+need a different quantization recipe and new `sm_86`/`sm_89` HC/QSA kernels.** Nominal payload
+arithmetic is not proof that a 24 GB lane can run the upstream recipe. GGUF/`IQ2_XS` with CPU expert
+offload is a different Flash-Next model/artifact decision, not a dense `Qwen4` fallback.
+
+Adoption/re-base triggers, evaluated against stock-client traffic on the documented lanes:
+
+| Trigger | Evidence required to reopen the decision |
+| --- | --- |
+| **T1 — runnable dense `Qwen4`** | Public official `Qwen4-27B` weights **and** upstream master accepting a dense, PLE-free model layer with a converter recipe. A new `qwen4` directory or recipe name is a watch signal, not satisfaction of the whole gate. |
+| **T2 — measured RTX 5090 payoff** | A matched vanilla-master run beats the qualified engine on the EXP-097 role corpus by more than about **3% median decode**, or improves warm-turn TTFT by more than **10% beyond the targeted split-removal change** ([fork #114](https://github.com/alphastorm/ninfer/pull/114)). |
+| **T3 — reachable correctness cost** | A product-reachable defect, such as [#89](https://github.com/alphastorm/ninfer/issues/89) or [#103](https://github.com/alphastorm/ninfer/issues/103), reproduces on stock traffic and its upstream fix conflicts across more than about **15 files**. |
+| **T4 — backport maintenance cost** | Cumulative backport adaptations exceed about **40 agent-hours per release**. |
+
+If a trigger fires, reconsider a staged re-base with the RTX 5090 container first; do not
+automatically move the native lanes. Native adoption additionally needs a founder decision to
+offer the upstream feature on 24 GB cards, or evidence that maintaining two engine lines costs
+more than about 40 hours per release. Upstream currently targets only `rtx5090` and `dgx_spark`,
+so a native move is a new platform/kernel port, not an already-supported build switch.
+
+On T1, pin and inspect the real artifact, template/tool contract and license; establish fit on
+each proposed card, then make the new-model product decision. Every adopted lane needs an engine
+re-cut where bytes change, hardware qualification and the **1,120-prompt powered quality screen**.
+The design's FP8 KV is not pre-approved by these calculations or by another model's results.
+The [read-only readiness check](docs/UPSTREAM.md#running-the-watch) records the external signals
+without moving any release, model or component pin.
+
 ## Deferred and rejected decisions
 
 Negative and deferred results stay visible in [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md#experiment-ledger)

@@ -15,18 +15,23 @@ baseline. Evidence identities exclude observation bookkeeping and run time.
 from __future__ import annotations
 
 import argparse
+import ast
+import base64
 import datetime as dt
 import hashlib
 import json
 import re
 import subprocess
 import sys
+import urllib.request
 from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 API_COMMIT_LIMIT = 250
 API_FILE_LIMIT = 300
+QWEN4_MODELS_URL = "https://huggingface.co/api/models?author=Qwen&search=Qwen4"
+DENSE_QWEN4_NAME = re.compile(r"qwen4(?:_(?:27b|dense)(?:_[a-z0-9]+)*)?")
 
 CLASS_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("security", re.compile(r"secur|cve-|overflow|use.after.free|race\b|toctou", re.I)),
@@ -76,6 +81,174 @@ def full_commit(value: str) -> str:
 def evidence_identity(document: Any) -> str:
     encoded = json.dumps(document, sort_keys=True, separators=(",", ":")).encode("utf-8")
     return "sha256:" + hashlib.sha256(encoded).hexdigest()
+
+
+def hf_models() -> dict[str, Any]:
+    """Read the public organization search without forwarding GitHub credentials."""
+    request = urllib.request.Request(QWEN4_MODELS_URL, method="GET")
+    with urllib.request.urlopen(request, timeout=120) as response:
+        return {
+            "models": json.loads(response.read().decode("utf-8")),
+            "has_next_page": bool(re.search(
+                r'\brel="?next"?', response.headers.get("Link", ""), re.I,
+            )),
+        }
+
+
+def validate_qwen4_readiness(result: dict[str, Any]) -> None:
+    """Check the additive readiness receipt's closed schema and derived signals."""
+    root_schema = {
+        "schema_version": (int,), "id": (str,), "upstream": (str,), "verdict": (str,),
+    }
+    if result.get("verdict") == "error":
+        root_schema["error"] = (str,)
+    else:
+        root_schema.update({
+            "last_seen": (dict,), "hugging_face": (dict,), "engine": (dict,),
+            "unknown_reasons": (list,), "applicability": (str,),
+            "evidence_identity": (str,), "observation": (str,),
+        })
+    schemas = [(result, root_schema)]
+    for document, schema in schemas:
+        if (not isinstance(document, dict) or set(document) != set(schema)
+                or any(type(document[key]) not in kinds for key, kinds in schema.items())):
+            raise ValueError("invalid Qwen4 readiness receipt fields")
+        if document is result and result["verdict"] != "error":
+            schemas.extend([
+                (result["last_seen"], {"ref": (str,), "commit": (str,), "commit_date": (str,)}),
+                (result["hugging_face"], {
+                    "url": (str,), "model_ids": (list,), "models_present": (bool, type(None)),
+                    "has_next_page": (bool,),
+                }),
+                (result["engine"], {
+                    "recipe_path": (str,), "dense_recipe_names": (list,),
+                    "dense_recipe_present": (bool, type(None)), "models_path": (str,),
+                    "dense_model_directories": (list,),
+                    "dense_model_directory_present": (bool, type(None)), "models_truncated": (bool,),
+                }),
+            ])
+    if result["schema_version"] != 1:
+        raise ValueError("unsupported Qwen4 readiness receipt schema")
+    if result["verdict"] == "error":
+        return
+    full_commit(result["last_seen"]["commit"])
+    hf, engine = result["hugging_face"], result["engine"]
+    if (hf["url"] != QWEN4_MODELS_URL
+            or engine["recipe_path"] != "tools/convert/official_recipes.py"
+            or engine["models_path"] != "src/models"):
+        raise ValueError("unexpected Qwen4 readiness source")
+    for values in (hf["model_ids"], engine["dense_recipe_names"],
+                   engine["dense_model_directories"], result["unknown_reasons"]):
+        if not all(isinstance(value, str) and value for value in values) or values != sorted(set(values)):
+            raise ValueError("Qwen4 readiness lists must contain sorted unique strings")
+    for present, values, incomplete in (
+        (hf["models_present"], hf["model_ids"], hf["has_next_page"]),
+        (engine["dense_recipe_present"], engine["dense_recipe_names"],
+         "recipe-registry-not-understood" in result["unknown_reasons"]),
+        (engine["dense_model_directory_present"], engine["dense_model_directories"],
+         engine["models_truncated"]),
+    ):
+        expected = True if values else (None if incomplete else False)
+        if present is not expected:
+            raise ValueError("inconsistent Qwen4 readiness presence field")
+    signals = (hf["models_present"], engine["dense_recipe_present"],
+               engine["dense_model_directory_present"])
+    verdict = ("unknown" if result["unknown_reasons"] else
+               "delta-observed" if any(value is True for value in signals) else "up-to-date")
+    if (result["verdict"] != verdict or result["applicability"] != "not-assessed"
+            or result["observation"] not in ("initial", "changed", "unchanged")):
+        raise ValueError("invalid Qwen4 readiness interpretation")
+    evidence = {key: value for key, value in result.items()
+                if key not in ("evidence_identity", "observation")}
+    if result["evidence_identity"] != evidence_identity(evidence):
+        raise ValueError("Qwen4 readiness evidence identity differs")
+
+
+def watch_qwen4(
+    entry: dict[str, Any], previous: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Observe official listings and named dense engine surfaces, never execute recipes."""
+    hf = hf_models()
+    models = hf["models"]
+    if (not isinstance(models, list) or type(hf["has_next_page"]) is not bool
+            or any(not isinstance(model, dict) or not isinstance(model.get("id"), str)
+                   for model in models)):
+        raise ValueError("expected Hugging Face model search objects with id fields")
+    model_ids = sorted({model["id"] for model in models
+                        if model["id"].startswith("Qwen/") and "qwen4" in model["id"][5:].lower()})
+    upstream, ref = entry["upstream"], entry["upstream_ref"]
+    head = gh_api(f"repos/{upstream}/commits/{ref}")
+    sha = full_commit(head["sha"])
+    recipe_path, models_path = "tools/convert/official_recipes.py", "src/models"
+    recipe = gh_api(f"repos/{upstream}/contents/{recipe_path}?ref={sha}")
+    if (not isinstance(recipe, dict) or recipe.get("encoding") != "base64"
+            or not isinstance(recipe.get("content"), str)):
+        raise ValueError("expected base64 GitHub recipe contents")
+    source = base64.b64decode("".join(recipe["content"].split()), validate=True).decode("utf-8")
+    reasons = []
+    recipe_names = []
+    try:
+        registries = [
+            node.value for node in ast.parse(source).body
+            if (isinstance(node, ast.Assign)
+                and any(isinstance(target, ast.Name) and target.id == "RECIPES"
+                        for target in node.targets))
+            or (isinstance(node, ast.AnnAssign)
+                and isinstance(node.target, ast.Name) and node.target.id == "RECIPES")
+        ]
+        if len(registries) != 1 or not isinstance(registries[0], ast.Dict):
+            raise ValueError("expected one literal RECIPES dictionary")
+        keys = registries[0].keys
+        if any(not isinstance(key, ast.Constant) or not isinstance(key.value, str) for key in keys):
+            raise ValueError("expected literal recipe names")
+        recipe_names = sorted({key.value for key in keys if DENSE_QWEN4_NAME.fullmatch(key.value)})
+    except (SyntaxError, ValueError):
+        reasons.append("recipe-registry-not-understood")
+    directories = gh_api(f"repos/{upstream}/contents/{models_path}?ref={sha}")
+    if (not isinstance(directories, list)
+            or any(not isinstance(item, dict) or not isinstance(item.get("name"), str)
+                   or item.get("type") not in ("file", "dir", "symlink", "submodule")
+                   for item in directories)):
+        raise ValueError("expected GitHub model directory listing")
+    dense_directories = sorted({item["name"] for item in directories
+                                if item["type"] == "dir" and DENSE_QWEN4_NAME.fullmatch(item["name"])})
+    models_truncated = len(directories) >= 1000
+    if models_truncated:
+        reasons.append("model-directory-list-at-api-limit")
+    if hf["has_next_page"]:
+        reasons.append("hugging-face-pagination-incomplete")
+    recipe_present = True if recipe_names else (None if "recipe-registry-not-understood" in reasons else False)
+    directory_present = True if dense_directories else (None if models_truncated else False)
+    weights_present = True if model_ids else (None if hf["has_next_page"] else False)
+    result = {
+        "schema_version": 1,
+        "id": entry["id"],
+        "upstream": upstream,
+        "last_seen": {"ref": ref, "commit": sha, "commit_date": head["commit"]["committer"]["date"]},
+        "hugging_face": {
+            "url": QWEN4_MODELS_URL, "model_ids": model_ids,
+            "models_present": weights_present, "has_next_page": hf["has_next_page"],
+        },
+        "engine": {
+            "recipe_path": recipe_path, "dense_recipe_names": recipe_names,
+            "dense_recipe_present": recipe_present, "models_path": models_path,
+            "dense_model_directories": dense_directories,
+            "dense_model_directory_present": directory_present, "models_truncated": models_truncated,
+        },
+        "verdict": ("unknown" if reasons else "delta-observed" if
+                    any(value is True for value in (weights_present, recipe_present, directory_present))
+                    else "up-to-date"),
+        "unknown_reasons": sorted(reasons),
+        "applicability": "not-assessed",
+    }
+    result["evidence_identity"] = evidence_identity(result)
+    old_identity = previous.get("evidence_identity") if previous else None
+    result["observation"] = (
+        "initial" if old_identity is None else
+        "unchanged" if old_identity == result["evidence_identity"] else "changed"
+    )
+    validate_qwen4_readiness(result)
+    return result
 
 
 def load_composition(root: Path) -> dict[str, Any]:
@@ -320,10 +493,16 @@ def main() -> int:
     manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
     composition = load_composition(ROOT)
     previous = {}
+    previous_checks = {}
     if args.receipt and args.receipt.exists():
+        old_report = json.loads(args.receipt.read_text(encoding="utf-8"))
         previous = {
             (result["id"], result["upstream"]): result
-            for result in json.loads(args.receipt.read_text(encoding="utf-8"))["upstreams"]
+            for result in old_report["upstreams"]
+        }
+        previous_checks = {
+            (result["id"], result["upstream"]): result
+            for result in old_report.get("readiness_checks", [])
         }
     report: dict[str, Any] = {
         "artifact_type": "omp_ninfer_upstream_watch_report",
@@ -336,6 +515,7 @@ def main() -> int:
         "interpretation": "Title/path triage only; applicability is not assessed, including unchanged observations.",
         "residuals": [],
         "upstreams": [],
+        "readiness_checks": [],
     }
 
     failures = 0
@@ -359,6 +539,17 @@ def main() -> int:
                       "error": str(error)}
         report["upstreams"].append(result)
 
+    check = manifest.get("qwen4_readiness")
+    if check and (not args.only or check["id"] in args.only):
+        try:
+            result = watch_qwen4(check, previous_checks.get((check["id"], check["upstream"])))
+        except Exception as error:  # noqa: BLE001 - preserve the watch's report-and-continue contract
+            failures += 1
+            result = {"schema_version": 1, "id": check["id"], "upstream": check["upstream"],
+                      "verdict": "error", "error": str(error)}
+        validate_qwen4_readiness(result)
+        report["readiness_checks"].append(result)
+
     report["evidence_identity"] = evidence_identity({
         "schema_version": report["schema_version"],
         "composition": composition,
@@ -367,6 +558,10 @@ def main() -> int:
         "upstreams": [
             {key: value for key, value in result.items() if key != "observation"}
             for result in report["upstreams"]
+        ],
+        "readiness_checks": [
+            {key: value for key, value in result.items() if key != "observation"}
+            for result in report["readiness_checks"]
         ],
     })
     for result in report["upstreams"]:
@@ -382,6 +577,18 @@ def main() -> int:
               f"path triage {comparison['path_triage']}; applicability not assessed")
         if comparison["unknown_reasons"]:
             print(f"   unknown: {', '.join(comparison['unknown_reasons'])}")
+    for result in report["readiness_checks"]:
+        print(f"== {result['id']} ({result['upstream']}) -> {result['verdict']}")
+        if result["verdict"] == "error":
+            print(f"   {result['error']}")
+            continue
+        print(f"   last seen {result['last_seen']['commit']} ({result['observation']})")
+        print(f"   official Qwen4 listing: {result['hugging_face']['models_present']}; "
+              f"dense recipe: {result['engine']['dense_recipe_present']}; "
+              f"dense model directory: {result['engine']['dense_model_directory_present']}; "
+              "applicability not assessed")
+        if result["unknown_reasons"]:
+            print(f"   unknown: {', '.join(result['unknown_reasons'])}")
     print(f"evidence identity: {report['evidence_identity']}")
 
     if args.receipt:
