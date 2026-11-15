@@ -954,7 +954,7 @@ def required_input(driver: ReleaseDriver, group: str) -> str:
             items += ["--bundle LANE=DIR", "--native-publication LANE=JSON", "--asset ROLE=PATH when external"]
         if any(row["id"] == COMPONENT_IDS[0] and row["disposition"] == "recut" for row in driver.plan["components"]):
             items += ["--runtime-handoff DIR (or --stage-input JSON, --lane-receipt rtx5090=PATH, "
-                      "--runtime-publication JSON), --runtime-artifacts JSON, "
+                      "--runtime-publication JSON), --runtime-artifacts JSON (scripts/runtime_artifacts.py), "
                       "--runtime-build-identity JSON, --runtime-rc JSON; --runtime-base JSON if changed"]
         if driver.plan["client"]["disposition"] == "updated":
             items += ["--client-component JSON"]
