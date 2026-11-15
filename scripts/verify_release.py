@@ -2875,12 +2875,17 @@ ROLLBACK_LOCATIONS: frozenset[MarkdownLocation] = frozenset({
     ("docs/QUICKSTART.md", ("Shared native operation and fallback", "Package selection and fallback")),
 })
 TIER_TWO_LOCATIONS: frozenset[tuple[MarkdownLocation, str]] = frozenset({
-    (("docs/QUICKSTART.md", ()), "> **Prepared guide:"),
-    (("docs/QUICKSTART.md", ()), "> **Versioned guide:"),
     (("docs/QUICKSTART.md", ("Current release at a glance",)), "- **Checkpoint boundary:**"),
     (("docs/QUICKSTART.md", ("3. Prepare the model and key on the inference host",)), "Release "),
     (("docs/QUICKSTART.md", ("4. Start NInfer on the inference host",)), "For an upgrade from "),
 })
+PREDECESSOR_GUIDE_LOCATIONS: frozenset[tuple[MarkdownLocation, str]] = frozenset({
+    (("docs/QUICKSTART.md", ()), "> **Prepared guide:"),
+    (("docs/QUICKSTART.md", ()), "> **Versioned guide:"),
+    (("docs/QUICKSTART.md", ("Acceptance evidence",)), "The [immutable "),
+    (("docs/QUICKSTART.md", ("Current release at a glance",)), "- **Legacy owners:**"),
+})
+CLIENT_REVIEW_LOCATION: MarkdownLocation = ("docs/QUICKSTART.md", ("OMP client",))
 
 
 def markdown_heading_paths(text: str) -> list[tuple[str, ...]]:
@@ -2901,25 +2906,32 @@ def markdown_heading_paths(text: str) -> list[tuple[str, ...]]:
                 level = len(heading[1])
                 headings = [item for item in headings if item[0] < level]
                 if level > 1:
-                    headings.append((level, heading[2]))
+                    # The client version is an identity, not a different authoring slot.
+                    title = re.sub(r"^OMP \d+\.\d+\.\d+ client$", "OMP client", heading[2])
+                    headings.append((level, title))
         paths.append(tuple(title for _, title in headings))
     return paths
 
 
 def guide_reference_location(location: MarkdownLocation, block: str, *, tier_two: bool = False,
                              position: int | None = None) -> bool:
+    if tier_two and location == CLIENT_REVIEW_LOCATION:
+        review = r"v\d+\.\d+\.\d+ client→\d+\.\d+\.\d+ review"
+        return re.fullmatch(r"(?:\[" + review + r"\]\(measurements/[^)\s]+\)|" + review + r")",
+                            block.strip()) is not None
+    if tier_two and any(location == section and block.lstrip().startswith(prefix)
+                        for section, prefix in PREDECESSOR_GUIDE_LOCATIONS):
+        # Only the immutable predecessor-guide link is historical, not another
+        # instruction or claim in its surrounding banner or paragraph.
+        return position is not None and any(
+            match.start() <= position < match.end() for match in re.finditer(
+                r"\[(?:immutable )?(v\d+\.\d+\.\d+) guide\]"
+                r"\(https://github\.com/alphastorm/omp-ninfer/blob/\1/docs/QUICKSTART\.md\)", block))
     allowed = location in ROLLBACK_LOCATIONS or (
         tier_two and any(location == section and block.lstrip().startswith(prefix)
                          for section, prefix in TIER_TWO_LOCATIONS))
     if not allowed:
         return False
-    if not location[1]:
-        # Only the immutable predecessor-guide link is historical in the banner;
-        # its subject and publication instruction still describe the current release.
-        return position is not None and any(
-            match.start() <= position < match.end() for match in re.finditer(
-                r"\[immutable (v\d+\.\d+\.\d+) guide\]"
-                r"\(https://github\.com/alphastorm/omp-ninfer/blob/\1/docs/QUICKSTART\.md\)", block))
     if position is None:
         return True
     # A predecessor reference does not exempt the current identity in the same

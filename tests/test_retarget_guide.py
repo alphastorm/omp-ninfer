@@ -355,6 +355,16 @@ class RetargetGuideTest(unittest.TestCase):
                 atomic_write(self.guide, completed.replace(f"until {NEW}", f"until {OLD}"))
                 self.assert_refuses("c")
 
+    def test_client_review_label_is_history_not_a_current_instruction(self) -> None:
+        self.write_prior()
+        text = route_guide() + "\n## OMP 18.2.0 client\n\nv0.19.0 client→18.2.0 review\n"
+        atomic_write(self.guide, text)
+        self.assertTrue(self.run_retarget())
+        self.assertIn(f"{OLD} client→18.2.0 review", self.guide.read_text(encoding="utf-8"))
+        self.assertFalse(self.run_retarget())
+        self.append(f"\nInstall {OLD} now.\n")
+        self.assert_refuses("c")
+
     def test_completed_guide_resolves_current_and_rollback_occurrences_individually(self) -> None:
         prior = self.write_prior()
         prior_tag = prior["components"]["ninfer"]["release_tag"]
