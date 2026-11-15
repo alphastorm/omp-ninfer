@@ -2882,7 +2882,7 @@ TIER_TWO_LOCATIONS: frozenset[tuple[MarkdownLocation, str]] = frozenset({
 PREDECESSOR_GUIDE_LOCATIONS: frozenset[tuple[MarkdownLocation, str]] = frozenset({
     (("docs/QUICKSTART.md", ()), "> **Prepared guide:"),
     (("docs/QUICKSTART.md", ()), "> **Versioned guide:"),
-    (("docs/QUICKSTART.md", ("Acceptance evidence",)), "The [immutable "),
+    (("docs/QUICKSTART.md", ("Acceptance evidence",)), "Fresh "),
     (("docs/QUICKSTART.md", ("Current release at a glance",)), "- **Legacy owners:**"),
 })
 CLIENT_REVIEW_LOCATION: MarkdownLocation = ("docs/QUICKSTART.md", ("OMP client",))

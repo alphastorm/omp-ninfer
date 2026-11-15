@@ -986,6 +986,8 @@ def _rehearsal_guide_edit(root: Path, predecessor: str, release: str) -> None:
             if provenance_claim_errors(markdown_prose(sentence), "guide"):
                 body = body.replace(sentence, statement, 1)
                 authored += 1
+        if body.strip() == statement:
+            body = "\n" + statement + "\n\n"
         text = text[:block.start] + body + text[block.end:]
     if authored:
         atomic_write(guide, text)
