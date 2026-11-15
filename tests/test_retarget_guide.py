@@ -359,6 +359,7 @@ class RetargetGuideTest(unittest.TestCase):
         self.write_prior()
         text = (route_guide() + "\n## OMP 18.2.0 client\n\n"
                 f"Release {OLD} selects the upstream client.\n"
+                "The [release notes](../releases/v0.19.0/NINFER_RELEASE_NOTES.md) bind its assets.\n"
                 "The v0.19.0 client→18.2.0 review\n"
                 "covers source behavior, not client execution or live acceptance.\n")
         atomic_write(self.guide, text)
@@ -923,8 +924,12 @@ class HistoryGoldenTest(unittest.TestCase):
                 with self.subTest(authority=authority):
                     text = f"Rollback release {predecessor}.\n\n" + text
                     mappings, anchors = GUIDE.identity_map(authority, predecessor, release)
-                    self.assertEqual(GUIDE.retarget_text(text, guide, predecessor, release, mappings, anchors),
-                                     text)
+                    if GUIDE.release_version(release) >= (0, 20, 0):
+                        with self.assertRaisesRegex(GUIDE.Refusal, r":1: refusal \(c\)"):
+                            GUIDE.retarget_text(text, guide, predecessor, release, mappings, anchors)
+                    else:
+                        self.assertEqual(GUIDE.retarget_text(
+                            text, guide, predecessor, release, mappings, anchors), text)
 
 
 class HistoryPolicyTest(unittest.TestCase):

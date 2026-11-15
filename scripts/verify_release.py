@@ -2885,7 +2885,19 @@ PREDECESSOR_GUIDE_LOCATIONS: frozenset[tuple[MarkdownLocation, str]] = frozenset
     (("docs/QUICKSTART.md", ("Acceptance evidence",)), "Fresh "),
     (("docs/QUICKSTART.md", ("Current release at a glance",)), "- **Legacy owners:**"),
 })
-CLIENT_REVIEW_LOCATION: MarkdownLocation = ("docs/QUICKSTART.md", ("OMP client",))
+EVIDENCE_LINK_LOCATIONS: dict[MarkdownLocation, tuple[str, ...]] = {
+    ("docs/QUICKSTART.md", ("OMP client",)): (
+        r"\[release notes\]\(\.\./releases/v\d+\.\d+\.\d+/NINFER_RELEASE_NOTES\.md\)",
+        r"\[v\d+\.\d+\.\d+ client→\d+\.\d+\.\d+ review\]\(measurements/[^)\s]+\)",
+        r"v\d+\.\d+\.\d+ client→\d+\.\d+\.\d+ review",
+    ),
+    ("docs/QUICKSTART.md", ("3. Prepare the model and key on the inference host",)): (
+        r"\[(v\d+\.\d+\.\d+) compatibility matrix\]\(\.\./releases/\1/COMPATIBILITY\.md\)",
+    ),
+    ("docs/QUICKSTART.md", ("Current release at a glance",)): (
+        r"\[manifest\]\(\.\./releases/v\d+\.\d+\.\d+/manifest\.json\)",
+    ),
+}
 
 
 def markdown_heading_paths(text: str) -> list[tuple[str, ...]]:
@@ -2915,11 +2927,11 @@ def markdown_heading_paths(text: str) -> list[tuple[str, ...]]:
 
 def guide_reference_location(location: MarkdownLocation, block: str, *, tier_two: bool = False,
                              position: int | None = None) -> bool:
-    if tier_two and location == CLIENT_REVIEW_LOCATION:
-        review = r"v\d+\.\d+\.\d+ client→\d+\.\d+\.\d+ review"
-        return position is not None and any(
-            match.start() <= position < match.end() for match in re.finditer(
-                r"(?:\[" + review + r"\]\(measurements/[^)\s]+\)|" + review + r")", block))
+    if tier_two and position is not None and any(
+            match.start() <= position < match.end()
+            for pattern in EVIDENCE_LINK_LOCATIONS.get(location, ())
+            for match in re.finditer(pattern, block)):
+        return True
     if tier_two and any(location == section and block.lstrip().startswith(prefix)
                         for section, prefix in PREDECESSOR_GUIDE_LOCATIONS):
         # Only the immutable predecessor-guide link is historical, not another
