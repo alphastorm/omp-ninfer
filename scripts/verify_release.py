@@ -2917,8 +2917,9 @@ def guide_reference_location(location: MarkdownLocation, block: str, *, tier_two
                              position: int | None = None) -> bool:
     if tier_two and location == CLIENT_REVIEW_LOCATION:
         review = r"v\d+\.\d+\.\d+ client→\d+\.\d+\.\d+ review"
-        return re.fullmatch(r"(?:\[" + review + r"\]\(measurements/[^)\s]+\)|" + review + r")",
-                            block.strip()) is not None
+        return position is not None and any(
+            match.start() <= position < match.end() for match in re.finditer(
+                r"(?:\[" + review + r"\]\(measurements/[^)\s]+\)|" + review + r")", block))
     if tier_two and any(location == section and block.lstrip().startswith(prefix)
                         for section, prefix in PREDECESSOR_GUIDE_LOCATIONS):
         # Only the immutable predecessor-guide link is historical, not another

@@ -357,7 +357,10 @@ class RetargetGuideTest(unittest.TestCase):
 
     def test_client_review_label_is_history_not_a_current_instruction(self) -> None:
         self.write_prior()
-        text = route_guide() + "\n## OMP 18.2.0 client\n\nv0.19.0 client→18.2.0 review\n"
+        text = (route_guide() + "\n## OMP 18.2.0 client\n\n"
+                f"Release {OLD} selects the upstream client.\n"
+                "The v0.19.0 client→18.2.0 review\n"
+                "covers source behavior, not client execution or live acceptance.\n")
         atomic_write(self.guide, text)
         self.assertTrue(self.run_retarget())
         self.assertIn(f"{OLD} client→18.2.0 review", self.guide.read_text(encoding="utf-8"))
