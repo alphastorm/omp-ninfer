@@ -151,17 +151,18 @@ profile: a sanity signal that the quantization preserves capability, not a leade
 ## Engine campaign highlights
 
 Upstream performance measurements published by
-[Neroued/ninfer](https://github.com/Neroued/ninfer#performance) on one RTX 5090 with INT8 KV, using
-different artifacts and settings than the product profiles
+[Neroued/ninfer](https://github.com/Neroued/ninfer#performance) on one RTX 5090 used **FP8 E4M3
+row-256 KV for Qwen3.8** and **INT8 group-64 KV for Qwen3.6**, with different artifacts and settings
+than the product profiles
 ([upstream performance document](https://github.com/Neroued/ninfer/blob/master/docs/performance.md)):
 
 | Published upstream measurement | Result |
 | --- | --- |
-| Qwen3.6-35B-A3B prefill at a 7,680-token prompt | 15,544 tok/s |
-| Qwen3.6-27B `nvfp4` prefill at a 7,680-token prompt | 11,191 tok/s (3.48× groupwise-int) |
-| Qwen3.6-35B-A3B saturated decode at concurrency 8 | 1,313.8 aggregate tok/s |
+| Qwen3.6-35B-A3B prefill at a 7,680-token prompt | 17,705.4 tok/s |
+| Qwen3.6-27B `nvfp4` prefill at a 7,680-token prompt | 11,191.5 tok/s (3.48× groupwise-int) |
+| Qwen3.6-35B-A3B saturated decode at concurrency 8 | 1,380.7 aggregate tok/s |
 | Qwen3.6-27B `nvfp4` saturated decode at concurrency 8 | 1,146.9 aggregate tok/s (5.67× C=1) |
-| Qwen3.8-27B `nvfp4` MTP3 structured output | 219.8 tok/s at 90.8% acceptance |
+| Qwen3.8-27B `nvfp4` MTP3 structured output | 231.7 tok/s at 90.6% acceptance |
 
 These are upstream results on different artifacts and settings, not product claims; the product's
 qualified numbers are in [Current qualified results](#current-qualified-results).

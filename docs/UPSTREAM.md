@@ -13,14 +13,16 @@ The current release's client and runtime pins are in [Current positions](#curren
 
 | Upstream | Shipped in v0.19.0 | Watch head and date | Status |
 | --- | --- | --- | --- |
-| `can1357/oh-my-pi` (client) | Unmodified upstream OMP 18.20.0, source `c308970263ae13744ea15ab67302e3dac840e266`, tree `ba890953dd69eb4bf73bb7233bbe50ccfacd6912`, release `443638329` | Upstream release [`v18.20.0`](https://github.com/can1357/oh-my-pi/releases/tag/v18.20.0) (2026-11-12) | Pinned (`PASS 31/31 blocks on 6b22f219, 2026-11-13`). Six `examples/` fragments unchanged; Windows `bash` tool description drops emulated-bash guidance ([18.20.0 binding](#v0190-client-binding--omp-18200); prior watch in [2026-11-11 watch](#2026-11-11-upstream-and-fork-watch)). |
+| `can1357/oh-my-pi` (client) | Unmodified upstream OMP 18.20.0, source `c308970263ae13744ea15ab67302e3dac840e266`, tree `ba890953dd69eb4bf73bb7233bbe50ccfacd6912`, release `443638329` | Latest published release source [`7c49c11a`](https://github.com/can1357/oh-my-pi/commit/7c49c11aa5bbaf3f418406583096168ad5b8c6dc) (2026-11-14; checked 2026-11-15) | Watch observation only; the incorporated client remains selected by the [composition](FACTS.md#current-release). Prior qualified binding: `PASS 31/31 blocks on 6b22f219, 2026-11-13` ([binding](#v0190-client-binding--omp-18200)). |
 | `alphastorm/ninfer` (RTX 5090 container runtime) | `v0.7.0-qwen38-5090-beta.8`, engine source `41f89b310b443481db5917a01a2b45e49f85e723` | Upstream base `Neroued/ninfer` `master` `64d10fbf9f8e6bfc79ab0570b94674c5b9997929` | Shipped fork. Bounds retryable checkpoint-save refusals at six retries or 10 s ([PR #122](https://github.com/alphastorm/ninfer/pull/122)), with coordinator follow-ups in [fork #123](https://github.com/alphastorm/ninfer/issues/123) ([v0.19.0 binding](#v0190-runtime-and-client-binding); base triage in [2026-11-11 watch](#2026-11-11-upstream-and-fork-watch)). |
 | `alphastorm/ninfer` (RTX 4090 and RTX 3090 native Windows runtimes) | RTX 4090 `v0.8.0-qwen38-4090-beta.3` (source `48c8ac4644322f024b5c3bd5b657af5874567251`); RTX 3090 `v0.8.0-qwen38-3090-beta.4` (`tc` tensor-core verify build, source `15c3e3959c0a6167f799e9383482ec4e03db9cad`) | Upstream base `Neroued/ninfer` `master` `64d10fbf9f8e6bfc79ab0570b94674c5b9997929` | Shipped fork. RTX 3090 matches RTX 5090 serve source `41f89b31`; RTX 4090 omits bounded pressure-save retries ([PR #122](https://github.com/alphastorm/ninfer/pull/122)) until the next native rebuild ([v0.19.0 binding](#v0190-runtime-and-client-binding); base triage in [2026-11-11 watch](#2026-11-11-upstream-and-fork-watch)). |
-| `Neroued/ninfer` (engine watch) | Container and native merge base `64d10fbf` | `master` `13ebb92f6` (2026-11-11, 33 commits after `77c2e5e2` on 2026-11-07, 291 after `64d10fbf` at `77c2e5e2`; `dev` equals `master`). Receipts: [2026-11-10 watch](measurements/2026-11-10-upstream-watch.json); earlier heads `a754fcf3` (2026-11-02) and `1882c6ad` / `b57eaddc` are in the [2026-10-29 watch](measurements/2026-10-29-upstream-watch.json) | Watch. Full re-port deferred (`9/228` commits apply cleanly at `a754fcf3`, estimated 7–10 multi-agent days, low dense-27B value); targeted fixes backport onto `64d10fbf` ([2026-11-11 watch](#2026-11-11-upstream-and-fork-watch)). |
-| `Neroued/ninfer` (Qwen 4 feature watch) | None | `feat/qwen4-27b-ops` at `e1874e94` (2026-10-29; checked 2026-11-10, 204 commits after `64d10fbf`). The [2026-11-10](measurements/2026-11-10-upstream-watch.json) and [2026-10-29](measurements/2026-10-29-upstream-watch.json) receipts list all 204 commits (`unknown-truncated` at 300 files) | Research only. `Qwen4-27B` has no public weights as of 2026-11-11 and no dense model layer or converter ([2026-11-11 watch](#2026-11-11-upstream-and-fork-watch)). |
-| `sergiuszm/ninfer-4090` (engine watch) | None | `rtx4090-port` at `7f47a622` (2026-10-24, 172 commits after 2026-10-07 baseline `81c8ce09`); `master` at `07811ec5` (2026-08-08); `catchup4b` at `4a22fae7` (2026-10-31) | `upgrade-available`. Active `sm_89` reference replacing `UDPSendToFailed/ninfer-4090` (`5c60b7c9`, 2026-09-09); no dense-27B decode or prefill gain to port, with `--tolerant-tool-calls` on watch ([2026-11-10 watch](#2026-11-10-upstream-and-fork-watch)). |
-| `ashalliants/ninfer-3090` (active `sm_86` fork watch; supersedes `Don-Chad/ninfer-3090`) | Apache-2.0 kernel provenance `4a178c4b1fd78555b5efd9b07d10d5b1946ca3ad` for RTX 3090 `tc` small-T tensor-core verify ([PR #104](https://github.com/alphastorm/ninfer/pull/104)); no community binary | `master` `aa6566fc` (2026-11-09, 2,141 commits past `81c8ce09`; release `v0.17.2-rtx3090` 2026-11-07 on base `f76e19c0`) | `upgrade-available`. Supersedes `Don-Chad/ninfer-3090` (`master` `115dee6b`, 2026-10-31, `1,912` commits past `ef6ecc3c`); n-gram copy drafting fails byte-identical qualification and linear retunes await in-situ A/B ([2026-11-10 watch](#2026-11-10-upstream-and-fork-watch)). |
-| `iamwavecut/ninfer-all` (consolidation hub watch) | Ported host NFC normalization ([PR #96](https://github.com/alphastorm/ninfer/pull/96)), request-scoped logit faults ([PR #98](https://github.com/alphastorm/ninfer/pull/98)), and default-off prefill pacing ([PR #95](https://github.com/alphastorm/ninfer/pull/95)); no community binary | `master` `64bd1115` (2026-11-11; `8412e774` on 2026-11-10) | Watch. Multi-architecture consolidation hub; zero commits in `8412e774..64bd1115` carry a measured dense-27B speed gain ([2026-11-11 watch](#2026-11-11-upstream-and-fork-watch)), and `gguf_blocks_v1` artifacts do not load ([2026-11-10 watch](#2026-11-10-upstream-and-fork-watch)). |
+| `Neroued/ninfer` (engine watch) | Container and native merge base `64d10fbf` | `master` [`d9ad9dea4`](https://github.com/Neroued/ninfer/commit/d9ad9dea4cdbc64ec44b5b18704b46b5db2613dc) (2026-11-14; checked 2026-11-15, 352 commits after `64d10fbf`) | Watch. Targeted grammar backport selected; wholesale re-port remains deferred behind the [adoption triggers](../ROADMAP.md#2026-11-15-qwen4-dense-adoption--deferred). [2026-11-15 watch](#2026-11-15-upstream-and-fork-watch). |
+| `Neroued/ninfer` (`Qwen4` readiness watch) | None | `master` `d9ad9dea4` (2026-11-14; checked 2026-11-15); historical `feat/qwen4-27b-ops` remains `e1874e94` (2026-10-29) | Research only. Dense `Qwen4` ops landed on master during 2026-11-11..14, but there is still no dense model layer, converter recipe or public `Qwen4` weights. `qwen4_exp` is Qwen3.8-Flash-Next MoE+PLE, not dense `Qwen4`. [2026-11-15 watch](#2026-11-15-upstream-and-fork-watch). |
+| `sergiuszm/ninfer-4090` (engine watch) | None | `rtx4090-port` [`7f47a622`](https://github.com/sergiuszm/ninfer-4090/commit/7f47a62282b8e9d3c3b03bd6750d0bfe37e9bb66) (2026-10-24); `catchup4b` `4a22fae7` (2026-10-31); both unchanged at 2026-11-15 census | Watch. Active `sm_89` reference; quoted tool-call delimiters merit a targeted parser correction, not wholesale permissive recovery. KV and prefill changes remain separately gated. [2026-11-15 watch](#2026-11-15-upstream-and-fork-watch). |
+| `ashalliants/ninfer-3090` (active `sm_86` fork watch; supersedes `Don-Chad/ninfer-3090`) | Apache-2.0 kernel provenance `4a178c4b1fd78555b5efd9b07d10d5b1946ca3ad` for RTX 3090 `tc` small-T tensor-core verify ([PR #104](https://github.com/alphastorm/ninfer/pull/104)); no community binary | `master` [`8e935f0c`](https://github.com/ashalliants/ninfer-3090/commit/8e935f0c2a76535e78e02e1b619a7353712639aa) (2026-11-12; checked 2026-11-15) | Watch. New prefill and imatrix-artifact candidates need independent fit and powered quality evidence; no as-is dense-27B speed port selected. `Don-Chad` remains `115dee6b`. [2026-11-15 watch](#2026-11-15-upstream-and-fork-watch). |
+| `iamwavecut/ninfer-all` (consolidation hub watch) | Ported host NFC normalization ([PR #96](https://github.com/alphastorm/ninfer/pull/96)), request-scoped logit faults ([PR #98](https://github.com/alphastorm/ninfer/pull/98)), and default-off prefill pacing ([PR #95](https://github.com/alphastorm/ninfer/pull/95)); no community binary | `master` [`40d913db`](https://github.com/iamwavecut/ninfer-all/commit/40d913db2e87e2211fce4089c0c7920480a5e7a0) (2026-11-13; checked 2026-11-15) | Watch. DSpine, adaptive drafting and FP8 prompt routes offer no qualified improvement for the product profiles; `gguf_blocks_v1` still requires a new artifact/decoder decision. [2026-11-15 watch](#2026-11-15-upstream-and-fork-watch). |
+| `ValerioDolci/capy-flash` (serve and dense-27B prefill watch) | None | `main` [`564de122d`](https://github.com/ValerioDolci/capy-flash/commit/564de122d9a1c4fd36391e76cf494cc003c28749) (2026-11-15) | Watch. Context-overflow handling is relevant to agents; INT8-KV FP16-accumulate prefill gains are measured on Blackwell, not on the native Ampere/Ada lanes. CPU-offloaded Flash-Next and 16 GB tiers are separate model/artifact decisions. [2026-11-15 watch](#2026-11-15-upstream-and-fork-watch). |
+| `by-mav/ninfer-engine` (agent-history serve watch) | None | `bymav` [`286ef7a14`](https://github.com/by-mav/ninfer-engine/commit/286ef7a142f856de1c9193aba01da17ea08c0aa4) (2026-11-14; checked 2026-11-15, 9 commits ahead of upstream master) | Watch. Daily upstream sync; tool-history constraints and Responses replay changes need a captured stock-client reproducer before porting. [2026-11-15 watch](#2026-11-15-upstream-and-fork-watch). |
 | `13thblade/ninfer-all-nvfp4` (non-Blackwell `NVFP4` watch) | None | `master` `9b4b8a00` (2026-11-02; README-only after `245f3ad2` on 2026-10-30) | Watch. Non-Blackwell `NVFP4` (`--nvfp4-w4a16`, `--nvfp4-w4a8-int`); adoption requires independent artifact fit and 1,120-prompt powered quality screening ([2026-10-30 census](#fork-network-and-upstream-code-watch--2026-10-30); head in the [2026-11-10 watch](#2026-11-10-upstream-and-fork-watch)). |
 | `IMGillusion/ninfer-disk-kv` / `IMGillusion/ninfer-engine` (disk KV tier watch) | None | `IMGillusion/ninfer-engine` `main` `ae1ba85a` (2026-11-02); `troyliu0105/ninfer-all` `81bf00d0` (2026-11-02) | Watch. Host/disk L3 KV tier with phased read/write workers and device-to-host spill settlement; design reference only alongside the authenticated schema 3 checkpoint store ([2026-10-30 census](#fork-network-and-upstream-code-watch--2026-10-30), [2026-11-10 watch](#2026-11-10-upstream-and-fork-watch)). |
 | `eagle-hq/EAGLE-4` / `EAGLE-Corp/Qwen3.8-27B-EAGLE4` (drafter watch) | None | `eagle-hq/EAGLE-4` `0.1.1` (2026-10-21); `EAGLE-Corp/Qwen3.8-27B-EAGLE4` `f58a5985` (2026-10-19) | Watch. Autoregressive tree drafter (`6.18 GB` BF16, non-Apache-2.0 `eagle-4` license; [Neroued/ninfer#413](https://github.com/Neroued/ninfer/issues/413)); needs license review, an engine tree-verify path, and 24 GB fit ([2026-10-30 census](#fork-network-and-upstream-code-watch--2026-10-30)). |
@@ -35,11 +37,14 @@ are commit-subject and path heuristics, not a security assessment or a qualifica
 python3 scripts/upstream_watch.py --receipt docs/measurements/$(date +%F)-upstream-watch.json
 # per-commit overlap scoring (one extra API call per upstream commit):
 python3 scripts/upstream_watch.py --only ninfer-4090 --per-commit-files
+# official Qwen listings and upstream dense-model readiness only:
+python3 scripts/upstream_watch.py --only qwen4-readiness --receipt qwen4-readiness.json
 ```
 
 Run from the repository root with an authenticated GitHub CLI session. The tool is read-only: it
-queries the entries in [`upstream-watch.json`](../upstream-watch.json) on GitHub and writes only
-the receipt you name, while the remaining forks and drafters in
+queries the entries in [`upstream-watch.json`](../upstream-watch.json) on GitHub, plus the public
+Hugging Face Qwen search for the readiness check, and writes only the receipt you name.
+The remaining forks and drafters in
 [Current positions](#current-positions) are tracked manually. Watch schema 2 derives `incorporated`
 from root `compatibility.json` and that release's `manifest.json`: stock OMP version, tag, and
 commit, upstream engine base, and each runtime lane's fork source and component tag. The
@@ -68,6 +73,27 @@ when reported totals exceed listed commits, when required lists or counts are mi
 are `unknown` too, recorded in `comparison.status`, `unknown_reasons`, `commits_truncated`, and
 `files_truncated`. An `unchanged` observation can have an `unknown` comparison; a stable
 `evidence_identity` is not a completeness or applicability claim.
+
+The additive `readiness_checks` array contains a schema-1 `qwen4-readiness` record, separate from
+the unchanged `upstreams` comparison contract. It records the
+[official Qwen organization search](https://huggingface.co/api/models?author=Qwen&search=Qwen4)
+as `hugging_face.model_ids` / `models_present`, and pins both engine reads to the same full master
+commit in `last_seen`. `engine.dense_recipe_names` / `dense_recipe_present` inspect only literal
+keys registered in `tools/convert/official_recipes.py`; `dense_model_directories` /
+`dense_model_directory_present` inspect directories under `src/models`. Recognized dense names
+are `qwen4`, `qwen4_27b` and `qwen4_dense`, including underscore-suffixed recipe variants.
+`qwen4_exp`, the `qwen3_8_flash_next` recipe, comments and unregistered functions are not dense
+support. The downloaded Python is parsed, never imported or executed.
+
+Readiness presence fields are booleans, or `null` when incomplete evidence cannot prove absence.
+An unfollowed Hugging Face page, a model-directory listing at its API limit, or an unrecognized
+recipe registry yields `unknown` with `unknown_reasons`; failed or malformed reads yield `error`
+and a nonzero exit. A complete absence of all three signals is `up-to-date`; any positive signal
+is `delta-observed`, **not** proof of downloadable weights, a dense adapter, licensing, fit,
+quality or adoption. The closed receipt field sets, types, presence/verdict consistency and
+evidence hash are checked before writing. Readiness `observation` compares evidence identities,
+so an official model listing changes it even when master does not move. Neither check advances
+incorporated pins.
 
 ## Why the fork points are what they are
 
@@ -110,6 +136,80 @@ values and source-grounded field sets, not claimed live inference receipts.
 Everything below this heading is a dated record, preserved as published. Records are append-only:
 a new record is added and an old one is not edited. For what is true today, read the sections
 above and the [canonical facts](FACTS.md#current-release).
+
+## 2026-11-15 upstream and fork watch
+
+Read-only source and fork census, checked **2026-11-15**. Heads are observations, not adopted
+sources. The automated `Qwen4` readiness verdict is **`up-to-date`**: the official
+[Hugging Face search](https://huggingface.co/api/models?author=Qwen&search=Qwen4) returned `[]`;
+master [`d9ad9dea4`](https://github.com/Neroued/ninfer/commit/d9ad9dea4cdbc64ec44b5b18704b46b5db2613dc)
+has neither a [dense converter recipe](https://github.com/Neroued/ninfer/blob/d9ad9dea4cdbc64ec44b5b18704b46b5db2613dc/tools/convert/official_recipes.py)
+nor a [dense `qwen4` directory](https://github.com/Neroued/ninfer/tree/d9ad9dea4cdbc64ec44b5b18704b46b5db2613dc/src/models).
+Here `up-to-date` means no availability signal, **not ready to adopt**.
+
+| Watch | Observed head | Verdict and disposition |
+| --- | --- | --- |
+| Upstream engine | `master` `d9ad9dea4`, 2026-11-14; 352 commits after `64d10fbf` | Full comparison remains `unknown` beyond API caps. Select the [xgrammar cache/token-boundary fixes `8e4648129`](https://github.com/Neroued/ninfer/commit/8e4648129) for targeted backport; defer wholesale re-port behind [T1–T4](../ROADMAP.md#2026-11-15-qwen4-dense-adoption--deferred). |
+| `Qwen4` feature branch | [`e1874e94`](https://github.com/Neroued/ninfer/tree/e1874e94), unchanged since 2026-10-29 | Historical comparison remains `unknown` at the file cap. Superseded as an ops port source: master gained the dense geometries during 2026-11-11..14, including [NVFP4 FFN](https://github.com/Neroued/ninfer/commit/2ebf2937d), [four-head QSA](https://github.com/Neroued/ninfer/commit/d01e04bac) and [decode tuning](https://github.com/Neroued/ninfer/commit/47bfd71a6). Still no dense layer, recipe or public weights. |
+| Native fork census | `sergiuszm` `7f47a622` / `4a22fae7`, `Don-Chad` `115dee6b`, `13thblade` `9b4b8a00`, `troyliu0105` `81bf00d0`: unchanged; `ashalliants` advanced to `8e935f0c`, `iamwavecut` to `40d913db` | No complete new comparison receipt: verdict `unknown`, not an applicability claim. Watch new prefill/artifact work; no as-is dense-27B speed port selected. [ashalliants history](https://github.com/ashalliants/ninfer-3090/commits/8e935f0c2a76535e78e02e1b619a7353712639aa), [iamwavecut history](https://github.com/iamwavecut/ninfer-all/commits/40d913db2e87e2211fce4089c0c7920480a5e7a0). |
+| New serve watches | `ValerioDolci/capy-flash` `564de122d`; `by-mav/ninfer-engine` `bymav` `286ef7a14` | Census only (`unknown` for a product-base comparison), not adoption. Add both to Current positions: [capy-flash](https://github.com/ValerioDolci/capy-flash/tree/564de122d9a1c4fd36391e76cf494cc003c28749), [by-mav](https://github.com/by-mav/ninfer-engine/tree/286ef7a142f856de1c9193aba01da17ea08c0aa4). |
+| Disk tier | `IMGillusion/ninfer-engine` `ae1ba85a`, unchanged | Keep as a [design reference](https://github.com/IMGillusion/ninfer-engine/tree/ae1ba85a6ac2298a5705ea77e677e9bad56b85d7), not a replacement for the authenticated checkpoint store; cross-repository comparison is unavailable (`unknown`). |
+
+**`Qwen4` distinction and fit.** The upstream and fork `qwen4_exp` layer is
+**Qwen3.8-Flash-Next MoE+PLE**, not the proposed dense `Qwen4-27B`. Its existing
+`qwen3_8_flash_next` recipe cannot load the proposed PLE-free dense geometry. The
+[dense RTX 5090 design](https://github.com/Neroued/ninfer/blob/d9ad9dea4cdbc64ec44b5b18704b46b5db2613dc/docs/designs/qwen4-27b-rtx5090.md)
+is provisional until real weights confirm it; its NVFP4/FP8 recipe targets only the 32 GB lane.
+The 24 GB cards need another recipe and new `sm_86`/`sm_89` HC/QSA kernels, not a feature-branch
+cherry-pick. The [deferred-decision record](../ROADMAP.md#2026-11-15-qwen4-dense-adoption--deferred)
+owns the intake and re-base triggers.
+
+**Triaged and dispositioned:**
+
+- **Select narrow host-side fixes, not fork-wide policy changes.** Quoted `</parameter>` /
+  `</function>` values can turn a real tool call into text; use the
+  [sergiuszm recovery work](https://github.com/sergiuszm/ninfer-4090/commit/91829c357)
+  as a reproducer/reference for a targeted parser correction. Capy-flash's context-length
+  reporting motivates an OpenAI-style overflow message. Neither selection adopts blanket
+  tolerant parsing, a larger default output budget or media-to-text fallback. The latter policies,
+  [by-mav's no-tools history constraint](https://github.com/by-mav/ninfer-engine/commit/286ef7a14)
+  and [Responses replay changes](https://github.com/by-mav/ninfer-engine/commit/4c743b67c)
+  remain deferred until stock-client request evidence establishes the reachable defect and the
+  intended semantics.
+- **Native capacity remains a separate decision.** `rk4v4` is already implemented; RTX 4090
+  concurrency/context adoption is held on the
+  [geometry-matched durability oracle](https://github.com/alphastorm/ninfer/issues/60), fit and
+  powered quality evidence. Existing INT8 fit probes do not grant permission to change KV format.
+- **Keep prefill candidates on research watch.** ashalliants' A8/cuBLAS paths and
+  [capy-flash FP16-accumulate INT8-KV attention](https://github.com/ValerioDolci/capy-flash/pull/72)
+  change numerical behavior; the latter's reported long-prefill gains were measured on
+  Blackwell, not Ampere/Ada. The failed `Group64` A8 leak screen, native workspace fit, Windows
+  cuBLAS packaging and the 1,120-prompt powered screen remain gates. sergiuszm's small `sm_89`
+  attention retune is deferred rather than treated as a free speed gain.
+- **New artifacts stay separate product decisions.** The
+  [imatrix `grouped_search` 27B recipe](https://github.com/ashalliants/ninfer-3090/blob/8e935f0c2a76535e78e02e1b619a7353712639aa/model-cards/Qwen3.8-27B-NInfer-3090/README.md)
+  and `IQ2_XS`/GGUF CPU-offloaded Flash-Next are research candidates, not compatible replacements.
+  Official [groupwise-int model-card changes](https://huggingface.co/neroued/Qwen3.8-27B-NInfer/commits/main)
+  through `337b691c` are README-only: the `20,437,521,664`-byte artifact remains `81f924d4`.
+  Keep the model pin; the [DFlash2 companion](https://huggingface.co/z-lab/Qwen3.8-27B-DFlash2)
+  remains at `50307d4c`.
+- **Do not adopt the remaining speculative routes.** DSpine trails DFlash2 on its published
+  corpus; adaptive width misses its own gain target and changes outputs; relaxed drafting and
+  multi-row MTP verification lack acceptable output/quality evidence. FP8 fast prompt kernels
+  do not apply to the native INT8 profiles; the 22.09 GiB NVFP4 artifact does not leave 24 GB
+  context headroom. Native Windows RTX 5090 build recipes
+  ([`SV8ARJ`](https://github.com/SV8ARJ/ninfer-windows-5090)) are not measured product lanes; YaRN
+  does not solve a VRAM ceiling below the native context window, and 16 GB 3-bit tiers require a
+  different artifact and quality decision.
+- **No duplicate reliability/security ports without a reproducer.** Recovery-loss membership
+  was already fixed in [fork #97](https://github.com/alphastorm/ninfer/pull/97), and fragmented Host
+  placement is already represented by `can_place` / `HostContiguity`. Host/Origin proposals need
+  a demonstrated path past the required API-key boundary; mirror-only, stale, Volta-only and
+  custom-endpoint forks add no stock-client benefit. No new watches are added for those forks.
+
+The [engine campaign table](BENCHMARKS.md#engine-campaign-highlights) is corrected separately:
+upstream Qwen3.8 uses FP8 E4M3 row-256 KV, not INT8; Qwen3.6 retains INT8 group-64 KV. These are
+upstream conditions, not claims about the qualified product profiles.
 
 ## v0.19.0 runtime and client binding
 

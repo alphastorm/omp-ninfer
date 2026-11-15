@@ -1,6 +1,11 @@
 {
   "schema_version": 2,
   "description": "Read-only upstream/fork inventory and title/path triage configuration. baseline_component derives incorporated pins from the release manifest selected by compatibility.json; entries without one retain a declared comparison base, not a current adoption claim. Last-seen observations live in receipts, never in incorporated pins.",
+  "qwen4_readiness": {
+    "id": "qwen4-readiness",
+    "upstream": "Neroued/ninfer",
+    "upstream_ref": "master"
+  },
   "upstreams": [
     {
       "id": "ninfer-5090",
