@@ -153,6 +153,13 @@ class ComponentProvenanceTests(unittest.TestCase):
         self.assertTrue(any(f"releases/{self.release}/NINFER_RELEASE_NOTES.md:8" in error
                             for error in errors), errors)
 
+    def test_markdown_headings_are_also_authored_claims(self):
+        notes = self.root / "releases" / self.release / "NINFER_RELEASE_NOTES.md"
+        atomic_write(notes, "# Release\n\n## All runtime components were rebuilt\n")
+        errors = self.validate({})
+        self.assertTrue(any(f"releases/{self.release}/NINFER_RELEASE_NOTES.md:3" in error
+                            for error in errors), errors)
+
     def test_claim_free_notes_and_code_examples_remain_ordinary_prose(self):
         notes = self.root / "releases" / self.release / "NINFER_RELEASE_NOTES.md"
         atomic_write(notes, "# Release\n\nRuntime identities and support limits come from the ready predecessor.\n"

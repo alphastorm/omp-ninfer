@@ -62,6 +62,12 @@ class ReleaseRehearsalTests(unittest.TestCase):
             self.assertEqual(hashlib.sha256(audit.read_bytes()).hexdigest(),
                              qualification["receipt_audit"]["sha256"])
             manifest = json.loads((clone / "releases" / release / "manifest.json").read_text(encoding="utf-8"))
+            staged_notes = clone / ".release-state/rehearsal/stage-notes.md"
+            self.assertIn("Runtime identities and support limits come from the ready predecessor.",
+                          staged_notes.read_text(encoding="utf-8"))
+            from verify_release import component_provenance
+            statement = component_provenance(clone, release, manifest)["statement"]
+            self.assertIn(statement, (clone / "docs/QUICKSTART.md").read_text(encoding="utf-8"))
             summary = clone / "releases" / release / manifest["qualification"]["summary"]
             self.assertEqual(hashlib.sha256(summary.read_bytes()).hexdigest(),
                              manifest["qualification"]["summary_sha256"])

@@ -429,6 +429,19 @@ class RetargetGuideTest(unittest.TestCase):
         atomic_write(self.guide, text)
         self.assert_refuses("c")
 
+    def test_generated_current_provenance_keeps_its_real_predecessor(self) -> None:
+        self.after["manifest.json"]["components"] = deepcopy(self.before["manifest.json"]["components"])
+        self.write_releases()
+        from verify_release import component_provenance
+        statement = component_provenance(self.root, NEW, self.after["manifest.json"])["statement"]
+        self.assertIn(f"carried unchanged from {OLD}", statement)
+        for current in (OLD, NEW):
+            with self.subTest(guide_release=current):
+                atomic_write(self.guide, route_guide(current) + statement + " Observed routes passed.\n")
+                self.assertEqual(self.run_retarget(), current == OLD)
+                self.assertIn(statement, self.guide.read_text(encoding="utf-8"))
+                self.assertFalse(self.run_retarget())
+
     def test_location_refusals_start_at_v0200_not_the_published_predecessor(self) -> None:
         for release, predecessor, prior in (("v0.19.0", "v0.18.0", "v0.17.0"),
                                              ("v0.20.0", "v0.19.0", "v0.18.0")):

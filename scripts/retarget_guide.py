@@ -28,8 +28,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import documented_route
 from release_io import atomic_write
 from verify_release import (COMPONENT_TAG_RE, MARKDOWN_LINK_RE, PRODUCT_RAW_URL_RE,
-                            bound_file, checkpoint_host_directory, guide_reference_location,
-                            markdown_heading_paths, pinned_evidence, sha256_file)
+                            bound_file, checkpoint_host_directory, component_provenance,
+                            guide_reference_location, markdown_heading_paths,
+                            mask_generated_sentences, pinned_evidence, sha256_file)
 
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE_RE = re.compile(r"v\d+\.\d+\.\d+\Z")
@@ -779,7 +780,12 @@ def retarget(root: Path, predecessor: str, release: str, guide: Path, *, check: 
         text = original.decode("utf-8")
     except (OSError, UnicodeError) as error:
         raise Refusal(f"{guide}:1: cannot read guide: {error}") from error
-    result = retarget_text(text, guide, predecessor, release, mappings, anchors)
+    generated = ()
+    if release_version(release) >= (0, 20, 0):
+        manifest = json.loads((root / "releases" / release / "manifest.json").read_text(encoding="utf-8"))
+        generated = (component_provenance(root, release, manifest)["statement"],)
+    result = retarget_text(text, guide, predecessor, release, mappings, anchors,
+                           protected=lambda value: mask_generated_sentences(value, generated))
     bindings = bound_evidence(root, release)
     evidence_diagnostics(result, bindings, guide, mode="guide",
                          masked=masked_text(result, predecessor, evidence_release=release))

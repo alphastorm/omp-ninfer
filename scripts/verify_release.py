@@ -2875,6 +2875,7 @@ ROLLBACK_LOCATIONS: frozenset[MarkdownLocation] = frozenset({
     ("docs/QUICKSTART.md", ("Shared native operation and fallback", "Package selection and fallback")),
 })
 TIER_TWO_LOCATIONS: frozenset[tuple[MarkdownLocation, str]] = frozenset({
+    (("docs/QUICKSTART.md", ()), "> Use the [immutable "),
     (("docs/QUICKSTART.md", ("Current release at a glance",)), "- **Checkpoint boundary:**"),
     (("docs/QUICKSTART.md", ("3. Prepare the model and key on the inference host",)), "Release "),
     (("docs/QUICKSTART.md", ("4. Start NInfer on the inference host",)), "For an upgrade from "),
@@ -2916,13 +2917,30 @@ def guide_reference_location(location: MarkdownLocation, block: str, *, tier_two
     prefix = re.split(r"[,;]|[.!?](?=\s)", block[:position])[-1]
     roles = re.findall(
         r"\b(?:current|rollback|predecessor|retained|incumbent|upgrade\s+from"
-        r"|matching\s+published|keeping\s+a)\b", prefix, re.IGNORECASE)
+        r"|matching\s+published|keeping\s+a|immutable)\b", prefix, re.IGNORECASE)
     return bool(roles and roles[-1].lower() != "current")
+
+
+def mask_generated_sentences(text: str, generated: tuple[str, ...]) -> str:
+    """Mask only complete generated sentences, preserving source offsets and lines."""
+    for statement in generated:
+        for match in reversed(list(re.finditer(re.escape(statement), text))):
+            prefix, suffix = text[:match.start()], text[match.end():]
+            if ((not prefix.strip() or re.search(r"(?:[.!?]\s+|\n[ \t]*\n[ \t]*)\Z", prefix))
+                    and (not suffix or suffix[0].isspace())):
+                text = text[:match.start()] + re.sub(r"[^\n]", " ", match[0]) + suffix
+    return text
+
+
+def markdown_prose(text: str) -> str:
+    text = re.sub(r"(`+)(?!`).*?(?<!`)\1(?!`)",
+                  lambda match: re.sub(r"[^\n]", " ", match[0]), text, flags=re.DOTALL)
+    return re.sub(r"(?<=\]\()[^)]+(?=\))", lambda match: " " * len(match[0]), text)
 
 
 def markdown_units(text: str, file: str, *,
                    generated: tuple[str, ...] = ()) -> Iterator[tuple[MarkdownLocation, int, str]]:
-    """Yield located prose sentences, excluding code and exact generated sentences."""
+    """Yield located source sentences, excluding fenced code and exact generated sentences."""
     paths = markdown_heading_paths(text)
     first, paragraph = 0, []
     fence: str | None = None
@@ -2934,19 +2952,9 @@ def markdown_units(text: str, file: str, *,
         location = (file, paths[first - 1])
         if guide_reference_location(location, body, tier_two=True):
             return
-        # Only complete generated sentences are admitted, never a clause or a
-        # generated statement embedded in a negation or another authored claim.
-        for statement in generated:
-            for match in reversed(list(re.finditer(re.escape(statement), body))):
-                prefix, suffix = body[:match.start()], body[match.end():]
-                if ((not prefix.strip() or re.search(r"[.!?]\s+\Z", prefix))
-                        and (not suffix or suffix[0].isspace())):
-                    body = body[:match.start()] + re.sub(r"[^\n]", " ", match[0]) + suffix
-        body = re.sub(r"(`+)(?!`).*?(?<!`)\1(?!`)",
-                      lambda match: re.sub(r"[^\n]", " ", match[0]), body, flags=re.DOTALL)
-        body = re.sub(r"(?<=\]\()[^)]+(?=\))", lambda match: " " * len(match[0]), body)
-        for match in re.finditer(r"\S[\s\S]*?(?:[.!?](?=\s|$)|\Z)", body):
-            yield location, first + body.count("\n", 0, match.start()), match[0]
+        visible = markdown_prose(mask_generated_sentences(body, generated))
+        for match in re.finditer(r"\S[\s\S]*?(?:[.!?](?=\s|$)|\Z)", visible):
+            yield location, first + body.count("\n", 0, match.start()), body[match.start():match.end()]
 
     for number, line in enumerate([*text.splitlines(), ""], 1):
         marker = re.match(r"^ {0,3}(`{3,}|~{3,})", line)
@@ -2960,9 +2968,12 @@ def markdown_units(text: str, file: str, *,
                 fence = marker[1]
             elif marker[1][0] == fence[0] and len(marker[1]) >= len(fence):
                 fence = None
-        elif fence is None and line.strip() and not heading:
+        elif fence is None and line.strip():
             first = first if paragraph else number
             paragraph.append(line)
+            if heading:
+                yield from units()
+                paragraph = []
 
 
 def validate_markdown_component_provenance(root: Path, release: str, statement: str,
@@ -2985,7 +2996,7 @@ def validate_markdown_component_provenance(root: Path, release: str, statement: 
         label = document.relative_to(root).as_posix()
         for _, line, sentence in markdown_units(document.read_text(encoding="utf-8"), label,
                                                 generated=(statement,)):
-            errors.extend(provenance_claim_errors(sentence, f"{label}:{line}"))
+            errors.extend(provenance_claim_errors(markdown_prose(sentence), f"{label}:{line}"))
 
 
 def validate_component_tag_bindings(root: Path, release: str, manifest: dict[str, Any],
