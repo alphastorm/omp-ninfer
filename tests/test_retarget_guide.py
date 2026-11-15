@@ -31,6 +31,7 @@ NATIVE_TAG = "v1.0.0-qwen38-4090-beta.1"
 SOURCE = "a" * 40
 CONTAINER_SOURCE = "b" * 40
 NATIVE_SOURCE = "c" * 40
+FALLBACK_SECTION = "\n## Shared native operation and fallback\n\n### Package selection and fallback\n\n"
 
 
 def route_guide(release: str = OLD) -> str:
@@ -217,7 +218,7 @@ class RetargetGuideTest(unittest.TestCase):
     def test_previous_distinct_and_current_identities_advance_in_one_pass(self) -> None:
         prior = self.write_prior()
         old_tag = prior["components"]["ninfer"]["release_tag"]
-        self.append(f"RTX 5090 current `{CONTAINER_TAG}`, rollback `{old_tag}`.\n")
+        self.append(FALLBACK_SECTION + f"RTX 5090 current `{CONTAINER_TAG}`, rollback `{old_tag}`.\n")
         self.run_retarget()
         result = self.guide.read_text(encoding="utf-8")
         self.assertIn(f"RTX 5090 current `{CONTAINER_TAG[:-1]}2`, rollback `{CONTAINER_TAG}`.", result)
@@ -232,7 +233,7 @@ class RetargetGuideTest(unittest.TestCase):
         new_digest = self.after["manifest.json"]["components"]["omp"]["artifact_sha256"]
         prior_tag = prior["components"]["ninfer"]["release_tag"]
         new_tag = self.after["manifest.json"]["components"]["ninfer"]["release_tag"]
-        self.append(f"| RTX 5090 current | `{CONTAINER_TAG}` |\n"
+        self.append(FALLBACK_SECTION + f"| RTX 5090 current | `{CONTAINER_TAG}` |\n"
                     f"| RTX 5090 rollback | `{prior_tag}` |\n"
                     f"| Client current | `{old_digest}` |\n"
                     f"| Client rollback | `{prior_digest}` |\n"
@@ -275,6 +276,38 @@ class RetargetGuideTest(unittest.TestCase):
                 self.assertIn(f"{self.guide}:{line}:", error)
                 self.assertIn(value, error)
 
+    def test_negated_rollback_package_outside_fallback_section_refuses(self) -> None:
+        prior = self.write_prior()
+        prior["components"]["omp"]["artifact_name"] = "client-prior.zip"
+        atomic_write_json(self.root / "releases" / prior["release"] / "manifest.json", prior)
+        atomic_write(self.guide, route_guide(NEW))
+        line = len(self.guide.read_text(encoding="utf-8").splitlines()) + 3
+        self.append("\n## Install the current client\n"
+                    "Do not use this rollback package client-old.zip; install it.\n")
+        error = self.assert_refuses("c")
+        self.assertIn(f"{self.guide}:{line}:", error)
+        self.assertIn("client-old.zip", error)
+
+    def test_tier_two_product_output_is_not_a_current_instruction_exemption(self) -> None:
+        self.write_prior()
+        atomic_write(self.guide, route_guide(NEW))
+        line = len(self.guide.read_text(encoding="utf-8").splitlines()) + 3
+        self.append("\n## Clone and verify the exact product release\n"
+                    f"Install the tier-two release {OLD} now.\n")
+        error = self.assert_refuses("c")
+        self.assertIn(f"{self.guide}:{line}:", error)
+        self.assertIn(OLD, error)
+
+    def test_predecessor_package_in_the_native_fallback_section_passes(self) -> None:
+        prior = self.write_prior()
+        prior["components"]["omp"]["artifact_name"] = "client-prior.zip"
+        atomic_write_json(self.root / "releases" / prior["release"] / "manifest.json", prior)
+        text = (route_guide(NEW) + FALLBACK_SECTION +
+                "Client rollback client-old.zip.\n")
+        atomic_write(self.guide, text)
+        self.assertFalse(self.run_retarget())
+        self.assertEqual(self.guide.read_text(encoding="utf-8"), text)
+
     def test_completed_download_and_package_rollback_clauses_are_occurrence_scoped(self) -> None:
         prior = self.write_prior()
         old = self.before["manifest.json"]["components"]["omp"]
@@ -285,7 +318,8 @@ class RetargetGuideTest(unittest.TestCase):
         new = self.after["manifest.json"]["components"]["omp"]
         for key in ("artifact_url", "artifact_name"):
             with self.subTest(key=key):
-                text = route_guide() + f"Client current {old[key]}; rollback {prior['components']['omp'][key]}.\n"
+                text = (route_guide() + FALLBACK_SECTION
+                        + f"Client current {old[key]}; rollback {prior['components']['omp'][key]}.\n")
                 atomic_write(self.guide, text)
                 self.assertTrue(self.run_retarget())
                 completed = self.guide.read_bytes()
@@ -299,7 +333,7 @@ class RetargetGuideTest(unittest.TestCase):
         self.write_prior()
         for kind in ("Prepared", "Versioned"):
             with self.subTest(kind=kind):
-                text = (f"Rollback release {OLD}.\n\n"
+                text = (FALLBACK_SECTION + f"Rollback release {OLD}.\n\n"
                         f"> **{kind} guide: {NEW} · documented routes**\n\n" + route_guide(NEW))
                 atomic_write(self.guide, text)
                 self.assertFalse(self.run_retarget())
@@ -314,7 +348,7 @@ class RetargetGuideTest(unittest.TestCase):
                            f"rollback `{prior_tag}`; install `{CONTAINER_TAG}`",
                            f"rollback `{prior_tag}`. Install `{CONTAINER_TAG}`"):
             with self.subTest(references=references):
-                atomic_write(self.guide, route_guide() + f"RTX 5090 {references}.\n")
+                atomic_write(self.guide, route_guide() + FALLBACK_SECTION + f"RTX 5090 {references}.\n")
                 self.assertTrue(self.run_retarget())
                 completed = self.guide.read_text(encoding="utf-8")
                 self.assertFalse(self.run_retarget())
@@ -330,7 +364,7 @@ class RetargetGuideTest(unittest.TestCase):
             self.before["manifest.json"]["components"]["ninfer_variants"])
         self.write_releases()
         old_tag = prior["components"]["ninfer_variants"][0]["release_tag"]
-        self.append(f"RTX 4090 current `{NATIVE_TAG}`, rollback `{old_tag}`.\n")
+        self.append(FALLBACK_SECTION + f"RTX 4090 current `{NATIVE_TAG}`, rollback `{old_tag}`.\n")
         self.run_retarget()
         self.assertIn(f"RTX 4090 current `{NATIVE_TAG}`, rollback `{old_tag}`.",
                       self.guide.read_text(encoding="utf-8"))
@@ -341,7 +375,7 @@ class RetargetGuideTest(unittest.TestCase):
         carried["release"] = "v0.19.0"
         atomic_write_json(self.root / "releases" / "v0.19.0" / "manifest.json", carried)
         self.write_prior("v0.19.1", status="candidate")
-        self.append(f"RTX 5090 rollback `{older['components']['ninfer']['source_commit']}`.\n")
+        self.append(FALLBACK_SECTION + f"RTX 5090 rollback `{older['components']['ninfer']['source_commit']}`.\n")
         self.run_retarget()
         self.assertIn(f"RTX 5090 rollback `{SOURCE}`.", self.guide.read_text(encoding="utf-8"))
 
@@ -364,14 +398,56 @@ class RetargetGuideTest(unittest.TestCase):
 
     def test_previous_store_is_allowed_only_at_its_produced_span(self) -> None:
         self.write_prior()
-        self.append("Current checkpoints-v020; rollback checkpoints-v019.\n")
+        self.append(FALLBACK_SECTION + "Current checkpoints-v020; rollback checkpoints-v019.\n")
         self.run_retarget()
         self.assertIn("Current checkpoints-v021; rollback checkpoints-v020.",
                       self.guide.read_text(encoding="utf-8"))
         self.assertFalse(self.run_retarget())
-        original = route_guide() + "Current checkpoints-v020; rollback checkpoints-v019; stray v020.\n"
+        original = (route_guide() + FALLBACK_SECTION
+                    + "Current checkpoints-v020; rollback checkpoints-v019; stray v020.\n")
         atomic_write(self.guide, original)
         self.assert_refuses("c")
+
+    def test_tier_two_checkpoint_exemption_is_limited_to_its_real_guide_block(self) -> None:
+        self.write_prior()
+        text = (route_guide() + "\n## Current release at a glance\n\n"
+                "- **Checkpoint boundary:** Current checkpoints-v020; predecessor checkpoints-v019.\n")
+        atomic_write(self.guide, text)
+        self.assertTrue(self.run_retarget())
+        self.assertFalse(self.run_retarget())
+        completed = self.guide.read_text(encoding="utf-8")
+        atomic_write(self.guide, completed.replace("checkpoints-v021", "checkpoints-v020", 1))
+        self.assert_refuses("c")
+        atomic_write(self.guide, completed)
+        self.append("\nInstall checkpoints-v020 as the current store.\n")
+        self.assert_refuses("c")
+
+    def test_rollback_location_requires_the_expected_previous_identity(self) -> None:
+        prior = self.write_prior()
+        text = (route_guide(NEW) + FALLBACK_SECTION
+                + f"RTX 5090 rollback `{prior['components']['ninfer']['release_tag']}`.\n")
+        atomic_write(self.guide, text)
+        self.assert_refuses("c")
+
+    def test_location_refusals_start_at_v0200_not_the_published_predecessor(self) -> None:
+        for release, predecessor, prior in (("v0.19.0", "v0.18.0", "v0.17.0"),
+                                             ("v0.20.0", "v0.19.0", "v0.18.0")):
+            with self.subTest(release=release), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                for tag, successor in ((prior, False), (predecessor, False), (release, True)):
+                    documents = release_documents(tag, successor=successor)
+                    if tag == prior:
+                        documents["manifest.json"]["components"]["omp"]["artifact_name"] = "client-prior.zip"
+                    for relative, document in documents.items():
+                        atomic_write_json(root / "releases" / tag / relative, document)
+                guide = root / "docs/QUICKSTART.md"
+                atomic_write(guide, route_guide(release)
+                             + "Do not use this rollback package client-old.zip; install it.\n")
+                if release == "v0.19.0":
+                    self.assertFalse(GUIDE.retarget(root, predecessor, release, guide))
+                else:
+                    with self.assertRaisesRegex(GUIDE.Refusal, r"refusal \(c\)"):
+                        GUIDE.retarget(root, predecessor, release, guide)
 
     def test_checkpoint_derivation_keeps_the_frozen_historical_store(self) -> None:
         self.assertEqual(GUIDE.checkpoint_name("v0.16.2"), "checkpoints-v013")

@@ -14,7 +14,7 @@ SPEC = importlib.util.spec_from_file_location("component_provenance", ROOT / "sc
 assert SPEC is not None and SPEC.loader is not None
 VERIFY = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(VERIFY)
-from release_io import atomic_write_json
+from release_io import atomic_write, atomic_write_json
 
 
 class ComponentProvenanceTests(unittest.TestCase):
@@ -95,6 +95,82 @@ class ComponentProvenanceTests(unittest.TestCase):
                          "A derived result is shown."):
             with self.subTest(sentence=sentence):
                 self.assertEqual(VERIFY.provenance_claim_errors(sentence, "evidence"), [])
+
+    def test_notes_and_current_guide_claims_name_the_document_and_line(self):
+        claim = "All runtime components derive from the identical NInfer revision."
+        paths = (self.root / "releases" / self.release / "NINFER_RELEASE_NOTES.md",
+                 self.root / "docs/QUICKSTART.md")
+        for path in paths:
+            with self.subTest(document=path.name):
+                atomic_write(path, f"# Release\n\n> **Versioned guide: {self.release}**\n\n{claim}\n")
+                errors = self.validate({})
+                label = f"{path.relative_to(self.root).as_posix()}:5"
+                self.assertTrue(any(label in error and "ungenerated" in error for error in errors), errors)
+                path.unlink()
+
+    def test_rollback_words_do_not_exempt_current_guide_provenance(self):
+        guide = self.root / "docs/QUICKSTART.md"
+        atomic_write(guide, f"# Quickstart\n\n> **Versioned guide: {self.release}**\n\n"
+                     "## Install the current client\n\n"
+                     "Do not use these rebuilt components for rollback; install them now.\n")
+        errors = self.validate({})
+        self.assertTrue(any("docs/QUICKSTART.md:7" in error for error in errors), errors)
+
+    def test_only_the_real_fallback_location_exempts_predecessor_prose(self):
+        guide = self.root / "docs/QUICKSTART.md"
+        for heading, allowed in (("Shared native operation and fallback", True),
+                                 ("Install the current client", False)):
+            with self.subTest(heading=heading):
+                atomic_write(guide, f"# Quickstart\n\n> **Versioned guide: {self.release}**\n\n"
+                             f"## {heading}\n\n### Package selection and fallback\n\n"
+                             "Retain the predecessor's rebuilt package for rollback.\n")
+                self.assertEqual(bool(self.validate({})), not allowed)
+
+    def test_markdown_allows_exact_statement_not_clauses_or_negations(self):
+        provenance, clauses = VERIFY.component_provenance_parts(
+            self.root, self.release, self.manifest)
+        notes = self.root / "releases" / self.release / "NINFER_RELEASE_NOTES.md"
+        for text, allowed in (
+                (provenance["statement"], True),
+                (provenance["statement"] + "\n\nDocumented routes passed.", True),
+                (provenance["statement"] + " Documented routes passed.", True),
+                ("Current component evidence does not transfer predecessor review approval "
+                 "or authorize production promotion.", True),
+                (next(iter(clauses.values())) + ".", False),
+                ("It is not true that " + provenance["statement"], False),
+                (provenance["statement"] + " All runtimes were rebuilt.", False)):
+            with self.subTest(text=text):
+                atomic_write(notes, "# Release\n\n" + text + "\n")
+                self.assertEqual(bool(self.validate({})), not allowed)
+
+    def test_wrapped_claims_keep_the_claim_sentence_line_and_notes_have_no_rollback_location(self):
+        notes = self.root / "releases" / self.release / "NINFER_RELEASE_NOTES.md"
+        atomic_write(notes, "# Release\n\n## Shared native operation and fallback\n\n"
+                     "### Package selection and fallback\n\n"
+                     "Documented routes passed.\nAll runtime components derive from\n"
+                     "the identical NInfer revision.\n")
+        errors = self.validate({})
+        self.assertTrue(any(f"releases/{self.release}/NINFER_RELEASE_NOTES.md:8" in error
+                            for error in errors), errors)
+
+    def test_claim_free_notes_and_code_examples_remain_ordinary_prose(self):
+        notes = self.root / "releases" / self.release / "NINFER_RELEASE_NOTES.md"
+        atomic_write(notes, "# Release\n\nRuntime identities and support limits come from the ready predecessor.\n"
+                     "Qualification is limited to documented routes.\n\n"
+                     "```text\nAll runtime components were rebuilt.\n```\n\n"
+                     "~~~text\nAll components derive from one source.\n~~~\n\n"
+                     "The example string is `Runtime components were rebuilt`.\n")
+        self.assertEqual(self.validate({}), [])
+
+    def test_historical_and_non_target_guides_are_not_rescanned(self):
+        guide = self.root / "docs/QUICKSTART.md"
+        atomic_write(guide, "# Quickstart\n\n> **Versioned guide: v0.19.0**\n\n"
+                     "All runtime components were rebuilt.\n")
+        self.assertEqual(self.validate({}), [])
+        notes = self.root / "releases/v0.19.0/NINFER_RELEASE_NOTES.md"
+        atomic_write(notes, "# Release\n\nAll runtime components were rebuilt.\n")
+        self.release = "v0.19.0"
+        self.assertEqual(self.validate({}), [])
 
     def test_acceptance_requires_exact_record_note_scope_and_plan_dispositions(self):
         provenance = VERIFY.component_provenance(self.root, self.release, self.manifest)

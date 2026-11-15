@@ -2868,6 +2868,125 @@ PROVENANCE_CLAIM_RE = re.compile(
     r"|(?:same|identical|single|one)[-\s]+(?:\w+[-\s]+){0,2}(?:source|revision|commit)"
     r"|derive[sd]?\s+from)\b", re.IGNORECASE)
 
+# Paths omit the document title. These are the predecessor-reference locations in
+# the versioned guide, not keywords that an unrelated instruction can borrow.
+MarkdownLocation = tuple[str, tuple[str, ...]]
+ROLLBACK_LOCATIONS: frozenset[MarkdownLocation] = frozenset({
+    ("docs/QUICKSTART.md", ("Shared native operation and fallback", "Package selection and fallback")),
+})
+TIER_TWO_LOCATIONS: frozenset[tuple[MarkdownLocation, str]] = frozenset({
+    (("docs/QUICKSTART.md", ("Current release at a glance",)), "- **Checkpoint boundary:**"),
+    (("docs/QUICKSTART.md", ("3. Prepare the model and key on the inference host",)), "Release "),
+    (("docs/QUICKSTART.md", ("4. Start NInfer on the inference host",)), "For an upgrade from "),
+})
+
+
+def markdown_heading_paths(text: str) -> list[tuple[str, ...]]:
+    """Read real Markdown headings only; fenced examples cannot change a location."""
+    paths = []
+    headings: list[tuple[int, str]] = []
+    fence: str | None = None
+    for line in text.splitlines():
+        marker = re.match(r"^ {0,3}(`{3,}|~{3,})", line)
+        if marker:
+            if fence is None:
+                fence = marker[1]
+            elif marker[1][0] == fence[0] and len(marker[1]) >= len(fence):
+                fence = None
+        elif fence is None:
+            heading = re.match(r"^ {0,3}(#{1,6})[ \t]+(.+?)\s*#*\s*$", line)
+            if heading:
+                level = len(heading[1])
+                headings = [item for item in headings if item[0] < level]
+                if level > 1:
+                    headings.append((level, heading[2]))
+        paths.append(tuple(title for _, title in headings))
+    return paths
+
+
+def guide_reference_location(location: MarkdownLocation, block: str, *, tier_two: bool = False,
+                             position: int | None = None) -> bool:
+    allowed = location in ROLLBACK_LOCATIONS or (
+        tier_two and any(location == section and block.lstrip().startswith(prefix)
+                         for section, prefix in TIER_TWO_LOCATIONS))
+    if not allowed or position is None:
+        return allowed
+    # A predecessor reference does not exempt the current identity in the same
+    # paragraph or table row. Roles are considered only inside the closed locations.
+    prefix = re.split(r"[,;]|[.!?](?=\s)", block[:position])[-1]
+    roles = re.findall(
+        r"\b(?:current|rollback|predecessor|retained|incumbent|upgrade\s+from"
+        r"|matching\s+published|keeping\s+a)\b", prefix, re.IGNORECASE)
+    return bool(roles and roles[-1].lower() != "current")
+
+
+def markdown_units(text: str, file: str, *,
+                   generated: tuple[str, ...] = ()) -> Iterator[tuple[MarkdownLocation, int, str]]:
+    """Yield located prose sentences, excluding code and exact generated sentences."""
+    paths = markdown_heading_paths(text)
+    first, paragraph = 0, []
+    fence: str | None = None
+
+    def units() -> Iterator[tuple[MarkdownLocation, int, str]]:
+        if not paragraph:
+            return
+        body = "\n".join(paragraph)
+        location = (file, paths[first - 1])
+        if guide_reference_location(location, body, tier_two=True):
+            return
+        # Only complete generated sentences are admitted, never a clause or a
+        # generated statement embedded in a negation or another authored claim.
+        for statement in generated:
+            for match in reversed(list(re.finditer(re.escape(statement), body))):
+                prefix, suffix = body[:match.start()], body[match.end():]
+                if ((not prefix.strip() or re.search(r"[.!?]\s+\Z", prefix))
+                        and (not suffix or suffix[0].isspace())):
+                    body = body[:match.start()] + re.sub(r"[^\n]", " ", match[0]) + suffix
+        body = re.sub(r"(`+)(?!`).*?(?<!`)\1(?!`)",
+                      lambda match: re.sub(r"[^\n]", " ", match[0]), body, flags=re.DOTALL)
+        body = re.sub(r"(?<=\]\()[^)]+(?=\))", lambda match: " " * len(match[0]), body)
+        for match in re.finditer(r"\S[\s\S]*?(?:[.!?](?=\s|$)|\Z)", body):
+            yield location, first + body.count("\n", 0, match.start()), match[0]
+
+    for number, line in enumerate([*text.splitlines(), ""], 1):
+        marker = re.match(r"^ {0,3}(`{3,}|~{3,})", line)
+        heading = re.match(r"^ {0,3}#{1,6}[ \t]+", line)
+        item = re.match(r"^\s*(?:[-+*]|\d+[.)])\s+|^\s*\|", line)
+        if marker or not line.strip() or (fence is None and (heading or item)):
+            yield from units()
+            paragraph = []
+        if marker:
+            if fence is None:
+                fence = marker[1]
+            elif marker[1][0] == fence[0] and len(marker[1]) >= len(fence):
+                fence = None
+        elif fence is None and line.strip() and not heading:
+            first = first if paragraph else number
+            paragraph.append(line)
+
+
+def validate_markdown_component_provenance(root: Path, release: str, statement: str,
+                                           errors: list[str]) -> None:
+    notes = root / "releases" / release / "NINFER_RELEASE_NOTES.md"
+    guide = root / "docs/QUICKSTART.md"
+    documents = [notes] if notes.is_file() else []
+    if guide.is_file():
+        text = guide.read_text(encoding="utf-8")
+        units = list(markdown_units(text, "docs/QUICKSTART.md"))
+        declaration = next((match[1] for _, _, sentence in units
+                            if (match := re.search(
+                                r"\*\*(?:Prepared|Versioned) guide:[ \t]+(v\d+\.\d+\.\d+)(?![\w.-])",
+                                sentence))), None)
+        newest = max((path.parent.name for path in (root / "releases").glob("*/manifest.json")
+                      if ga_release(path.parent.name)), key=product_version, default=release)
+        if declaration == release or (declaration is None and newest == release):
+            documents.append(guide)
+    for document in documents:
+        label = document.relative_to(root).as_posix()
+        for _, line, sentence in markdown_units(document.read_text(encoding="utf-8"), label,
+                                                generated=(statement,)):
+            errors.extend(provenance_claim_errors(sentence, f"{label}:{line}"))
+
 
 def validate_component_tag_bindings(root: Path, release: str, manifest: dict[str, Any],
                                     errors: list[str]) -> None:
@@ -3002,6 +3121,7 @@ def validate_component_provenance(
                                   external if path == external_path else load_json(path)))
         for label, document in documents:
             errors.extend(provenance_claim_errors(document, label, statement=statement, clauses=clauses))
+        validate_markdown_component_provenance(root, release, statement, errors)
         return
     require(external.get("component_provenance") == provenance,
             "composed acceptance component_provenance must equal the manifest-derived record", errors)
@@ -4523,6 +4643,8 @@ def validate(
         if lint_metadata is not None:
             lint_metadata.update(lint_phase=through, skipped_checks=skipped)
     else:
+        if require_installable:
+            validate_component_provenance(root, selected_release, manifest, compatibility, qualification, errors)
         next(row for row in READY_CHECKS if row.name == "validate_markdown_links").run(context, errors)
         if upstream_omp and warnings is not None:
             ready_upstream_client_leftovers(context, warnings)
