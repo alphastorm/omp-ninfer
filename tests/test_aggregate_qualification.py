@@ -527,6 +527,9 @@ class PrivateAggregateGoldenTests(unittest.TestCase):
             plan["decisions"] = [{"id": path.stem, "kind": "waiver" if "waiver" in path.stem else "scope",
                                   "sha256": AGGREGATE.sha(path.read_bytes())}
                                  for path in sorted(decision_root.glob("*.json"))]
+            # A re-cut lane's publication authorization is a plan decision too. It is never a
+            # bundle member or a release file, so the replayed outputs below must not change.
+            plan["decisions"].append({"id": "cut-rtx3090", "kind": "component-cut", "sha256": "c" * 64})
             plan_path = root / "releases/v0.19.0/plan.json"
             atomic_write_json(plan_path, plan)
             old_manifest = deepcopy(manifest)
