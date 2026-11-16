@@ -94,6 +94,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `aggregate_qualification.py admit` skips `component-cut` plan decisions, as the decision binder
+  already did. A release with a re-cut native lane and a committed cut authorization no longer
+  refuses at admission for a `cut-<lane>.json` that no bundle carries; cut authorizations stay out
+  of the release tree.
 - The release driver stages re-cut runtimes with their current publication, artifact
   authentication, build identity and qualification receipts, including the authenticated archive
   size; it stages operator-authored notes before validating the draft.

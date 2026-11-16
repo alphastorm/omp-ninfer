@@ -266,6 +266,8 @@ def admit_outputs(root: Path, release: str, plan_path: Path, directories: dict[s
                       "slow-first-request-parity-waiver-class": 2}
     planned_decisions = list(enumerate(field(plan, "decisions", list, plan_path)))
     for index, item in sorted(planned_decisions, key=lambda pair: decision_order.get(pair[1].get("id"), 3)):
+        if item.get("kind") == "component-cut":
+            continue  # Bound by the plan and checked by the cut step; never a bundle member or release file.
         identifier = field(item, "id", str, plan_path, f"/decisions/{index}")
         require(re.fullmatch(r"[a-z][a-z0-9-]*", identifier), plan_path, f"/decisions/{index}/id",
                 "expected a decision filename stem")
