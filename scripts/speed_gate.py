@@ -2,9 +2,14 @@
 """Reduce native ABBA captures under their release's recorded speed decision.
 
 The declaration embeds the release's hash-bound qualification decision, binding
-its authenticated rule into the pre-screen plan. Both weighted suites and every case
-must pass. Output bytes must match across all arms unless the decision selects
-within-engine identity and binds this lane/candidate's passing EXP-085 screen.
+its authenticated rule into the pre-screen plan. Both weighted suites must pass.
+The per-case floor covers every case unless that decision selects
+"every byte-identical case", which checks only outputs identical in all four
+ABBA arms and skips the per-case check when none are identical. This scope requires
+the screened output rule: changed-output cases remain subject to both weighted
+ratios and this lane/candidate's bound passing EXP-085 screen. Within-engine
+identity is always required. Otherwise output bytes must match across all arms
+unless the decision selects within-engine identity and binds that passing screen.
 Identity comparisons always bind both digests and compare build profiles when both records
 carry them; an absent historical profile is not replaced by a lane default.
 Non-default identity-first builds require the hash-bound decision's
@@ -90,7 +95,7 @@ def _arm_mismatches(observed: dict[str, str], expected: dict[str, str]) -> list[
     return [field for field in fields if observed.get(field) != expected.get(field)]
 
 
-def recorded_thresholds(decision: Any, release: Any) -> dict[str, float]:
+def recorded_thresholds(decision: Any, release: Any) -> dict[str, Any]:
     if (not isinstance(release, str) or not release
             or not isinstance(decision, dict)
             or decision.get("artifact_type") != "omp_ninfer_founder_gate_decision"
@@ -105,10 +110,20 @@ def recorded_thresholds(decision: Any, release: Any) -> dict[str, float]:
     applies_to = rule.get("applies_to")
     if (not isinstance(applies_to, list) or len(applies_to) != 3
             or any(not isinstance(item, str) for item in applies_to)
-            or set(applies_to) != {"role weighted", "all-cases weighted", "every case"}):
-        raise SpeedGateError("decision rule must cover role weighted, all-cases weighted and every case")
-    return {"weighted_minimum": positive_number(rule.get("weighted_decode_ratio_minimum"), "weighted minimum"),
-            "every_case_minimum": positive_number(rule.get("every_case_ratio_minimum"), "every-case minimum")}
+            or set(applies_to) not in (
+                {"role weighted", "all-cases weighted", "every case"},
+                {"role weighted", "all-cases weighted", "every byte-identical case"})):
+        raise SpeedGateError("decision rule must cover role weighted, all-cases weighted and "
+                             "every case or every byte-identical case")
+    identical_scope = "every byte-identical case" in applies_to
+    if identical_scope and rule["byte_identical_normalized_outputs"] != SCREEN_OUTPUT_RULE:
+        raise SpeedGateError("every byte-identical case scope requires the screened output-byte rule")
+    thresholds: dict[str, Any] = {
+        "weighted_minimum": positive_number(rule.get("weighted_decode_ratio_minimum"), "weighted minimum"),
+        "every_case_minimum": positive_number(rule.get("every_case_ratio_minimum"), "every-case minimum")}
+    if identical_scope:
+        thresholds["every_case_scope"] = "byte-identical"
+    return thresholds
 
 
 def authenticate_decision(value: dict[str, Any], root: Path) -> None:
@@ -359,9 +374,12 @@ def reduce(gate: dict[str, Any], captures: Sequence[dict[str, Any]],
     all_cases = summarize(arms, case_ids, thresholds["every_case_minimum"])
     reasons = identity_differences(gate, arms, plan, root=root)
     mismatches = output_mismatches(captures)
+    identical_scope = thresholds.get("every_case_scope") == "byte-identical"
+    case_floor = (summarize(arms, case_ids - set(mismatches), thresholds["every_case_minimum"])
+                  if identical_scope else all_cases)
     passed = (roles is not None and roles["weighted_decode_ratio"] >= thresholds["weighted_minimum"]
               and all_cases["weighted_decode_ratio"] >= thresholds["weighted_minimum"]
-              and all_cases["minimum_case_ratio"] >= thresholds["every_case_minimum"])
+              and (case_floor is None or case_floor["minimum_case_ratio"] >= thresholds["every_case_minimum"]))
     screened = gate["decision"]["rule"]["byte_identical_normalized_outputs"] == SCREEN_OUTPUT_RULE
     within_mismatches = output_mismatches(captures, within_engine=True) if screened else mismatches
     screen_sha = (passing_screen(gate, arms[1]["identity"], root if root is not None else ROOT)
@@ -382,6 +400,8 @@ def reduce(gate: dict[str, Any], captures: Sequence[dict[str, Any]],
             "supplemental": summarize(arms, case_ids - role_ids, thresholds["every_case_minimum"]),
             "all_cases": all_cases,
             "arms": arms}
+    if identical_scope:
+        result["identical_cases"] = case_floor
     if screened:
         result.update(output_rule=SCREEN_OUTPUT_RULE, output_rule_passed=output_passed,
                       within_engine_outputs_identical=not within_mismatches,
