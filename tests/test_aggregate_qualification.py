@@ -25,6 +25,7 @@ assert HISTORY_SPEC is not None and HISTORY_SPEC.loader is not None
 HISTORY = importlib.util.module_from_spec(HISTORY_SPEC)
 HISTORY_SPEC.loader.exec_module(HISTORY)
 from release_io import atomic_write, atomic_write_json
+from acceptance_fixtures import successor_release
 
 
 def load(path):
@@ -67,12 +68,8 @@ def staging_versions(root):
                 ready.append((AGGREGATE.verifier.product_version(path.parent.name), path.parent.name))
     if not ready:
         raise AssertionError("carry-all fixture requires a ready public predecessor")
-    version, predecessor = max(ready)
-    major, minor, _ = version
-    minor += 1
-    while (root / "releases" / f"v{major}.{minor}.0").exists():
-        minor += 1
-    return predecessor, f"v{major}.{minor}.0"
+    _, predecessor = max(ready)
+    return predecessor, successor_release(root)
 
 
 def restore_predecessor_authority(root, release):
@@ -106,6 +103,24 @@ class StagingVersionTests(unittest.TestCase):
             atomic_write_json(root / "releases/v0.19.0/manifest.json", {"status": "ready"})
             atomic_write_json(root / "releases/v0.20.0/manifest.json", {"status": "draft"})
             self.assertEqual(staging_versions(root), ("v0.19.0", "v0.21.0"))
+
+    def test_plan_only_directory_above_a_gap_bounds_the_successor(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            atomic_write_json(root / "releases/v0.19.0/manifest.json", {"status": "ready"})
+            atomic_write_json(root / "releases/v0.25.3/plan.json", {})
+            (root / "releases/notes").mkdir()
+            atomic_write(root / "releases/v99.0.0", "not a release directory\n")
+            self.assertEqual(staging_versions(root), ("v0.19.0", "v0.26.0"))
+
+    def test_successor_orders_prerelease_directories_numerically_across_majors(self):
+        for release, successor in (("v0.100.7-rc.1", "v0.101.0"), ("v2.3.0-rc.1", "v2.4.0")):
+            with self.subTest(release=release), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                atomic_write_json(root / "releases/v0.9.0/manifest.json", {"status": "ready"})
+                atomic_write_json(root / "releases/v0.19.0/manifest.json", {"status": "ready"})
+                (root / "releases" / release).mkdir()
+                self.assertEqual(staging_versions(root), ("v0.19.0", successor))
 
 
 class CarriedAggregateTests(unittest.TestCase):

@@ -70,8 +70,7 @@ class CollectorTests(unittest.TestCase):
         self.root.mkdir()
         previous = FIXTURES.predecessor(ROOT)
         current = previous["release"]
-        major, minor, _ = COLLECT.composer.product_version(current)
-        self.release = f"v{major}.{minor + 1}.0"
+        self.release = FIXTURES.successor_release(ROOT)
         directory = self.root / "releases" / self.release
         shutil.copytree(ROOT / "releases" / current, directory)
         atomic_write_json(self.root / "releases" / current / "manifest.json",
