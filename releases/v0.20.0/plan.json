@@ -1,0 +1,51 @@
+{
+  "artifact_type": "omp_ninfer_release_plan",
+  "schema_version": 1,
+  "release": "v0.20.0",
+  "predecessor": "v0.19.0",
+  "client": {
+    "upstream_tag": "v18.20.2",
+    "disposition": "updated"
+  },
+  "components": [
+    {
+      "id": "rtx5090-container",
+      "disposition": "recut",
+      "release_tag": "v0.7.0-qwen38-5090-beta.9",
+      "source_commit": "ca4c39179921e85defa9141db5fff7c2b05d7136"
+    },
+    {
+      "id": "rtx4090-windows-native",
+      "disposition": "recut",
+      "release_tag": "v0.8.0-qwen38-4090-beta.5",
+      "source_commit": "ca4c39179921e85defa9141db5fff7c2b05d7136"
+    },
+    {
+      "id": "rtx3090-windows-native",
+      "disposition": "recut",
+      "release_tag": "v0.8.0-qwen38-3090-beta.5",
+      "source_commit": "ca4c39179921e85defa9141db5fff7c2b05d7136"
+    }
+  ],
+  "platforms": {
+    "darwin-remote-ssh": "preview",
+    "windows-docker-local": "qualified",
+    "linux-docker-local": "qualified"
+  },
+  "limitations": [
+    "Stock upstream OMP 18.20.2 uses explicit qwen3 tokenizers for opaque aliases, supported effort clamps and disabled automatic update/setup. Explicit omp update remains an operator action.",
+    "Retained RTX 5090 qwen38-5090-v0.13.0 configuration 751d22dc, 131072 context, BF16 auto KV, DFlash2 K7, C2 and 180-second pending timeout; optional pacing stays off. No fairness or general performance guarantee.",
+    "Successor host checkpoints-v020 is isolated from predecessor checkpoints-v019, checkpoints-v018, checkpoints-v017 and checkpoints-v013; retained container mount/profile names do not establish cross-binary checkpoint compatibility. Preserve old stores and replay authoritative OMP transcripts.",
+    "Durable sessions use identity codec qwen-identity/2 and parser codec qwen-parser/2; checkpoints written by earlier releases are refused, so a resumed session's first turn prefills again.",
+    "Retryable pressure-save refusals (filesystem capacity, I/O outage, stale tag) settle after six retries or 10 seconds with one pressure/abandoned receipt; a refusal from the store's own quota (reason quota) settles at once with no pressure/abandoned receipt. Deferred coordinator residuals are tracked in https://github.com/alphastorm/ninfer/issues/123.",
+    "No predecessor waiver, live-client acceptance, product review approval or public installation result grants this candidate a pass. Fresh five-route acceptance, restoration, composition and exact-subject reviews remain separate gates.",
+    "macOS remains manual-SSH preview; Linux client evidence is WSL2-scoped. Image input is RTX 5090 macOS/Windows only. Publication and production promotion remain founder-owned."
+  ],
+  "decisions": [
+    {
+      "id": "v020-scope-s3",
+      "kind": "scope",
+      "sha256": "4467a95e45840cccd3cd95f597f509807abe76f157d44104b90dfe458aaa6959"
+    }
+  ]
+}
