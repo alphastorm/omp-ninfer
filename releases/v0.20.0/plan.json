@@ -51,6 +51,11 @@
       "id": "v020-native-speed-rule",
       "kind": "scope",
       "sha256": "f3e3569f2b55f1cee8450d5d51b51e8767a7c5122e50793e50f6932acfa1e2fe"
+    },
+    {
+      "id": "cut-rtx5090",
+      "kind": "component-cut",
+      "sha256": "0a4b594ed4bc4c67ad09922cdfe4e18c4f21930f9934b251b265354c5feafbf4"
     }
   ]
 }
