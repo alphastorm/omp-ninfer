@@ -23,6 +23,7 @@ SPEC = importlib.util.spec_from_file_location("release_rehearsal_test", ROOT / "
 assert SPEC is not None and SPEC.loader is not None
 DRIVER = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(DRIVER)
+from acceptance_fixtures import successor_release
 
 
 class ReleaseRehearsalTests(unittest.TestCase):
@@ -81,18 +82,15 @@ class ReleaseRehearsalTests(unittest.TestCase):
             clone = Path(temporary) / "product"
             subprocess.run(["git", "clone", "--quiet", "--shared", str(ROOT), str(clone)],
                            check=True, capture_output=True)
-            ready = DRIVER.latest_ready_manifest(clone)["release"]
-            major, minor, _ = map(int, ready[1:].split("."))
-            later = f"v{major}.{minor + 1}.0"
+            later = successor_release(clone)
             plan = clone / "releases" / later / "plan.json"
-            if not plan.parent.exists():
-                plan.parent.mkdir(parents=True)
-                plan.write_text("{}\n", encoding="utf-8")
-                subprocess.run(["git", "add", "--", str(plan)], cwd=clone, check=True, capture_output=True)
-                subprocess.run(["git", "-c", "user.name=Release fixture", "-c",
-                                "user.email=release@example.invalid", "-c", "commit.gpgsign=false",
-                                "commit", "--quiet", "-m", f"chore(release): plan {later}"],
-                               cwd=clone, check=True, capture_output=True)
+            plan.parent.mkdir(parents=True)
+            plan.write_text("{}\n", encoding="utf-8")
+            subprocess.run(["git", "add", "--", str(plan)], cwd=clone, check=True, capture_output=True)
+            subprocess.run(["git", "-c", "user.name=Release fixture", "-c",
+                            "user.email=release@example.invalid", "-c", "commit.gpgsign=false",
+                            "commit", "--quiet", "-m", f"chore(release): plan {later}"],
+                           cwd=clone, check=True, capture_output=True)
             head = DRIVER.git(clone, "rev-parse", "HEAD").strip()
             output = io.StringIO()
             with contextlib.redirect_stdout(output), contextlib.redirect_stderr(output):

@@ -1494,8 +1494,7 @@ class AcceptanceFixtureCommandTests(unittest.TestCase):
                 shutil.copy2(ROOT / "tests" / name, root / "tests" / name)
             previous = FIXTURES.predecessor(root)
             source = previous["release"]
-            major, minor, _ = MODULE.product_version(source)
-            release = f"v{major}.{minor + 1}.0"
+            release = FIXTURES.successor_release(root)
             directory = root / "releases" / release
             shutil.copytree(root / "releases" / source, directory)
             manifest = json.loads((directory / "manifest.json").read_text().replace(
