@@ -73,6 +73,33 @@ def record_decision(root, gate):
     return path
 
 
+def screened_fixture(root):
+    gate, captures = fixture()
+    gate["lane"] = "rtx4090"
+    gate["decision"]["rule"].update(
+        weighted_decode_ratio_minimum=0.98, byte_identical_normalized_outputs=SCREEN_RULE,
+        applies_to=["role weighted", "all-cases weighted", "every byte-identical case"])
+    screen = json.loads(
+        (ROOT / "releases/v0.16.0/qualification/rtx4090-windows-native.quality-screen.json").read_text())
+    for role, index in (("production", 0), ("production_determinism", 0),
+                        ("candidate", 1), ("candidate_determinism", 1)):
+        screen["runs"][role]["arm"].update(
+            server_binary_sha256=captures[index]["identity"]["binary_sha256"],
+            configuration_sha256=digest(captures[index]["identity"]["config"]))
+    path = root / "releases" / gate["release"] / "qualification/screen.json"
+    path.write_text(json.dumps(screen), encoding="utf-8")
+    gate["decision"]["quality_screens"] = [{
+        "lane": gate["lane"], "repository_path": path.relative_to(root).as_posix(),
+        "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}]
+    for arm in captures:
+        for row, tokens in zip(arm["requests"], (100, 100) if arm["arm"] == "A" else (94, 110)):
+            row.update(completion_tokens=tokens, decode_seconds=1)
+        if arm["arm"] == "B":
+            arm["requests"][0]["normalized_output"] += " changed"
+    record_decision(root, gate)
+    return gate, captures
+
+
 class SpeedDecisionBindingTests(unittest.TestCase):
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()
@@ -127,6 +154,120 @@ class SpeedGateTests(unittest.TestCase):
         patch = mock.patch.object(SPEED, "ROOT", self.root)
         patch.start()
         self.addCleanup(patch.stop)
+
+    def test_byte_identical_scope_allows_screened_changed_case_below_floor(self):
+        gate, captures = screened_fixture(self.root)
+        result = SPEED.reduce(gate, captures, plan_for(gate, captures))
+        self.assertEqual(result["status"], "PASS")
+        self.assertTrue(result["thresholds_passed"])
+        self.assertTrue(result["gate_passed"])
+        self.assertEqual(result["thresholds"], {
+            "weighted_minimum": 0.98, "every_case_minimum": 0.95,
+            "every_case_scope": "byte-identical"})
+        self.assertAlmostEqual(result["all_cases"]["minimum_case_ratio"], 0.94)
+        self.assertEqual(result["all_cases"]["below_case_floor"], ["log-024@0"])
+        self.assertEqual(result["identical_cases"], SPEED.summarize(
+            result["arms"], {"role-002@0"}, 0.95))
+        self.assertEqual(result["output_mismatch_case_ids"], ["log-024@0"])
+        self.assertTrue(result["within_engine_outputs_identical"])
+        self.assertEqual(result["quality_screen_sha256"], gate["decision"]["quality_screens"][0]["sha256"])
+
+    def test_every_case_scope_still_rejects_the_same_screened_changed_case(self):
+        gate, captures = screened_fixture(self.root)
+        gate["decision"]["rule"]["applies_to"] = ["role weighted", "all-cases weighted", "every case"]
+        record_decision(self.root, gate)
+        result = SPEED.reduce(gate, captures, plan_for(gate, captures))
+        self.assertEqual(result["status"], "FAIL")
+        self.assertFalse(result["thresholds_passed"])
+        self.assertTrue(result["output_rule_passed"])
+        self.assertGreaterEqual(result["role_suite"]["weighted_decode_ratio"], 0.98)
+        self.assertGreaterEqual(result["all_cases"]["weighted_decode_ratio"], 0.98)
+        self.assertAlmostEqual(result["all_cases"]["minimum_case_ratio"], 0.94)
+        self.assertEqual(result["thresholds"], {"weighted_minimum": 0.98, "every_case_minimum": 0.95})
+        self.assertNotIn("identical_cases", result)
+
+    def test_byte_identical_scope_still_enforces_the_inclusive_identical_case_floor(self):
+        for candidate_tokens, status in ((94, "FAIL"), (95, "PASS")):
+            with self.subTest(candidate_tokens=candidate_tokens):
+                gate, captures = screened_fixture(self.root)
+                for arm in captures:
+                    if arm["arm"] == "B":
+                        for row, tokens in zip(arm["requests"], (110, candidate_tokens)):
+                            row["completion_tokens"] = tokens
+                result = SPEED.reduce(gate, captures, plan_for(gate, captures))
+                self.assertEqual(result["status"], status)
+                self.assertEqual(result["thresholds_passed"], status == "PASS")
+                self.assertTrue(result["output_rule_passed"])
+                self.assertGreaterEqual(result["role_suite"]["weighted_decode_ratio"], 0.98)
+                self.assertGreaterEqual(result["all_cases"]["weighted_decode_ratio"], 0.98)
+                self.assertEqual(result["identical_cases"]["case_count"], 1)
+                self.assertAlmostEqual(result["identical_cases"]["minimum_case_ratio"], candidate_tokens / 100)
+                self.assertEqual(result["identical_cases"]["below_case_floor"],
+                                 ["role-002@0"] if status == "FAIL" else [])
+
+    def test_byte_identical_scope_requires_the_screened_output_rule(self):
+        gate, _ = screened_fixture(self.root)
+        gate["decision"]["rule"]["byte_identical_normalized_outputs"] = SPEED.OUTPUT_RULE
+        record_decision(self.root, gate)
+        with self.assertRaisesRegex(SPEED.SpeedGateError, "requires the screened output-byte rule"):
+            SPEED.recorded_thresholds(gate["decision"], gate["release"])
+        with self.assertRaisesRegex(SPEED.SpeedGateError, "requires the screened output-byte rule"):
+            SPEED.declaration(gate)
+
+    def test_byte_identical_scope_with_every_case_changed_uses_both_weighted_floors(self):
+        for candidate_tokens, roles, status in (
+                ((94, 102), ["role-002@0"], "PASS"),
+                ((94, 100), ["role-002@0"], "FAIL"),
+                ((94, 110), ["log-024@0"], "FAIL")):
+            with self.subTest(candidate_tokens=candidate_tokens, roles=roles):
+                gate, captures = screened_fixture(self.root)
+                gate["role_case_ids"] = roles
+                for arm in captures:
+                    if arm["arm"] == "B":
+                        for row, tokens in zip(arm["requests"], candidate_tokens):
+                            row["completion_tokens"] = tokens
+                        arm["requests"][1]["normalized_output"] += " changed"
+                result = SPEED.reduce(gate, captures, plan_for(gate, captures))
+                self.assertEqual(result["status"], status)
+                self.assertEqual(result["thresholds_passed"], status == "PASS")
+                self.assertTrue(result["output_rule_passed"])
+                self.assertIsNone(result["identical_cases"])
+                self.assertEqual(result["output_mismatch_case_ids"], ["log-024@0", "role-002@0"])
+                self.assertLess(result["all_cases"]["minimum_case_ratio"], 0.95)
+                self.assertEqual(result["thresholds_passed"],
+                                 result["role_suite"]["weighted_decode_ratio"] >= 0.98
+                                 and result["all_cases"]["weighted_decode_ratio"] >= 0.98)
+
+    def test_byte_identical_scope_with_no_changed_outputs_needs_no_screen(self):
+        gate, captures = screened_fixture(self.root)
+        gate["decision"]["quality_screens"] = []
+        record_decision(self.root, gate)
+        for index in (1, 2):
+            captures[index]["requests"][0]["normalized_output"] = captures[0]["requests"][0]["normalized_output"]
+        result = SPEED.reduce(gate, captures, plan_for(gate, captures))
+        self.assertEqual(result["status"], "FAIL")
+        self.assertFalse(result["thresholds_passed"])
+        self.assertTrue(result["output_rule_passed"])
+        self.assertEqual(result["identical_cases"], result["all_cases"])
+        self.assertIsNone(result["quality_screen_sha256"])
+
+    def test_byte_identical_scope_preserves_screen_and_within_engine_requirements(self):
+        for change in ("screen", 0, 1, 2, 3):
+            with self.subTest(change=change):
+                gate, captures = screened_fixture(self.root)
+                if change == "screen":
+                    gate["decision"]["quality_screens"] = []
+                    record_decision(self.root, gate)
+                else:
+                    captures[change]["requests"][1]["normalized_output"] += " nondeterministic"
+                result = SPEED.reduce(gate, captures, plan_for(gate, captures))
+                self.assertEqual(result["status"], "FAIL")
+                self.assertTrue(result["thresholds_passed"])
+                self.assertFalse(result["output_rule_passed"])
+                self.assertFalse(result["gate_passed"])
+                if change != "screen":
+                    self.assertFalse(result["within_engine_outputs_identical"])
+                    self.assertIsNone(result["identical_cases"])
 
     def test_recorded_native_no_regression_rule_replaces_the_speedup_floor(self):
         gate, captures = fixture()
@@ -290,6 +431,7 @@ class SpeedGateTests(unittest.TestCase):
         self.assertTrue(result["gate_predictive"])
         self.assertTrue(result["gate_passed"])
         self.assertEqual(result["diagnostic_reasons"], [])
+        self.assertNotIn("identical_cases", result)
         for source, receipt in zip(captures, result["arms"]):
             self.assertEqual(receipt["identity"]["binary_sha256"], source["identity"]["binary_sha256"])
             self.assertEqual(receipt["identity"]["configuration_sha256"], digest(source["identity"]["config"]))
