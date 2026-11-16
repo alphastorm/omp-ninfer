@@ -244,7 +244,7 @@ applies the same `>= 0.98` / `>= 0.95` floors on RTX 3090 `beta.4` `tc` against 
 (`856ac8d2`). The earlier v0.16.0 speedup-claim rule remains expressible by
 recording `1.08` / `0.95` instead.
 Both role-only and combined role-plus-supplemental weighted ratios must clear the
-recorded weighted floor; the every-case floor covers the combined suite.
+recorded weighted floor; by default, the every-case floor covers the combined suite.
 The default output rule requires identity within **and across** engines. A second,
 explicitly decision-selected rule requires identity **within each engine**
 (`A0/A3`, `B1/B2`) and admits cross-engine differences only with that decision's
@@ -279,6 +279,17 @@ Before collecting candidate data, freeze one `gate.json` declaration:
   measured binary/configuration identities. Missing, failed, foreign or rehashed
   evidence cannot authorize differences. Byte-identical cross-engine outputs
   need no screen under either output rule; within-engine differences always fail.
+- Only with that screened output rule may the release's hash-bound decision
+  select `applies_to: ["role weighted", "all-cases weighted", "every byte-identical case"]`.
+  The per-case floor then covers only cases whose normalized outputs are
+  byte-identical in all four arms (`A0`, `B1`, `B2`, `A3`); if none are identical,
+  there is no per-case check. Changed-output cases remain in both weighted
+  ratios and require the bound passing EXP-085 screen. The thresholds are
+  unchanged (`0.98` weighted / `0.95` per case for the no-regression rule), and
+  within-engine identity remains mandatory. This scope is refused with the
+  strict cross-engine output rule. Its result adds `identical_cases`, the
+  identical subset's summary or `null` when empty. Decisions selecting
+  `"every case"` retain the full per-case floor and unchanged result format.
 - `comparator`: `binary_sha256` of the shipped incumbent executable and
   `configuration_sha256` of its measured configuration. A candidate executable
   configured for MTP3 is **not** the shipped-incumbent comparator.
