@@ -18,6 +18,7 @@ assert SPEC is not None and SPEC.loader is not None
 VERIFY = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(VERIFY)
 from release_io import atomic_write, atomic_write_json
+from acceptance_fixtures import successor_release
 
 HISTORY_SPEC = importlib.util.spec_from_file_location("lint_history", ROOT / "tests/history.py")
 assert HISTORY_SPEC is not None and HISTORY_SPEC.loader is not None
@@ -32,8 +33,7 @@ DRIVER_SPEC.loader.exec_module(DRIVER)
 def stage_successor(root: Path) -> str:
     """Build the complete carry-all stage group, not the raw stager's intermediate output."""
     source = DRIVER.latest_ready_manifest(root)
-    major, minor, _ = VERIFY.product_version(source["release"])
-    release = f"v{major}.{minor + 1}.0"
+    release = successor_release(root)
     for key, value in (("user.name", "Release fixture"), ("user.email", "release@example.invalid"),
                        ("commit.gpgsign", "false")):
         DRIVER.git(root, "config", key, value)

@@ -21,6 +21,7 @@ SPEC = importlib.util.spec_from_file_location("receipt_audit", ROOT / "scripts" 
 assert SPEC is not None and SPEC.loader is not None
 AUDIT = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(AUDIT)
+from acceptance_fixtures import successor_release
 
 PREVIOUS = "v0.19.0"
 RELEASE = "v0.20.0"
@@ -61,6 +62,7 @@ def stage_carry_all(root: Path) -> subprocess.CompletedProcess[str]:
 import argparse
 import importlib.util
 import json
+import sys
 from pathlib import Path
 
 root = Path.cwd()
@@ -68,11 +70,7 @@ spec = importlib.util.spec_from_file_location("receipt_audit_driver", root / "sc
 driver = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(driver)
 previous = driver.latest_ready_manifest(root)
-major, minor, _ = map(int, previous["release"][1:].split("."))
-minor += 1
-while (root / "releases" / f"v{major}.{minor}.0").exists():
-    minor += 1
-release = f"v{major}.{minor}.0"
+release = sys.argv[1]
 driver.init_plan(root, release)
 notes = root / ".release-state" / "receipt-audit" / "stage-notes.md"
 driver.atomic_write(notes, f"# {release}\\n\\nSynthetic host-free audit fixture.\\n"
@@ -85,7 +83,8 @@ candidate = driver.ReleaseDriver(root, release, argparse.Namespace(
 driver.run_pipeline(candidate, finalize=False, no_suite=True, through="stage")
 print(json.dumps({"release": release, "predecessor": predecessor}))
 """
-    return subprocess.run([sys.executable, "-c", code], cwd=root, capture_output=True, text=True)
+    return subprocess.run([sys.executable, "-c", code, successor_release(root)],
+                          cwd=root, capture_output=True, text=True)
 
 
 class ReceiptAuditTest(unittest.TestCase):

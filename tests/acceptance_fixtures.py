@@ -192,6 +192,14 @@ def predecessor(root: Path, release: str | None = None) -> dict:
     return max(ready, key=lambda item: COMPOSER.product_version(item["release"]))
 
 
+def successor_release(root: Path) -> str:
+    """Next minor above every release directory, including manifest-less plans and prereleases."""
+    versions = (COMPOSER.product_version(path.name)
+                for path in (root / "releases").iterdir() if path.is_dir())
+    major, minor, _ = max(version for version in versions if version is not None)
+    return f"v{major}.{minor + 1}.0"
+
+
 def public_release_tree(root: Path, release: str, destination: Path) -> str:
     """Materialize the public tag's exact tree and history, never the current authority."""
     (commit,) = HISTORY.resolve_commits(f"refs/tags/{release}", root=root)
