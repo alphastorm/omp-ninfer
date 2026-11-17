@@ -18,7 +18,7 @@ assert SPEC is not None and SPEC.loader is not None
 VERIFY = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(VERIFY)
 from release_io import atomic_write, atomic_write_json
-from acceptance_fixtures import successor_release
+from acceptance_fixtures import restore_predecessor_authority, successor_release
 
 HISTORY_SPEC = importlib.util.spec_from_file_location("lint_history", ROOT / "tests/history.py")
 assert HISTORY_SPEC is not None and HISTORY_SPEC.loader is not None
@@ -37,6 +37,7 @@ def stage_successor(root: Path) -> str:
     for key, value in (("user.name", "Release fixture"), ("user.email", "release@example.invalid"),
                        ("commit.gpgsign", "false")):
         DRIVER.git(root, "config", key, value)
+    restore_predecessor_authority(root, source["release"], checkpoint=True)
     DRIVER.init_plan(root, release)
     notes = root / ".release-state" / "lint-notes.md"
     atomic_write(notes, f"# OMP NInfer {release}\n\nQualification is limited to documented routes.\n")
