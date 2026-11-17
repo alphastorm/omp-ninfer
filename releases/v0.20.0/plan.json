@@ -43,6 +43,21 @@
   ],
   "decisions": [
     {
+      "id": "native-speed-decision",
+      "kind": "scope",
+      "sha256": "96b6f0142524782b91303f054d862c6104b510b7f60b093b443088760e7321fc"
+    },
+    {
+      "id": "native-identity-decision",
+      "kind": "scope",
+      "sha256": "62b78a1d519130d4fb9ff7f6c4b0fe01207e7cb15dd8bc00f336d530163fd5b6"
+    },
+    {
+      "id": "slow-first-request-parity-waiver-class",
+      "kind": "waiver",
+      "sha256": "6f5c8281342d4fbc4e1651bffc2c43c218f243dd8d30eb32d83615f3229be2a4"
+    },
+    {
       "id": "cut-rtx5090",
       "kind": "component-cut",
       "sha256": "0a4b594ed4bc4c67ad09922cdfe4e18c4f21930f9934b251b265354c5feafbf4"
