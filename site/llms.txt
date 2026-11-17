@@ -6,26 +6,26 @@
 > (served model). Community project; not affiliated with or endorsed by Oh My Pi, Qwen, or
 > NVIDIA.
 
-Qualified on RTX 5090 · 4090 · 3090 — **v0.19.0** (published 2026-11-13, GitHub Latest), stock
-**Oh My Pi 18.20.0**. The 0.x series supports only the latest published release and its exact
+Qualified on RTX 5090 · 4090 · 3090 — **v0.20.0** (published 2026-11-17, GitHub Latest), stock
+**Oh My Pi 18.20.2**. The 0.x series supports only the latest published release and its exact
 manifest and profiles.
 
 ## Lanes
 
 The lane runtimes are builds of the `alphastorm/ninfer` fork of [`Neroued/ninfer`](https://github.com/Neroued/ninfer).
 
-- **RTX 5090:** Docker Desktop/WSL2 container on Windows 11, loopback `127.0.0.1:18089`, runtime `v0.7.0-qwen38-5090-beta.8`.
+- **RTX 5090:** Docker Desktop/WSL2 container on Windows 11, loopback `127.0.0.1:18089`, runtime `v0.7.0-qwen38-5090-beta.9`.
   Clients: Windows (local), macOS over a manual SSH tunnel (preview), Linux under WSL2; two requests in flight, 131,072-token context, vision, tools, and JSON-schema output.
-- **RTX 4090:** Native Windows 11 package on loopback `127.0.0.1:18082`, runtime `v0.8.0-qwen38-4090-beta.3` (bound to its GPU UUID; one native lane runs at a time).
+- **RTX 4090:** Native Windows 11 package on loopback `127.0.0.1:18082`, runtime `v0.8.0-qwen38-4090-beta.5` (bound to its GPU UUID; one native lane runs at a time).
   Local Windows client; one request at a time over a 131,072-token context, serving text, tools, and JSON-schema output (no vision).
-- **RTX 3090:** Native Windows 11 package on loopback `127.0.0.1:18082`, runtime `v0.8.0-qwen38-3090-beta.4` (bound to its GPU UUID; one native lane runs at a time).
+- **RTX 3090:** Native Windows 11 package on loopback `127.0.0.1:18082`, runtime `v0.8.0-qwen38-3090-beta.5` (bound to its GPU UUID; one native lane runs at a time).
   Local Windows client; two requests in flight over one shared 131,072-token pool under a 350 W cap, serving text, tools, and JSON-schema output (no vision).
 
 ## Measured
 
-- **RTX 5090:** 181.71 tok/s server-side decode; 56.67 s exact 130,048-token retrieval from a cold start.
-- **RTX 4090:** 253.71 tok/s decode (measured with one request at a time); 83.45 s exact 130,048-token retrieval.
-- **RTX 3090:** 227.19 tok/s decode (measured with one request at a time); 188.45 s exact 130,048-token retrieval.
+- **RTX 5090:** 192.90 tok/s server-side decode; 56.62 s exact 130,048-token retrieval from a cold start.
+- **RTX 4090:** 252.74 tok/s decode (measured with one request at a time); 83.45 s exact 130,048-token retrieval.
+- **RTX 3090:** 226.33 tok/s decode (measured with one request at a time); 188.32 s exact 130,048-token retrieval.
 
 Each lane is measured on its own gate, so the lanes are not a ranking; method and receipts are in
 [current qualified results](https://github.com/alphastorm/omp-ninfer/blob/main/docs/BENCHMARKS.md#current-qualified-results).
@@ -41,13 +41,13 @@ Each lane is measured on its own gate, so the lanes are not a ranking; method an
 
 Every documented install route (five routes, 31 command blocks) was run end to end on the current release with unmodified Oh My Pi
 on three client platforms, including both native Windows package installs:
-[acceptance receipt](https://github.com/alphastorm/omp-ninfer/blob/v0.19.0/releases/v0.19.0/acceptance/composed-external-installation.json). All results are owner-operated measurements.
+[acceptance receipt](https://github.com/alphastorm/omp-ninfer/blob/v0.20.0/releases/v0.20.0/acceptance/composed-external-installation.json). All results are owner-operated measurements.
 
 ## Release authorities
 
-- [Release manifest](https://github.com/alphastorm/omp-ninfer/blob/v0.19.0/releases/v0.19.0/manifest.json): exact client, runtime, model, and profile pins
-- [Release notes](https://github.com/alphastorm/omp-ninfer/blob/v0.19.0/releases/v0.19.0/NINFER_RELEASE_NOTES.md): release composition, client SHA-256 digests, acceptance, and support boundaries
-- [Tagged quickstart](https://github.com/alphastorm/omp-ninfer/blob/v0.19.0/docs/QUICKSTART.md): immutable installation guide for the current release
+- [Release manifest](https://github.com/alphastorm/omp-ninfer/blob/v0.20.0/releases/v0.20.0/manifest.json): exact client, runtime, model, and profile pins
+- [Release notes](https://github.com/alphastorm/omp-ninfer/blob/v0.20.0/releases/v0.20.0/NINFER_RELEASE_NOTES.md): release composition, client SHA-256 digests, acceptance, and support boundaries
+- [Tagged quickstart](https://github.com/alphastorm/omp-ninfer/blob/v0.20.0/docs/QUICKSTART.md): immutable installation guide for the current release
 
 ## Living canonical documents
 
