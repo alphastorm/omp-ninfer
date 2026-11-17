@@ -1,0 +1,48 @@
+{
+  "artifact_type": "omp-ninfer.native-fit",
+  "schema_version": 1,
+  "status": "passed",
+  "identity": {
+    "package_sha256": "89f14b7b7b3b340c9afb7c37f97722b23f3dbbc122b809789c1685ff12fb111c",
+    "server_binary_sha256": "61e24366b103a89ae0d8ce2ad30a012fe6fab7cf70de1afdf8d1abd12acf4863",
+    "configuration_sha256": "0851d97937e45ccbe3233cc2e71f480f7797ed106c39e46bba3a5614dda12d2b",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+  },
+  "runtime_shape": {
+    "max_concurrency": 1,
+    "speculative_backend": "dflash2",
+    "draft_tokens": {
+      "min": 7,
+      "max": 7
+    },
+    "proposal": "artifact-default",
+    "fit": {
+      "device_state_slots": 2,
+      "admission_headroom_mib": 640,
+      "draft_mlp_device_format": "Q4_G64_FP16",
+      "token_embedding_residency": "host-mapped"
+    }
+  },
+  "maximum_context_tokens": 131072,
+  "configuration": {
+    "max_context": 131072,
+    "kv_capacity": 131072,
+    "kv_dtype": "int8",
+    "concurrency": 1,
+    "pending_timeout_ms": 30000,
+    "prefill_chunk": 1024,
+    "device_state_slots": 2,
+    "admission_headroom_mib": 640,
+    "host_context_mib": "15747.734375",
+    "host_context_bytes": 16512696320,
+    "speculative_backend": "dflash2",
+    "speculative_draft_tokens": 7,
+    "public_model_id": "qwen3.8-27b"
+  },
+  "measured_admission_headroom_mib": 1008.0,
+  "effective_weights": {
+    "converted_device_bytes": 473497600,
+    "host_mapped_bytes": 1350860800
+  },
+  "raw_prompts_outputs_or_secrets_included": false
+}

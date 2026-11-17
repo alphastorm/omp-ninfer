@@ -1,0 +1,109 @@
+{
+  "artifact_type": "omp_ninfer_founder_gate_decision",
+  "schema_version": 1,
+  "recorded_utc": "2026-11-13T06:25:00Z",
+  "release": "v0.20.0",
+  "decision": "A lane byte-identical to its incumbent on every speed-ABBA case and the 80 determinism prompts skips the 1,120-prompt arm. A non-default native build profile may take this path only against the published incumbent of the same build profile; default profiles keep the existing rule.",
+  "lanes": [],
+  "rule": {
+    "quality_admission": "speed-ABBA byte identity and 80/80 sealed incumbent determinism byte identity",
+    "build_variant": "default-or-same-profile-published-incumbent"
+  },
+  "sealed_incumbent_determinism": {},
+  "application_rule": "Both v0.20.0 native lanes, RTX 3090 and RTX 4090, each against its own published incumbent. A default build profile is compared with its published incumbent; a non-default (tensor-core or A8) build profile only with the published incumbent of the same lane and build profile variant, sealed here by component, build profile and identity. Bind the exact candidate and incumbent package/server/configuration/model identities, every complete speed-ABBA output pairing, the incumbent's sealed responses SHA-256 and frozen 80-prompt membership, and all 80 retained-output byte comparisons. The complete speed declaration still runs; any output difference, a different build profile variant or a missing seal requires the powered EXP-085 arm. Fit, speed thresholds, durability, parity and release acceptance remain required.",
+  "provenance": {
+    "source_sha256": "0997290cebb74306be17a235785a8f80ec60f910f8507d6843d720b0672a8636",
+    "founder_rule": "identity_first",
+    "founder_records": [
+      {
+        "release": "v0.18.0",
+        "kind": "founder plan confirmation selecting the identity_first rule",
+        "recorded_utc": "2026-11-11T03:43:31Z",
+        "sha256": "ffb302ff3e923088fed85ebcf662328e4cb2387c18e290c30b7bf3a490fe0736"
+      },
+      {
+        "release": "v0.19.0",
+        "kind": "founder authority to cut, qualify and publish the release",
+        "recorded_utc": "2026-11-13T05:46:00Z",
+        "sha256": "00f0e13e8254d60749910ceffd7ecfb1f9b42eb049daf600b2647c65663a4307"
+      },
+      {
+        "release": "v0.19.0",
+        "kind": "founder scope decision: same-profile identity-first for non-default native build profiles against the published incumbent of that profile",
+        "recorded_utc": "2026-11-13T06:25:00Z",
+        "sha256": "0997290cebb74306be17a235785a8f80ec60f910f8507d6843d720b0672a8636"
+      },
+      {
+        "release": "v0.19.0",
+        "kind": "founder decision: new native source freeze and full re-qualification of both native lanes; no rule change",
+        "recorded_utc": "2026-11-13T11:58:00Z",
+        "sha256": "4c924f9cd6aefce220e955bc81da82a82efa874993854c529881d15943b6737d"
+      },
+      {
+        "release": "v0.19.0",
+        "kind": "founder decision: carry the RTX 4090 native component unchanged at its published beta.3; only the RTX 3090 native lane is re-cut and bound; no rule change",
+        "recorded_utc": "2026-11-13T17:12:00Z",
+        "sha256": "1309f9e224ac89069a3c15dfac4ccdd355fc563dcc0ac3a596a9586f66742ca8"
+      },
+      {
+        "release": "v0.20.0",
+        "kind": "founder scope decision: one engine freeze for the RTX 5090 runtime and both native lanes, stock OMP 18.20.2, and a powered 1,120-prompt quality path for any lane whose outputs change; identity-first and parity-waiver rules unchanged",
+        "recorded_utc": "2026-11-15T22:11:49Z",
+        "sha256": "4467a95e45840cccd3cd95f597f509807abe76f157d44104b90dfe458aaa6959"
+      }
+    ],
+    "projection": "Founder rule retained; release lead binds exact authenticated subjects. This decision is not a measured verdict."
+  },
+  "subjects": {
+    "native": {
+      "rtx3090": {
+        "source_commit": "ca4c39179921e85defa9141db5fff7c2b05d7136",
+        "candidate_component": "v0.8.0-qwen38-3090-beta.5",
+        "build_profile": "native-v0.8.0-beta.5-tc-rtx3090",
+        "candidate": {
+          "package_sha256": "873bbba30f9d63f3d43e4e93222b846ee7a451d23eefadcee2838612de8753b9",
+          "server_binary_sha256": "2734d0e2583d67bafca35cbf498feafda9fd47dbef58c758a27da1dc5d59e158",
+          "configuration_sha256": "af98423ff7f3eca5c2621ab08a1e2b39f311a0af9eb7d91c1786882012037c46",
+          "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+        },
+        "incumbent_component": "v0.8.0-qwen38-3090-beta.4",
+        "incumbent_build_profile": "native-v0.8.0-beta.4-tc-rtx3090",
+        "incumbent": {
+          "package_sha256": "62b9effd87c63e22af76b46171ea34d8b45ed55eed113b2f1be8fd24aab7a785",
+          "server_binary_sha256": "2c25588ec5772562ecfe95d25d9221097f85ab67ee51f2a57c70790a55f6f180",
+          "configuration_sha256": "6e4c6fc23946aa1bcbcb165779744853376a44c31406f4b994f96ace7ab62930",
+          "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+        }
+      },
+      "rtx4090": {
+        "source_commit": "ca4c39179921e85defa9141db5fff7c2b05d7136",
+        "candidate_component": "v0.8.0-qwen38-4090-beta.5",
+        "build_profile": "native-v0.8.0-beta.5-rtx4090",
+        "candidate": {
+          "package_sha256": "89f14b7b7b3b340c9afb7c37f97722b23f3dbbc122b809789c1685ff12fb111c",
+          "server_binary_sha256": "61e24366b103a89ae0d8ce2ad30a012fe6fab7cf70de1afdf8d1abd12acf4863",
+          "configuration_sha256": "0851d97937e45ccbe3233cc2e71f480f7797ed106c39e46bba3a5614dda12d2b",
+          "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+        },
+        "incumbent_component": "v0.8.0-qwen38-4090-beta.3",
+        "incumbent_build_profile": "native-v0.8.0-beta.3-rtx4090",
+        "incumbent": {
+          "package_sha256": "ac41700ac2bb9fb171188f35e73481cfd9f1140c5781320b1e6304ee760d7166",
+          "server_binary_sha256": "a5266ae676305cc56086df6d3b8dc8968be110b3cf0eb7b18147adafc2f66d22",
+          "configuration_sha256": "b71a2cff25d671703106474d86fe6a808dc803db28703b6fd7740013fcfee278",
+          "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+        }
+      }
+    },
+    "runtime": {
+      "source_commit": "ca4c39179921e85defa9141db5fff7c2b05d7136",
+      "component": "v0.7.0-qwen38-5090-beta.9",
+      "image_digest": "sha256:dc89893b90db89fe44b9605c4adca76ec5eb2a9dd314c68f284fa2fcbbe47ca6",
+      "server_binary_sha256": "06c73e9800b1911e89f0cbf825324f767dcdc4abfd4a497f51fc031b5e3d69b8",
+      "configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+      "archive_sha256": "4ada5a1a3a4f602a9d4d9407b4c18c3625ea63ed4ce39191a1149b2c9a8b42f1",
+      "build_profile": "rtx5090",
+      "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+    }
+  }
+}

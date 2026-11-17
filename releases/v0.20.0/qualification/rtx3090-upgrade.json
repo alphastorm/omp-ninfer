@@ -1,0 +1,76 @@
+{
+  "artifact_type": "omp_ninfer_native_upgrade_projection",
+  "schema_version": 1,
+  "release": "v0.20.0",
+  "lane": "rtx3090",
+  "status": "passed",
+  "subject": {
+    "source_commit": "ca4c39179921e85defa9141db5fff7c2b05d7136",
+    "component_tag": "v0.8.0-qwen38-3090-beta.5",
+    "build_profile": "native-v0.8.0-beta.5-tc-rtx3090",
+    "package_sha256": "873bbba30f9d63f3d43e4e93222b846ee7a451d23eefadcee2838612de8753b9",
+    "server_binary_sha256": "2734d0e2583d67bafca35cbf498feafda9fd47dbef58c758a27da1dc5d59e158",
+    "configuration_sha256": "af98423ff7f3eca5c2621ab08a1e2b39f311a0af9eb7d91c1786882012037c46",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+  },
+  "incumbent": {
+    "source_commit": "15c3e3959c0a6167f799e9383482ec4e03db9cad",
+    "component_tag": "v0.8.0-qwen38-3090-beta.4",
+    "build_profile": "native-v0.8.0-beta.4-tc-rtx3090",
+    "package_sha256": "62b9effd87c63e22af76b46171ea34d8b45ed55eed113b2f1be8fd24aab7a785",
+    "server_binary_sha256": "2c25588ec5772562ecfe95d25d9221097f85ab67ee51f2a57c70790a55f6f180",
+    "configuration_sha256": "6e4c6fc23946aa1bcbcb165779744853376a44c31406f4b994f96ace7ab62930",
+    "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da"
+  },
+  "scenarios": {
+    "running": {
+      "status": "passed",
+      "restored": true,
+      "canonical_state_unchanged": true,
+      "restored_power_w": 370.0,
+      "owned_process_count": 0,
+      "forced_containment": false,
+      "cleanup_errors": [],
+      "supervisor_sha256": "b7dc5545cfeb421560b9c25c7cd8c2ff6027f7834c32d731da7857004bd7819b",
+      "archive_sha256": "1ecb11a7904163afe8ca1bd9dfdb22d49360e697410cfe38e24427e37fe41293",
+      "archive_seal_sha256": "45d203f6c904726abeae93c3723ba060056829f19d7b9ae65029063a50fbb493"
+    },
+    "rollback": {
+      "status": "passed",
+      "restored": true,
+      "canonical_state_unchanged": true,
+      "restored_power_w": 370.0,
+      "owned_process_count": 0,
+      "forced_containment": false,
+      "cleanup_errors": [],
+      "supervisor_sha256": "344660f15671c2d9bcdd2ce6a1a42edc8f21de4d49e586e0b153700b535bb531",
+      "archive_sha256": "3e4d4607b59be8cc9d3a7e82956b86ff5d5e9da27f366d1bed183a39323d3618",
+      "archive_seal_sha256": "c44aaa514b9ac988f96a86f692161045d00cb5233f2f0ea20f838fa604906c0e"
+    },
+    "repair": {
+      "status": "passed",
+      "restored": true,
+      "canonical_state_unchanged": true,
+      "restored_power_w": 370.0,
+      "owned_process_count": 0,
+      "forced_containment": false,
+      "cleanup_errors": [],
+      "supervisor_sha256": "f5645af0058e2f09458d5d006975e08ad088439e7fb3cd19cd990d11392144dd",
+      "archive_sha256": "56b1293d8cf10a80a39d7a7687a86d27e2330e69b99056e290693f35c6aede9e",
+      "archive_seal_sha256": "6f4a4e22e121910a7b3695f7aec894ffdb71da71f1e9093fee30fcab9c10c8c3"
+    }
+  },
+  "provenance": {
+    "evidence_name": "tail-upgrades-terminal.json",
+    "evidence_sha256": "a6ef9d558cd96150778e43bb1825655fc70d96245745795027f4f96f4dd635a4",
+    "source_commit": "ca4c39179921e85defa9141db5fff7c2b05d7136",
+    "evidence_archive_sha256": {
+      "running": "1ecb11a7904163afe8ca1bd9dfdb22d49360e697410cfe38e24427e37fe41293",
+      "rollback": "3e4d4607b59be8cc9d3a7e82956b86ff5d5e9da27f366d1bed183a39323d3618",
+      "repair": "56b1293d8cf10a80a39d7a7687a86d27e2330e69b99056e290693f35c6aede9e"
+    }
+  },
+  "scope": "v0.8.0-qwen38-3090-beta.5 against v0.8.0-qwen38-3090-beta.4; running upgrade, forced-start rollback and interrupted-install repair. Not product-route acceptance.",
+  "publication_authorized": false,
+  "external_installation_qualified": false
+}
