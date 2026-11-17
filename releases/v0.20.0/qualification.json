@@ -316,6 +316,6 @@
   "eligibility_scope": "Current component lanes only; external-install acceptance, native public installs/campaigns, product review, audit reconciliation and immutable pins remain binding.",
   "receipt_audit": {
     "repository_path": "releases/v0.20.0/qualification/receipt-audit.json",
-    "sha256": "268cf73221a3921b33dc83f48a102cd7c96792d623c3468faea2c7f3e4e6067c"
+    "sha256": "5433ae676a211f7089db11745fc937bc9f5641a63569560c7bf0e55e906b2cc6"
   }
 }
