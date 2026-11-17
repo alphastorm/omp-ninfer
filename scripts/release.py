@@ -769,6 +769,23 @@ class ReleaseDriver:
         lanes = state.get("lanes")
         if not isinstance(lanes, dict) or set(lanes) != set(expected):
             refuse("lanes must equal the manifest's declared lanes")
+
+        def indexed_path(value: Any, label: str, *, directory: bool = False) -> Path:
+            if (not isinstance(value, str) or not value or "\\" in value
+                    or PurePosixPath(value).is_absolute()
+                    or PureWindowsPath(value).drive or PureWindowsPath(value).root):
+                refuse(f"{label} must be a relative POSIX path")
+            try:
+                path = (root / value).resolve()
+            except (OSError, RuntimeError) as error:
+                raise ReleaseError(f"window-state.json: {label} cannot be resolved") from error
+            if not path.is_relative_to(root):
+                refuse(f"{label} escapes the window root")
+            if not (path.is_dir() if directory else path.is_file()):
+                kind = "directory" if directory else "file"
+                refuse(f"{label} must exist and be a {kind}")
+            return path
+
         arguments: list[str] = []
         for lane in expected:
             record = lanes[lane]
@@ -780,7 +797,7 @@ class ReleaseDriver:
             attempts = record.get("attempts")
             if not isinstance(attempts, list):
                 refuse(f"{lane} attempts must be an array")
-            entries: dict[int, tuple[Path, str]] = {}
+            entries: dict[int, tuple[Path, dict]] = {}
             for position, entry in enumerate(attempts):
                 label = f"{lane}.attempts[{position}]"
                 if not isinstance(entry, dict):
@@ -791,29 +808,30 @@ class ReleaseDriver:
                 status = entry.get("status")
                 if status not in ("planned", "spent-failed", "passed", "retired"):
                     refuse(f"{label} status is invalid")
-                directory = entry.get("directory")
-                if (not isinstance(directory, str) or not directory or "\\" in directory
-                        or PurePosixPath(directory).is_absolute()
-                        or PureWindowsPath(directory).drive or PureWindowsPath(directory).root):
-                    refuse(f"{label} directory must be a relative POSIX path")
-                try:
-                    path = (root / directory).resolve()
-                except (OSError, RuntimeError) as error:
-                    raise ReleaseError(f"window-state.json: {label} directory cannot be resolved") from error
-                if not path.is_relative_to(root):
-                    refuse(f"{label} directory escapes the window root")
-                if not path.is_dir():
-                    refuse(f"{label} directory must exist and be a directory")
-                entries[attempt] = (path, status)
+                path = indexed_path(entry.get("directory"), f"{label} directory", directory=True)
+                entries[attempt] = (path, entry)
             if accepted not in entries:
                 refuse(f"{lane} accepted attempt has no matching entry")
-            path, status = entries[accepted]
-            if status not in ("passed", "retired"):
+            path, entry = entries[accepted]
+            if entry["status"] not in ("passed", "retired"):
                 refuse(f"{lane} accepted attempt must be passed or retired")
             arguments += ["--lane-dir", f"{lane}={path}"]
-            for attempt, (path, status) in sorted(entries.items()):
-                if attempt < accepted and status == "spent-failed":
+            if lane == "rtx5090":
+                production = indexed_path(entry.get("production_restoration"),
+                                          "rtx5090 accepted attempt production_restoration")
+                arguments += ["--production-restoration", str(production)]
+            for attempt, (path, entry) in sorted(entries.items()):
+                if attempt < accepted and entry["status"] == "spent-failed":
                     arguments += ["--corrected-attempt", f"{lane}={path}"]
+        if any(lane != "rtx5090" for lane in expected):
+            census = state.get("native_census")
+            if not isinstance(census, dict):
+                refuse("native_census must be an object for accepted native lanes")
+            for flag, key in (("--pre-window-census", "before"),
+                              ("--pre-window-holds-client", "holds_before"),
+                              ("--final-census", "final"),
+                              ("--final-holds-client", "holds_final")):
+                arguments += [flag, str(indexed_path(census.get(key), f"native_census.{key}"))]
         return arguments
 
     def compose(self) -> None:

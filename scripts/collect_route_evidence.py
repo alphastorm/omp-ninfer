@@ -9,7 +9,8 @@ a JSON object with the evidence path and the five composer ``--route`` paths.
 For a corrected slot, ``--corrected-attempt LANE=PRIOR_DIR`` identifies its restored
 failed predecessor. Founder exceptions require both ``--native-route-waiver`` and
 ``--lead-restoration`` (raw output) and ``--lead-restoration-proof`` (JSON) bindings,
-never merely a failed status. Post-recovery census paths can also be supplied explicitly.
+never merely a failed status. Pre/final census and production-restoration paths can
+also be supplied explicitly; these files must stay inside the window root.
 Component cut/carry and source-count prose is deliberately absent: the composer owns it.
 """
 from __future__ import annotations
@@ -174,7 +175,9 @@ def collect(root: Path, release: str, candidate: str, window_root: Path, plan: d
             waivers: dict[str, Path] | None = None,
             recoveries: dict[str, Path] | None = None,
             recovery_proofs: dict[str, Path] | None = None,
-            final_census: Path | None = None, final_holds: Path | None = None) -> tuple[dict, dict[str, Path]]:
+            pre_window_census: Path | None = None, pre_window_holds: Path | None = None,
+            final_census: Path | None = None, final_holds: Path | None = None,
+            production_restoration: Path | None = None) -> tuple[dict, dict[str, Path]]:
     require(re.fullmatch(r"[0-9a-f]{40}", candidate), "candidate must be a full commit")
     require(plan.get("artifact_type") == "omp_ninfer_release_plan"
             and plan.get("schema_version") == 1 and plan.get("release") == release,
@@ -198,6 +201,24 @@ def collect(root: Path, release: str, candidate: str, window_root: Path, plan: d
             "unknown lane directory or corrected attempt")
     require(set(waivers) == set(recoveries) == set(recovery_proofs) and set(waivers) <= set(native),
             "each native waiver needs exactly one explicit lead restoration")
+
+    def window_file(path: Path | None, default: str, option: str) -> Path:
+        if path is None:
+            return window_root / default
+        try:
+            resolved = path.expanduser().resolve()
+        except (OSError, RuntimeError) as error:
+            raise SystemExit(f"collect_route_evidence: {option} cannot be resolved") from error
+        require(resolved.is_relative_to(window_root.resolve()), f"{option} must resolve inside the window root")
+        return resolved
+
+    pre_window_census = window_file(pre_window_census, "native-pre-window-census.json", "--pre-window-census")
+    pre_window_holds = window_file(pre_window_holds, "native-pre-window-census-holds-client.json",
+                                   "--pre-window-holds-client")
+    final_census = window_file(final_census, "native-final.json", "--final-census")
+    final_holds = window_file(final_holds, "native-final-holds-client.json", "--final-holds-client")
+    production_restoration = window_file(production_restoration, "production-and-fleet-after.json",
+                                         "--production-restoration")
     priors = {lane: corrected_prior(lane, folder, release, candidate)
               for lane, folder in corrected.items()}
     runtime = directories["rtx5090"]
@@ -218,18 +239,16 @@ def collect(root: Path, release: str, candidate: str, window_root: Path, plan: d
         "documented_directories_restored", "window_seconds"))
         and all(rr.get(key) == value for key, value in raw_restoration.items()),
         "container restoration differs from summary")
-    post = load(window_root / "production-and-fleet-after.json")
+    post = load(production_restoration)
     require(post.get("candidate") == candidate and post.get("status") == "passed" and post.get("same_container") is True
             and post.get("same_image") is True and post.get("health_http") == 200
             and post.get("restart_policy") == "unless-stopped"
             and post.get("checkpoint_mounts_identical_sorted_by_destination") is True
             and post.get("fleet_phase") == "Fleet" and post.get("fleet_healthy") is True,
             "post-window production service is unrestored")
-    original = load(window_root / "native-pre-window-census.json")
-    final_census = final_census or window_root / "native-final.json"
-    final_holds = final_holds or window_root / "native-final-holds-client.json"
+    original = load(pre_window_census)
     final = load(final_census)
-    holds = load(window_root / "native-pre-window-census-holds-client.json")
+    holds = load(pre_window_holds)
     final_holds_value = load(final_holds)
     require(original == final and holds == final_holds_value, "native census or client files are unrestored")
     require(not final["processes"] and not final["listeners"], "native processes or listeners remain")
@@ -241,8 +260,6 @@ def collect(root: Path, release: str, candidate: str, window_root: Path, plan: d
         # never an absolute private path, in the composer's provenance references.
         if resolved.is_relative_to(base):
             name = resolved.relative_to(base).as_posix()
-        elif resolved == final_census.resolve():
-            name = "native-final.json"
         else:
             matches = [(lane, folder.resolve()) for lane, folder in directories.items()
                        if resolved.is_relative_to(folder.resolve())]
@@ -337,7 +354,7 @@ def collect(root: Path, release: str, candidate: str, window_root: Path, plan: d
             failed = {"evidence_name": f"{lane}/evidence/window-failure.json",
                       "sha256": digest(folder / "evidence/window-failure.json"),
                       "boundary": failure["boundary"], "observed_summary": waiver["observed_summary"]}
-            census = {**reference(window_root / "native-pre-window-census.json"), "lane": lane,
+            census = {**reference(pre_window_census), "lane": lane,
                       "power_limit_w": owner["power_limit_w"]}
             behavior = load(folder / "evidence/expected-runtime.json")
             probe_acceptance = native_probe_summary({
@@ -348,7 +365,7 @@ def collect(root: Path, release: str, candidate: str, window_root: Path, plan: d
                 ("documented-route.json", route_path),
                 ("window-failure.json", folder / "evidence/window-failure.json"),
                 ("driver-window.json", folder / "driver-window.json"),
-                ("pre-window-census.json", window_root / "native-pre-window-census.json"),
+                ("pre-window-census.json", pre_window_census),
             ):
                 require(waiver.get("evidence_sha256", {}).get(name) == digest(source),
                         f"{lane}: waiver does not bind {name}")
@@ -573,8 +590,11 @@ def main() -> int:
     parser.add_argument("--native-route-waiver", action="append", default=[], metavar="LANE=FILE")
     parser.add_argument("--lead-restoration", action="append", default=[], metavar="LANE=FILE")
     parser.add_argument("--lead-restoration-proof", action="append", default=[], metavar="LANE=FILE")
-    parser.add_argument("--final-census", type=Path, help="explicit post-recovery native census")
-    parser.add_argument("--final-holds-client", type=Path, help="explicit post-recovery client census")
+    parser.add_argument("--pre-window-census", type=Path, help="explicit pre-window native census inside window root")
+    parser.add_argument("--pre-window-holds-client", type=Path, help="explicit pre-window client census inside window root")
+    parser.add_argument("--final-census", type=Path, help="explicit final native census inside window root")
+    parser.add_argument("--final-holds-client", type=Path, help="explicit final client census inside window root")
+    parser.add_argument("--production-restoration", type=Path, help="explicit production restoration inside window root")
     args = parser.parse_args()
     print(json.dumps(write_evidence(
         ROOT, args.release, args.candidate, args.window_root, load(args.plan), args.output,
@@ -583,7 +603,9 @@ def main() -> int:
         waivers=pairs(args.native_route_waiver, "native waiver", allowed=LANES[1:]),
         recoveries=pairs(args.lead_restoration, "lead restoration", allowed=LANES[1:]),
         recovery_proofs=pairs(args.lead_restoration_proof, "lead restoration proof", allowed=LANES[1:]),
-        final_census=args.final_census, final_holds=args.final_holds_client)))
+        pre_window_census=args.pre_window_census, pre_window_holds=args.pre_window_holds_client,
+        final_census=args.final_census, final_holds=args.final_holds_client,
+        production_restoration=args.production_restoration)))
     return 0
 
 

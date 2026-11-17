@@ -94,6 +94,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Release finalization passes indexed native census, client-file and production-restoration
+  inputs to the route collector instead of requiring their old flat-root copies. Index mode
+  refuses missing or escaping evidence paths; windows without an index retain the original layout.
 - `aggregate_qualification.py admit` skips `component-cut` plan decisions, as the decision binder
   already did. A release with a re-cut native lane and a committed cut authorization no longer
   refuses at admission for a `cut-<lane>.json` that no bundle carries; cut authorizations stay out
