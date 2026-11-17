@@ -643,7 +643,7 @@ fork). The default mode checks that the outer `SHA256SUMS` closes and verifies t
 directory, that the package build receipt and the lane specification at the commit name the same
 release and source, that the source archive's tar stream is byte-identical to `git archive` of
 the commit, that the dependency CycloneDX maps every packaged DLL in a component graph rooted at
-the server, and that neither the tag nor the release exists. `--publish` is founder-only: it
+the server, and that neither the tag nor the release exists. `--publish` needs the founder's approval of the cut: it
 pushes the component tag and creates one prerelease with the closed set; binding it into a
 product release stays `scripts/bind_native_variant.py`. The component tag must name the package
 filename's version and beta: `v0.7.0-qwen38-4090-beta.3` for
@@ -689,7 +689,7 @@ receipts plus the complete asset directory for the lane; never infer a package h
 result.
 
 1. Publish the lane's component prerelease (`scripts/hosts/cut-ninfer-4090-component.sh`; its
-   `--publish` is founder-only), then stage the product release with `scripts/stage_release.py`,
+   `--publish` needs the founder's approval of the cut), then stage the product release with `scripts/stage_release.py`,
    `--keep-deployment-profile`, and the predecessor's `client-components.json` as
    `--omp-component`, leaving the existing lanes' component pins and deployment profiles intact.
 2. Commit the lane receipt under `releases/<version>/qualification/`. Run
@@ -882,10 +882,10 @@ SUMS_SHA=$(shasum -a 256 "$ASSETS/SHA256SUMS" | cut -d' ' -f1)
 bash scripts/hosts/cut-ninfer-4090-component.sh --lane rtx3090 --version v0.6.2 \
   --commit f08309da3cc1d4226d127b7c9ce22267d12070cc --assets "$ASSETS" \
   --checksums-sha "$SUMS_SHA" --notes-file "$NOTES" --dry-run
-# FOUNDER-ONLY / AGENT MUST NOT EXECUTE: repeat that command with --publish instead of --dry-run.
+# After the founder approves this cut: repeat that command with --publish instead of --dry-run.
 ```
 
-After founder publication, stage the next product release with the existing lanes' component pins
+After publication, stage the next product release with the existing lanes' component pins
 and deployment profiles intact. In the worked example, v0.9.0 is the predecessor, not the current
 release. Passing the existing stock-client descriptor resets client/route acceptance without
 changing the OMP binary. Its predecessor-pin warnings are expected because OMP remains 18.4.0; do
