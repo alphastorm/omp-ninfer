@@ -14,8 +14,11 @@ pending composition.review or the identical generated value may be replaced.
 Product subjects must lie between this release's plan addition (when present) and
 the candidate. Runtime and native-delta subjects must name released component sources.
 This records review closure, never publication.
-From v0.20.0 every selected result and closed source status is required. Operator free
-text refuses path-like tokens except HTTPS links within the project's GitHub organization.
+From v0.20.0 selected strong critics must supply results. Other selected seats may lack
+a result only when their latest dispatch attempt failed; missing results never grant approval.
+The manifest and lead values supply council closure; an optional review-record status must
+also be closed. Focused receipts require their own closed status. Operator free text refuses
+path-like tokens except HTTPS links within the project's GitHub organization.
 ``--check`` validates the inputs and refuses if either checked-in output differs.
 """
 from __future__ import annotations
@@ -98,7 +101,20 @@ def receipts(directory: Path, patterns: list[str]) -> dict:
             for path in sorted(directory.glob(pattern)) if path.is_file()}
 
 
-def results(directory: Path, seats: list[dict], *, required: bool) -> dict:
+def failed_dispatch_agents(directory: Path) -> set[str]:
+    latest: dict[str, tuple[int, bool]] = {}
+    for path in directory.glob("review-dispatch-envelope.attempt-*.json"):
+        attempt = load(path)
+        for seat in attempt["seats"]:
+            agent = seat["agent"]
+            previous = latest.get(agent)
+            if previous is None or attempt["attempt"] > previous[0]:
+                latest[agent] = (attempt["attempt"], seat.get("failed") is True)
+    return {agent for agent, (_, failed) in latest.items() if failed}
+
+
+def results(directory: Path, seats: list[dict], *, required: bool,
+            failed_agents: set[str] | None = None) -> dict:
     output = {}
     for seat in seats:
         path = directory / (seat["reviewer_id"] + ".json")
@@ -107,7 +123,10 @@ def results(directory: Path, seats: list[dict], *, required: bool) -> dict:
             output[seat["reviewer_id"]] = {
                 key: result[key] for key in ("summary", "evidence", "unresolved")}
         else:
-            require(not required, f"missing result for selected reviewer {seat['reviewer_id']}")
+            allowed_missing = (failed_agents is not None and seat["role"] != "strong_critic"
+                               and seat.get("agent") in failed_agents)
+            require(not required or allowed_missing,
+                    f"missing result for selected reviewer {seat['reviewer_id']}")
             output[seat["reviewer_id"]] = {"status": "missing", "approval_granted": False}
     return output
 
@@ -120,7 +139,7 @@ def council(directory: Path, status: str, closure: str, *, product: bool,
     resolver = load(directory / "resolver-receipt.json")
     record = load(directory / "review-record.json")
     require(record.get("review_id") == directory.name, "review-record review_id mismatch")
-    if strict or "status" in record:
+    if "status" in record:
         closed(record.get("status"), "review-record status")
     selected = panel["selected"]
     output = {"repository": "https://github.com/alphastorm/omp-ninfer"} if product else {}
@@ -137,7 +156,8 @@ def council(directory: Path, status: str, closure: str, *, product: bool,
             "resolver-receipt.json", "panel-selection.json",
             *(seat["reviewer_id"] + ".json" for seat in selected),
             "review-dispatch-envelope.attempt-*.json"]),
-        reviewer_results=results(directory, selected, required=strict),
+        reviewer_results=results(directory, selected, required=strict,
+                                 failed_agents=failed_dispatch_agents(directory) if strict else None),
         dispositions={row[0].split(" — ", 1)[0].strip(): {
             "severity": row[3], "result": row[6], "disposition": row[7],
             "change": row[8], "rationale": row[9]} for row in table(directory / "ledger.md", 10)},
@@ -278,7 +298,7 @@ def build(root: Path, release: str, candidate: str, reviews: Path,
         if not directory.is_absolute():
             directory = manifest_path.parent / directory
         record = load(directory / "review-record.json")
-        if private_review or "status" in record:
+        if "status" in record:
             closed(record.get("status"), "epoch review-record status")
         if private_review:
             require(record.get("review_id") == directory.name, "epoch review-record review_id mismatch")
@@ -342,6 +362,8 @@ def build(root: Path, release: str, candidate: str, reviews: Path,
                 for field, text in row.items():
                     operator_text(text, f"{name}.dispositions.{finding}.{field}")
             for result in section["reviewer_results"].values():
+                if result.get("status") == "missing":
+                    continue
                 result["summary"] = PRIVATE_REVIEW_SUMMARY
                 for key in ("evidence", "unresolved"):
                     result[key] = [prefix[0] for statement in result[key]
