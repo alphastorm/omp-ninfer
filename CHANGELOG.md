@@ -9,50 +9,103 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Mark v0.20.0 as the published release across the README, facts, roadmap, release history,
+  upstream watch, reference docs, site, and brand assets; front-door install links point to
+  `v0.20.0` and `docs/QUICKSTART.md` on `main`.
+- A native component cut's `--publish` needs the founder's recorded approval of that cut; with it,
+  the release lead runs the publication. The native cutter header and `docs/RELEASES.md` say so;
+  product publication and the RTX 5090 runtime cut are unchanged
+  ([#200](https://github.com/alphastorm/omp-ninfer/pull/200)).
+
+## [0.20.0] - 2026-11-17
+
+### Changed
+
+- Compose v0.20.0 from one NInfer source, `ca4c39179921e85defa9141db5fff7c2b05d7136` (fork `main`
+  `8d0018ac` plus forks [#131](https://github.com/alphastorm/ninfer/pull/131) to
+  [#135](https://github.com/alphastorm/ninfer/pull/135) and
+  [#137](https://github.com/alphastorm/ninfer/pull/137)): RTX 5090 `v0.7.0-qwen38-5090-beta.9`
+  (image `dc89893b`, server `06c73e98`, isolated host checkpoint store `checkpoints-v020` on kept
+  profile `qwen38-5090-v0.13.0`), native RTX 3090 `v0.8.0-qwen38-3090-beta.5` (build profile
+  `native-v0.8.0-beta.5-tc-rtx3090`, package `873bbba3`) and native RTX 4090
+  `v0.8.0-qwen38-4090-beta.5` (build profile `native-v0.8.0-beta.5-rtx4090`, package
+  `89f14b7b`), with the unchanged model container v3 `81f924d4` and unmodified stock OMP 18.20.2.
+  The runtimes recover tool calls whose argument values contain literal parameter tags on the
+  opt-in unconstrained tool route, stop splitting warm-turn prefill at chat-template markers, and
+  take the upstream xgrammar cache and token-boundary fixes; the RTX 4090 gains the bounded
+  pressure-save retries of [fork #122](https://github.com/alphastorm/ninfer/pull/122). Durable
+  checkpoints carry codecs `qwen-identity/2` and `qwen-parser/2`, so checkpoints from earlier
+  releases are refused and each saved session prefills once (engine review residuals in
+  [fork #138](https://github.com/alphastorm/ninfer/issues/138); product residuals in
+  [#196](https://github.com/alphastorm/omp-ninfer/issues/196)). Frozen candidate
+  `f9b95b820f2b87d2ec82d1994ed244df5253af6f` passed all five documented routes (`31/31` blocks),
+  all three stock 18.20.2 clients, both native post-route campaigns, anonymous public installs, and
+  independent restoration on 2026-11-17 without a waiver (`416.888 s` RTX 5090 hold, `516.099 s`
+  RTX 4090 window, `2,023.852 s` RTX 3090 window; on RTX 3090: `0` HTTP `503` responses, `5`
+  HTTP `200` fanout responses, and `2` committed compactions). Full evidence is in the
+  [release notes](releases/v0.20.0/NINFER_RELEASE_NOTES.md).
+- Pin stock OMP 18.20.2 without changing the reviewed `models.fragment.yml` or
+  `examples/manual-tunnel/fail-closed.yml` client configuration fragments. Its rendered system
+  prompt is 119 bytes shorter, so the first turn after the upgrade prefills a cold prefix, and it
+  classifies the engine's HTTP 400 `context_length_exceeded` body as context overflow.
+- `scripts/speed_gate.py`: with the screened cross-engine output rule, a release's hash-bound
+  decision may apply the per-case speed floor only to cases whose outputs are byte-identical in
+  all four arms; changed-output cases stay in both weighted ratios and need a passing `EXP-085`
+  screen ([#192](https://github.com/alphastorm/omp-ninfer/pull/192)).
 - Mark v0.19.0 as the published release across the README, facts, roadmap, release history,
   upstream watch, reference docs, site, and brand assets; front-door install links point to
-  `v0.19.0` and `docs/QUICKSTART.md` on `main`.
+  `v0.19.0` and `docs/QUICKSTART.md` on `main`
+  ([#177](https://github.com/alphastorm/omp-ninfer/pull/177)).
 - Rewrite the README and the documentation set for their readers. Each fact class has one owner:
   `docs/FACTS.md` holds the current release's identities and per-lane limits as tables,
   `docs/BENCHMARKS.md` the measured results and how to read them, and `docs/RELEASES.md` the
   current release, the upgrade steps and the cut procedure. The other pages link to the owner
-  instead of restating it.
+  instead of restating it ([#178](https://github.com/alphastorm/omp-ninfer/pull/178)).
 - In `docs/BENCHMARKS.md`, `docs/PERFORMANCE.md`, `docs/RELEASES.md`, `docs/UPSTREAM.md` and
   `ROADMAP.md`, the living sections come first and every dated record follows a `## Records`
-  heading, unchanged. The upgrade steps moved from the README to `docs/RELEASES.md`.
+  heading, unchanged. The upgrade steps moved from the README to `docs/RELEASES.md`
+  ([#178](https://github.com/alphastorm/omp-ninfer/pull/178)).
 - The reference pages (`docs/ARCHITECTURE.md`, `docs/SECURITY.md`, `SECURITY.md`,
   `docs/DECISION_GUIDE.md`, `docs/RELATED_WORK.md`, `docs/TROUBLESHOOTING.md`, `CONTRIBUTING.md`,
   `examples/fleet/README.md`) name no current release, client version or component tag, so
   publishing a release does not edit them. `docs/RELEASES.md` lists the pages that are edited.
-  `docs/QUICKSTART.md` is unchanged: its bytes are bound to the release's acceptance evidence.
+  `docs/QUICKSTART.md` is unchanged: its bytes are bound to the release's acceptance evidence
+  ([#178](https://github.com/alphastorm/omp-ninfer/pull/178)).
 - `docs/TROUBLESHOOTING.md` entries start from the symptom and end with the action; the dated
-  incident notes behind them sit in a section at the end of the page.
+  incident notes behind them sit in a section at the end of the page
+  ([#178](https://github.com/alphastorm/omp-ninfer/pull/178)).
 - Component provenance has one source. The verifier derives, from a release's manifest and its
   predecessor, which components were re-cut and which are carried; the aggregate and the
   composer write that generated statement, and the verifier refuses release evidence that makes
   a provenance claim in any other words. Release-level limitation sentences are authored in the
-  plan and no longer inherited from the previous release.
+  plan and no longer inherited from the previous release
+  ([#179](https://github.com/alphastorm/omp-ninfer/pull/179)).
 - Lane labels, runtime contract lanes, publication target tags and component tag shapes are
-  derived from the manifest instead of being edited for each release.
+  derived from the manifest instead of being edited for each release
+  ([#179](https://github.com/alphastorm/omp-ninfer/pull/179)).
 - The cut procedure in `docs/RELEASES.md` describes the plan and the driver; living documents
-  change once, after publication.
+  change once, after publication ([#179](https://github.com/alphastorm/omp-ninfer/pull/179)).
 - From v0.20.0 the ready gate, under `--check-pins`, refuses a review ledger whose product review
   subject lies outside the release's own history or after its route candidate, and a runtime or
-  native component review of a source commit the release does not ship.
+  native component review of a source commit the release does not ship
+  ([#179](https://github.com/alphastorm/omp-ninfer/pull/179)).
 - From v0.20.0 guide rollback identities are admitted only in the native package fallback
   section, and older product/store identities only in its predecessor-reference blocks.
-  A rollback word or tier-two identity elsewhere cannot exempt a current instruction.
+  A rollback word or tier-two identity elsewhere cannot exempt a current instruction
+  ([#189](https://github.com/alphastorm/omp-ninfer/pull/189)).
 - From v0.20.0 installable, lint-ready and ready checks scan release notes and the targeted
   guide for component provenance claims, reporting the file and line. Use the complete
   manifest-derived provenance statement verbatim; ordinary claim-free prose and code
-  examples remain valid, and published releases retain their original contract.
+  examples remain valid, and published releases retain their original contract
+  ([#189](https://github.com/alphastorm/omp-ninfer/pull/189)).
 
 ### Added
 
 - `tests/test_docs.py`: every Markdown link must name a heading or anchor that exists in its
   target, including links from release notes, the site, `llms.txt` and the issue forms
   ([#176](https://github.com/alphastorm/omp-ninfer/issues/176), item 5), and the reference
-  pages must not name the current release, client version or a component tag.
+  pages must not name the current release, client version or a component tag
+  ([#178](https://github.com/alphastorm/omp-ninfer/pull/178)).
 - `scripts/release.py`: one resumable driver for everything a release does after its hardware
   runs. A committed `releases/<version>/plan.json` (`scripts/release_plan.py`) names the
   predecessor, each component as re-cut or carried, the client, platform statuses, the release's
@@ -61,54 +114,71 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   final audit; `publish --preflight` runs the publisher's no-effect checks. Each step is one
   commit whose trailers are the driver's only memory, so a rerun continues where it stopped and
   never rewrites history. `rehearse` cuts a synthetic successor to the ready gate in a
-  disposable clone with no private input; CI runs it on every change.
+  disposable clone with no private input; CI runs it on every change
+  ([#179](https://github.com/alphastorm/omp-ninfer/pull/179)).
 - `scripts/qualification_bundle.py` and `scripts/aggregate_qualification.py`: a closed,
   hash-bound bundle is the contract between a native qualification run and the release tree.
   `admit` validates it and installs decisions and proofs before the binder; `compose` derives
   the aggregate qualification afterwards. A carried lane takes no bundle and keeps its
-  published rows.
+  published rows ([#179](https://github.com/alphastorm/omp-ninfer/pull/179)).
 - `scripts/receipt_audit.py` generates the lane-stage and final receipt audits and removes
   predecessor copies no row binds, logging each one; the verifier recomputes the audit from its
-  own commit under `--check-pins`.
+  own commit under `--check-pins` ([#179](https://github.com/alphastorm/omp-ninfer/pull/179)).
 - `scripts/collect_route_evidence.py`, `scripts/review_ledger.py`, `scripts/native_publication.py`
   and `scripts/retarget_guide.py`: acceptance evidence collection, the public review ledger,
   anonymous authentication of a published native component, and identity retargeting of the
   Quick Start from the release manifests. Each reproduces the published v0.19.0 result in its
-  tests.
+  tests ([#179](https://github.com/alphastorm/omp-ninfer/pull/179)).
 - `scripts/release.py cut`: the component cut for a re-cut native lane. It runs the publisher's
   dry run by default; `--publish` needs an authorization file whose SHA-256 the committed plan
   records, then authenticates the published bytes anonymously and keeps that record for
   `candidate`. `candidate --runtime-handoff` takes the RTX 5090 runtime's publication inputs as
-  one hash-checked directory.
+  one hash-checked directory ([#180](https://github.com/alphastorm/omp-ninfer/pull/180)).
 - `scripts/flip_docs.py`: after publication, moves the release, client and component identities
   in the living pages from the previous release's manifest to the new one and lists what still
-  needs an author. It never edits a record.
+  needs an author. It never edits a record
+  ([#180](https://github.com/alphastorm/omp-ninfer/pull/180)).
 - `scripts/retarget_guide.py` refuses a guide that already names the target release but still
-  carries a predecessor component identity outside a rollback reference.
+  carries a predecessor component identity outside a rollback reference
+  ([#180](https://github.com/alphastorm/omp-ninfer/pull/180)).
 - `scripts/verify_release.py --lint-ready`: a staged release is held to everything the ready
   gate will require except evidence its remaining phases have not produced, so defects surface
-  when the draft is staged instead of after acceptance.
+  when the draft is staged instead of after acceptance
+  ([#179](https://github.com/alphastorm/omp-ninfer/pull/179)).
 - `scripts/run_tests.py`: the contract suite runs one isolated process per module, splits
   oversized modules into fixed chunks and can run a shard. CI uses it on every platform, runs
-  native Windows in four shards and now also runs on `release/**` branches.
+  native Windows in four shards and now also runs on `release/**` branches
+  ([#179](https://github.com/alphastorm/omp-ninfer/pull/179)).
+- `scripts/runtime_artifacts.py` authenticates the six published RTX 5090 runtime assets
+  anonymously against the GitHub release API and a local mirror, hashing archive members as a
+  stream without extracting or executing them
+  ([#188](https://github.com/alphastorm/omp-ninfer/pull/188)).
+- `scripts/upstream_watch.py --only qwen4-readiness` records whether the official Qwen listing and
+  the upstream engine show dense `Qwen4` weights, a converter recipe or a model directory; a
+  positive signal is an observation, not adoption
+  ([#186](https://github.com/alphastorm/omp-ninfer/pull/186)).
 
 ### Fixed
 
 - Build strict review ledgers from critical-review records without an embedded status, using
   the manifest and lead's closed status. A selected non-strong seat may lack a result only
   when its latest dispatch attempt failed; strong-critic results remain mandatory, and the
-  ledger records missing seats without approval and binds the dispatch attempts by digest.
+  ledger records missing seats without approval and binds the dispatch attempts by digest
+  ([#198](https://github.com/alphastorm/omp-ninfer/pull/198)).
 - Route collection and composition accept the restored RTX 5090 incumbent's digest from any
-  older ready GA release manifest, not just the latest release; unpublished digests still refuse.
+  older ready GA release manifest, not just the latest release; unpublished digests still refuse
+  ([#197](https://github.com/alphastorm/omp-ninfer/pull/197)).
 - Indexed native census and client-file evidence refuse before collection when the before and
-  final paths identify the same file, including aliases.
+  final paths identify the same file, including aliases
+  ([#197](https://github.com/alphastorm/omp-ninfer/pull/197)).
 - Release finalization passes indexed native census, client-file and production-restoration
   inputs to the route collector instead of requiring their old flat-root copies. Index mode
-  refuses missing or escaping evidence paths; windows without an index retain the original layout.
+  refuses missing or escaping evidence paths; windows without an index retain the original layout
+  ([#194](https://github.com/alphastorm/omp-ninfer/pull/194)).
 - `aggregate_qualification.py admit` skips `component-cut` plan decisions, as the decision binder
   already did. A release with a re-cut native lane and a committed cut authorization no longer
   refuses at admission for a `cut-<lane>.json` that no bundle carries; cut authorizations stay out
-  of the release tree.
+  of the release tree ([#193](https://github.com/alphastorm/omp-ninfer/pull/193)).
 - The release driver stages re-cut runtimes with their current publication, artifact
   authentication, build identity and qualification receipts, including the authenticated archive
   size; it stages operator-authored notes before validating the draft.
@@ -117,35 +187,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   From v0.20.0 review closure requires selected strong-critic results, matching epoch identities
   and closed focused receipts; operator free text uses a structural path-token refusal.
   Published RC receipts cannot be reused by changing JSON formatting, current pinned guide
-  citations require authenticated evidence, and stage inputs cannot be null.
+  citations require authenticated evidence, and stage inputs cannot be null
+  ([#183](https://github.com/alphastorm/omp-ninfer/pull/183)).
 - Route composition binds staged parity waivers to the accepted candidate and refreshes their
   hash chains. Review epochs must match their closed directories' frozen subjects; from v0.20.0
   the candidate must contain its release plan, and a carried runtime refuses staging identity
-  overrides.
+  overrides ([#183](https://github.com/alphastorm/omp-ninfer/pull/183)).
 - Guide evidence links must be reachable through the release authorities' hash-bound evidence,
   not orphan receipts. Anonymous native-publication downloads stay on GitHub release hosts;
-  headers, redirects and streamed bodies share an operation deadline.
-
+  headers, redirects and streamed bodies share an operation deadline
+  ([#183](https://github.com/alphastorm/omp-ninfer/pull/183)).
 - `docs/RELEASES.md` records an erratum for v0.19.0: five descriptive strings in its acceptance
   evidence describe the RTX 4090 component as newly cut or promoted, or the three components as
-  built from one source. The manifest, receipts, hashes and pins are correct and unchanged.
+  built from one source. The manifest, receipts, hashes and pins are correct and unchanged
+  ([#179](https://github.com/alphastorm/omp-ninfer/pull/179)).
 - Issue forms: remove a benchmark command that stock Oh My Pi does not have, stop marking
   restart continuation as native-lane-only, cover the native Windows lanes in the
-  installation-failure form, and replace placeholders from early releases.
+  installation-failure form, and replace placeholders from early releases
+  ([#178](https://github.com/alphastorm/omp-ninfer/pull/178)).
 - `docs/UPSTREAM.md` linked a quickstart anchor the guide no longer has; the record now names
-  the tagged guide that has it.
+  the tagged guide that has it ([#178](https://github.com/alphastorm/omp-ninfer/pull/178)).
 - `docs/RELEASES.md` said that completing a partial publication waits for the push-to-`main` and
   tag CI runs. `scripts/hosts/publish-product-release.sh` reads only the pull request's check
   rollup; the page now says so. It also said the changelog is dated at cut time, while the tagged
-  tree keeps `[Unreleased]` and the version heading is dated after publication.
+  tree keeps `[Unreleased]` and the version heading is dated after publication
+  ([#178](https://github.com/alphastorm/omp-ninfer/pull/178)).
 - `docs/TROUBLESHOOTING.md` named the obsolete `--host-kv-mib` flag (profiles use
   `--host-context-mib`), and `docs/SECURITY.md` called the native CycloneDX dependency pins
-  optional (components at `v0.7.0` or later require them).
+  optional (components at `v0.7.0` or later require them)
+  ([#178](https://github.com/alphastorm/omp-ninfer/pull/178)).
 - `ROADMAP.md` still described the `rk4v4` token-32 restore mismatch as unexplained after
-  `EXP-116` classified it, and listed closed trackers as open.
+  `EXP-116` classified it, and listed closed trackers as open
+  ([#178](https://github.com/alphastorm/omp-ninfer/pull/178)).
 - `examples/fleet/README.md` pointed to a roadmap item that does not exist and did not say that
   `open-tunnels.sh` forwards the RTX 5090 lane to port `18088` while the quickstart container
-  publishes `18089`.
+  publishes `18089` ([#178](https://github.com/alphastorm/omp-ninfer/pull/178)).
+
+### Documentation
+
+- Review stock Oh My Pi `18.20.0 → 18.20.2`, including 18.20.1
+  (`7c49c11aa5bbaf3f418406583096168ad5b8c6dc`, release `445558988`), with a census of `552`
+  upstream commits and probes of the published macOS arm64 executable against a local stub, in
+  [`docs/measurements/2026-11-16-omp-18202-client-upgrade-review.json`](docs/measurements/2026-11-16-omp-18202-client-upgrade-review.json)
+  ([#187](https://github.com/alphastorm/omp-ninfer/pull/187)).
+- `docs/RELEASES.md` describes what the public review ledger carries from v0.20.0: finding id,
+  severity and confidence, with reviewer prose kept in the private records the ledger binds by
+  digest ([#185](https://github.com/alphastorm/omp-ninfer/pull/185)).
 
 ## [0.19.0] - 2026-11-13
 
@@ -3407,7 +3494,8 @@ URLs ([receipt](releases/v0.5.1/acceptance/composed-external-installation.json))
 - Excluded secrets, private host identifiers, prompts, model output, and raw logs from support
   material.
 
-[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.19.0...HEAD
+[Unreleased]: https://github.com/alphastorm/omp-ninfer/compare/v0.20.0...HEAD
+[0.20.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.19.0...v0.20.0
 [0.19.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.17.0...v0.18.0
 [0.17.0]: https://github.com/alphastorm/omp-ninfer/compare/v0.16.2...v0.17.0

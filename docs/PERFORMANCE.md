@@ -25,14 +25,14 @@ program so contributors can see the state of play in one place.
 Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release layer) → NInfer
 (inference engine) → Qwen3.8 27B (served model). Qualified on RTX 5090 · 4090 · 3090 over one shared
 Qwen3.8 27B model artifact at a 131,072-token context. Exact component, source, and profile
-identities for **v0.19.0** are in [canonical facts](FACTS.md#current-release), terms in the
+identities for **v0.20.0** are in [canonical facts](FACTS.md#current-release), terms in the
 [glossary](FACTS.md#glossary), and throughput in
 [benchmarks](BENCHMARKS.md#current-qualified-results).
 
 | Lane | Speculative decoding | KV format | Requests in flight | Kernel paths that differ |
 | --- | --- | --- | --- | --- |
 | RTX 5090 container (`sm_120a`) | DFlash2 draft window 7 (`--lm-head-draft`) | `BF16` | Two (`C2`) | Single-launch 8-column `BF16` verify attention; small-T tensor-core `Q4` query/key (`T=8/16`) and two-request `Q5` `LinearAdd` post-mixer (`T=16`) verify projections; `--gpu-keep-warm-ms` single-warp spin (`3.5/10 ms`, GPU state `P1`); `Group64` `A8` prefill and prefill pacing off |
-| RTX 4090 native Windows (`sm_89`) | DFlash2 draft window 7 | `INT8` | One (`C1`) | `Q4_G64_FP16` draft MLP `gate`/`up` weights and host-mapped `token_embedding`; output-identical `sm_89` attention prefill; `sm_89` keep-warm spin (`50 ms/100 ms`); small-T tensor-core verify (`tc`), `Group64` `A8` prefill, and FP32 head logits (`--fp32-head-logits`) off (package omits bounded pressure-save retries) |
+| RTX 4090 native Windows (`sm_89`) | DFlash2 draft window 7 | `INT8` | One (`C1`) | `Q4_G64_FP16` draft MLP `gate`/`up` weights and host-mapped `token_embedding`; output-identical `sm_89` attention prefill; `sm_89` keep-warm spin (`50 ms/100 ms`); small-T tensor-core verify (`tc`), `Group64` `A8` prefill, and FP32 head logits (`--fp32-head-logits`) off |
 | RTX 3090 native Windows (`sm_86`) | DFlash2 draft window 7 | `INT8` (shared pool) | Two (`C2`) | `sm_86` small-T tensor-core verify at `T=8/16` (`tc`); `Q4_G64_FP16` draft MLP `gate`/`up` weights and host-mapped `token_embedding`; output-identical `sm_86` attention prefill; `Group64` `A8` prefill, FP32 head logits (`--fp32-head-logits`), and keep-warm off |
 
 **What the program has established** (full history in the [experiment ledger](#experiment-ledger)
@@ -60,6 +60,11 @@ and [release records](RELEASES.md#release-records)):
   context-pressure starvation at `3.0 s` max pause on RTX 5090 ([`EXP-112`](#experiment-ledger),
   [PR #108](https://github.com/alphastorm/ninfer/pull/108),
   [`alphastorm/ninfer#122`](https://github.com/alphastorm/ninfer/pull/122)).
+- Chat-template markers (assistant header, thinking opener, reasoning close) no longer force
+  prefill or Replay chunk boundaries on any lane: across 2,880 prompt preparations the token IDs,
+  types, positions and reusability stayed byte-identical while 31,422 rewrite execution frontiers
+  disappeared ([fork #134](https://github.com/alphastorm/ninfer/pull/134), in line with upstream
+  `77418cfec`; [v0.20.0 notes](../releases/v0.20.0/NINFER_RELEASE_NOTES.md)).
 - Specialized `sm_86` and `sm_89` attention prefill speeds up exact retrieval (`+5.40%` on RTX 3090)
   without changing output bytes, while `Group64` `A8` prefill stays compiled off after
   redaction-screen leak flips ([`EXP-100`](#experiment-ledger)).
@@ -71,9 +76,8 @@ and [release records](RELEASES.md#release-records)):
 **Open work** — the [ideas backlog](#ideas-backlog) below is a pool; product sequencing lives in
 [`ROADMAP.md`](../ROADMAP.md):
 
-- Native RTX 4090 build with bounded pressure-save retries
-  ([`alphastorm/ninfer#122`](https://github.com/alphastorm/ninfer/pull/122)), coordinator and load
-  edge cases ([`alphastorm/ninfer#123`](https://github.com/alphastorm/ninfer/issues/123),
+- Pressure-save coordinator and load edge cases
+  ([`alphastorm/ninfer#123`](https://github.com/alphastorm/ninfer/issues/123),
   [`alphastorm/ninfer#89`](https://github.com/alphastorm/ninfer/issues/89)), fresh-admission window
   rotation ([`alphastorm/ninfer#103`](https://github.com/alphastorm/ninfer/issues/103),
   [`EXP-112`](#experiment-ledger)), checkpoint-prepare ordering
@@ -241,8 +245,11 @@ cross-engine output differences, and the
 [v0.19.0 decision](../releases/v0.19.0/qualification/native-speed-decision.json) (`bba32162`)
 applies the same `>= 0.98` / `>= 0.95` floors on RTX 3090 `beta.4` `tc` against published `beta.3`
 `tc` alongside [`native-identity-decision.json`](../releases/v0.19.0/qualification/native-identity-decision.json)
-(`856ac8d2`). The earlier v0.16.0 speedup-claim rule remains expressible by
-recording `1.08` / `0.95` instead.
+(`856ac8d2`). The
+[v0.20.0 decision](../releases/v0.20.0/qualification/native-speed-decision.json) (`96b6f014`)
+keeps the `>= 0.98` / `>= 0.95` floors for both native lanes against their published incumbents
+but applies the per-case floor only to byte-identical cases, as described below. The earlier
+v0.16.0 speedup-claim rule remains expressible by recording `1.08` / `0.95` instead.
 Both role-only and combined role-plus-supplemental weighted ratios must clear the
 recorded weighted floor; by default, the every-case floor covers the combined suite.
 The default output rule requires identity within **and across** engines. A second,

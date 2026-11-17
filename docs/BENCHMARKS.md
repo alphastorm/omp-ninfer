@@ -39,23 +39,23 @@ published result. None is a universal GPU, model, or end-to-end latency claim.
 <a id="current-qualified-results--v0190"></a>
 ## Current qualified results
 
-Release **v0.19.0** (2026-11-13) binds the measurements below, and each row links its qualification
-receipt. The RTX 4090 rows are the byte-identical `v0.18.0` qualification of the same package,
-which this release binds without measuring again. Component identities and per-lane limits are in
+Release **v0.20.0** (2026-11-17) binds the measurements below, and each row links its qualification
+receipt. All three lanes were measured again on packages built from one engine source
+(`ca4c3917`). Component identities and per-lane limits are in
 [Current release](FACTS.md#current-release), and end-to-end install and route acceptance results
 are in [Evidence](FACTS.md#evidence).
 
 | Lane | Gate | Result | Receipt |
 | --- | --- | --- | --- |
-| RTX 5090 container, `v0.7.0-qwen38-5090-beta.8` | `prefill_curve` (130,048 tokens, cold) | **56.67 s** (`56.668 s` wall, **2,294.9 tok/s** wall, **56.55 s** / `56.548 s` server prefill, `30,400 MiB` post-gate VRAM); exact retrieval (`ORCHID=493817; COLOR=COBALT`) | [`releases/v0.19.0/qualification/rtx5090.json`](../releases/v0.19.0/qualification/rtx5090.json) |
-| RTX 5090 container, `v0.7.0-qwen38-5090-beta.8` | `decode` (2,048 completion tokens, [DFlash2](FACTS.md#glossary) K=7) | **181.71 tok/s** server-side (**180.20 tok/s** wall, `11.271 s` server / `11.365 s` wall); **0.244** DFlash2 acceptance (`1,291 / 5,281` drafted tokens across `756` verify rounds), **2.71 tokens/round** | [`releases/v0.19.0/qualification/rtx5090.json`](../releases/v0.19.0/qualification/rtx5090.json) |
-| RTX 5090 container, `v0.7.0-qwen38-5090-beta.8` | `agent_protocol`, [schema 3](FACTS.md#glossary) restart, and 32 GB C2 | **passed** — Authenticated session identity, stateful continuation, 2 forks, deleted-parent HTTP 404 before and after Docker restart with no resurrection, and surviving descendant and live sibling continuations at HTTP 200. Checkpoint restoration across four container restarts and two-request memory-pressure overlap on 32 GB VRAM also passed ([`runtime-rc.json`](../releases/v0.19.0/qualification/runtime-rc.json)). | [`releases/v0.19.0/qualification/rtx5090.json`](../releases/v0.19.0/qualification/rtx5090.json) |
-| RTX 4090 native Windows, `v0.8.0-qwen38-4090-beta.3` | `long_session` (130,048 tokens) | **83.45 s** (**83.451 s**); exact retrieval (`ORCHID=493817; COLOR=COBALT`) | [`releases/v0.19.0/qualification/rtx4090.json`](../releases/v0.19.0/qualification/rtx4090.json) |
-| RTX 4090 native Windows, `v0.8.0-qwen38-4090-beta.3` | `benchmark_c1` (4,541 prompt / 1,024 completion tokens, DFlash2 K=7) | **253.71 tok/s** decode at **83.88%** DFlash2 acceptance; **2,129.62 tok/s** prefill; 6.224 s wall, 22,639 MiB peak, 463.12 W peak | [`releases/v0.19.0/qualification/rtx4090.json`](../releases/v0.19.0/qualification/rtx4090.json) |
-| RTX 4090 native Windows, `v0.8.0-qwen38-4090-beta.3` | `persistence`, `protocol`, `state_security` | **passed** — 1,647 cached tokens after an explicit save and 1,650 after a graceful `stop-event` flush, across a 42.654 s restart. OpenAI Chat and Responses protocol checks, including JSON-schema output and 128-character tool names, and Windows state-directory access-control checks also passed. Upgrade, rollback, and repair rehearsals (`3/3`) passed in `v0.18.0` ([`rtx4090-upgrade.json`](../releases/v0.18.0/qualification/rtx4090-upgrade.json)). | [`releases/v0.19.0/qualification/rtx4090.json`](../releases/v0.19.0/qualification/rtx4090.json) |
-| RTX 3090 native Windows, `v0.8.0-qwen38-3090-beta.4` | `long_session` (130,048 tokens) | **188.45 s** (**188.453 s**); exact retrieval (`ORCHID=493817; COLOR=COBALT`) | [`releases/v0.19.0/qualification/rtx3090.json`](../releases/v0.19.0/qualification/rtx3090.json) |
-| RTX 3090 native Windows, `v0.8.0-qwen38-3090-beta.4` | `benchmark_c1` (4,541 prompt / 1,024 completion tokens, DFlash2 K=7) | **227.19 tok/s** decode at **84.04%** DFlash2 acceptance; **978.19 tok/s** prefill; 9.245 s wall, 22,584 MiB peak, 350.68 W peak (`350.0 W` enforced cap across all `56` samples, `0` over `355.0 W` envelope) | [`releases/v0.19.0/qualification/rtx3090.json`](../releases/v0.19.0/qualification/rtx3090.json) |
-| RTX 3090 native Windows, `v0.8.0-qwen38-3090-beta.4` | `persistence`, `protocol`, `state_security` | **passed** — 1,647 cached tokens after an explicit save and 1,650 after a graceful `stop-event` flush, across a 46.953 s restart. OpenAI Chat and Responses protocol checks, including JSON-schema output and 128-character tool names, and Windows state-directory access-control checks also passed. Upgrade, rollback, and repair rehearsals (`3/3`) passed separately ([`rtx3090-upgrade.json`](../releases/v0.19.0/qualification/rtx3090-upgrade.json)). | [`releases/v0.19.0/qualification/rtx3090.json`](../releases/v0.19.0/qualification/rtx3090.json) |
+| RTX 5090 container, `v0.7.0-qwen38-5090-beta.9` | `prefill_curve` (130,048 tokens, cold) | **56.62 s** (`56.617 s` wall, **2,297.0 tok/s** wall, **56.52 s** / `56.516 s` server prefill, `30,400 MiB` post-gate VRAM); exact retrieval (`ORCHID=493817; COLOR=COBALT`) | [`releases/v0.20.0/qualification/rtx5090.json`](../releases/v0.20.0/qualification/rtx5090.json) |
+| RTX 5090 container, `v0.7.0-qwen38-5090-beta.9` | `decode` (2,048 completion tokens, [DFlash2](FACTS.md#glossary) K=7) | **192.90 tok/s** server-side (**191.42 tok/s** wall, `10.617 s` server / `10.699 s` wall); **0.269** DFlash2 acceptance (`1,335 / 4,967` drafted tokens across `712` verify rounds), **2.88 tokens/round** | [`releases/v0.20.0/qualification/rtx5090.json`](../releases/v0.20.0/qualification/rtx5090.json) |
+| RTX 5090 container, `v0.7.0-qwen38-5090-beta.9` | `agent_protocol`, [schema 3](FACTS.md#glossary) restart, and 32 GB C2 | **passed** — Authenticated session identity, stateful continuation, 2 forks, deleted-parent HTTP 404 before and after Docker restart with no resurrection, and surviving descendant and live sibling continuations at HTTP 200. Checkpoint restoration across four container restarts and two-request memory-pressure overlap on 32 GB VRAM also passed ([`runtime-rc.json`](../releases/v0.20.0/qualification/runtime-rc.json)). | [`releases/v0.20.0/qualification/rtx5090.json`](../releases/v0.20.0/qualification/rtx5090.json) |
+| RTX 4090 native Windows, `v0.8.0-qwen38-4090-beta.5` | `long_session` (130,048 tokens) | **83.45 s** (**83.455 s**); exact retrieval (`ORCHID=493817; COLOR=COBALT`) | [`releases/v0.20.0/qualification/rtx4090.json`](../releases/v0.20.0/qualification/rtx4090.json) |
+| RTX 4090 native Windows, `v0.8.0-qwen38-4090-beta.5` | `benchmark_c1` (4,541 prompt / 1,024 completion tokens, DFlash2 K=7) | **252.74 tok/s** decode at **83.14%** DFlash2 acceptance; **2,160.52 tok/s** prefill; 6.263 s wall, 22,639 MiB peak, 461.78 W peak | [`releases/v0.20.0/qualification/rtx4090.json`](../releases/v0.20.0/qualification/rtx4090.json) |
+| RTX 4090 native Windows, `v0.8.0-qwen38-4090-beta.5` | `persistence`, `protocol`, `state_security` | **passed** — 1,647 cached tokens after an explicit save and 1,650 after a graceful `stop-event` flush, across a 41.006 s restart. OpenAI Chat and Responses protocol checks, including JSON-schema output and 128-character tool names, and Windows state-directory access-control checks also passed. Upgrade, rollback, and repair rehearsals from `v0.8.0-qwen38-4090-beta.3` passed separately ([`rtx4090-upgrade.json`](../releases/v0.20.0/qualification/rtx4090-upgrade.json)). | [`releases/v0.20.0/qualification/rtx4090.json`](../releases/v0.20.0/qualification/rtx4090.json) |
+| RTX 3090 native Windows, `v0.8.0-qwen38-3090-beta.5` | `long_session` (130,048 tokens) | **188.32 s** (**188.318 s**); exact retrieval (`ORCHID=493817; COLOR=COBALT`) | [`releases/v0.20.0/qualification/rtx3090.json`](../releases/v0.20.0/qualification/rtx3090.json) |
+| RTX 3090 native Windows, `v0.8.0-qwen38-3090-beta.5` | `benchmark_c1` (4,541 prompt / 1,024 completion tokens, DFlash2 K=7) | **226.33 tok/s** decode at **83.14%** DFlash2 acceptance; **982.36 tok/s** prefill; 9.283 s wall, 22,584 MiB peak, 350.13 W peak (`350.0 W` enforced cap across all `56` samples, `0` over `355.0 W` envelope) | [`releases/v0.20.0/qualification/rtx3090.json`](../releases/v0.20.0/qualification/rtx3090.json) |
+| RTX 3090 native Windows, `v0.8.0-qwen38-3090-beta.5` | `persistence`, `protocol`, `state_security` | **passed** — 1,647 cached tokens after an explicit save and 1,650 after a graceful `stop-event` flush, across a 46.923 s restart. OpenAI Chat and Responses protocol checks, including JSON-schema output and 128-character tool names, and Windows state-directory access-control checks also passed. Upgrade, rollback, and repair rehearsals from `v0.8.0-qwen38-3090-beta.4` passed separately ([`rtx3090-upgrade.json`](../releases/v0.20.0/qualification/rtx3090-upgrade.json)). | [`releases/v0.20.0/qualification/rtx3090.json`](../releases/v0.20.0/qualification/rtx3090.json) |
 
 Gate-by-gate detail for this release is the first record under
 [Historical measurements](#historical-measurements).
@@ -225,6 +225,40 @@ a new record is added and an old one is not edited. For what is true today, read
 above and the [canonical facts](FACTS.md#current-release).
 
 ## Historical measurements
+
+### v0.20.0 one-source re-cut: identity-first misses, powered `EXP-085` quality screens, and speed gates
+
+In `v0.20.0`, all three lanes rebuild from `ca4c3917`: RTX 5090 `v0.7.0-qwen38-5090-beta.9`, native
+RTX 4090 `v0.8.0-qwen38-4090-beta.5` (`native-v0.8.0-beta.5-rtx4090`), and native RTX 3090
+`v0.8.0-qwen38-3090-beta.5` (`native-v0.8.0-beta.5-tc-rtx3090`). The chat-template change moves
+prefill chunk decomposition, so generated tokens can differ from `v0.19.0` by design. Identity-first
+admission
+([`native-identity-decision.json`](../releases/v0.20.0/qualification/native-identity-decision.json)
+`62b78a1d`) therefore did not hold on any lane, and each lane ran the 1,120-prompt
+[`EXP-085`](PERFORMANCE.md#experiment-ledger) screen and a fresh 80-prompt determinism rerun:
+
+| Lane | Incumbent | Outputs byte-identical to the incumbent | `EXP-085` secret-leak ratio (upper 95% bound, limit `1.1`) | Determinism rerun |
+| --- | --- | --- | --- | --- |
+| RTX 5090 | `v0.7.0-qwen38-5090-beta.8` | `1/80` determinism, `23/84` counted roles | 1.0386 (1.0888), pass ([release notes](../releases/v0.20.0/NINFER_RELEASE_NOTES.md#rtx-5090-beta9-runtime)) | no mismatch |
+| RTX 4090 | `v0.8.0-qwen38-4090-beta.3` | `0/80` determinism | 0.9857 (1.0265), pass ([`rtx4090-windows-native.quality-screen.json`](../releases/v0.20.0/qualification/rtx4090-windows-native.quality-screen.json) `03b584a7`) | no mismatch |
+| RTX 3090 | `v0.8.0-qwen38-3090-beta.4` `tc` | `0/80` determinism | 1.0365 (1.0849), pass ([`rtx3090-windows-native.quality-screen.json`](../releases/v0.20.0/qualification/rtx3090-windows-native.quality-screen.json) `fb263f37`) | no mismatch |
+
+Under [`native-speed-decision.json`](../releases/v0.20.0/qualification/native-speed-decision.json)
+(`96b6f014`, [#192](https://github.com/alphastorm/omp-ninfer/pull/192)), the `0.98` weighted floor
+covers all 84 speed-suite cases and the `0.95` per-case floor covers only cases whose outputs were
+byte-identical in all four `ABBA` arms:
+
+| Lane | Weighted ratio vs incumbent (84 cases) | Cases byte-identical in all four arms | Minimum ratio among those cases |
+| --- | ---: | ---: | ---: |
+| [RTX 4090](../releases/v0.20.0/qualification/rtx4090-speed.json) (`049cf3ca`) | 0.999 (`174.72 → 174.59 tok/s`) | 38 | 0.970 |
+| [RTX 3090 `tc`](../releases/v0.20.0/qualification/rtx3090-speed.json) (`87b69d88`) | 1.006 (`154.84 → 155.78 tok/s`) | 32 | 0.960 |
+
+Both native lanes also passed all 15 managed native phases, `83/83` agent-parity positions without
+a parity waiver
+([RTX 4090](../releases/v0.20.0/qualification/rtx4090-agent-parity.json) `5abe7130`,
+[RTX 3090](../releases/v0.20.0/qualification/rtx3090-agent-parity.json) `59838b54`), their
+shipping-package fit proofs, and upgrade, rollback, and repair rehearsals from their published
+incumbents.
 
 ### v0.19.0 RTX 3090 `beta.4` same-profile identity-first admission, carried RTX 4090 `beta.3`, and acceptance boundary
 

@@ -223,16 +223,16 @@ download link in both.
 keeps your session's continuation state resident on your GPU. **OMP NInfer** is the qualified release
 that binds them with one hash-pinned Qwen3.8 27B model on an RTX 5090, 4090, or 3090 you own.
 
-Every install route in the guide was run end to end on **v0.19.0** with unmodified
-[Oh My Pi 18.20.0](https://github.com/can1357/oh-my-pi/releases/tag/v18.20.0) — 31 steps,
+Every install route in the guide was run end to end on **v0.20.0** with unmodified
+[Oh My Pi 18.20.2](https://github.com/can1357/oh-my-pi/releases/tag/v18.20.2) — 31 steps,
 three client platforms, both native lanes
-([receipt](releases/v0.19.0/acceptance/composed-external-installation.json)).
+([receipt](releases/v0.20.0/acceptance/composed-external-installation.json)).
 
 ### [Get started →](docs/QUICKSTART.md)
 
 [![CI][ci-badge]][ci] [![Release][release-badge]][releases] [![RTX 5090 decode][decode-badge]][benchmarks] [![Context][context-badge]][benchmarks] [![License][license-badge]][license]
 
-[Download v0.19.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.19.0) · [Lanes](docs/QUICKSTART.md#choose-your-lane) ·
+[Download v0.20.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.20.0) · [Lanes](docs/QUICKSTART.md#choose-your-lane) ·
 [Facts](docs/FACTS.md) · [Compare](docs/DECISION_GUIDE.md) · [Benchmarks](docs/BENCHMARKS.md) ·
 [Architecture](docs/ARCHITECTURE.md) · [Security](docs/SECURITY.md) · [Troubleshooting](docs/TROUBLESHOOTING.md) ·
 [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)

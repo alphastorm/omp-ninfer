@@ -6,16 +6,16 @@
 keeps your session's continuation state resident on your GPU. **OMP NInfer** is the qualified release
 that binds them with one hash-pinned Qwen3.8 27B model on an RTX 5090, 4090, or 3090 you own.
 
-Every install route in the guide was run end to end on **v0.19.0** with unmodified
-[Oh My Pi 18.20.0](https://github.com/can1357/oh-my-pi/releases/tag/v18.20.0) — 31 steps,
+Every install route in the guide was run end to end on **v0.20.0** with unmodified
+[Oh My Pi 18.20.2](https://github.com/can1357/oh-my-pi/releases/tag/v18.20.2) — 31 steps,
 three client platforms, both native lanes
-([receipt](releases/v0.19.0/acceptance/composed-external-installation.json)).
+([receipt](releases/v0.20.0/acceptance/composed-external-installation.json)).
 
 ### [Get started →](docs/QUICKSTART.md)
 
 [![CI][ci-badge]][ci] [![Release][release-badge]][releases] [![RTX 5090 decode][decode-badge]][benchmarks] [![Context][context-badge]][benchmarks] [![License][license-badge]][license]
 
-[Download v0.19.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.19.0) · [Lanes](docs/QUICKSTART.md#choose-your-lane) ·
+[Download v0.20.0](https://github.com/alphastorm/omp-ninfer/releases/tag/v0.20.0) · [Lanes](docs/QUICKSTART.md#choose-your-lane) ·
 [Facts](docs/FACTS.md) · [Compare](docs/DECISION_GUIDE.md) · [Benchmarks](docs/BENCHMARKS.md) ·
 [Architecture](docs/ARCHITECTURE.md) · [Security](docs/SECURITY.md) · [Troubleshooting](docs/TROUBLESHOOTING.md) ·
 [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)
@@ -27,7 +27,7 @@ three client platforms, both native lanes
 [releases]: https://github.com/alphastorm/omp-ninfer/releases
 [release-badge]: https://img.shields.io/github/v/release/alphastorm/omp-ninfer?filter=v*&label=release&color=8E7BE8&labelColor=0B0E11
 [benchmarks]: docs/BENCHMARKS.md
-[decode-badge]: https://img.shields.io/badge/RTX%205090%20decode-181.71%20tok%2Fs-8E7BE8?labelColor=0B0E11
+[decode-badge]: https://img.shields.io/badge/RTX%205090%20decode-192.90%20tok%2Fs-8E7BE8?labelColor=0B0E11
 [context-badge]: https://img.shields.io/badge/context-130%2C048%20tokens%20exact-1C232B?labelColor=0B0E11
 [license]: LICENSE
 [license-badge]: https://img.shields.io/github/license/alphastorm/omp-ninfer?color=1C232B&labelColor=0B0E11
@@ -76,25 +76,26 @@ JSON-schema output, and the same 20.4 GB Qwen3.8 27B artifact (`81f924d4`).
 
 | Lane | Runs as | Serves | Decode | Exact&nbsp;retrieval, 130,048&nbsp;tokens |
 | --- | --- | --- | --- | --- |
-| **RTX&nbsp;5090** | Docker Desktop/WSL2 container on Windows 11; clients: Windows (local), macOS over a manual SSH tunnel (preview), Linux under WSL2 | Two requests in flight; vision, tools, and preserved thinking | [181.71&nbsp;tok/s](releases/v0.19.0/qualification/rtx5090.json) | [56.67&nbsp;s](releases/v0.19.0/qualification/rtx5090.json) |
-| **RTX&nbsp;4090** | Native Windows 11 package; Windows client (local) | One request at a time; text and tools | [253.71&nbsp;tok/s](releases/v0.19.0/qualification/rtx4090.json) | [83.45&nbsp;s](releases/v0.19.0/qualification/rtx4090.json) |
-| **RTX&nbsp;3090** | Native Windows 11 package; Windows client (local) | Two requests in flight over one shared 131,072-token pool, under a 350 W serving cap; text and tools | [227.19&nbsp;tok/s](releases/v0.19.0/qualification/rtx3090.json) | [188.45&nbsp;s](releases/v0.19.0/qualification/rtx3090.json) |
+| **RTX&nbsp;5090** | Docker Desktop/WSL2 container on Windows 11; clients: Windows (local), macOS over a manual SSH tunnel (preview), Linux under WSL2 | Two requests in flight; vision, tools, and preserved thinking | [192.90&nbsp;tok/s](releases/v0.20.0/qualification/rtx5090.json) | [56.62&nbsp;s](releases/v0.20.0/qualification/rtx5090.json) |
+| **RTX&nbsp;4090** | Native Windows 11 package; Windows client (local) | One request at a time; text and tools | [252.74&nbsp;tok/s](releases/v0.20.0/qualification/rtx4090.json) | [83.45&nbsp;s](releases/v0.20.0/qualification/rtx4090.json) |
+| **RTX&nbsp;3090** | Native Windows 11 package; Windows client (local) | Two requests in flight over one shared 131,072-token pool, under a 350 W serving cap; text and tools | [226.33&nbsp;tok/s](releases/v0.20.0/qualification/rtx3090.json) | [188.32&nbsp;s](releases/v0.20.0/qualification/rtx3090.json) |
 
 Each number links to its qualification receipt. RTX 5090 retrieval is from a cold start; native
 decode is measured with one request at a time.
 
 Both native lanes install on one two-GPU host, each bound to its GPU UUID, and run one at a time on
 port `18082`. Checkpoints are best effort and restore only on the same runtime, model, profile, and
-credentials. In `v0.19.0`, the RTX 5090 and RTX 3090 runtimes stop retrying a refused
-memory-pressure checkpoint save after six retries or 10 seconds; the RTX 4090 package does not
-include that bound. Exact component, source, and model identities:
-[facts](docs/FACTS.md#current-release) · [glossary](docs/FACTS.md#glossary) ·
-[manifest](releases/v0.19.0/manifest.json).
+credentials. In `v0.20.0`, all three runtimes are built from one engine source, and each stops
+retrying a refused memory-pressure checkpoint save after six retries or 10 seconds (the RTX 4090
+package gained this bound in this release). Checkpoints saved by earlier releases are refused, so
+each saved session prefills once after the upgrade. Exact
+component, source, and model identities: [facts](docs/FACTS.md#current-release) ·
+[glossary](docs/FACTS.md#glossary) · [manifest](releases/v0.20.0/manifest.json).
 
 ## Get started
 
 1. **[Choose your lane](docs/QUICKSTART.md#choose-your-lane)** and check its prerequisites.
-2. **Clone tag `v0.19.0`** and run `python3 scripts/verify_release.py --require-ready`.
+2. **Clone tag `v0.20.0`** and run `python3 scripts/verify_release.py --require-ready`.
 3. **[Install the stock Oh My Pi client](docs/QUICKSTART.md#omp-18186-client)** with the fail-closed
    config and per-model fragment.
 4. **Run the acceptance checks** at the end of your lane's route: tool turn, continuation, restart
@@ -126,7 +127,7 @@ Oh My Pi (coding-agent client) → OMP NInfer (qualified appliance and release l
 
 ## Measured, not estimated
 
-![Qualification receipts for v0.19.0, each lane on its own gate, not a ranking. RTX 5090: 181.71 tok/s decode and exact 130,048-token retrieval in 56.67 s from a cold start. RTX 4090: 253.71 tok/s decode and exact retrieval in 83.45 s. RTX 3090: 227.19 tok/s decode and exact retrieval in 188.45 s.](assets/benchmarks.png)
+![Qualification receipts for v0.20.0, each lane on its own gate, not a ranking. RTX 5090: 192.90 tok/s decode and exact 130,048-token retrieval in 56.62 s from a cold start. RTX 4090: 252.74 tok/s decode and exact retrieval in 83.45 s. RTX 3090: 226.33 tok/s decode and exact retrieval in 188.32 s.](assets/benchmarks.png)
 
 Each lane is measured on its own gate, machine, and profile; the figure is not a ranking. Method,
 per-lane charts, the warm-versus-cold boundary rules, model quality, and the community table:
@@ -178,7 +179,7 @@ Lifecycle and cut rules: [releases](docs/RELEASES.md#how-a-release-is-cut).
   [contributor acceptance and doctor](docs/QUICKSTART.md#contributor-acceptance-and-preflight).
 
 Routing rules: [CONTRIBUTING.md](CONTRIBUTING.md). Strip keys, hostnames, prompts, outputs, and raw
-logs before filing. Support covers `v0.19.0` and its exact profiles for a single local owner; no
+logs before filing. Support covers `v0.20.0` and its exact profiles for a single local owner; no
 SLA. Vulnerabilities: [private reporting](SECURITY.md), never a public issue.
 
 ## Credits
