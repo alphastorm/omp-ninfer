@@ -94,6 +94,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Build strict review ledgers from critical-review records without an embedded status, using
+  the manifest and lead's closed status. A selected non-strong seat may lack a result only
+  when its latest dispatch attempt failed; strong-critic results remain mandatory, and the
+  ledger records missing seats without approval and binds the dispatch attempts by digest.
+- Route collection and composition accept the restored RTX 5090 incumbent's digest from any
+  older ready GA release manifest, not just the latest release; unpublished digests still refuse.
+- Indexed native census and client-file evidence refuse before collection when the before and
+  final paths identify the same file, including aliases.
 - Release finalization passes indexed native census, client-file and production-restoration
   inputs to the route collector instead of requiring their old flat-root copies. Index mode
   refuses missing or escaping evidence paths; windows without an index retain the original layout.
@@ -106,8 +114,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   size; it stages operator-authored notes before validating the draft.
   Publication targets describe the selected runtime image and client, not predecessor identities.
   Re-cut closure also bounds reviewer text, carried inputs, RC freshness, evidence edges and tag deadlines.
-  From v0.20.0 review closure requires every selected result, matching epoch identities and closed
-  focused receipts; operator free text uses a structural path-token refusal.
+  From v0.20.0 review closure requires selected strong-critic results, matching epoch identities
+  and closed focused receipts; operator free text uses a structural path-token refusal.
   Published RC receipts cannot be reused by changing JSON formatting, current pinned guide
   citations require authenticated evidence, and stage inputs cannot be null.
 - Route composition binds staged parity waivers to the accepted candidate and refreshes their

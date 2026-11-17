@@ -551,14 +551,8 @@ def collect(root: Path, release: str, candidate: str, window_root: Path, plan: d
             "Selected component qualification is separate from the failed, founder-waived native campaign.")
     for lane, path in routes.items():
         composer.check_route(lane, load(path), candidate)
-    predecessors = [load(path) for path in (root / "releases").glob("*/manifest.json")]
-    previous = [item for item in predecessors if item.get("status") == "ready"
-                and composer.ga_release(item.get("release"))
-                and composer.product_version(item["release"]) < composer.product_version(release)]
-    require(previous, "restoration needs a ready predecessor")
-    incumbent = max(previous, key=lambda item: composer.product_version(item["release"]))
     composer.check_restoration(restoration, tuple(routes), candidate,
-                               incumbent["components"]["ninfer"]["oci_manifest_digest"],
+                               composer.published_incumbent_digests(root, release),
                                {lane + "-native": evidence[lane] for lane in waivers})
     return evidence, routes
 

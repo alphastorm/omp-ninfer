@@ -71,6 +71,51 @@ class ReviewLedgerTests(unittest.TestCase):
         return LEDGER.write_ledger(self.root, self.release, self.candidate,
                                    self.manifest_path, self.values, **kwargs)
 
+    def write_real_council_record(self, directory):
+        # Fixed key set and value types from retained critical-review records; no reviewer prose.
+        atomic_write_json(directory / "review-record.json", {
+            "artifact_digest": "a" * 64, "artifact_path": "artifact.diff",
+            "changed_file_digests": {}, "changed_files": [], "cross_subsystem_omissions": [],
+            "disputed_or_unresolved_p01": [], "founder_followup_authorization": None,
+            "general_review_pass_count": 1, "incomplete_invariant_ids": [],
+            "invariant_proof_matrix": [], "known_deterministic_failures": [],
+            "lead_verification": [], "lifecycle_design_artifacts": None,
+            "material_change_categories": [], "new_risk_classes": [], "parent_review_id": None,
+            "proof_classes": {}, "proof_receipts": {}, "remediated_finding_ids": [],
+            "remediation_scope": None, "resolved_finding_ids": [], "review_id": directory.name,
+            "review_mode": "initial", "review_sequence_id": self.release + "-fixture",
+            "sequence_history": [], "targeted_refutation_used": False, "touched_risk_domains": [],
+        })
+
+    def select_supplemental_seat(self, directory, *, role="lead_family_security"):
+        panel_path = directory / "panel-selection.json"
+        panel = LEDGER.load(panel_path)
+        critic = panel["selected"][0]
+        critic["agent"] = "review-critic"
+        panel["selected"].append({
+            **critic, "reviewer_id": "supplement", "agent": "review-supplement",
+            "selectionClass": "supplement", "role": role, "authority": "supplemental_evidence",
+            "independence_class": ("same_lineage_blind_sample" if role == "lead_family_security"
+                                   else "cross_family"),
+        })
+        atomic_write_json(panel_path, panel)
+        resolver_path = directory / "resolver-receipt.json"
+        resolver = LEDGER.load(resolver_path)
+        resolver["assignments"] = panel["selected"]
+        atomic_write_json(resolver_path, resolver)
+
+    def write_dispatch_attempt(self, directory, number, *outcomes):
+        path = directory / f"review-dispatch-envelope.attempt-{number}.json"
+        atomic_write_json(path, {
+            "schema": "critical-review-task-attempt-v1", "attempt": number,
+            "seats": [{
+                "seat": index, "agent": agent, "aborted": False, "failed": failed,
+                "exitCode": 1 if failed else 0,
+                "error": "Synthetic transport failure." if failed else None,
+            } for index, (agent, failed) in enumerate(outcomes)],
+        })
+        return path
+
     def test_closed_reviews_write_a_verifier_accepted_g4_binding_and_check_is_read_only(self):
         result = self.write()
         ledger = LEDGER.load(self.root / result["repository_path"])
@@ -110,14 +155,18 @@ class ReviewLedgerTests(unittest.TestCase):
             self.write()
 
     def test_nonclosed_source_record_cannot_be_approved_by_values(self):
-        record = self.out / "reviews/product_tooling/review-record.json"
-        source = LEDGER.load(record)
-        source["status"] = "open"
-        atomic_write_json(record, source)
-        with self.assertRaisesRegex(SystemExit, "not closed"):
-            self.write()
+        for section in ("native_runtime", "product_tooling"):
+            record = self.out / "reviews" / section / "review-record.json"
+            source = LEDGER.load(record)
+            for status in (None, "", "open", "pending"):
+                with self.subTest(section=section, status=status):
+                    atomic_write_json(record, {**source, "status": status})
+                    with self.assertRaisesRegex(SystemExit, "not closed"):
+                        self.write()
+                    self.assertFalse((self.qualification.parent / "review").exists())
+            atomic_write_json(record, source)
 
-    def test_new_reviews_require_every_selected_reviewers_result(self):
+    def test_new_reviews_require_every_strong_critics_result(self):
         before = self.qualification.read_bytes()
         for section in LEDGER.SECTIONS:
             with self.subTest(section=section):
@@ -147,33 +196,119 @@ class ReviewLedgerTests(unittest.TestCase):
                 self.assertEqual(self.qualification.read_bytes(), before)
                 self.assertFalse((self.qualification.parent / "review").exists())
 
-    def test_new_council_records_require_their_own_closed_status(self):
+    def test_real_council_records_use_the_leads_closed_status(self):
         for section in ("native_runtime", "product_tooling"):
             with self.subTest(section=section):
-                path = self.out / "reviews" / section / "review-record.json"
-                record = LEDGER.load(path)
-                without_status = {key: value for key, value in record.items() if key != "status"}
-                atomic_write_json(path, without_status)
-                before = self.qualification.read_bytes()
-                with self.assertRaisesRegex(SystemExit, "review-record status is not closed"):
+                directory = self.out / "reviews" / section
+                self.write_real_council_record(directory)
+                ledger, _ = LEDGER.build(self.root, self.release, self.candidate,
+                                          self.manifest_path, self.values)
+                self.assertEqual(ledger[section]["status"], "closed-by-disposition")
+                self.assertEqual(ledger[section]["receipt_digests"]["review-record.json"],
+                                 LEDGER.digest(directory / "review-record.json"))
+
+    def test_real_council_records_with_a_failed_supplement_build_an_approved_ledger(self):
+        directory = self.out / "reviews/product_tooling"
+        self.write_real_council_record(directory)
+        for role in ("supplement", "lead_family_security"):
+            with self.subTest(role=role):
+                panel = LEDGER.load(directory / "panel-selection.json")
+                panel["selected"] = panel["selected"][:1]
+                atomic_write_json(directory / "panel-selection.json", panel)
+                self.select_supplemental_seat(directory, role=role)
+                attempt = self.write_dispatch_attempt(
+                    directory, 1, ("review-critic", False), ("review-supplement", True))
+                result = self.write()
+                ledger = LEDGER.load(self.root / result["repository_path"])
+                self.assertTrue(ledger["approval_granted"])
+                self.assertEqual(ledger["product_tooling"]["reviewer_results"]["supplement"],
+                                 {"status": "missing", "approval_granted": False})
+                self.assertEqual(ledger["product_tooling"]["receipt_digests"][attempt.name],
+                                 LEDGER.digest(attempt))
+                errors = []
+                LEDGER.validate_review_ledger(self.root, self.release,
+                                               LEDGER.load(self.qualification), errors)
+                self.assertEqual(errors, [])
+
+    def test_real_council_records_still_refuse_a_failed_strong_critic(self):
+        directory = self.out / "reviews/product_tooling"
+        self.write_real_council_record(directory)
+        self.select_supplemental_seat(directory)
+        self.write_dispatch_attempt(
+            directory, 1, ("review-critic", True), ("review-supplement", True))
+        (directory / "critic.json").unlink()
+        before = self.qualification.read_bytes()
+        with self.assertRaisesRegex(SystemExit, "missing result for selected reviewer critic"):
+            self.write()
+        self.assertEqual(self.qualification.read_bytes(), before)
+        self.assertFalse((self.qualification.parent / "review").exists())
+
+    def test_missing_supplement_requires_its_own_failed_dispatch_attempt(self):
+        directory = self.out / "reviews/product_tooling"
+        self.write_real_council_record(directory)
+        self.select_supplemental_seat(directory)
+        before = self.qualification.read_bytes()
+        for outcomes in ((), (("review-supplement", False),), (("review-other", True),)):
+            with self.subTest(outcomes=outcomes):
+                if outcomes:
+                    self.write_dispatch_attempt(directory, 1, *outcomes)
+                with self.assertRaisesRegex(SystemExit, "missing result for selected reviewer supplement"):
                     self.write()
                 self.assertEqual(self.qualification.read_bytes(), before)
                 self.assertFalse((self.qualification.parent / "review").exists())
-                atomic_write_json(path, record)
 
-    def test_new_epoch_records_require_their_own_closed_status(self):
+    def test_only_the_latest_dispatch_attempt_per_seat_permits_a_missing_supplement(self):
+        directory = self.out / "reviews/product_tooling"
+        self.write_real_council_record(directory)
+        self.select_supplemental_seat(directory)
+        # Numeric order, not filename order or creation order, determines the last outcome.
+        latest = self.write_dispatch_attempt(directory, 10, ("review-supplement", True))
+        earlier = self.write_dispatch_attempt(directory, 2, ("review-supplement", False))
+        first = self.write_dispatch_attempt(directory, 1, ("review-supplement", True))
+        unrelated = self.write_dispatch_attempt(directory, 11, ("review-critic", False))
+        ledger, _ = LEDGER.build(self.root, self.release, self.candidate,
+                                  self.manifest_path, self.values)
+        product = ledger["product_tooling"]
+        self.assertEqual(product["reviewer_results"]["supplement"],
+                         {"status": "missing", "approval_granted": False})
+        for path in (first, earlier, latest, unrelated):
+            self.assertEqual(product["receipt_digests"][path.name], LEDGER.digest(path))
+        self.write_dispatch_attempt(directory, 10, ("review-supplement", False))
+        with self.assertRaisesRegex(SystemExit, "missing result for selected reviewer supplement"):
+            self.write()
+        self.assertFalse((self.qualification.parent / "review").exists())
+
+    def test_real_epoch_records_use_the_leads_closed_status(self):
         directory = self.out / "reviews/epoch"
-        atomic_write_json(directory / "review-record.json", {})
+        self.write_real_council_record(directory)
+        atomic_write_json(directory / "frozen-subject.json", {"subjectCommit": self.candidate})
+        self.values["product_council"]["epochs"] = [{
+            "directory": "epoch", "review_mode": "initial", "review_class": "full-council",
+            "status": "closed-by-disposition", "reviewed_commit": self.candidate,
+        }]
+        ledger, _ = LEDGER.build(self.root, self.release, self.candidate,
+                                  self.manifest_path, self.values)
+        epoch = ledger["product_tooling"]["epochs"][0]
+        self.assertEqual(epoch["status"], "closed-by-disposition")
+        self.assertEqual(epoch["receipt_digests"]["review-record.json"],
+                         LEDGER.digest(directory / "review-record.json"))
+
+    def test_epoch_records_with_status_must_be_closed(self):
+        directory = self.out / "reviews/epoch"
         atomic_write_json(directory / "frozen-subject.json", {"subjectCommit": self.candidate})
         self.values["product_council"]["epochs"] = [{
             "directory": "epoch", "review_mode": "initial", "review_class": "full-council",
             "status": "closed-by-disposition", "reviewed_commit": self.candidate,
         }]
         before = self.qualification.read_bytes()
-        with self.assertRaisesRegex(SystemExit, "epoch review-record status is not closed"):
-            self.write()
-        self.assertEqual(self.qualification.read_bytes(), before)
-        self.assertFalse((self.qualification.parent / "review").exists())
+        for status in (None, "", "open", "pending"):
+            with self.subTest(status=status):
+                atomic_write_json(directory / "review-record.json",
+                                  {"review_id": directory.name, "status": status})
+                with self.assertRaisesRegex(SystemExit, "epoch review-record status is not closed"):
+                    self.write()
+                self.assertEqual(self.qualification.read_bytes(), before)
+                self.assertFalse((self.qualification.parent / "review").exists())
 
     def test_new_epoch_review_id_must_match_its_directory(self):
         directory = self.out / "reviews/epoch"

@@ -478,28 +478,28 @@ def positive_seconds(value: Any) -> bool:
     return isinstance(value, (int, float)) and not isinstance(value, bool) and value > 0
 
 
-def predecessor_image_digest(release: str) -> str:
-    """Read the incumbent from the latest ready GA predecessor, never from operator evidence."""
+def published_incumbent_digests(root: Path, release: str) -> set[str]:
+    """Read eligible incumbent digests from older ready GA manifests, never operator evidence."""
     current = product_version(release)
-    predecessors = []
-    for path in (ROOT / "releases").iterdir():
-        version = product_version(path.name)
-        if (not path.is_dir() or not ga_release(path.name) or version is None
-                or current is None or version >= current or not (path / "manifest.json").is_file()):
+    digests: set[str] = set()
+    for path in (root / "releases").glob("*/manifest.json"):
+        version = product_version(path.parent.name)
+        if (not ga_release(path.parent.name) or version is None
+                or current is None or version >= current):
             continue
-        manifest = load(path / "manifest.json")
-        if manifest.get("status") == "ready":
-            predecessors.append((version, manifest))
-    require(bool(predecessors), "restoration requires a published predecessor manifest")
-    predecessor = max(predecessors, key=lambda row: row[0])[1]
-    digest = predecessor.get("components", {}).get("ninfer", {}).get("oci_manifest_digest")
-    require(isinstance(digest, str) and OCI_DIGEST_RE.fullmatch(digest) is not None,
-            "published predecessor must bind an RTX 5090 image digest")
-    return digest
+        manifest = load(path)
+        if manifest.get("status") != "ready":
+            continue
+        digest = manifest.get("components", {}).get("ninfer", {}).get("oci_manifest_digest")
+        if isinstance(digest, str) and OCI_DIGEST_RE.fullmatch(digest) is not None:
+            digests.add(digest)
+    require(bool(digests), "restoration requires a published predecessor manifest "
+            "with an RTX 5090 image digest")
+    return digests
 
 
 def check_restoration(restoration: Any, lanes: tuple[str, ...], candidate: str,
-                      predecessor_digest: str, waived: dict[str, dict] | None = None) -> None:
+                      incumbent_digests: set[str], waived: dict[str, dict] | None = None) -> None:
     """Restoration requires every displaced incumbent back in place and every named native audit."""
     require(isinstance(restoration, dict) and bool(restoration), "restoration evidence is empty")
     overridden = sorted(set(restoration).intersection(RESTORATION_RECEIPT_FIELDS))
@@ -513,8 +513,8 @@ def check_restoration(restoration: Any, lanes: tuple[str, ...], candidate: str,
     image = incumbent.get("original_image")
     require(isinstance(image, str) and OCI_IMAGE_RE.fullmatch(image) is not None,
             "rtx5090 restoration must name the incumbent's digest-pinned image")
-    require(image.rsplit("@", 1)[1] == predecessor_digest,
-            "rtx5090 restored image must match the published predecessor digest")
+    require(image.rsplit("@", 1)[1] in incumbent_digests,
+            "rtx5090 restored image must match a published ready GA predecessor digest")
     require(incumbent.get("restart_policy") == "unless-stopped",
             f"rtx5090 restoration left restart policy {incumbent.get('restart_policy')!r}, "
             "not unless-stopped")
@@ -799,7 +799,7 @@ def main() -> int:
                 native["probe_acceptance"], native_configurations[variant["id"]], variant)
     # The restoration receipt and every incumbent-restored claim below rest on this evidence.
     check_restoration(evidence["restoration"], lanes, candidate,
-                      predecessor_image_digest(args.release), waived)
+                      published_incumbent_digests(ROOT, args.release), waived)
     restoration = public_restoration(evidence["restoration"], lanes, waived)
     for lane, campaign in waived.items():
         failure = campaign["window_failure"]

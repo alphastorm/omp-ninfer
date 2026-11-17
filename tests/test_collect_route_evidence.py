@@ -132,6 +132,23 @@ class CollectorTests(unittest.TestCase):
             self.assertEqual(Path(path).name, lane + "-run.json")
             self.assertEqual(Path(path).read_bytes(), sources[lane].read_bytes())
 
+    def test_restoration_accepts_an_older_ready_release_after_a_newer_publication(self):
+        newer = deepcopy(FIXTURES.predecessor(self.root, self.release))
+        major, minor, patch = COLLECT.composer.product_version(newer["release"])
+        newer["release"] = f"v{major}.{minor}.{patch + 1}"
+        newer["components"]["ninfer"]["oci_manifest_digest"] = "sha256:" + "0" * 64
+        atomic_write_json(self.root / "releases" / newer["release"] / "manifest.json", newer)
+        evidence, _ = self.collect()
+        self.assertEqual(evidence, COLLECT.load(Path(self.outputs["evidence"])))
+
+    def test_unpublished_restored_image_is_refused_without_writes(self):
+        image = "ghcr.io/alphastorm/ninfer-runtime@sha256:" + "0" * 64
+        self.change("rtx5090/restoration.json", lambda value: value.update(image=image))
+        self.change("rtx5090/final-summary.json",
+                    lambda value: value["restoration"].update(image=image))
+        self.assert_refused_without_writes(
+            "restored image must match a published ready GA predecessor digest")
+
     def test_platform_statuses_are_owned_by_the_plan_not_the_old_evidence(self):
         selected = ("qualified" if self.plan["platforms"]["darwin-remote-ssh"] == "preview"
                     else "preview")
