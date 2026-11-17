@@ -301,15 +301,34 @@ class ReleaseDriverTests(unittest.TestCase):
         candidate = DRIVER.group_commits(self.root, RELEASE)["guide"]["commit"]
         manifest = json.loads((self.root / "releases" / RELEASE / "manifest.json").read_text())
         state = {"schema": 1, "release": RELEASE, "candidate": candidate, "lanes": {},
-                 "other_field": "ignored"}
+                 "preflights": []}
         for component in DRIVER.manifest_components(manifest):
             lane = component.split("-", 1)[0]
             directory = f"{lane}/attempt-1"
             (self.private / "windows" / directory).mkdir(parents=True)
+            attempt = {"attempt": 1, "directory": directory, "status": "passed",
+                       "driver_attempt": "initial"}
+            if lane == "rtx5090":
+                attempt["production_restoration"] = directory + "/production-and-fleet-after.json"
+                atomic_write_json(self.private / "windows" / attempt["production_restoration"], {})
+            else:
+                attempt["census"] = {
+                    "before": directory + "/native-before.json",
+                    "after_route": directory + "/native-after-route.json",
+                    "before_public": directory + "/native-before-public.json",
+                    "final": directory + "/native-final.json",
+                    "holds_before": directory + "/native-before-holds-client.json",
+                    "holds_final": directory + "/native-final-holds-client.json",
+                }
+                for name in attempt["census"].values():
+                    atomic_write_json(self.private / "windows" / name, {})
+                census = state.setdefault("native_census", {})
+                for key in ("before", "holds_before"):
+                    census.setdefault(key, attempt["census"][key])
+                for key in ("final", "holds_final"):
+                    census[key] = attempt["census"][key]
             state["lanes"][lane] = {
-                "accepted": 1, "other_field": "ignored",
-                "attempts": [{"attempt": 1, "directory": directory, "status": "passed",
-                              "other_field": "ignored"}],
+                "accepted": 1, "attempts": [attempt],
             }
         atomic_write_json(self.private / "windows" / "window-state.json", state)
         return state
@@ -880,6 +899,17 @@ class ReleaseDriverTests(unittest.TestCase):
                     for lane, row in state["lanes"].items()}
         self.assertEqual(actual, expected)
         self.assertNotIn("--corrected-attempt", arguments)
+        for flag, name in (
+            ("--pre-window-census", state["native_census"]["before"]),
+            ("--pre-window-holds-client", state["native_census"]["holds_before"]),
+            ("--final-census", state["native_census"]["final"]),
+            ("--final-holds-client", state["native_census"]["holds_final"]),
+            ("--production-restoration",
+             state["lanes"]["rtx5090"]["attempts"][0]["production_restoration"]),
+        ):
+            self.assertIn(flag, arguments)
+            self.assertEqual(arguments[arguments.index(flag) + 1],
+                             str((self.private / "windows" / name).resolve()))
 
     def test_corrected_container_attempt_passes_each_earlier_spent_attempt(self) -> None:
         self.candidate("--no-suite")
@@ -888,7 +918,11 @@ class ReleaseDriverTests(unittest.TestCase):
         for number, status in ((1, "spent-failed"), (2, "spent-failed"), (3, "passed"), (4, "spent-failed")):
             directory = f"rtx5090/attempt-{number}"
             (self.private / "windows" / directory).mkdir(parents=True, exist_ok=True)
-            attempts.append({"attempt": number, "directory": directory, "status": status})
+            entry = {"attempt": number, "directory": directory, "status": status}
+            if status == "passed":
+                entry["production_restoration"] = directory + "/production-and-fleet-after.json"
+                atomic_write_json(self.private / "windows" / entry["production_restoration"], {})
+            attempts.append(entry)
         state["lanes"]["rtx5090"] = {"accepted": 3, "attempts": attempts}
         atomic_write_json(self.private / "windows" / "window-state.json", state)
         self.finalize("--no-suite")
@@ -898,6 +932,8 @@ class ReleaseDriverTests(unittest.TestCase):
                      if argument == "--corrected-attempt"]
         self.assertEqual(corrected, [f"rtx5090={(self.private / 'windows' / f'rtx5090/attempt-{number}').resolve()}"
                                      for number in (1, 2)])
+        self.assertEqual(arguments[arguments.index("--production-restoration") + 1],
+                         str((self.private / "windows" / attempts[2]["production_restoration"]).resolve()))
 
     def test_unindexed_window_keeps_the_recorded_layout(self) -> None:
         self.candidate("--no-suite")
@@ -906,6 +942,9 @@ class ReleaseDriverTests(unittest.TestCase):
         self.assertIn("--window-root", arguments)
         self.assertNotIn("--lane-dir", arguments)
         self.assertNotIn("--corrected-attempt", arguments)
+        for flag in ("--pre-window-census", "--pre-window-holds-client", "--final-census",
+                     "--final-holds-client", "--production-restoration"):
+            self.assertNotIn(flag, arguments)
 
     def test_index_lane_set_follows_the_manifest_not_a_fixed_lane_count(self) -> None:
         self.previous["components"]["ninfer_variants"] = []
@@ -921,6 +960,68 @@ class ReleaseDriverTests(unittest.TestCase):
         actual = [arguments[position + 1].partition("=")[0] for position, argument in enumerate(arguments)
                   if argument == "--lane-dir"]
         self.assertEqual(actual, ["rtx5090"])
+        self.assertIn("--production-restoration", arguments)
+        self.assertNotIn("--pre-window-census", arguments)
+        self.assertNotIn("--final-census", arguments)
+
+    def test_window_index_requires_complete_restoration_inputs_before_running_tools(self) -> None:
+        self.candidate("--no-suite")
+        baseline = self.window_state()
+        mutations = [
+            ("missing-census", lambda state: state.pop("native_census"), "native_census"),
+            ("census-type", lambda state: state.update(native_census=[]), "native_census"),
+            ("missing-production", lambda state: state["lanes"]["rtx5090"]["attempts"][0].pop(
+                "production_restoration"), "production_restoration"),
+        ]
+        for key in ("before", "holds_before", "final", "holds_final"):
+            mutations.append(("missing-" + key, lambda state, key=key: state["native_census"].pop(key),
+                              "native_census." + key))
+        before = self.worktree_bytes()
+        for name, mutate, message in mutations:
+            with self.subTest(rule=name):
+                state = copy.deepcopy(baseline)
+                mutate(state)
+                atomic_write_json(self.private / "windows" / "window-state.json", state)
+                result = self.finalize("--no-suite", success=False)
+                self.assertIn("window-state.json:", result.stderr)
+                self.assertIn(message, result.stderr)
+                self.assertEqual(self.calls("collect_route_evidence.py"), [])
+                self.assertEqual(self.worktree_bytes(), before)
+
+    def test_window_index_validates_each_restoration_path_like_lane_directories(self) -> None:
+        self.candidate("--no-suite")
+        baseline = self.window_state()
+        root = self.private / "windows"
+        outside = self.private / "outside.json"
+        atomic_write_json(outside, {})
+        link = root / "outside-link.json"
+        try:
+            link.symlink_to(outside)
+        except OSError:
+            self.skipTest("file symlinks are not available")
+        before = self.worktree_bytes()
+        paths = [
+            (None, "relative POSIX path"), ([], "relative POSIX path"),
+            ("", "relative POSIX path"), (outside.resolve().as_posix(), "relative POSIX path"),
+            ("D:/outside.json", "relative POSIX path"), (r"rtx5090\after.json", "relative POSIX path"),
+            ("../outside.json", "escapes the window root"),
+            ("outside-link.json", "escapes the window root"),
+            ("missing.json", "must exist and be a file"),
+            ("rtx5090/attempt-1", "must exist and be a file"),
+        ]
+        for key in ("before", "holds_before", "final", "holds_final", "production_restoration"):
+            for path, message in paths:
+                with self.subTest(input=key, path=path):
+                    state = copy.deepcopy(baseline)
+                    target = (state["lanes"]["rtx5090"]["attempts"][0]
+                              if key == "production_restoration" else state["native_census"])
+                    target[key] = path
+                    atomic_write_json(root / "window-state.json", state)
+                    result = self.finalize("--no-suite", success=False)
+                    self.assertIn("window-state.json:", result.stderr)
+                    self.assertIn(message, result.stderr)
+                    self.assertEqual(self.calls("collect_route_evidence.py"), [])
+                    self.assertEqual(self.worktree_bytes(), before)
 
     def test_window_index_refusals_do_not_run_tools_or_change_product_bytes(self) -> None:
         self.candidate("--no-suite")
@@ -1011,7 +1112,10 @@ class ReleaseDriverTests(unittest.TestCase):
         state = self.window_state()
         directory = "rtx5090/attempt-2"
         (self.private / "windows" / directory).mkdir()
-        state["lanes"]["rtx5090"]["attempts"].append({"attempt": 2, "directory": directory, "status": "passed"})
+        production = directory + "/production-and-fleet-after.json"
+        atomic_write_json(self.private / "windows" / production, {})
+        state["lanes"]["rtx5090"]["attempts"].append({
+            "attempt": 2, "directory": directory, "status": "passed", "production_restoration": production})
         atomic_write_json(self.private / "windows" / "window-state.json", state)
         self.interrupt(finalize=True, command="finalize", window_root=self.private / "windows",
                        reviews=self.private / "reviews", values=self.private / "values.json", as_of="2026-01-02")
@@ -1021,6 +1125,8 @@ class ReleaseDriverTests(unittest.TestCase):
         calls = self.calls("collect_route_evidence.py")
         self.assertEqual(len(calls), 2)
         self.assertIn(f"rtx5090={(self.private / 'windows' / directory).resolve()}", calls[1]["arguments"])
+        self.assertEqual(calls[1]["arguments"][calls[1]["arguments"].index("--production-restoration") + 1],
+                         str((self.private / "windows" / production).resolve()))
 
     def test_rewritten_recorded_history_is_refused(self) -> None:
         self.candidate("--no-suite")

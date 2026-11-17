@@ -476,6 +476,12 @@ receives explicit `--lane-dir` arguments for accepted attempts and `--corrected-
 for every earlier `spent-failed` attempt of that lane. Older windows without an index keep their
 original root layout.
 
+Index mode also passes the pre-window and final native census and client-file paths from
+`native_census`, and the accepted RTX 5090 attempt's `production_restoration` file. These
+relative POSIX paths must name files inside the window root after symlink resolution. An
+accepted native lane requires all four census paths; an accepted RTX 5090 attempt requires
+its production-restoration path. Missing inputs refuse before collection.
+
 The driver remembers private input paths only in ignored `.release-state/<version>.json`, written
 atomically, and keeps authenticated component records under `.release-state/<version>/`.
 The input-state file is a cache, not authority: first-parent commits with `Release:` and
