@@ -26,6 +26,7 @@ def module(name: str, path: Path):
 
 
 COLLECT = module("collect_route_evidence", ROOT / "scripts/collect_route_evidence.py")
+DRIVER = module("indexed_evidence_release_driver", ROOT / "scripts/release.py")
 FIXTURES = module("acceptance_fixtures", ROOT / "tests/acceptance_fixtures.py")
 from release_io import atomic_write, atomic_write_json, git
 
@@ -351,6 +352,139 @@ class CollectorTests(unittest.TestCase):
         outputs = json.loads(result.stdout)
         self.assertEqual(len(outputs["routes"]), 5)
         self.assertEqual(Path(outputs["routes"]["rtx3090-native"]).parent.name, "route-inputs")
+
+    def test_indexed_kit_layout_collects_through_driver_arguments_without_flat_files(self):
+        # RTX attempt/index fields follow the captured W2 window; native census fields
+        # follow the kit's accepted-native writer (first before, last final).
+        state = {"schema": 1, "release": self.release, "candidate": self.candidate,
+                 "lanes": {}, "native_census": {}, "preflights": []}
+        census = COLLECT.load(self.windows / "native-pre-window-census.json")
+        holds = COLLECT.load(self.windows / "native-pre-window-census-holds-client.json")
+        for lane in ("rtx5090", "rtx4090", "rtx3090"):
+            original = self.windows / lane
+            original.rename(self.windows / (lane + "-collected"))
+            directory = original / "attempt-1"
+            original.mkdir()
+            (self.windows / (lane + "-collected")).rename(directory)
+            relative = directory.relative_to(self.windows).as_posix()
+            record = {"attempt": 1, "directory": relative, "status": "passed",
+                      "driver_attempt": "initial"}
+            if lane == "rtx5090":
+                record["production_restoration"] = relative + "/production-and-fleet-after.json"
+                post = COLLECT.load(self.windows / "production-and-fleet-after.json")
+                post.pop("release")
+                post.update(running=True, fleet_reserved=False)
+                atomic_write_json(directory / "production-and-fleet-after.json", post)
+            else:
+                record["census"] = {
+                    "before": relative + "/native-before.json",
+                    "after_route": relative + "/native-after-route.json",
+                    "before_public": relative + "/native-before-public.json",
+                    "final": relative + "/native-final.json",
+                    "holds_before": relative + "/native-before-holds-client.json",
+                    "holds_final": relative + "/native-final-holds-client.json",
+                }
+                for key, name in record["census"].items():
+                    atomic_write_json(self.windows / name, holds if key.startswith("holds_") else census)
+                for key in ("before", "holds_before"):
+                    state["native_census"].setdefault(key, record["census"][key])
+                for key in ("final", "holds_final"):
+                    state["native_census"][key] = record["census"][key]
+            state["lanes"][lane] = {"accepted": 1, "attempts": [record]}
+        for name in ("production-and-fleet-after.json", "native-pre-window-census.json",
+                     "native-pre-window-census-holds-client.json", "native-final.json",
+                     "native-final-holds-client.json"):
+            (self.windows / name).unlink()
+            self.assertFalse((self.windows / name).exists())
+        atomic_write_json(self.windows / "window-state.json", state)
+        # Exercise the real index adapter without constructing unrelated release history.
+        driver = DRIVER.ReleaseDriver.__new__(DRIVER.ReleaseDriver)
+        driver.release = self.release
+        driver.plan_path = self.root / "releases" / self.release / "plan.json"
+        driver.records = {"guide": {"commit": self.candidate}}
+        driver.state = {"private": {"window_root": str(self.windows)}}
+        arguments = driver._window_attempt_arguments()
+        shutil.copytree(ROOT / "scripts", self.root / "scripts")
+        result = subprocess.run([
+            sys.executable, "scripts/collect_route_evidence.py", "--release", self.release,
+            "--candidate", self.candidate, "--window-root", str(self.windows),
+            "--plan", str(self.windows / "plan.json"), "--output", str(self.destination),
+            *arguments,
+        ], cwd=self.root, text=True, capture_output=True,
+           env=FIXTURES.subprocess_environment(self.root))
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        evidence = COLLECT.load(self.destination)
+        for lane in ("rtx4090", "rtx3090"):
+            sources = evidence["restoration"][lane]["sources"]
+            self.assertEqual(sources[-1], {
+                "evidence_name": state["native_census"]["final"],
+                "sha256": COLLECT.digest(self.windows / state["native_census"]["final"]),
+            })
+            self.assertEqual(sources[0]["evidence_name"],
+                             f"{lane}/attempt-1/evidence/restoration.json")
+        outputs = json.loads(result.stdout)
+        projected = COLLECT.composer.public_restoration(evidence["restoration"],
+                                                       tuple(outputs["routes"]), {})
+        self.assertEqual(projected["rtx3090"]["status"], "passed")
+        self.assertEqual(projected["rtx4090"]["status"], "passed")
+        self.assertNotIn("attempt-1", json.dumps(projected))
+        for lane, name in outputs["routes"].items():
+            folder = lane.split("-")[0] + "/attempt-1"
+            source = (self.windows / folder / "evidence/route.json" if lane.endswith("-native")
+                      else self.windows / folder / {
+                          "rtx5090-container-host": "host-route.json",
+                          "rtx5090-macos-client": "mac-route.json",
+                          "rtx5090-windows-client": "windows-route.json",
+                      }[lane])
+            self.assertEqual(Path(name).read_bytes(), source.read_bytes())
+
+    def test_explicit_window_evidence_paths_keep_the_existing_restoration_checks(self):
+        inputs = (
+            ("pre_window_census", "native-pre-window-census.json", "census or client files"),
+            ("pre_window_holds", "native-pre-window-census-holds-client.json", "census or client files"),
+            ("final_census", "native-final.json", "census or client files"),
+            ("final_holds", "native-final-holds-client.json", "census or client files"),
+            ("production_restoration", "production-and-fleet-after.json", "production service"),
+        )
+        for keyword, name, message in inputs:
+            with self.subTest(input=keyword):
+                path = self.windows / "selected" / name
+                value = COLLECT.load(self.windows / name)
+                atomic_write_json(path, value)
+                self.collect(**{keyword: path})
+                if keyword == "production_restoration":
+                    value["same_image"] = False
+                elif "holds" in keyword:
+                    value["identical"] = False
+                else:
+                    value["lanes"][0]["state_sha256"] = "0" * 64
+                atomic_write_json(path, value)
+                self.assert_refused_without_writes(message, **{keyword: path})
+
+    def test_explicit_window_evidence_paths_cannot_escape_the_root(self):
+        outside = self.windows.parent / "outside.json"
+        atomic_write_json(outside, {})
+        link = self.windows / "outside-link.json"
+        try:
+            link.symlink_to(outside)
+        except OSError:
+            self.skipTest("file symlinks are not available")
+        for keyword in ("pre_window_census", "pre_window_holds", "final_census",
+                        "final_holds", "production_restoration"):
+            for path in (outside, self.windows / ".." / outside.name, link):
+                with self.subTest(input=keyword, path=path):
+                    self.assert_refused_without_writes("inside the window root", **{keyword: path})
+
+    def test_explicit_pre_window_census_binds_waiver_provenance(self):
+        arguments = self.prepare_waiver("structured-outage")
+        original = self.windows / "native-pre-window-census.json"
+        selected = self.windows / "rtx3090/native-before.json"
+        original.rename(selected)
+        evidence, _ = self.collect(pre_window_census=selected, **arguments)
+        self.assertEqual(evidence["rtx3090"]["stopped_owner_census"]["evidence_name"],
+                         "rtx3090/native-before.json")
+        self.assertEqual(evidence["rtx3090"]["stopped_owner_census"]["sha256"],
+                         COLLECT.digest(selected))
 
 
 class PrivateCollectorGoldenTests(unittest.TestCase):
