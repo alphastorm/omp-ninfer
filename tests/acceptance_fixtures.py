@@ -29,7 +29,7 @@ assert HISTORY_SPEC and HISTORY_SPEC.loader
 HISTORY = importlib.util.module_from_spec(HISTORY_SPEC)
 sys.modules[HISTORY_SPEC.name] = HISTORY
 HISTORY_SPEC.loader.exec_module(HISTORY)
-from release_io import atomic_write_json, git
+from release_io import atomic_write, atomic_write_json, git
 
 # v0.7.4's accepted posture: the macOS SSH profile stays preview, the Docker-local ones install.
 ACCEPTED = {"darwin-remote-ssh": "preview", "windows-docker-local": "qualified",
@@ -198,6 +198,33 @@ def successor_release(root: Path) -> str:
                 for path in (root / "releases").iterdir() if path.is_dir())
     major, minor, _ = max(version for version in versions if version is not None)
     return f"v{major}.{minor + 1}.0"
+
+
+def restore_predecessor_authority(root: Path, release: str, *, checkpoint: bool = False) -> None:
+    """Reset a disposable successor fixture's root to its ready predecessor, not a live candidate."""
+    spec = importlib.util.spec_from_file_location(
+        "acceptance_fixture_rebind", root / "scripts" / "rebind_release.py")
+    assert spec is not None and spec.loader is not None
+    rebind = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(rebind)
+    source = root / "releases" / release
+    profiles = {path.name: path for path in (source / "profiles").glob("*.json")}
+    if not profiles:
+        raise AssertionError("ready predecessor must retain its profile snapshots")
+    for path in (root / "profiles").glob("*.json"):
+        if path.name not in profiles:
+            path.unlink()
+    for name, path in profiles.items():
+        atomic_write(root / "profiles" / name, path.read_bytes())
+    rebind.promote_root(release, source / "manifest.json")
+    atomic_write(root / "docs" / "COMPATIBILITY.md", (source / "COMPATIBILITY.md").read_bytes())
+    if checkpoint:
+        # The release driver requires a clean tree before it can initialize the fixture plan.
+        paths = ("compatibility.json", "docs/COMPATIBILITY.md", "profiles",
+                 "examples/manual-tunnel", f"releases/{release}/profiles")
+        git(root, "add", "--", *paths)
+        if git(root, "diff", "--cached", "--name-only", "--", *paths).strip():
+            git(root, "commit", "--quiet", "-m", "test(release): restore ready predecessor authority")
 
 
 def public_release_tree(root: Path, release: str, destination: Path) -> str:

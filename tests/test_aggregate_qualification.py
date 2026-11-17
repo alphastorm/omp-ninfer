@@ -25,7 +25,7 @@ assert HISTORY_SPEC is not None and HISTORY_SPEC.loader is not None
 HISTORY = importlib.util.module_from_spec(HISTORY_SPEC)
 HISTORY_SPEC.loader.exec_module(HISTORY)
 from release_io import atomic_write, atomic_write_json
-from acceptance_fixtures import successor_release
+from acceptance_fixtures import restore_predecessor_authority, successor_release
 
 
 def load(path):
@@ -70,20 +70,6 @@ def staging_versions(root):
         raise AssertionError("carry-all fixture requires a ready public predecessor")
     _, predecessor = max(ready)
     return predecessor, successor_release(root)
-
-
-def restore_predecessor_authority(root, release):
-    source = root / "releases" / release
-    atomic_write(root / "compatibility.json", (source / "compatibility.json").read_bytes())
-    atomic_write(root / "docs/COMPATIBILITY.md", (source / "COMPATIBILITY.md").read_bytes())
-    profiles = {path.name: path for path in (source / "profiles").glob("*.json")}
-    if not profiles:
-        raise AssertionError("ready predecessor must retain its profile snapshots")
-    for path in (root / "profiles").glob("*.json"):
-        if path.name not in profiles:
-            path.unlink()
-    for name, path in profiles.items():
-        atomic_write(root / "profiles" / name, path.read_bytes())
 
 
 class StagingVersionTests(unittest.TestCase):

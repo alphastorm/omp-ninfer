@@ -21,7 +21,7 @@ SPEC = importlib.util.spec_from_file_location("receipt_audit", ROOT / "scripts" 
 assert SPEC is not None and SPEC.loader is not None
 AUDIT = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(AUDIT)
-from acceptance_fixtures import successor_release
+from acceptance_fixtures import predecessor, restore_predecessor_authority, successor_release
 
 PREVIOUS = "v0.19.0"
 RELEASE = "v0.20.0"
@@ -56,6 +56,7 @@ def stage_carry_all(root: Path) -> subprocess.CompletedProcess[str]:
     for key, value in (("user.name", "fixture"), ("user.email", "fixture@example.invalid"),
                        ("commit.gpgsign", "false"), ("core.autocrlf", "false")):
         run_git(root, "config", key, value)
+    restore_predecessor_authority(root, predecessor(root)["release"], checkpoint=True)
     run_git(root, "remote", "remove", "origin")
     # Run the same plan/stage path as rehearsal, not a second set of stager flags.
     code = """
