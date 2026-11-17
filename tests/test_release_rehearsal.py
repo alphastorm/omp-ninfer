@@ -68,7 +68,12 @@ class ReleaseRehearsalTests(unittest.TestCase):
                           staged_notes.read_text(encoding="utf-8"))
             from verify_release import component_provenance
             statement = component_provenance(clone, release, manifest)["statement"]
-            self.assertIn(statement, (clone / "docs/QUICKSTART.md").read_text(encoding="utf-8"))
+            # The rehearsal replaces copied provenance claims with the generated statement; a
+            # predecessor guide without such claims (v0.20.0 onward) needs no authored statement.
+            authored = re.search(r"^rehearsal: guide: replaced (\d+) copied provenance claims",
+                                 transcript, re.MULTILINE)
+            self.assertEqual((clone / "docs/QUICKSTART.md").read_text(encoding="utf-8").count(statement),
+                             int(authored[1]) if authored else 0, transcript)
             summary = clone / "releases" / release / manifest["qualification"]["summary"]
             self.assertEqual(hashlib.sha256(summary.read_bytes()).hexdigest(),
                              manifest["qualification"]["summary_sha256"])
