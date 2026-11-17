@@ -14,7 +14,7 @@
   "components": {
     "omp": {
       "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
-      "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/d6d1dcfe46fa0572d8463345f327a3fef6b85ca4/compatibility.json",
+      "compatibility_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c68e856cc9ba935efdbfbe436727ffe338ac17c3/compatibility.json",
       "compatibility_sha256": "811c3250fa11b3502d13d4af95395e23ac12c7bf844d4cc0b1912aea4209b773",
       "distribution_kind": "upstream-release",
       "upstream_repository": "https://github.com/can1357/oh-my-pi",
@@ -96,7 +96,7 @@
         "qualification": {
           "summary": "releases/v0.20.0/qualification/rtx3090.json",
           "sha256": "8b801b7c30f2dab8827a7930084445fcaca1718e14ab9aea2e15c1dd5d5221b6",
-          "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/d6d1dcfe46fa0572d8463345f327a3fef6b85ca4/releases/v0.20.0/qualification/rtx3090.json",
+          "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c68e856cc9ba935efdbfbe436727ffe338ac17c3/releases/v0.20.0/qualification/rtx3090.json",
           "release_spec": {
             "path": "releases/v0.20.0/profiles/rtx3090/release-spec.json",
             "sha256": "aa5382821719dc2983bcf943ddd00345f0532e23082aeb42fae49d7667cddad5"
@@ -165,7 +165,7 @@
         "qualification": {
           "summary": "releases/v0.20.0/qualification/rtx4090.json",
           "sha256": "5c189f866f3d332be711d1c55a55a995f8760597ccb891734b758778e5e27af4",
-          "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/d6d1dcfe46fa0572d8463345f327a3fef6b85ca4/releases/v0.20.0/qualification/rtx4090.json",
+          "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c68e856cc9ba935efdbfbe436727ffe338ac17c3/releases/v0.20.0/qualification/rtx4090.json",
           "release_spec": {
             "path": "releases/v0.20.0/profiles/rtx4090/release-spec.json",
             "sha256": "99332c6b20c480ef718cbd920740bcea099699edda3e5ffe208f880990a66d59"
@@ -220,7 +220,7 @@
   "qualification": {
     "summary": "qualification.json",
     "summary_sha256": "ca80e75e287aaafd772d0c422dde77dfac0680119ee6c2425bfaade03e6660ec",
-    "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/d6d1dcfe46fa0572d8463345f327a3fef6b85ca4/releases/v0.20.0/qualification.json",
+    "public_url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/c68e856cc9ba935efdbfbe436727ffe338ac17c3/releases/v0.20.0/qualification.json",
     "runtime_release_eligible": true,
     "external_installation_passed": true
   },
