@@ -1023,6 +1023,38 @@ class ReleaseDriverTests(unittest.TestCase):
                     self.assertEqual(self.calls("collect_route_evidence.py"), [])
                     self.assertEqual(self.worktree_bytes(), before)
 
+    def test_window_index_refuses_aliased_native_census_before_running_tools(self) -> None:
+        self.candidate("--no-suite")
+        baseline = self.window_state()
+        root = self.private / "windows"
+        before = self.worktree_bytes()
+        for initial, final in (("before", "final"), ("holds_before", "holds_final")):
+            source = root / baseline["native_census"][initial]
+            aliases = [baseline["native_census"][initial], "./" + baseline["native_census"][initial]]
+            symlink = root / (final + "-symlink.json")
+            hardlink = root / (final + "-hardlink.json")
+            try:
+                symlink.symlink_to(source)
+                aliases.append(symlink.name)
+            except OSError:
+                pass
+            try:
+                hardlink.hardlink_to(source)
+                aliases.append(hardlink.name)
+            except OSError:
+                pass
+            for alias in aliases:
+                with self.subTest(initial=initial, final=final, alias=alias):
+                    state = copy.deepcopy(baseline)
+                    state["native_census"][final] = alias
+                    atomic_write_json(root / "window-state.json", state)
+                    result = self.finalize("--no-suite", success=False)
+                    self.assertIn(
+                        f"window-state.json: native_census.{initial} and native_census.{final} "
+                        "must resolve to different files", result.stderr)
+                    self.assertEqual(self.calls("collect_route_evidence.py"), [])
+                    self.assertEqual(self.worktree_bytes(), before)
+
     def test_window_index_refusals_do_not_run_tools_or_change_product_bytes(self) -> None:
         self.candidate("--no-suite")
         baseline = self.window_state()

@@ -119,7 +119,7 @@ class RestorationAuditTests(unittest.TestCase):
     def check(self, restoration: dict) -> None:
         MODULE.check_restoration(
             restoration, MODULE.NATIVE_LANES, CANDIDATE,
-            RESTORATION["rtx5090"]["original_image"].rsplit("@", 1)[1])
+            {RESTORATION["rtx5090"]["original_image"].rsplit("@", 1)[1]})
 
     def test_every_native_audit_requires_every_named_check(self) -> None:
         for lane in MODULE.NATIVE_LANES:
@@ -243,9 +243,11 @@ class UpstreamCompositionTests(unittest.TestCase):
         manifest.update(release=self.release, status="candidate",
                         publication={"blockers": ["acceptance"]}, qualification={})
         MODULE.save(self.release_root / "manifest.json", manifest)
-        MODULE.save(self.root / "releases/v0.14.0/manifest.json", {
-            "release": "v0.14.0", "status": "ready", "components": {"ninfer": {
-                "oci_manifest_digest": RESTORATION["rtx5090"]["original_image"].split("@")[1]}}})
+        predecessor = deepcopy(MANIFEST)
+        predecessor.update(release="v0.14.0", status="ready")
+        predecessor["components"]["ninfer"]["oci_manifest_digest"] = (
+            RESTORATION["rtx5090"]["original_image"].split("@")[1])
+        MODULE.save(self.root / "releases/v0.14.0/manifest.json", predecessor)
         MODULE.save(self.release_root / "qualification.json", {
             "as_of": "2026-01-01", "documented_route_acceptance": deepcopy(STAGED_ROUTE_ACCEPTANCE),
             "composition": {"external_installation_acceptance": {
@@ -604,15 +606,31 @@ class UpstreamCompositionTests(unittest.TestCase):
              "cannot set the receipt's own fields"),
         ))
 
-    def test_restored_image_must_equal_the_published_predecessor_digest(self) -> None:
+    def test_restored_image_from_an_older_ready_release_is_accepted(self) -> None:
+        latest = deepcopy(MANIFEST)
+        latest.update(release="v9.9.8", status="ready")
+        latest["components"]["ninfer"]["oci_manifest_digest"] = "sha256:" + "2" * 64
+        MODULE.save(self.root / "releases/v9.9.8/manifest.json", latest)
+        self.assertEqual(self.compose(), 0)
+        restoration = MODULE.load(self.root / "docs/measurements/fixture-acceptance-restoration.json")
+        self.assertEqual(restoration["rtx5090"]["original_image_digest"],
+                         RESTORATION["rtx5090"]["original_image"].split("@")[1])
+
+    def test_unpublished_restored_image_is_refused(self) -> None:
+        for release, status in (("v9.9.8", "draft"), ("v9.9.8-rc.1", "ready"),
+                                ("v10.0.0", "ready")):
+            manifest = deepcopy(MANIFEST)
+            manifest.update(release=release, status=status)
+            manifest["components"]["ninfer"]["oci_manifest_digest"] = "sha256:" + "0" * 64
+            MODULE.save(self.root / "releases" / release / "manifest.json", manifest)
         self.refused_before_writing(lambda evidence: evidence["restoration"]["rtx5090"], (
             ("wrong digest", lambda incumbent: incumbent.update(
                 original_image="ghcr.io/alphastorm/ninfer-runtime@sha256:" + "0" * 64),
-             "restored image must match the published predecessor digest"),
+             "restored image must match a published ready GA predecessor digest"),
             ("candidate not predecessor", lambda incumbent: incumbent.update(
                 original_image="ghcr.io/alphastorm/ninfer-runtime@" +
                 MANIFEST["components"]["ninfer"]["oci_manifest_digest"]),
-             "restored image must match the published predecessor digest"),
+             "restored image must match a published ready GA predecessor digest"),
         ))
 
     def test_restoration_requires_a_published_predecessor_not_a_draft(self) -> None:
@@ -1489,6 +1507,7 @@ class AcceptanceFixtureCommandTests(unittest.TestCase):
                            check=True, capture_output=True, env=environment)
             shutil.copy2(ROOT / "tests/acceptance_fixtures.py", root / "tests/acceptance_fixtures.py")
             shutil.copy2(ROOT / "scripts/collect_route_evidence.py", root / "scripts/collect_route_evidence.py")
+            shutil.copy2(ROOT / "scripts/compose_route_acceptance.py", root / "scripts/compose_route_acceptance.py")
             shutil.copy2(ROOT / "scripts/review_ledger.py", root / "scripts/review_ledger.py")
             for name in ("test_review_ledger.py", "test_collect_route_evidence.py"):
                 shutil.copy2(ROOT / "tests" / name, root / "tests" / name)

@@ -98,6 +98,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the manifest and lead's closed status. A selected non-strong seat may lack a result only
   when its latest dispatch attempt failed; strong-critic results remain mandatory, and the
   ledger records missing seats without approval and binds the dispatch attempts by digest.
+- Route collection and composition accept the restored RTX 5090 incumbent's digest from any
+  older ready GA release manifest, not just the latest release; unpublished digests still refuse.
+- Indexed native census and client-file evidence refuse before collection when the before and
+  final paths identify the same file, including aliases.
 - Release finalization passes indexed native census, client-file and production-restoration
   inputs to the route collector instead of requiring their old flat-root copies. Index mode
   refuses missing or escaping evidence paths; windows without an index retain the original layout.
