@@ -43,19 +43,19 @@
   ],
   "decisions": [
     {
-      "id": "v020-scope-s3",
-      "kind": "scope",
-      "sha256": "4467a95e45840cccd3cd95f597f509807abe76f157d44104b90dfe458aaa6959"
-    },
-    {
-      "id": "v020-native-speed-rule",
-      "kind": "scope",
-      "sha256": "f3e3569f2b55f1cee8450d5d51b51e8767a7c5122e50793e50f6932acfa1e2fe"
-    },
-    {
       "id": "cut-rtx5090",
       "kind": "component-cut",
       "sha256": "0a4b594ed4bc4c67ad09922cdfe4e18c4f21930f9934b251b265354c5feafbf4"
+    },
+    {
+      "id": "cut-rtx3090",
+      "kind": "component-cut",
+      "sha256": "77c73330ce1aa3c9460e1e0616d44e17449965c7ea0e5e2cdccef20776e24c42"
+    },
+    {
+      "id": "cut-rtx4090",
+      "kind": "component-cut",
+      "sha256": "77c73330ce1aa3c9460e1e0616d44e17449965c7ea0e5e2cdccef20776e24c42"
     }
   ]
 }
