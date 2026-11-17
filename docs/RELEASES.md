@@ -480,7 +480,8 @@ Index mode also passes the pre-window and final native census and client-file pa
 `native_census`, and the accepted RTX 5090 attempt's `production_restoration` file. These
 relative POSIX paths must name files inside the window root after symlink resolution. An
 accepted native lane requires all four census paths; an accepted RTX 5090 attempt requires
-its production-restoration path. Missing inputs refuse before collection.
+its production-restoration path. Before and final census paths, and before and final
+client-file paths, must identify different files; missing or aliased inputs refuse before collection.
 
 The driver remembers private input paths only in ignored `.release-state/<version>.json`, written
 atomically, and keeps authenticated component records under `.release-state/<version>/`.
