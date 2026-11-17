@@ -827,11 +827,17 @@ class ReleaseDriver:
             census = state.get("native_census")
             if not isinstance(census, dict):
                 refuse("native_census must be an object for accepted native lanes")
+            census_paths: dict[str, Path] = {}
             for flag, key in (("--pre-window-census", "before"),
                               ("--pre-window-holds-client", "holds_before"),
                               ("--final-census", "final"),
                               ("--final-holds-client", "holds_final")):
-                arguments += [flag, str(indexed_path(census.get(key), f"native_census.{key}"))]
+                census_paths[key] = indexed_path(census.get(key), f"native_census.{key}")
+                arguments += [flag, str(census_paths[key])]
+            for initial, final in (("before", "final"), ("holds_before", "holds_final")):
+                if census_paths[initial].samefile(census_paths[final]):
+                    refuse(f"native_census.{initial} and native_census.{final} "
+                           "must resolve to different files")
         return arguments
 
     def compose(self) -> None:
