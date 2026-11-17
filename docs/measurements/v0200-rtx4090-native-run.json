@@ -1,0 +1,119 @@
+{
+    "artifact_type":  "omp_ninfer_documented_route_run",
+    "schema_version":  1,
+    "lane":  "rtx4090-native",
+    "document":  "docs/QUICKSTART.md",
+    "document_sha256":  "b610fc3acc6d825064a66a57aa888f8da36576a5262265c9912339dcdb3fdd7d",
+    "started_utc":  "2026-11-17T11:41:50.0846189Z",
+    "host_os":  "Microsoft Windows 11 Pro",
+    "powershell":  "5.1.26100.9818",
+    "elevated":  true,
+    "clone_commit":  "f9b95b820f2b87d2ec82d1994ed244df5253af6f",
+    "steps":  [
+                  {
+                      "position":  1,
+                      "slug":  "client-install",
+                      "heading":  "Install the exact native Windows client",
+                      "index":  0,
+                      "block_sha256":  "01e7a2a81a1b5a7a19cbd103e3637383f48b0889944aa0299cecab1ae564f624",
+                      "executed_sha256":  "01e7a2a81a1b5a7a19cbd103e3637383f48b0889944aa0299cecab1ae564f624",
+                      "started_utc":  "2026-11-17T11:41:50.2842123Z",
+                      "status":  "passed",
+                      "elapsed_seconds":  8.535,
+                      "error":  null,
+                      "substitution":  null
+                  },
+                  {
+                      "position":  2,
+                      "slug":  "clone-and-verify",
+                      "heading":  "Native Windows RTX 4090 release lane",
+                      "index":  0,
+                      "block_sha256":  "9fc45f872ff2d66ad7b170c8e64dcdf1c6d8f5ed0771a9f581a5762641bea7dd",
+                      "executed_sha256":  "9fc45f872ff2d66ad7b170c8e64dcdf1c6d8f5ed0771a9f581a5762641bea7dd",
+                      "started_utc":  "2026-11-17T11:41:58.8691730Z",
+                      "status":  "substituted",
+                      "elapsed_seconds":  19.843,
+                      "error":  null,
+                      "substitution":  "cloned commit f9b95b820f2b87d2ec82d1994ed244df5253af6f in place of the tag this run\u0027s acceptance creates; verified as installable, not ready"
+                  },
+                  {
+                      "position":  3,
+                      "slug":  "variant",
+                      "heading":  "Native Windows RTX 4090 release lane",
+                      "index":  1,
+                      "block_sha256":  "59aedbb7de8c043d2b7165296d8081ac734814d58551efadf711f346d916ca5c",
+                      "executed_sha256":  "59aedbb7de8c043d2b7165296d8081ac734814d58551efadf711f346d916ca5c",
+                      "started_utc":  "2026-11-17T11:42:18.7205404Z",
+                      "status":  "passed",
+                      "elapsed_seconds":  0.007,
+                      "error":  null,
+                      "substitution":  null
+                  },
+                  {
+                      "position":  4,
+                      "slug":  "stage-and-install",
+                      "heading":  "Native Windows RTX 4090 release lane",
+                      "index":  2,
+                      "block_sha256":  "b590edad6299eca4237f027db861ebf7589cc9390a0b5ff2afe94217b16da9e2",
+                      "executed_sha256":  "b590edad6299eca4237f027db861ebf7589cc9390a0b5ff2afe94217b16da9e2",
+                      "started_utc":  "2026-11-17T11:42:18.7325405Z",
+                      "status":  "passed",
+                      "elapsed_seconds":  184.965,
+                      "error":  null,
+                      "substitution":  null
+                  },
+                  {
+                      "position":  5,
+                      "slug":  "operate",
+                      "heading":  "Operate the native lane",
+                      "index":  0,
+                      "block_sha256":  "4ea38c9b7614db973c4e89b38ed8347f33d2e714c7c69348e1a7c59113b8e9fa",
+                      "executed_sha256":  "4ea38c9b7614db973c4e89b38ed8347f33d2e714c7c69348e1a7c59113b8e9fa",
+                      "started_utc":  "2026-11-17T11:45:23.7010451Z",
+                      "status":  "passed",
+                      "elapsed_seconds":  43.12,
+                      "error":  null,
+                      "substitution":  null
+                  },
+                  {
+                      "position":  6,
+                      "slug":  "provider",
+                      "heading":  "Point OMP at the native lane",
+                      "index":  0,
+                      "block_sha256":  "c756befd69d1e5d02556306a9995b6923340709146b21afd22e33a98b8a6aa82",
+                      "executed_sha256":  "c756befd69d1e5d02556306a9995b6923340709146b21afd22e33a98b8a6aa82",
+                      "started_utc":  "2026-11-17T11:46:06.8225796Z",
+                      "status":  "passed",
+                      "elapsed_seconds":  0.023,
+                      "error":  null,
+                      "substitution":  null
+                  },
+                  {
+                      "position":  7,
+                      "slug":  "acceptance",
+                      "heading":  "Native lane acceptance",
+                      "index":  0,
+                      "block_sha256":  "97ad0206b73f22c205d7f7ebc399863d397919f011729b660e4d06cd149a79cb",
+                      "executed_sha256":  "97ad0206b73f22c205d7f7ebc399863d397919f011729b660e4d06cd149a79cb",
+                      "started_utc":  "2026-11-17T11:46:06.8485787Z",
+                      "status":  "passed",
+                      "elapsed_seconds":  89.261,
+                      "error":  null,
+                      "substitution":  null
+                  }
+              ],
+    "status":  "passed",
+    "completed_utc":  "2026-11-17T11:47:36.1553747Z",
+    "candidate_commit":  "f9b95b820f2b87d2ec82d1994ed244df5253af6f",
+    "installed":  {
+                      "config_sha256":  "0851d97937e45ccbe3233cc2e71f480f7797ed106c39e46bba3a5614dda12d2b",
+                      "source_commit":  "ca4c39179921e85defa9141db5fff7c2b05d7136",
+                      "package_sha256":  "89f14b7b7b3b340c9afb7c37f97722b23f3dbbc122b809789c1685ff12fb111c",
+                      "binary_sha256":  "61e24366b103a89ae0d8ce2ad30a012fe6fab7cf70de1afdf8d1abd12acf4863"
+                  },
+    "release":  "v0.20.0",
+    "client":  {
+                   "version":  "omp/18.20.2",
+                   "binary_sha256":  "6dbb8ac30106f163fcb61d818e6756799a816cb58d63fc3e11a0d7af56abfb90"
+               }
+}

@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "kind": "omp-ninfer-platform-acceptance-receipt",
+  "receipt_id": "linux-docker-local-7c49c11a-f34cfa5731-v0.20.0",
+  "product_release": "v0.20.0",
+  "candidate_commit": "f9b95b820f2b87d2ec82d1994ed244df5253af6f",
+  "profile": "linux-docker-local",
+  "status": "passed",
+  "as_of": "2026-11-17",
+  "source": {
+    "repository": "https://github.com/can1357/oh-my-pi",
+    "tag": "v18.20.2",
+    "commit": "7c49c11aa5bbaf3f418406583096168ad5b8c6dc",
+    "tree": "bc176229265a781c3b502673566328bcb473466c"
+  },
+  "client": {
+    "distribution_kind": "upstream-release",
+    "upstream_repository": "https://github.com/can1357/oh-my-pi",
+    "upstream_tag": "v18.20.2",
+    "upstream_commit": "7c49c11aa5bbaf3f418406583096168ad5b8c6dc",
+    "os": "Linux under WSL2",
+    "architecture": "x64",
+    "published": true,
+    "asset_name": "omp-linux-x64",
+    "asset_bytes": 288860336,
+    "asset_sha256": "f34cfa57311ed67a45f01bb1a21519cad4d74875d181316f00fa0cd6a4abcaaa",
+    "binary_sha256": "f34cfa57311ed67a45f01bb1a21519cad4d74875d181316f00fa0cd6a4abcaaa",
+    "release_id": 445558988,
+    "asset_id": 748638308,
+    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.20.2/omp-linux-x64"
+  },
+  "live_acceptance": {
+    "tool_result_marker": true,
+    "exact_visible_final_answer": true,
+    "agent_end": true,
+    "continuation_exact_nonce": true,
+    "runtime_identity_bound": true,
+    "typed_read_tool_calls": 1,
+    "linked_tool_results": 1,
+    "omp_version": "omp/18.20.2",
+    "event_counts": {
+      "session": 1,
+      "agent_start": 1,
+      "turn_start": 2,
+      "message_start": 4,
+      "message_end": 4,
+      "message_update": 22,
+      "tool_execution_start": 1,
+      "tool_execution_end": 1,
+      "turn_end": 2,
+      "agent_end": 1
+    },
+    "raw_transcript_included": false,
+    "runtime_image_digest": "sha256:dc89893b90db89fe44b9605c4adca76ec5eb2a9dd314c68f284fa2fcbbe47ca6",
+    "runtime_server_binary_sha256": "06c73e9800b1911e89f0cbf825324f767dcdc4abfd4a497f51fc031b5e3d69b8",
+    "runtime_configuration_sha256": "751d22dc405595c17ef129b9b57d3582908567e47e6aa39507c02b9b9da82a47",
+    "model_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "fail_closed": {
+      "exit_code": 1,
+      "no_model_response": true,
+      "only_selected_local_provider_observed": true,
+      "errors": [
+        {
+          "kind": "client-error",
+          "sha256": "8be2d4a909302a94aa8ddcd698df1629c37649a94a0e8d94294700852f0c1347"
+        }
+      ]
+    },
+    "capture_sha256": "559ef42f1a6d2a1155a586c28e530550875788b8646d9996d004bb8c8e9c341e"
+  },
+  "checks": {
+    "new_client_asset_and_binary_identity": "passed",
+    "new_client_clean_install": "passed",
+    "new_client_version": "passed",
+    "live_authenticated_tool_and_continuation": "passed",
+    "fail_closed_route_configuration": "passed"
+  },
+  "safety": {
+    "cloud_fallback_observed": false,
+    "production_omp_activation_performed": false,
+    "runtime_incumbent_restored": true,
+    "private_fleet_projection_included": false
+  },
+  "limitations": [
+    "Owner-operated tester-equivalent acceptance; no new runtime performance guarantee.",
+    "Linux x64 under WSL2 only; no separate native Linux OS or Linux vision claim."
+  ]
+}

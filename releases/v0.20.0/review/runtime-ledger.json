@@ -1,0 +1,320 @@
+{
+  "artifact_type": "omp_ninfer_review_ledger",
+  "schema_version": 1,
+  "release": "v0.20.0",
+  "as_of": "2026-11-17",
+  "status": "closed-by-disposition",
+  "approval_granted": true,
+  "publication_authorized": false,
+  "public_route_acceptance_granted": false,
+  "scope": "Closed exact-source runtime full council CR-20261116T051524Z-ca4c3917 on N ca4c39179921e85defa9141db5fff7c2b05d7136 (closed-without-remediation), and product full council CR-20261117T112545Z-f9b95b82-product (closed-by-disposition) with route stage candidate f9b95b820f2b87d2ec82d1994ed244df5253af6f. Product release-path residuals are tracked in https://github.com/alphastorm/omp-ninfer/issues/196. This is not approval of a later executable subject, publication, or independent public-user acceptance; no human waivers are recorded.",
+  "native_runtime": {
+    "review_id": "CR-20261116T051524Z-ca4c3917",
+    "review_sequence_id": "omp-ninfer-v0.20.0-engine",
+    "review_class": "full-council",
+    "status": "closed-without-remediation",
+    "source_commit": "ca4c39179921e85defa9141db5fff7c2b05d7136",
+    "base_commit": "15c3e3959c0a6167f799e9383482ec4e03db9cad",
+    "subject_digest": "2d5ca4146898fa4af015967dea335440ffd37b918e7e5a14faaa3cc6979d4d27",
+    "resolver_subject_digest": "05b7857cf8fe682634e50e5ccd0da658ef42eec2aac541028fb8ef36a0c9e9aa",
+    "resolver_assignments": [
+      {
+        "reviewer_id": "daybreak-blue",
+        "selectionClass": "strong",
+        "role": "strong_critic",
+        "independence_class": "cross_family",
+        "authority": "independent_evidence",
+        "model": "openai-codex/gpt-6-sol:max",
+        "model_family": "gpt"
+      },
+      {
+        "reviewer_id": "gemini-carbon",
+        "selectionClass": "strong",
+        "role": "strong_critic",
+        "independence_class": "cross_family",
+        "authority": "independent_evidence",
+        "model": "xai-oauth/grok-4.7:xhigh",
+        "model_family": "grok"
+      },
+      {
+        "reviewer_id": "gpt-astra",
+        "selectionClass": "supplement",
+        "role": "supplement",
+        "independence_class": "cross_family",
+        "authority": "supplemental_evidence",
+        "model": "openai-codex/gpt-6-astra:max",
+        "model_family": "gpt"
+      },
+      {
+        "reviewer_id": "claude-mythos",
+        "selectionClass": "supplement",
+        "role": "lead_family_security",
+        "independence_class": "same_lineage_blind_sample",
+        "authority": "supplemental_evidence",
+        "model": "anthropic/claude-mythos-5-2:max",
+        "model_family": "claude"
+      }
+    ],
+    "receipt_digests": {
+      "close-report.md": "4cabbecba3675653d96ec1e097dc12f2e68f608e651cd016c23670ce15ebfa5a",
+      "ledger.md": "374fd7f2723cd96a5e026f2b39c12297532ec32264ff571725770350e4bd0936",
+      "review-record.json": "bbe1d1fcf9bba974b25274cef13d6bc3673f33f4911c3bc864a7f31c56d2f3a9",
+      "frozen-subject.json": "de00f1bdafec0a56ea92fde0bd35394c01551d24918be50c4eb646ec57062946",
+      "resolver-receipt.json": "2c993f9e1c8fffdcb254d786c59f2897cfb910a50ee8361918082a765bba772d",
+      "panel-selection.json": "1c63d3ba379eb232146df72ded9022e133499bec259147a69683a8cd66341ed7",
+      "daybreak-blue.json": "479066987aedb4dbdb20fe80381efb686d5e2036f76427d8e4f2c2797d352133",
+      "gemini-carbon.json": "f5b6e7f1a7160aeb6311d173ebdf95e227820821f5e929f8b8cace32ff163611",
+      "gpt-astra.json": "9298391b1fa1acc0a724263fa5ee6be466749ac8929e064f527ce83560599d94",
+      "claude-mythos.json": "373d5ea060676a55f4433d9d9ad049b3e6cee6cf859f4facf101123c3f737fb2",
+      "review-dispatch-envelope.attempt-1.json": "36c21f9787008affbe97003459ff30fcfd49f460b20e9e3f5ad621f862f849ce"
+    },
+    "reviewer_results": {
+      "daybreak-blue": {
+        "summary": "Reviewer text is kept in the private review record bound by digest.",
+        "evidence": [],
+        "unresolved": []
+      },
+      "gemini-carbon": {
+        "summary": "Reviewer text is kept in the private review record bound by digest.",
+        "evidence": [
+          "R1|P2|conf=0.74|"
+        ],
+        "unresolved": [
+          "U1|P2|conf=0.55|"
+        ]
+      },
+      "gpt-astra": {
+        "summary": "Reviewer text is kept in the private review record bound by digest.",
+        "evidence": [],
+        "unresolved": []
+      },
+      "claude-mythos": {
+        "summary": "Reviewer text is kept in the private review record bound by digest.",
+        "evidence": [
+          "R1|P2|conf=0.8|",
+          "R2|P3|conf=0.75|"
+        ],
+        "unresolved": [
+          "U1|P2|conf=0.5|",
+          "U2|P2|conf=0.4|",
+          "U3|P3|conf=0.4|"
+        ]
+      }
+    },
+    "dispositions": {
+      "claude-mythos-R1": {
+        "severity": "P2",
+        "result": "confirmed by source reading (lookahead_after_close 498-503 boundary before a following '<tool_call>'; recovered publication 754-760); balanced-pass step not re-traced; not executed",
+        "disposition": "defer",
+        "change": "none in F5; https://github.com/alphastorm/ninfer/issues/138 item 1",
+        "rationale": "Blocking test: product traffic cannot produce it. Stock Oh My Pi 18.20.2 tool turns on all three lanes take the constrained route (claude-mythos-U1 evidence), where the terminal parse and the continuation check use ConstrainedToolRegionParser (tool_call_parser.cpp:820-830, 845-868); the balanced and recovery passes run only for unconstrained contracts (tool_contract.cpp:292-300). Residual is limited to API callers who opt in with tool_constraints:\"auto\", which the product neither sends nor documents. Mitigation needs a new freeze plus rebuild and requalification of three lanes, disproportionate to a residual outside the product route. Reviewer severity P2 kept for the opt-in route; product residual none."
+      },
+      "claude-mythos-U1": {
+        "severity": "P2",
+        "result": "answered: no; stock tool turns are constrained on all three lanes",
+        "disposition": "reject (product reach falsified)",
+        "change": "none",
+        "rationale": "Client side: the lead's 18.20.2 client-check captures for the RTX 5090, RTX 3090 and RTX 4090 lane configurations (mock requests.json) show POST to the Responses endpoint with non-strict function tools and no tool_choice, parallel_tool_calls or tool_constraints. Engine at ca4c39179: absent tool_constraints leaves ToolConstraintMode::Basic (types.h:327; request_validation.cpp:112-122 accepts only explicit auto or basic), Basic makes the contract constrained (tool_contract.cpp:319-323), and a constrained region goes to ConstrainedToolRegionParser (tool_call_parser.cpp:845-868; continuation 820-830); parse_qwen_tool_call_output and region_has_completed_call run only for unconstrained contracts (873-874, 831-834). Remaining unconstrained case: a tool-less request whose history carries tool calls (tool_contract.cpp:292-295); the captured tool-less 18.20.2 requests carried user items only."
+      },
+      "claude-mythos-U2": {
+        "severity": "P2",
+        "result": "falsified: the pick is byte-identical to upstream",
+        "disposition": "reject",
+        "change": "none",
+        "rationale": "git patch-id --stable of the vendored xgrammar delta is 309a875b532e5193e6e57ca93900735fdfff7c9e for both upstream 8e4648129 and the fork pick 1c7d451ff (#137); the added and removed lines are byte-identical (their diff is empty); the vendored xgrammar tree is unchanged from 1c7d451ff to ca4c39179. Three files (grammar_compiler.cc, grammar_functor.cc, grammar_impl.h) differ from upstream's post-commit blobs only because the fork's pre-pick bases differ from upstream's parent; the five others are blob-equal."
+      },
+      "gemini-carbon-R1": {
+        "severity": "P2",
+        "result": "confirmed by source reading (lookahead_after_close 489-491 returns ValueText; find_structural_close 473-481 keeps scanning; serving.md:254-256 says fallback); not executed",
+        "disposition": "defer",
+        "change": "none in F5; https://github.com/alphastorm/ninfer/issues/138 item 2",
+        "rationale": "Same reachability as claude-mythos-R1: unconstrained route only, which stock 18.20.2 traffic does not reach (claude-mythos-U1); the reviewer states the default basic route does not use this pass. Code and documentation disagree on the opt-in route; fixing it needs a new freeze. Reviewer severity P2 kept for the opt-in route; product residual none."
+      },
+      "gemini-carbon-U1": {
+        "severity": "P2",
+        "result": "answered: no; captured 18.20.2 requests carry no tool_constraints",
+        "disposition": "reject (product reach falsified)",
+        "change": "none",
+        "rationale": "Same question and evidence as claude-mythos-U1 (merged there for the close report): captured 18.20.2 requests on all three lane configurations carry no tool_constraints, so the engine default Basic applies."
+      },
+      "claude-mythos-R2": {
+        "severity": "P3",
+        "result": "confirmed by source reading (region_has_completed_call 513-522 on the prefix; boundary rule 498-503; the two-pass check runs only on the unconstrained branch 831-834); not executed",
+        "disposition": "defer",
+        "change": "none in F5; https://github.com/alphastorm/ninfer/issues/138 item 3",
+        "rationale": "Unconstrained route only: a constrained continuation is checked by ConstrainedToolRegionParser (820-830). The reviewer finds no unsafe effect under the declared client. P3."
+      },
+      "claude-mythos-U3": {
+        "severity": "P3",
+        "result": "unresolved host-free; hardware qualification measures it end to end",
+        "disposition": "accept",
+        "change": "none in F5; real-vocabulary golden noted in https://github.com/alphastorm/ninfer/issues/138",
+        "rationale": "The release's oracle for token changes is hardware qualification on the real vocabulary: identity-first on each lane (80 determinism prompts and one variant of each of the 84 counted roles against the incumbent) and the powered 1,120-prompt screen whenever an output differs, expected on every lane because #134 changes prefill. A real-vocabulary mask change that alters constrained output is caught and screened there; one that alters no output has no consequence. A host-free real-vocabulary walk needs new test code after the freeze; disproportionate for P3."
+      }
+    },
+    "closure": "Closed without remediation. All findings are dispositioned and no confirmed in-scope P0 or P1 remains. Opt-in unconstrained tool-call residuals and the real-vocabulary golden are tracked in https://github.com/alphastorm/ninfer/issues/138."
+  },
+  "product_tooling": {
+    "repository": "https://github.com/alphastorm/omp-ninfer",
+    "review_id": "CR-20261117T112545Z-f9b95b82-product",
+    "review_sequence_id": "omp-ninfer-v0.20.0-product",
+    "review_class": "full-council",
+    "status": "closed-by-disposition",
+    "reviewed_commit": "f9b95b820f2b87d2ec82d1994ed244df5253af6f",
+    "base_commit": "571b0789e6e0d38cf09996163da45f46cac1a65d",
+    "subject_digest": "627c825aecc7971c0d9138af756cdaf65ed38ef6c92a0215362a331c87dc63dd",
+    "resolver_subject_digest": "d4dd9e4f205223601bc049e373ffbdc2d249988b4a036d7ddcc67d5972af0b8d",
+    "resolver_assignments": [
+      {
+        "reviewer_id": "daybreak-blue",
+        "selectionClass": "strong",
+        "role": "strong_critic",
+        "independence_class": "cross_family",
+        "authority": "independent_evidence",
+        "model": "openai-codex/gpt-6-sol:max",
+        "model_family": "gpt"
+      },
+      {
+        "reviewer_id": "gemini-carbon",
+        "selectionClass": "strong",
+        "role": "strong_critic",
+        "independence_class": "cross_family",
+        "authority": "independent_evidence",
+        "model": "xai-oauth/grok-4.7:xhigh",
+        "model_family": "grok"
+      },
+      {
+        "reviewer_id": "gpt-astra",
+        "selectionClass": "supplement",
+        "role": "supplement",
+        "independence_class": "cross_family",
+        "authority": "supplemental_evidence",
+        "model": "openai-codex/gpt-6-astra:max",
+        "model_family": "gpt"
+      },
+      {
+        "reviewer_id": "claude-mythos",
+        "selectionClass": "supplement",
+        "role": "lead_family_security",
+        "independence_class": "same_lineage_blind_sample",
+        "authority": "supplemental_evidence",
+        "model": "anthropic/claude-mythos-5-2:max",
+        "model_family": "claude"
+      }
+    ],
+    "receipt_digests": {
+      "close-report.md": "22750f2f324deac4edee8038b5f51758313253d6fca8c74aa6cf5db4cbd362f6",
+      "ledger.md": "2a75bfb899b838a42974ed63c1c98edbba875290703b745fd7c6bf07238759df",
+      "review-record.json": "3ec22182c9075866296419e6cf50dcd8391ed9afb7731b9371f1773119cde283",
+      "frozen-subject.json": "5421322b45f5657480aeedd9346b580a4b9674bebf4be1698eef6a1938d88457",
+      "resolver-receipt.json": "d6fd1ea6d000e1ae37df6ab3a3b0377ccf89c5aaf0f11104cece537afd00a469",
+      "panel-selection.json": "7522f1f3c2f068d110e167d949343d705051d12db662cf26d4cbc74315556e7a",
+      "daybreak-blue.json": "271739f6c00bb7633b65312e443558e613beae9d3b51d52a0fae9562308156af",
+      "gemini-carbon.json": "bc60126b7fe5ca0f8f45a3bd8644163013a0af3077ae4dea2fc44ad4228e03a5",
+      "gpt-astra.json": "93261db23263c4b706526b8a6b95feea67504c94776800f157fe0d1d2459a23f",
+      "review-dispatch-envelope.attempt-1.json": "6cfcdbd47dd6dba8b937bd2a13919c464570c41031d18b329f527be6fbc7099e"
+    },
+    "reviewer_results": {
+      "daybreak-blue": {
+        "summary": "Reviewer text is kept in the private review record bound by digest.",
+        "evidence": [
+          "R1|P1|conf=0.96|",
+          "R2|P1|conf=0.95|",
+          "R3|P1|conf=0.93|"
+        ],
+        "unresolved": [
+          "U1|P1|conf=0.72|"
+        ]
+      },
+      "gemini-carbon": {
+        "summary": "Reviewer text is kept in the private review record bound by digest.",
+        "evidence": [
+          "R1|P1|conf=0.84|",
+          "R2|P2|conf=0.92|"
+        ],
+        "unresolved": []
+      },
+      "gpt-astra": {
+        "summary": "Reviewer text is kept in the private review record bound by digest.",
+        "evidence": [
+          "R1|P1|conf=0.98|",
+          "R2|P2|conf=0.99|"
+        ],
+        "unresolved": [
+          "U1|P2|conf=0.80|"
+        ]
+      },
+      "claude-mythos": {
+        "status": "missing",
+        "approval_granted": false
+      }
+    },
+    "dispositions": {
+      "daybreak-blue-R1": {
+        "severity": "P1",
+        "result": "confirmed",
+        "disposition": "defer",
+        "change": "none in v0.20.0; follow-up issue; W4b-2 operational control: lead re-verifies production container identity, image, restart policy, health and absence of the beta container right after the RTX attempt and again about five minutes later",
+        "rationale": "Lead read accept-rtx5090-host.py:215-256 (the comment states an already-running action is not stopped; restore returns once restoration.json exists). Lead re-rating after declared controls: P2. The race needs the host watchdog (begins at 3000 s) to fire while a route action is in flight; the acceptance kit kills the driver tree at its 1680 s child budget first and then runs its own restore, the rehearsal attempt took 719 s, the consequence is a recoverable production disruption that the post-window re-verification detects, and the driver design predates v0.20.0. Fixing the window driver now would change the reviewed candidate and invalidate the acceptance windows in progress."
+      },
+      "daybreak-blue-R2": {
+        "severity": "P1",
+        "result": "confirmed",
+        "disposition": "mitigate",
+        "change": "finalize driver refuses index-mode census paths where before equals final or holds_before equals holds_final (remediation pull request with regression)",
+        "rationale": "Lead re-rating after declared controls: P3. The acceptance kit writes before from the first accepted lane's native-before.json and final from the last lane's native-final.json (windows.py 985-998), so inputs our own code produces cannot alias; the two-line refusal is a small obvious correction in finalize-time tooling and joins the remediation batch."
+      },
+      "daybreak-blue-R3": {
+        "severity": "P1",
+        "result": "confirmed",
+        "disposition": "defer",
+        "change": "none in v0.20.0; follow-up issue for a credential-shaped token refusal in operator text",
+        "rationale": "Lead re-rating after declared controls: P3. The only operator text is lead-authored closure and disposition prose for this release, which carries no credential value; the public ledger already omits reviewer prose and refuses path-like words. No input our own process produces reaches the gap."
+      },
+      "daybreak-blue-U1": {
+        "severity": "P1",
+        "result": "design decision",
+        "disposition": "reject",
+        "change": "none",
+        "rationale": "Outside the product subject: the question concerns the review tooling, not the reviewed product paths. Under the live protocol every returned item receives a ledger row and final disposition before close; this ledger dispositions all nine rows."
+      },
+      "gemini-carbon-R1": {
+        "severity": "P1",
+        "result": "confirmed",
+        "disposition": "defer",
+        "change": "same as daybreak-blue-R1 (duplicate root cause)",
+        "rationale": "Same root cause as daybreak-blue-R1; same lead re-rating to P2 after controls and the same post-window production re-verification."
+      },
+      "gpt-astra-R1": {
+        "severity": "P1",
+        "result": "confirmed",
+        "disposition": "defer",
+        "change": "same as daybreak-blue-R1 (duplicate root cause)",
+        "rationale": "Same root cause as daybreak-blue-R1; same lead re-rating to P2 after controls and the same post-window production re-verification."
+      },
+      "gemini-carbon-R2": {
+        "severity": "P2",
+        "result": "confirmed",
+        "disposition": "accept",
+        "change": "none",
+        "rationale": "Design of the candidate-bound guide: its executable blocks are what the acceptance windows run, so it is written for the ready release and carries a draft banner until then. Publication requires finalize and the ready gate, which bind composed acceptance for this exact guide candidate with every lane passed or retired; if any window fails, the release is not published and a new candidate revises the guide. The main-branch guide that users read is unchanged until the post-publication documentation flip."
+      },
+      "gpt-astra-R2": {
+        "severity": "P2",
+        "result": "confirmed",
+        "disposition": "accept",
+        "change": "none",
+        "rationale": "Same root cause as gemini-carbon-R2; accepted for the same reason."
+      },
+      "gpt-astra-U1": {
+        "severity": "P2",
+        "result": "confirmed",
+        "disposition": "mitigate",
+        "change": "composer accepts the RTX 5090 image digest of any older ready GA release from published manifests as the restored incumbent; production is not changed (remediation pull request with regression)",
+        "rationale": "Lead verification: the acceptance kit preflight recorded production image digest 496195ec, which is v0.18.0's published beta.7; v0.19.0 recorded production_upgrade_activated false; the composer demands v0.19.0's c3ec151b, so finalize would refuse correct restoration evidence (fail-closed, no unsafe effect, P2). The fix keeps the digest bound to published manifests and every other restoration requirement."
+      }
+    },
+    "closure": "The release review found no remaining P0 or P1 defect after verification. A finalization check that required the latest release's RTX 5090 image instead of the actual published incumbent was corrected, and the remaining findings are tracked as follow-ups.",
+    "stage_commit": "f9b95b820f2b87d2ec82d1994ed244df5253af6f"
+  }
+}

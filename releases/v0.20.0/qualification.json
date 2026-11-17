@@ -107,21 +107,87 @@
       "sha256": "2f4a5ac4d3180fae53db39dd780a8362a32457c7af4cc0584792ebb050f358b1"
     },
     "external_installation_acceptance": {
-      "status": "pending",
-      "note": "rerun against the published v0.7.0-qwen38-5090-beta.9 component (image dc89893b) before the cut; the receipt lands at releases/v0.20.0/acceptance/composed-external-installation.json"
+      "status": "passed",
+      "repository_path": "releases/v0.20.0/acceptance/composed-external-installation.json",
+      "sha256": "420a92e125861e1954c9e8f6b76b351ca47e1578f3b2c69dc09e334057ee7b84",
+      "public_url": null,
+      "as_of": "2026-11-17",
+      "release": "v0.20.0",
+      "component_release_tag": "v18.20.2",
+      "tools": true,
+      "vision": true,
+      "stateful_resume": true,
+      "fail_closed": true,
+      "runtime_incumbent_restored": true,
+      "windows_asset_sha256": "6dbb8ac30106f163fcb61d818e6756799a816cb58d63fc3e11a0d7af56abfb90",
+      "windows_binary_sha256": "6dbb8ac30106f163fcb61d818e6756799a816cb58d63fc3e11a0d7af56abfb90",
+      "compatibility_authority": "omp-ninfer-v0.7.3-qualified-1",
+      "compatibility_sha256": "9a7812159907298032239e38b0f0a47b5ebe2e50e277e283fafc53f89207756b",
+      "platform_receipts": [
+        {
+          "profile": "darwin-remote-ssh",
+          "sha256": "01227ed8e9527cc817e7a468c23033f89641adc08b224e1df0c69718f5049324"
+        },
+        {
+          "profile": "windows-docker-local",
+          "sha256": "7a6f0f5a4eda08d5d829238d208c47a871413b46830d3bc642b9b6e67024d4f6"
+        },
+        {
+          "profile": "linux-docker-local",
+          "sha256": "f0709ead97d2cee3643dfc7f95ecbb640d0a465c66f4b7431a2ffad5013937bc"
+        }
+      ],
+      "note": "Runtime components: RTX 5090 container `v0.7.0-qwen38-5090-beta.9` re-cut for this release; RTX 3090 native Windows `v0.8.0-qwen38-3090-beta.5` re-cut for this release; RTX 4090 native Windows `v0.8.0-qwen38-4090-beta.5` re-cut for this release. They were built from 1 distinct NInfer source commits. Fresh five-route execution and candidate-profile native probes passed, with independent restoration and final audits. Exact stock client and current runtime/configuration/model identities were observed. Council binding, final immutable pins, strict ready verification and publication remain separate gates."
     },
     "review": {
-      "status": "pending"
+      "status": "closed-by-disposition",
+      "scope": "Runtime full council CR-20261116T051524Z-ca4c3917 on ca4c39179921e85defa9141db5fff7c2b05d7136 closed (closed-without-remediation). Closed without remediation. All findings are dispositioned and no confirmed in-scope P0 or P1 remains. Opt-in unconstrained tool-call residuals and the real-vocabulary golden are tracked in https://github.com/alphastorm/ninfer/issues/138. Product full council CR-20261117T112545Z-f9b95b82-product closed (closed-by-disposition) with route candidate f9b95b820f2b87d2ec82d1994ed244df5253af6f. Deferred product residuals are tracked in https://github.com/alphastorm/omp-ninfer/issues/196. The combined content-safe ledger is releases/v0.20.0/review/runtime-ledger.json. Review approval authorizes neither product publication nor production promotion."
+    },
+    "documented_route_acceptance": {
+      "status": "passed",
+      "repository_path": "releases/v0.20.0/acceptance/documented-routes.json",
+      "sha256": "65cce50db4bf440bcaa528e00b9ecbb8505ccebed426933e771bf21d72daa0b1"
     }
   },
   "as_of": "2026-11-17",
   "status": "runtime-release-eligible",
   "publication_authorized": false,
-  "external_installation_qualified": false,
+  "external_installation_qualified": true,
   "scope": "Runtime components: RTX 5090 container `v0.7.0-qwen38-5090-beta.9` re-cut for this release; RTX 3090 native Windows `v0.8.0-qwen38-3090-beta.5` re-cut for this release; RTX 4090 native Windows `v0.8.0-qwen38-4090-beta.5` re-cut for this release. They were built from 1 distinct NInfer source commits. No product-route or client-platform execution is inferred.",
   "interpretation": "Runtime components: RTX 5090 container `v0.7.0-qwen38-5090-beta.9` re-cut for this release; RTX 3090 native Windows `v0.8.0-qwen38-3090-beta.5` re-cut for this release; RTX 4090 native Windows `v0.8.0-qwen38-4090-beta.5` re-cut for this release. They were built from 1 distinct NInfer source commits. Raw parity observations are retained; a class-bound waiver never rewrites a failure into a pass.",
   "documented_route_acceptance": {
-    "status": "pending"
+    "status": "passed",
+    "scope": "Runtime components: RTX 5090 container `v0.7.0-qwen38-5090-beta.9` re-cut for this release; RTX 3090 native Windows `v0.8.0-qwen38-3090-beta.5` re-cut for this release; RTX 4090 native Windows `v0.8.0-qwen38-4090-beta.5` re-cut for this release. They were built from 1 distinct NInfer source commits. Fresh candidate-bound documented routes, stock clients, native public installs and candidate-profile probes. Linux is WSL2-scoped; macOS remains preview.",
+    "candidate_commit": "f9b95b820f2b87d2ec82d1994ed244df5253af6f",
+    "evidence_commit_changes_candidate": false,
+    "evidence_path": "releases/v0.20.0/acceptance/documented-routes.json",
+    "evidence_sha256": "65cce50db4bf440bcaa528e00b9ecbb8505ccebed426933e771bf21d72daa0b1",
+    "documented_route_steps": {
+      "rtx5090-container-host": "2/2",
+      "rtx5090-macos-client": "10/10",
+      "rtx5090-windows-client": "5/5",
+      "rtx4090-native": "7/7",
+      "rtx3090-native": "7/7"
+    },
+    "platform_receipts": [
+      "releases/v0.20.0/acceptance/darwin-arm64-18.20.2.json",
+      "releases/v0.20.0/acceptance/windows-x64-18.20.2.json",
+      "releases/v0.20.0/acceptance/linux-x64-18.20.2.json"
+    ],
+    "fresh_product_acceptance": true,
+    "restoration": {
+      "path": "docs/measurements/v0200-acceptance-restoration.json",
+      "status": "passed",
+      "driver_hold_s": 416.888,
+      "production_upgrade_activated": false,
+      "documented_directory_presence_restored": true,
+      "native_documented_stage_restored": true,
+      "native_driver_window_s": {
+        "rtx4090": 516.0991430282593,
+        "rtx3090": 2023.8520290851593
+      }
+    },
+    "composition_run": true
   },
   "observed_gates": {
     "native_speed_decision": {
@@ -235,12 +301,18 @@
       "positions": 83,
       "repository_path": "releases/v0.20.0/qualification/rtx4090-agent-parity.json",
       "sha256": "5abe7130b8f736d0aeba8217a24aa3a9e356530711f12f6d1cf0a7c8d0a996de"
+    },
+    "g4_review": {
+      "status": "passed",
+      "repository_path": "releases/v0.20.0/review/runtime-ledger.json",
+      "sha256": "533b89e12ee59ff53863a91f98926bb6139516323a7947302d8ce9986af7a4ae",
+      "ledger_status": "closed-by-disposition",
+      "approval_granted": true,
+      "publication_authorized": false,
+      "public_route_acceptance_granted": false
     }
   },
-  "remaining_release_gates": [
-    "Prepare the five-route guide and run fresh candidate-bound external-install acceptance, three stock-client platforms, native campaigns/public installs and independent restoration.",
-    "Bind the current product council/combined review ledger; reconcile the receipt audit and immutable evidence pins before publication admission."
-  ],
+  "remaining_release_gates": [],
   "eligibility_scope": "Current component lanes only; external-install acceptance, native public installs/campaigns, product review, audit reconciliation and immutable pins remain binding.",
   "receipt_audit": {
     "repository_path": "releases/v0.20.0/qualification/receipt-audit.json",

@@ -3,7 +3,7 @@
   "authority_id": "omp-ninfer-v0.7.3-qualified-1",
   "product_release": "v0.20.0",
   "composition": {
-    "status": "v0.20.0 upstream OMP v18.20.2 client acceptance pending",
+    "status": "qualified",
     "lifecycle_repository": "https://github.com/can1357/oh-my-pi",
     "lifecycle_source_release": "https://github.com/can1357/oh-my-pi/releases/tag/v18.20.2",
     "lifecycle_source_commit": "7c49c11aa5bbaf3f418406583096168ad5b8c6dc",
@@ -41,10 +41,11 @@
         "Fresh stock OMP 18.20.2 platform and candidate-bound documented-route acceptance is required; no predecessor client execution transfers.",
         "macOS manual SSH preview."
       ],
-      "blockers": [
-        "upstream OMP v18.20.2 client acceptance is pending"
-      ],
-      "acceptance_receipt": null,
+      "blockers": [],
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/f9b95b820f2b87d2ec82d1994ed244df5253af6f/releases/v0.20.0/acceptance/darwin-arm64-18.20.2.json",
+        "sha256": "01227ed8e9527cc817e7a468c23033f89641adc08b224e1df0c69718f5049324"
+      },
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
@@ -115,7 +116,7 @@
     {
       "id": "windows-docker-local",
       "adapter": "windows-docker-local",
-      "status": "preview",
+      "status": "qualified",
       "transport": "local-loopback",
       "commands": [
         "doctor",
@@ -128,7 +129,7 @@
         "support-bundle"
       ],
       "silent_cloud_fallback": false,
-      "installable": false,
+      "installable": true,
       "support_owner": "alphastorm/omp-ninfer",
       "product_release": "v0.20.0",
       "aliases": [
@@ -139,10 +140,11 @@
       "limitations": [
         "Fresh stock OMP 18.20.2 platform and candidate-bound documented-route acceptance is required; no predecessor client execution transfers."
       ],
-      "blockers": [
-        "upstream OMP v18.20.2 client acceptance is pending"
-      ],
-      "acceptance_receipt": null,
+      "blockers": [],
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/f9b95b820f2b87d2ec82d1994ed244df5253af6f/releases/v0.20.0/acceptance/windows-x64-18.20.2.json",
+        "sha256": "7a6f0f5a4eda08d5d829238d208c47a871413b46830d3bc642b9b6e67024d4f6"
+      },
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",
@@ -213,7 +215,7 @@
     {
       "id": "linux-docker-local",
       "adapter": "linux-docker-local",
-      "status": "preview",
+      "status": "qualified",
       "transport": "local-loopback",
       "commands": [
         "doctor",
@@ -226,7 +228,7 @@
         "support-bundle"
       ],
       "silent_cloud_fallback": false,
-      "installable": false,
+      "installable": true,
       "support_owner": "alphastorm/omp-ninfer",
       "product_release": "v0.20.0",
       "aliases": [
@@ -238,10 +240,11 @@
         "Fresh stock OMP 18.20.2 platform and candidate-bound documented-route acceptance is required; no predecessor client execution transfers.",
         "Linux x64 under WSL2 only; no separate native Linux OS or Linux vision claim."
       ],
-      "blockers": [
-        "upstream OMP v18.20.2 client acceptance is pending"
-      ],
-      "acceptance_receipt": null,
+      "blockers": [],
+      "acceptance_receipt": {
+        "url": "https://raw.githubusercontent.com/alphastorm/omp-ninfer/f9b95b820f2b87d2ec82d1994ed244df5253af6f/releases/v0.20.0/acceptance/linux-x64-18.20.2.json",
+        "sha256": "f0709ead97d2cee3643dfc7f95ecbb640d0a465c66f4b7431a2ffad5013937bc"
+      },
       "client_distribution": {
         "distribution_kind": "upstream-release",
         "upstream_repository": "https://github.com/can1357/oh-my-pi",

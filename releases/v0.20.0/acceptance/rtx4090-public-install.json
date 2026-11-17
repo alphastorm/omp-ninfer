@@ -1,0 +1,266 @@
+{
+  "artifact_type": "omp_ninfer_native_public_install_acceptance",
+  "schema_version": 1,
+  "release": "v0.20.0",
+  "lane": "rtx4090-windows-native",
+  "as_of": "2026-11-17",
+  "status": "passed",
+  "candidate_commit": "f9b95b820f2b87d2ec82d1994ed244df5253af6f",
+  "client": {
+    "distribution_kind": "upstream-release",
+    "upstream_repository": "https://github.com/can1357/oh-my-pi",
+    "upstream_tag": "v18.20.2",
+    "upstream_commit": "7c49c11aa5bbaf3f418406583096168ad5b8c6dc",
+    "os": "Windows 11",
+    "architecture": "x64",
+    "published": true,
+    "asset_name": "omp-windows-x64.exe",
+    "asset_bytes": 252504064,
+    "asset_sha256": "6dbb8ac30106f163fcb61d818e6756799a816cb58d63fc3e11a0d7af56abfb90",
+    "binary_sha256": "6dbb8ac30106f163fcb61d818e6756799a816cb58d63fc3e11a0d7af56abfb90",
+    "release_id": 445558988,
+    "asset_id": 748638314,
+    "asset_url": "https://github.com/can1357/oh-my-pi/releases/download/v18.20.2/omp-windows-x64.exe",
+    "version": "omp/18.20.2"
+  },
+  "installed": {
+    "source_commit": "ca4c39179921e85defa9141db5fff7c2b05d7136",
+    "package_sha256": "89f14b7b7b3b340c9afb7c37f97722b23f3dbbc122b809789c1685ff12fb111c",
+    "binary_sha256": "61e24366b103a89ae0d8ce2ad30a012fe6fab7cf70de1afdf8d1abd12acf4863",
+    "config_sha256": "0851d97937e45ccbe3233cc2e71f480f7797ed106c39e46bba3a5614dda12d2b"
+  },
+  "runtime": {
+    "tag": "v0.8.0-qwen38-4090-beta.5",
+    "source_commit": "ca4c39179921e85defa9141db5fff7c2b05d7136",
+    "package_bytes": 992174594,
+    "package_sha256": "89f14b7b7b3b340c9afb7c37f97722b23f3dbbc122b809789c1685ff12fb111c",
+    "binary_sha256": "61e24366b103a89ae0d8ce2ad30a012fe6fab7cf70de1afdf8d1abd12acf4863",
+    "configuration_sha256": "0851d97937e45ccbe3233cc2e71f480f7797ed106c39e46bba3a5614dda12d2b",
+    "model_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+    "build_profile": "native-v0.8.0-beta.5-rtx4090",
+    "configuration": {
+      "max_context": 131072,
+      "kv_capacity": 131072,
+      "kv_dtype": "int8",
+      "concurrency": 1,
+      "pending_timeout_ms": 30000,
+      "prefill_chunk": 1024,
+      "device_state_slots": 2,
+      "admission_headroom_mib": 640,
+      "host_context_mib": "15747.734375",
+      "host_context_bytes": 16512696320,
+      "speculative_backend": "dflash2",
+      "speculative_draft_tokens": 7,
+      "public_model_id": "qwen3.8-27b"
+    },
+    "runtime_shape": {
+      "max_concurrency": 1,
+      "speculative_backend": "dflash2",
+      "draft_tokens": {
+        "min": 7,
+        "max": 7
+      },
+      "proposal": "artifact-default",
+      "fit": {
+        "device_state_slots": 2,
+        "admission_headroom_mib": 640,
+        "draft_mlp_device_format": "Q4_G64_FP16",
+        "token_embedding_residency": "host-mapped"
+      }
+    }
+  },
+  "probe_acceptance": {
+    "fleet": {
+      "sha256": "9d509435a23003bdff3f2ffcbd6f251c18ab65b4d06f113fabba57d394450124",
+      "artifact_type": "omp_ninfer_fleet_fanout_probe",
+      "identity": {
+        "binary_sha256": "61e24366b103a89ae0d8ce2ad30a012fe6fab7cf70de1afdf8d1abd12acf4863",
+        "config_sha256": "0851d97937e45ccbe3233cc2e71f480f7797ed106c39e46bba3a5614dda12d2b",
+        "model_artifact_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+        "model_id": "qwen3.8-27b",
+        "source_dirty": false,
+        "build_profile": "native-v0.8.0-beta.5-rtx4090"
+      },
+      "branches": 4,
+      "transient_retries": 0,
+      "steps": [
+        "base_prefill",
+        "warm_edit",
+        "checkpoint_save",
+        "branch_0",
+        "branch_1",
+        "branch_2",
+        "branch_3",
+        "session_delete"
+      ]
+    },
+    "capture_sha256": "78c76ac0ab22d0a11ef26b8aa76f94c7e2e0032f2a2b9a3a2c70786f1f28e645"
+  },
+  "preparation": {
+    "lineage_mode": "first_release",
+    "previous_release_present": false,
+    "qualification_installed_instance_preserved": true,
+    "documented_stage_preserved": true,
+    "two_gpu_host": true,
+    "one_native_lane_at_a_time": true,
+    "shared_port": 18082,
+    "capture_sha256": "ce5b30ccbb6a24bf9198ab920c74c75054f1deba855cd715f8a7af733d9fbf92"
+  },
+  "observations": {
+    "exact_tool_marker": true,
+    "linked_tool_history": true,
+    "exact_continuation_nonce": true,
+    "offline_request_failed_without_model_response": true,
+    "recovery_health_and_bound_runtime_identity_passed": true,
+    "cloud_fallback_observed": false,
+    "documented_marker_bare_line": true,
+    "server_tool_calls": 1,
+    "local_reasoning_compatibility_retries": 0,
+    "continuation_reuse": "private_endpoint",
+    "structured_client": {
+      "tool_result_marker": true,
+      "exact_visible_final_answer": true,
+      "agent_end": true,
+      "continuation_exact_nonce": true,
+      "runtime_identity_bound": true,
+      "typed_read_tool_calls": 1,
+      "linked_tool_results": 1,
+      "omp_version": "omp/18.20.2",
+      "event_counts": {
+        "session": 1,
+        "agent_start": 1,
+        "turn_start": 2,
+        "message_start": 4,
+        "message_end": 4,
+        "message_update": 25,
+        "tool_execution_start": 1,
+        "tool_execution_end": 1,
+        "turn_end": 2,
+        "agent_end": 1
+      },
+      "raw_transcript_included": false,
+      "runtime_server_binary_sha256": "61e24366b103a89ae0d8ce2ad30a012fe6fab7cf70de1afdf8d1abd12acf4863",
+      "runtime_configuration_sha256": "0851d97937e45ccbe3233cc2e71f480f7797ed106c39e46bba3a5614dda12d2b",
+      "model_sha256": "81f924d440c27261d820c19a9f8d45794c5aee410f8a68bd358133fa8c0375da",
+      "fail_closed": {
+        "exit_code": 1,
+        "no_model_response": true,
+        "only_selected_local_provider_observed": true,
+        "errors": [
+          {
+            "kind": "client-error",
+            "sha256": "8ef23e6515a43a9ef8e058d26b89cd232c29fa3f950988117ee360f7a77010bc"
+          }
+        ]
+      }
+    },
+    "rollback": {
+      "status": "not_applicable",
+      "directions": 0,
+      "reason": "first release of the lineage"
+    },
+    "public_install": {
+      "status": "passed",
+      "source": {
+        "product_release": "v0.20.0",
+        "candidate_commit": "f9b95b820f2b87d2ec82d1994ed244df5253af6f"
+      },
+      "client": {
+        "version": "omp/18.20.2",
+        "binary_sha256": "6dbb8ac30106f163fcb61d818e6756799a816cb58d63fc3e11a0d7af56abfb90"
+      },
+      "integrity": {
+        "checksum_set_sha256": "7dd49fc9c75bac5d57f138499b9ef72a0f6e6a77a907fe825240b92ccad72a81",
+        "checksum_entries": 10,
+        "all_manifest_assets_downloaded_from_public_urls": true,
+        "all_manifest_asset_hashes_verified": true,
+        "assets": {
+          "package": {
+            "sha256": "89f14b7b7b3b340c9afb7c37f97722b23f3dbbc122b809789c1685ff12fb111c",
+            "bytes": 992174594,
+            "in_checksum_set": true
+          },
+          "sbom": {
+            "sha256": "e3abf9016e245bc8462802db22a95df33923afa6c44ae5d7707ed47bba813423",
+            "bytes": 34269,
+            "in_checksum_set": true
+          },
+          "source_archive": {
+            "sha256": "995ed0abab26230650f2544e9876957e246d2daa8832f09dc9f7ac173d192ed9",
+            "bytes": 12611879,
+            "in_checksum_set": true
+          },
+          "installer": {
+            "sha256": "2eedd45d9eab069a755d969ddba0c7f2b309470ec55d41859f4e76b09bb74e4d",
+            "bytes": 88913,
+            "in_checksum_set": true
+          },
+          "controller": {
+            "sha256": "159fba12c85adf4963d271a80c4fb7d3527e2b9043e64e74c43d4981336b1ce3",
+            "bytes": 77843,
+            "in_checksum_set": true
+          },
+          "gpu_owner_controller": {
+            "sha256": "432f06a8e97743e46b1b7d9285e68d4bc361a93d5f25badeaa7c713f147f3334",
+            "bytes": 17391,
+            "in_checksum_set": true
+          },
+          "state_protection": {
+            "sha256": "baaea4e29cf48ab80ed2fd08935e3e75ec4be119fa77058a03c8b2f739a1c5b8",
+            "bytes": 16952,
+            "in_checksum_set": true
+          }
+        }
+      },
+      "installed": {
+        "source_commit": "ca4c39179921e85defa9141db5fff7c2b05d7136",
+        "package_sha256": "89f14b7b7b3b340c9afb7c37f97722b23f3dbbc122b809789c1685ff12fb111c",
+        "binary_sha256": "61e24366b103a89ae0d8ce2ad30a012fe6fab7cf70de1afdf8d1abd12acf4863",
+        "config_sha256": "0851d97937e45ccbe3233cc2e71f480f7797ed106c39e46bba3a5614dda12d2b",
+        "server_binary_sha256": "61e24366b103a89ae0d8ce2ad30a012fe6fab7cf70de1afdf8d1abd12acf4863",
+        "configuration_sha256": "0851d97937e45ccbe3233cc2e71f480f7797ed106c39e46bba3a5614dda12d2b",
+        "matches_manifest": true
+      },
+      "install": {
+        "execution_source": "downloaded-public-url",
+        "outcome": "already_installed",
+        "package_sha256": "89f14b7b7b3b340c9afb7c37f97722b23f3dbbc122b809789c1685ff12fb111c",
+        "exact_qualified_bytes_accepted": true,
+        "lifecycle_pointers_changed": false,
+        "runtime_start_requested": false
+      },
+      "smoke": {
+        "authenticated_status_http": 200,
+        "status_ms": 2.1,
+        "anonymous_status_http": 401,
+        "completion_http": 200,
+        "completion_ms": 101.4,
+        "completion_tokens": 3,
+        "served_identity_matches_installed": true,
+        "output_sha256": "25ab960d578e9fb9c7cb17ddbf211f8188564f13e24e64ad515b1a22cbf51f1c",
+        "output_contains_marker": true,
+        "speculative_backend": "dflash2"
+      },
+      "restoration": {
+        "process_state": "stopped",
+        "endpoint_state": "unavailable",
+        "prior_state_restored": true,
+        "power_limit_w": 450
+      }
+    },
+    "capture_sha256": "ef9cf1ccdf42dd3ca082b1cb50bc18a760e3412af849268f870c7c3c20e099ab"
+  },
+  "documented_route": {
+    "repository_path": "docs/measurements/v0200-rtx4090-native-run.json",
+    "sha256": "34a995da272ad4b8e942a12d9acff07ae597fa44854cac2af85d7a992aa38c36"
+  },
+  "restoration": {
+    "repository_path": "docs/measurements/v0200-acceptance-restoration.json",
+    "sha256": "697d697d0b926c4e207a51a0e775c6f6ed584652e23eec60d658d41e48b93fbd"
+  },
+  "limitations": [
+    "One two-GPU Windows host, native serving sequential on shared port 18082.",
+    "First-lineage route acceptance has no predecessor; rollback not_applicable, zero directions. This is not running-lane upgrade/rollback qualification.",
+    "No native vision or additional runtime performance claim; component qualification remains separate."
+  ]
+}

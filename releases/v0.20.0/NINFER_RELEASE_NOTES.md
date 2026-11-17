@@ -88,3 +88,22 @@ The [client review](../../docs/measurements/2026-11-16-omp-18202-client-upgrade-
 - Retryable pressure-save refusals (filesystem capacity, I/O outage, stale tag) settle after six retries or 10 seconds with one pressure/abandoned receipt; a refusal from the store's own quota (reason quota) settles at once with no pressure/abandoned receipt. Deferred coordinator residuals are tracked in https://github.com/alphastorm/ninfer/issues/123.
 - No predecessor waiver, live-client acceptance, product review approval or public installation result grants this candidate a pass. Fresh five-route acceptance, restoration, composition and exact-subject reviews remain separate gates.
 - macOS remains manual-SSH preview; Linux client evidence is WSL2-scoped. Image input is RTX 5090 macOS/Windows only. Publication and production promotion remain founder-owned.
+
+## Acceptance
+
+Owner-operated, tester-equivalent acceptance of frozen candidate `f9b95b820f2b87d2ec82d1994ed244df5253af6f` closed on 2026-11-17. It is not independent external-user acceptance.
+
+| Documented route | Executable blocks | Result |
+| --- | --- | --- |
+| RTX 5090 container host | 2 | passed |
+| macOS arm64 client over a manual SSH tunnel (preview) | 10 | passed |
+| Native Windows x64 client | 5 | passed |
+| RTX 4090 native, `v0.8.0-qwen38-4090-beta.5` (`C1`) | 7 | passed |
+| RTX 3090 native, `v0.8.0-qwen38-3090-beta.5` (`C2`) | 7 | passed |
+
+- Stock OMP 18.20.2 platform checks: macOS arm64 passed (preview), Windows x64 passed and WSL2 Linux x64 passed ([macOS](acceptance/darwin-arm64-18.20.2.json), [Windows](acceptance/windows-x64-18.20.2.json), [Linux](acceptance/linux-x64-18.20.2.json)).
+- The RTX 5090 window held the production lane for 416.888 s; the native windows held their lanes for 516.099 s (RTX 4090) and 2023.852 s (RTX 3090). Independent restoration passed: the same incumbent container, immutable image, checkpoint mounts, restart policy, Windows and WSL2 health and fleet health were checked; both stopped native canonical lineages, documented stages, tasks, power, leases, processes, listeners, holds and client files matched their before-window census.
+- Native post-route campaigns and anonymous public installs: RTX 4090 C1: sequential fleet branches 4; transient retries 0; compaction, concurrent fanout, subagent and session overlap proofs not exercised for the C1 profile; anonymous public install passed. RTX 3090 C2: sequential fleet branches 4; transient retries 0; committed compactions 2; fanout HTTP 200 count 5; HTTP 503 count 0; subagents proof passed (max in flight 2, overlap 29.186 s); sessions proof passed (max in flight 2, overlap 16.436 s); anonymous public install passed.
+- Reviews: `CR-20261117T112545Z-f9b95b82-product` closed-by-disposition, binding candidate `f9b95b820f2b87d2ec82d1994ed244df5253af6f`. Deferred product residuals: https://github.com/alphastorm/omp-ninfer/issues/196. The combined content-safe ledger is [review/runtime-ledger.json](review/runtime-ledger.json).
+
+The final receipt audit, the platform, acceptance and manifest pins and the strict ready check bind these receipts. No predecessor acceptance receipt, waiver, transcript or review approval is renewed. macOS remains preview, Linux evidence stays WSL2-scoped, vision remains RTX 5090 container-only, and native lanes remain sequential on their shared port. Promoting an existing production deployment to these components is a separate operator decision.
