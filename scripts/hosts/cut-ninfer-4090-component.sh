@@ -9,7 +9,8 @@
 # archive ships to one SHA-256-bound component; an identity-only document is refused.
 # Build variants must select a committed lane build_profiles entry and carry that exact
 # build_profile in both the package receipt and packaged release-spec. Older specs keep equality.
-# Live --publish is FOUNDER-ONLY / AGENT MUST NOT EXECUTE.
+# Live --publish needs the founder's approval of this exact cut (release.py cut --publish checks the
+# committed authorization); with that approval the release lead runs it.
 #
 # Usage:
 #   cut-ninfer-4090-component.sh [--lane rtx3090|rtx4090] --version v0.6.6 --commit <sha40> --assets DIR \
