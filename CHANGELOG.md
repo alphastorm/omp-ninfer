@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mark v0.20.0 as the published release across the README, facts, roadmap, release history,
   upstream watch, reference docs, site, and brand assets; front-door install links point to
   `v0.20.0` and `docs/QUICKSTART.md` on `main`.
+- A native component cut's `--publish` needs the founder's recorded approval of that cut; with it,
+  the release lead runs the publication. The native cutter header and `docs/RELEASES.md` say so;
+  product publication and the RTX 5090 runtime cut are unchanged
+  ([#200](https://github.com/alphastorm/omp-ninfer/pull/200)).
 
 ## [0.20.0] - 2026-11-17
 
